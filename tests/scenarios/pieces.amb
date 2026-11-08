@@ -1,0 +1,62 @@
+# the pieces: PRESETS picks one of ten (01 .. 10), each with its own settings and its own six drum
+# patterns; each remembers its changes while the power is on
+wait 500
+expect piece 0
+expect lane0 0x1111
+# 01's pad down (the Pad page: ENV): an edit, marked
+tap ENV
+spin K1 -10
+expect par0 35
+expect edited 1
+shot edited.png
+# the next piece: 02, its recipe (124 BPM, D Dorian, the drone up, its second pattern) and its patterns
+turn PRESET 1
+expect piece 1
+expect par5 124
+expect par2 80
+expect par71 2
+expect par48 1
+expect pool 0x6AD
+expect lane5 0x0848
+expect pats0_0 0x1111
+expect pats5_0 0
+wait 8000
+shot piece02.png
+# and 03 (E Phrygian, its acid up, the rumbling kick)
+turn PRESET 1
+expect piece 2
+expect par1 60
+expect par72 2
+expect lane0 0x9999
+wait 10000
+expect pad_level >5
+# back to 01: as it was left
+turn PRESET -2
+expect piece 0
+expect par0 35
+# a pattern edited in 01 stays 01's: 02's is untouched
+press SEQ
+wait 500
+release SEQ
+tapkey 4
+expect lane0 0x1115
+turn PRESET 1
+expect piece 1
+expect pats0_0 0x1111
+turn PRESET -1
+expect lane0 0x1115
+# ten of them, round and round: 10 is next to 01
+turn PRESET -1
+expect piece 9
+expect par5 118
+turn PRESET 1
+expect piece 0
+expect par0 35
+expect lane0 0x1115
+# none of it stored: power off and on, all as it was made
+reboot
+wait 300
+expect piece 0
+expect par0 45
+expect lane0 0x1111
+expect edited 0

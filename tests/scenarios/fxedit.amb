@@ -1,0 +1,351 @@
+# The FX edit pages: SEL + FX walks them (the gate, the phaser, the flanger, the vinyl, then the keys again); FX alone
+# closes. The page's effect is on while it is up. The gate's page: the white keys are the pattern's steps, the knobs
+# the pattern (a name), the loop's length, the targets, the depth.
+wait 3000
+expect fxpage -1
+# SEL + FX: the first edit page, the gate
+press SEL
+tap FX
+release SEL
+wait 200
+expect fxpage 1
+expect fxmask 65536
+expect gxpreset 0
+expect gxpat 0x5249
+expect fxs0 16
+shot gate_page.png
+# a white key: step 1 (G3, key 2) opens; the pattern is then the keys' own (CUSTOM, 12)
+tapkey 2
+wait 100
+expect gxpat 0x524B
+expect gxpreset 12
+# the keys are not the scale, not effects
+expect pool 0x5AD
+# the pattern knob back to the first, then one on: TRES (steps 0 3 6, a loop of 8)
+spin K1 -12
+wait 100
+expect gxpreset 0
+expect gxpat 0x5249
+spin K1 1
+wait 100
+expect gxpreset 1
+expect gxpat 0x49
+expect fxs0 8
+shot gate_tres.png
+# the loop's length (knob 2): 12 steps; the pattern is then CUSTOM
+spin K2 4
+wait 100
+expect fxs0 12
+expect gxpreset 12
+# the Euclidean ones: E 5 is five hits in sixteen
+spin K1 -12
+spin K1 3
+wait 100
+expect gxpreset 3
+expect fxs0 16
+# the targets (knob 3: the drums) and the depth (knob 4: half)
+spin K3 4
+spin K4 -50
+wait 100
+expect fxs2 50
+wait 3000
+# the next page: the phaser (its effect on), its rate up
+press SEL
+tap FX
+release SEL
+wait 200
+expect fxpage 2
+expect fxmask 524288
+spin K1 10
+wait 100
+expect fxs3 50
+# the flanger, then the vinyl
+press SEL
+tap FX
+release SEL
+wait 200
+expect fxpage 3
+expect fxmask 1048576
+# talk and wah come next (page numbers 21, 22: the walk's order is not the numbers')
+press SEL
+tap FX
+release SEL
+wait 200
+expect fxpage 21
+press SEL
+tap FX
+release SEL
+wait 200
+expect fxpage 22
+press SEL
+tap FX
+release SEL
+wait 200
+expect fxpage 4
+expect fxmask 33554432
+# tape, roll, pump, riser (the dial walks them too)
+spin SELECT 1
+wait 100
+expect fxpage 5
+expect fxmask 2097152
+spin SELECT 1
+wait 100
+expect fxpage 6
+expect fxmask 0
+# the roll's page: heard with a key held
+key 3 down
+wait 200
+expect fxmask 4194304
+key 3 up
+wait 100
+expect fxmask 0
+spin SELECT 1
+wait 100
+expect fxpage 7
+expect fxmask 8388608
+spin SELECT 1
+wait 100
+expect fxpage 8
+expect fxmask 0
+# the beat effects' pages: scatter, brake, half time (heard with a key held)
+spin SELECT 1
+wait 100
+expect fxpage 9
+key 3 down
+wait 200
+expect fxmask 67108864
+key 3 up
+spin SELECT 1
+wait 100
+expect fxpage 10
+key 3 down
+wait 200
+expect fxmask 134217728
+key 3 up
+spin SELECT 1
+wait 100
+expect fxpage 11
+key 3 down
+wait 200
+expect fxmask 536870912
+key 3 up
+# the repeats' page (0.14.10): pitch, decay, gate, refresh; the pitch knob counts in semitones
+spin SELECT 1
+wait 100
+expect fxpage 23
+spin K1 2
+wait 50
+spin K1 -2
+spin K4 1
+wait 50
+spin K4 -1
+# the sweep (heard as it is edited), the last page
+spin SELECT 1
+wait 100
+expect fxpage 12
+expect fxmask 1073741824
+# the scratch, the freeze, the reverse swell (each heard with a key held), the ring mod (heard as it is edited)
+spin SELECT 1
+wait 100
+expect fxpage 13
+key 3 down
+wait 200
+expect fxmask -2147483648
+key 3 up
+spin SELECT 1
+wait 100
+expect fxpage 14
+key 3 down
+wait 200
+expect fxmaskhi 1
+key 3 up
+spin SELECT 1
+wait 100
+expect fxpage 15
+key 3 down
+wait 200
+expect fxmaskhi 2
+key 3 up
+spin SELECT 1
+wait 100
+expect fxpage 16
+expect fxmaskhi 4
+# the punch-ins on tracks (0.15.19): FILTER, DELAY, PHASE, each with its Targets
+spin SELECT 1
+wait 100
+expect fxpage 28
+shot fx_punch_filter.png
+spin SELECT 1
+wait 100
+expect fxpage 29
+spin SELECT 1
+wait 100
+expect fxpage 30
+# Flex Beat's page, the last: its quantize (bar), mode (one shot), mix (all)
+spin SELECT 1
+wait 100
+expect fxpage 19
+expect flexq 2
+expect flexmode 0
+spin K1 -1
+wait 50
+expect flexq 1
+spin K1 1
+spin K2 1
+wait 50
+expect flexmode 1
+spin K2 -1
+# the sampler's page, the last: keys (pitch), play (loop), window (half), mix (80)
+spin SELECT 1
+wait 100
+expect fxpage 20
+expect smpmode 0
+spin K1 1
+wait 50
+expect smpmode 1
+spin K1 -1
+# the dial stops at the last page (the sampler's)
+spin SELECT 1
+wait 100
+expect fxpage 20
+# the dial back down one page
+spin SELECT -1
+wait 100
+expect fxpage 19
+spin SELECT 1
+wait 100
+# and the keys again with SEL + FX (from the last page); FX alone closes
+spin SELECT 1
+wait 100
+press SEL
+tap FX
+release SEL
+wait 200
+expect fxpage 0
+expect fxmask 0
+tap FX
+wait 100
+expect fxon 0
+# the keys are the scale again
+tapkey 1
+expect pool 0x7AD
+# the settings' own walk (0.16.1): HOME held opens it; the dial goes FILTERS, SCREAM (first since 0.16.28: the piece's), SETTINGS (the drop's
+# key change), AUTO DJ, SET, USB & MIDI, MIDI IN, SCREEN, SAMPLE and stops there
+press HOME
+wait 800
+release HOME
+wait 100
+expect fxon 1
+expect fxpage 27
+# SCREAM (0.16.4): Drive, Scream, Wow, Target (EN_FXS_SQ_*: 88 .. 91), all 0 to begin with
+spin SELECT 1
+wait 100
+expect fxpage 33
+expect fxs88 0
+spin K1 10
+spin K2 5
+spin K3 3
+spin K4 2
+wait 50
+expect fxs88 >0
+expect fxs89 >0
+expect fxs90 >0
+expect fxs91 2
+spin K1 -100
+spin K2 -100
+spin K3 -100
+spin K4 -2
+wait 50
+expect fxs88 0
+expect fxs89 0
+expect fxs90 0
+expect fxs91 0
+spin SELECT 1
+wait 100
+expect fxon 1
+expect fxpage 18
+expect fxmask 0
+expect keyset 0
+spin K1 2
+wait 50
+expect keyset 2
+spin K1 -2
+wait 50
+spin SELECT 1
+wait 100
+expect fxpage 17
+expect fxmask 0
+expect fxmaskhi 0
+expect scenequant 1
+spin K1 -1
+wait 50
+expect scenequant 0
+spin K1 1
+wait 50
+expect scenequant 1
+spin K2 1
+wait 50
+expect djlen 2
+spin K2 -1
+wait 50
+expect djlen 1
+spin K3 1
+wait 50
+expect djbreak 2
+spin K3 -1
+wait 50
+# AUTO FX (0.16.8): Auto FX (off, gentle, medium, wild), Every (4 .. 32 bars), Length (a beat .. 2 bars), Pick (genre, any): EN_FXS_AF_* 92 .. 95
+spin SELECT 1
+wait 100
+expect fxpage 34
+expect fxmask 0
+expect fxs92 0
+expect fxs93 1
+expect fxs94 2
+expect fxs95 0
+spin K1 3
+spin K2 -1
+spin K3 -2
+spin K4 1
+wait 50
+expect fxs92 3
+expect fxs93 0
+expect fxs94 0
+expect fxs95 1
+spin K1 -3
+spin K2 1
+spin K3 2
+spin K4 -1
+wait 50
+expect fxs92 0
+spin SELECT 1
+wait 100
+expect fxpage 25
+spin SELECT 1
+wait 100
+expect fxpage 24
+spin K1 1
+wait 50
+spin K1 -1
+wait 50
+spin SELECT 1
+wait 100
+expect fxpage 26
+spin SELECT 1
+wait 100
+expect fxpage 31
+spin SELECT 1
+wait 100
+expect fxpage 32
+spin SELECT 1
+wait 100
+expect fxpage 32
+spin SELECT -1
+wait 100
+expect fxpage 31
+# SEL + FX from a setting: the effects' walk, from its first page
+press SEL
+tap FX
+release SEL
+wait 100
+expect fxpage 1

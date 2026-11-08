@@ -1,0 +1,178 @@
+# The beat effects: the FX menu's second bank (the SELECT dial in the FX menu): the repeats together (F3 .. C4: 1/2, 1/4, 1/6, 1/8,
+# 1/16, 1/32, then the triplets 1/8T and 1/16T), scatter D4, brake D#4, spin-back E4, half time F4, scratch F#4, the drums' mutes where
+# they are on the first page. The first page keeps the rest (sweep, ring mod, freeze, reverse swell moved there). And the small
+# shortcuts: FX + OCT- everything back, GLO + B3 undo, GLO + E4 tap tempo.
+wait 3000
+tap FX
+wait 100
+expect fxbank 0
+spin SELECT 1
+wait 100
+expect fxbank 1
+shot beatfx_bank.png
+key 0 down
+wait 400
+expect fxmask 1
+key 0 up
+wait 300
+key 3 down
+wait 400
+expect fxmask 8
+key 3 up
+wait 300
+key 5 down
+wait 400
+expect fxmask 32
+key 5 up
+wait 300
+key 6 down
+wait 400
+expect fxmaskhi 8
+key 6 up
+wait 300
+key 7 down
+wait 400
+expect fxmaskhi 16
+key 7 up
+wait 300
+key 9 down
+wait 400
+expect fxmask 67108864
+key 9 up
+wait 300
+key 10 down
+wait 400
+expect fxmask 134217728
+key 10 up
+wait 300
+key 11 down
+wait 400
+expect fxmask 268435456
+key 11 up
+wait 300
+key 12 down
+wait 400
+expect fxmask 536870912
+key 12 up
+wait 300
+key 13 down
+wait 400
+expect fxmask -2147483648
+key 13 up
+wait 300
+# the drum rolls (C#5 hat roll, D5 hat triplets, D#5 snare roll, E5 flams, F5 double kick)
+key 20 down
+wait 400
+expect fxmaskhi 4194304
+key 20 up
+wait 300
+key 21 down
+wait 400
+expect fxmaskhi 8388608
+key 21 up
+wait 300
+key 22 down
+wait 400
+expect fxmaskhi 16777216
+key 22 up
+wait 300
+key 23 down
+wait 400
+expect fxmaskhi 33554432
+key 23 up
+wait 300
+key 24 down
+wait 400
+expect fxmaskhi 67108864
+key 24 up
+wait 300
+# the mutes are there too
+key 14 down
+wait 400
+expect fxmask 256
+key 14 up
+wait 100
+expect fxmask 0
+# back to the first bank: sweep F3, ring mod G3, freeze A3, reverse swell B3 are there now
+spin SELECT -1
+wait 100
+expect fxbank 0
+key 0 down
+wait 400
+expect fxmask 1073741824
+key 0 up
+wait 300
+key 2 down
+wait 400
+expect fxmaskhi 4
+key 2 up
+wait 300
+key 4 down
+wait 400
+expect fxmaskhi 1
+key 4 up
+wait 300
+key 6 down
+wait 400
+expect fxmaskhi 2
+key 6 up
+wait 300
+key 17 down
+wait 100
+expect fxmask 8388608
+key 17 up
+# talk (C4) and wah (D4)
+key 7 down
+wait 400
+expect fxmaskhi 1048576
+key 7 up
+wait 300
+key 9 down
+wait 400
+expect fxmaskhi 2097152
+key 9 up
+wait 300
+# a tap latches an effect past bit 31 too (freeze, A3): it stayed a hold before; a tap again lets it go
+tapkey 4
+wait 100
+expect fxmaskhi 1
+tapkey 4
+wait 100
+expect fxmaskhi 0
+# FX + OCT-: everything back. The kick muted first (GLO held, F3), the crush up (FX knob 2)
+press GLO
+tapkey 0
+release GLO
+spin K2 30
+wait 100
+expect trkmute 1
+expect fxk1 30
+tap OCT-
+wait 100
+expect trkmute 0
+expect fxk1 0
+# undo (GLO + B3): the kick muted and the crush back; again: redo
+press GLO
+tapkey 6
+release GLO
+wait 100
+expect trkmute 1
+expect fxk1 30
+press GLO
+tapkey 6
+release GLO
+wait 100
+expect trkmute 0
+tap FX
+# tap tempo (GLO + E4, key 11): half a second apart (the taps take a little themselves), 120 bpm
+press GLO
+tapkey 11
+wait 410
+tapkey 11
+wait 410
+tapkey 11
+wait 410
+tapkey 11
+release GLO
+wait 100
+expect tempo 120

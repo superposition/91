@@ -1,0 +1,35 @@
+# the theme (and Tune, MIDI out) stick across a power cycle even if the music never stops: written
+# four seconds after (faded out and in, as a store is) the last change. A piece stored while playing is written at once (a short pause).
+wait 500
+expect playing 1
+tap GLO
+spin K2 2
+expect theme 2
+expect dirty 1
+wait 3000
+expect store_writes 0
+wait 2000
+expect dirty 0
+expect store_writes 1
+reboot
+wait 300
+expect theme 2
+# a piece stored while playing: written at once; then a theme, written two seconds on
+tap ENV
+spin K1 -10
+tap GLO
+tap SAVE
+wait 300
+expect saved 1
+expect store_writes 3
+expect playing 1
+spin K2 1
+expect theme 3
+wait 5500
+expect store_writes 4
+expect dirty 0
+reboot
+wait 300
+expect theme 3
+expect saved 1
+expect par0 35

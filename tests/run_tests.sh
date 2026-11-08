@@ -1,0 +1,92 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-only
+# AMB-1 host tests: the maths, the platform pieces kept from Felucca / X0X, the instrument, and the
+# whole firmware app in the simulator (tests/scenarios/*.amb: UI, chords, rhythm, persistence), with
+# screenshots and audio in build/scenarios/.
+#   tests/run_tests.sh
+set -u
+cd "$(dirname "$0")/.."
+CC="${CC:-cc}"
+FAIL=0
+OUT=build/host
+mkdir -p "$OUT" build/scenarios
+run() {
+    name="$1"; shift
+    if "$@" > "$OUT/$name.log" 2>&1; then
+        echo "  ok   $name"
+    else
+        echo "  FAIL $name (see $OUT/$name.log)"
+        tail -15 "$OUT/$name.log" | sed 's/^/       /'
+        FAIL=1
+    fi
+}
+run fastmath sh -c "$CC -O2 -ffp-contract=off -Wall -Wextra -Werror -o $OUT/fastmath_test tests/host/fastmath_test.c -lm && $OUT/fastmath_test"
+run encoder sh -c "$CC -O2 -w -Ifirmware/hal -o $OUT/encoder_test tests/host/encoder_test.c && $OUT/encoder_test"
+run uac sh -c "$CC -O2 -w -Ifirmware/src -Ifirmware/hal -o $OUT/uac_test tests/host/uac_test.c -lm && $OUT/uac_test"
+run trs sh -c "$CC -O2 -w -Ifirmware/src -Ifirmware/hal -o $OUT/trs_test tests/host/trs_test.c && $OUT/trs_test"
+run flashid sh -c "$CC -O2 -Wall -Wextra -Werror -Ifirmware/hal -o $OUT/flash_id_test tests/host/flash_id_test.c && $OUT/flash_id_test"
+run usbhost sh -c "$CC -O2 -Wall -Wextra -Werror -Ifirmware/src -o $OUT/usbhost_test tests/host/usbhost_test.c && $OUT/usbhost_test"
+run amb sh -c "$CC -O2 -ffp-contract=off -std=c99 -Wall -Wextra -Wdouble-promotion -Werror -DEN_HOST -Ifirmware/src/dsp \
+    -o $OUT/amb_test tests/host/amb_test.c firmware/src/dsp/amb.c -lm && $OUT/amb_test"
+# no two pieces of a genre too alike (0.16.7: the audit's twins; gtwin prints them and their count, 0 wanted)
+run harmony sh -c "$CC -O2 -ffp-contract=off -std=c99 -DEN_HOST -Ifirmware/src/dsp -o $OUT/gharm tests/host/gharm.c firmware/src/dsp/amb.c -lm && $OUT/gharm 20 10"
+run form sh -c "$CC -O2 -ffp-contract=off -std=c99 -DEN_HOST -Ifirmware/src/dsp -o $OUT/gsong tests/host/gsong.c firmware/src/dsp/amb.c -lm && $OUT/gsong"
+run twins sh -c "$CC -O2 -ffp-contract=off -std=c99 -DEN_HOST -Ifirmware/src/dsp -o $OUT/gtwin tests/host/gtwin.c firmware/src/dsp/amb.c -lm && \
+    $OUT/gtwin 7 | tee /dev/stderr | tail -1 | grep -q '^0 pairs'"
+run core2 sh -c "$CC -O2 -ffp-contract=off -std=c11 -Wall -Wextra -DEN_HOST -Ifirmware/src/dsp -o $OUT/core2_test tests/host/core2_test.c firmware/src/dsp/amb.c -lm -pthread && \
+    s=\$($OUT/core2_test 0) && d=\$($OUT/core2_test 1) && t=\$($OUT/core2_test 2) && m=\$($OUT/core2_test 3) && $OUT/core2_test 4 && $OUT/core2_test 5 && \
+    [ \"\$($OUT/core2_test 0 - 1 | cut -d' ' -f2)\" = \"\$($OUT/core2_test 2 - 1 | cut -d' ' -f2)\" ] && \
+    [ \"\$($OUT/core2_test 0 - 2 | cut -d' ' -f2)\" = \"\$($OUT/core2_test 2 - 2 | cut -d' ' -f2)\" ] && \
+    [ \"\$($OUT/core2_test 0 | cut -d' ' -f2)\" = \"\$($OUT/core2_test 2 - 0 0 | cut -d' ' -f2)\" ] && \
+    [ \"\$($OUT/core2_test 0 | cut -d' ' -f2)\" = \"\$($OUT/core2_test 3 - 0 0 | cut -d' ' -f2)\" ] && \
+    [ \"\$($OUT/core2_test 0 | cut -d' ' -f2)\" = \"\$($OUT/core2_test 2 - 0 2 | cut -d' ' -f2)\" ] && \
+    [ \"\$($OUT/core2_test 0 | cut -d' ' -f2)\" = \"\$($OUT/core2_test 3 - 0 2 | cut -d' ' -f2)\" ] && \
+    [ \"\$($OUT/core2_test 0 | cut -d' ' -f2)\" = \"\$($OUT/core2_test 1 - 0 2 | cut -d' ' -f2)\" ] && \
+    [ \"\$($OUT/core2_test 0 | cut -d' ' -f2)\" = \"\$($OUT/core2_test 0 - 0 -1 1 | cut -d' ' -f2)\" ] && \
+    [ \"\$($OUT/core2_test 0 - 1 | cut -d' ' -f2)\" = \"\$($OUT/core2_test 0 - 1 -1 1 | cut -d' ' -f2)\" ] && \
+    [ \"\${s#* }\" = \"\${d#* }\" ] && [ \"\${s#* }\" = \"\${t#* }\" ] && [ \"\${s#* }\" = \"\${m#* }\" ] && echo \$s \$d \$t \$m"
+run storage sh -c "$CC -O2 -o $OUT/storage_test tests/storage_test.c && $OUT/storage_test"
+if command -v node >/dev/null 2>&1; then run websyx node tests/web_syx_test.js; fi
+if command -v node >/dev/null 2>&1; then run webbackup node tests/web_backup_test.js; fi
+if command -v node >/dev/null 2>&1; then run webota node tests/web_ota_test.mjs; fi
+if command -v node >/dev/null 2>&1; then run webidle node tests/web_idle_test.mjs; fi
+run dxproto sh -c "$CC -O2 -Wall -Wextra -Werror -o $OUT/dxproto_test tests/host/dxproto_test.c && $OUT/dxproto_test"
+run params sh -c "python3 tools/make_params.py"
+if command -v node >/dev/null 2>&1; then
+    run webvoice sh -c "$CC -O1 -std=c99 -DEN_HOST -Ifirmware/src/dsp -o $OUT/gvoice tests/host/gvoice.c firmware/src/dsp/amb.c -lm && $OUT/gvoice > $OUT/voices.json && node tests/web_voice_test.js $OUT/voices.json"
+fi
+# the update path, against the firmware package (Felucca's tests; needs ./build.sh)
+if [ -f build/amb.fwsc ]; then
+    run ota-entry sh -c "$CC -o $OUT/ota_test tests/ota_test.c && $OUT/ota_test build/amb.fwsc"
+    if [ -z "${AC79_SDK:-}" ]; then
+        echo "  skip update-loader (needs AC79_SDK, as the build)"
+    else
+    run update-loader sh -c "head -c 100000 build/amb.bin > $OUT/old_app.bin && \
+        python3 tools/fm1pkg_make.py $OUT/old_app.bin build/loader/ota.bin $OUT/old.fwsc >/dev/null && \
+        $CC -o $OUT/ldr_test tests/ldr_test.c && $OUT/ldr_test $OUT/old.fwsc build/amb.fwsc"
+    # the boot stub (0.16.17, ChoralRoot's as Melodee ships it): the package side, then a power cut after every erase
+    # and programmed page of an install, each state given to the stub's own decision (tests from Melodee 1.3.5)
+    run boot-pkg python3 tests/boot_stub_pkg_test.py
+    run powercut sh -c "python3 tests/boot_fixtures.py >/dev/null && $CC -O2 -o $OUT/loader_powercut_test tests/loader_powercut_test.c && \
+        $OUT/loader_powercut_test build/host/boot-fixtures/legacy.fwsc build/amb.fwsc build/host/boot-fixtures/same-stub.fwsc \
+        build/host/boot-fixtures/other-legacy.fwsc build/host/boot-fixtures/old-stub.fwsc"
+    fi
+    run boot-stub sh -c "$CC -O2 -o $OUT/boot_stub_test tests/boot_stub_test.c && $OUT/boot_stub_test"
+    run theory sh -c "$CC -std=c99 -Wno-unused-function -o $OUT/theory_test tests/host/theory_test.c && $OUT/theory_test"
+    run installer python3 tests/install_test.py
+else
+    echo "  skip update-path tests (no build/amb.fwsc: run ./build.sh)"
+fi
+run host-build sh host/build_host.sh
+if command -v node >/dev/null 2>&1; then run webpiece node tests/web_piece_test.js build/host/amb_host; fi
+if command -v emcc >/dev/null 2>&1; then
+    run emu sh -c "sh web/emu/build.sh >/dev/null && node tests/host/emu_test.mjs build/emu/amb.wasm"
+    run app sh -c "sh web/app/build.sh >/dev/null && node tests/host/app_test.mjs build/app/amb.wasm"
+fi
+for s in tests/scenarios/*.amb; do
+    n=$(basename "$s" .amb)
+    mkdir -p "build/scenarios/$n"
+    run "scenario-$n" build/host/amb_host "$s" "build/scenarios/$n"
+done
+[ $FAIL -eq 0 ] && echo "all tests passed" || echo "TESTS FAILED"
+exit $FAIL

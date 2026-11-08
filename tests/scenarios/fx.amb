@@ -1,0 +1,136 @@
+# FX: one press, the menu (and the keys are effects while held); again, off. The audio (fx.wav) has
+# each effect in its own stretch, for listening: the times are in the comments.
+wait 4000
+wav fx.wav
+wait 4000
+tap FX
+wait 100
+expect fxon 1
+expect fxmask 0
+shot fx_menu.png
+# 4.1 s: beat repeat 1/4 (G3), 4 s
+key 17 down
+wait 4000
+expect fxmask 8388608
+shot fx_held.png
+key 17 up
+wait 2000
+# 10.1 s: the punch-in FILTER on the synths (G4, where the kick's mute was until 0.15.19; FX_TFILT is bit 38), 4 s
+key 14 down
+wait 4000
+expect fxbit38 1
+key 14 up
+# 14.1 s: reverse (E4), 2 s; 16.1 s: tape stop (F4), 2 s
+key 11 down
+wait 2000
+key 11 up
+key 12 down
+wait 2000
+key 12 up
+# 18.1 s: low-pass (F5), 3 s; 21.1 s: gate 1/16 (F#3), 3 s
+key 24 down
+wait 3000
+key 24 up
+key 1 down
+wait 3000
+key 1 up
+# 24.1 s: echo throw (D5), 2 s; 26.1 s: fill (E5), 2 s; 28.1 s: gate pattern (A#3), 3 s\nkey 21 down
+wait 2000
+key 21 up
+key 23 down
+wait 2000
+key 23 up
+key 5 down
+wait 3000
+key 5 up
+# 31.1 s: phaser (C#4), flanger (D#4), tape (F#4), 3 s each
+key 8 down
+wait 3000
+key 8 up
+key 10 down
+wait 3000
+key 10 up
+key 13 down
+wait 3000
+key 13 up
+# 33.1 s: a key tapped (let go quickly) latches its effect: the low-pass (F5). Held, it is only played.
+tapkey 24
+wait 2500
+expect fxlock 4096
+expect fxmask 4096
+expect sec 0
+shot fx_locked.png
+# another key, held: it plays while held (a hold is not a latch), the latch stays
+key 17 down
+wait 400
+expect fxlock 4096
+expect fxmask 8392704
+key 17 up
+wait 100
+expect fxmask 4096
+expect fxlock 4096
+# more taps: the gate 1/8 (G#3), the phaser (C#4); the low-pass tapped again: off
+tapkey 3
+tapkey 8
+tapkey 24
+wait 100
+expect fxlock 557056
+expect fxmask 557056
+# a latched effect's key tapped: that one off (the phaser), the gate 1/8 stays latched
+tapkey 8
+wait 50
+expect fxlock 32768
+expect fxmask 32768
+# and the last one: none latched
+tapkey 3
+wait 50
+expect fxlock 0
+expect fxmask 0
+# four latched: the gate 1/8, the phaser, the low-pass, the gate 1/16
+tapkey 3
+tapkey 8
+tapkey 24
+tapkey 1
+wait 100
+expect fxlock 577536
+expect fxmask 577536
+shot fx_latched.png
+# FX closed: the locked ones play on (the keys are the scale again, the locks untouched)
+tap FX
+wait 100
+expect fxon 0
+expect fxmask 577536
+expect fxlock 577536
+shot fx_closed_locked.png
+tapkey 1
+expect pool 0x7AD
+tapkey 1
+expect pool 0x5AD
+expect fxlock 577536
+# FX again: a locked effect's key turns that one off; all four, none locked
+tap FX
+tapkey 3
+tapkey 8
+tapkey 24
+tapkey 1
+wait 100
+expect fxlock 0
+expect fxmask 0
+tap FX
+wait 100
+expect fxon 0
+expect fxmask 0
+# SAVE tapped alone in FX is the breakdown still
+tap FX
+tap SAVE
+wait 2500
+expect sec 1
+tap SAVE
+tap FX
+wait 100
+# with the menu off, a key is the scale again
+tapkey 1
+expect pool 0x7AD
+wait 3000
+wavstop
+expect peak_db_max -0.5

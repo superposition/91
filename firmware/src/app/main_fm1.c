@@ -1,0 +1,996 @@
+/* SPDX-License-Identifier: GPL-3.0-only
+ * Boot, audio ISR and main loop adapted from Felucca's main.c / audio.c, Copyright (C) 2026
+ * Leo Kuroshita (@kurogedelic), Hugelton Instruments. */
+/* AMB-1 on the FM-1 (from X0X's): boot (WDT first, boot-loop guard, guards), LCD, input (TIMER5
+ * 10 kHz), audio (ALNK0), USB; then the main loop: UI at ~60 frames/s, input polled in between. */
+extern uint32_t _data_start[], _data_end[], _data_load[], _bss_start[], _bss_end[];
+extern uint32_t _pool_start[], _pool_end[], _rt_start[], _rt_end[], _rt_load[], _dsp_start[], _dsp_end[], _dsp_load[], _rh_start[], _rh_end[], _rh_load[];
+extern char _ustack_top[];                          /* (the others: fm1_guard.h, fm1_core1.h) */
+#define STK_W(a) ((uint32_t *)(void *)(a))
+
+/* how deep the stacks went (telemetry, 0.16.5: is there room for more, a Bluetooth stack, say): each is painted at boot below what is in
+ * use, and the lowest word no longer painted is the deepest it reached; bytes used, of the main 24 KB, the interrupts' 8 KB, CPU1's 4 + 4 KB */
+#define STK_PAINT 0x5354ACC5u
+static void stk_paint(uint32_t *lo, uint32_t *top)
+{
+    uint32_t here, *p = &here;
+    if (p >= lo && p < top)                         /* the stack this runs on: only well below its frame */
+        top = p - 64;
+    while (lo < top)
+        *lo++ = STK_PAINT;
+}
+static uint32_t stk_used(const uint32_t *lo, const uint32_t *top)
+{
+    const uint32_t *p = lo;
+    while (p < top && *p == STK_PAINT)
+        p++;
+    return (uint32_t)(top - p) * 4u;
+}
+
+/* --------------------------------------------------------------- audio --- */
+/* Felucca's 256-frame halves (5.8 ms): AMB-1's render is light, and a strum wants the short latency */
+#ifndef EN_HALF
+#define EN_HALF 512u                        /* two renders per half: a slow chunk borrows from a quick one (the telemetry showed the xruns were
+                                             * single renders of 6.0 .. 6.2 ms against the 5.8 ms a half of 256 allows, at 70% load on average);
+                                             * the price is 5.8 ms more delay. 256: the old, one render per half */
+#endif
+#define HALF_FRAMES EN_HALF                 /* I2S half buffer: 11.6 ms at 44.1 kHz (256: 5.8 ms) */
+#define HALF_WORDS (HALF_FRAMES * 2u)
+#define FS 44100u
+#define REND_FRAMES 256u                    /* en_render's frames per call */
+#if FELUCCA_UAC
+_Static_assert(REND_FRAMES == UA_HALF, "usb.c sizes the USB audio ring band for this block");
+#endif
+static int32_t abuf[2u * HALF_WORDS] __attribute__((aligned(4)));
+#if FELUCCA_UAC
+static int16_t usb_buf[2u * REND_FRAMES] __attribute__((section(".pool.usb"), aligned(4)));   /* the USB audio at its fixed level, when the setting asks (en_usb_out) */
+#endif
+
+#define DBG_MAGIC 0x44424731u                       /* "DBG1": read with `fm1t memr` */
+struct en_dbg {
+    uint32_t magic, halves, max_us, nested, in_audio, late, timer_irqs, ui_frames;
+    uint32_t last_us, cpu_q8, boots, stage;
+    uint32_t crash_seen;                            /* the crash count already reported at a boot */
+} en_dbg __attribute__((section(".noinit")));
+static uint8_t safe_mode;                           /* two failed boots: no audio, USB on (safe_main) */
+static volatile uint32_t tel_isr_in, tel_isr_out;   /* telemetry: ticks in the timer interrupt while a render ran (it nests into it) and outside it */
+static volatile uint32_t tel_hist[9];                  /* telemetry: renders by time: <5 ms, 5-6, ... 11-12, >= 12 ms */
+static volatile uint32_t tel_max_us;                /* telemetry: the longest render (a half block) since the last frame */
+/* telemetry: that slowest half, dissected (the 12 ms halves whose slowest chunk is under 4 ms): its us; the sum of its chunks' stages (us: what
+ * render_chunk saw); its chunks; the timer interrupt's us nested inside it; those ticks; the step it began at, the main loop's place when it
+ * began (0 between turns, 1 the UI frame, 2 the USB services) << 8 and the half << 12; and its waits for the other core (us, part of the stages).
+ * The rest (us - stages - isr) is drain, control, the pulse and the swung hits: the engine's work outside render_chunk. */
+static volatile uint32_t tel_pkr[7], tel_pkr_sent[7];
+static volatile uint8_t main_where;
+
+static void render_block(int32_t *o)                /* ALNK0: one half, measured */
+{
+    uint32_t t0 = fm1_ticks(), us, budget = HALF_FRAMES * 1000000u / FS;
+    uint32_t s0 = 0, w0, c0 = en_prof[9], i0 = tel_isr_in, n0 = en_dbg.nested, k;
+    for (k = 0; k < 9u; k++)
+        s0 += en_prof[k];
+    w0 = en_prof[3] + en_prof[7];
+    en_dbg.in_audio = 1;
+#if FELUCCA_UAC
+    uac_render_start();
+#endif
+    fm1_core1_check();                              /* nothing outstanding: retire a CPU1 that faulted or misread */
+    {
+        uint32_t k;
+        for (k = 0; k < HALF_FRAMES; k += REND_FRAMES) {
+#if FELUCCA_UAC
+            en_usb_out = en_usb_fixed && uac.feed ? usb_buf : 0;   /* the Settings' USB page says FIXED and a computer is recording: a second output at unity */
+            en_render(o + 2u * k, REND_FRAMES, master_q12);
+            uac_tap(o + 2u * k, en_usb_out ? usb_buf : 0, REND_FRAMES);   /* the USB audio input: the master output, or that */
+#else
+            en_render(o + 2u * k, REND_FRAMES, master_q12);
+#endif
+        }
+    }
+    us = (fm1_ticks() - t0) / FM1_TICKS_PER_US;
+    en_dbg.cpu_q8 = (en_dbg.cpu_q8 * 15u + (us * 256u) / budget) / 16u;
+    audio_cpu_pct = (en_dbg.cpu_q8 * 100u) >> 8;
+    en_dbg.halves++;
+    en_dbg.last_us = us;
+    if (us > en_dbg.max_us)
+        en_dbg.max_us = us;
+    if (us > tel_max_us) {
+        uint32_t s1 = 0, w1 = en_prof[3] + en_prof[7];
+        tel_max_us = us;
+        for (k = 0; k < 9u; k++)
+            s1 += en_prof[k];
+        tel_pkr[0] = us;                        /* (a frame may have zeroed en_prof between the two sums: then the stage words are 0 for this half) */
+        tel_pkr[1] = s1 >= s0 ? (s1 - s0) / FM1_TICKS_PER_US : 0u;
+        tel_pkr[2] = en_prof[9] - c0;
+        tel_pkr[3] = (tel_isr_in - i0) / FM1_TICKS_PER_US;
+        tel_pkr[4] = en_dbg.nested - n0;
+        tel_pkr[5] = (uint32_t)en_drum_pos | (uint32_t)main_where << 8 | (o == abuf ? 0u : 1u) << 12;
+        tel_pkr[6] = w1 >= w0 ? (w1 - w0) / FM1_TICKS_PER_US : 0u;
+    }
+    tel_hist[us < 5000u ? 0u : us >= 12000u ? 8u : (us - 4000u) / 1000u]++;
+    {
+        const uint32_t pc = us * 100u / budget;
+        if (pc > pk_cur_pct)
+            pk_cur_pct = pc;
+        if (++pk_n >= FS / HALF_FRAMES) {           /* a second: the window slides */
+            pk_n = 0;
+            pk_prev_pct = pk_cur_pct;
+            pk_cur_pct = 0;
+        }
+    }
+    en_dbg.in_audio = 0;
+}
+
+static uint32_t last_half = 2u;                     /* the half rendered last (2: none yet) */
+void fm1_alnk0_irq(void)                            /* via isr_alnk0 (hal/fm1_isr.S) */
+{
+    uint8_t p = fm1_audio_pending();
+    fm1_audio_ack_aux(p);
+    if (p & FM1_AUDIO_HALF) {
+        uint32_t half = fm1_audio_free_half();
+        /* The half's flag is cleared before the render, not after it: a half that ends while this one renders raises the interrupt again, and the
+         * next render follows at once. (Cleared at the end it took that one too: a render that ran past its half, 11.6 to 12.4 ms in a lofi piece at
+         * 55 % load, cost the next half its render, and its buffer played a second time. The telemetry's xruns were exactly that: every one was a
+         * window with one render fewer in its "renders" column.) */
+        fm1_audio_ack_half();
+        if (half == last_half)
+            audio_xruns++;                          /* two ends went by in one render, or the interrupts were off: a half was never rendered */
+        last_half = half;
+        render_block(&abuf[half * HALF_WORDS]);
+        if (fm1_audio_free_half() != half) {
+            en_dbg.late++;                         /* the DMA moved on while we rendered: the next render is due already, nothing is lost */
+            audio_late++;
+        }
+    }
+}
+extern void isr_alnk0(void);
+
+static void audio_init(void)
+{
+    uint32_t i;
+    for (i = 0; i < 2u * HALF_WORDS; i++)
+        abuf[i] = 0;
+    fm1_audio_init(abuf, HALF_WORDS, isr_alnk0, 3);
+}
+
+static void audio_silence(void)                     /* IRQs off (flash erase): the DMA would loop stale audio */
+{
+    uint32_t i;
+    for (i = 0; i < sizeof abuf / sizeof abuf[0]; i++)
+        abuf[i] = 0;
+}
+
+/* ------------------------------------------------------------ timer --- */
+static uint8_t usb_due;
+/* 0.16.22: the timer ISR runs from RAM (.ram_hot, copied at boot). It fires 10,000 times a second and nests into the
+ * render, so from the flash each tick fetched its code cold and pushed the render's out of the cache (the 0.16.21 logs:
+ * the same ISR 69 -> 77 ms a second once the code moved). RAM code cannot call into the flash directly (out of reach):
+ * the USB and TRS polls, which run outside the render, are called through these pointers. */
+static void (*volatile tm_usb_poll)(void) = usb_poll;
+#if FELUCCA_UAC
+static void (*volatile tm_uac_service)(void) = uac_service;
+#define uac_service() tm_uac_service()
+#endif
+#if EN_TRS
+static void (*volatile tm_uart_poll)(void) = uart_midi_poll;
+#define uart_midi_poll() tm_uart_poll()
+#endif
+#define usb_poll() tm_usb_poll()
+__attribute__((section(".ram_hot.timer5"), noinline, used)) void fm1_timer5_irq(void)
+{
+    static uint32_t sub;
+    const uint32_t tel_t0 = fm1_ticks(), tel_nest = en_dbg.in_audio;
+    fm1_timer5_ack();
+    en_dbg.timer_irqs++;
+    if (en_dbg.in_audio)
+        en_dbg.nested++;
+    fm1_input_tick();
+    /* 2 kHz: all USB SIE traffic lives here. This ISR now nests into the audio render (so the key
+     * matrix keeps its rhythm, below); USB shares the MIDI queues with the audio ISR, so a poll that
+     * falls inside the render waits for the first tick outside it, as it did before the nesting. */
+    if (sub % 5u == 0u) {
+        usb_due = 1;
+#if FELUCCA_UAC
+        /* the USB audio stream cannot wait for the render (one packet per 1 ms frame, a render takes
+         * up to ~11.6 ms): it runs nested too. It touches only EP4 (INDEX is set on every access) and
+         * the consumer side of its ring, and usb_poll never runs nested, so the two never interleave */
+        if (en_dbg.in_audio)
+            uac_service();
+#endif
+    }
+    if (usb_due && !en_dbg.in_audio) {
+        usb_due = 0;
+        usb_poll();
+#if EN_TRS
+        uart_midi_poll();                           /* the TRS jack: same context, same queue */
+#endif
+    }
+    if (++sub == 10u)
+        sub = 0;
+    if (tel_nest)
+        tel_isr_in += fm1_ticks() - tel_t0;
+    else
+        tel_isr_out += fm1_ticks() - tel_t0;
+    {
+        static uint32_t last, acc;
+        uint32_t now = fm1_ticks();
+        acc += now - last;
+        last = now;
+        while (acc >= 1000u * FM1_TICKS_PER_US) {
+            acc -= 1000u * FM1_TICKS_PER_US;
+            fm1_ms++;
+        }
+    }
+}
+#undef usb_poll
+#undef uac_service
+#undef uart_midi_poll
+extern void isr_timer5(void);
+
+/* ------------------------------------------------------------- boot --- */
+#define BOOTGUARD_MAGIC 0x42475244u
+struct bootguard_s bootguard __attribute__((section(".noinit")));   /* declared in main.c (ota_commit) */
+
+static void hexs(char *b, uint32_t v)
+{
+    uint32_t i;
+    for (i = 0; i < 8u; i++)
+        b[i] = "0123456789ABCDEF"[(v >> (28u - 4u * i)) & 15u];
+    b[8] = 0;
+}
+
+static void fm1_fault(const fm1_crash_t *c)
+{
+    char b[12];
+    uint32_t t0;
+    if (fm1_core1_online()) {
+        /* CPU1's data can go bad too, so a crash may bar it: but only when it is to blame (it faulted itself) or when the crashes repeat (the second since power-on):
+         * a crash of the first core alone (a stack overrun in the main loop, say) left the unit on one core, with its xruns, until the power was cycled */
+        const uint32_t n = fm1_core1_crash_note();
+        if (fm1_core1_fault.count || n >= 2u)
+            fm1_core1_bar_set();
+    }
+    fm1_core1_stop();
+    fm1_audio_stop();
+    lcd_fill(0, 0, 240, 240, RGB(160, 0, 0));
+    draw_text_box(0, 8, 240, &FONT_S, "PERF-1 CRASH", C_WHITE, 1);
+    hexs(b, c->vec);
+    draw_text_box(10, 40, 220, &FONT_S, b, C_WHITE, 0);
+    hexs(b, c->pc);
+    draw_text_box(10, 60, 220, &FONT_S, b, C_WHITE, 0);
+    hexs(b, c->emu);
+    draw_text_box(10, 84, 220, &FONT_S, b, C_WHITE, 0);
+    hexs(b, c->dbg);
+    draw_text_box(10, 102, 220, &FONT_S, b, C_WHITE, 0);
+    hexs(b, c->rets);
+    draw_text_box(10, 120, 220, &FONT_S, b, C_WHITE, 0);
+    t0 = fm1_ticks();
+    while ((uint32_t)(fm1_ticks() - t0) < 4000u * 1000u * FM1_TICKS_PER_US)
+        ;
+    fm1_reboot();
+}
+
+static void enter_uboot(const char *why)
+{
+    fm1_audio_stop();
+    lcd_fill(0, 0, 240, 240, C_BLACK);
+    draw_text_box(0, 110, 240, &FONT_S, why, C_WHITE, 1);
+    fm1_delay_ms(20);
+    usb_detach();
+    fm1_delay_ms(30);
+    bootguard.pending = 0;                          /* intentional reset: not a failed boot */
+    fm1_enter_uboot();
+}
+
+/* SAFE MODE: AMB-1 crashed (or hung) twice while starting. Nothing that makes sound runs: no audio,
+ * no engine, no UI; USB is on, so the web installer (AMB-1, or the stock firmware) and M-UPGRADE can
+ * reach it. PLAY tries AMB-1 again. The chip's own update mode stays the last resort (fm1_cstart). */
+static void safe_main(void)
+{
+    char b[24];
+    uint32_t t0, play;
+    lcd_fill(0, 0, 240, 240, C_BLACK);
+    draw_text_box(0, 18, 240, &FONT_B, "PERF-1 SAFE MODE", C_HI, 1);
+    draw_text_box(0, 52, 240, &FONT_S, "IT CRASHED TWICE", C_WHITE, 1);
+    draw_text_box(0, 72, 240, &FONT_S, "WHILE STARTING.", C_WHITE, 1);
+    draw_text_box(0, 102, 240, &FONT_S, "NO SOUND. USB IS ON:", C_WHITE, 1);
+    draw_text_box(0, 122, 240, &FONT_S, "REINSTALL FROM THE", C_WHITE, 1);
+    draw_text_box(0, 142, 240, &FONT_S, "WEB INSTALLER.", C_WHITE, 1);
+    draw_text_box(0, 172, 240, &FONT_S, "PLAY: TRY AGAIN", C_HI, 1);
+    if (fm1_crash.magic == FM1_CRASH_MAGIC) {
+        b[0] = 'P';
+        b[1] = 'C';
+        b[2] = ' ';
+        hexs(b + 3, fm1_crash.pc);
+        draw_text_box(0, 208, 240, &FONT_S, b, C_GRAY, 1);
+    }
+    fm1_input_init();
+    panel_init();
+    usb_start();
+    fm1_timer5_start(isr_timer5, 1);
+    fm1_guard_lock_top();
+    fm1_irq_enable_all();
+    play = 1u << panel.btn[B_PLAY];
+    t0 = fm1_ms;
+    for (;;) {
+        fm1_wdt_feed();
+        usb_retry(fm1_ms);
+        if (bootguard.pending && fm1_ms - t0 > 10000u)
+            bootguard.pending = 0;                  /* safe mode itself is up: not another failed boot */
+        if ((fm1_in.buttons & play) && fm1_ms - t0 > 500u) {
+            bootguard.failed = 0;                   /* try AMB-1 again, from scratch */
+            bootguard.pending = 0;
+            draw_text_box(0, 172, 240, &FONT_S, "STARTING PERF-1...", C_HI, 1);
+            usb_detach();
+            fm1_delay_ms(30);
+            fm1_reboot();
+        }
+        ota_service();
+        if (usb.ota_req) {
+            usb.ota_req = 0;
+            if (flash_ok)
+                ota_session();                      /* an install commits and resets; else back here */
+        }
+        if (usb.uboot_req)
+            enter_uboot("UBOOT (USB)");
+    }
+}
+
+/* TELEMETRY. A host (tools/fm1log.py) sends F0 7D 50 46 01 F7 and every few seconds again; while it does, a status frame goes back four
+ * times a second: F0 7D 50 46 (version 1) then 34 little-endian words packed 8-to-7, F7. Nothing is sent otherwise, and a frame
+ * that would have to wait for the host is dropped. The words (tel_service): sequence, ms, CPU %, CPU1 %, core2 state, xruns, late,
+ * the longest render since the last frame (us), the last render, nested ticks, shed level, playing, flash writes, the last write's
+ * us, crash count, renders, UI frames, the render budget (us), the longest gap between main-loop turns and the longest UI frame (us), the genre and the piece, then the first core's stages (render_chunk PT: clear, bass+acid, pluck+DX+snips+noise, wait for the pad,
+ * merge+sidechain, drums, echoes, wait for the reverb, master; us) and the chunks they cover, then the timer interrupt's time (nested in renders, outside). */
+static uint32_t tel_gap_us, tel_ui_us;              /* the longest since the last frame */
+/* BENCH. On request (F0 7D 50 46 02 F7, tools/fm1log.py --bench) the chip times a handful of loops with the interrupts off (a glitch in
+ * the music, once): float multiply-add, the same from RAM, divide, int <-> float, a table's lookup from flash and from RAM, a rational
+ * soft clip, integer adds and a RAM copy; each BN turns, in ticks. Back: F0 7D 50 47 then the words (BN, ticks per us, the nine results) F7. */
+#define BN 1500u
+#define BENCH_BODY_F     float a = 1.0f, b = 0.5f;     uint32_t i;     for (i = 0; i < BN; i++) {         a = a * 0.9999f + b;         b = b * 0.9998f + a * 0.0001f;         a = a * 1.0001f - b * 0.0001f;         b = b + a * 0.00002f;     }     return a + b;
+static float bench_sink;
+static __attribute__((noinline)) float bench_f_flash(void) { BENCH_BODY_F }
+static __attribute__((section(".ram_text.bench"), noinline, used)) float bench_f_ram(void) { BENCH_BODY_F }
+static __attribute__((noinline)) float bench_div(void)
+{
+    float a = 1.0f;
+    uint32_t i;
+    for (i = 0; i < BN; i++) {
+        a = 1.0f / (a + 1.5f);
+        a = 1.0f / (a + 1.5f);
+        a = 1.0f / (a + 1.5f);
+        a = 1.0f / (a + 1.5f);
+    }
+    return a;
+}
+static __attribute__((noinline)) float bench_cvt(void)
+{
+    float a = 0.37f;
+    uint32_t i;
+    for (i = 0; i < BN; i++) {
+        a = (float)(int32_t)(a * 1000.0f) * 0.001f + 0.37f;
+        a = (float)(int32_t)(a * 1000.0f) * 0.001f + 0.21f;
+        a = (float)(int32_t)(a * 1000.0f) * 0.001f + 0.13f;
+        a = (float)(int32_t)(a * 1000.0f) * 0.001f + 0.43f;
+    }
+    return a;
+}
+static const float bench_tab_f[130] = {0.0f, 0.049f, 0.098f, 0.146f, 0.195f, 0.243f, 0.290f, 0.336f, 0.382f, 0.426f, 0.471f, 0.514f, 0.556f, 0.596f, 0.634f, 0.673f, 0.707f};
+static float bench_tab_r[130] = {0.0f, 0.049f, 0.098f, 0.146f, 0.195f, 0.243f, 0.290f, 0.336f, 0.382f, 0.426f, 0.471f, 0.514f, 0.556f, 0.596f, 0.634f, 0.673f, 0.707f};
+static __attribute__((noinline)) float bench_tab(const float *tb)
+{
+    float a = 0.0f, ph = 0.1f;
+    uint32_t i;
+    for (i = 0; i < BN; i++) {
+        float x, f;
+        int k;
+        ph += 0.0371f;
+        ph -= (float)(int32_t)ph;
+        x = ph * 64.0f;
+        k = (int)x;
+        f = x - (float)k;
+        a += tb[k] + (tb[k + 1] - tb[k]) * f;
+        a *= 0.5f;
+    }
+    return a;
+}
+static __attribute__((noinline)) float bench_sat(void)
+{
+    float a = 0.3f;
+    uint32_t i;
+    for (i = 0; i < BN; i++) {
+        float x = a * 1.7f;
+        x = x > 3.0f ? 3.0f : x < -3.0f ? -3.0f : x;
+        a = x * (27.0f + x * x) / (27.0f + 9.0f * x * x) + 0.3f;
+    }
+    return a;
+}
+static __attribute__((noinline)) uint32_t bench_int(void)
+{
+    uint32_t a = 1u, b = 7u, i;
+    for (i = 0; i < BN; i++) {
+        a = a * 3u + b;
+        b ^= a >> 3;
+        a += b;
+        b += a & 0xFFu;
+    }
+    return a ^ b;
+}
+static uint32_t bench_buf[256], bench_buf2[256];
+static __attribute__((noinline)) uint32_t bench_copy(void)
+{
+    uint32_t i, j, s = 0;
+    for (j = 0; j < BN / 64u; j++)
+        for (i = 0; i < 256u; i++) {
+            bench_buf2[i] = bench_buf[i] + s;
+            s += bench_buf2[i];
+        }
+    return s;
+}
+static void bench_run(uint32_t *w)
+{
+    uint32_t t, f = irq_save();
+#define BT(slot, call) t = fm1_ticks(); bench_sink += (float)(call); w[slot] = fm1_ticks() - t
+    BT(2, bench_f_flash());
+    BT(3, FL_FAR(bench_f_ram)());
+    BT(4, bench_div());
+    BT(5, bench_cvt());
+    BT(6, bench_tab(bench_tab_f));
+    BT(7, bench_tab(bench_tab_r));
+    BT(8, bench_sat());
+    BT(9, bench_int());
+    BT(10, bench_copy());
+#undef BT
+    irq_restore(f);
+    w[0] = BN;
+    w[1] = FM1_TICKS_PER_US;
+    fm1_probe_read(w + 11);                         /* the cache control as the boot left it (stock writes 0x1EEE008, 0x1EEE00C = 0x808080, 0x1EEE010 = 0xFFFF), the PLL, the CPU1 enable */
+}
+
+/* BACKUP AND RESTORE (backup_proto.h; the installer page's buttons): an object of flash read out in frames, or written from chunks. The chunks gather in bk_buf,
+ * the object is checked as its loader would take it, and written when the page says it is complete; after any write nothing else is stored (plat_store_restore)
+ * and the page asks for a restart, which loads everything afresh. */
+static uint8_t bk_buf[BK_MAX] __attribute__((section(".pool.bk")));
+static bk_sess_t bk_sess;
+static uint8_t bk_restored;                      /* an object was written: a restart may follow */
+static uint8_t bk_ack[8], bk_ack_n;              /* an answer waiting for room in the USB queue */
+static uint32_t bk_rd_obj = 0xFFFFFFFFu, bk_rd_i, bk_rd_len;   /* an object being sent: which, how far, how long */
+static uint32_t bk_wait_obj = 0xFFFFFFFFu;       /* an object being written (the music fading out): which */
+static int bk_obj_ok(uint32_t obj) { return obj < OBJ_NOBJ && obj != OBJ_PANEL; }
+static void bk_ack_put(uint32_t obj, uint32_t idx, uint32_t status) { bk_ack_n = (uint8_t)bk_build_ack(bk_ack, obj, idx, status); }
+
+/* THE PLAYER'S DX7 VOICES. usb.c collects a DX7 SysEx (a 32-voice bulk dump: the first EN_NUSER voices replace the loaded ones; a single voice, appended; or
+ * ours, F0 7D 50 56 slot 128-bytes checksum F7: one slot, or 7F alone to clear), here it is checked and handed to the engine, and the UI keeps them. */
+static void dx_service(void)
+{
+    uint32_t i, k, sum = 0;
+    uint8_t b[128], ack[7];
+    int kind, r;                                     /* r: the voices taken; -1 a bad checksum; -2 not taken */
+    if (dx_state != 2u)
+        return;
+    RING_PUBLISH();
+    kind = dx_kind;
+    if (kind == 5) {                                 /* a chunk of a restore: taken into bk_buf, answered */
+        bk_chunk_t c;
+        uint8_t f[8];
+        int st = bk_parse_chunk(dx_buf, dx_pos, &c);
+        const uint32_t obj = dx_pos > 4u ? dx_buf[4] & 0x7Fu : 0u;
+        if (st == 0 && (!bk_obj_ok(c.obj) || ui_restore_state() == 1 || bk_accept(&bk_sess, bk_buf, &c) != 0))
+            st = 2;
+        dx_state = 0;
+        usb_sysex_try(f, bk_build_ack(f, obj, st == 0 ? c.idx : 0x7Eu, (uint32_t)st));
+        return;
+    }
+    if (kind == 1) {                                 /* bulk: 5 header bytes, 4096 data, the checksum */
+        for (i = 0; i < 4096u; i++)
+            sum += dx_buf[5u + i];
+        if (((sum + dx_buf[5u + 4096u]) & 0x7Fu) != 0u) {
+            r = -1;
+        } else {
+            en_user_clear();
+            for (r = 0, k = 0; k < EN_NUSER; k++)
+                r += en_user_voice((int)k, dx_buf + 5u + k * 128u);
+        }
+    } else if (kind == 2) {                          /* a single voice: 155 bytes, packed, appended */
+        for (i = 0; i < 155u; i++)
+            sum += dx_buf[5u + i];
+        if (((sum + dx_buf[5u + 155u]) & 0x7Fu) != 0u) {
+            r = -1;
+        } else {
+            en_voice_pack(dx_buf + 5u, b);
+            r = en_user_voice(en_user_next(), b) ? 1 : -2;
+        }
+    } else if (kind == 3) {                          /* ours: one slot */
+        for (i = 0; i < 128u; i++)
+            sum += dx_buf[4u + i];
+        if (((sum + dx_buf[4u + 128u]) & 0x7Fu) != 0u)
+            r = -1;
+        else
+            r = en_user_voice(dx_buf[3], dx_buf + 4u) ? 1 : -2;
+    } else {
+        en_user_clear();
+        r = 0;
+    }
+    ui_voices_changed(r, kind);
+    ack[0] = 0xF0, ack[1] = 0x7D, ack[2] = 0x50, ack[3] = 0x57, ack[4] = (uint8_t)kind, ack[5] = r < 0 ? 0x7Fu : (uint8_t)r, ack[6] = 0xF7;
+    dx_state = 0;                                    /* dx_buf free before the answer goes, so the next voice the answer releases is never dropped */
+    usb_sysex_try(ack, sizeof ack);                  /* the answer: the page waits for it before the next voice */
+}
+
+/* THE EDITOR (web/editor): parameter changes, a dump of every parameter, a voice read back. Changes are applied as the knobs would; a dump goes out in
+ * frames of up to 24 parameters (F0 7D 50 51 first-hi first-lo count, then each value + 8192 as two 7-bit bytes, F7), a frame a turn of the loop as the
+ * USB queue has room; a voice goes back as F0 7D 50 58 slot loaded [128 bytes, a checksum] F7 (no bytes when the slot is empty). */
+static void px_service(void)
+{
+    static uint32_t dump_i = 0xFFFFFFFFu, vox_req = 0xFFFFFFFFu;
+    static uint8_t about_req;                        /* the pieces page asked what this firmware is */
+    uint8_t f[PX_FRAME_MAX];                         /* the longest frame (a voice) fits: dx_proto.h, checked by tests/host/dxproto_test.c */
+    while (px_r != px_w) {
+        const uint32_t e = px_q[px_r % PX_N];
+        RING_PUBLISH();
+        px_r++;
+        if (e >> 28 == 1u)
+            ui_param_set((int)(e >> 14 & 0x3FFFu), (int)(e & 0x3FFFu) - 8192);
+        else if (e >> 28 == 2u)
+            dump_i = 0;
+        else if (e >> 28 == 3u)
+            vox_req = e & 0x7Fu;
+        else if (e >> 28 == 4u) {                        /* backup: send an object (a restore under way is dropped) */
+            const uint32_t obj = e & 0x7Fu;
+            if (bk_obj_ok(obj) && bk_rd_obj == 0xFFFFFFFFu && ui_restore_state() != 1) {
+                const int n = plat_store_load(obj, bk_buf, BK_MAX);
+                bk_sess.mask = 0;
+                bk_rd_len = n > 0 ? (uint32_t)n : 0u;
+                bk_rd_i = 0;
+                bk_rd_obj = obj;
+            }
+        } else if (e >> 28 == 5u) {                      /* restore: the object is complete: check it, write it */
+            const uint32_t obj = e >> 14 & 0x1Fu, len = e & 0x3FFFu;
+            if (!bk_obj_ok(obj) || !bk_complete(&bk_sess, obj, len) || ui_restore_state() == 1)
+                bk_ack_put(obj, 0x7Fu, 1u);
+            else if (!ui_restore_valid(obj, bk_buf, len))
+                bk_ack_put(obj, 0x7Fu, 2u);
+            else {
+                bk_wait_obj = obj;
+                ui_restore_start(obj, bk_buf, len);
+            }
+            bk_sess.mask = 0;
+        } else if (e >> 28 == 6u && bk_restored && ui_restore_state() == 2) {   /* restore: restart, once something was written */
+            usb_detach();
+            fm1_delay_ms(30);
+            fm1_reboot();
+        } else if (e >> 28 == 7u) {                      /* about: answered below, as the queue has room */
+            about_req = 1;
+        }
+    }
+    if (about_req && usb_sysex_try(f, bk_build_about(f, (uint32_t)P_NPARAMS, (uint32_t)EN_NGENRE, (uint32_t)en_user_count())) == 0)
+        about_req = 0;
+    if (bk_wait_obj != 0xFFFFFFFFu && ui_restore_state() >= 2) {   /* the written object's answer */
+        bk_restored |= ui_restore_state() == 2;
+        bk_ack_put(bk_wait_obj, 0x7Fu, ui_restore_state() == 2 ? 0u : 3u);
+        bk_wait_obj = 0xFFFFFFFFu;
+    }
+    if (bk_ack_n && usb_sysex_try(bk_ack, bk_ack_n) == 0)
+        bk_ack_n = 0;
+    if (bk_rd_obj != 0xFFFFFFFFu) {                      /* an object going out, a frame a turn of the loop as the queue has room */
+        const uint32_t n = bk_rd_len - bk_rd_i > BK_FRAME ? BK_FRAME : bk_rd_len - bk_rd_i;
+        if (usb_sysex_try(f, bk_build_frame(f, bk_rd_obj, bk_rd_i / BK_FRAME, bk_rd_len, bk_buf + bk_rd_i, n)) == 0) {
+            bk_rd_i += n;
+            if (bk_rd_i >= bk_rd_len)
+                bk_rd_obj = 0xFFFFFFFFu;
+        }
+    }
+    if (dump_i < (uint32_t)P_NPARAMS) {
+        int32_t vals[24];
+        uint32_t k, n = (uint32_t)P_NPARAMS - dump_i > 24u ? 24u : (uint32_t)P_NPARAMS - dump_i;
+        for (k = 0; k < n; k++)
+            vals[k] = ui_param_get((int)(dump_i + k));
+        if (usb_sysex_try(f, px_build_dump(f, dump_i, vals, n)) == 0)
+            dump_i += n;
+    }
+    if (vox_req != 0xFFFFFFFFu) {
+        const uint32_t loaded = (uint32_t)en_user_count();
+        const uint8_t *d = vox_req < loaded ? en_user_get((int)vox_req) : 0;
+        if (usb_sysex_try(f, px_build_voice(f, vox_req, loaded, d)) == 0)
+            vox_req = 0xFFFFFFFFu;
+    }
+}
+
+static uint32_t prof_clk(void) { return fm1_ticks(); }
+static void tel_service(void)
+{
+    static uint8_t on, extra;
+    static uint32_t until, next, seq;
+    uint8_t r = usb.tel_req;
+    if (r == 3u) {                                  /* the bench, once */
+        uint32_t w[16], i;
+        uint8_t f[4 + 16 * 5 + 2], b[16 * 4];
+        usb.tel_req = 0;
+        bench_run(w);
+        for (i = 0; i < 16u; i++)
+            b[4 * i] = (uint8_t)w[i], b[4 * i + 1] = (uint8_t)(w[i] >> 8), b[4 * i + 2] = (uint8_t)(w[i] >> 16), b[4 * i + 3] = (uint8_t)(w[i] >> 24);
+        f[0] = 0xF0, f[1] = 0x7D, f[2] = 0x50, f[3] = 0x47;
+        i = 4u + ota_pack7(b, sizeof b, f + 4);
+        f[i++] = 0xF7;
+        usb_sysex_try(f, i);
+        return;
+    }
+    if (r) {
+        usb.tel_req = 0;
+        on = r == 2u;
+        until = fm1_ms + 10000u;
+        if (on)
+            next = fm1_ms;
+    }
+    if (!on)
+        return;
+    if ((int32_t)(fm1_ms - until) > 0) {            /* the host went quiet: stop */
+        on = 0;
+        return;
+    }
+    if (extra == 1) {                               /* the second frame (F0 7D 50 5A): the slowest chunk's stages and when it was, the histogram of renders, the slowest half dissected */
+        uint32_t w[40], i, o = 4;
+        uint8_t f[4 + 40 * 5 + 2], b[40 * 4];
+        _Static_assert(4 + (40 * 4 * 8 + 6) / 7 + 1 <= 192, "the frame fits usb.c's SysEx queue (64 packets)");
+        for (i = 0; i < 9u; i++)
+            w[i] = en_peak_stage[i] / FM1_TICKS_PER_US;
+        w[9] = en_peak_total / FM1_TICKS_PER_US;
+        w[10] = en_peak_info;
+        for (i = 0; i < 9u; i++)
+            w[11 + i] = tel_hist[i];
+        for (i = 0; i < 7u; i++)
+            w[20 + i] = tel_pkr_sent[i];
+        for (i = 0; i < 9u; i++)                /* the short chunks' stages (us), their count and their frames: with the totals, each stage's fixed cost a chunk */
+            w[27 + i] = en_prof_sm[i] / FM1_TICKS_PER_US;
+        w[36] = en_prof_sm[9];
+        w[37] = en_prof_sm[10];
+        w[38] = (uint32_t)tap_n[0] | (uint32_t)tap_n[1] << 8 | (uint32_t)tap_n[2] << 16 | (uint32_t)tap_n[3] << 24;   /* the drums tapped from MIDI (0.16.6: */
+        w[39] = (uint32_t)tap_n[4] | (uint32_t)tap_n[5] << 8 | (um.drops & 0xFFFFu) << 16;   /* kick .. perc, a byte each) and the TRS bytes lost */
+        for (i = 0; i < 40u; i++)
+            b[4 * i] = (uint8_t)w[i], b[4 * i + 1] = (uint8_t)(w[i] >> 8), b[4 * i + 2] = (uint8_t)(w[i] >> 16), b[4 * i + 3] = (uint8_t)(w[i] >> 24);
+        f[0] = 0xF0, f[1] = 0x7D, f[2] = 0x50, f[3] = 0x5A;
+        o += ota_pack7(b, sizeof b, f + o);
+        f[o++] = 0xF7;
+        if (usb_sysex_try(f, o) == 0) {
+            en_peak_total = 0;
+            for (i = 0; i < 9u; i++)
+                tel_hist[i] = 0;
+            for (i = 0; i < 11u; i++)
+                en_prof_sm[i] = 0;
+            extra = EN_DIAG ? 2 : 0;
+        }
+        return;
+    }
+#if EN_DIAG
+    if (extra == 2) {                               /* the third frame (F0 7D 50 5B): the diagnostic pieces (amb.c en_diag), us and counts; EN_DIAG=1 builds only */
+        uint32_t w[36], i, o = 4;
+        uint8_t f[4 + 36 * 5 + 2], b[36 * 4];
+        _Static_assert(4 + (36 * 4 * 8 + 6) / 7 + 1 <= 4 + 36 * 5 + 2, "the frame fits its buffer");
+        for (i = 0; i < 36u; i++)
+            w[i] = i < 28u || i >= 32u ? en_diag[i] / FM1_TICKS_PER_US : en_diag[i];
+        for (i = 0; i < 36u; i++)
+            b[4 * i] = (uint8_t)w[i], b[4 * i + 1] = (uint8_t)(w[i] >> 8), b[4 * i + 2] = (uint8_t)(w[i] >> 16), b[4 * i + 3] = (uint8_t)(w[i] >> 24);
+        f[0] = 0xF0, f[1] = 0x7D, f[2] = 0x50, f[3] = 0x5B;
+        o += ota_pack7(b, sizeof b, f + o);
+        f[o++] = 0xF7;
+        if (usb_sysex_try(f, o) == 0) {
+            for (i = 0; i < 36u; i++)
+                en_diag[i] = 0;
+            extra = 0;
+        }
+        return;
+    }
+#endif
+    if ((int32_t)(fm1_ms - next) < 0)
+        return;
+    {
+        uint32_t w[40], i;
+        uint8_t f[4 + 40 * 5 + 2];   /* (40 words, 188 bytes: usb.c's SysEx queue takes 64 packets, 192 bytes) */
+        uint32_t n = 4;
+        w[0] = seq;
+        w[1] = fm1_ms;
+        w[2] = audio_cpu_pct;
+        w[3] = fm1_core1_load();
+        w[4] = plat_core2();
+        w[5] = audio_xruns;
+        w[6] = en_dbg.late;
+        w[7] = tel_max_us;
+        w[8] = en_dbg.last_us;
+        w[9] = en_dbg.nested;
+        w[10] = (uint32_t)en_shed_level | (uint32_t)en_chorus_c0 << 8 | (uint32_t)en_bass_c1 << 9 |   /* (bit 8: the chorus on the first core) */
+                (uint32_t)flash_chip << 12 | (uint32_t)susp_bad << 14 |   /* bits 12-13 the flash part (1 P25Q80, 2 UC25HQ80), 14 its erase didn't suspend (0.16.23) */
+                (uint32_t)boot_head << 15;          /* bits 15-16 the startup code: 1 V15, 2 V16, 3 another (0.16.25) */
+        w[11] = (uint32_t)en_playing;
+        w[12] = tel_stores;
+        w[13] = tel_store_us;
+        w[14] = fm1_crash.magic == FM1_CRASH_MAGIC ? fm1_crash.count : 0u;
+        w[15] = en_dbg.halves;
+        w[16] = en_dbg.ui_frames;
+        w[17] = HALF_FRAMES * 1000000u / FS;
+        w[18] = tel_gap_us;
+        w[19] = tel_ui_us;
+        w[20] = (uint32_t)proj.genre;
+        w[21] = (uint32_t)proj.piece;
+        for (i = 0; i < 9u; i++) {                  /* the first core's time by stage since the last frame (us), then the chunks */
+            w[22 + i] = en_prof[i] / FM1_TICKS_PER_US;
+            en_prof[i] = 0;
+        }
+        w[31] = en_prof[9];
+        en_prof[9] = 0;
+        w[32] = tel_isr_in / FM1_TICKS_PER_US;      /* the timer interrupt: us nested into renders, and outside them */
+        w[33] = tel_isr_out / FM1_TICKS_PER_US;
+        w[34] = batt_raw;                           /* the battery divider's reading (0xFFFFFFFF: none yet) */
+        w[35] = stk_used(STK_W(_ustack_lo), STK_W(_ustack_top));   /* the stacks' deepest (bytes): main, interrupts, CPU1's user and supervisor */
+        w[36] = stk_used(STK_W(_sstack_lo), STK_W(_sstack_top));
+        w[37] = stk_used(STK_W(_cpu1_stacks_lo), STK_W(_cpu1_stacks_lo + 4096));
+        w[38] = stk_used(STK_W(_cpu1_stacks_lo + 4096), STK_W(_cpu1_stacks_lo + 8192));
+        w[39] = ui.min_last;                        /* MIDI in's last message, a USB-MIDI packet (0.16.6; the drums tapped: the second frame) */
+        tel_isr_in = tel_isr_out = 0;
+        f[0] = 0xF0, f[1] = 0x7D, f[2] = 0x50, f[3] = 0x46;
+        {
+            uint8_t b[40 * 4];
+            for (i = 0; i < 40u; i++)
+                b[4 * i] = (uint8_t)w[i], b[4 * i + 1] = (uint8_t)(w[i] >> 8), b[4 * i + 2] = (uint8_t)(w[i] >> 16), b[4 * i + 3] = (uint8_t)(w[i] >> 24);
+            n += ota_pack7(b, sizeof b, f + n);
+        }
+        f[n++] = 0xF7;
+        if (usb_sysex_try(f, n) == 0) {
+            {                                       /* the slowest half's record goes with this window (the second frame carries it; a render may replace it before then) */
+                const uint32_t fl = irq_save();
+                for (i = 0; i < 7u; i++)
+                    tel_pkr_sent[i] = tel_pkr[i];
+                tel_max_us = 0;
+                irq_restore(fl);
+            }
+            extra = 1;
+            seq++;
+            tel_gap_us = 0;
+            tel_ui_us = 0;
+            next += 250u;
+            if ((int32_t)(fm1_ms - next) > 0)
+                next = fm1_ms + 250u;
+        } else {
+            next = fm1_ms + 250u;                   /* no room (no host listening): try again later */
+        }
+    }
+}
+
+static void splash(void)
+{
+    lcd_fill(0, 0, 240, 240, RGB(22, 21, 27));       /* charcoal, until the UI's RedtailWorks card (ui_init) */
+    lcd_sync();
+}
+
+static void fm1_main(void)
+{
+    int32_t knob = 512 * 16;
+    uint32_t last_frame = 0;
+    {
+        uint32_t f = irq_save();
+        const uint32_t id = FL_FAR(fl_jedec_ram)();
+        flash_ok = FL_JEDEC_OK(id);                       /* the Puya of the first units or the UC25HQ80 of the newer ones (0.16.23) */
+        flash_chip = (uint8_t)FL_CHIP(id);
+        if (flash_ok)
+            FL_FAR(fl_resume_ram)();                      /* (an erase left suspended by a reset finishes) */   /* the expected 1 MiB part, else RAM only */
+        irq_restore(f);
+        if (flash_ok)
+            ota_boot_cleanup();
+    }
+    if (flash_ok) {                                       /* which startup code the unit has (0.16.25): flash.bin's first 16 KiB, as ota.c's check reads it.
+                                                           * M-VAVE's V16 runs the whole chip 12.5% slower than V15 (the bench, 2026-11-06); PERF's installs
+                                                           * keep whatever is there, so the status log and the Install page say which */
+        uint8_t b[256];
+        uint32_t i, c = 0;
+        for (i = 0; i < 0x4000u && !st_read(i, b, sizeof b); i += sizeof b)
+            c = ota_crc32(b, sizeof b, c);
+        boot_head = i < 0x4000u ? 0u : c == 0x3A04AD23u ? 1u : c == 0x08316064u ? 2u : 3u;
+    }
+    lcd_init();
+    palette_set(1);
+    splash();
+    if (en_dbg.magic != DBG_MAGIC) {
+        memset(&en_dbg, 0, sizeof en_dbg);
+        en_dbg.magic = DBG_MAGIC;
+    }
+    if (safe_mode)
+        safe_main();                                /* never returns */
+    if (fm1_crash.magic == FM1_CRASH_MAGIC && fm1_crash.count != en_dbg.crash_seen) {
+        char b[16];                                 /* a crash since the last boot: say so, a moment */
+        en_dbg.crash_seen = fm1_crash.count;
+        b[0] = 'P';
+        b[1] = 'C';
+        b[2] = ' ';
+        hexs(b + 3, fm1_crash.pc);
+        draw_text_box(0, 176, 240, &FONT_S, "RESTARTED AFTER A CRASH", RGB(255, 80, 60), 1);
+        draw_text_box(0, 196, 240, &FONT_S, b, C_GRAY, 1);
+        if (fm1_core1_barred())                     /* the second core is held until the power is cycled: say so (it is why the load is higher) */
+            draw_text_box(0, 216, 240, &FONT_S, "ONE CORE: POWER-CYCLE", RGB(255, 212, 71), 1);
+        fm1_wdt_feed();
+        fm1_delay_ms(2500);
+        fm1_wdt_feed();
+    }
+    en_dbg.boots++;
+    en_dbg.max_us = 0;
+    fm1_input_init();
+    fm1_adc_init();
+    panel_init();
+    led_pos_init();
+    en_init();
+    en_prof_clock = prof_clk;
+#if EN_CORE2
+    en_core2_attach(fm1_core1_submit, fm1_core1_join, fm1_core1_fence, fm1_core1_alive);   /* the reverb runs on CPU1 while it is online */
+#endif
+    project_start(plat_seed());                     /* a piece at random, a little changed */
+    project_apply();
+    audio_init();
+    usb_start();
+#if EN_TRS
+    uart_midi_init();                               /* before TIMER5: it read-modify-writes port H too */
+#endif
+    /* above ALNK0 (3): the key / encoder / LED matrix is scanned one column per tick and must keep
+     * its rhythm through a render (X0X's finding: below the audio, turns lost steps and LEDs flickered) */
+    fm1_timer5_start(isr_timer5, 4);
+    fm1_guard_lock_top();
+    fm1_irq_enable_all();
+    fm1_delay_ms(30);
+    if ((fm1_in.buttons & 3u) == 3u)
+        panel_setup();                              /* OCT- + OCT+ held at power-on */
+    fm1_delay_ms(400);
+    ui_init();
+
+    for (;;) {
+        {   /* telemetry: the longest gap between turns of this loop (a flash write, a long frame: what the audio felt) */
+            static uint32_t last_turn;
+            const uint32_t t = fm1_ticks(), g = (t - last_turn) / FM1_TICKS_PER_US;
+            if (last_turn && g > tel_gap_us)
+                tel_gap_us = g;
+            last_turn = t;
+        }
+        fm1_wdt_feed();
+        usb_retry(fm1_ms);
+#if PERF_USB_HOST
+        uh_task(fm1_ms);                            /* the port as a MIDI host, when the MIDI IN page asks */
+#endif
+        if (fm1_ms > 30000u && bootguard.pending) {     /* a crash or hang in the first 30 s counts */
+            bootguard.pending = 0;
+            bootguard.failed = 0;
+        }
+        {
+            int32_t a = fm1_adc_read(FM1_ADC_MASTER);
+            if (a >= 0) {
+                uint32_t k10;
+                knob += (a * 16 - knob) / 8;
+                k10 = (uint32_t)(knob / 16);
+                master_q12 = (k10 * k10) >> 8;           /* 0 .. ~4096 */
+            }
+        }
+        {   /* the battery divider, once a second, smoothed (the indicator's, and the telemetry's) */
+            static uint32_t bt;
+            static int32_t bs = -1;
+            if (fm1_ms - bt >= 1000u) {
+                const int32_t a = fm1_adc_read(FM1_ADC_BATT);
+                bt = fm1_ms;
+                if (a >= 0) {
+                    bs = bs < 0 ? a * 16 : bs + (a * 16 - bs) / 4;
+                    batt_raw = (uint32_t)(bs / 16);
+                }
+            }
+        }
+        {   /* OCT- + OCT+ held 5 s: update mode (Felucca's, unchanged) */
+            static uint32_t t0, shown;
+            uint32_t both = (1u << panel.btn[B_OCTDN]) | (1u << panel.btn[B_OCTUP]);
+            if ((fm1_in.buttons & both) != both) {
+                if (shown)
+                    ui_say("UPDATE MODE", "CANCELLED");
+                shown = 0;
+                t0 = fm1_ms;
+            } else if (fm1_ms - t0 > 2000u && fm1_ms - t0 <= 5000u) {
+                uint32_t left = (5000u - (fm1_ms - t0) + 999u) / 1000u;
+                if (left != shown) {
+                    char d[4] = {(char)('0' + left), '.', '.', 0};
+                    ui_say("UPDATE MODE IN", d);
+                    shown = left;
+                }
+            } else if (fm1_ms - t0 > 5000u) {
+                enter_uboot("UBOOT");
+            }
+        }
+        main_where = 2;
+        ota_service();                              /* M-UPGRADE handshake (other SysEx is dropped) */
+        tel_service();
+        dx_service();
+        px_service();
+        main_where = 0;
+        if (usb.ota_req) {
+            usb.ota_req = 0;
+            en_play(0);
+            en_panic();
+            ui_flush();                             /* a store or autosave in flight: written, its fade undone */
+            if (flash_ok)
+                ota_session();                      /* returns only if nothing was committed */
+            ui_init();
+        }
+        if (usb.uboot_req)
+            enter_uboot("UBOOT (USB)");
+#if EN_CDC
+        cdc_task();
+#endif
+        if (fm1_ms - last_frame >= 16u) {           /* ~60 frames/s at most; input in between */
+            last_frame = fm1_ms;
+            en_dbg.ui_frames++;
+            {
+                const uint32_t t = fm1_ticks();
+                uint32_t u;
+                main_where = 1;
+                ui_frame();
+                main_where = 0;
+                u = (fm1_ticks() - t) / FM1_TICKS_PER_US;
+                if (u > tel_ui_us)
+                    tel_ui_us = u;
+            }
+        } else {
+            ui_input_only();
+        }
+    }
+}
+
+void fm1_cstart(void)
+{
+    uint32_t *s, *d, p3, src, wdt;
+    fm1_time_init();
+    fm1_reset_reason();
+    p3 = fm1_boot.p3_rst;
+    src = fm1_boot.rst_src;
+    wdt = fm1_boot.wdt_con;
+    fm1_wdt_arm(0x0D);
+    fm1_core1_stop();                               /* a CPU1 left running by the last boot: hold it before RAM is cleared */
+    if (bootguard.magic != BOOTGUARD_MAGIC) {
+        bootguard.magic = BOOTGUARD_MAGIC;
+        bootguard.failed = 0;
+        bootguard.pending = 0;
+    }
+    if (bootguard.pending)
+        bootguard.failed++;
+    bootguard.pending = 1;
+    if (bootguard.failed >= 4u) {                   /* safe mode failed too: the chip's own update mode */
+        bootguard.failed = 0;
+        bootguard.pending = 0;
+        fm1_enter_uboot();
+    }
+    p3 |= (bootguard.failed >= 2u) << 8;            /* two failed boots: safe mode (kept past the .bss clear) */
+    fm1_irq_init();
+    for (d = _bss_start; d < _bss_end; d++)
+        *d = 0;
+    for (d = _pool_start; d < _pool_end; d++)
+        *d = 0;
+    for (s = _data_load, d = _data_start; d < _data_end; s++, d++)
+        *d = *s;
+    for (s = _rt_load, d = _rt_start; d < _rt_end; s++, d++)
+        *d = *s;
+    for (s = _dsp_load, d = _dsp_start; d < _dsp_end; s++, d++)
+        *d = *s;                                    /* CPU1's worker loop (EN_CORE2) */
+    for (s = _rh_load, d = _rh_start; d < _rh_end; s++, d++)
+        *d = *s;                                    /* the hot render code (.ram_hot) */
+    fm1_mailbox_clear();
+    stk_paint(STK_W(_ustack_lo), STK_W(_ustack_top));   /* (CPU1 is held: its stacks are free to paint) */
+    stk_paint(STK_W(_sstack_lo), STK_W(_sstack_top));
+    stk_paint(STK_W(_cpu1_stacks_lo), STK_W(_cpu1_stacks_lo + 8192));
+#if EN_CORE2
+    fm1_guard_enable(FM1_GUARD_STACK | FM1_GUARD_WRITE | FM1_GUARD_BUS);
+    /* One core after a crash (CPU1's data can go bad where no check reaches), in safe mode, or after CPU1
+     * was retired: the bar stays until power-off. CPU1 starts through mask ROM before it reaches our RAM
+     * worker, so the instruction-fetch limits come after it. */
+    if (!fm1_core1_barred() && bootguard.failed == 0u)
+        fm1_core1_boot();
+    fm1_guard_enable(FM1_GUARD_PC);
+#else
+    fm1_guard_enable(FM1_GUARD_STACK | FM1_GUARD_WRITE | FM1_GUARD_BUS | FM1_GUARD_PC);
+#endif
+    safe_mode = (uint8_t)(p3 >> 8);
+    fm1_boot.p3_rst = (uint8_t)p3;
+    fm1_boot.rst_src = src;
+    fm1_boot.wdt_con = (uint8_t)wdt;
+    fm1_main();
+    for (;;)
+        ;
+}

@@ -1,0 +1,466 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2026 Leo Kuroshita (@kurogedelic), Hügelton Instruments
+"""Build HYP-1 (a fork of AMB-1, built on Felucca as X0X is): the app, the update loader and an installable .fwsc package.
+
+  tools/build.py [--release X.Y[-suffix]]
+
+Outputs in build/: amb.bin (app), loader/ota.bin (update loader, Felucca's, unchanged),
+amb.fwsc (package). See BUILDING.md for the toolchain and the SDK.
+
+The JieLi toolchain is Linux x86-64 only. JIELI_TOOLCHAIN points at it; on
+macOS (or with JIELI_DOCKER=1) each tool runs in a linux/amd64 container.
+"""
+import argparse
+import hashlib
+import os
+import platform
+import re
+import struct
+import subprocess
+import sys
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+SRC = Path(__file__).resolve().parents[1]
+FW = SRC / "firmware"
+OUT = SRC / "build"
+GEN = OUT / "gen"
+LDR = OUT / "loader"
+STB = OUT / "stub"
+sys.path.insert(0, str(SRC / "tools"))
+import fm1pkg_make  # noqa: E402
+import lz4blk  # noqa: E402
+
+STUB_XIP = 0x02000120               # app.bin offset 0 in the XIP map, where the SPL jumps: the boot stub
+STUB_LEN = fm1pkg_make.STUB_LEN
+APP_XIP = 0x02001000                # the body (the app proper), after the stub: its _start (app.ld)
+# the stub's own flags, exactly Melodee 1.3.5's (tools/build.py CFLAGS), so the same sources give the bytes its stub.lock pins
+STUB_CFLAGS = ["-mcpu=r3", "-mfprev1", "-ffp-contract=off", "-Werror=double-promotion", "-Os", "-ffunction-sections",
+               "-fdata-sections", "-fno-builtin", "-Wall", "-Wno-unused-function"]
+APP_SLOT = fm1pkg_make.APP_SLOT
+LOADER_LOAD = 0x01C0A800
+LOADER_NAME = b"usb_hid_ota.bin"    # the file name the SPL looks for
+DOCKER_IMAGE = os.environ.get("JIELI_DOCKER_IMAGE", "debian:bookworm-slim")
+CFLAGS = ["-Os", "-ffunction-sections", "-fno-builtin", "-Wall", "-Wno-unused-function"]
+# the AC79's single-precision FPU (the SDK's own flags); no fused multiply-add, so the host
+# build (-ffp-contract=off) computes the same samples
+FPU = ["-mcpu=r3", "-mfprev1", "-ffp-contract=off"]
+# the instrument: a separate unit at -O2
+O2_UNITS = ["dsp/amb.c"]
+LINE = re.compile(r"^\s*([0-9a-f]+):\s+((?:[0-9a-f]{2} )+)\s*\t(.*)$")
+
+# SDK files of AC79NN_SDK_V1.2.1_2023-12-13 (the tested version)
+SDK_SHA256 = {
+    "uboot.boot": "4e3b4c220dc96641cb5a723f41e68ce41d5261ae9434bb33fbd7f2c59976ded4",
+    "cfg_tool.bin": "276579954f076886a6a7694f65dc71c034a63a2c204b76749065c0ac7b010d1b",
+    "cfg/eq_cfg_hw.bin": "41167491bffed4651750719c973d2758adeb9021a5670d02d6a53c85ed80ea7d",
+}
+
+PRODUCT = "FM-1_700"                # package identity; release builds are FM-1_7XXYYZZ (see main)
+VERSION = None                      # FELUCCA_VERSION for release builds (default: firmware/src/ui.c)
+
+
+def toolchain():
+    tc = os.environ.get("JIELI_TOOLCHAIN")
+    if not tc or not (Path(tc) / "pi32v2" / "bin" / "clang").exists():
+        raise SystemExit("JIELI_TOOLCHAIN must point at the JieLi Linux toolchain "
+                         "(the directory with pi32v2/ and common/; see tools/get_toolchain.sh)")
+    return Path(tc).resolve()
+
+
+def use_docker():
+    native = platform.system() == "Linux" and platform.machine() in ("x86_64", "AMD64")
+    return os.environ.get("JIELI_DOCKER", "0" if native else "1") == "1"
+
+
+_BUILDER = None
+_BUILDER_LOCK = __import__("threading").Lock()
+
+
+def builder():
+    """one long-lived toolchain container per source tree (starting a container per tool call cost
+    most of the build); it stops by itself after an hour without a build"""
+    global _BUILDER
+    with _BUILDER_LOCK:            # the loader and the app build in parallel: start it once
+        return _builder_start()
+
+
+def _builder_start():
+    global _BUILDER
+    if _BUILDER:
+        return _BUILDER
+    name = "jieli-" + hashlib.sha1(str(SRC).encode()).hexdigest()[:10]
+    st = subprocess.run(["docker", "inspect", "-f", "{{.State.Running}}", name], capture_output=True, text=True)
+    if st.stdout.strip() != "true":
+        subprocess.run(["docker", "rm", "-f", name], capture_output=True)
+        r = subprocess.run(["docker", "run", "-d", "--rm", "--name", name, "--platform", "linux/amd64",
+                            "-v", f"{SRC}:/work", "-v", f"{toolchain()}:/opt/jieli:ro", "-w", "/work",
+                            DOCKER_IMAGE, "sh", "-c", "sleep 3600"], capture_output=True, text=True)
+        if r.returncode:
+            sys.stderr.write(r.stderr)
+            raise SystemExit("build: cannot start the toolchain container")
+    else:                           # an hour from now again
+        subprocess.run(["docker", "exec", "-d", name, "sh", "-c", "sleep 3600 && kill 1"], capture_output=True)
+    _BUILDER = name
+    return name
+
+
+def tc(tool, *args):
+    """run a toolchain binary (pi32v2/bin/..., common/bin/...) with cwd SRC; paths relative to SRC"""
+    rel = [str(Path(a).resolve().relative_to(SRC)) if isinstance(a, Path) else a for a in args]
+    if tool == "cc":                # the toolchain's cc wrapper needs python3; call clang directly
+        tool, rel = "pi32v2/bin/clang", ["-target", "pi32v2", *rel]
+    if use_docker():
+        cmd = ["docker", "exec", "-w", "/work", builder(), f"/opt/jieli/{tool}", *rel]
+    else:
+        cmd = [str(toolchain() / tool), *rel]
+    r = subprocess.run(cmd, cwd=SRC, capture_output=True, text=True)
+    if r.returncode:
+        sys.stderr.write(r.stdout + r.stderr)
+        raise SystemExit(f"build: {tool} failed")
+    if r.stderr.strip():
+        sys.stderr.write(r.stderr)
+    return r.stdout
+
+
+def tc_all(*cmds):
+    # at most 4 at once: a podman machine drops concurrent container connections (ssh EOF)
+    with ThreadPoolExecutor(min(len(cmds), int(os.environ.get("EN_JOBS", "4")))) as ex:
+        return list(ex.map(lambda c: tc(*c), cmds))
+
+
+def generate():
+    """generated headers: the font (Felucca's)"""
+    GEN.mkdir(parents=True, exist_ok=True)
+    r = subprocess.run([sys.executable, str(SRC / "tools" / "gen_font.py"), str(GEN / "felucca_font.h")],
+                       capture_output=True, text=True)
+    sys.stdout.write(r.stdout)
+    if r.returncode:
+        sys.stderr.write(r.stderr)
+        raise SystemExit("build: gen_font.py failed")
+
+
+# ---- update loader
+
+def crc16(d, c=0):
+    for b in d:
+        c ^= b << 8
+        for _ in range(8):
+            c = ((c << 1) ^ 0x1021) if c & 0x8000 else c << 1
+        c &= 0xFFFF
+    return c
+
+
+def ldr_head(dcrc, a, b, attr, name):
+    body = struct.pack("<HIIBBH16s", dcrc, a, b, attr, 0, 0, name)
+    return struct.pack("<H", crc16(body)) + body
+
+
+def ldr_wrap(image):
+    """ota.bin = outer JLFS head (32 B) + inner head (32 B, load address) +
+    blocks [clen u32][dlen u32][LZ4 block], dlen 4096 except the last"""
+    blocks = bytearray()
+    for i in range(0, len(image), 4096):
+        raw = image[i:i + 4096]
+        c = lz4blk.compress(raw)
+        if len(c) > 4096 or lz4blk.decompress(c) != raw:
+            raise SystemExit(f"loader: block {i // 4096} does not compress below 4096 B")
+        blocks += struct.pack("<II", len(c), len(raw)) + c
+    inner = ldr_head(crc16(image), len(image), LOADER_LOAD, 0, LOADER_NAME)
+    body = inner + bytes(blocks)
+    return ldr_head(crc16(body), 0x20, len(body), 0x41, LOADER_NAME) + body
+
+
+def build_loader():
+    LDR.mkdir(parents=True, exist_ok=True)
+    src = FW / "loader"
+    flags = [*CFLAGS, "-Ifirmware/hal", "-Ifirmware/src"]
+    tc_all(("cc", "-c", src / "crt0_ldr.S", "-o", LDR / "crt0_ldr.o"),
+           ("cc", *flags, "-c", src / "loader.c", "-o", LDR / "loader.o"))
+    elf = LDR / "loader.elf"
+    tc("pi32v2/bin/ld", "--gc-sections", "-e", "_start", "-T", src / "loader.ld",
+       LDR / "crt0_ldr.o", LDR / "loader.o", "-o", elf)
+    _, dis, hdr, syms = tc_all(("common/bin/objcopy", "-O", "binary", "-j", ".text", elf, LDR / "loader.bin"),
+                               ("common/bin/objdump", "-d", elf),
+                               ("common/bin/objdump", "-h", elf),
+                               ("common/bin/objdump", "-t", elf))
+    (LDR / "loader.dis").write_text(dis)
+    for ln in hdr.splitlines():     # the loader rewrites the flash: nothing may run from XIP
+        p = ln.split()
+        if len(p) > 4 and p[1].startswith(".") and int(p[3], 16) >= 0x02000000 and int(p[2], 16):
+            raise SystemExit(f"loader: section {p[1]} at {p[3]} is outside RAM")
+    image = (LDR / "loader.bin").read_bytes()
+    if not image or len(image) > 0x14000:
+        raise SystemExit("loader: image empty or too big")
+    ota = ldr_wrap(image)
+    (LDR / "ota.bin").write_bytes(ota)
+    bss = [int(ln.split()[0], 16) for ln in syms.splitlines() if ln.rstrip().endswith("_bss_end")]
+    print(f"loader: image {len(image)} B at {LOADER_LOAD:#x}" + (f", bss end {bss[0]:#x}" if bss else ""))
+    print(f"loader: ota.bin {len(ota)} B")
+    return ota
+
+
+# ---- boot stub (0.16.17): ChoralRoot FM-1 v0.16's, as Melodee 1.3.5 ships it (version 3), unchanged
+
+def build_stub():
+    """firmware/stub -> app.bin's first STUB_LEN bytes (0xFF padded). Code and constants only, built from its own
+    sources alone, so it is the same bytes in every build: the loader rewrites sector 0x4000 only when it changes
+    (firmware/stub/stub_core.h). firmware/stub/stub.lock records the version and hash of the stub that is meant to ship.
+    (Adapted from Melodee's tools/build.py, Kerem Kilic / ChoralRoot FM-1 contributors, GPL-3.0-only.)"""
+    STB.mkdir(parents=True, exist_ok=True)
+    src = FW / "stub"
+    tc_all(("cc", "-Ifirmware/stub", "-c", src / "crt0_stub.S", "-o", STB / "crt0_stub.o"),
+           ("cc", *STUB_CFLAGS, "-Ifirmware/stub", "-c", src / "stub.c", "-o", STB / "stub.o"))
+    elf = STB / "stub.elf"
+    tc("pi32v2/bin/ld", "--gc-sections", "-e", "_start", "-T", src / "stub.ld",
+       STB / "crt0_stub.o", STB / "stub.o", "-o", elf)
+    (STB / "stub.bin").unlink(missing_ok=True)
+    _, dis, hdr, syms = tc_all(("common/bin/objcopy", "-O", "binary", "-j", ".text", elf, STB / "stub.bin"),
+                               ("common/bin/objdump", "-d", elf),
+                               ("common/bin/objdump", "-h", elf),
+                               ("common/bin/objdump", "-t", elf))
+    (STB / "stub.dis").write_text(dis)
+    img = (STB / "stub.bin").read_bytes()
+    for ln in hdr.splitlines():     # no .data, no .bss: nothing but .text may have a size
+        p = ln.split()
+        if len(p) > 3 and p[0].isdigit() and p[1].startswith(".") and int(p[2], 16) and \
+                p[1] not in (".text", ".shstrtab", ".symtab", ".strtab"):
+            raise SystemExit(f"stub: section {p[1]} holds {int(p[2], 16)} B; the stub is code and constants only")
+    m = re.search(r"^([0-9a-f]+) .*\s_start$", syms, re.M)
+    if not m or int(m.group(1), 16) != STUB_XIP:
+        raise SystemExit(f"stub: _start is not at {STUB_XIP:#x}")
+    if img[:4] != bytes.fromhex("04818000"):
+        raise SystemExit(f"stub: starts with {img[:4].hex()}, not the entry the SPL expects (goto +4; rts)")
+    if not fm1pkg_make.has_stub(img + bytes(STUB_LEN)):
+        raise SystemExit("stub: no CRSTUB signature at offset 8")
+    if not img or len(img) > STUB_LEN - 256:     # keep a margin: a stub that grows to the brim cannot be fixed
+        raise SystemExit(f"stub: {len(img)} B does not fit {STUB_LEN} B with 256 B to spare")
+    for ln in dis.splitlines():     # nothing may call or load an address in the chip ROM (as the app's check)
+        mm = LINE.match(ln)
+        for v in (re.findall(r"= (-?\d+) <|call -?\d+ <[^:>]*: ([0-9a-f]+) >", mm.group(3)) if mm else ()):
+            val = (int(v[0]) & 0xFFFFFFFF) if v[0] else int(v[1], 16) & 0xFFFFFFFF
+            if 0xFFC00000 <= val < 0xFFD00000:
+                raise SystemExit(f"stub: reference to ROM address {val:#010x}")
+    used = len(img)
+    img += b"\xff" * (STUB_LEN - len(img))
+    ver, sha = fm1pkg_make.stub_version(img), hashlib.sha256(img).hexdigest()
+    print(f"stub: {used} B of {STUB_LEN} ({100 * used / STUB_LEN:.1f}%), version {ver}, sha256 {sha[:16]}")
+    lock = src / "stub.lock"
+    want = lock.read_text().split() if lock.exists() else []
+    if want != [str(ver), sha]:
+        if os.environ.get("FM1_STUB_LOCK") == "update":
+            lock.write_text(f"{ver} {sha}\n")
+            print(f"stub: {lock.relative_to(SRC)} updated")
+        else:
+            msg = (f"the boot stub differs from {lock.relative_to(SRC)} ({' '.join(want)[:20] or 'none'}..): installing "
+                   "this build rewrites sector 0x4000, the one window an interruption is not rescued in. If the "
+                   "change is meant: bump STUB_VERSION (firmware/stub/stub_core.h), rebuild with "
+                   "FM1_STUB_LOCK=update, and say so in the release notes")
+            if VERSION:
+                raise SystemExit("build: " + msg)
+            print("WARNING: " + msg)
+    return img
+
+
+# ---- app
+
+def build_app(stub):
+    os.environ.setdefault("EN_CORE2", "1")      # the reverb on the second core (fallback to one core built in); EN_CORE2=0 for single core
+    flags = [*CFLAGS, *FPU, "-Ifirmware/hal", "-Ifirmware/src", "-Ibuild/gen"]
+    for flag in ("EN_CDC", "EN_CORE2", "EN_DIAG"):
+        v = os.environ.get(flag)    # unset: the default in firmware/src/main.c (EN_DIAG: firmware/src/dsp/amb.h)
+        if v in ("0", "1"):
+            flags.append(f"-D{flag}={v}")
+    flags.append(f'-DFELUCCA_ID="{PRODUCT}"')
+    if VERSION:
+        flags.append(f'-DEN_VERSION="{VERSION}"')
+    o2 = [f if f != "-Os" else "-O2" for f in flags]
+    asm = ["-DEN_CORE2=1"] if os.environ.get("EN_CORE2") == "1" else []      # the assembly files test it too
+    units = [("cc", *asm, "-c", FW / "crt0.S", "-o", OUT / "crt0.o"),
+             ("cc", *asm, "-c", FW / "hal" / "fm1_vec.S", "-o", OUT / "fm1_vec.o"),
+             ("cc", "-c", FW / "hal" / "fm1_isr.S", "-o", OUT / "fm1_isr.o"),
+             ("cc", *flags, "-c", FW / "src" / "main.c", "-o", OUT / "main.o")]
+    objs = [OUT / "crt0.o", OUT / "fm1_vec.o", OUT / "fm1_isr.o", OUT / "main.o"]
+    (OUT / "o2").mkdir(parents=True, exist_ok=True)
+    for u in O2_UNITS:
+        o = OUT / "o2" / (u.replace("/", "_")[:-2] + ".o")
+        units.append(("cc", *o2, "-c", FW / "src" / u, "-o", o))
+        objs.append(o)
+    tc_all(*units)
+    elf = OUT / "amb.elf"
+    # unreferenced functions (each in its own section: -ffunction-sections) are dropped: the DSP keeps
+    # mono reference paths for the host tests that the firmware no longer calls
+    tc("pi32v2/bin/ld", "--gc-sections", "-e", "_start", "-T", FW / "app.ld", *objs, "-o", elf)
+    for sect in ("text.bin", "data.bin", "ramtext.bin", "dsptext.bin", "ramhot.bin"):
+        (OUT / sect).unlink(missing_ok=True)
+    *_, syms, dis, rt = tc_all(("common/bin/objcopy", "-O", "binary", "-j", ".text", elf, OUT / "text.bin"),
+                               ("common/bin/objcopy", "-O", "binary", "-j", ".data", elf, OUT / "data.bin"),
+                               ("common/bin/objcopy", "-O", "binary", "-j", ".ram_text", elf, OUT / "ramtext.bin"),
+                               ("common/bin/objcopy", "-O", "binary", "-j", ".dsp_text", elf, OUT / "dsptext.bin"),
+                               ("common/bin/objcopy", "-O", "binary", "-j", ".ram_hot", elf, OUT / "ramhot.bin"),
+                               ("common/bin/objdump", "-t", elf),
+                               ("common/bin/objdump", "-d", elf),
+                               ("common/bin/objdump", "-d", "-j", ".ram_text", elf))
+    (OUT / "amb.dis").write_text(dis)
+
+    def symv(name):
+        return int(re.search(r"^([0-9a-f]+) .*\s" + name + r"$", syms, re.M).group(1), 16)
+    img = bytearray((OUT / "text.bin").read_bytes())
+    # .ram_text and .data follow .text at their load addresses; crt0 copies them by words
+    for sect, lname in (("ramtext.bin", "_rt_load"), ("dsptext.bin", "_dsp_load"), ("ramhot.bin", "_rh_load"), ("data.bin", "_data_load")):
+        load = symv(lname)
+        if load % 4:
+            raise SystemExit(f"{lname} {load:#x} is not word aligned")
+        blob = (OUT / sect).read_bytes() if (OUT / sect).exists() else b""
+        if blob:
+            if load - APP_XIP < len(img):
+                raise SystemExit(f"{lname} overlaps the image")
+            img += b"\xff" * (load - APP_XIP - len(img))
+            img += blob
+    img += b"\xff" * (-len(img) % 4)
+    img = bytearray(stub) + img                 # app.bin: the stub (flash 0x4120..0x4FFF), then the body (0x5000 on)
+    (OUT / "amb.bin").write_bytes(img)
+    return bytes(img), syms, dis, rt
+
+
+def check(img, syms, dis, rt):
+    errors, notes = [], []
+    m = re.search(r"^([0-9a-f]+) .*\s_start$", syms, re.M)
+    if not m or int(m.group(1), 16) != APP_XIP:
+        errors.append(f"_start is not at {APP_XIP:#x}")
+    if img[:4] != bytes.fromhex("04818000"):
+        errors.append(f"image starts with {img[:4].hex()}, not the entry stub")
+    rt_calls = [ln for ln in rt.splitlines() if re.search(r"\bcall\b", ln)]
+    if rt_calls:                    # RAM code runs with the flash off: no calls into XIP
+        errors.append(f".ram_text contains calls: {rt_calls[:3]}")
+    else:
+        notes.append(f".ram_text: {len([ln for ln in rt.splitlines() if LINE.match(ln)])} insns, no calls")
+    for ln in dis.splitlines():     # nothing may call or load an address in the chip ROM
+        mm = LINE.match(ln)
+        if not mm:
+            continue
+        for v in re.findall(r"= (-?\d+) <|call -?\d+ <[^:>]*: ([0-9a-f]+) >", mm.group(3)):
+            val = (int(v[0]) & 0xFFFFFFFF) if v[0] else int(v[1], 16) & 0xFFFFFFFF
+            if 0xFFC00000 <= val < 0xFFD00000:
+                errors.append(f"reference to ROM address {val:#010x}")
+    if len(img) > APP_SLOT:
+        errors.append(f"image {len(img)} B exceeds the app slot")
+    if len(img) - STUB_LEN > fm1pkg_make.BODY_MAX:
+        errors.append(f"app body {len(img) - STUB_LEN} B overlaps the commit-marker sector (at most {fm1pkg_make.BODY_MAX} B)")
+    else:
+        notes.append(f"body {len(img) - STUB_LEN} B of {fm1pkg_make.BODY_MAX} below the commit marker's sector")
+    # the FPU is single precision; a soft-double routine in the image means a double crept in
+    soft = sorted(set(re.findall(r"\s(__(?:add|sub|mul|div|neg|cmp|eq|ne|lt|le|gt|ge|un|extendsf|truncdf|fixdf|fixunsdf|floatsidf|floatunsidf|floatdidf)\w*df\w*)$", syms, re.M)))
+    if soft:
+        errors.append(f"soft-double routines linked: {soft[:6]} (a double in the code)")
+    else:
+        notes.append("no soft-double routines (single-precision FPU only)")
+
+    def sym(name):
+        mm = re.search(r"^([0-9a-f]+) .*\s" + name + r"$", syms, re.M)
+        return int(mm.group(1), 16) if mm else 0
+    bss = sym("_bss_end") - 0x01C08000
+    pool = sym("_pool_end") - sym("_pool_start")
+    notes.append(f"image {len(img)} B; RAM .data+.bss {bss} B of 98304; pool {pool} B of {0x54000}")
+    if bss > 96 * 1024:
+        errors.append("RAM region overflow")
+    spare = 4096                                  # (8192 until the reverb's predelay line grew a chunk for the second core)
+    if 0x54000 - pool < spare:                    # keep some of the pool spare
+        errors.append(f"pool headroom {0x54000 - pool} B < {spare} B")
+    return errors, notes
+
+
+# Every hardware register access lives in hal/. In src/ and loader/ (comments stripped):
+#  - no volatile pointer cast, except of a C object's address (`*(volatile T *)&x`: a read-once
+#    of a RAM flag shared with an ISR, e.g. usb.c ota_wire_send);
+#  - no literal in a register or reserved window (core SFRs 0x10000-0x13FFF, SFC 0x40000-0x43FFF,
+#    GPIO/IOMAP 0x50000-0x51FFF, CPU 0x1EE0000-0x1EEFFFF, RAM top 0x01C7F000- (boot info,
+#    mailbox, vectors), XIP 0x02000000-0x020FFFFF);
+#  - no inline asm, except the empty compiler barrier RING_PUBLISH() (emits no instruction);
+#  - no HAL register macro (a hal/ #define that is, or expands to, a volatile access).
+# Linker symbols (_bss_start[], _rt_load[], ...) are plain C objects and pass.
+MMIO_LIT = re.compile(r"\b0x0*(1[0-3][0-9a-f]{3}|4[0-3][0-9a-f]{3}|5[01][0-9a-f]{3}|1ee[0-9a-f]{4}|"
+                      r"1c7f[0-9a-f]{3}|20[0-9a-f]{5})u?l?\b", re.I)
+MMIO_CAST = re.compile(r"\(\s*(?:const\s+)?volatile\b[^()]*\*\s*\)(?!\s*&)")
+MMIO_ASM = re.compile(r"\b(?:__asm__|asm)\b(?!\s+volatile\s*\(\s*\"\"\s*:::\s*\"memory\"\s*\))")
+
+
+def mmio_check():
+    def strip(s):
+        s = re.sub(r"/\*.*?\*/", lambda m: "\n" * m.group(0).count("\n"), s, flags=re.S)
+        return re.sub(r"//[^\n]*", "", s)
+    defs = {}
+    for h in sorted((FW / "hal").glob("*.h")):
+        for m in re.finditer(r"^#define\s+(\w+)(?:\([^)]*\))?\s+(.*)$", strip(h.read_text()), re.M):
+            defs[m.group(1)] = m.group(2)
+    regs = {n for n, b in defs.items() if re.search(r"\bvolatile\b", b)}
+    while True:                                   # macros built on register macros (FM1_WR_LIMIT_H -> FM1_X2)
+        more = {n for n, b in defs.items() if n not in regs and set(re.findall(r"\w+", b)) & regs}
+        if not more:
+            break
+        regs |= more
+    errors = []
+    for f in sorted([*(FW / "src").rglob("*.[ch]"), *(FW / "loader").glob("*.c")]):
+        for no, ln in enumerate(strip(f.read_text()).splitlines(), 1):
+            where = f"{f.relative_to(FW)}:{no}"
+            for rx, what in ((MMIO_LIT, "register/window address"), (MMIO_CAST, "volatile pointer cast"),
+                             (MMIO_ASM, "inline asm")):
+                m = rx.search(ln)
+                if m:
+                    errors.append(f"{where}: {what} outside hal/ ({m.group(0).strip()}); add a hal/ helper")
+            used = set(re.findall(r"\b[A-Z_][A-Z0-9_]*\b", ln)) & regs
+            if used:
+                errors.append(f"{where}: HAL register macro {sorted(used)[0]} outside hal/; use a hal/ helper")
+    return errors
+
+
+def main():
+    global PRODUCT, VERSION
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--release", metavar="X.Y[.Z]", help="release build: identity FM-1_7XXYYZZ, version string X.Y[.Z]")
+    ap.add_argument("--sdk", type=Path, help="JieLi AC79 SDK checkout (default: $AC79_SDK)")
+    a = ap.parse_args()
+    name = "amb.fwsc"
+    if a.release:
+        # identity FM-1_7 + major, minor, patch as two digits each (0.1 -> FM-1_7000100): FM-1 is the
+        # model the update tools match on; the number is ours (X0X is FM-1_9...). Digits only after the
+        # underscore, as the tools parse it.
+        m = re.fullmatch(r"(\d{1,2})\.(\d{1,2})(?:\.(\d{1,2}))?(-[A-Za-z0-9]+)?", a.release)
+        if not m:
+            raise SystemExit(f"--release {a.release}: use X.Y[.Z][-suffix], up to two digits each")
+        PRODUCT = "FM-1_7%02d%02d%02d" % (int(m[1]), int(m[2]), int(m[3] or 0))
+        VERSION = a.release.upper()
+        name = f"amb-{a.release}.fwsc"
+    fm1pkg_make.SDK = a.sdk
+    for rel, sha in SDK_SHA256.items():          # fail early without the SDK
+        if hashlib.sha256(fm1pkg_make.sdk_file(rel)).hexdigest() != sha:
+            print(f"warning: SDK {rel} differs from AC79NN_SDK_V1.2.1; the package will not match the reference")
+    OUT.mkdir(parents=True, exist_ok=True)
+    with ThreadPoolExecutor(2) as ex:
+        gen, ldr = ex.submit(generate), ex.submit(build_loader)
+        gen.result()
+        ota = ldr.result()
+    stub = build_stub()
+    img, syms, dis, rt = build_app(stub)
+    errors, notes = check(img, syms, dis, rt)
+    hal_err = mmio_check()
+    errors += hal_err
+    if not hal_err:
+        notes.append("register access: hal/ only (src/, loader/ clean)")
+    for n in notes:
+        print("  ok   ", n)
+    for e in errors:
+        print("  FAIL ", e)
+    if errors:
+        raise SystemExit("build: checks failed")
+    pkg = fm1pkg_make.ufw(fm1pkg_make.flash_image(img, fm1pkg_make.KEY), ota, PRODUCT)
+    (OUT / name).write_bytes(pkg)
+    print(f"app      {OUT / 'amb.bin'}  {len(img)} B")
+    print(f"loader   {LDR / 'ota.bin'}  {len(ota)} B")
+    print(f"package  {OUT / name}  {len(pkg)} B, identity {PRODUCT}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

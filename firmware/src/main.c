@@ -1,0 +1,174 @@
+/* SPDX-License-Identifier: GPL-3.0-only */
+/* AMB-1 firmware for the M-VAVE FM-1: one compilation unit for the platform and the app
+ * (Felucca's layout, as X0X: the HAL is header-only, so everything that touches it is here).
+ * The instrument (dsp/amb.c) is a separate unit compiled at -O2 by tools/build.py; this one is
+ * -Os. Order matters. */
+#include <stdint.h>
+#include "fm1_time.h"
+#include "fm1_sys.h"
+#include "fm1_irq.h"
+#include "fm1_guard.h"
+#include "fm1_core1.h"
+#include "fm1_input.h"
+#include "fm1_timer.h"
+#include "fm1_audio.h"
+#include "fm1_adc.h"
+#include "fm1_lcd_hw.h"
+#include "fm1_flash.h"
+#include "fm1_xip.h"
+#include "fm1_perf.h"
+#include "fm1_probe.h"
+
+#include "libc.c"
+#include "lcd.c"
+#include "gfx.c"
+
+static volatile uint32_t fm1_ms;  /* milliseconds since boot (TIMER4-based, TIMER5 ISR) */
+#define RING_PUBLISH() __asm__ volatile("" ::: "memory")
+static inline int32_t clamp(int32_t v, int32_t lo, int32_t hi) { return v < lo ? lo : v > hi ? hi : v; }
+
+#include "app/plat.h"
+
+#define FELUCCA_OTA 1             /* M-UPGRADE update entry: keeps the web installer working */
+#ifndef EN_CDC
+#define EN_CDC 0                  /* USB serial console off: one plain MIDI interface */
+#endif
+#define FELUCCA_CDC EN_CDC
+#ifndef EN_UAC
+#define EN_UAC 1                  /* USB audio input: the master output, recordable over the cable */
+#endif
+#define FELUCCA_UAC EN_UAC
+#ifndef FELUCCA_ID
+#define FELUCCA_ID "FM-1_700"     /* package identity (tools/build.py) */
+#endif
+#define USB_DX 1                    /* the DX7's SysEx: the player's voices (dx_service) */
+#ifndef PERF_USB_HOST
+#define PERF_USB_HOST 1             /* the MIDI IN page's USB host (usb_host.c); never in the update loader */
+#endif
+#include "usb.c"
+#ifndef EN_TRS
+#define EN_TRS 1                  /* MIDI IN on the TRS jack */
+#endif
+#if EN_TRS
+#include "midi_uart.c"
+#endif
+
+static uint8_t flash_ok;          /* JEDEC id matched at boot */
+static uint8_t flash_chip;        /* which part (fm1_flash_id.h FL_CHIP): the status log says it */
+static uint8_t boot_head;         /* the startup code (0.16.25): 0 not read, 1 M-VAVE's V15, 2 V16 (12.5% slower), 3 another */
+static void audio_silence(void);
+static int st_read(uint32_t off, void *dst, uint32_t n)   /* 256-byte IRQ-off windows: audio keeps up */
+{
+    uint8_t *d = dst;
+    while (n) {
+        uint32_t k = n > 256u ? 256u : n, f = irq_save();
+        int rc = FL_FAR(fl_read_ram)(off, d, k);
+        irq_restore(f);
+        if (rc)
+            return rc;
+        off += k;
+        d += k;
+        n -= k;
+    }
+    return 0;
+}
+static uint8_t susp_bad;                          /* the part did not suspend an erase: back to the blocking one, with the audio stopped */
+static uint8_t susp_used;                         /* an erase has been sliced (the first one is the test: if the part cannot, that one is heard) */
+static int st_erase(uint32_t off)
+{
+    uint32_t took;
+    if (!FL_STORE_OK(off, 0x1000u))
+        return -8;
+    if (!susp_bad) {                              /* in slices of about 1.2 ms with the interrupts on between, so the audio goes on */
+        uint32_t first = 1u;
+        int rc;
+        for (;;) {
+            uint32_t f = irq_save();
+            rc = FL_FAR(fl_erase_slice_ram)(off, first, 1200u);
+            irq_restore(f);
+            first = 0u;
+            susp_used = 1;
+            if (rc == 1) {                         /* suspended: the audio's interrupt may run now, and the main loop's keeper */
+                const uint32_t t0 = fm1_ticks();
+                fm1_wdt_feed();
+                while ((uint32_t)(fm1_ticks() - t0) < 2500u * FM1_TICKS_PER_US)
+                    ;
+                continue;
+            }
+            if (rc == 2)
+                susp_bad = 1;
+            return rc == 2 ? 0 : rc;
+        }
+    }
+    audio_silence();
+    return fl_erase4k(off, &took);
+}
+static int st_prog(uint32_t off, const void *src, uint32_t n)
+{
+    if (!FL_STORE_OK(off, n))
+        return -8;
+    return fl_write(off, src, n);
+}
+#include "storage.c"
+
+struct bootguard_s { uint32_t magic, failed, pending; };
+extern struct bootguard_s bootguard;
+#include "ota.c"
+static uint32_t ota_now_ms(void) { return fm1_ms; }
+static void ota_idle(void) { fm1_wdt_feed(); }
+static int ota_in_area(uint32_t off, uint32_t n) { return FL_IN(off, n, OTA_AREA, OTA_AREA + OTA_AREA_LEN); }
+static int ota_erase(uint32_t off)
+{
+    uint32_t took;
+    if (!ota_in_area(off, 0x1000u) || (off & 0xFFFu))
+        return -8;
+    audio_silence();
+    return fl_erase4k(off, &took);
+}
+static int ota_prog(uint32_t off, const void *p, uint32_t n)
+{
+    if (!ota_in_area(off, n))
+        return -8;
+    return fl_write(off, p, n);
+}
+static int ota_fread(uint32_t off, void *p, uint32_t n) { return st_read(off, p, n); }
+static void ota_show(uint32_t step, int32_t code)
+{
+    static const char *const STEP[] = {"", "PACKAGE", "CHECK HEAD", "LOADER", "CONFIRM", "RESTART"};
+    lcd_fill(0, 0, 240, 240, C_BLACK);
+    draw_text_box(0, 92, 240, &FONT_S, "UPDATE", C_WHITE, 1);
+    if (step < 9u) {
+        draw_text_box(0, 124, 240, &FONT_S, STEP[step < 6u ? step : 0], C_HI, 1);
+        return;
+    }
+    draw_text_box(0, 124, 240, &FONT_S, code == 1 ? "DRY RUN OK" : "FAILED", C_HI, 1);
+    if (code == -5) {                                   /* an official package with a boot head that is not M-VAVE's V15 or V16 (ota.c
+                                                         * ota_known_head): never rewritten from here */
+        draw_text_box(0, 150, 240, &FONT_S, "UNKNOWN BOOT HEAD.", C_WHITE, 1);
+        draw_text_box(0, 170, 240, &FONT_S, "INSTALL STOCK V15 FIRST,", C_WHITE, 1);
+        draw_text_box(0, 190, 240, &FONT_S, "THEN UPDATE FROM STOCK.", C_WHITE, 1);
+        uint32_t t;
+        for (t = 0; t < 60u; t++) {                     /* 6 s to read it, the watchdog fed */
+            fm1_wdt_feed();
+            fm1_delay_ms(100);
+        }
+    }
+    fm1_delay_ms(1500);
+}
+static void ota_commit(const uint8_t *parm)
+{
+    bootguard.pending = 0;                              /* intentional reset */
+    bootguard.failed = 0;                               /* a new install starts with a clean slate */
+    usb_detach();
+    fm1_delay_ms(30);
+    fm1_enter_update(parm);
+}
+
+#include "app/app.h"
+#include "app/panel.c"
+#include "dx_proto.h"
+#include "backup_proto.h"
+#include "app/plat_fm1.c"
+#include "app/project.c"
+#include "app/ui.c"
+#include "app/main_fm1.c"

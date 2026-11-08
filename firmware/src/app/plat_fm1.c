@@ -1,0 +1,222 @@
+/* SPDX-License-Identifier: GPL-3.0-only */
+/* AMB-1 platform on the FM-1: plat.h over Felucca's HAL, panel map, USB rings and storage.
+ * Part of the unity build (amb.c), after the HAL, usb.c, storage.c and panel.c. */
+
+uint32_t plat_ms(void) { return fm1_ms; }
+
+/* the power-on seed: the MASTER pot's noise and the timer between reads, with what the last boot left
+ * (RAM that survives a reset; after a power cut, whatever it powered up as) */
+static uint32_t seed_carry __attribute__((section(".noinit")));
+uint32_t plat_seed(void)
+{
+    uint32_t h = 2166136261u ^ seed_carry, i;
+    for (i = 0; i < 24u; i++) {
+        h = (h ^ (uint32_t)fm1_adc_read(FM1_ADC_MASTER)) * 16777619u;
+        h = (h ^ fm1_ticks()) * 16777619u;
+        fm1_delay_ms(1);
+    }
+    h ^= h >> 15;
+    seed_carry = h * 2654435761u + 1u;
+    return h ? h : 1u;
+}
+
+uint32_t plat_buttons(void)
+{
+    uint32_t raw = fm1_in.buttons, out = 0, i;
+    for (i = 0; i < NB; i++)
+        if (raw & (1u << panel.btn[i]))
+            out |= 1u << i;
+    return out;
+}
+
+uint32_t plat_keys(void) { return fm1_in.notes & ((1u << NKEYS) - 1u); }
+
+int32_t plat_enc(int role)
+{
+    if (role < 0 || role >= NE)
+        return 0;
+    return fm1_enc_take(panel.enc[role]) * panel.dir[role];
+}
+
+static volatile uint32_t master_q12 = 2048;
+uint32_t plat_master(void) { return master_q12; }
+static volatile uint32_t batt_raw = 0xFFFFFFFFu;
+uint32_t plat_battery(void) { return batt_raw; }
+int plat_usb_power(void) { return usb.config && !usb.suspended; }
+
+/* LEDs: the picture is built off-line and copied one byte per column (Felucca: clearing
+ * and relighting would let the 10 kHz scan catch the dark gap and flicker) */
+static uint8_t led_pos[FM1_NKEY];
+static void led_pos_init(void)
+{
+    uint32_t id, p, r;
+    for (id = 0; id < FM1_NKEY; id++) {
+        led_pos[id] = 0xFF;
+        for (p = 0; p < FM1_NCOL; p++)
+            for (r = 1; r < 5u; r++)
+                if (FM1_KEYMAP[r][p] == (int8_t)id)
+                    led_pos[id] = (uint8_t)((p << 3) | r);
+    }
+}
+/* Glow: every button not lit is lit dim, on one scan frame in GLOW_DIV (the HAL's fm1_led_dim) */
+#define GLOW_DIV 4u
+#define KEYS_DIV 6u                             /* the keys' dim (the scale while a chord plays): one frame in six, ~150 Hz; fainter than the glow (0.15.24) */
+static uint8_t glow_on = 1;
+void plat_glow(int on) { glow_on = (uint8_t)(on != 0); }
+static uint32_t keys_dim;               /* (plat_keys_dim: the next plat_leds only) */
+void plat_keys_dim(uint32_t keys) { keys_dim = keys; }
+/* PLAY has two LEDs: its red at the button's own position, a green at the keyless matrix position
+ * column 8, row PA5 (found on the device). Green, unless recording. */
+static uint8_t play_red;
+void plat_play_red(int red) { play_red = (uint8_t)(red != 0); }
+void plat_leds(uint32_t buttons, uint32_t keys)
+{
+    uint8_t nl[FM1_NCOL] = {0}, dl[FM1_NCOL] = {0}, dk[FM1_NCOL] = {0};
+    uint32_t i, c;
+    for (i = 0; i < NB + NKEYS; i++) {
+        uint32_t id = i < NB ? panel.btn[i] : 14u + (i - NB);
+        int on = i < NB ? (buttons >> i) & 1u : (keys >> (i - NB)) & 1u;
+        uint8_t q = led_pos[id];
+        if (i == B_PLAY && !play_red)            /* PLAY's green LED instead (keyless position col 8, row PA5) */
+            q = (uint8_t)((8u << 3) | 1u);
+        if (q == 0xFF)
+            continue;
+        if (on)
+            nl[q >> 3] |= (uint8_t)(1u << (q & 7u));
+        else if (i < NB && glow_on)
+            dl[q >> 3] |= (uint8_t)(1u << (q & 7u));
+        else if (i >= NB && (keys_dim >> (i - NB) & 1u))
+            dk[q >> 3] |= (uint8_t)(1u << (q & 7u));
+    }
+    for (c = 0; c < FM1_NCOL; c++) {
+        fm1_led[c] = nl[c];
+        fm1_led_dim[c] = dl[c];
+        fm1_led_dim2[c] = dk[c];
+    }
+    fm1_led_dim_div = glow_on ? GLOW_DIV : 0u;
+    fm1_led_dim2_div = keys_dim ? KEYS_DIV : 0u;
+    keys_dim = 0;
+}
+
+/* MIDI: Felucca's rings carry 4-byte USB-MIDI event packets, byte 0 = cable / CIN */
+int plat_midi_in(uint32_t *pkt)
+{
+    if (mi_r == mi_w)
+        return 0;
+    *pkt = midi_in_q[mi_r % MQ];
+    mi_r++;
+    return 1;
+}
+void plat_midi_out(uint32_t pkt)                    /* the ring has one writer at a time: IRQs off */
+{
+    uint32_t f = irq_save();
+    midi_out_event(pkt);
+    irq_restore(f);
+}
+/* the engine's MIDI out (from the render): a USB-MIDI packet, cable 0, CIN = the status's high nibble */
+void en_midi_out(uint32_t st, uint32_t d1, uint32_t d2) { plat_midi_out(st >> 4 | st << 8 | d1 << 16 | d2 << 24); }
+
+int plat_store_load(uint32_t obj, void *dst, uint32_t max) { return flash_ok ? st_load(obj, dst, max) : -1; }
+static volatile uint32_t tel_stores, tel_store_us;       /* telemetry: flash writes so far, and how long the last one stopped the chip */
+static uint8_t store_lock;                               /* a backup was restored: what is in RAM is out of date, so nothing more is written until the restart */
+int plat_store_locked(void) { return store_lock; }
+int plat_store_seamless(void) { return flash_ok && !susp_bad; }
+#if PERF_USB_HOST
+void plat_usb_host(int on) { uh.want = (uint8_t)(on != 0); }   /* uh_task (the main loop) switches the port */
+int plat_usb_host_state(void) { return !uh.on ? 0 : uh.run ? 2 : uh.tried ? 3 : 1; }
+int plat_usb_host_msg(void)
+{
+    const int m = uh.msg;
+    uh.msg = UH_MSG_NONE;
+    return m;
+}
+static char *diag_put(char *b, const char *s)
+{
+    while (*s)
+        *b++ = *s++;
+    *b = 0;
+    return b;
+}
+static char *diag_num(char *b, uint32_t v)
+{
+    char t[8];
+    int n = 0;
+    do
+        t[n++] = (char)('0' + v % 10u);
+    while ((v /= 10u) && n < 7);
+    while (n)
+        *b++ = t[--n];
+    *b = 0;
+    return b;
+}
+void plat_usb_host_diag(char *b)
+{
+    static const char *const STEP[7] = {"OK", "NO ANSWER", "NO ADDR", "NO CONFIG", "NO MIDI", "CFG REFUSED", "IF REFUSED"};
+    static const char HX[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+    char *p = b;
+    *p = 0;
+    if (!uh_d.root) {                            /* nothing answered the first request: the error, the line and DEVCTL (0.15.11) */
+        p = diag_put(p, "NO ANSWER E");
+        p = diag_num(p, uh_d.err);
+        p = diag_put(p, " L");
+        p = diag_num(p, uh_d.line);
+        p = diag_put(p, " D");
+        *p++ = HX[uh_d.devctl >> 4];
+        *p++ = HX[uh_d.devctl & 15u];
+        *p = 0;
+        return;
+    }
+    if (uh_d.root == 1) {
+        p = diag_put(p, "HUB ");
+        p = diag_num(p, uh_d.ports);
+        p = diag_put(p, uh_d.nested ? "P, HUB INSIDE" : uh_d.devs ? "P " : "P, NOTHING ON IT");   /* (23 characters at most: say) */
+        if (uh_d.nested || !uh_d.devs)
+            return;
+    }
+    if (uh_d.devs || uh_d.root == 2) {
+        p = diag_put(p, "C");
+        p = diag_num(p, uh_d.cls);
+        p = diag_put(p, " ");
+        p = diag_num(p, uh_d.cfg);
+        p = diag_put(p, "B ");
+        diag_put(p, STEP[uh_d.step % 7u]);
+    }
+}
+#else
+void plat_usb_host(int on) { (void)on; }
+int plat_usb_host_msg(void) { return 0; }
+void plat_usb_host_diag(char *b) { b[0] = 0; }
+int plat_usb_host_state(void) { return 0; }
+#endif
+int plat_store_save(uint32_t obj, const void *src, uint32_t len)
+{
+    uint32_t t0, r;
+    if (!flash_ok)
+        return -9;
+    if (store_lock)
+        return -8;
+    t0 = fm1_ticks();
+    r = (uint32_t)st_save(obj, src, len);
+    tel_store_us = (fm1_ticks() - t0) / FM1_TICKS_PER_US;
+    tel_stores++;
+    return (int)r;
+}
+int plat_store_restore(uint32_t obj, const void *src, uint32_t len)
+{
+    int r;
+    if (!flash_ok)
+        return -9;
+    store_lock = 1;
+    r = st_save(obj, src, len);
+    tel_stores++;
+    return r;
+}
+
+static volatile uint32_t audio_cpu_pct, audio_xruns, audio_late;
+uint32_t plat_cpu_pct(void) { return audio_cpu_pct; }
+uint32_t plat_xruns(void) { return audio_xruns; }
+uint32_t plat_late(void) { return audio_late; }
+static volatile uint32_t pk_cur_pct, pk_prev_pct, pk_n;   /* the longest render, in percent of its time, in this second and the last */
+uint32_t plat_peak_pct(void) { return pk_cur_pct > pk_prev_pct ? pk_cur_pct : pk_prev_pct; }
+uint32_t plat_cpu1_pct(void) { return fm1_core1_load(); }
+uint32_t plat_core2(void) { return EN_CORE2 ? (fm1_core1_online() ? 1u : 2u) : 0u; }

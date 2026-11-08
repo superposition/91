@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-only
+"""PERF-1's web site (for GitHub Pages or any static host) from a release build:
+
+  python3 tools/make_pages_site.py VERSION OUTDIR      (after tools/release.sh VERSION)
+
+OUTDIR gets index.html (the landing page), install/ (the web installer with the package in it),
+emu/ (the browser emulator), editor/ (the parameter and DX7 voice editor), pieces/ and library/ (sharing), manual/ and firmware/perf1-VERSION.fwsc.
+  --no-sharing   leaves out pieces/ and library/ and their links (a release whose sharing pages are not ready: 0.16.1)
+All links are relative, so it works at any path (https://USER.github.io/PERF-1/ and a local server alike)."""
+import json
+import re
+import shutil
+import sys
+from pathlib import Path
+
+SRC = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(SRC / "web"))
+from make_site import product_of, strip_module  # noqa: E402
+
+SHARING = "--no-sharing" not in sys.argv
+args = [a for a in sys.argv[1:] if a != "--no-sharing"]
+ver = args[0] if args else sys.exit(__doc__)
+OUT = Path(args[1] if len(args) > 1 else SRC / "build" / "site")
+REPO = "https://github.com/deamonSLINKY/PERF-1"
+pkg = SRC / "build" / f"amb-{ver}.fwsc"
+raw = pkg.read_bytes()
+product = product_of(raw)
+if not re.fullmatch(r"FM-1_7\d{6}", product):
+    sys.exit(f"{pkg}: identity {product!r}: make a release build (tools/release.sh {ver})")
+if b"FELUCCA-LOADER-1" not in raw:
+    sys.exit(f"{pkg}: no update loader in it")
+if OUT.exists():
+    for old in OUT.iterdir():
+        shutil.rmtree(old) if old.is_dir() else old.unlink()
+for d in ("install", "firmware", "img", "manual/img"):
+    (OUT / d).mkdir(parents=True, exist_ok=True)
+(OUT / ".nojekyll").write_text("", encoding="utf-8")
+name = f"perf1-{ver}.fwsc"
+shutil.copy(pkg, OUT / "firmware" / name)
+shutil.copytree(SRC / "build" / "emu", OUT / "emu")
+shutil.copy(SRC / "web" / "img" / "slinky.png", OUT / "img" / "slinky.png")
+shutil.copy(SRC / "web" / "img" / "favicon.png", OUT / "img" / "favicon.png")
+
+page = (SRC / "web" / "amb_installer.html").read_text(encoding="utf-8")
+lib = strip_module((SRC / "web" / "fm1pkg.js").read_text(encoding="utf-8")) + "\n" + strip_module((SRC / "web" / "fm1ota.js").read_text(encoding="utf-8")) + "\n" + strip_module((SRC / "web" / "fm1backup.js").read_text(encoding="utf-8")) + "\n" + strip_module((SRC / "web" / "fm1idle.js").read_text(encoding="utf-8"))
+meta = json.dumps({"version": ver, "product": product, "pkg": "../firmware/" + name})
+page = page.replace("/*LIB*/", lib).replace("/*META*/", meta).replace("<h1>Install PERF-1</h1>", f"<h1>Install PERF-1 {ver}</h1>")
+(OUT / "install" / "index.html").write_text(page, encoding="utf-8", newline="\n")
+
+params = SRC / "build" / "params.json"
+if params.exists():
+    (OUT / "editor").mkdir(exist_ok=True)
+    ed = (SRC / "web" / "editor" / "index.html").read_text(encoding="utf-8").replace("/*PARAMS*/", params.read_text(encoding="utf-8"))
+    (OUT / "editor" / "index.html").write_text(ed, encoding="utf-8", newline="\n")
+    plib = "\n".join(strip_module((SRC / "web" / f).read_text(encoding="utf-8")) for f in ("fm1backup.js", "fm1piece.js", "fm1card.js", "fm1share.js", "fm1idle.js"))
+    lib_json = (SRC / "web" / "library" / "library.json").read_text(encoding="utf-8")
+    relay = SRC / "web" / "relay" / "relay.json"           # the library relay's address (web/relay/README.md), or none
+    relay_json = relay.read_text(encoding="utf-8").strip() if relay.exists() else "{}"
+    for d in ("pieces", "library") if SHARING else ():   # sharing pieces and sets, and the library of them: the modules, the parameters' names, the library's codes
+        (OUT / d).mkdir(exist_ok=True)
+        pg = (SRC / "web" / d / "index.html").read_text(encoding="utf-8").replace("/*PARAMS*/", params.read_text(encoding="utf-8")).replace("/*LIB*/", plib)
+        (OUT / d / "index.html").write_text(pg.replace("/*LIBRARY*/", lib_json).replace("/*RELAY*/", relay_json), encoding="utf-8", newline="\n")
+shutil.copy(SRC / "docs" / "manual.html", OUT / "manual" / "index.html")
+(OUT / "manual" / "maps").mkdir(exist_ok=True)         # ready MIDI maps the manual links (0.16.18: the Launch Control XL 3's)
+for f in (SRC / "docs" / "maps").glob("*.perfmap"):
+    shutil.copy(f, OUT / "manual" / "maps" / f.name)
+quick_card = ""
+if (SRC / "build" / "quick-manual.pdf").exists():   # the printable quick manual (tools/make_quick_manual.py, made on Windows with Edge)
+    shutil.copy(SRC / "build" / "quick-manual.pdf", OUT / "manual" / "PERF-1-quick-manual.pdf")
+    quick_card = '<a class="card" href="manual/PERF-1-quick-manual.pdf" download><b>Quick manual (PDF)</b><span>Eight A4 pages to print: every control, page and key map on paper.</span></a>'
+if (SRC / "build" / "beginners-guide.pdf").exists():  # the beginner's guide (docs/GUIDE.md, tools/make_quick_manual.py docs/GUIDE.md --out beginners-guide)
+    shutil.copy(SRC / "build" / "beginners-guide.pdf", OUT / "manual" / "PERF-1-beginners-guide.pdf")
+    quick_card = '<a class="card" href="manual/PERF-1-beginners-guide.pdf" download><b>Beginner\'s guide (PDF)</b><span>Your first hour, step by step, in plain words.</span></a>' + quick_card
+if (SRC / "build" / "manual.pdf").exists():         # the whole manual as a PDF (Edge headless printing docs/manual.html: tools/make_manual_pdf.sh)
+    shutil.copy(SRC / "build" / "manual.pdf", OUT / "manual" / "PERF-1-manual.pdf")
+    quick_card += '<a class="card" href="manual/PERF-1-manual.pdf" download><b>Full manual (PDF)</b><span>The whole manual to download or print.</span></a>'
+for img in [*(SRC / "docs" / "img").glob("perf-screen-*.png"), *(SRC / "docs" / "img").glob("guide-*.png")]:
+    shutil.copy(img, OUT / "manual" / "img" / img.name)
+
+(OUT / "index.html").write_text(f'''<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PERF-1</title><link rel="icon" href="img/favicon.png">
+<meta name="description" content="PERF-1: live-performance firmware for the M-VAVE FM-1: nineteen genres of generative pieces, an auto-DJ, effects, a web editor and DX7 voices.">
+<style>
+:root{{--bg:#140e0c;--panel:#2a1e1b;--line:#4e3831;--text:#f4e8c8;--dim:#a68c7e;--acc:#ffd447;--red:#e0344f}}
+@media (prefers-color-scheme:light){{:root{{--bg:#f6efe2;--panel:#ebe0cc;--line:#cdbb9f;--text:#2a1c16;--dim:#7a6657;--acc:#a86b00;--red:#b3203a}}}}
+*{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,"Segoe UI",sans-serif}}
+main{{max-width:760px;margin:0 auto;padding:40px 16px 56px}}
+img.logo{{width:96px;height:auto;display:block;margin:0 0 12px}}h1{{margin:0;font-size:2.4rem;letter-spacing:.02em}}h1 span{{color:var(--red)}}
+.tag{{color:var(--dim);margin:.2rem 0 1.6rem}}.v{{color:var(--acc);font-weight:600}}
+.grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:0 0 28px}}
+.card{{display:block;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;color:inherit;text-decoration:none}}
+.card:hover{{border-color:var(--acc)}}.card b{{display:block;font-size:1.05rem;color:var(--acc)}}.card span{{color:var(--dim);font-size:.92rem}}
+p.small{{color:var(--dim);font-size:.88rem}}a{{color:var(--acc)}}
+</style></head><body><main>
+<img class="logo" src="img/slinky.png" alt="the PERF-1 slinky">
+<h1>PERF<span>-1</span></h1>
+<p class="tag">Free firmware that turns the M-VAVE FM-1 into a groovebox that plays by itself. By deamonSLINKY. Version <span class="v">{ver}</span>.</p>
+<p>Switch it on and music starts: drums, bass, a pad, an acid line and a plucked melody, in nineteen styles from techno to psytrance. You steer it with the buttons and keys: change the chords, break it down and drop it back in, mute parts, throw on effects, or let the auto-DJ run the show. When you want more, nearly everything can be edited and saved. New here? Start with the beginner's guide.</p>
+<div class="grid">
+<a class="card" href="install/"><b>Install</b><span>Install it from this website in Chrome or Edge, with the FM-1 plugged in. You can go back to the original firmware the same way.</span></a>
+<a class="card" href="emu/"><b>Try it in your browser</b><span>Play with PERF-1 on screen, with sound, before you install anything.</span></a>
+<a class="card" href="editor/"><b>Editor</b><span>Change any setting from your computer, and make your own DX7 sounds and hear them on the FM-1.</span></a>
+<a class="card" href="pieces/"><b>Library &amp; pieces</b><span>Pieces and sets made by players: hear them in your browser and add them to your FM-1. Submit your own, one or many at once.</span></a>
+<a class="card" href="manual/"><b>Manual</b><span>Starts with a beginner's guide, then explains every button and page.</span></a>
+{quick_card}
+<a class="card" href="firmware/{name}"><b>Download the firmware file</b><span>{name} ({len(raw) // 1024} KB). You only need this if you install another way than the page above.</span></a>
+<a class="card" href="{REPO}/issues/new/choose"><b>Ideas and problems</b><span>Tell me what you'd like next, or what went wrong. Most new features started as someone's idea.</span></a>
+<a class="card" href="https://ko-fi.com/deamonslinky" target="_blank" rel="noopener"><b>Buy me a coffee</b><span>PERF-1 is free. If it makes your music, a coffee on Ko-fi keeps new features coming.</span></a>
+<a class="card" href="{REPO}"><b>Source code</b><span>Free and open source (GPL-3.0), on GitHub.</span></a>
+</div>
+<p class="small">Installing firmware is at your own risk. If something goes wrong, the installer can put the original firmware back, and an FM-1 that fails to start twice in a row starts in a safe mode the installer can reach. Section 1 of the manual explains it all.</p>
+<p class="small">PERF-1 is a fork of HYP-1 by <a href="https://www.redtail.works">RedtailWorks</a>, itself a fork of AMB-1 by Charles Vestal, built on Felucca by Leo Kuroshita (Hügelton Instruments); the six-operator FM engine is Melodee's by Kerem Kilic (Ellic Studio), after Dexed. GPL-3.0-only; see LICENSING.md in the repository. "M-VAVE" and "FM-1" are trademarks of their owners: PERF-1 is independent firmware, not affiliated with or endorsed by them.</p>
+</main></body></html>
+''', encoding="utf-8", newline="\n")
+if not SHARING:                                 # the menus and the landing page without them
+    for f in OUT.rglob("*.html"):
+        t = f.read_text(encoding="utf-8")
+        u = re.sub(r'<a (?:class="card" )?href="(?:\.\./)?(?:pieces|library)/"[^>]*>.*?</a>\n?', "", t)
+        if u != t:
+            f.write_text(u, encoding="utf-8", newline="\n")
+print(f"site: {OUT}: index, install/, emu/, editor/, manual/, firmware/{name} ({len(raw)} B, {product})")

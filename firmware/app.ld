@@ -1,0 +1,46 @@
+/* SPDX-License-Identifier: GPL-3.0-only
+ * Copyright (C) 2026 Leo Kuroshita (@kurogedelic), Hügelton Instruments */
+/* Felucca memory map.
+ * Code + constants execute in place from XIP. app.bin offset 0 = 0x02000120 is the boot stub (firmware/stub,
+ * 0.16.17, ChoralRoot's as Melodee ships it); the body (this link) starts at XIP 0x02001000 (flash 0x5000) and
+ * ends below the commit marker's sector (flash 0x91000). 0x01C7C000..0x01C7C01F belongs to the stub (its rescue
+ * word and mailbox, across warm resets): NOINIT starts after it.
+ * 0x01C00000..0x01C06000 holds .ram_text (code that must run while the flash
+ * is busy: the flash driver), .dsp_text (CPU1's worker loop) and CPU1's two small stacks; 0x01C06000..0x01C08000 stays for RAM-run debug.
+ * RAM  : .data/.bss (96 KiB)
+ * POOL : big zero-initialised buffers (FX lines, canvases), section .pool
+ * STACKS with 256-byte guard bands; NOINIT survives resets and UBOOT entry.
+ * 0x01C7FD50.. is reserved: boot_info, boot-state mailbox, vector table. */
+MEMORY
+{
+    XIP    (rx)  : ORIGIN = 0x02001000, LENGTH = 0x8C000
+    RAMTEXT (rwx): ORIGIN = 0x01C00000, LENGTH = 0x6000
+    RAM    (rwx) : ORIGIN = 0x01C08000, LENGTH = 96K
+    POOL   (rw)  : ORIGIN = 0x01C20000, LENGTH = 0x54000
+    NOINIT (rw)  : ORIGIN = 0x01C7C020, LENGTH = 0x3D30
+}
+SECTIONS
+{
+    .text : { KEEP(*(.text.crt0)) *(.text*) *(.rodata*) . = ALIGN(4); _etext = .; } > XIP
+    .ram_text : { _rt_start = .; KEEP(*(.ram_text*)) . = ALIGN(4); _rt_end = .; } > RAMTEXT AT > XIP
+    _rt_load = LOADADDR(.ram_text);
+    /* the second core's worker loop (EN_CORE2): RAM code, copied at boot, inside the PC guard's window */
+    .dsp_text : { _dsp_start = .; KEEP(*(.dsp_text*)) . = ALIGN(4); _dsp_end = .; } > RAMTEXT AT > XIP
+    _dsp_load = LOADADDR(.dsp_text);
+    /* hot render code, in RAM so the flash cache need not fetch it every chunk (0.14.4: render_bass); copied at boot like the two above */
+    .ram_hot : { _rh_start = .; KEEP(*(.ram_hot*)) . = ALIGN(4); _rh_end = .; } > RAMTEXT AT > XIP
+    _rh_load = LOADADDR(.ram_hot);
+    _guard_ram_end = _rh_end;
+    .cpu1_stacks (NOLOAD) : { . = ALIGN(32); _cpu1_stacks_lo = .; KEEP(*(.cpu1_stacks)) _cpu1_stacks_hi = .; } > RAMTEXT
+    _cpu1_ustack_top = _cpu1_stacks_lo + 4096;
+    _cpu1_sstack_top = _cpu1_stacks_lo + 8192;
+    ASSERT(_cpu1_stacks_hi <= 0x01C06000, "RAM code and CPU1 stacks overflow RAMTEXT")
+    .data : { . = ALIGN(4); _data_start = .; *(.data*) *(.sdata*) . = ALIGN(4); _data_end = .; } > RAM AT > XIP
+    _data_load = LOADADDR(.data);
+    .bss (NOLOAD) : { _bss_start = .; *(.bss*) *(.sbss*) *(COMMON) . = ALIGN(4); _bss_end = .; } > RAM
+    .pool (NOLOAD) : { _pool_start = .; *(.pool*) . = ALIGN(4); _pool_end = .; } > POOL
+    .noinit (NOLOAD) : { *(.noinit*) } > NOINIT
+    _guard0 = 0x01C74000; _ustack_lo = 0x01C74100; _ustack_top = 0x01C7A000;
+    _guard1 = 0x01C7A000; _sstack_lo = 0x01C7A100; _sstack_top = 0x01C7C000;
+    /DISCARD/ : { *(.comment) *(.note*) }
+}

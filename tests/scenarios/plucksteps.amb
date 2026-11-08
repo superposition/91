@@ -1,0 +1,30 @@
+# the Pluck steps page (ARP x9): a step chosen with a white key, its kind (Step, knob 1) and note (knob 2); an edit freezes the line
+seed 0
+wait 3000
+tap ARP
+tap ARP
+tap ARP
+tap ARP
+tap ARP
+tap ARP
+tap ARP
+tap ARP
+tap ARP
+wait 300
+expect view 19
+shot plucksteps_free.png
+spin K1 3
+wait 200
+expect par175 1
+tapkey w4
+wait 100
+spin K1 2
+spin K2 5
+wait 200
+tapkey w8
+wait 100
+spin K1 1
+wait 300
+shot plucksteps.png
+wait 2000
+shot plucksteps_play.png

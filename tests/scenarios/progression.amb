@@ -1,0 +1,128 @@
+# The Progression page (0.15.6): EDIT held opens it (a tap is still the next chord). Eight slots, each a chord of the scale (a degree, or none: the chord
+# before holds) and its bars; Play Loop plays them in turn up to the last one set, Walk gives the chords back to the genre. The page shows the chords heard
+# last until the first edit makes them the piece's. SEL + Drift: the chord's time in bars or in seconds, in any genre. Stored with the piece.
+seed 0
+wait 3000
+press EDIT
+wait 600
+release EDIT
+wait 100
+expect view 5
+expect progpos -1
+expect prgplay 0
+expect prgslot0 0
+# the seeded piece is in A natural minor (pool 0x5AD): I is Am (root 9), VI F (5), IV Dm (2), V Em (4)
+expect pool 0x5AD
+shot progression_heard.png
+# slot 1 (K1, Chord, at 1): I; slot 2 (a white key): VI; slot 3: IV; slot 4: V; eight bars each, so EDIT steps through them
+turn K1 -8
+turn K1 1
+turn K3 4
+expect prgplay 1
+expect prgslot0 1
+expect prgbars0 8
+tapkey w1
+turn K1 -8
+turn K1 6
+turn K3 4
+tapkey w2
+turn K1 -8
+turn K1 4
+turn K3 4
+tapkey w3
+turn K1 -8
+turn K1 5
+turn K3 4
+expect prgslot1 6
+expect prgslot2 4
+expect prgslot3 5
+expect prgbars3 8
+wait 5000
+expect progpos 0
+expect chordroot 9
+shot progression.png
+tap EDIT
+wait 2500
+expect progpos 1
+expect chordroot 5
+tap EDIT
+wait 2500
+expect progpos 2
+expect chordroot 2
+tap EDIT
+wait 2500
+expect progpos 3
+expect chordroot 4
+shot progression_play.png
+# the loop ends at the last slot set: then the first again
+tap EDIT
+wait 2500
+expect progpos 0
+expect chordroot 9
+# an empty slot: the chord before goes on through it
+tapkey w1
+turn K1 -8
+expect prgslot1 0
+tap EDIT
+wait 2500
+expect progpos 1
+expect chordroot 9
+shot progression_hold.png
+# a slot's own chord type (0.16.6, GitHub issue 2): slot 1's I (A minor) as an 11th, A G B D (the root, b7, 9, 11); the others keep the piece's
+tapkey w0
+turn K2 7
+expect prgtype0 7
+expect prgtype2 0
+tap EDIT
+wait 2500
+tap EDIT
+wait 2500
+tap EDIT
+wait 2500
+expect progpos 0
+expect chordiv 1061
+shot progression_types.png
+# Walk: the genre's chords again (the slots kept)
+turn K4 -1
+expect prgplay 0
+expect progpos -1
+expect prgslot2 4
+turn K4 1
+expect prgplay 1
+# SEL + Drift on the Tempo page: hypno counts seconds, so right is bars (stored), left is its own seconds again (0)
+turn SELECT -100 10
+expect view 0
+press SEL
+turn K4 1
+release SEL
+expect prgunit 1
+shot tempo_drift_bars.png
+press SEL
+turn K4 -1
+release SEL
+expect prgunit 0
+# stored with the piece: Global, SAVE; power off and on
+tap GLO
+expect view 32
+tap SAVE
+wait 300
+tap PLAY
+wait 4000
+reboot
+wait 3000
+expect prgslot0 1
+expect prgslot2 4
+expect prgplay 1
+expect prgtype0 7
+# THEORY (0.16.10) with the loop playing: the slot lit, NEXT the next slot's chord, a line to its root
+tap HOME
+wait 100
+tap HOME
+wait 100
+expect view 37
+spin SELECT -1
+wait 300
+spin SELECT -1
+wait 1500
+expect viz 8
+shot theory_loop.png
