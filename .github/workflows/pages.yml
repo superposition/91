@@ -1,0 +1,95 @@
+name: pages
+
+# Builds the browser player and the whole static site, then publishes it to GitHub Pages:
+#   https://<user>.github.io/<repo>/       landing page
+#   https://<user>.github.io/<repo>/emu/   the firmware running as WebAssembly
+#   .../install/ (web MIDI installer)  .../editor/  .../manual/  .../pieces/
+# Enable it once in Settings → Pages → Source: GitHub Actions.
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+# Bump on release; the string shows on the device screen's boot card and in the installer.
+env:
+  VERSION: 0.1.0
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Python packages
+        run: python3 -m pip install --quiet Pillow fonttools
+
+      - name: JieLi Linux toolchain (clang 4.0.1 for pi32v2)
+        run: sh tools/get_toolchain.sh
+
+      - name: JieLi AC79 SDK (Apache-2.0, three boot files)
+        run: |
+          git clone --depth 1 --branch AC79NN_SDK_V1.2.1_2023-12-13 \
+            https://gitee.com/Jieli-Tech/fw-AC79_AIoT_SDK.git "$HOME/fw-AC79_AIoT_SDK"
+
+      - name: zig (clang + wasm-ld for the browser player)
+        run: |
+          curl -fsSL https://ziglang.org/download/0.17.1/zig-x86_64-linux-0.17.1.tar.xz -o /tmp/zig.tar.xz
+          echo "3581863e3cbcfd0fce0efc682ce7e9e93da96668a977791d356a26d2a7e9b17a  /tmp/zig.tar.xz" | sha256sum -c -
+          tar -xf /tmp/zig.tar.xz -C "$HOME"
+          mv "$HOME/zig-x86_64-linux-0.17.1" "$HOME/zig"
+          mkdir -p "$HOME/shim"
+          cat > "$HOME/shim/clang" <<'EOS'
+          #!/usr/bin/env bash
+          args=()
+          for a in "$@"; do
+              case "$a" in
+                  --target=wasm32|-target=wasm32) ;;
+                  *) args+=("$a") ;;
+              esac
+          done
+          exec "$HOME/zig/zig" cc -target wasm32-freestanding "${args[@]}"
+          EOS
+          chmod +x "$HOME/shim/clang"
+
+      - name: Firmware package
+        run: ./build.sh --release "$VERSION"
+
+      - name: Browser player (WebAssembly)
+        env:
+          EN_VERSION: ${{ env.VERSION }}
+        run: |
+          export PATH="$HOME/shim:$PATH"
+          sh web/emu/build_clang.sh
+
+      - name: Static site
+        run: |
+          python3 tools/make_params.py
+          python3 tools/manual_html.py
+          python3 tools/make_pages_site.py "$VERSION" build/site
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

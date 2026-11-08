@@ -1,0 +1,21 @@
+name: release
+
+# Tagged build of the firmware package, attested by zvenson/fm1-build so the firmware hub shows
+# "Built from source" and links the exact commit + public build log.
+#   git tag v0.1.0 && git push --tags
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: zvenson/fm1-build/.github/workflows/build.yml@v1
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    with:
+      build: ./build.sh --release "${GITHUB_REF_NAME#v}"
+      packages: build/*.fwsc
+      # test: sh tests/run_tests.sh
