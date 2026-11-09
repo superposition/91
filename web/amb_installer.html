@@ -75,10 +75,20 @@
   footer.mark { display: flex; align-items: center; gap: .8rem; margin-top: 2rem; }
   footer.mark img { width: 34px; height: 34px; image-rendering: pixelated; opacity: .9; }
 </style>
+<link rel="stylesheet" href="../fonts/fm1-fonts.css">
+<style>
+/* NAIWAN 91: the beach palette in three tiers — sand ground, white surfaces, navy type, coral for "now" */
+:root{{--ground:#FFF6E3;--bg:#FFF6E3;--panel:#FFFFFF;--card:#FFFFFF;--card-2:#FFF1D8;--ink:#14263A;--text:#14263A;
+--muted:#6B5A3C;--dim:#6B5A3C;--rule:#E3D3AE;--line:#E3D3AE;--accent:#F2542D;--acc:#F2542D;--red:#E8302E;--orange:#F2542D;
+--purple:#1B7FD6;--purple-2:#0F4A80;--rust:#0E9E7E;--horn:#F6E2A8;--green-1:#0E9E7E;--river:#1B7FD6;--river-2:#0F4A80}}
+html,body{{background:var(--ground);color:var(--ink)}}
+body{{font-family:"Nunito","Segoe UI",system-ui,sans-serif}}
+h1,h2,h3,h4,b,strong,.card b,.tag b,nav a,button{{font-family:"Quicksand","Nunito",system-ui,sans-serif;letter-spacing:.01em}}
+img.logo{{display:none}}
+</style>
 </head>
 <body>
 <main>
-  <p class="kofi" style="margin:0 0 .5rem;text-align:right;font-size:.88rem"><a href="https://ko-fi.com/deamonslinky" target="_blank" rel="noopener">☕ Buy me a coffee</a></p>
   <header class="site"><a class="home" href="../"><img class="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFwAAABcCAYAAADj79JYAAACGklEQVR42u2dMUoEMQBF/4iFjSCCKCgIooWCJ9DCwjtYKLLgGawXL+ANbMQtxM5SLCxc7BW0UIQFBcVG8ABr60SYEJNMMuP73bLMbPL5PLN/krWQRbMTC8Ofr18/nws1WKnnMyIkDMdwFEqFjXEP98el95dXdtUkpuc2HxIOUjAcxWR405me+3hJOEjBcBRQo64X3N5ceDE1tGwMdh0vCQcpCMPbtA63Mfn0aKf0/tbeSel1f3E16gTWnu7kMp7U3xNIOIZjOErZpZhMnt/eqLx+0LvKasIm8+lSQArC8DY/07Qx22S0yUhTvuvy0Pevm+kkHKRgOFLCPty2rn65Xqq+vuM34Nj3J+EgBWF4mxlu09z6Y9Q+fNAZq1xHx+7fSThIQRjeJIZfvn94fcDk+b6q9va5ytwrKON+vuNV5DNDJBykYDhSwmeabZNr/217XmDr10k4SMFwlLJL8d2XYnsmadPB+IzX9d2vN4Vktjn/fk/GfDUk4SAFw1Eu63Bfhm5OTzntc5HjvpTY624SDlIQhrfpjE/d62jzb4AS7w+nDwcpCMOVcZcS+oyP7zqahCMMx3D09z78176PwzOF7NNz61JIOEhBGC66FLWlS/H9/XESDlIwHNGlqLH/M4KEgxQMR3QpoktBGI7hiC6lduaTcJCC4YguRcnOaZJwkIIwnDM+6boUGA5SEIbTpejf/D4KCQcpCMMz1jcYZfe1K9DPsQAAAABJRU5ErkJggg==" width="46" height="46" alt="">NAIWAN 91</a><nav><a href="../emu/">Emulator</a><a href="../editor/">Editor</a><a href="../pieces/">Library &amp; pieces</a><a href="../install/" aria-current="page">Install</a><a href="../manual/">Manual</a></nav></header>
   <button class="lang" id="lang"></button>
   <h1>Install NAIWAN 91</h1>
@@ -152,9 +162,9 @@
   </ol>
   <p><button id="stockgo" disabled data-t="stockinstall"></button></p>
   <p><a href="../" style="color:inherit" data-t="manual"></a></p>
-  <p class="small">Comments, ideas and bug reports are welcome: <a href="https://github.com/deamonSLINKY/NAIWAN 91/issues/new/choose" target="_blank" rel="noopener" style="color:inherit">open an issue on GitHub</a> (<a href="https://github.com/deamonSLINKY/NAIWAN 91" target="_blank" rel="noopener" style="color:inherit">source</a>). Everyone is invited to help make NAIWAN 91 better.</p>
-  <footer class="mark"><img class="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFwAAABcCAYAAADj79JYAAACGklEQVR42u2dMUoEMQBF/4iFjSCCKCgIooWCJ9DCwjtYKLLgGawXL+ANbMQtxM5SLCxc7BW0UIQFBcVG8ABr60SYEJNMMuP73bLMbPL5PLN/krWQRbMTC8Ofr18/nws1WKnnMyIkDMdwFEqFjXEP98el95dXdtUkpuc2HxIOUjAcxWR405me+3hJOEjBcBRQo64X3N5ceDE1tGwMdh0vCQcpCMPbtA63Mfn0aKf0/tbeSel1f3E16gTWnu7kMp7U3xNIOIZjOErZpZhMnt/eqLx+0LvKasIm8+lSQArC8DY/07Qx22S0yUhTvuvy0Pevm+kkHKRgOFLCPty2rn65Xqq+vuM34Nj3J+EgBWF4mxlu09z6Y9Q+fNAZq1xHx+7fSThIQRjeJIZfvn94fcDk+b6q9va5ytwrKON+vuNV5DNDJBykYDhSwmeabZNr/217XmDr10k4SMFwlLJL8d2XYnsmadPB+IzX9d2vN4Vktjn/fk/GfDUk4SAFw1Eu63Bfhm5OTzntc5HjvpTY624SDlIQhrfpjE/d62jzb4AS7w+nDwcpCMOVcZcS+oyP7zqahCMMx3D09z78176PwzOF7NNz61JIOEhBGC66FLWlS/H9/XESDlIwHNGlqLH/M4KEgxQMR3QpoktBGI7hiC6lduaTcJCC4YguRcnOaZJwkIIwnDM+6boUGA5SEIbTpejf/D4KCQcpCMMz1jcYZfe1K9DPsQAAAABJRU5ErkJggg==" alt=""><span class="small">NAIWAN 91 &middot; deamonSLINKY</span></footer>
-  <p class="small">NAIWAN 91 by deamonSLINKY is based on HYP-1, a <a href="https://www.redtail.works" style="color:inherit">RedtailWorks</a> project (GPL-3.0), a fork of AMB-1 by Charles Vestal, its six-operator FM engine is Melodee's by Kerem Kilic (Ellic Studio), built on Felucca by Leo Kuroshita (@kurogedelic), <a href="https://hugelton.com" target="_blank" rel="noopener" style="color:inherit">Hügelton Instruments</a>,
+  <p class="small">Comments, ideas and bug reports are welcome: <a href="https://github.com/superposition/91/issues/new/choose" target="_blank" rel="noopener" style="color:inherit">open an issue on GitHub</a> (<a href="https://github.com/superposition/91" target="_blank" rel="noopener" style="color:inherit">source</a>). Everyone is invited to help make NAIWAN 91 better.</p>
+  <footer class="mark"><img class="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFwAAABcCAYAAADj79JYAAACGklEQVR42u2dMUoEMQBF/4iFjSCCKCgIooWCJ9DCwjtYKLLgGawXL+ANbMQtxM5SLCxc7BW0UIQFBcVG8ABr60SYEJNMMuP73bLMbPL5PLN/krWQRbMTC8Ofr18/nws1WKnnMyIkDMdwFEqFjXEP98el95dXdtUkpuc2HxIOUjAcxWR405me+3hJOEjBcBRQo64X3N5ceDE1tGwMdh0vCQcpCMPbtA63Mfn0aKf0/tbeSel1f3E16gTWnu7kMp7U3xNIOIZjOErZpZhMnt/eqLx+0LvKasIm8+lSQArC8DY/07Qx22S0yUhTvuvy0Pevm+kkHKRgOFLCPty2rn65Xqq+vuM34Nj3J+EgBWF4mxlu09z6Y9Q+fNAZq1xHx+7fSThIQRjeJIZfvn94fcDk+b6q9va5ytwrKON+vuNV5DNDJBykYDhSwmeabZNr/217XmDr10k4SMFwlLJL8d2XYnsmadPB+IzX9d2vN4Vktjn/fk/GfDUk4SAFw1Eu63Bfhm5OTzntc5HjvpTY624SDlIQhrfpjE/d62jzb4AS7w+nDwcpCMOVcZcS+oyP7zqahCMMx3D09z78176PwzOF7NNz61JIOEhBGC66FLWlS/H9/XESDlIwHNGlqLH/M4KEgxQMR3QpoktBGI7hiC6lduaTcJCC4YguRcnOaZJwkIIwnDM+6boUGA5SEIbTpejf/D4KCQcpCMMz1jcYZfe1K9DPsQAAAABJRU5ErkJggg==" alt=""><span class="small">NAIWAN 91 &middot; NAIWAN 91</span></footer>
+  <p class="small">NAIWAN 91 (GPL-3.0) is based on HYP-1, a <a href="https://www.redtail.works" style="color:inherit">RedtailWorks</a> project (GPL-3.0), a fork of AMB-1 by Charles Vestal, its six-operator FM engine is Melodee's by Kerem Kilic (Ellic Studio), built on Felucca by Leo Kuroshita (@kurogedelic), <a href="https://hugelton.com" target="_blank" rel="noopener" style="color:inherit">Hügelton Instruments</a>,
     by way of X0X and FoMni.<br>
     Fonts: Chakra Petch and Barlow Semi Condensed (SIL OFL 1.1). M-VAVE and FM-1 are trademarks of their respective owners.<br>
     <span data-t="license"></span> <a href="https://github.com/charlesvestal/fm1-amb" target="_blank" rel="noopener" style="color:inherit">github.com/charlesvestal/fm1-amb</a></p>

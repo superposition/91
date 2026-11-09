@@ -6,7 +6,7 @@ You don't have to program anything to get going. You steer the music: change the
 
 If you're new, read **Start here** below first. The numbered sections after it are the full reference.
 
-This manual is for **NAIWAN 91 0.15**. NAIWAN 91 is made by deamonSLINKY, based on [HYP-1](https://www.redtail.works) by RedtailWorks, and it's free and open source (GPL-3.0). It's still young and changes often, so keep a way back to the stock firmware (section 1 explains how).
+This manual is for **NAIWAN 91 0.15**. NAIWAN 91 is GPL-3.0, forked from PERF-1 and built on [HYP-1](https://www.redtail.works) by RedtailWorks. It's still young and changes often, so keep a way back to the stock firmware (section 1 explains how).
 
 ![The Tempo page, the home screen](img/perf-screen-home.png)
 
@@ -26,8 +26,8 @@ You are the conductor. You don't have to play notes. You change the chords, brea
 
 ### Before you start
 
-- **Try it without installing.** The [emulator](https://deamonslinky.github.io/NAIWAN 91/emu/) runs NAIWAN 91 in your web browser, with sound. Every step in this guide works there too.
-- **Installing** takes a couple of minutes with the [web installer](https://deamonslinky.github.io/NAIWAN 91/install/) in Chrome or Edge. Use a USB cable that carries data, not a charge-only one.
+- **Try it without installing.** The [emulator](https://superposition.github.io/91/emu/) runs NAIWAN 91 in your web browser, with sound. Every step in this guide works there too.
+- **Installing** takes a couple of minutes with the [web installer](https://superposition.github.io/91/install/) in Chrome or Edge. Use a USB cable that carries data, not a charge-only one.
 - **You can always go back.** The same installer page puts M-VAVE's own firmware back. Anything you saved on the stock firmware may be lost when you switch, so keep copies of what you care about.
 
 ### The buttons you need today
@@ -112,7 +112,7 @@ You don't need any of this to have fun, but it is there.
 - **The SET page** has an **Intro** that starts with just a pad and brings the band in one part at a time over a few minutes. Great for mixing in, or for playing over. You get there by holding **SEL** and pressing **FX**, then turning SELECT.
 
 ![The SET page: Rounds, Ramp, Intro](img/perf-screen-set.png)
-- The [quick manual](https://deamonslinky.github.io/NAIWAN 91/manual/NAIWAN 91-quick-manual.pdf) is eight pages to print and keep beside the FM-1.
+- The [quick manual](https://superposition.github.io/91/manual/NAIWAN 91-quick-manual.pdf) is eight pages to print and keep beside the FM-1.
 
 ### If something goes wrong
 
@@ -120,8 +120,8 @@ You don't need any of this to have fun, but it is there.
 - **An effect won't go away?** Press **FX**, then **OCT-**, then **FX** again.
 - **The music stopped?** Press **PLAY**.
 - **A piece sounds odd after a lot of changes?** Turn PRESETS to another piece and back, or reset it with **SEL** and **SAVE** held on the **GLO** page.
-- **Want the original firmware back?** Use the [installer](https://deamonslinky.github.io/NAIWAN 91/install/) page: "Back to the stock firmware" at the bottom.
-- **Found a bug or have an idea?** Tell us on [GitHub](https://github.com/deamonSLINKY/NAIWAN 91/issues). Most of the newest features came from ideas like yours.
+- **Want the original firmware back?** Use the [installer](https://superposition.github.io/91/install/) page: "Back to the stock firmware" at the bottom.
+- **Found a bug or have an idea?** Tell us on [GitHub](https://github.com/superposition/91/issues). Most of the newest features came from ideas like yours.
 
 ### Words you will see
 
@@ -278,8 +278,8 @@ a guarantee. Otherwise, recovery needs
 New to NAIWAN 91? **Start here**, at the top of this manual, walks you through your first hour. This is the
 short version.
 
-1. Switch it on. The **deamonSLINKY** card shows (the slinky mascot hops twice and blinks, then the name and
-   PRESENTS), then the **NAIWAN 91** card (the version, "by deamonSLINKY", "based on HYP-1 by RedtailWorks"),
+1. Switch it on. The **内湾** card wipes in — the wordmark with a shine running over it and a few sparkles, then
+   the version and CITY POP // THE COAST — then the **NAIWAN 91** card,
    with sixteen steps filling in and the white keys lighting with them. Any button or key skips the cards.
    Then a random piece from the HYPNO bank starts playing.
 2. Turn **SELECT** to move through the pages. The four knobs under the screen change what each page shows.
@@ -2382,7 +2382,7 @@ Run the **hardware calibration** (a Felucca feature). Hold **OCT-** and **OCT+**
 Use the pluck's Sound knob, or **SEL** + **ALGORITHM** on a Pluck page. Your voices come after the 30 built-in DX7 voices. Check that the page said they were sent and the header showed `DX7 VOICES n LOADED`, that the pluck's Level isn't 0, and that the FM-1 runs NAIWAN 91 0.11 or later. A bank must pass the DX7 checksum.
 
 **Crackles or dropouts.**
-Look at the load line (section 16). `XR` goes up by one with each click. `S1` or `S2` mean the FM-1 is already easing off to keep up. Heavy DX plucks, a shimmer reverb and the fast genres push it hardest. Record a status log for a minute (Live status on the installer page, or `fm1log.py`) and send the CSV to deamonSLINKY, with the piece, its sounds and the tempo.
+Look at the load line (section 16). `XR` goes up by one with each click. `S1` or `S2` mean the FM-1 is already easing off to keep up. Heavy DX plucks, a shimmer reverb and the fast genres push it hardest. Record a status log for a minute (Live status on the installer page, or `fm1log.py`) and attach the CSV, with the piece, its sounds and the tempo.
 
 **The emulator doesn't see the FM-1.**
 Close any DAW using the FM-1's MIDI port, and use Chrome, Edge or Firefox (Safari doesn't support Web MIDI). For the FM-1's panel to play the emulator, the FM-1 must be in remote (**SEL** + **GLO**).
@@ -2394,9 +2394,9 @@ MIDI notes coming in on channel 1 add and remove notes from the scale. Send on a
 
 ## 19. Credits
 
-**Feedback and contributing.** Comments, ideas and bug reports are welcome, and anyone is invited to help: [open an issue on GitHub](https://github.com/deamonSLINKY/NAIWAN 91/issues/new/choose). The source is at <https://github.com/deamonSLINKY/NAIWAN 91>. A bug report helps most when it includes the version (shown on the boot card), the genre and piece, and, for anything about load or crackles, a status log (section 16).
+**Feedback and contributing.** Comments, ideas and bug reports are welcome, and anyone is invited to help: [open an issue on GitHub](https://github.com/superposition/91/issues/new/choose). The source is at <https://github.com/superposition/91>. A bug report helps most when it includes the version (shown on the boot card), the genre and piece, and, for anything about load or crackles, a status log (section 16).
 
-NAIWAN 91 is by **deamonSLINKY**: the firmware, the slinky mascot and the pages around them. It is a fork of **HYP-1**, a [RedtailWorks](https://www.redtail.works) project, which is itself a fork of [AMB-1](https://github.com/charlesvestal/fm1-amb) by Charles Vestal.
+NAIWAN 91 is GPL-3.0 firmware: a fork of **HYP-1**, a [RedtailWorks](https://www.redtail.works) project, which is itself a fork of [AMB-1](https://github.com/charlesvestal/fm1-amb) by Charles Vestal. The 内湾 wordmark, the sea glyphs and the pages around them are this project's.
 
 The platform (USB, update loader, storage, installer) is [Felucca](https://github.com/hugelton/Felucca) by Leo Kuroshita (@kurogedelic), Hügelton Instruments. It reaches NAIWAN 91 by way of X0X and FoMni. The panel calibration is Felucca's. The boot guard, knob acceleration, help cards and anti-aliased drawing came from X0X.
 

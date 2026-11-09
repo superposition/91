@@ -96,10 +96,20 @@
   #dlgp { white-space: pre-wrap; }
   [hidden] { display: none !important; }
 </style>
+<link rel="stylesheet" href="../fonts/fm1-fonts.css">
+<style>
+/* NAIWAN 91: the beach palette in three tiers — sand ground, white surfaces, navy type, coral for "now" */
+:root{{--ground:#FFF6E3;--bg:#FFF6E3;--panel:#FFFFFF;--card:#FFFFFF;--card-2:#FFF1D8;--ink:#14263A;--text:#14263A;
+--muted:#6B5A3C;--dim:#6B5A3C;--rule:#E3D3AE;--line:#E3D3AE;--accent:#F2542D;--acc:#F2542D;--red:#E8302E;--orange:#F2542D;
+--purple:#1B7FD6;--purple-2:#0F4A80;--rust:#0E9E7E;--horn:#F6E2A8;--green-1:#0E9E7E;--river:#1B7FD6;--river-2:#0F4A80}}
+html,body{{background:var(--ground);color:var(--ink)}}
+body{{font-family:"Nunito","Segoe UI",system-ui,sans-serif!important}}
+h1,h2,h3,h4,b,strong,.card b,.tag b,nav a,button{{font-family:"Quicksand","Nunito",system-ui,sans-serif!important;letter-spacing:.01em}}
+img.logo{{display:none}}
+</style>
 </head>
 <body>
 <main>
-  <p class="kofi" style="margin:0 0 .5rem;text-align:right;font-size:.88rem"><a href="https://ko-fi.com/deamonslinky" target="_blank" rel="noopener">☕ Buy me a coffee</a></p>
   <header class="site"><a class="home" href="../">PERF-1</a><nav><a href="../emu/">Emulator</a><a href="../editor/">Editor</a><a href="./" aria-current="page">Library &amp; pieces</a><a href="../install/">Install</a><a href="../manual/">Manual</a></nav></header>
   <h1>Library &amp; pieces</h1>
   <nav class="tabs" role="tablist">
@@ -161,7 +171,7 @@
     </div>
   </section>
 
-  <p class="small" style="margin-top:1.6rem">PERF-1 by deamonSLINKY, GPL-3.0, no warranty. The pieces are their makers'. <a href="https://github.com/deamonSLINKY/PERF-1" target="_blank" rel="noopener">Source</a>.</p>
+  <p class="small" style="margin-top:1.6rem">NAIWAN 91 (GPL-3.0), GPL-3.0, no warranty. The pieces are their makers'. <a href="https://github.com/superposition/91" target="_blank" rel="noopener">Source</a>.</p>
 </main>
 
 <dialog id="dlg"><h3 id="dlgh"></h3><p id="dlgp"></p><div id="dlgb"></div></dialog>
@@ -724,7 +734,7 @@ $("submit").addEventListener("click", async () => {
     if (!RELAY) {
       const body = "For the Library:\n\n" + codes.map((c, k) => names[k] + "\n" + PAGE_URL + "#p=" + c).join("\n\n") + "\n";
       const t = "Library: " + (xs.length > 1 ? xs.length + " pieces" : names[0]);
-      window.open("https://github.com/deamonSLINKY/PERF-1/issues/new?title=" + encodeURIComponent(t) + "&body=" + encodeURIComponent(body), "_blank", "noopener");
+      window.open("https://github.com/superposition/91/issues/new?title=" + encodeURIComponent(t) + "&body=" + encodeURIComponent(body), "_blank", "noopener");
       say("The issue is open in a new tab: press Submit new issue there.");
     } else {
       say("Submitting…");

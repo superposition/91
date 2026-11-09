@@ -272,25 +272,25 @@ static const uint8_t GEN_TR[EN_NGENRE][EN_NPIECES][3] = {
     {{118, 9, 2}, {120, 2, 3}, {116, 0, 4}, {122, 5, 5}, {124, 7, 0}, {126, 4, 1}, {119, 11, 2}, {121, 1, 3}, {117, 6, 0}, {123, 10, 5}},   /* SEASIDE */
     {{72, 0, 0}, {74, 5, 1}, {70, 9, 2}, {76, 2, 3}, {78, 7, 4}, {68, 4, 5}, {73, 11, 0}, {75, 1, 1}, {80, 6, 2}, {71, 10, 3}},   /* SANDS */};
 static const uint8_t GEN_PLUCK[EN_NGENRE][5] = {
-    {2, 12, 24, 19, 7},   /* CITYPOP */
-    {2, 12, 25, 19, 5},   /* SUNSET */
-    {19, 2, 12, 25, 18},   /* AOR */
-    {7, 24, 2, 19, 17},   /* SHIBUYA */
-    {2, 7, 24, 12, 9},   /* BOOGIE */
-    {19, 2, 25, 12, 18},   /* YACHT */
-    {2, 12, 7, 19, 1},   /* TAPE */
-    {27, 12, 2, 8, 26},   /* NEON */
-    {25, 2, 12, 30, 18},   /* KAYO */
-    {2, 5, 12, 18, 7},   /* LOUNGE */
-    {7, 9, 19, 1, 4},   /* SURF */
-    {5, 1, 12, 28, 2},   /* BALEAR */
-    {1, 31, 3, 5, 2},   /* TROPIC */
-    {2, 12, 4, 28, 1},   /* SUMMER */
-    {12, 2, 25, 26, 5},   /* MARINA */
-    {31, 1, 9, 3, 7},   /* CALYPSO */
-    {1, 3, 5, 12, 2},   /* ISLAND */
-    {4, 2, 12, 1, 11},   /* SEASIDE */
-    {5, 26, 12, 1, 30},   /* SANDS */
+    {12, 15, 22, 25, 24},
+    {12, 15, 22, 18, 25},
+    {19, 12, 25, 15, 18},
+    {24, 12, 19, 22, 17},
+    {12, 24, 15, 19, 22},
+    {19, 12, 18, 25, 22},
+    {12, 17, 19, 22, 25},
+    {27, 12, 22, 26, 15},
+    {25, 12, 18, 30, 22},
+    {12, 17, 18, 22, 15},
+    {19, 15, 22, 12, 13},
+    {18, 12, 22, 28, 25},
+    {13, 31, 22, 12, 15},
+    {12, 22, 13, 28, 15},
+    {12, 25, 22, 26, 18},
+    {31, 15, 22, 12, 13},
+    {12, 22, 18, 25, 15},
+    {13, 12, 22, 15, 26},
+    {18, 26, 12, 25, 30},
 };
 static const char *const GEN_PIECE_NAME[EN_NGENRE][EN_NPIECES] = {
     {"C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10"},   /* CITYPOP */
@@ -399,6 +399,22 @@ void en_piece_g(int g, int i, int16_t *par, uint16_t *pool)
         par[P_CM_LVL] = (int16_t)(par[P_CM_LVL] * 3 / 4);
         vary(d, i, par);                        /* the donor's palette, rate and pad shift */
         par[P_CM_SND] = (int16_t)GEN_PLUCK[g][(i * 4 + d) % 5];   /* the genre's own five pluck sounds */
+        {   /* NAIWAN 91: bigger, retro pads that stab and ring; open (drop-2) voicings; a long, jazzy lead */
+            static const uint8_t RETRO[EN_NSOUND] = {0, 16, 2, 3, 4, 5, 6, 0, 6, 5, 5, 5, 12, 6, 6, 15, 16, 17, 18, 19, 2, 12, 2, 23};
+            const int pt = par[P_PADTONE] < 0 || par[P_PADTONE] >= EN_NSOUND ? 0 : par[P_PADTONE];
+            par[P_PADTONE] = (int16_t)RETRO[pt];
+            par[P_PAD_COMP] = (int16_t)(2 + (i % 5));            /* a stab rhythm: off-beat, on-beat, 3-3-2, Charleston, syncopated */
+            par[P_PE_ATK] = 4;                                   /* in fast: a stab */
+            par[P_PE_REL] = (int16_t)(58 + (i * 3) % 18);        /* out long: it rings */
+            par[P_BRIGHT] = (int16_t)(par[P_BRIGHT] > 72 ? 100 : par[P_BRIGHT] + 14);
+            par[P_DETUNE] = 8;                                   /* FM voices stay clean */
+            par[P_VOICING] = 1;                                  /* open: drop 2, jazzier */
+            par[P_CM_DEC] = (int16_t)(64 + (i % 3) * 8);         /* the lead rings too */
+            par[P_CM_STYLE] = (int16_t)(i % 3 == 0 ? 0 : i % 3 == 1 ? 5 : 2);   /* up, thirds, up-down */
+            par[P_DRIFT] = 82;                                   /* chords twice as long: four bars, not two */
+            par[P_SWING] = (int16_t)(par[P_SWING] + 8 > 64 ? 64 : par[P_SWING] + 8);   /* the timing sits back */
+            par[P_HUMAN] = (int16_t)(par[P_HUMAN] + 10 > 60 ? 60 : par[P_HUMAN] + 10);
+        }
         par[P_PADTONE] = (int16_t)PALETTE[d].pad[i % 5];          /* shift 0: pieces i and i+6 never share a pad */
     }
     if (psy_slow(g, i)) {                       /* psy-ambient, psychill: the bass held, the pluck in eighths, the acid thin, a wide shimmer, the pad up */
