@@ -93,7 +93,7 @@ static const char *const RPP_NAME[25] = {"-12", "-11", "-10", "-9", "-8", "-7", 
 static const char *const RPG_NAME[4] = {"FULL", "3/4", "HALF", "1/4"};                              /* the repeat's gate: the part of the slice that sounds */
 static const char *const RPR_NAME[3] = {"OFF", "BEAT", "BAR"};                                      /* the repeat's slip refresh */                                       /* the USB audio's level: the master knob's, or fixed (a recording that does not move with the knob) */
 static const char *const KEYSET_NAME[5] = {"SAME", "+2", "+3", "+5", "+7"};                     /* the drop's key change, in semitones */
-static const char *const GENRE_UI_NAME[EN_NGENRE] = {"HYPNO", "LOFI", "HOUSE", "DUBSTEP", "DUB", "DNB", "BREAKS", "GARAGE", "ELECTRO", "TRAP", "DISCO", "FUNK", "REGGAE", "SYNTHWV", "AMAPI", "TRIPHOP", "INDUS", "PSY", "FOREST"};
+static const char *const GENRE_UI_NAME[EN_NGENRE] = {"CITYPOP", "SUNSET", "AOR", "SHIBUYA", "BOOGIE", "YACHT", "TAPE", "NEON", "KAYO", "LOUNGE", "SURF", "BALEAR", "TROPIC", "SUMMER", "MARINA", "CALYPSO", "ISLAND", "SEASIDE", "SANDS"};
 static const char *const SCQ_NAME[2] = {"AT ONCE", "NEXT BAR"};                                  /* when a scene comes */
 static const char *const DJG_NAME[5] = {"8 BARS", "16 BARS", "32 BARS", "64 BARS", "SYNC"};   /* the auto-DJ's groove (SYNC: until the chord changes) */
 static const char *const DJB_NAME[3] = {"SHORT", "HALF", "FULL"};                                /* its breakdown, against the groove */
@@ -4439,7 +4439,7 @@ static void polar(int32_t cx, int32_t cy, float r, int i, int n, int32_t *x, int
 /* THE SIGIL (the middle of the home screen; it replaced HYP-1's ring of dots): a summoning circle turned so the chord's root is at the
  * top, the chord's tones joined into a figure (a triad a triangle, a seventh a four-sided shape: the chord's kind read as a shape, its name
  * under the eye). Outside, the 4-bar phrase drawing itself round; then the bar's 16 steps (the kick's larger, the acid's gates tinted, the
- * playhead white); a pentagram turning once in 16 bars behind it; runes flaring by the notes the pluck plays. In the middle a demon eye
+ * playhead white); a honu turning once in 16 bars behind it; sea glyphs flaring by the notes the pluck plays. In the middle a demon eye
  * (SEL + HOME: the slinky imp instead): half open in a groove, its slit pupil widening on the kick and its gaze flipping on the snare;
  * shut in a breakdown; wide and trembling in a build, the phrase ring opening in spinning gaps; a white flash and a shock ring on the
  * drop. When the engine sheds load the pentagram and the runes go first. */
@@ -4462,9 +4462,10 @@ static void sg_line2(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint16_t c)
     cv_line(x0 + 1, y0, x1 + 1, y1, c);
     cv_line(x0, y0 + 1, x1, y1 + 1, c);
 }
-static const uint8_t RUNE[8][5] = {              /* 5 x 5, a row a byte (bit 4 the left) */
-    {0x04, 0x0E, 0x15, 0x04, 0x04}, {0x11, 0x0A, 0x04, 0x0A, 0x11}, {0x1C, 0x12, 0x1C, 0x12, 0x1C}, {0x04, 0x06, 0x05, 0x04, 0x04},
-    {0x11, 0x1B, 0x15, 0x11, 0x11}, {0x0E, 0x11, 0x04, 0x11, 0x0E}, {0x10, 0x18, 0x14, 0x12, 0x11}, {0x04, 0x0A, 0x11, 0x0A, 0x04}};
+static const uint8_t SEA[8][5] = {               /* 5 x 5 sea glyphs, a row a byte (bit 4 the left): scallop, starfish,
+                                                  * fish, turtle, jellyfish, sun, anchor, palm */
+    {0x1F, 0x11, 0x0A, 0x04, 0x00}, {0x04, 0x15, 0x0E, 0x15, 0x04}, {0x00, 0x0A, 0x1F, 0x0A, 0x00}, {0x11, 0x1F, 0x15, 0x1F, 0x11},
+    {0x0E, 0x1F, 0x15, 0x0A, 0x04}, {0x15, 0x0E, 0x1F, 0x0E, 0x15}, {0x0E, 0x04, 0x15, 0x15, 0x0E}, {0x1C, 0x0E, 0x04, 0x04, 0x04}};
 static void draw_sigil(void)
 {
     static const uint8_t EYE[9] = {12, 12, 11, 11, 10, 9, 7, 5, 2};   /* the eye's half-width, from its middle row out (scaled to its opening) */
@@ -4506,13 +4507,33 @@ static void draw_sigil(void)
         sg.rn[sg.rn_i].t = now;
         sg.rn_i = (uint8_t)((sg.rn_i + 1u) % 5u);
     }
-    if (!shed) {                                 /* the pentagram, turning once in 16 bars */
+    if (!shed) {                                 /* the honu: shell, scutes, flippers, head and tail, turning once in 16 bars */
         const float pa = (float)(en_bars & 255u) * (FM_TWO_PI / 256.0f);
-        int32_t sx[5], sy[5];
-        for (i = 0; i < 5; i++)
-            sg_pt(36.0f, pa + (float)i * (FM_TWO_PI / 5.0f), &sx[i], &sy[i]);
-        for (i = 0; i < 5; i++)
-            cv_line(sx[i], sy[i], sx[(i + 2) % 5], sy[(i + 2) % 5], mix(K_BG, K_LINE, 9));
+        const uint16_t tc = mix(K_BG, K_LINE, 9);
+        const float cr = fm_cosf(pa), sr = fm_sinf(pa);
+        int32_t lx = 0, ly = 0;
+        int k;
+        for (k = 0; k <= 40; k++) {               /* the shell: a rotated ellipse */
+            const float t = (float)k * (FM_TWO_PI / 40.0f);
+            const int32_t x = CX + (int32_t)(22.0f * fm_cosf(t) * cr - 14.0f * fm_sinf(t) * sr),
+                          y = CY - (int32_t)(22.0f * fm_cosf(t) * sr + 14.0f * fm_sinf(t) * cr);
+            if (k)
+                cv_line(lx, ly, x, y, tc);
+            lx = x, ly = y;
+        }
+        for (k = 0; k < 3; k++) {                 /* three scutes across the shell */
+            const float a = pa + (float)k * (FM_TWO_PI / 3.0f);
+            cv_line(CX + (int32_t)(7.0f * fm_cosf(a)), CY - (int32_t)(7.0f * fm_sinf(a)),
+                    CX + (int32_t)(21.0f * fm_cosf(a)), CY - (int32_t)(21.0f * fm_sinf(a)), tc);
+        }
+        for (k = 0; k < 4; k++) {                 /* four flippers */
+            const float a = pa + (float)k * (FM_TWO_PI / 4.0f) + (FM_TWO_PI / 8.0f);
+            cv_line(CX + (int32_t)(20.0f * fm_cosf(a)), CY - (int32_t)(20.0f * fm_sinf(a)),
+                    CX + (int32_t)(30.0f * fm_cosf(a)), CY - (int32_t)(30.0f * fm_sinf(a)), tc);
+        }
+        cv_disc(CX + (int32_t)(27.0f * cr), CY - (int32_t)(27.0f * sr), 3, tc);          /* the head */
+        cv_line(CX - (int32_t)(21.0f * cr), CY + (int32_t)(21.0f * sr),
+                CX - (int32_t)(28.0f * cr), CY + (int32_t)(28.0f * sr), tc);             /* the tail */
     }
     {   /* the phrase: 64 dots, filled through 4 bars (thin in a breakdown, opening in spinning gaps in a build) */
         const int lit = play ? (int)(((en_bars >> 4) & 3u) * 16u + (en_bars & 15u)) : -1, spin = (int)(now / 60u);
@@ -4572,7 +4593,7 @@ static void draw_sigil(void)
         else
             cv_rect(px[i], py[i], 1, 1, K_LINE);
     }
-    if (!shed)                                   /* the runes, fading over 0.7 s */
+    if (!shed)                                   /* the sea glyphs, fading over 0.7 s */
         for (i = 0; i < 5; i++) {
             const uint32_t age = now - sg.rn[i].t;
             int32_t x, y, r, c;
@@ -4581,7 +4602,7 @@ static void draw_sigil(void)
             sg_pt(44.0f, (float)sg.rn[i].pc * step + sg.rot + 0.16f, &x, &y);
             for (r = 0; r < 5; r++)
                 for (c = 0; c < 5; c++)
-                    if (RUNE[sg.rn[i].kind][r] >> (4 - c) & 1u)
+                    if (SEA[sg.rn[i].kind][r] >> (4 - c) & 1u)
                         cv_pset(x - 2 + c, y - 2 + r, mix(K_BG, K_ACC, 16 - (int)(age * 16u / 700u)));
         }
     if (ui.centre_imp) {                         /* the imp, summoned into it (in the Synth look he stands on the sun, no box) */
@@ -6657,7 +6678,7 @@ static void draw_knobs(void)
                 int same = proj.par[P_KIT_SNARE] == k && proj.par[P_KIT_HAT] == k && proj.par[P_KIT_PERC] == k;
                 caps(u, same ? EN_KIT_NAME[(unsigned)k < EN_NKIT ? k : 0] : "Mixed kit", sizeof u);
             } else {
-                caps(u, "PERF-1", sizeof u);
+                caps(u, "NAIWAN 91", sizeof u);
             }
             xs = cv_text(4, -1, &FONT_XS, u, K_DIM);
             if (by_hand(vc))                     /* the voice off the algorithm: said beside its sound */
@@ -7494,8 +7515,8 @@ static void draw_splash(void)
     lcd_fill(0, 0, 240, 240, K_BG);
     splash_mascot(0, 0);
     cv_begin(240, 132, K_BG);                    /* the name, the rings, and what's next */
-    text_c(120, 0, &FONT_L, "DEAMON", RGB(242, 230, 196));
-    text_c(120, 36, &FONT_L, "SLINKY", RGB(255, 143, 143));
+    text_c(120, 0, &FONT_L, "NAIWAN", RGB(242, 230, 196));
+    text_c(120, 36, &FONT_L, "91", RGB(255, 143, 143));
     for (i = 0; i < 9; i++)
         cv_rect(48 + i * 16, 86, 12, 6, i & 1 ? RGB(224, 52, 79) : RGB(156, 29, 58));
     cv_frame(40, 80, 160, 18, K_LINE);
@@ -7503,16 +7524,16 @@ static void draw_splash(void)
     cv_blit(0, 108);
 }
 
-/* the second card: PERF-1, big 5 x 7 pixel letters (6 px a pixel), an orange shadow under the purple */
+/* the second card: NAIWAN 91, big 5 x 7 pixel letters (6 px a pixel), an orange shadow under the purple */
 #define BIG_N 6
 #define BIG_PX 6
 static const uint8_t BIG_GLYPH[BIG_N][7] = {
-    {0x1E, 0x11, 0x11, 0x1E, 0x10, 0x10, 0x10},  /* P */
-    {0x1F, 0x10, 0x10, 0x1E, 0x10, 0x10, 0x1F},  /* E */
-    {0x1E, 0x11, 0x11, 0x1E, 0x14, 0x12, 0x11},  /* R */
-    {0x1F, 0x10, 0x10, 0x1E, 0x10, 0x10, 0x10},  /* F */
-    {0x00, 0x00, 0x00, 0x0E, 0x00, 0x00, 0x00},  /* - */
-    {0x04, 0x0C, 0x04, 0x04, 0x04, 0x04, 0x0E},  /* 1 */
+    {0x11, 0x19, 0x15, 0x13, 0x11, 0x11, 0x11},  /* N */
+    {0x0E, 0x11, 0x11, 0x1F, 0x11, 0x11, 0x11},  /* A */
+    {0x1F, 0x04, 0x04, 0x04, 0x04, 0x04, 0x1F},  /* I */
+    {0x11, 0x11, 0x11, 0x15, 0x15, 0x1B, 0x11},  /* W */
+    {0x0E, 0x11, 0x11, 0x1F, 0x11, 0x11, 0x11},  /* A */
+    {0x11, 0x19, 0x15, 0x13, 0x11, 0x11, 0x11},  /* N */
 };
 #define SPLASH_STEP_Y 184
 static void draw_hyp(void)
@@ -7530,9 +7551,9 @@ static void draw_hyp(void)
     text_c(120, 86, &FONT_S, "GENERATIVE  //  LIVE", K_TEXT);
     cv_blit(0, 6);
     cv_begin(240, 52, K_BG);                     /* (a canvas is at most 144 rows) */
-    text_c(120, 0, &FONT_XS, EN_VERSION[0] == 'D' ? "FM-1 CUSTOM FIRMWARE" : "FM-1 CUSTOM FIRMWARE  //  " EN_VERSION, K_TEXT);
-    text_c(120, 16, &FONT_XS, "BY DEAMONSLINKY", RGB(255, 143, 143));
-    text_c(120, 32, &FONT_XS, "BASED ON HYP-1 BY REDTAILWORKS", K_DIM);
+    text_c(120, 0, &FONT_XS, EN_VERSION[0] == 'D' ? "NAIWAN 91  //  FM-1 FIRMWARE" : "NAIWAN 91  //  " EN_VERSION, K_TEXT);
+    text_c(120, 16, &FONT_XS, "CITY POP  //  THE COAST", K_TEXT);
+    text_c(120, 32, &FONT_XS, "AFTER PERF-1 BY DEAMONSLINKY", K_DIM);
     cv_blit(0, 120);
     for (c = 0; c < 16; c++)
         lcd_fill(8 + c * 14, SPLASH_STEP_Y, 11, 11, K_PANEL);

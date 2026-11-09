@@ -1,22 +1,22 @@
-<!-- footer: PERF-1 quick manual · 0.17, 7 November 2026 · full manual: deamonslinky.github.io/PERF-1/manual/ · GPL-3.0-only -->
+<!-- footer: NAIWAN 91 quick manual · 0.17, 7 November 2026 · full manual: deamonslinky.github.io/NAIWAN 91/manual/ · GPL-3.0-only -->
 
-# PERF-1 quick manual
+# NAIWAN 91 quick manual
 
-<p class="lead">Eight pages of what to press. The full manual, with screenshots and more detail, is at <b>https://deamonslinky.github.io/PERF-1/manual/</b>; if the two disagree, trust the full manual. The 27 keys run from <code>F3</code> to <code>G5</code>: sixteen white, eleven black.</p>
+<p class="lead">Eight pages of what to press. The full manual, with screenshots and more detail, is at <b>https://deamonslinky.github.io/NAIWAN 91/manual/</b>; if the two disagree, trust the full manual. The 27 keys run from <code>F3</code> to <code>G5</code>: sixteen white, eleven black.</p>
 
 <div class="cols">
 
-**What it is.** PERF-1 turns the M-VAVE FM-1 into a groovebox that makes up music as it plays. Five tracks start when you switch it on: a slow pad, a bass, a 303-style acid line, a plucked counter-melody and drums you can program, all written on the spot from the key, scale and chord, in seventeen genres of ten pieces. You steer: break it down, build it, drop it, mute and solo, throw effects, edit the drums, play along, store what you like, and record it over the same USB cable (the FM-1 is a USB audio and MIDI device). By deamonSLINKY; a fork of HYP-1 (RedtailWorks), itself a fork of AMB-1 (Charles Vestal). GPL-3.0-only, no warranty. It's still in development and can crash.
+**What it is.** NAIWAN 91 turns the M-VAVE FM-1 into a groovebox that makes up music as it plays. Five tracks start when you switch it on: a slow pad, a bass, a 303-style acid line, a plucked counter-melody and drums you can program, all written on the spot from the key, scale and chord, in seventeen genres of ten pieces. You steer: break it down, build it, drop it, mute and solo, throw effects, edit the drums, play along, store what you like, and record it over the same USB cable (the FM-1 is a USB audio and MIDI device). By deamonSLINKY; a fork of HYP-1 (RedtailWorks), itself a fork of AMB-1 (Charles Vestal). GPL-3.0-only, no warranty. It's still in development and can crash.
 
 ## Install in five steps
 
-1. **Try it first.** The emulator at https://deamonslinky.github.io/PERF-1/ runs the same firmware in your browser, with sound.
-2. **Keep copies.** PERF-1 can't read other firmwares' projects, and what's stored may be lost when you switch either way: keep your `.syx` files. On PERF-1, the installer's **Back up and restore** card saves everything stored to a `.p1bak` file.
-3. **Open the web installer**, https://deamonslinky.github.io/PERF-1/install/, in Chrome or Edge. Plug the FM-1 straight into the computer with a USB *data* cable, and close anything using its MIDI port (a DAW). Allow MIDI with SysEx (the messages the installer uses) when asked.
-4. **Press Install.** The line under the button names the version it will write; if it's older than you expect, hard-refresh (Ctrl+F5 or Cmd+Shift+R). Don't unplug or close the page while it writes. The FM-1 restarts into PERF-1 and the page checks the version.
-5. **To go back** to M-VAVE's FM-1 V15, use "Back to the stock firmware" at the bottom of the same page: download `FM-1.fwsc` from the link there, choose it (the page checks its SHA-256) and press **Install the stock firmware**. It works from PERF-1, safe mode and update mode; M-VAVE's M-UPGRADE works too.
+1. **Try it first.** The emulator at https://deamonslinky.github.io/NAIWAN 91/ runs the same firmware in your browser, with sound.
+2. **Keep copies.** NAIWAN 91 can't read other firmwares' projects, and what's stored may be lost when you switch either way: keep your `.syx` files. On NAIWAN 91, the installer's **Back up and restore** card saves everything stored to a `.p1bak` file.
+3. **Open the web installer**, https://deamonslinky.github.io/NAIWAN 91/install/, in Chrome or Edge. Plug the FM-1 straight into the computer with a USB *data* cable, and close anything using its MIDI port (a DAW). Allow MIDI with SysEx (the messages the installer uses) when asked.
+4. **Press Install.** The line under the button names the version it will write; if it's older than you expect, hard-refresh (Ctrl+F5 or Cmd+Shift+R). Don't unplug or close the page while it writes. The FM-1 restarts into NAIWAN 91 and the page checks the version.
+5. **To go back** to M-VAVE's FM-1 V15, use "Back to the stock firmware" at the bottom of the same page: download `FM-1.fwsc` from the link there, choose it (the page checks its SHA-256) and press **Install the stock firmware**. It works from NAIWAN 91, safe mode and update mode; M-VAVE's M-UPGRADE works too.
 
-**Update mode.** Hold **OCT-** and **OCT+** together for 5 s while PERF-1 runs. From 2 s the screen counts `UPDATE MODE IN 3..`; let go to cancel. If an install was cut off, the FM-1 stays in update mode: press Install again. **Safe mode.** Two crashes in a row while starting give a black screen, `PERF-1 SAFE MODE`, with USB on: reinstall, or press **PLAY** to try again. Installing is at your own risk; nothing protects against a damaged boot loader or a power cut mid-write.
+**Update mode.** Hold **OCT-** and **OCT+** together for 5 s while NAIWAN 91 runs. From 2 s the screen counts `UPDATE MODE IN 3..`; let go to cancel. If an install was cut off, the FM-1 stays in update mode: press Install again. **Safe mode.** Two crashes in a row while starting give a black screen, `NAIWAN 91 SAFE MODE`, with USB on: reinstall, or press **PLAY** to try again. Installing is at your own risk; nothing protects against a damaged boot loader or a power cut mid-write.
 
 </div>
 
@@ -425,9 +425,9 @@ How hard the FM-1 is working: `CPU 41 XR 0`, with `C2 38` and `S1` or `S2` under
 
 **MIDI in:** notes on channel 1 add or remove their note from the scale (use another channel to avoid that). Clock and start / stop drive the tempo (`EXT`). It listens on the USB MIDI port, and the TRS input where your version has it.
 
-**The site**, https://deamonslinky.github.io/PERF-1/: the **installer** (install, back to stock, Load DX7 voices, Back up and restore, Live status), the **emulator**, the **editor** and the **manual**.
+**The site**, https://deamonslinky.github.io/NAIWAN 91/: the **installer** (install, back to stock, Load DX7 voices, Back up and restore, Live status), the **emulator**, the **editor** and the **manual**.
 
-**Backup and restore** (installer). **Save a backup** copies everything stored (pieces in every genre, settings, DX7 voices, theme, Tune, MIDI out) to a `.p1bak` file; do it before you install anything else. Unstored edits and the panel calibration aren't in it. **Restore the chosen backup** writes it back one item at a time, then the FM-1 restarts. Needs PERF-1 0.14 or later on the FM-1.
+**Backup and restore** (installer). **Save a backup** copies everything stored (pieces in every genre, settings, DX7 voices, theme, Tune, MIDI out) to a `.p1bak` file; do it before you install anything else. Unstored edits and the panel calibration aren't in it. **Restore the chosen backup** writes it back one item at a time, then the FM-1 restarts. Needs NAIWAN 91 0.14 or later on the FM-1.
 
 **The editor** has two tabs. **Sound**: every setting of the piece playing, with the FM-1's page names and ranges, plus a page for the rest (lane levels, tunings, decays, chances, lengths; pans and sends; octaves; by-hand switches). Changes play at once; store the piece on the FM-1 to keep them. **DX7 voices**: read the 16 slots, edit a voice (name, algorithm, feedback, LFO, pitch envelope, each operator's level, ratio, envelope, scaling, velocity); **Live** sends each change as you make it; load `.syx` banks, save a slot or the bank as `.syx`.
 
@@ -443,7 +443,7 @@ How hard the FM-1 is working: `CPU 41 XR 0`, with `C2 38` and `S1` or `S2` under
 
 - **No sound:** MASTER; PLAY lit; a Level at 0 (KNOB1 on its page; the Mixer shows all); `BY HAND` (SEL + ENV); a mute on the mix map; an effect latched (`FX` in the header; OCT- in the menu clears all). Jam silences the voice it plays; REMOTE silences the FM-1 on purpose.
 - **A short dip when you store or change a setting:** normal. **A stored piece came back as before:** the power went off during the save. **My changes vanished:** only a stored piece (Global, SAVE) is kept.
-- **The installer doesn't find the FM-1:** Chrome or Edge, a data cable, no DAW using the port, MIDI with SysEx allowed. **It offers an old version:** hard-refresh. **An install was cut off:** run it again. **`PERF-1 SAFE MODE`:** two crashes at start; reinstall, or PLAY to retry.
+- **The installer doesn't find the FM-1:** Chrome or Edge, a data cable, no DAW using the port, MIDI with SysEx allowed. **It offers an old version:** hard-refresh. **An install was cut off:** run it again. **`NAIWAN 91 SAFE MODE`:** two crashes at start; reinstall, or PLAY to retry.
 - **Buttons or knobs don't match their labels:** hold OCT- and OCT+ while switching on to calibrate.
 - **Loaded DX7 voices don't show:** they come after the 30 built-in DX sounds; check for `LOADED`.
 - **Crackles or dropouts:** watch `XR` and `S1`/`S2`; send a Live status CSV with the piece.
@@ -451,6 +451,6 @@ How hard the FM-1 is working: `CPU 41 XR 0`, with `C2 38` and `S1` or `S2` under
 
 ### Credits and licence
 
-PERF-1 is by **deamonSLINKY**: the firmware, the slinky mascot and the pages around them. It is a fork of **HYP-1** (RedtailWorks), itself a fork of **AMB-1** by Charles Vestal. The platform layer (USB, update loader, storage, installer, the panel calibration) is **Felucca** by Leo Kuroshita (Hügelton Instruments), by way of X0X and FoMni. The six-operator FM engine, its factory voices and the second-core work are from **Melodee** by Kerem Kilic (Ellic Studio); its synthesis is after **Dexed** by Pascal Gauthier, on **MSFA** by Raph Levien (Google). The bass line modes, pad comping, ghost notes, deja vu and the motif follow ideas in **Tuna** by delirioux, written afresh for this engine. The plate reverb is Jon Dattorro's; the emulator idea is Groove OS's; the hardware knowledge is FM-1-RE's. Fonts: Chakra Petch and Barlow Semi Condensed (SIL OFL 1.1). Source and issues: https://github.com/deamonSLINKY/PERF-1. **Licence: GPL-3.0-only, no warranty.** M-VAVE and FM-1 are trademarks of their owners; PERF-1 is not affiliated with M-VAVE.
+NAIWAN 91 is by **deamonSLINKY**: the firmware, the slinky mascot and the pages around them. It is a fork of **HYP-1** (RedtailWorks), itself a fork of **AMB-1** by Charles Vestal. The platform layer (USB, update loader, storage, installer, the panel calibration) is **Felucca** by Leo Kuroshita (Hügelton Instruments), by way of X0X and FoMni. The six-operator FM engine, its factory voices and the second-core work are from **Melodee** by Kerem Kilic (Ellic Studio); its synthesis is after **Dexed** by Pascal Gauthier, on **MSFA** by Raph Levien (Google). The bass line modes, pad comping, ghost notes, deja vu and the motif follow ideas in **Tuna** by delirioux, written afresh for this engine. The plate reverb is Jon Dattorro's; the emulator idea is Groove OS's; the hardware knowledge is FM-1-RE's. Fonts: Chakra Petch and Barlow Semi Condensed (SIL OFL 1.1). Source and issues: https://github.com/deamonSLINKY/NAIWAN 91. **Licence: GPL-3.0-only, no warranty.** M-VAVE and FM-1 are trademarks of their owners; NAIWAN 91 is not affiliated with M-VAVE.
 
 </div>

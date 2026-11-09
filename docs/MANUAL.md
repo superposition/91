@@ -1,12 +1,12 @@
-# PERF-1
+# NAIWAN 91
 
-PERF-1 is free firmware that turns your M-VAVE FM-1 into a groovebox that plays by itself. Switch it on and a piece of music starts: drums, a bass line, a pad, an acid line and a short plucked melody, made up as it plays so it never repeats exactly. There are seventeen styles, from techno and house to lofi, reggae, drum and bass and industrial, with ten pieces each.
+NAIWAN 91 is free firmware that turns your M-VAVE FM-1 into a groovebox that plays by itself. Switch it on and a piece of music starts: drums, a bass line, a pad, an acid line and a short plucked melody, made up as it plays so it never repeats exactly. There are seventeen styles, from techno and house to lofi, reggae, drum and bass and industrial, with ten pieces each.
 
 You don't have to program anything to get going. You steer the music: change the chords, break the beat down and bring it back, mute parts, throw on effects, or let the auto-DJ do it for you. When you want to go deeper, almost everything can be edited, from the drum steps to the sounds, and any piece you shape can be saved. The FM-1 also works as a USB audio and MIDI device, so you can record what you play straight into your computer.
 
 If you're new, read **Start here** below first. The numbered sections after it are the full reference.
 
-This manual is for **PERF-1 0.15**. PERF-1 is made by deamonSLINKY, based on [HYP-1](https://www.redtail.works) by RedtailWorks, and it's free and open source (GPL-3.0). It's still young and changes often, so keep a way back to the stock firmware (section 1 explains how).
+This manual is for **NAIWAN 91 0.15**. NAIWAN 91 is made by deamonSLINKY, based on [HYP-1](https://www.redtail.works) by RedtailWorks, and it's free and open source (GPL-3.0). It's still young and changes often, so keep a way back to the stock firmware (section 1 explains how).
 
 ![The Tempo page, the home screen](img/perf-screen-home.png)
 
@@ -16,18 +16,18 @@ This manual is for **PERF-1 0.15**. PERF-1 is made by deamonSLINKY, based on [HY
 
 This guide is for your first hour. No music theory needed, nothing to set up. Every step is one thing to press, and what you will hear.
 
-When you want every detail, the [quick manual](PERF-1-quick-manual.pdf) has every control on eight pages, and the rest of this manual, from section 1 on, explains everything. This part is also a [printable PDF](PERF-1-beginners-guide.pdf).
+When you want every detail, the [quick manual](NAIWAN 91-quick-manual.pdf) has every control on eight pages, and the rest of this manual, from section 1 on, explains everything. This part is also a [printable PDF](NAIWAN 91-beginners-guide.pdf).
 
-### What PERF-1 is
+### What NAIWAN 91 is
 
-PERF-1 turns your M-VAVE FM-1 into a little band that plays by itself. Switch it on and music starts: drums, a bass, a soft pad, a squelchy "acid" line and a plucked melody, all made up on the spot so it never repeats exactly.
+NAIWAN 91 turns your M-VAVE FM-1 into a little band that plays by itself. Switch it on and music starts: drums, a bass, a soft pad, a squelchy "acid" line and a plucked melody, all made up on the spot so it never repeats exactly.
 
 You are the conductor. You don't have to play notes. You change the chords, break the beat down and bring it back, throw effects on, mute things, and keep the moments you like.
 
 ### Before you start
 
-- **Try it without installing.** The [emulator](https://deamonslinky.github.io/PERF-1/emu/) runs PERF-1 in your web browser, with sound. Every step in this guide works there too.
-- **Installing** takes a couple of minutes with the [web installer](https://deamonslinky.github.io/PERF-1/install/) in Chrome or Edge. Use a USB cable that carries data, not a charge-only one.
+- **Try it without installing.** The [emulator](https://deamonslinky.github.io/NAIWAN 91/emu/) runs NAIWAN 91 in your web browser, with sound. Every step in this guide works there too.
+- **Installing** takes a couple of minutes with the [web installer](https://deamonslinky.github.io/NAIWAN 91/install/) in Chrome or Edge. Use a USB cable that carries data, not a charge-only one.
 - **You can always go back.** The same installer page puts M-VAVE's own firmware back. Anything you saved on the stock firmware may be lost when you switch, so keep copies of what you care about.
 
 ### The buttons you need today
@@ -90,7 +90,7 @@ Only a few. The rest can wait.
 
 **11. Tap the keys to mute parts.** On this screen the keys switch parts of the band off and on. The screen shows which key is which. Try muting the kick drum, listen to how much it changes, then bring it back.
 
-**12. Let it play itself.** Hold **GLO** and tap the **F5** key (the second white key from the right). "DJ" lights up at the top of the screen. Now PERF-1 runs breakdowns, builds and drops on its own, like a DJ. Do the same again to switch it off.
+**12. Let it play itself.** Hold **GLO** and tap the **F5** key (the second white key from the right). "DJ" lights up at the top of the screen. Now NAIWAN 91 runs breakdowns, builds and drops on its own, like a DJ. Do the same again to switch it off.
 
 ### Keep what you like
 
@@ -112,7 +112,7 @@ You don't need any of this to have fun, but it is there.
 - **The SET page** has an **Intro** that starts with just a pad and brings the band in one part at a time over a few minutes. Great for mixing in, or for playing over. You get there by holding **SEL** and pressing **FX**, then turning SELECT.
 
 ![The SET page: Rounds, Ramp, Intro](img/perf-screen-set.png)
-- The [quick manual](https://deamonslinky.github.io/PERF-1/manual/PERF-1-quick-manual.pdf) is eight pages to print and keep beside the FM-1.
+- The [quick manual](https://deamonslinky.github.io/NAIWAN 91/manual/NAIWAN 91-quick-manual.pdf) is eight pages to print and keep beside the FM-1.
 
 ### If something goes wrong
 
@@ -120,8 +120,8 @@ You don't need any of this to have fun, but it is there.
 - **An effect won't go away?** Press **FX**, then **OCT-**, then **FX** again.
 - **The music stopped?** Press **PLAY**.
 - **A piece sounds odd after a lot of changes?** Turn PRESETS to another piece and back, or reset it with **SEL** and **SAVE** held on the **GLO** page.
-- **Want the original firmware back?** Use the [installer](https://deamonslinky.github.io/PERF-1/install/) page: "Back to the stock firmware" at the bottom.
-- **Found a bug or have an idea?** Tell us on [GitHub](https://github.com/deamonSLINKY/PERF-1/issues). Most of the newest features came from ideas like yours.
+- **Want the original firmware back?** Use the [installer](https://deamonslinky.github.io/NAIWAN 91/install/) page: "Back to the stock firmware" at the bottom.
+- **Found a bug or have an idea?** Tell us on [GitHub](https://github.com/deamonSLINKY/NAIWAN 91/issues). Most of the newest features came from ideas like yours.
 
 ### Words you will see
 
@@ -137,7 +137,7 @@ You don't need any of this to have fun, but it is there.
 | **Scale** | The set of notes the music is allowed to use. The keys switch them on and off. |
 | **Breakdown, build, drop** | Calm down, climb back up, then everything hits at once. SAVE runs them. |
 | **Latch** | An effect that stays on after you tap its key. |
-| **Auto-DJ** | PERF-1 running the breakdowns, builds and drops by itself. |
+| **Auto-DJ** | NAIWAN 91 running the breakdowns, builds and drops by itself. |
 
 ---
 
@@ -167,10 +167,10 @@ You don't need any of this to have fun, but it is there.
 
 ## 1. Install
 
-You can try PERF-1 before you install it. The [PERF-1 emulator](../emu/) runs the same firmware in your web
+You can try NAIWAN 91 before you install it. The [NAIWAN 91 emulator](../emu/) runs the same firmware in your web
 browser, with sound. Play it with the mouse, a touch screen or your computer keyboard.
 
-### Installing PERF-1
+### Installing NAIWAN 91
 
 1. Open the [web installer](../install/) in Chrome or Edge.
 2. Connect the FM-1 straight to the computer with a USB cable that carries data (some cables only charge).
@@ -179,13 +179,13 @@ browser, with sound. Play it with the mouse, a touch screen or your computer key
 4. When the browser asks, allow MIDI with SysEx. SysEx is the kind of MIDI message the installer uses to
    send the firmware.
 5. Wait until the **Install** button isn't grey (the page is still loading the firmware). The line under it
-   names the version it will write (`PERF-1 0.15.1`, for example). If that's older than you expected, hard-refresh the
+   names the version it will write (`NAIWAN 91 0.15.1`, for example). If that's older than you expected, hard-refresh the
    page (Ctrl+F5, or Cmd+Shift+R on a Mac) so the browser doesn't use an old saved copy.
 6. Press **Install**.
 
 The bar and the line above it show each stage: verifying, switching to update mode, writing, restarting,
 done. **Don't unplug the cable or close the page while it writes.** The page asks before it lets you leave.
-When it's finished, the FM-1 restarts into PERF-1 and the page checks that it reports the right version.
+When it's finished, the FM-1 restarts into NAIWAN 91 and the page checks that it reports the right version.
 
 > Installing firmware is at your own risk. The author accepts no responsibility if your FM-1 is damaged or misbehaves because of this custom firmware. Anything you stored (pieces, settings, DX7 voices) may be lost when the firmware is replaced: keep your own copies of the .syx files you load.
 
@@ -201,14 +201,14 @@ the unit.
 2. Choose that file on the page. The page checks the file's SHA-256 fingerprint and refuses any other file.
 3. Connect the FM-1 and press **Install the stock firmware**.
 
-It works from PERF-1, from safe mode and from update mode. M-VAVE's own updater, M-UPGRADE (Downloads,
-PC Software), works too from PERF-1 0.16.13 on. M-UPGRADE 3.11 doesn't find older PERF-1 builds ("A USB MIDI device is
+It works from NAIWAN 91, from safe mode and from update mode. M-VAVE's own updater, M-UPGRADE (Downloads,
+PC Software), works too from NAIWAN 91 0.16.13 on. M-UPGRADE 3.11 doesn't find older NAIWAN 91 builds ("A USB MIDI device is
 present but did not answer"): use this page's button for those.
 
-**V16.** M-UPGRADE now offers M-VAVE's newer firmware, V16 (`FM-1_016`). From PERF-1 0.16.15 on you can go either way:
-M-UPGRADE takes PERF-1 straight to V16, and this page installs PERF-1 on an FM-1 that runs V16. This page's button takes V15's
-or V16's file. (V16 changes the FM-1's boot head, the first 16 KB of its memory. PERF-1 lets that change happen only between
-M-VAVE's own V15 and V16 heads.) An older PERF-1 shows `UPDATE FAILED` and M-UPGRADE times out (error 258). There, choose V15's
+**V16.** M-UPGRADE now offers M-VAVE's newer firmware, V16 (`FM-1_016`). From NAIWAN 91 0.16.15 on you can go either way:
+M-UPGRADE takes NAIWAN 91 straight to V16, and this page installs NAIWAN 91 on an FM-1 that runs V16. This page's button takes V15's
+or V16's file. (V16 changes the FM-1's boot head, the first 16 KB of its memory. NAIWAN 91 lets that change happen only between
+M-VAVE's own V15 and V16 heads.) An older NAIWAN 91 shows `UPDATE FAILED` and M-UPGRADE times out (error 258). There, choose V15's
 `FM-1.fwsc` with M-UPGRADE's **Select firmware**, or use this page's button, then update the stock V15 to V16 with M-UPGRADE.
 
 **One program at a time.** On Windows only one program can use the FM-1's MIDI port. This page and the Pieces page let go of it
@@ -219,7 +219,7 @@ pages that use it, then unplug the FM-1 and plug it back in.
 ### Update mode
 
 In update mode the installer can write to the FM-1. To enter it yourself, hold **OCT-** and **OCT+**
-together for 5 seconds while PERF-1 is running.
+together for 5 seconds while NAIWAN 91 is running.
 
 - After 2 seconds the screen counts down: `UPDATE MODE IN 3..`.
 - Let go before the end and it says `UPDATE MODE CANCELLED`.
@@ -230,29 +230,29 @@ the page says it lost the FM-1, unplug the cable and plug it back in first.
 
 ### Safe mode
 
-If PERF-1 crashes or freezes twice in a row while starting up, the FM-1 starts in safe mode instead. The
-screen is black and says `PERF-1 SAFE MODE`, with the address of the crash at the bottom. There's no sound,
+If NAIWAN 91 crashes or freezes twice in a row while starting up, the FM-1 starts in safe mode instead. The
+screen is black and says `NAIWAN 91 SAFE MODE`, with the address of the crash at the bottom. There's no sound,
 but USB works. From here you can:
 
 - reinstall from the web installer, or
-- press **PLAY** to try starting PERF-1 again.
+- press **PLAY** to try starting NAIWAN 91 again.
 
 If starting keeps failing even then, the FM-1 goes into update mode by itself, ready for the installer.
 
-If PERF-1 crashes while it's running, the next start tells you: the screen shows `RESTARTED AFTER A CRASH`
+If NAIWAN 91 crashes while it's running, the next start tells you: the screen shows `RESTARTED AFTER A CRASH`
 and a `PC` address for two and a half seconds. If you report the crash, note that address.
 
 ### Recovering an FM-1 that won't start
 
-**An install that was cut off (PERF-1 0.16.17 on).** If the power or the cable goes while PERF-1 is being installed, switch the FM-1 on
+**An install that was cut off (NAIWAN 91 0.16.17 on).** If the power or the cable goes while NAIWAN 91 is being installed, switch the FM-1 on
 again. The key lights flash three times and the screen stays dark: it is waiting for the installer. Plug it in, open the Install page and
 press **Install** again; it finishes the job. To get there on purpose, hold **OCT-** alone while you switch the FM-1 on. One long flash
 instead means that rescue was not possible; the FM-1 is then in the chip's own USB mode (below). This comes from ChoralRoot's boot stub,
-as Melodee uses it. It is **experimental** in PERF-1: the method is tested in Melodee and ChoralRoot, and PERF-1 boots through it on every
-start, but its own copy hasn't been through a cut-off install yet, so don't rely on it on purpose. The first install of 0.16.17 over an older PERF-1 has a moment, early on, that isn't protected yet: keep the cable
+as Melodee uses it. It is **experimental** in NAIWAN 91: the method is tested in Melodee and ChoralRoot, and NAIWAN 91 boots through it on every
+start, but its own copy hasn't been through a cut-off install yet, so don't rely on it on purpose. The first install of 0.16.17 over an older NAIWAN 91 has a moment, early on, that isn't protected yet: keep the cable
 in and the power on until it's done. Installing the stock firmware or another firmware removes it.
 
-- **Covered:** a bad PERF-1 install. The installer checks the package before sending it, checks each packet
+- **Covered:** a bad NAIWAN 91 install. The installer checks the package before sending it, checks each packet
   it writes, and reads the FM-1's version back after the restart. On the FM-1 there's safe mode, update mode
   after four failed starts, the **OCT-** + **OCT+** hold, and a USB command that enters update mode. The
   installer works from all of them.
@@ -263,7 +263,7 @@ in and the power on until it's done. Installing the stock firmware or another fi
   FM-1 that fails like that may be gone for good.
 
 If the FM-1 won't start but still reaches the chip's own update mode (it shows up on USB as 4C4A:8057,
-`UBOOT`), the PERF-1 source has a rescue tool, `tools/fm1_rescue.py` (and its wrapper `fm1_rescue.sh`). It
+`UBOOT`), the NAIWAN 91 source has a rescue tool, `tools/fm1_rescue.py` (and its wrapper `fm1_rescue.sh`). It
 puts the stock V15 back from a Mac, using sudo, `pyusb` and `libusb-package`. It backs up the whole memory
 first, writes only the 4 KiB sectors between 0x4000 and 0x93000 that differ from V15, reads everything back
 to check, and accepts only the exact V15 file. It was written for an FM-1 stuck crashing at start-up, and it
@@ -275,11 +275,11 @@ a guarantee. Otherwise, recovery needs
 
 ## 2. Getting started
 
-New to PERF-1? **Start here**, at the top of this manual, walks you through your first hour. This is the
+New to NAIWAN 91? **Start here**, at the top of this manual, walks you through your first hour. This is the
 short version.
 
 1. Switch it on. The **deamonSLINKY** card shows (the slinky mascot hops twice and blinks, then the name and
-   PRESENTS), then the **PERF-1** card (the version, "by deamonSLINKY", "based on HYP-1 by RedtailWorks"),
+   PRESENTS), then the **NAIWAN 91** card (the version, "by deamonSLINKY", "based on HYP-1 by RedtailWorks"),
    with sixteen steps filling in and the white keys lighting with them. Any button or key skips the cards.
    Then a random piece from the HYPNO bank starts playing.
 2. Turn **SELECT** to move through the pages. The four knobs under the screen change what each page shows.
@@ -541,7 +541,7 @@ slowly swings between sparse and full, over a minute or two. **Evolve** makes th
 restless.
 
 **Tempo.** Tempo runs from 70 to 190. To set it from any page, hold **HOME** and turn **SELECT**. To tap it
-in, hold **GLO** and tap `E4` four times or so. When an outside MIDI clock drives PERF-1, it follows that
+in, hold **GLO** and tap `E4` four times or so. When an outside MIDI clock drives NAIWAN 91, it follows that
 clock and the screen says `EXT`.
 
 ### Octaves
@@ -629,7 +629,7 @@ to the next slot, and the drop of a build goes back to slot 1.
 **Fills.** The **black keys** write a whole progression into the slots in one press. The first five are circle of fifths fills,
 one that moves round the circle of fifths: each chord a fifth below the one before, as the scale allows. That
 fall by a fifth is the strongest pull in harmony, the one that makes a progression sound like it's going home. The
-other six are progressions that are everywhere in songs (from Steven's chord chart in the PERF-1 issues).
+other six are progressions that are everywhere in songs (from Steven's chord chart in the NAIWAN 91 issues).
 
 | Black key | Writes | In C major | In A minor |
 |---|---|---|---|
@@ -672,7 +672,7 @@ genre takes over again, with your slots kept for later. The progression is store
 
 ![Storing a piece on Global](img/perf-screen-store.png)
 
-PERF-1 has nineteen **genres**. Each is a bank of ten **pieces**, ready-made songs to play and change.
+NAIWAN 91 has nineteen **genres**. Each is a bank of ten **pieces**, ready-made songs to play and change.
 
 - Turn **PRESETS** for another piece in the bank. It goes from 01 to 10 and wraps round.
 - Hold **GLO** and turn **PRESETS** for another bank (it wraps round too), or use the Genre knob on the Global
@@ -740,9 +740,9 @@ factory piece. **SAVE** alone only stores.
 **When it's written.** Straight away. The FM-1 can't make sound while it writes to its memory. So if the music
 is playing, it fades out (the screen says `STORING`), writes, and fades back in exactly where it was. The
 pause is a fraction of a second, and the song stays in time with itself. MIDI clock out pauses with it.
-Factory works the same way, and so does anything else PERF-1 saves (section 13).
+Factory works the same way, and so does anything else NAIWAN 91 saves (section 13).
 
-**At power-on** PERF-1 always starts in HYPNO, on a random piece. If you stored that piece, it plays as you
+**At power-on** NAIWAN 91 always starts in HYPNO, on a random piece. If you stored that piece, it plays as you
 stored it. If you didn't, it plays the factory piece with small random changes.
 
 | HYPNO piece | Character | BPM | Key |
@@ -854,7 +854,7 @@ sixteenths either side of the "and". So "and-of-2" is halfway between beats 2 an
 | Kick | On every kick, as an 808 or sub bass does |
 | Eighths | On every eighth |
 | Off-beat | On the off-beat eighths, as in house |
-| Walk | On the beats: the root, then the third or fifth, then the fifth, then a lead-in to the next bar: the scale note just below the root, or half the time the note a half step below (a chromatic approach, the one passing note PERF-1 plays outside the scale) |
+| Walk | On the beats: the root, then the third or fifth, then the fifth, then a lead-in to the next bar: the scale note just below the root, or half the time the note a half step below (a chromatic approach, the one passing note NAIWAN 91 plays outside the scale) |
 | Riff | On the genre's own figure. Disco bounces the octave, funk and amapiano syncopate, reggae leans on the fifth. |
 | Octaves | Eighths bouncing between the root and its octave (disco) |
 | Two-step | 1, and-of-2, and-of-3 (garage, drum and bass) |
@@ -997,7 +997,7 @@ The last eight built-in DX voices are guitars, a bass and brass:
 | Sax | A reed with a vibrato that comes in late |
 | Mute Trumpet | The thin, nasal sound of a muted trumpet |
 
-These eight are first drafts, written for PERF-1 and tuned by numbers rather than by ear. The disco, funk, reggae,
+These eight are first drafts, written for NAIWAN 91 and tuned by numbers rather than by ear. The disco, funk, reggae,
 synthwave, amapiano and trip-hop genres use them. Tell the maker what you think of them.
 
 **The DY set.** On the Settings page, **Voices** chooses between two sets. **DY** (the default) swaps all thirty
@@ -1005,14 +1005,14 @@ built-in voices for DX7 patches made by people, of the same kind, chosen by name
 Pafreak's SYNTHOXICATED banks, madFame's Custom Patches, the 1980s magazine banks on Bobby Blues' page, and one from
 Jack Deckard's collection on Dave Benson's page. **DX** puts the built-in set back. Each DY voice shows its bank's
 own name. For example, madFame's `MF EPRHOD1` stands in for the Tine EP and the Aftertouch magazine's `SAXOPHONE`
-for the Sax. The full list is in the PERF-1 source. The names on the screen change with the switch. Each DY voice is
+for the Sax. The full list is in the NAIWAN 91 source. The names on the screen change with the switch. Each DY voice is
 set to the same loudness as the DX voice it replaces, so the genres' mix stays balanced.
 
 For more sounds, load your own. The installer page takes any DX7 `.syx` bank or single voice (section 15), and there
 are large free collections, such as [Bobby Blues' DX7 archive](https://bobbyblues.recup.ch/yamaha_dx7/dx7_patches.html),
 [Soundarchive](https://www.soundarchive.co/yamaha-dx7) and
 [Yamaha Black Boxes](https://yamahablackboxes.com/collection/yamaha-dx7-synthesizer/patches/). Each bank's licence is
-its author's. PERF-1 doesn't include any of them.
+its author's. NAIWAN 91 doesn't include any of them.
 
 ### Pluck steps: freeze the pluck's loop and edit it
 
@@ -1602,7 +1602,7 @@ The kick and clap always stay as written, and a snare on a beat never moves, so 
 
 ![Drum drift](img/perf-screen-drum-drift.png)
 
-PERF-1 doesn't save songs. To keep a performance, record the audio (or the MIDI out) into your computer's recording software, and keep the takes you like.
+NAIWAN 91 doesn't save songs. To keep a performance, record the audio (or the MIDI out) into your computer's recording software, and keep the takes you like.
 
 ### The Perform screen
 
@@ -1875,7 +1875,7 @@ The Settings page:
 
 ### The sampling helper (SAMPLE)
 
-The **SAMPLE** page plays PERF-1's sounds one at a time, so a sampler (an MPC sampling its input, say) can record them and your project keeps them without the FM-1. It's the last settings page.
+The **SAMPLE** page plays NAIWAN 91's sounds one at a time, so a sampler (an MPC sampling its input, say) can record them and your project keeps them without the FM-1. It's the last settings page.
 
 | Knob | What it does |
 |---|---|
@@ -1930,15 +1930,15 @@ While a visualizer is up, the knobs are still the FX knobs, **ALGORITHM** still 
 
 ### Backing up and restoring
 
-Installing another firmware, or reinstalling, can wipe what PERF-1 has stored. The **Back up and restore** card on the installer page (below the DX7 voices) protects it:
+Installing another firmware, or reinstalling, can wipe what NAIWAN 91 has stored. The **Back up and restore** card on the installer page (below the DX7 voices) protects it:
 
 - **Save a backup** reads everything the FM-1 has stored and saves it as a `.p1bak` file: the pieces you saved in every genre, the settings, the DX7 voices, the theme, Tune and MIDI out. Do this *before* you install anything else. Changes to a piece that you haven't stored aren't included (store them first, section 6). The panel calibration isn't included either, because it belongs to that particular unit.
-- **Restore the chosen backup** (choose the file first) writes everything in the file back, one item at a time, then the FM-1 restarts. It replaces what is stored now. The music fades out for each write, and nothing else is saved until the restart. A backup from an older PERF-1 loads into a newer one. Anything in the file the firmware doesn't recognise is refused and never written.
-- Only PERF-1 reads these files, and the FM-1 must be running PERF-1 0.14 or later. An older version doesn't answer, and the page tells you so.
+- **Restore the chosen backup** (choose the file first) writes everything in the file back, one item at a time, then the FM-1 restarts. It replaces what is stored now. The music fades out for each write, and nothing else is saved until the restart. A backup from an older NAIWAN 91 loads into a newer one. Anything in the file the firmware doesn't recognise is refused and never written.
+- Only NAIWAN 91 reads these files, and the FM-1 must be running NAIWAN 91 0.14 or later. An older version doesn't answer, and the page tells you so.
 
 ### Sharing pieces
 
-The **Pieces** page on the PERF-1 website shares one piece at a time: you send a piece you made to someone else, and you add the pieces other people share. Plug the FM-1 in by USB and open the page in Chrome or Edge.
+The **Pieces** page on the NAIWAN 91 website shares one piece at a time: you send a piece you made to someone else, and you add the pieces other people share. Plug the FM-1 in by USB and open the page in Chrome or Edge.
 
 **What goes with a piece:** all of its settings, its six drum patterns and step tricks, a frozen acid or pluck line, your chord progression, and the DX7 voice its pluck plays if that voice is one you loaded yourself (section 15). Your effects settings, the theme and the set list stay yours.
 
@@ -1970,9 +1970,9 @@ The **Pieces** page on the PERF-1 website shares one piece at a time: you send a
 
 **Based on.** When you add a piece from a share, this browser remembers where it came from. If you change it, store it and share it again, it goes out as "based on" the original (its title and maker), and the card says so. If you share it unchanged, the page fills in its original title and maker for you.
 
-**The Library.** The **Library** tab of the **Library & pieces** page collects pieces and sets people made: each with its card, title, maker and note, to hear in the emulator or add to your FM-1 (**Hear or add**). Filter it by genre, search it, or show only the maker's **picked** ones, the newest, or yours. To put yours in, tick them on **My FM-1** and press **Submit**: they are there at once, for everyone, with no account. A submission is checked first (it has to be a real PERF-1 piece or set; the title, name and note short and plain). What you submitted from a browser can be taken back from the same browser: its card there has **Remove**.
+**The Library.** The **Library** tab of the **Library & pieces** page collects pieces and sets people made: each with its card, title, maker and note, to hear in the emulator or add to your FM-1 (**Hear or add**). Filter it by genre, search it, or show only the maker's **picked** ones, the newest, or yours. To put yours in, tick them on **My FM-1** and press **Submit**: they are there at once, for everyone, with no account. A submission is checked first (it has to be a real NAIWAN 91 piece or set; the title, name and note short and plain). What you submitted from a browser can be taken back from the same browser: its card there has **Remove**.
 
-**Versions.** Both of you need PERF-1 0.16.3 or later to add a piece. A piece made on an older PERF-1 loads into a newer one: anything it doesn't have yet plays as the piece's genre sets it. A piece made on a newer PERF-1 loads into an older one without the newer settings, and the page tells you so.
+**Versions.** Both of you need NAIWAN 91 0.16.3 or later to add a piece. A piece made on an older NAIWAN 91 loads into a newer one: anything it doesn't have yet plays as the piece's genre sets it. A piece made on a newer NAIWAN 91 loads into an older one without the newer settings, and the page tells you so.
 
 ---
 
@@ -2026,7 +2026,7 @@ The FM-1 sends MIDI over its USB port only (its TRS jack is an input), and the s
 
 On the sampler:
 
-- **Model:Samples:** its tracks listen on channels 1-6 as they come. Each hit is note 36, the sample's own pitch. Set the MIDI input to USB (or MIDI, for a host box with a DIN or TRS out), and turn clock in on to follow PERF-1's tempo.
+- **Model:Samples:** its tracks listen on channels 1-6 as they come. Each hit is note 36, the sample's own pitch. Set the MIDI input to USB (or MIDI, for a host box with a DIN or TRS out), and turn clock in on to follow NAIWAN 91's tempo.
 - **MPC Sample:** set the MIDI port to USB (or External), Pad MIDI In on, the MIDI In channel to All or 1, and MIDI Sync In to MIDI Clock. The notes follow the MPC's default pad map, bank A.
 - **SP-404MKII:** set MIDI mode A, where channel 1 plays bank A, and MIDI Sync to Auto. The pads are counted as Roland counts them: 13 to 16 is the bottom row.
 
@@ -2034,7 +2034,7 @@ These maps follow the samplers' manuals and default settings (for the MPC Sample
 
 **MIDI in:** notes on channel 1 add their note to the scale, or remove it if it's already there. MIDI clock and start / stop from other gear set the tempo, and `EXT` shows where the tempo usually is. The FM-1 listens on its USB MIDI port, and on the TRS MIDI input where the build has one.
 
-**Playing PERF-1 from a pad controller.** An MPC, or any box with pads that sends MIDI notes, can play PERF-1. Connect the pad box's MIDI out to the FM-1's TRS MIDI input with a 3.5 mm TRS MIDI cable (both ends type A for an MPC Sample), or over USB through a computer. Then open the **MIDI IN** settings page (hold **HOME**, then turn **SELECT** past USB & MIDI) and set **Notes** to **Pads**. **Channel** listens to all channels, or only the one you pick.
+**Playing NAIWAN 91 from a pad controller.** An MPC, or any box with pads that sends MIDI notes, can play NAIWAN 91. Connect the pad box's MIDI out to the FM-1's TRS MIDI input with a 3.5 mm TRS MIDI cable (both ends type A for an MPC Sample), or over USB through a computer. Then open the **MIDI IN** settings page (hold **HOME**, then turn **SELECT** past USB & MIDI) and set **Notes** to **Pads**. **Channel** listens to all channels, or only the one you pick.
 
 The pads are read in banks of 16, from note 36, the way an MPC's pads come out of the box (bank A is notes 36-51, bank B 52-67, and so on):
 
@@ -2048,26 +2048,26 @@ The pads are read in banks of 16, from note 36, the way an MPC's pads come out o
 
 On an MPC Sample, turn on **Pad MIDI Out** so the pads send notes, and set its MIDI port to External for the TRS cable. With Notes on Pads, channel 1 notes no longer change the scale; set it back to Scale for that.
 
-**USB host: plugging a MIDI device straight into the FM-1.** Normally the FM-1's USB port is a device: a computer plugs into it. Turn **USB host** on (the MIDI IN page's third knob) and the port becomes the host instead, so a class-compliant USB MIDI device plugs straight in: an MPC Sample, a keyboard, a pad controller, a groovebox. Its notes, clock and transport come in like any MIDI in (so with Notes on Pads its pads play PERF-1), and PERF-1's MIDI out goes to it, following the MIDI map.
+**USB host: plugging a MIDI device straight into the FM-1.** Normally the FM-1's USB port is a device: a computer plugs into it. Turn **USB host** on (the MIDI IN page's third knob) and the port becomes the host instead, so a class-compliant USB MIDI device plugs straight in: an MPC Sample, a keyboard, a pad controller, a groovebox. Its notes, clock and transport come in like any MIDI in (so with Notes on Pads its pads play NAIWAN 91), and NAIWAN 91's MIDI out goes to it, following the MIDI map.
 
 - **Power:** the FM-1 doesn't power the port. Plug the device in through a **powered USB hub**, or an adapter that powers the device. One device, directly or behind one hub.
 - **While it's on,** the computer side of the port is off: no USB audio, no MIDI to the computer, no editor, no updates. Turn it off to get them back. It's never kept: every power-on starts with USB host off, so the installer always works.
 - **What it says:** `ON: PLUG IN A DEVICE`, then `DEVICE CONNECTED` when it finds one. `NO MIDI DEVICE` means it found something without USB MIDI, or nothing answered: the MIDI IN page then shows what it found (`NO ANSWER` with its codes, `HUB INSIDE` for a dock with a hub behind its hub, or the device and the step it stopped at). The page also shows the last MIDI message that came in and whether a clock is coming in, from any input. Low-speed devices (some old keyboards) aren't supported. `DEVICE LOST: LOOKING` means it came unplugged; it reconnects by itself.
 - Full-speed USB MIDI 1.0 only, notes and clock: no SysEx goes to or comes from the device.
 
-This is Melodee's USB host (by Kerem Kilic). Receiving from a device has been tried on hardware with Melodee; sending to a device hasn't been yet, so if your device doesn't answer PERF-1's notes, say so.
+This is Melodee's USB host (by Kerem Kilic). Receiving from a device has been tried on hardware with Melodee; sending to a device hasn't been yet, so if your device doesn't answer NAIWAN 91's notes, say so.
 
 **A Model:Samples (or any Elektron Model) as a controller.** The Model:Samples sends each of its six tracks on its own channel (1-6), at whatever note that track is pitched to, so the **Pads** layout doesn't fit it. Set **Notes** to **M:S** instead, and the channel decides what a trig does, whatever its note:
 
 | M:S track (channel) | 1 | 2 | 3 | 4 | 5 | 6 |
 |---|---|---|---|---|---|---|
-| PERF-1 | Next chord | Fill | Breakdown | Build | Drop | Next piece |
+| NAIWAN 91 | Next chord | Fill | Breakdown | Build | Drop | Next piece |
 
 The sections and pieces wait for the bar, as they do from the pads. Connect its MIDI out to the FM-1's TRS MIDI input. On the Model:Samples, turn on MIDI out for the tracks you want to use as triggers and leave it off for the ones you play yourself. Its trigs still play their own samples, so a trigger track can be a quiet one, or one you like hearing with the change.
 
-**An Akai MPK mini as the keyboard.** Set **Notes** to **MPK**. Connect its MIDI out to the FM-1's TRS MIDI input (the MPK mini MK4's DIN MIDI out, with a TRS type A to DIN cable or adapter), or over USB through a computer. It expects the MPK's factory program: keys on channel 1, pads on channel 10 from note 36, knobs on CC 24-31 (the MK4's; an older MPK mini's CC 70-77 work too). The MK4's knobs turn endlessly and send steps, so PERF-1 moves each setting from where it is, about fifty clicks from one end to the other; an older MPK's knobs (CC 70-77) set the value straight to where the knob points.
+**An Akai MPK mini as the keyboard.** Set **Notes** to **MPK**. Connect its MIDI out to the FM-1's TRS MIDI input (the MPK mini MK4's DIN MIDI out, with a TRS type A to DIN cable or adapter), or over USB through a computer. It expects the MPK's factory program: keys on channel 1, pads on channel 10 from note 36, knobs on CC 24-31 (the MK4's; an older MPK mini's CC 70-77 work too). The MK4's knobs turn endlessly and send steps, so NAIWAN 91 moves each setting from where it is, about fifty clicks from one end to the other; an older MPK's knobs (CC 70-77) set the value straight to where the knob points.
 
-| MPK | PERF-1 |
+| MPK | NAIWAN 91 |
 |---|---|
 | Keys | Play the Jam page's voice (pluck, pad, acid or bass) with their velocity, snapped to the scale, so there are no wrong notes. With Jam's Keys on Chords, every key plays a triad of the scale. |
 | Pads, bank A (1-8) | The drums (kick, snare, clap, closed hat, open hat, perc), with velocity; pad 7 mutes all the drums or brings them back. |
@@ -2090,15 +2090,15 @@ The keys play over the song from any page. On the Jam page the voice is all your
 | Wash | 13 | Reverb send |
 | Mood (in only) | 1 | (the mod wheel on a keyboard) |
 
-- **In:** these CCs on the listened channel (**Channel**, All by default) move PERF-1's FX knobs. On a Model:Samples, turn on its knobs' MIDI out (ENCS), and its filter, resonance, delay send and reverb send knobs play PERF-1's Filter, Crush, Throw and Wash.
-- **Out:** turning PERF-1's FX knobs sends the same CCs on every channel the **MIDI map** uses (GM: 1-4 and 10; M:Samples: 1-6, so the filter sweeps all six tracks at once). It needs MIDI out on, and it goes out over USB, so the same limits apply as for notes (below). A CC that came in isn't sent back out.
+- **In:** these CCs on the listened channel (**Channel**, All by default) move NAIWAN 91's FX knobs. On a Model:Samples, turn on its knobs' MIDI out (ENCS), and its filter, resonance, delay send and reverb send knobs play NAIWAN 91's Filter, Crush, Throw and Wash.
+- **Out:** turning NAIWAN 91's FX knobs sends the same CCs on every channel the **MIDI map** uses (GM: 1-4 and 10; M:Samples: 1-6, so the filter sweeps all six tracks at once). It needs MIDI out on, and it goes out over USB, so the same limits apply as for notes (below). A CC that came in isn't sent back out.
 - **In+Out:** both.
 
-**Freeze from MIDI:** CC 64, the sustain pedal's number, works like holding **REC**: the chord freezes while the pedal is down (or the CC is 64 or more) and thaws when it's let up. It works in every Notes mode, on the listened channel, so a pedal on a keyboard or a button in an editor can freeze PERF-1. Start, Continue and Stop always start and stop the music.
+**Freeze from MIDI:** CC 64, the sustain pedal's number, works like holding **REC**: the chord freezes while the pedal is down (or the CC is 64 or more) and thaws when it's let up. It works in every Notes mode, on the listened channel, so a pedal on a keyboard or a button in an editor can freeze NAIWAN 91. Start, Continue and Stop always start and stop the music.
 
 **Any controller as the panel:** a map you make with MIDI learn in the emulator turns any controller's pads, keys, buttons and knobs into the FM-1's own (section 17, "Your MIDI map on the FM-1"). It takes its messages before everything above.
 
-What the FM-1 can't do here: its TRS jack is an input, so nothing goes back to the Model:Samples over TRS. PERF-1's notes and knob CCs reach it only over USB, through a computer, a USB MIDI host box, or the FM-1's own USB host (above; not yet tried with a Model:Samples). Clock works both ways: PERF-1 follows the Model:Samples' clock over TRS, or sends its own over USB.
+What the FM-1 can't do here: its TRS jack is an input, so nothing goes back to the Model:Samples over TRS. NAIWAN 91's notes and knob CCs reach it only over USB, through a computer, a USB MIDI host box, or the FM-1's own USB host (above; not yet tried with a Model:Samples). Clock works both ways: NAIWAN 91 follows the Model:Samples' clock over TRS, or sends its own over USB.
 
 **USB audio:** the FM-1 also shows up on a computer as a stereo USB audio input (16-bit, 44.1 kHz). It carries the master output, so you can record the FM-1 over the same cable. On the USB & MIDI settings page, the level can follow the **MASTER** knob (KNOB) or stay at a fixed level (FIXED, about the same as the knob at three quarters). With FIXED you can turn your speakers down without changing the recording.
 
@@ -2106,7 +2106,7 @@ What the FM-1 can't do here: its TRS jack is an input, so nothing goes back to t
 
 ## 15. Your own DX7 voices
 
-The DX7 was Yamaha's classic FM synth, and thousands of its sounds (voices) are free online as `.syx` files. PERF-1 can hold **16 of your own DX7 voices** and plays them on the pluck. They stay stored when you switch off. On the Pluck page they come after the 22 built-in DX sounds: use the Sound knob, or **SEL** + **ALGORITHM** on a pluck page. Each shows as `DX` and the voice's own name (ten characters).
+The DX7 was Yamaha's classic FM synth, and thousands of its sounds (voices) are free online as `.syx` files. NAIWAN 91 can hold **16 of your own DX7 voices** and plays them on the pluck. They stay stored when you switch off. On the Pluck page they come after the 22 built-in DX sounds: use the Sound knob, or **SEL** + **ALGORITHM** on a pluck page. Each shows as `DX` and the voice's own name (ten characters).
 
 ### Loading them from the installer page
 
@@ -2116,7 +2116,7 @@ The DX7 was Yamaha's classic FM synth, and thousands of its sounds (voices) are 
 
 **Clear the loaded voices** empties the slots.
 
-The FM-1 must be running PERF-1 and connected. Use Chrome or Edge, allow MIDI with SysEx (the kind of MIDI message that carries sound data) when the browser asks, and make sure nothing else is using the FM-1's MIDI port. If the FM-1 doesn't answer, the page says `The FM-1 did not answer (an older firmware?)`.
+The FM-1 must be running NAIWAN 91 and connected. Use Chrome or Edge, allow MIDI with SysEx (the kind of MIDI message that carries sound data) when the browser asks, and make sure nothing else is using the FM-1's MIDI port. If the FM-1 doesn't answer, the page says `The FM-1 did not answer (an older firmware?)`.
 
 ### Loading them from a MIDI librarian
 
@@ -2193,7 +2193,7 @@ The easiest way to record what's happening:
 
 ### Recording with the logger (for people comfortable with Python)
 
-The PERF-1 source has a small Python tool that records the same kind of log from a computer.
+The NAIWAN 91 source has a small Python tool that records the same kind of log from a computer.
 
 1. Install what it needs: `pip install mido python-rtmidi`.
 2. With the FM-1 on USB, run `python tools/fm1log.py`. Use `--list` to see the MIDI ports, and `--port` and `--out` to choose a port and a file name.
@@ -2220,7 +2220,7 @@ The FM-1 sends nothing until it's asked, and stops ten seconds after the last as
 
 ## 17. The emulator
 
-The [emulator](../emu/) runs the real PERF-1 firmware in your web browser, so you can try it without the FM-1 or follow along with this manual.
+The [emulator](../emu/) runs the real NAIWAN 91 firmware in your web browser, so you can try it without the FM-1 or follow along with this manual.
 
 - Drag a knob up or down, or scroll over it.
 - Click buttons and keys.
@@ -2275,14 +2275,14 @@ Buttons and keys can take a note or a CC. Knobs take a CC, either absolute (a no
 
 *Experimental: it works in the tests, and is still being tried on more controllers. Tell us what yours does.*
 
-What you learn in the emulator can play the real PERF-1 too, with no computer in between: your controller's pads, keys, buttons and knobs become the FM-1's own buttons, keys and knobs.
+What you learn in the emulator can play the real NAIWAN 91 too, with no computer in between: your controller's pads, keys, buttons and knobs become the FM-1's own buttons, keys and knobs.
 
 1. Learn the controls in the emulator, as above.
 2. Press **Send it to your FM-1**. It opens the Install page's **Your MIDI map** section, which lists what you learned.
 3. Plug the FM-1 in and press **Send to my FM-1**. The FM-1 keeps the map and restarts.
 4. Plug your controller into the FM-1 (USB host, or the TRS MIDI jack), or play it through the computer.
 
-A learned control works in every mode, before anything else PERF-1 does with MIDI: a pad you learned as **PLAY** starts and stops, a fader you learned on **SELECT** walks the pages, an encoder on a page knob turns it. A button or key is held while its note (or its CC at 64 and over) is down, so holds work too (**SEQ** held opens the sequencer, **SEL** held is a shift). Anything you did not learn does what it did before. **MASTER** stays the FM-1's own knob: a learned MASTER works in the emulator only. Up to 48 controls.
+A learned control works in every mode, before anything else NAIWAN 91 does with MIDI: a pad you learned as **PLAY** starts and stops, a fader you learned on **SELECT** walks the pages, an encoder on a page knob turns it. A button or key is held while its note (or its CC at 64 and over) is down, so holds work too (**SEQ** held opens the sequencer, **SEL** held is a shift). Anything you did not learn does what it did before. **MASTER** stays the FM-1's own knob: a learned MASTER works in the emulator only. Up to 48 controls.
 
 Nothing learns? Some controllers keep their pads off MIDI until you turn it on. On an **MPC Sample**: SHIFT + pad 8 (MIDI Config), **MIDI Port** USB (the TRS jacks are External), **Pad MIDI Out** Always. While learning, the emulator shows anything it hears, so you can tell whether the controller is sending at all.
 
@@ -2309,7 +2309,7 @@ How it behaves:
 - The change is the same as turning the FM-1's own knob: it belongs to the piece that is playing until you store it (the player's own settings, such as Tune, are kept at once, as always).
 - Only CCs, on the channel they were learned on. A setting has one control; learning a new one replaces the old.
 - Panel controls (learned in the emulator) and settings share the map: 48 in all.
-- An FM-1 with an older PERF-1 refuses a map that has settings. Install 0.16.18 or later first.
+- An FM-1 with an older NAIWAN 91 refuses a map that has settings. Install 0.16.18 or later first.
 
 #### Novation Launch Control XL 3: a ready map
 
@@ -2356,10 +2356,10 @@ That's normal. While the FM-1 saves, the music fades out and back in. Settings a
 It was stored while playing and the power went off before the save finished. Stores happen straight away, with a short dip in the sound. Don't switch off during the dip.
 
 **Everything I saved is gone after switching off, or an install stops at once.**
-Newer FM-1s (sold since autumn 2026) have a different memory chip. PERF-1 before 0.16.23, and many other firmwares, don't recognise it: they keep your saves only until power-off and can't take an update (the installer says "nothing was written"). Nothing is broken. Install 0.16.23 or newer. If the installer can't reach the FM-1, use a recovery tool such as FM-SWITCH, or the Firmware Hub's rescue page, to put the stock firmware back first. The Install page's Live status shows which chip yours has (P25Q80 or UC25HQ80).
+Newer FM-1s (sold since autumn 2026) have a different memory chip. NAIWAN 91 before 0.16.23, and many other firmwares, don't recognise it: they keep your saves only until power-off and can't take an update (the installer says "nothing was written"). Nothing is broken. Install 0.16.23 or newer. If the installer can't reach the FM-1, use a recovery tool such as FM-SWITCH, or the Firmware Hub's rescue page, to put the stock firmware back first. The Install page's Live status shows which chip yours has (P25Q80 or UC25HQ80).
 
-**PERF-1 got heavier after I tried M-VAVE's V16 (CPU higher, easing off sooner).**
-V16 also changes the FM-1's startup code, and with it the whole FM-1 runs about 12% slower. Installing PERF-1 again doesn't change that. On the Install page, **Full speed** checks your FM-1 and can put V15's startup code back (it installs M-VAVE's V15, then PERF-1). FM-1s with the newer memory chip stay on V16 for now.
+**NAIWAN 91 got heavier after I tried M-VAVE's V16 (CPU higher, easing off sooner).**
+V16 also changes the FM-1's startup code, and with it the whole FM-1 runs about 12% slower. Installing NAIWAN 91 again doesn't change that. On the Install page, **Full speed** checks your FM-1 and can put V15's startup code back (it installs M-VAVE's V15, then NAIWAN 91). FM-1s with the newer memory chip stay on V16 for now.
 
 **My changes vanished.**
 Only a piece you stored (Global, **SAVE**) is kept. Changes you didn't store are lost when you change genre or switch off. See "What is remembered" in section 13.
@@ -2373,7 +2373,7 @@ Hard-refresh the page: Ctrl+F5, or Cmd+Shift+R on a Mac.
 **An install was cut off.**
 Run it again. The FM-1 stays in update mode until an install finishes. If it doesn't come back at all, see "Recovering an FM-1 that won't start" in section 1.
 
-**The screen says `PERF-1 SAFE MODE`.**
+**The screen says `NAIWAN 91 SAFE MODE`.**
 The FM-1 crashed twice while starting up. Reinstall from the installer, or press **PLAY** to try again.
 
 **`UPDATE MODE IN 3..` appeared.**
@@ -2383,7 +2383,7 @@ You were holding **OCT-** and **OCT+** together. Let go before the countdown end
 Run the **hardware calibration** (a Felucca feature). Hold **OCT-** and **OCT+** while you switch the FM-1 on. It asks you to press each button and turn each knob in turn, and saves the result. If you don't touch anything for 30 seconds it gives up and changes nothing.
 
 **The DX7 voices I loaded don't show up.**
-Use the pluck's Sound knob, or **SEL** + **ALGORITHM** on a Pluck page. Your voices come after the 30 built-in DX7 voices. Check that the page said they were sent and the header showed `DX7 VOICES n LOADED`, that the pluck's Level isn't 0, and that the FM-1 runs PERF-1 0.11 or later. A bank must pass the DX7 checksum.
+Use the pluck's Sound knob, or **SEL** + **ALGORITHM** on a Pluck page. Your voices come after the 30 built-in DX7 voices. Check that the page said they were sent and the header showed `DX7 VOICES n LOADED`, that the pluck's Level isn't 0, and that the FM-1 runs NAIWAN 91 0.11 or later. A bank must pass the DX7 checksum.
 
 **Crackles or dropouts.**
 Look at the load line (section 16). `XR` goes up by one with each click. `S1` or `S2` mean the FM-1 is already easing off to keep up. Heavy DX plucks, a shimmer reverb and the fast genres push it hardest. Record a status log for a minute (Live status on the installer page, or `fm1log.py`) and send the CSV to deamonSLINKY, with the piece, its sounds and the tempo.
@@ -2398,21 +2398,21 @@ MIDI notes coming in on channel 1 add and remove notes from the scale. Send on a
 
 ## 19. Credits
 
-**Feedback and contributing.** Comments, ideas and bug reports are welcome, and anyone is invited to help: [open an issue on GitHub](https://github.com/deamonSLINKY/PERF-1/issues/new/choose). The source is at <https://github.com/deamonSLINKY/PERF-1>. A bug report helps most when it includes the version (shown on the boot card), the genre and piece, and, for anything about load or crackles, a status log (section 16).
+**Feedback and contributing.** Comments, ideas and bug reports are welcome, and anyone is invited to help: [open an issue on GitHub](https://github.com/deamonSLINKY/NAIWAN 91/issues/new/choose). The source is at <https://github.com/deamonSLINKY/NAIWAN 91>. A bug report helps most when it includes the version (shown on the boot card), the genre and piece, and, for anything about load or crackles, a status log (section 16).
 
-PERF-1 is by **deamonSLINKY**: the firmware, the slinky mascot and the pages around them. It is a fork of **HYP-1**, a [RedtailWorks](https://www.redtail.works) project, which is itself a fork of [AMB-1](https://github.com/charlesvestal/fm1-amb) by Charles Vestal.
+NAIWAN 91 is by **deamonSLINKY**: the firmware, the slinky mascot and the pages around them. It is a fork of **HYP-1**, a [RedtailWorks](https://www.redtail.works) project, which is itself a fork of [AMB-1](https://github.com/charlesvestal/fm1-amb) by Charles Vestal.
 
-The platform (USB, update loader, storage, installer) is [Felucca](https://github.com/hugelton/Felucca) by Leo Kuroshita (@kurogedelic), Hügelton Instruments. It reaches PERF-1 by way of X0X and FoMni. The panel calibration is Felucca's. The boot guard, knob acceleration, help cards and anti-aliased drawing came from X0X.
+The platform (USB, update loader, storage, installer) is [Felucca](https://github.com/hugelton/Felucca) by Leo Kuroshita (@kurogedelic), Hügelton Instruments. It reaches NAIWAN 91 by way of X0X and FoMni. The panel calibration is Felucca's. The boot guard, knob acceleration, help cards and anti-aliased drawing came from X0X.
 
 The six-operator FM that plays the DX7 voices, the factory voices, the second-core work (the reverb, the pad and the DX voices on the FM-1's other processor core) and the safe core hold are from **Melodee** by Kerem Kilic (Ellic Studio, GPL-3.0). The FM itself is after **Dexed** by Pascal Gauthier, on MSFA by Raph Levien (Google; Apache 2.0 / GPL-3.0).
 
 The idea of running FM-1 firmware in the browser comes from [Groove OS](https://www.groove-os.com/)'s emulator. What is known about the FM-1's hardware comes largely from the [FM-1-RE](https://github.com/AL-255/FM-1-RE) reverse-engineering work. The rescue route uses [FM-1-transporter](https://github.com/kurogedelic/FM-1-transporter)'s protocol and JieLi's flash loader from kagaimiq's jl-uboot-tool.
 
-The bass modes, the pad's comping rhythms, the ghost notes and accents of the genres, and the deja vu loop in the pluck follow ideas in **Tuna** by delirioux ([github.com/delirioux/tuna](https://github.com/delirioux/tuna), GPL-3.0), a generative firmware for the FM-1 on Felucca. Tuna's random section is a port of **Marbles** by Emilie Gillet (Mutable Instruments, MIT). PERF-1's versions are written for its own engine.
+The bass modes, the pad's comping rhythms, the ghost notes and accents of the genres, and the deja vu loop in the pluck follow ideas in **Tuna** by delirioux ([github.com/delirioux/tuna](https://github.com/delirioux/tuna), GPL-3.0), a generative firmware for the FM-1 on Felucca. Tuna's random section is a port of **Marbles** by Emilie Gillet (Mutable Instruments, MIT). NAIWAN 91's versions are written for its own engine.
 
 Screen and page fonts: Chakra Petch and Barlow Semi Condensed (SIL OFL 1.1). Licence: GPL-3.0, no warranty.
 
 
-M-VAVE and FM-1 are trademarks of their owners; PERF-1 is not affiliated with M-VAVE.
+M-VAVE and FM-1 are trademarks of their owners; NAIWAN 91 is not affiliated with M-VAVE.
 
 Runners: hold shift and edit the beat.

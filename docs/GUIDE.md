@@ -1,20 +1,20 @@
-<!-- footer: PERF-1 for beginners · 0.17.0 · the full manual: deamonslinky.github.io/PERF-1/manual/ · GPL-3.0-only -->
-# PERF-1 for beginners
+<!-- footer: NAIWAN 91 for beginners · 0.17.0 · the full manual: deamonslinky.github.io/NAIWAN 91/manual/ · GPL-3.0-only -->
+# NAIWAN 91 for beginners
 
 This guide is for your first hour. No music theory needed, nothing to set up. Every step is one thing to press, and what you will hear.
 
-When you want every detail, the [quick manual](https://deamonslinky.github.io/PERF-1/manual/PERF-1-quick-manual.pdf) has every control on eight pages, and the [full manual](https://deamonslinky.github.io/PERF-1/manual/) explains everything.
+When you want every detail, the [quick manual](https://deamonslinky.github.io/NAIWAN 91/manual/NAIWAN 91-quick-manual.pdf) has every control on eight pages, and the [full manual](https://deamonslinky.github.io/NAIWAN 91/manual/) explains everything.
 
-## What PERF-1 is
+## What NAIWAN 91 is
 
-PERF-1 turns your M-VAVE FM-1 into a little band that plays by itself. Switch it on and music starts: drums, a bass, a soft pad, a squelchy "acid" line and a plucked melody, all made up on the spot so it never repeats exactly.
+NAIWAN 91 turns your M-VAVE FM-1 into a little band that plays by itself. Switch it on and music starts: drums, a bass, a soft pad, a squelchy "acid" line and a plucked melody, all made up on the spot so it never repeats exactly.
 
 You are the conductor. You don't have to play notes. You change the chords, break the beat down and bring it back, throw effects on, mute things, and keep the moments you like.
 
 ## Before you start
 
-- **Try it without installing.** The [emulator](https://deamonslinky.github.io/PERF-1/emu/) runs PERF-1 in your web browser, with sound. Every step in this guide works there too.
-- **Installing** takes a couple of minutes with the [web installer](https://deamonslinky.github.io/PERF-1/install/) in Chrome or Edge. Use a USB cable that carries data, not a charge-only one.
+- **Try it without installing.** The [emulator](https://deamonslinky.github.io/NAIWAN 91/emu/) runs NAIWAN 91 in your web browser, with sound. Every step in this guide works there too.
+- **Installing** takes a couple of minutes with the [web installer](https://deamonslinky.github.io/NAIWAN 91/install/) in Chrome or Edge. Use a USB cable that carries data, not a charge-only one.
 - **You can always go back.** The same installer page puts M-VAVE's own firmware back. Anything you saved on the stock firmware may be lost when you switch, so keep copies of what you care about.
 
 ## The buttons you need today
@@ -77,7 +77,7 @@ Only a few. The rest can wait.
 
 **11. Tap the keys to mute parts.** On this screen the keys switch parts of the band off and on. The screen shows which key is which. Try muting the kick drum, listen to how much it changes, then bring it back.
 
-**12. Let it play itself.** Hold **GLO** and tap the **F5** key (the second white key from the right). "DJ" lights up at the top of the screen. Now PERF-1 runs breakdowns, builds and drops on its own, like a DJ. Do the same again to switch it off.
+**12. Let it play itself.** Hold **GLO** and tap the **F5** key (the second white key from the right). "DJ" lights up at the top of the screen. Now NAIWAN 91 runs breakdowns, builds and drops on its own, like a DJ. Do the same again to switch it off.
 
 ## Keep what you like
 
@@ -102,9 +102,9 @@ You don't need any of this to have fun, but it is there.
 ![The SET page: Rounds, Ramp, Intro](img/perf-screen-set.png)
 - **Write your own bass line:** press **LFO** five times for **Bass steps**. It starts with the bar the bass just played; press a white key
   to pick a step and turn the knobs to change it. It always follows the chords.
-- **Share a piece, or try other people's:** the [Pieces page](https://deamonslinky.github.io/PERF-1/pieces/) reads the pieces you saved, turns
+- **Share a piece, or try other people's:** the [Pieces page](https://deamonslinky.github.io/NAIWAN 91/pieces/) reads the pieces you saved, turns
   them into a link or a file, and has a **Library** of pieces made by other players: hear one in the emulator first, then add it to your FM-1.
-- The [quick manual](https://deamonslinky.github.io/PERF-1/manual/PERF-1-quick-manual.pdf) is eight pages to print and keep beside the FM-1.
+- The [quick manual](https://deamonslinky.github.io/NAIWAN 91/manual/NAIWAN 91-quick-manual.pdf) is eight pages to print and keep beside the FM-1.
 
 ## If something goes wrong
 
@@ -112,8 +112,8 @@ You don't need any of this to have fun, but it is there.
 - **An effect won't go away?** Press **FX**, then **OCT-**, then **FX** again.
 - **The music stopped?** Press **PLAY**.
 - **A piece sounds odd after a lot of changes?** Turn PRESETS to another piece and back, or reset it with **SEL** and **SAVE** held on the **GLO** page.
-- **Want the original firmware back?** Use the [installer](https://deamonslinky.github.io/PERF-1/install/) page: "Back to the stock firmware" at the bottom.
-- **Found a bug or have an idea?** Tell us on [GitHub](https://github.com/deamonSLINKY/PERF-1/issues). Most of the newest features came from ideas like yours.
+- **Want the original firmware back?** Use the [installer](https://deamonslinky.github.io/NAIWAN 91/install/) page: "Back to the stock firmware" at the bottom.
+- **Found a bug or have an idea?** Tell us on [GitHub](https://github.com/deamonSLINKY/NAIWAN 91/issues). Most of the newest features came from ideas like yours.
 
 ## Words you will see
 
@@ -129,4 +129,4 @@ You don't need any of this to have fun, but it is there.
 | **Scale** | The set of notes the music is allowed to use. The keys switch them on and off. |
 | **Breakdown, build, drop** | Calm down, climb back up, then everything hits at once. SAVE runs them. |
 | **Latch** | An effect that stays on after you tap its key. |
-| **Auto-DJ** | PERF-1 running the breakdowns, builds and drops by itself. |
+| **Auto-DJ** | NAIWAN 91 running the breakdowns, builds and drops by itself. |

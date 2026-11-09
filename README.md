@@ -1,4 +1,10 @@
-# PERF-1
+# NAIWAN 91
+
+**City pop and coastal firmware for the M-VAVE FM-1.** Nineteen genres that play themselves while you steer: ten urban (city pop, AOR, boogie, shibuya-kei, yacht rock and more) and nine coastal (surf, balearic, tropic, summer, marina, calypso, island, seaside, sands), each a set of ten jam pieces in the vein of the late-70s / early-80s records the genre is named for, played on the firmware's own FM, analog and percussion engines. A honu turns behind the chord figure, sea glyphs flare on the pluck, and the whole thing runs in the browser as WebAssembly.
+
+Forked from [PERF-1](https://github.com/deamonSLINKY/PERF-1) v0.17.0 by deamonSLINKY (GPL-3.0); the lineage and licence stay with it.
+
+# NAIWAN 91
 
 **Custom live-performance firmware for the M-VAVE FM-1.** Nineteen genres of music that plays itself while you steer it: an auto-DJ, a drum sequencer with real depth, an acid line that answers itself, DX7-style FM voices (and your own), effects you can edit page by page, a mixer and a real compressor and limiter, a Jam page to play along on, scenes, and a screen that shows you what the music is doing. By **deamonSLINKY**. DEMO VIDEO https://youtu.be/NSJR3SOgDXo
 
@@ -6,9 +12,9 @@
 
 *The home screen, the master bus and a visualizer.*
 
-**Try it now:** <https://deamonslinky.github.io/PERF-1/> (the browser emulator runs the same code with sound; the installer, editor and manual are there too).
+**Try it now:** <https://deamonslinky.github.io/NAIWAN 91/> (the browser emulator runs the same code with sound; the installer, editor and manual are there too).
 
-**Watch the tour (5 minutes, made from the firmware itself):** [![PERF-1 tour: the Perform screen, the auto-DJ's build, effects, genres](docs/img/readme-tour.png)](https://youtu.be/NSJR3SOgDXo)
+**Watch the tour (5 minutes, made from the firmware itself):** [![NAIWAN 91 tour: the Perform screen, the auto-DJ's build, effects, genres](docs/img/readme-tour.png)](https://youtu.be/NSJR3SOgDXo)
 
 ## What's new in 0.17.0
 
@@ -19,7 +25,7 @@
 - **Progression fills:** on the Progression page (hold EDIT) the black keys fill all eight slots in one press: circle-of-fifths runs like ii-V-I, and six classic loops like I-IV-V-V. White keys 9 and 10 switch the bass and the pad to **Pedal**: they stay on the key while the chords move, a drone to play over.
 
 **Your pieces, kept and shared**
-- **The Library is open.** On the [Pieces page](https://deamonslinky.github.io/PERF-1/pieces/), read your saved pieces, give them titles and **Submit** them; anyone can hear them in the emulator and add them to their FM-1.
+- **The Library is open.** On the [Pieces page](https://deamonslinky.github.io/NAIWAN 91/pieces/), read your saved pieces, give them titles and **Submit** them; anyone can hear them in the emulator and add them to their FM-1.
 - **More of a piece is saved with it:** its FILTERS and SCREAM settings (they're the first two settings pages now), its drum drift, its chord types and its bass steps. Factory pieces play the plain defaults.
 - **Switch on where you left off** (Settings, **Start**: Last or Random).
 
@@ -32,17 +38,17 @@
 **Fixes and the FM-1 itself**
 - **Newer FM-1s** (sold since autumn 2026, with a UCUN UC25HQ80 memory chip) can save and install now; before, saves were lost at power-off and installs stopped.
 - **Full speed after V16.** M-VAVE's V16 also changes the FM-1's startup code, and with it the whole unit runs about 12% slower. The Install page's **Full speed** section checks yours and can put V15's back.
-- **Safer installs (experimental):** a boot stub brings the unit back to the update loader if an install is cut off by a power cut or a pulled cable (OCT- held at power-on starts it by hand). It's the method Melodee and ChoralRoot use, tested on their units; PERF-1's copy boots fine but hasn't been through a cut-off install yet (I have one FM-1 and couldn't risk it).
+- **Safer installs (experimental):** a boot stub brings the unit back to the update loader if an install is cut off by a power cut or a pulled cable (OCT- held at power-on starts it by hand). It's the method Melodee and ChoralRoot use, tested on their units; NAIWAN 91's copy boots fine but hasn't been through a cut-off install yet (I have one FM-1 and couldn't risk it).
 
-Earlier updates, and every development build: [docs/CHANGELOG.md](docs/CHANGELOG.md) and the [releases](https://github.com/deamonSLINKY/PERF-1/releases).
+Earlier updates, and every development build: [docs/CHANGELOG.md](docs/CHANGELOG.md) and the [releases](https://github.com/deamonSLINKY/NAIWAN 91/releases).
 
 ## What it is
 
-PERF-1 is a custom firmware for the M-VAVE FM-1: a 5 track generative groovebox you perform on. You don't write a song and press play: you pick a piece, and it plays (a pad, a bass, a 303-style acid line, a pluck, drums), and you shape it live: break it down, build it back up, drop it, mute and solo parts, throw effects, change the pattern, take the acid somewhere else. Everything is changeable while it plays, and nothing is a loop of audio: the notes are generated by the engine on the FM-1 itself, from the key, the scale and the chord it is in. MPC Style Flex Beats, 27 effects that are all editable, or mute a track and jam directly. Auto-DJ can run the whole arc (groove, fill, breakdown, build, drop) by itself while you change the Mood, throw in dj snips, or run the effects. Open to any and all ideas and feedback. Still under heavy development, but tested constantly on a real FM-1. Many safety mechanisms in place to prevent audio drops.
+NAIWAN 91 is a custom firmware for the M-VAVE FM-1: a 5 track generative groovebox you perform on. You don't write a song and press play: you pick a piece, and it plays (a pad, a bass, a 303-style acid line, a pluck, drums), and you shape it live: break it down, build it back up, drop it, mute and solo parts, throw effects, change the pattern, take the acid somewhere else. Everything is changeable while it plays, and nothing is a loop of audio: the notes are generated by the engine on the FM-1 itself, from the key, the scale and the chord it is in. MPC Style Flex Beats, 27 effects that are all editable, or mute a track and jam directly. Auto-DJ can run the whole arc (groove, fill, breakdown, build, drop) by itself while you change the Mood, throw in dj snips, or run the effects. Open to any and all ideas and feedback. Still under heavy development, but tested constantly on a real FM-1. Many safety mechanisms in place to prevent audio drops.
 
 ## Who it's for
 
-- **If you want to make music without first learning how to build a good song,** PERF-1 is a place to start. Every piece already sounds finished: choose a genre, press play, and you are performing from the first minute, steering a groove that holds together (the chords, the drums, the acid and the effects all follow the same key and tempo). You learn by turning things, not by programming them.
+- **If you want to make music without first learning how to build a good song,** NAIWAN 91 is a place to start. Every piece already sounds finished: choose a genre, press play, and you are performing from the first minute, steering a groove that holds together (the chords, the drums, the acid and the effects all follow the same key and tempo). You learn by turning things, not by programming them.
 - **If you already know what you want,** it opens up. The sequencer, the sound pages, the acid line, the scales and the effects can be edited as deeply as you like, a piece you have shaped can be stored, and your own DX7 voices can be loaded. The sequencer keeps growing: per-step ratchets, push and levels, chains of patterns, slices and half or double time are in, and the acid, pluck and bass lines can be edited step by step.
 
 ## What makes it different
@@ -89,7 +95,7 @@ The screen is drawn in one look (warm black, one colour per voice: the pad bone,
 
 ## Install
 
-Use the web installer, <https://deamonslinky.github.io/PERF-1/install/>, in Chrome or Edge with the FM-1 plugged in. **Installing firmware is at your own risk.** The installer checks the package against the unit, can put M-VAVE's own firmware back, and an FM-1 that fails to start twice comes up in a safe mode the installer can reach. Read section 1 of the manual first, and keep a way to restore the stock firmware to hand. PERF-1 keeps its own pieces, settings and DX7 voices and does not read the projects or samples of other firmwares (HYP-1, AMB-1 or the stock one); what is stored may be lost when you switch either way, so keep copies of anything you care about (your `.syx` voice files, for one). `BUILDING.md` ends with what the install does and does not protect against.
+Use the web installer, <https://deamonslinky.github.io/NAIWAN 91/install/>, in Chrome or Edge with the FM-1 plugged in. **Installing firmware is at your own risk.** The installer checks the package against the unit, can put M-VAVE's own firmware back, and an FM-1 that fails to start twice comes up in a safe mode the installer can reach. Read section 1 of the manual first, and keep a way to restore the stock firmware to hand. NAIWAN 91 keeps its own pieces, settings and DX7 voices and does not read the projects or samples of other firmwares (HYP-1, AMB-1 or the stock one); what is stored may be lost when you switch either way, so keep copies of anything you care about (your `.syx` voice files, for one). `BUILDING.md` ends with what the install does and does not protect against.
 
 ## Under the hood
 
@@ -101,12 +107,12 @@ Use the web installer, <https://deamonslinky.github.io/PERF-1/install/>, in Chro
 
 ## Feedback, ideas and help
 
-PERF-1 is young and I welcome all of it: comments, suggestions, ideas, bug reports, and help improving it. [Open an issue](https://github.com/deamonSLINKY/PERF-1/issues/new/choose) (there are templates for a bug report and a feature request, and a free-form one for anything else). A bug report is most useful with the version (shown on the boot card), the genre and piece, and, for anything about load or crackles, a status log (`tools/fm1log.py`, or the "Live status" on the installer page). Code, documentation and sound-design contributions are welcome too: see `CONTRIBUTING.md`.
+NAIWAN 91 is young and I welcome all of it: comments, suggestions, ideas, bug reports, and help improving it. [Open an issue](https://github.com/deamonSLINKY/NAIWAN 91/issues/new/choose) (there are templates for a bug report and a feature request, and a free-form one for anything else). A bug report is most useful with the version (shown on the boot card), the genre and piece, and, for anything about load or crackles, a status log (`tools/fm1log.py`, or the "Live status" on the installer page). Code, documentation and sound-design contributions are welcome too: see `CONTRIBUTING.md`.
 
-PERF-1 is free. If it makes your music and you'd like to support it, there's [Ko-fi](https://ko-fi.com/deamonslinky).
+NAIWAN 91 is free. If it makes your music and you'd like to support it, there's [Ko-fi](https://ko-fi.com/deamonslinky).
 
 ## Credits and licence
 
-PERF-1 is a fork of **HYP-1** by [RedtailWorks](https://www.redtail.works), itself a fork of **AMB-1** by Charles Vestal, built on the platform layer of **Felucca** by Leo Kuroshita (Hügelton Instruments) through X0X and FoMni. The six-operator FM engine that plays the DX7 voices, its factory voices and the second-core work are from **Melodee** by Kerem Kilic (Ellic Studio); its synthesis is after **Dexed** by Pascal Gauthier, on MSFA by Raph Levien (Google). Several generator ideas (bass line modes, pad comping, ghost notes, the pluck's deja vu loop) follow **Tuna** by delirioux ([github.com/delirioux/tuna](https://github.com/delirioux/tuna), GPL-3.0), written afresh for this engine. The reverb is Jon Dattorro's plate ("Effect Design, Part 1", JAES 1997). The git history keeps every author's commits. The idea of a browser emulator for FM-1 firmware comes from Groove OS by Peter Gombos (no code taken). The community reverse-engineering of the chip, [AL-255/FM-1-RE](https://github.com/AL-255/FM-1-RE), informed the hardware work, and the rescue route uses FM-1-transporter's protocol and kagaimiq's jl-uboot-tool.
+NAIWAN 91 is a fork of **HYP-1** by [RedtailWorks](https://www.redtail.works), itself a fork of **AMB-1** by Charles Vestal, built on the platform layer of **Felucca** by Leo Kuroshita (Hügelton Instruments) through X0X and FoMni. The six-operator FM engine that plays the DX7 voices, its factory voices and the second-core work are from **Melodee** by Kerem Kilic (Ellic Studio); its synthesis is after **Dexed** by Pascal Gauthier, on MSFA by Raph Levien (Google). Several generator ideas (bass line modes, pad comping, ghost notes, the pluck's deja vu loop) follow **Tuna** by delirioux ([github.com/delirioux/tuna](https://github.com/delirioux/tuna), GPL-3.0), written afresh for this engine. The reverb is Jon Dattorro's plate ("Effect Design, Part 1", JAES 1997). The git history keeps every author's commits. The idea of a browser emulator for FM-1 firmware comes from Groove OS by Peter Gombos (no code taken). The community reverse-engineering of the chip, [AL-255/FM-1-RE](https://github.com/AL-255/FM-1-RE), informed the hardware work, and the rescue route uses FM-1-transporter's protocol and kagaimiq's jl-uboot-tool.
 
-GPL-3.0-only (`LICENSE`); the code's origins and the third-party material (fonts, the JieLi SDK) are in `LICENSING.md`. "M-VAVE" and "FM-1" are trademarks of their owners; PERF-1 is independent firmware, not affiliated with or endorsed by them.
+GPL-3.0-only (`LICENSE`); the code's origins and the third-party material (fonts, the JieLi SDK) are in `LICENSING.md`. "M-VAVE" and "FM-1" are trademarks of their owners; NAIWAN 91 is independent firmware, not affiliated with or endorsed by them.
