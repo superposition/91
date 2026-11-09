@@ -470,7 +470,7 @@ void en_piece_g(int g, int i, int16_t *par, uint16_t *pool)
             par[P_CHORD] = EN_CH_9TH;                  /* no 11th over a major third */
         par[P_ACID] = 12;                              /* the acid sits far back in a pop piece */
         par[P_AC_DENS] = 18;
-        naiwan_pending = (int8_t)(i % 3);                            /* and the records' own turns */
+        naiwan_pending = (int8_t)(i % 10);                            /* and the records' own turns */
     }
     if (g == 7) {                                      /* NEON: the bass drives it, the harmony moves */
         par[P_BL_MODE] = 4;                            /* off-beat: it pushes */
@@ -2080,19 +2080,33 @@ void en_prog_capture(uint8_t *b)
  *   B  i9 bVII9 bVI9 V7 | iv9 bVII9 i9 bVI9 the borrowed minor side: it pivots out without leaving the key
  *   C  iii7 vi7 ii7 V7 | I9 vi7 ii7 V7      the circle turnaround, the dominant leaning home
  *   D  ii7 V7 iii7 vi7 | ii7 V7 I9 vi9      the vamp that walks down and back */
-static const uint8_t NAIWAN_ARC[4][8] = {
-    {4, 5, 3, 6, 2, 5, 1, 6},   /* IV V iii vi | ii V I vi      the pop turn, then the ii-V-I pivot */
-    {1, 7, 6, 5, 3, 7, 1, 6},   /* i bVII bVI V | iv bVII i bVI the borrowed side, pivoting out of the major */
-    {3, 6, 2, 5, 1, 6, 2, 5},   /* iii vi ii V | I vi ii V      the circle, every chord falling a fifth */
-    {2, 5, 1, 6, 4, 5, 3, 6},   /* ii V I vi | IV V iii vi      the vamp that walks down and back */
+/* NAIWAN 91: ten arcs, one per preset to start from, and each rotates into the next — a piece has its own harmony
+ * and the set keeps moving. Kinds: 2 = 7th, 3 = 9th. Degrees are 0-based (I..vii; in a minor mode i, III, iv, VII…). */
+static const uint8_t NAIWAN_ARC[10][8] = {
+    {3, 4, 2, 5, 1, 4, 0, 5},   /* 01  IV V iii vi | ii V I vi    the pop turn and its ii-V-I */
+    {0, 6, 5, 4, 3, 6, 0, 4},   /* 02  i bVII bVI V | iv bVII i V  the borrowed minor side */
+    {2, 5, 1, 4, 0, 5, 1, 4},   /* 03  iii vi ii V | I vi ii V    the circle */
+    {1, 4, 0, 5, 3, 4, 2, 5},   /* 04  ii V I vi | IV V iii vi    the vamp */
+    {3, 4, 5, 1, 4, 0, 5, 4},   /* 05  IV V vi ii | V I vi V      the lift */
+    {5, 1, 4, 0, 3, 4, 2, 5},   /* 06  vi ii V I | IV V iii vi    the walk home */
+    {0, 5, 3, 4, 2, 5, 1, 4},   /* 07  I vi IV V | iii vi ii V    the long turn */
+    {6, 3, 0, 5, 1, 4, 2, 5},   /* 08  vii IV I vi | ii V iii vi  the borrowed start */
+    {0, 2, 6, 3, 5, 4, 0, 4},   /* 09  I iii vii IV | vi V I V    the modal lean */
+    {3, 4, 2, 5, 5, 4, 0, 4},   /* 10  IV V iii vi | vi V I V     the turnaround */
 };
-static const uint8_t NAIWAN_KIND[4][8] = {
+static const uint8_t NAIWAN_KIND[10][8] = {
     {3, 2, 2, 3, 2, 2, 3, 3},
-    {3, 3, 3, 2, 3, 3, 3, 3},
+    {3, 3, 3, 2, 3, 3, 3, 2},
     {2, 2, 2, 2, 3, 2, 2, 2},
-    {2, 2, 3, 3, 3, 2, 2, 2},
+    {2, 2, 3, 3, 3, 2, 2, 3},
+    {3, 2, 3, 2, 2, 3, 3, 2},
+    {3, 2, 2, 3, 3, 2, 2, 3},
+    {3, 3, 3, 2, 2, 3, 2, 2},
+    {3, 3, 3, 3, 2, 2, 2, 2},
+    {3, 3, 3, 3, 3, 2, 3, 2},
+    {3, 2, 2, 3, 3, 2, 3, 2},
 };
-static const uint8_t NAIWAN_BARS[4] = {1, 1, 0, 0};   /* the arc's bars a chord as log2: 1 = two bars, 0 = one */
+static const uint8_t NAIWAN_BARS[10] = {1, 1, 0, 0, 1, 0, 1, 0, 1, 0};   /* bars a chord as log2: 2 or 1 */
 
 static uint8_t naiwan_arc, naiwan_left, naiwan_rotate;   /* the arc playing, chords left in it, and whether it rotates */
 
@@ -2272,12 +2286,12 @@ static void chord_change(void)                  /* to another degree: the progre
         const int w = naiwan_pending;
         naiwan_pending = -1;
         naiwan_rotate = 1;
-        naiwan_arc = (uint8_t)w;
+        naiwan_arc = (uint8_t)w;                        /* the piece starts on its own progression */
         naiwan_prog(w);
         naiwan_bing((int)(en_chord_root % 12), 0);     /* the first chord: dim7 drop 2 */
         naiwan_bing((int)(en_chord_root % 12), 1);     /* and a semitone up, leaning back into it */
     } else if (naiwan_rotate && naiwan_left && !--naiwan_left) {
-        naiwan_arc = (uint8_t)((naiwan_arc + 1) % 4);  /* the arc is done: the next one takes over */
+        naiwan_arc = (uint8_t)((naiwan_arc + 1) % 10); /* the arc is done: the next preset's harmony takes over */
         naiwan_prog(naiwan_arc);
     }
     int i, bor;
