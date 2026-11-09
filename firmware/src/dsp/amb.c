@@ -2081,18 +2081,19 @@ void en_prog_capture(uint8_t *b)
  *   C  iii7 vi7 ii7 V7 | I9 vi7 ii7 V7      the circle turnaround, the dominant leaning home
  *   D  ii7 V7 iii7 vi7 | ii7 V7 I9 vi9      the vamp that walks down and back */
 static const uint8_t NAIWAN_ARC[4][8] = {
-    {4, 5, 3, 6, 0, 0, 0, 0},   /* IV V iii vi            the pop turn */
-    {1, 7, 6, 5, 0, 0, 0, 0},   /* i bVII bVI V           the borrowed side */
-    {3, 6, 2, 5, 0, 0, 0, 0},   /* iii vi ii V            the circle */
-    {2, 5, 1, 6, 0, 0, 0, 0},   /* ii V I vi              the vamp */
+    {4, 5, 3, 6, 2, 5, 1, 6},   /* IV V iii vi | ii V I vi      the pop turn, then the ii-V-I pivot */
+    {1, 7, 6, 5, 3, 7, 1, 6},   /* i bVII bVI V | iv bVII i bVI the borrowed side, pivoting out of the major */
+    {3, 6, 2, 5, 1, 6, 2, 5},   /* iii vi ii V | I vi ii V      the circle, every chord falling a fifth */
+    {2, 5, 1, 6, 4, 5, 3, 6},   /* ii V I vi | IV V iii vi      the vamp that walks down and back */
 };
 static const uint8_t NAIWAN_KIND[4][8] = {
-    {3, 2, 2, 3, 0, 0, 0, 0},
-    {3, 3, 3, 2, 0, 0, 0, 0},
-    {2, 2, 2, 2, 0, 0, 0, 0},
-    {2, 2, 3, 3, 0, 0, 0, 0},
+    {3, 2, 2, 3, 2, 2, 3, 3},
+    {3, 3, 3, 2, 3, 3, 3, 3},
+    {2, 2, 2, 2, 3, 2, 2, 2},
+    {2, 2, 3, 3, 3, 2, 2, 2},
 };
-static const uint8_t NAIWAN_DRIFT[4] = {10, 14, 5, 8};   /* seconds-ish per chord: the arc's own breathing */
+static const uint8_t NAIWAN_BARS[4] = {1, 1, 0, 0};   /* the arc's bars a chord as log2: 1 = two bars, 0 = one */
+
 static uint8_t naiwan_arc, naiwan_left, naiwan_rotate;   /* the arc playing, chords left in it, and whether it rotates */
 
 static void naiwan_prog(int which)
@@ -2104,13 +2105,12 @@ static void naiwan_prog(int which)
         en_prg_put(kb, 3 * s, 3, NAIWAN_KIND[which][s]);
     }
     for (s = 0; s < 8; s++)
-        en_prg_put(b, 24 + 2 * s, 2, 1);              /* (the bars, when the clock is not in charge) */
+        en_prg_put(b, 24 + 2 * s, 2, NAIWAN_BARS[which]);   /* one or two bars a chord, inside the set */
     en_prg_put(b, 40, 1, 1);                           /* Play */
-    en_prg_put(b, 41, 2, 2);                           /* the unit: seconds, by Drift — not bars */
+    en_prg_put(b, 41, 2, 0);                           /* the unit: bars */
     en_prog(b);
     en_prog_kinds(kb);                                 /* each slot's own chord type: the turnarounds rely on it */
-    en_set(P_DRIFT, NAIWAN_DRIFT[which]);               /* and its own harmonic clock */
-    naiwan_left = 4;                                 /* four chords an arc: it turns often */
+    naiwan_left = 8;                                 /* eight chords an arc */
 }
 static void chord_change(void);
 static void prog_take(uint32_t lo, uint32_t hi) /* the progression from the page or the piece (en_prog) */
