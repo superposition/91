@@ -1,6 +1,6 @@
 # NAIWAN 91
 
-**City pop and coastal firmware for the M-VAVE FM-1.** Nineteen genres that play themselves while you steer:
+**内湾 (NAIWAN) 91 — city pop and coastal firmware for the M-VAVE FM-1.** Nineteen genres that play themselves while you steer:
 ten urban (city pop, AOR, boogie, shibuya-kei, yacht rock and more) and nine coastal (surf, balearic, tropic,
 summer, marina, calypso, island, seaside, sands), each a set of ten jam pieces in the vein of the late-70s /
 early-80s records the genre is named for, played on the firmware's own FM, analog and percussion engines. A honu

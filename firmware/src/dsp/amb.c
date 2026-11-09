@@ -388,6 +388,15 @@ void en_piece_g(int g, int i, int16_t *par, uint16_t *pool)
         par[P_PADTONE] = r[4];
         par[P_DR_INST] = r[5];
         par[P_AC_WAVE] = r[6];
+        /* NAIWAN 91: the pad carries the piece and the lead waits, sits back, and the chords lean richer */
+        par[P_PAD] = (int16_t)(par[P_PAD] > 86 ? 100 : par[P_PAD] + 14);
+        if (par[P_CHORD] == EN_CH_TRIAD)
+            par[P_CHORD] = EN_CH_7TH;
+        else if (par[P_CHORD] == EN_CH_7TH)
+            par[P_CHORD] = EN_CH_9TH;
+        else if (par[P_CHORD] == EN_CH_9TH)
+            par[P_CHORD] = EN_CH_11TH;
+        par[P_CM_LVL] = (int16_t)(par[P_CM_LVL] * 3 / 4);
         vary(d, i, par);                        /* the donor's palette, rate and pad shift */
         par[P_CM_SND] = (int16_t)GEN_PLUCK[g][(i * 4 + d) % 5];   /* the genre's own five pluck sounds */
         par[P_PADTONE] = (int16_t)PALETTE[d].pad[i % 5];          /* shift 0: pieces i and i+6 never share a pad */
@@ -2045,9 +2054,10 @@ static const uint8_t CH_SEC[EN_NGENRE] = {0, 45, 15, 0, 0, 30, 0, 35, 0, 0, 50, 
 static const uint8_t CH_BOR[EN_NGENRE] = {0, 20, 20, 0, 0, 15, 0, 15, 0, 0, 15, 10, 0, 40, 15, 25, 0, 0, 0};
 static const uint8_t AEOLIAN[7] = {0, 2, 3, 5, 7, 8, 10};
 static int fixed_shape(void) { return par[P_CHORD] == EN_CH_DUB || par[P_CHORD] == EN_CH_4THS; }
-static int bor_key(void) { return nsteps == 7 && chord_genre && CH_BOR[chord_genre] && steps_nat[2] == 4 && !fixed_shape(); }   /* a major key, a genre that borrows */
+static int harm_pct(int v) { return v * 3 / 2 > 60 ? 60 : v * 3 / 2; }   /* NAIWAN 91: the genres reharmonise more than their donors */
+static int bor_key(void) { return nsteps == 7 && chord_genre && harm_pct(CH_BOR[chord_genre]) && steps_nat[2] == 4 && !fixed_shape(); }   /* a major key, a genre that borrows */
 static int borrow_vii(int i) { return i == 6 && bor_key(); }
-static int bor_decide(int i) { return bor_key() && (i == 6 || ((i == 3 || i == 5) && frand() * 100.0f < (float)CH_BOR[chord_genre])); }
+static int bor_decide(int i) { return bor_key() && (i == 6 || ((i == 3 || i == 5) && frand() * 100.0f < (float)harm_pct(CH_BOR[chord_genre]))); }
 static void alt_clear(void)                     /* the natural scale again (dom_apply and alt_apply set it as the next chord needs) */
 {
     int k;
@@ -2067,8 +2077,8 @@ static void alt_apply(int i, int bor, int n)    /* the chord on degree i (just m
         dom_on = 0;
         en_chord_alt = 2;
         changed = 1;
-    } else if (n >= 1 && n < 7 && n != i && CH_SEC[chord_genre] && (steps_nat[i] - steps_nat[n] + 12) % 12 == 7 &&
-               (steps_nat[(i + 4) % 7] - steps_nat[i] + 12) % 12 == 7 && frand() * 100.0f < (float)CH_SEC[chord_genre]) {
+    } else if (n >= 1 && n < 7 && n != i && harm_pct(CH_SEC[chord_genre]) && (steps_nat[i] - steps_nat[n] + 12) % 12 == 7 &&
+               (steps_nat[(i + 4) % 7] - steps_nat[i] + 12) % 12 == 7 && frand() * 100.0f < (float)harm_pct(CH_SEC[chord_genre])) {
         const int t = (i + 2) % 7, s = (i + 6) % 7;
         if ((steps[t] - steps_nat[i] + 12) % 12 == 3)
             steps[t]++, changed = 1;            /* its third, major */
@@ -2107,8 +2117,8 @@ static int walk_pick(void)                      /* the walk's next degree from w
                     w[i] += (float)(e[k].w & ~EB2);
             if (!CHT[cg].back && i == deg_prev && deg_prev != deg && cad_n)   /* no A B A (a loop's own chord is the pull back) */
                 w[i] = 0.0f;
-            if (CH_SEC[cg] && i != 0 && (steps_nat[deg] - steps_nat[i] + 12) % 12 == 7)
-                w[i] += (float)CH_SEC[cg] * 0.1f;   /* a fifth down: the circle (0.16.27, as much as the genre likes its dominants) */
+            if (harm_pct(CH_SEC[cg]) && i != 0 && (steps_nat[deg] - steps_nat[i] + 12) % 12 == 7)
+                w[i] += (float)harm_pct(CH_SEC[cg]) * 0.1f;   /* a fifth down: the circle (0.16.27, as much as the genre likes its dominants) */
             if (cad_n + 1 >= CHT[cg].cad_every && i == cad_to && deg != 0)
                 w[i] += 10.0f;                  /* the chord before the phrase's end: its leading chord */
             if (cad_n >= CHT[cg].cad_every && i == 0)
@@ -5421,7 +5431,7 @@ static void fx_control(uint32_t n)              /* once a chunk: what the held e
     }
     {   /* the intro: from Play the tracks come in one at a time over its length, the pad from the first bar, then the hats, perc, kick, snare, bass, pluck, acid
          * (each over a seventh of it), so a set can be mixed in under a pad and a hat rather than everything at once */
-        static const uint8_t IN_AT[EN_NTRACK] = {40, 6, 52, 20, 62, 82, 0, 72};   /* kick, hats, snare, perc, bass, acid, pad, pluck: hundredths of the intro where each starts */
+        static const uint8_t IN_AT[EN_NTRACK] = {40, 6, 52, 20, 62, 86, 0, 92};   /* kick, hats, snare, perc, bass, acid, pad, pluck: hundredths of the intro where each starts */
         float k = 1.0f;
         if (intro_len > 0 && en_playing) {
             if (intro_t < intro_len)

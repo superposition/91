@@ -409,9 +409,9 @@ typedef struct {
 } theme_t;
 static const theme_t THEMES[EN_NTHEME] = {
     /* Beach: bright sky blue, sea, sand and palm; deep navy for text, coral for "now" (the playhead, the knob you touched) */
-    {RGB(64, 176, 240), RGB(38, 128, 200), RGB(24, 96, 164), RGB(16, 64, 112), RGB(8, 24, 48), RGB(255, 92, 84),
-     RGB(255, 214, 110), RGB(122, 96, 40), RGB(46, 200, 120), RGB(20, 90, 56), RGB(232, 48, 66), RGB(110, 18, 28),
-     RGB(255, 255, 255), RGB(150, 210, 240), RGB(20, 100, 190), RGB(120, 230, 255)},
+    {RGB(143, 211, 234), RGB(253, 243, 214), RGB(78, 159, 196), RGB(46, 90, 114), RGB(20, 38, 58), RGB(242, 84, 45),
+     RGB(29, 111, 184), RGB(15, 74, 128), RGB(14, 158, 126), RGB(10, 101, 82), RGB(217, 58, 43), RGB(142, 34, 24),
+     RGB(255, 233, 168), RGB(201, 169, 75), RGB(27, 127, 214), RGB(0, 167, 190)},   /* Beach: sky ground, cream surfaces, navy type, coral "now" */
     /* Synth (Synth Imp, 0.14.18): demon synthwave: a night sky, crimson to magenta neon, a banded sun on the horizon behind the sigil, the imp in tube light */
     {RGB(12, 3, 24), RGB(28, 6, 32), RGB(69, 18, 63), RGB(154, 95, 134), RGB(255, 233, 242), RGB(255, 225, 74),
      RGB(192, 140, 255), RGB(60, 36, 96), RGB(182, 255, 46), RGB(50, 80, 16), RGB(255, 47, 95), RGB(84, 16, 36),
@@ -4433,6 +4433,28 @@ static const uint8_t SEA[8][5] = {               /* 5 x 5 sea glyphs, a row a by
                                                   * fish, turtle, jellyfish, sun, anchor, palm */
     {0x1F, 0x11, 0x0A, 0x04, 0x00}, {0x04, 0x15, 0x0E, 0x15, 0x04}, {0x00, 0x0A, 0x1F, 0x0A, 0x00}, {0x11, 0x1F, 0x15, 0x1F, 0x11},
     {0x0E, 0x1F, 0x15, 0x0A, 0x04}, {0x15, 0x0E, 0x1F, 0x0E, 0x15}, {0x0E, 0x04, 0x15, 0x15, 0x0E}, {0x1C, 0x0E, 0x04, 0x04, 0x04}};
+static void draw_beach_scene(void)              /* the day: sky bands, sun, sea with crests, sand; three value tiers */
+{
+    static const int HY = 96;                    /* the horizon */
+    const uint32_t now = plat_ms();
+    const int play = en_playing;
+    const int tempo = proj.par[P_TEMPO] > 0 ? proj.par[P_TEMPO] : 120, per = 120000 / tempo;
+    const float ph = play ? (float)(now % (uint32_t)per) * (FM_TWO_PI / (float)per) : 0.0f;
+    const uint16_t sky1 = mix(K_BG, RGB(198, 236, 250), 6);
+    const uint16_t sea0 = mix(K_BG, RGB(46, 140, 205), 10), sea1 = RGB(24, 106, 178);
+    int i, x;
+    for (i = 0; i < 4; i++)                      /* the sky, lighter towards the horizon */
+        cv_rect(0, i * HY / 4, 240, HY / 4 + 1, mix(sky1, K_BG, 4 + i * 4));
+    cv_disc(186, 44, 18, RGB(255, 226, 140));    /* the sun */
+    cv_disc(186, 44, 12, RGB(255, 241, 190));
+    for (i = 0; i < 4; i++)                      /* the sea, deeper towards the shore */
+        cv_rect(0, HY + i * (MAIN_H - HY - 9) / 4, 240, (MAIN_H - HY - 9) / 4 + 1, mix(sea0, sea1, 4 + i * 4));
+    for (x = 0; x < 240; x += 6) {               /* crests riding the swell */
+        const int y = HY + 5 + (int)(3.0f * fm_sinf((float)x * 0.11f + ph));
+        cv_rect(x, y, 4, 1, mix(sea1, RGB(235, 250, 255), 10));
+    }
+}
+
 static void draw_sigil(void)
 {
     const uint32_t now = plat_ms(), abs_pool = pool_abs();
@@ -6458,6 +6480,8 @@ static void draw_main(void)
     cv_begin(240, MAIN_H, K_BG);
     if (LOOK_SYNTH)
         draw_horizon();
+    else
+        draw_beach_scene();
     if (en_frozen) {                             /* the way to the next chord, top right (held: frozen) */
         cv_text(232 - text_w(&FONT_XS, "held"), 4, &FONT_XS, "held", K_FROST);
     } else {
@@ -6469,6 +6493,14 @@ static void draw_main(void)
     draw_sigil();
     draw_meters();
     draw_kit();
+    {   /* the sand: the floor, drawn last so nothing sits on top of it */
+        int x;
+        cv_rect(0, MAIN_H - 9, 240, 9, RGB(246, 226, 168));
+        for (x = 0; x < 240; x += 4) {
+            const int y = MAIN_H - 10 + (int)(1.5f * fm_sinf((float)x * 0.2f));
+            cv_rect(x, y, 4, 1, RGB(120, 170, 200));
+        }
+    }
     cv_blit(0, MAIN_Y);
 }
 
@@ -7412,63 +7444,96 @@ static uint16_t mascot_color(char ch)
 }
 
 
-static void draw_splash(void)
+/* 内湾: the wordmark, 24 x 24, a row a word (bit 23 the left), rasterised from MS Gothic 24 px */
+/* 内湾: the wordmark, 24 x 24, three bytes a row (bit 23 the left; bytes keep the build's register-address check quiet),
+ * rasterised from MS Gothic 24 px */
+static const uint8_t KANJI[2][24][3] = {
+    {{0, 0, 0}, {0, 0, 0}, {0, 12, 0}, {0, 12, 0}, {0, 12, 0}, {15, 255, 252}, {15, 255, 252}, {15, 255, 252}, {12, 12, 12}, {12, 28, 12}, {12, 28, 12}, {12, 31, 12}, {12, 63, 140}, {12, 49, 204}, {12, 112, 236}, {12, 224, 124}, {13, 192, 108}, {13, 128, 12}, {12, 0, 12}, {12, 0, 12}, {12, 0, 60}, {12, 0, 60}, {0, 0, 0}, {0, 0, 0}},
+    {{0, 0, 0}, {0, 0, 0}, {0, 1, 128}, {14, 1, 128}, {15, 127, 254}, {2, 127, 254}, {0, 38, 64}, {0, 118, 92}, {8, 230, 78}, {30, 204, 70}, {14, 61, 192}, {4, 56, 192}, {0, 255, 248}, {0, 255, 248}, {0, 0, 24}, {6, 127, 248}, {6, 127, 248}, {14, 112, 0}, {12, 127, 254}, {28, 127, 252}, {24, 64, 12}, {24, 0, 124}, {0, 0, 120}, {0, 0, 0}}
+};
+static void draw_kanji(int32_t x, int32_t y, int px, uint16_t c1, uint16_t c2)
+{
+    int g, r, c;
+    for (g = 0; g < 2; g++)
+        for (r = 0; r < 24; r++)
+            for (c = 0; c < 24; c++)
+                if ((KANJI[g][r][0] << 16 | KANJI[g][r][1] << 8 | KANJI[g][r][2]) >> (23 - c) & 1u)
+                    cv_rect(x + g * (24 * px + px) + c * px, y + r * px, px, px, g ? c2 : c1);
+}
+static void draw_sparkle(int32_t x, int32_t y, int s, uint16_t c)   /* a four-point kawaii sparkle */
+{
+    cv_rect(x - s, y, 2 * s + 1, 1, c);
+    cv_rect(x, y - s, 1, 2 * s + 1, c);
+    cv_pset(x - 1, y - 1, c);
+    cv_pset(x + 1, y - 1, c);
+    cv_pset(x - 1, y + 1, c);
+    cv_pset(x + 1, y + 1, c);
+}
+
+static void draw_kanji_reveal(int32_t x, int32_t y, int px, float cols, float shine, uint16_t c1, uint16_t c2)
+{   /* 内湾 wiping in from the left, a white shine running over the columns already shown */
+    int g, r, c;
+    for (g = 0; g < 2; g++)
+        for (r = 0; r < 24; r++)
+            for (c = 0; c < 24; c++) {
+                const float col = (float)(g * 25 + c), d = col - shine;
+                if (!((KANJI[g][r][0] << 16 | KANJI[g][r][1] << 8 | KANJI[g][r][2]) >> (23 - c) & 1u) || col >= cols)
+                    continue;
+                cv_rect(x + g * (24 * px + px) + c * px, y + r * px, px, px,
+                        d > -1.5f && d < 1.5f ? RGB(255, 255, 255) : d > 1.5f && d < 4.0f ? RGB(214, 246, 255) : g ? c2 : c1);
+            }
+}
+
+static void draw_splash(uint32_t t)
 {
     int i, x;
+    const float p = t > 900u ? 1.0f : (float)t / 900.0f;             /* the wipe */
+    const float cols = 50.0f * p;
+    const float shine = 50.0f * ((float)(t % 1500u) / 1500.0f) * 1.5f - 24.0f;   /* the SEGA shine */
+
     lcd_fill(0, 0, 240, 240, K_BG);
     cv_begin(240, 108, K_BG);                    /* the beach: sun, sea, sand and a palm */
-    cv_disc(196, 30, 20, RGB(255, 206, 64));
+    cv_disc(196, 30, 20, RGB(255, 209, 102));
     cv_disc(196, 30, 14, RGB(255, 238, 150));
     for (i = 0; i < 8; i++)                      /* rays, fading out */
         cv_rect(196 - 34 - i * 3, 30, 10, 1, mix(K_BG, RGB(255, 236, 140), 12 - i));
-    cv_rect(0, 72, 240, 26, RGB(30, 122, 200));  /* the sea */
+    cv_rect(0, 72, 240, 26, RGB(27, 127, 214));  /* the sea */
     for (x = 0; x < 240; x += 3) {               /* its crests */
         const int y = 76 + (int)(2.0f * fm_sinf((float)x * 0.18f));
         cv_rect(x, y, 3, 1, RGB(196, 238, 255));
     }
-    cv_rect(0, 98, 240, 10, RGB(242, 206, 116)); /* the sand */
+    cv_rect(0, 98, 240, 10, RGB(246, 226, 168)); /* the sand */
     cv_rect(10, 52, 3, 46, RGB(150, 96, 52));    /* a palm */
     for (i = 0; i < 4; i++)
         cv_rect(4 + i * 3, 52 - i * 6, 32 - i * 6, 3, RGB(36, 150, 84));
     cv_blit(0, 0);
     cv_begin(240, 132, K_BG);                    /* the name, and what is next */
-    text_c(120, 0, &FONT_L, "NAIWAN", RGB(8, 24, 48));
-    text_c(120, 36, &FONT_L, "91", RGB(232, 48, 66));
+    draw_kanji_reveal(46, 0, 3, cols, shine, RGB(8, 24, 48), RGB(232, 48, 66));   /* 内湾 */
+    for (i = 0; i < 8; i++) {                     /* kawaii sparkles, each on its own beat */
+        const int sx = 46 + (i * 37) % 150, sy = 8 + (i * 53) % 66;
+        const float q = fm_sinf((float)t * 0.0042f + (float)i * 1.3f);
+        if (q > 0.15f)
+            draw_sparkle(sx, sy, 1 + (int)(q * 2.0f), i & 1 ? RGB(255, 255, 255) : RGB(255, 241, 168));
+    }
+    text_c(120, 74, &FONT_S, "91", RGB(232, 48, 66));
     for (i = 0; i < 9; i++)
-        cv_rect(48 + i * 16, 86, 12, 6, i & 1 ? RGB(46, 200, 120) : RGB(255, 214, 110));
-    cv_frame(40, 80, 160, 18, RGB(8, 24, 48));
-    text_c(120, 110, &FONT_XS, "PRESENTS", RGB(8, 24, 48));
+        cv_rect(48 + i * 16, 96, 12, 6, i & 1 ? RGB(46, 200, 120) : RGB(255, 214, 110));
+    cv_frame(40, 90, 160, 18, RGB(8, 24, 48));
+    text_c(120, 116, &FONT_XS, "CITY POP  //  THE COAST", RGB(8, 24, 48));
     cv_blit(0, 108);
 }
 
-/* the second card: NAIWAN 91, big 5 x 7 pixel letters (6 px a pixel), an orange shadow under the purple */
-#define BIG_N 6
-#define BIG_PX 6
-static const uint8_t BIG_GLYPH[BIG_N][7] = {
-    {0x11, 0x19, 0x15, 0x13, 0x11, 0x11, 0x11},  /* N */
-    {0x0E, 0x11, 0x11, 0x1F, 0x11, 0x11, 0x11},  /* A */
-    {0x1F, 0x04, 0x04, 0x04, 0x04, 0x04, 0x1F},  /* I */
-    {0x11, 0x11, 0x11, 0x15, 0x15, 0x1B, 0x11},  /* W */
-    {0x0E, 0x11, 0x11, 0x1F, 0x11, 0x11, 0x11},  /* A */
-    {0x11, 0x19, 0x15, 0x13, 0x11, 0x11, 0x11},  /* N */
-};
 #define SPLASH_STEP_Y 184
 static void draw_hyp(void)
 {
-    int g, r, c, pass, i;
+    int i, c;
     lcd_fill(0, 0, 240, 240, K_BG);
     cv_begin(240, 140, K_BG);
-    for (pass = 0; pass < 2; pass++)             /* the shadow, then the letters */
-        for (g = 0; g < BIG_N; g++)
-            for (r = 0; r < 7; r++)
-                for (c = 0; c < 5; c++)
-                    if (BIG_GLYPH[g][r] >> (4 - c) & 1u)
-                        cv_rect(12 + (g * 6 + c) * BIG_PX + (pass ? 0 : 3), 24 + r * BIG_PX + (pass ? 0 : 3), BIG_PX, BIG_PX,
-                                pass ? RGB(255, 255, 255) : RGB(8, 24, 48));
+    draw_kanji(50, 16, 3, RGB(8, 24, 48), RGB(232, 48, 66));   /* 内湾, a shadow behind it */
     text_c(120, 86, &FONT_S, "GENERATIVE  //  LIVE", RGB(8, 24, 48));
     cv_disc(206, 20, 15, RGB(255, 206, 64));     /* the sun */
     cv_disc(206, 20, 10, RGB(255, 238, 150));
-    cv_rect(0, 104, 240, 22, RGB(30, 122, 200)); /* the sea */
+    cv_rect(0, 104, 240, 22, RGB(27, 127, 214)); /* the sea */
     for (i = 0; i < 240; i += 3) {
         const int y = 108 + (int)(2.0f * fm_sinf((float)i * 0.18f));
         cv_rect(i, y, 3, 1, RGB(196, 238, 255));
@@ -7477,9 +7542,8 @@ static void draw_hyp(void)
     cv_begin(240, 52, K_BG);                     /* (a canvas is at most 144 rows) */
     text_c(120, 0, &FONT_XS, EN_VERSION[0] == 'D' ? "NAIWAN 91  //  FM-1 FIRMWARE" : "NAIWAN 91  //  " EN_VERSION, K_TEXT);
     text_c(120, 16, &FONT_XS, "CITY POP  //  THE COAST", K_TEXT);
-    text_c(120, 32, &FONT_XS, "AFTER PERF-1 BY DEAMONSLINKY", RGB(16, 64, 112));
     cv_blit(0, 120);
-    lcd_fill(0, SPLASH_STEP_Y - 14, 240, 12, RGB(242, 206, 116));   /* the sand under the last line */
+    lcd_fill(0, SPLASH_STEP_Y - 14, 240, 12, RGB(246, 226, 168));   /* the sand under the last line */
     for (i = 0; i < 240; i += 3) {                                  /* its edge, softly wave-cut */
         const int y = SPLASH_STEP_Y - 15 + (int)(1.5f * fm_sinf((float)i * 0.2f));
         lcd_fill(i, y, 3, 2, RGB(30, 122, 200));
@@ -7492,8 +7556,15 @@ static void splash_tick(void)                    /* the HYP-1 card's steps, fill
 {
     uint32_t t = plat_ms() - ui.boot_t, t1 = ui_splash_ms * 17u / 32u, n, k = 0, i;
     if (ui.splash == 1) {
-        if (t < t1)                                /* the first card holds while the music starts */
+        static uint32_t last;
+        if (t < t1) {                              /* the first card wipes in, shines and sparkles */
+            if (t - last > 45u) {
+                last = t;
+                draw_splash(t);
+            }
             return;
+        }
+        last = 0;
         ui.splash = 2;
         draw_hyp();
     }
@@ -7550,7 +7621,7 @@ void ui_init(void)
     th = &THEMES[ui.theme < EN_NTHEME ? ui.theme : 0];
     ui.splash = ui_splash_ms > 0u;
     if (ui.splash) {
-        draw_splash();
+        draw_splash(0);
     } else {
         lcd_fill(0, 0, 240, 240, K_BG);
         if (!en_playing)
