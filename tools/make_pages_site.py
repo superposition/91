@@ -80,7 +80,7 @@ for img in [*(SRC / "docs" / "img").glob("perf-screen-*.png"), *(SRC / "docs" / 
 
 (OUT / "index.html").write_text(f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NAIWAN 91</title><link rel="icon" href="img/favicon.png">
+<title>NAIWAN 91</title>
 <meta name="description" content="NAIWAN 91: live-performance firmware for the M-VAVE FM-1: nineteen genres of generative pieces, an auto-DJ, effects, a web editor and DX7 voices.">
 <link rel="stylesheet" href="fonts/fm1-fonts.css">
 <style>

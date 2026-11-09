@@ -195,7 +195,7 @@ def convert(md):
         if ln.startswith("# "):                         # the title; AMB-1's own a way home (the site's root)
             t = ln[2:].strip()
             if t == NAME:                               # the site's header (home, the other pages), then the title
-                out.append('<header class="site"><a class="home" href="../"><img src="' + data_uri(WEB_IMG / "slinky.png") + '" width="46" height="46" alt="">NAIWAN 91</a><nav><a href="../emu/">Emulator</a><a href="../editor/">Editor</a><a href="../install/">Install</a><a href="../manual/" aria-current="page">Manual</a></nav></header>')
+                out.append('<header class="site"><a class="home" href="../">内湾 91</a><nav><a href="../emu/">Emulator</a><a href="../editor/">Editor</a><a href="../install/">Install</a><a href="../manual/" aria-current="page">Manual</a></nav></header>')
                 out.append('<h1>Manual</h1>')
                 out.append('<p class="printable">Printable: <a href="NAIWAN 91-manual.pdf" download>the full manual (PDF)</a> &middot; <a href="NAIWAN 91-quick-manual.pdf" download>the quick manual (PDF, eight A4 pages)</a> &middot; <a href="NAIWAN 91-beginners-guide.pdf" download>the beginner\'s guide (PDF)</a></p>')
             else:
@@ -271,11 +271,11 @@ def main():
     h1 = re.search(r"^# (.+)$", md, re.M)
     title, what = (f"{NAME} Manual", "The manual") if not h1 or h1.group(1) == NAME else (f"{NAME}: {h1.group(1)}", h1.group(1))
     body = convert(md)
-    FAVICON = data_uri(WEB_IMG / "favicon.png")
+    FAVICON = ""
     page = (f"<title>{html.escape(title)}</title>\n"
             f'<meta name="description" content="{html.escape(what)} for {NAME}, live-performance firmware for the M-VAVE FM-1 (a fork of HYP-1).">\n'
             '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow+Semi+Condensed:wght@400;500;600&display=swap">\n'
-            f'<link rel="icon" type="image/png" href="{FAVICON}">\n'
+            f'\n'
             f"<style>{CSS}</style>\n<main>\n{body}\n</main>\n")
     if not fragment:
         head, _, rest = page.partition("<main>")
