@@ -2074,26 +2074,43 @@ void en_prog_capture(uint8_t *b)
         en_prg_put(b, 24 + 2 * s, 2, bc);
     }
 }
-/* NAIWAN 91: the city-pop loops as pieces' progressions (degrees are 0-based, stored +1; two bars a chord).
- *   0  IV V iii vi   the "Stay With Me" turn (真夜中のドア / Miki Matsubara), also Ride On Time's chorus move
- *   1  i bVII bVI V  the descending minor loop (Anri, 悲しみがとまらない)
- *   2  I iii IV V    the summer lift (Anri, Remember Summer Days) */
+/* NAIWAN 91: four arcs, cycled — the dynamics are in the moving on, not in one loop. Kinds: 2 = 7th, 3 = 9th,
+ * 4 = sus, 0 = the piece's. Each arc also sets its own clock, so the harmony breathes faster or slower.
+ *   A  IV9 V7 iii7 vi9 | ii7 V7 I9 IV9      the pop turn, ending open
+ *   B  i9 bVII9 bVI9 V7 | iv9 bVII9 i9 bVI9 the borrowed minor side: it pivots out without leaving the key
+ *   C  iii7 vi7 ii7 V7 | I9 vi7 ii7 V7      the circle turnaround, the dominant leaning home
+ *   D  ii7 V7 iii7 vi7 | ii7 V7 I9 vi9      the vamp that walks down and back */
+static const uint8_t NAIWAN_ARC[4][8] = {
+    {4, 5, 3, 6, 0, 0, 0, 0},   /* IV V iii vi            the pop turn */
+    {1, 7, 6, 5, 0, 0, 0, 0},   /* i bVII bVI V           the borrowed side */
+    {3, 6, 2, 5, 0, 0, 0, 0},   /* iii vi ii V            the circle */
+    {2, 5, 1, 6, 0, 0, 0, 0},   /* ii V I vi              the vamp */
+};
+static const uint8_t NAIWAN_KIND[4][8] = {
+    {3, 2, 2, 3, 0, 0, 0, 0},
+    {3, 3, 3, 2, 0, 0, 0, 0},
+    {2, 2, 2, 2, 0, 0, 0, 0},
+    {2, 2, 3, 3, 0, 0, 0, 0},
+};
+static const uint8_t NAIWAN_DRIFT[4] = {10, 14, 5, 8};   /* seconds-ish per chord: the arc's own breathing */
+static uint8_t naiwan_arc, naiwan_left, naiwan_rotate;   /* the arc playing, chords left in it, and whether it rotates */
+
 static void naiwan_prog(int which)
 {
-    static const uint8_t LOOP[3][8] = {
-        {4, 5, 3, 6, 4, 5, 3, 6},
-        {1, 7, 6, 5, 1, 7, 6, 5},
-        {1, 3, 4, 5, 1, 3, 4, 5},
-    };
-    uint8_t b[6] = {0};
+    uint8_t b[6] = {0}, kb[3] = {0};
     int s;
+    for (s = 0; s < 8; s++) {
+        en_prg_put(b, 3 * s, 3, NAIWAN_ARC[which][s]);
+        en_prg_put(kb, 3 * s, 3, NAIWAN_KIND[which][s]);
+    }
     for (s = 0; s < 8; s++)
-        en_prg_put(b, 3 * s, 3, LOOP[which][s]);
-    for (s = 0; s < 8; s++)
-        en_prg_put(b, 24 + 2 * s, 2, 1);              /* two bars a chord */
+        en_prg_put(b, 24 + 2 * s, 2, 1);              /* (the bars, when the clock is not in charge) */
     en_prg_put(b, 40, 1, 1);                           /* Play */
     en_prg_put(b, 41, 2, 2);                           /* the unit: seconds, by Drift — not bars */
     en_prog(b);
+    en_prog_kinds(kb);                                 /* each slot's own chord type: the turnarounds rely on it */
+    en_set(P_DRIFT, NAIWAN_DRIFT[which]);               /* and its own harmonic clock */
+    naiwan_left = 4;                                 /* four chords an arc: it turns often */
 }
 static void chord_change(void);
 static void prog_take(uint32_t lo, uint32_t hi) /* the progression from the page or the piece (en_prog) */
@@ -2254,9 +2271,14 @@ static void chord_change(void)                  /* to another degree: the progre
     if (naiwan_pending >= 0) {                         /* NAIWAN 91: after the piece is loaded, its loop takes over */
         const int w = naiwan_pending;
         naiwan_pending = -1;
+        naiwan_rotate = 1;
+        naiwan_arc = (uint8_t)w;
         naiwan_prog(w);
         naiwan_bing((int)(en_chord_root % 12), 0);     /* the first chord: dim7 drop 2 */
         naiwan_bing((int)(en_chord_root % 12), 1);     /* and a semitone up, leaning back into it */
+    } else if (naiwan_rotate && naiwan_left && !--naiwan_left) {
+        naiwan_arc = (uint8_t)((naiwan_arc + 1) % 4);  /* the arc is done: the next one takes over */
+        naiwan_prog(naiwan_arc);
     }
     int i, bor;
     alt_clear();
