@@ -7490,6 +7490,28 @@ static void draw_splash(uint32_t t)
     const float p = t > 900u ? 1.0f : (float)t / 900.0f;             /* the wipe */
     const float cols = 50.0f * p;
     const float shine = 50.0f * ((float)(t % 1500u) / 1500.0f) * 1.5f - 24.0f;   /* the SEGA shine */
+    {   /* the shine crosses the mark: a turnaround — two diminished 7ths a semitone apart, drop 2, on the pluck's bell */
+        static int stage;
+        if (t == 0u)
+            stage = 0;
+        if (stage == 0 && shine > 18.0f && shine < 26.0f) {
+            const int base = 48 + (int)(en_chord_root % 12);
+            static const int V1[4] = {-6, 0, 3, 9};    /* dim7, the second voice from the top dropped an octave */
+            static const int ACC[4] = {66, 78, 72, 86};
+            int k;
+            stage = 1;
+            for (k = 0; k < 4; k++)
+                en_note_v(EN_V_PLUCK, base + V1[k], ACC[k]);
+        } else if (stage == 1 && shine > 26.0f && shine < 34.0f) {
+            const int base = 49 + (int)(en_chord_root % 12);   /* the same shape a semitone up: it leans into the chord */
+            static const int V2[4] = {-6, 0, 3, 9};
+            static const int ACC[4] = {70, 84, 74, 92};
+            int k;
+            stage = 2;
+            for (k = 0; k < 4; k++)
+                en_note_v(EN_V_PLUCK, base + V2[k], ACC[k]);
+        }
+    }
 
     lcd_fill(0, 0, 240, 240, K_BG);
     cv_begin(240, 108, K_BG);                    /* the beach: sun, sea, sand and a palm */

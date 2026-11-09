@@ -42,3 +42,18 @@ to 9ths and 11ths) and `P_VOICING` (open = drop 2).
 The Progression page's slots are stored with the piece. Set a slot to any degree 1–7 (a chord per slot), or leave
 slots empty to stop the loop short; the chord kind of each slot can be its own (`en_prog_kinds`) instead of the
 piece's. The three loops above are the defaults for CITYPOP pieces 01–10.
+
+## The sound at boot
+
+As the shine crosses the 内湾 wordmark the firmware plays a **turnaround**: two diminished-7th chords a semitone
+apart, drop-2 voicing (the second voice from the top dropped an octave), on the pluck's bell — the chord the piece is
+in, then the same shape a semitone above leaning back into it. It is fired from `draw_splash()` with `en_note_v`,
+so it is the same voice the piece plays, not a separate chime.
+
+## Bass, by genre
+
+- **CITYPOP**: eighths on the chord roots, fifths and octaves (`P_BL_MODE` 3, short notes, little movement) — a pop
+  bass, not a breakbeat riff; the acid sits far back so nothing wanders outside the key.
+- **NEON**: off-beat, short, octave lifts, and the harmony back to two bars a chord — it pushes instead of dragging.
+- Every genre's modes are limited to major, dorian, mixolydian and aeolian, so no piece lands in phrygian or lydian
+  under a IV–V–iii–vi loop.
