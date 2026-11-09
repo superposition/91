@@ -3569,12 +3569,6 @@ static void input(void)
             }
             if (i == B_SEQ)
                 ui.seq_held = 0;
-            if (i == B_HOME && (btn >> B_SEL & 1u)) {   /* shift: the sigil's middle, the eye or the imp */
-                ui.centre_imp = (uint8_t)!ui.centre_imp;
-                ui.set_lazy = 1;
-                ui.btn_used |= m | 1u << B_SEL;
-                say("SIGIL", ui.centre_imp ? "THE IMP" : "THE EYE");
-            }
 #ifndef EN_WEB
             if (i == B_GLO && (btn >> B_SEL & 1u)) {   /* shift: remote, the panel plays the browser (stopped only: it stops the music) */
                 if (en_playing) {
@@ -4213,27 +4207,6 @@ static void mascot_step(void)
     hm.dh = fm_clampf(hm.dh, -3.0f, 4.0f);
     hm.lift = fm_clampf(hm.lift, 0.0f, 3.0f);
 }
-static void draw_mascot(int32_t x, int32_t y, int sleepy)
-{
-    int r, c;
-    for (r = 0; r < 23; r++) {
-        /* rows 0..10 the head, then four coils of three rows: each shifted by its share of the stretch. Within a coil the share runs down
-         * across its width (the spring winds down to the right), so the stretch parts the coils along the winding, not straight across */
-        const int grp = r <= 10 ? 0 : (r - 8) / 3;
-        const int32_t dy0 = (int32_t)(hm.lift + hm.dh * (float)(4 - grp) * 0.25f + 0.5f);
-        for (c = 0; c < 23; c++) {
-            char ch = MASCOT[r][c];
-            int32_t dy = dy0;
-            if (ch == '.')
-                continue;
-            if (ch == 'Y' && sleepy)
-                ch = 'K';
-            if (grp > 0 && c < 16)
-                dy = (int32_t)(hm.lift + hm.dh * ((float)(4 - grp) - fm_clampf((float)(c - 2) * (1.0f / 13.0f), 0.0f, 1.0f)) * 0.25f + 0.5f);
-            cv_pset(x + c, y + r - dy, (ch == 'K' || ch == 'T') && !LOOK_SYNTH ? K_LINE : mascot_color(ch));
-        }
-    }
-}
 
 /* the header: the piece in a tag, its root and mode; on the right, the tempo with a beat light (a play
  * triangle while stopped), the section and a dot while the kit is unsaved. Messages take its place
@@ -4244,20 +4217,16 @@ static void draw_mascot(int32_t x, int32_t y, int sleepy)
 static void imp_header(void)
 {
     const float kg = fm_clampf(en_drum_glow[0], 0.0f, 1.0f);
-    const float amp = 1.0f + 2.2f * kg, st = 0.33f;
+    const float amp = 1.0f + 2.2f * kg;
     const float ph = (float)(plat_ms() % 1200u) * (FM_TWO_PI / 1200.0f);
-    float s = fm_sinf(ph), c = fm_cosf(ph);
-    const float ss = fm_sinf(st), cs = fm_cosf(st);
     const uint16_t cc = mix(K_LINE, K_BASS, 7 + q16(kg) * 9 / 16);
     int32_t x;
     int i;
     for (i = 0; i < 16; i++)                     /* the bar's sixteen steps */
         cv_rect(i * 15 + 1, 0, 13, i % 4 ? 1 : 2, en_playing && i == (int)en_drum_pos ? K_ACC : K_LINE);
-    for (x = 0; x < 240; x++) {                  /* the coil */
-        const int32_t y = 26 + (int32_t)(s * amp + (s < 0.0f ? -0.5f : 0.5f));
-        const float ns = s * cs + c * ss;
-        c = c * cs - s * ss;
-        s = ns;
+    for (x = 0; x < 240; x++) {                  /* the wave: one crest along the header, taller on the kick */
+        const float u = (float)x * 0.26f + ph;
+        const int32_t y = 26 + (int32_t)(amp * 1.6f * fm_sinf(u) + (fm_sinf(u) < 0.0f ? -0.5f : 0.5f));
         cv_pset(x, y, cc);
     }
 }
@@ -4311,7 +4280,6 @@ static void draw_header(void)
             }
             x -= 20;
         }
-        draw_mascot(212 + (en_playing && en_sec == EN_SEC_BUILD ? (int)(ui.frame / 2u & 1u) * 2 - 1 : 0), 3, en_playing && en_sec == EN_SEC_BREAK);
         if (project_pending()) {                   /* not yet in flash (the theme, Tune, MIDI out: two seconds on) */
             cv_round(x - 5, 12, 5, 5, 2, K_DIM);
             x -= 11;
@@ -4468,8 +4436,6 @@ static const uint8_t SEA[8][5] = {               /* 5 x 5 sea glyphs, a row a by
     {0x0E, 0x1F, 0x15, 0x0A, 0x04}, {0x15, 0x0E, 0x1F, 0x0E, 0x15}, {0x0E, 0x04, 0x15, 0x15, 0x0E}, {0x1C, 0x0E, 0x04, 0x04, 0x04}};
 static void draw_sigil(void)
 {
-    static const uint8_t EYE[9] = {12, 12, 11, 11, 10, 9, 7, 5, 2};   /* the eye's half-width, from its middle row out (scaled to its opening) */
-    static const uint8_t IRIS[6] = {5, 5, 5, 4, 3, 2};
     const uint32_t now = plat_ms(), abs_pool = pool_abs();
     const float step = FM_TWO_PI / 12.0f;
     const int shed = en_shed_level > 0, play = en_playing;
@@ -4494,12 +4460,6 @@ static void draw_sigil(void)
     if (play && en_sec == EN_SEC_GROOVE && sg.last_sec != EN_SEC_GROOVE)
         sg.drop_t = now;                         /* the drop */
     sg.last_sec = en_sec;
-    {   /* the gaze flips on each snare */
-        const int hi = en_drum_glow[1] > 0.5f;
-        if (hi && !sg.sn_hi)
-            sg.gaze = (int8_t)-sg.gaze;
-        sg.sn_hi = (uint8_t)hi;
-    }
     if (en_cm_count != sg.cm_seen) {             /* a pluck note: a rune by it */
         sg.cm_seen = en_cm_count;
         sg.rn[sg.rn_i].pc = (uint8_t)(en_cm_note % 12u);
@@ -4605,72 +4565,28 @@ static void draw_sigil(void)
                     if (SEA[sg.rn[i].kind][r] >> (4 - c) & 1u)
                         cv_pset(x - 2 + c, y - 2 + r, mix(K_BG, K_ACC, 16 - (int)(age * 16u / 700u)));
         }
-    if (ui.centre_imp) {                         /* the imp, summoned into it (in the Synth look he stands on the sun, no box) */
-        if (!LOOK_SYNTH)
-            cv_rect(CX - 13, CY - 14, 27, 27, K_BG);
-        draw_mascot(CX - 11, CY - 12, play && en_sec == EN_SEC_BREAK);
-    } else if (LOOK_SYNTH) {                     /* the scanner (the Synth look): a slit whose opening follows the section, a light sweeping across it once in two beats */
+    {   /* the wave: three crests sweeping at the tempo; calm in a breakdown, choppy in a build, a flash on the drop */
         const uint32_t dage = now - sg.drop_t;
         const int flash = play && sg.drop_t && dage < 450u;
-        const int open = flash ? 12 : !play ? 3 : en_sec == EN_SEC_BREAK ? 1 : en_sec == EN_SEC_BUILD ? 8 : 5;
-        const int32_t ex = CX + (play && en_sec == EN_SEC_BUILD ? (int32_t)(ui.frame & 1u) * 2 - 1 : 0);
-        const int w = 34, x0 = (int)ex - w / 2, y0 = CY - open / 2 - 2;
-        const int tempo = proj.par[P_TEMPO] > 0 ? proj.par[P_TEMPO] : 120, two = 120000 / tempo;
-        const float ang = play ? (float)(now % (uint32_t)two) * (FM_TWO_PI / (float)two) : 0.0f;
-        const float sw = (fm_sinf(ang) + 1.0f) * 0.5f;
-        const int fwd = fm_cosf(ang) > 0.0f, sx = x0 + 2 + (int)(sw * (float)(w - 8));
-        int j;
-        if (flash) {
-            cv_rect(x0 - 2, CY - 8, w + 4, 14, K_TEXT);
-        } else {
-            cv_rect(x0, y0, w, open + 2, RGB(0, 0, 0));
-            cv_rect(x0 - 1, y0 - 1, w + 2, 1, mix(K_BG, th->bass, 11));   /* its frame, in the bass's colour */
-            cv_rect(x0 - 1, y0 + open + 2, w + 2, 1, mix(K_BG, th->bass, 11));
-            cv_rect(x0 - 1, y0, 1, open + 2, mix(K_BG, th->bass, 11));
-            cv_rect(x0 + w, y0, 1, open + 2, mix(K_BG, th->bass, 11));
-            for (j = 4; j >= 0; j--)             /* the light and its trail */
-                cv_rect(sx - (fwd ? j * 3 : -j * 3), y0 + 1, 4, open, mix(RGB(0, 0, 0), th->bass, 16 - j * 3));
-            cv_rect(sx + 1, y0 + 1 + open / 2, 2, 1, K_TEXT);
-        }
-        if (flash) {                             /* the shock ring */
-            const float r = 20.0f + (float)dage * (40.0f / 450.0f);
+        const int amp = flash ? 6 : !play ? 1 : en_sec == EN_SEC_BREAK ? 2 : en_sec == EN_SEC_BUILD ? 6 : 4;
+        const int tempo = proj.par[P_TEMPO] > 0 ? proj.par[P_TEMPO] : 120, per = 120000 / tempo;
+        const float ph = play ? (float)(now % (uint32_t)per) * (FM_TWO_PI / (float)per) : 0.0f;
+        int r, x, j;
+        cv_rect(CX - 18, CY - 13, 37, 27, K_BG);  /* a dark surround, so the figure never runs through it */
+        for (r = 0; r < 3; r++)
+            for (x = -16; x <= 16; x++) {
+                const int y = CY - 7 + r * 7 + (int)((float)amp * fm_sinf((float)x * 0.32f + ph + (float)r * 0.9f));
+                const uint16_t c = flash ? K_TEXT : mix(K_BG, K_ACC, 12 - r * 2);
+                cv_pset(CX + x, y, c);
+                cv_pset(CX + x, y + 1, c);
+            }
+        if (flash) {                              /* the shock ring */
+            const float rr = 20.0f + (float)dage * (40.0f / 450.0f);
             const uint16_t c = mix(K_TEXT, K_BG, (int)(dage * 16u / 450u));
             for (j = 0; j < 48; j++) {
-                int32_t x, y;
-                sg_pt(r, (float)j * (FM_TWO_PI / 48.0f), &x, &y);
-                cv_rect(x, y, 2, 2, c);
-            }
-        }
-    } else {                                     /* the eye */
-        const uint32_t dage = now - sg.drop_t;
-        const int flash = sg.drop_t && dage < 450u;
-        const int open = flash ? 8 : !play || en_sec == EN_SEC_BREAK ? 0 : en_sec == EN_SEC_BUILD ? 8 : 5;
-        const int32_t ex = CX + (play && en_sec == EN_SEC_BUILD ? (int32_t)(ui.frame & 1u) * 2 - 1 : 0);
-        int j;
-        cv_rect(ex - 14, CY - open - 2, 29, 2 * open + 5, K_BG);   /* a dark surround, so the figure never runs through it */
-        if (!open) {                             /* shut: a lid and its lashes */
-            cv_rect(ex - 11, CY, 23, 1, K_DIM);
-            for (j = -2; j <= 2; j++)
-                cv_rect(ex + j * 4, CY + 1, 1, 2, K_DIM);
-        } else {
-            const int ir = open < 5 ? open : 5, gx = flash ? 0 : sg.gaze;
-            const int pw = 1 + (int)(fm_clampf(en_drum_glow[0], 0.0f, 1.0f) * 3.0f);
-            for (j = -open; j <= open; j++) {
-                const int a = j < 0 ? -j : j, w = EYE[a * 8 / open];
-                cv_rect(ex - w, CY + j, 2 * w + 1, 1, flash ? K_TEXT : mix(K_BG, RGB(255, 60, 40), 6));
-                if (!flash && a <= ir)
-                    cv_rect(ex + gx - IRIS[a], CY + j, 2 * IRIS[a] + 1, 1, K_ACC);
-            }
-            if (!flash)
-                cv_rect(ex + gx - pw / 2, CY - ir + 1, pw, 2 * ir - 1, K_BG);   /* the slit, wider on the kick */
-        }
-        if (flash) {                             /* the shock ring */
-            const float r = 20.0f + (float)dage * (40.0f / 450.0f);
-            const uint16_t c = mix(K_TEXT, K_BG, (int)(dage * 16u / 450u));
-            for (j = 0; j < 48; j++) {
-                int32_t x, y;
-                sg_pt(r, (float)j * (FM_TWO_PI / 48.0f), &x, &y);
-                cv_rect(x, y, 2, 2, c);
+                int32_t sx, sy;
+                sg_pt(rr, (float)j * (FM_TWO_PI / 48.0f), &sx, &sy);
+                cv_rect(sx, sy, 2, 2, c);
             }
         }
     }
@@ -6538,7 +6454,7 @@ static void draw_main(void)
                     (uint32_t)q16(en_acid_level) << 18);
     for (i = 0; i < 5; i++)
         h = hash(h, (uint32_t)proj.par[i]);
-    h = hash(h, (en_playing ? plat_ms() / 66u : 0u) | (uint32_t)en_sec << 28 | (uint32_t)ui.centre_imp << 30 | (uint32_t)en_shed_level << 26);   /* the sigil moves: 15 frames a second while playing */
+    h = hash(h, (en_playing ? plat_ms() / 66u : 0u) | (uint32_t)en_sec << 28 | (uint32_t)en_shed_level << 26);   /* the sigil moves: 15 frames a second while playing */
     if (h == ui.sig[1])
         return;
     ui.sig[1] = h;
@@ -7498,22 +7414,11 @@ static uint16_t mascot_color(char ch)
     }
 }
 
-static void splash_mascot(int hop, int blink)    /* the mascot, hopped up hop pixels, its eyes shut when blinking */
-{
-    int x, y;
-    cv_begin(240, 108, K_BG);
-    for (y = 0; y < 23; y++)
-        for (x = 0; x < 23; x++)
-            if (MASCOT[y][x] != '.')
-                cv_rect(120 - 23 * 2 + x * 4, 108 - 23 * 4 + y * 4 - hop, 4, 4, mascot_color(blink && MASCOT[y][x] == 'Y' ? 'K' : MASCOT[y][x]));
-    cv_blit(0, 0);
-}
 
 static void draw_splash(void)
 {
     int i;
     lcd_fill(0, 0, 240, 240, K_BG);
-    splash_mascot(0, 0);
     cv_begin(240, 132, K_BG);                    /* the name, the rings, and what's next */
     text_c(120, 0, &FONT_L, "NAIWAN", RGB(242, 230, 196));
     text_c(120, 36, &FONT_L, "91", RGB(255, 143, 143));
@@ -7563,18 +7468,8 @@ static void splash_tick(void)                    /* the HYP-1 card's steps, fill
 {
     uint32_t t = plat_ms() - ui.boot_t, t1 = ui_splash_ms * 17u / 32u, n, k = 0, i;
     if (ui.splash == 1) {
-        static uint32_t last = 0xFFFFFFFFu;
-        if (t < t1) {                              /* the mascot hops twice, then blinks */
-            const int hop = t < t1 * 3u / 5u ? (int)(14.0f * fm_fabsf(fm_sinf(FM_PI * (float)t / (float)(t1 * 3u / 10u + 1u)))) : 0,
-                      blink = t > t1 * 3u / 4u && t < t1 * 7u / 8u;
-            const uint32_t s = (uint32_t)hop | (uint32_t)blink << 8;
-            if (s != last) {
-                last = s;
-                splash_mascot(hop, blink);
-            }
+        if (t < t1)                                /* the first card holds while the music starts */
             return;
-        }
-        last = 0xFFFFFFFFu;
         ui.splash = 2;
         draw_hyp();
     }

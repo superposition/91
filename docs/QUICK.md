@@ -37,7 +37,7 @@
 | **ARP** | Acid; again Acid env, Acid line, Acid answer, Acid steps, Pluck, Pluck 2, Deja vu, Pluck steps. | | |
 | **EDIT** | The next chord, on the next bar. | 0.4 s: the Progression page. | Stopped: starts the music by itself. |
 | **GLO** | Global (Root, Theme, Tune, Genre). SAVE here stores the piece. | 0.4 s: the mix map, the load meter. | Remote: the FM-1 plays the emulator. |
-| **HOME** | Tempo page; again Perform; again Tempo. Twice quickly: visualizers. Leaves the FX menu. | 0.7 s: the settings. | The sigil's middle: eye or imp. |
+| **HOME** | Tempo page; again Perform; again Tempo. Twice quickly: visualizers. Leaves the FX menu. | 0.7 s: the settings. | — |
 | **SAVE** | Breakdown on the next bar; again a build, then the drop. On Global: store. | 0.5 s: the drop. | On Global, 1.5 s: back to factory. |
 | **SEQ** | Drums; again Links, Kit, Drum drift, Groove, Steps, Feel, Phrase. In the sequencer: back to Drums. | 0.4 s: the sequencer. | The links on and off. |
 | **PLAY** | Play and stop. | | |
@@ -237,7 +237,7 @@ Want the drums to change by themselves? **Change**: off, the next pattern, or a 
 
 **Top left:** the piece's tag (`01` HYPNO, `L03` lofi ..; a mark on it means unstored changes), the root and the mode. **Top right:** the mascot, the tempo (`EXT` on an outside clock; a play triangle while stopped), then the marks: **BREAK**, **BUILD** (with `>`: waiting for the bar; `DROP 3`: bars to the drop), **KNOB** (an FX knob off home), **KEY** (the drop's key change is on), **S1>** (a scene waiting), **DJ**, **FX** (effects latched, menu closed), a small dot (a save to memory waiting).
 
-**Left:** the levels of pad (P), bass (D), acid (A), pluck (C) and kit (K). **Middle:** the **sigil**, turned so the chord's root is at the top. The scale's notes are lit and the chord's notes are joined into a shape (a triad is a triangle, a seventh chord four-sided), with its name under the eye. Around it run the 4-bar phrase and the bar's 16 steps. The eye is half open in a groove, shut in a breakdown, wide in a build. **Right:** the pattern playing (`PAT 1`; `> 3` when one waits) and the load line (page 7). **Above the knobs:** the voice's sound, `BY HAND`, `+LINK` or `LINKS OFF`, the octave when it isn't home, the page's name and dots. On a change of page the header says where you are: `DRUMS  PHRASE 8/8`.
+**Left:** the levels of pad (P), bass (D), acid (A), pluck (C) and kit (K). **Middle:** the **sigil**, turned so the chord's root is at the top. The scale's notes are lit and the chord's notes are joined into a shape (a triad is a triangle, a seventh chord four-sided), with its name under the wave. Around it run the 4-bar phrase and the bar's 16 steps. The wave is gentle in a groove, flat in a breakdown, choppy in a build. **Right:** the pattern playing (`PAT 1`; `> 3` when one waits) and the load line (page 7). **Above the knobs:** the voice's sound, `BY HAND`, `+LINK` or `LINKS OFF`, the octave when it isn't home, the page's name and dots. On a change of page the header says where you are: `DRUMS  PHRASE 8/8`.
 
 </div>
 

@@ -495,7 +495,7 @@ static const char *const PAD_DEST_NAME[8] = {"Filter", "Level", "Pan", "Pitch", 
 static const char *const DRONE_DEST_NAME[8] = {"Cutoff", "Pitch", "Level", "Drive", "Reso", "Acid cut", "Acid reso", "Echo time"};
 static const char *const NOISE_NAME[8] = {"Mint", "Clean", "Light", "Used", "Worn", "Scratched", "Dusty", "Trashed"};   /* the vinyl's wear */
 static const char *const TRIG_NAME[6] = {"Chord", "1 bar", "2 bars", "4 bars", "8 bars", "Off"};
-static const char *const THEME_NAME[EN_NTHEME] = {"Imp", "Synth", "Acid", "Ice", "Ember", "Phosphor"};
+static const char *const THEME_NAME[EN_NTHEME] = {"Sea", "Synth", "Acid", "Ice", "Ember", "Phosphor"};
 /* the voice bank: what each voice can play (the sounds themselves: PAD_SOUND, DRONE_SOUND, ACID_SOUND, and
  * the kits: the old styles' drums) */
 const char *const EN_PAD_SOUND[EN_NSOUND] = {"Rhodes", "Voices", "Strings", "Glass", "Organ", "Warm", "Stabs", "Dark",

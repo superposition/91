@@ -66,7 +66,7 @@ Only a few. The rest can wait.
 
 **6. Tap SAVE: a breakdown.** At the next bar the drums drop out and the music gets softer and dreamier.
 
-![A breakdown: the circle thins out and the eye closes](img/perf-screen-breakdown.png)
+![A breakdown: the circle thins out and the waves flatten](img/perf-screen-breakdown.png)
 
 **7. Tap SAVE again: the build and the drop.** The drums come back climbing for a few bars, there is a short silence, and then everything hits at once. This is the moment DJs live for. Tap SAVE, wait, tap SAVE, and you have done it.
 
@@ -385,17 +385,13 @@ of those, marks show what's on:
 - The twelve notes sit around it, with the chord's root always at the top. Scale notes are lit, chord notes
   bright.
 - The chord's notes are joined into a shape: a triad (three-note chord) is a triangle, a seventh chord a
-  four-sided shape. You learn a chord's kind by its shape. Its name is under the eye.
+  four-sided shape. You learn a chord's kind by its shape. Its name is under the wave.
 - When the chord changes, the circle turns by the distance from the old root to the new one.
 - Outside it, a ring fills over each 4-bar phrase. Outside that are the bar's 16 steps: the kick's are
   larger, the acid's are tinted, the playhead is white.
 - Behind it, a pentagram turns once every 16 bars, and runes flare by the notes the pluck plays.
-- In the middle is a demon eye. In a groove it's half open: the pupil widens on the kick and the gaze flips
-  on the snare. It shuts in a breakdown. In a build it opens wide and trembles, and the phrase ring breaks
-  into spinning gaps. The drop brings a white flash and a shock ring. **SEL** + **HOME** puts the slinky imp
-  there instead (kept after power-off).
-- At the top right, a bar fills towards the next chord change, or says `held` while frozen.
-- When the FM-1 is working hard, it stops drawing the pentagram and runes first.
+- In the middle is a **wave**: three crests sweeping at the tempo. It is calm in a groove, flattens in a
+  breakdown, chops in a build, and the drop brings a white flash and a shock ring.
 
 **Right.** The drum pattern playing, each lane in its own colour, and its number (`PAT 1`). When another
 pattern is waiting, `> 3`. Under it is the load readout, which shows how hard the FM-1 is working:
@@ -1837,7 +1833,7 @@ The four settings are stored with the piece. The default is a light 1.5:1 at -12
 | **ENV** | On a pad, bass or acid page: takes that voice away from the automatic part so it only plays what you play by hand. Press again to hand it back. |
 | **FX** | Walks through the effects' settings pages one by one, then back to the keys. |
 | A key in the FX menu | Opens that effect's settings page. |
-| **HOME** | Changes the middle of the sigil on the home screen: the eye or the imp. |
+| **HOME** | Back to the Perform page (double-tap: visualizers). |
 | **GLO** | Remote: the FM-1's panel plays the emulator (section 17). Works only when stopped, because it stops the music. If the music is playing, the screen says `STOP FIRST`. |
 | **EDIT** | A secret. Works only when stopped. It starts the music by itself. |
 | Black keys 1-6 (in the sequencer) | Copies the pattern you're editing into pattern 1-6. Without SEL, the black keys in the sequencer choose the lane's source (section 8). |
@@ -1983,17 +1979,17 @@ The **Pieces** page on the NAIWAN 91 website shares one piece at a time: you sen
 The **Global** page (**GLO**) has four knobs:
 
 - **Root**: the key the music is in.
-- **Theme**: the colours. Choose Imp, Synth, Acid, Ice, Ember or Phosphor.
+- **Theme**: the colours. Choose Sea, Synth, Acid, Ice, Ember or Phosphor.
 - **Tune**: fine tuning, +-50 cents (a cent is a hundredth of a semitone).
 - **Genre**: the bank of pieces, the same as **GLO** + **PRESETS**.
 
 MIDI out and the USB audio level are on the **USB & MIDI** settings page. Hold **HOME** for the settings and turn **SELECT** to it.
 
-Synth is a look of its own, the Synth Imp, shown below. A night sky sits behind the sigil, with a striped sun on the horizon. The sun sinks in a breakdown, rises through a build and flashes on the drop. A floor of lines runs towards the horizon once a beat, and the imp glows like a neon tube.
+Synth is a look of its own. A night sky sits behind the sigil, with a striped sun on the horizon. The sun sinks in a breakdown, rises through a build and flashes on the drop. A floor of lines runs towards the horizon once a beat, and the wave in the middle glows like a neon tube.
 
 ![The Synth look: the home screen](img/perf-screen-home-synth.png)
 
-All the other themes are colour versions of the Imp look. The background is a warm black, and each voice keeps one colour everywhere. In Imp, the pad is bone white, the bass crimson, the acid lime, the pluck ice-teal and the drums pink. The ember colour marks whatever is happening right now.
+All the other themes are colour versions of the Sea look. The background is a warm black, and each voice keeps one colour everywhere. In Sea, the pad is bone white, the bass crimson, the acid lime, the pluck ice-teal and the drums pink. The ember colour marks whatever is happening right now.
 
 Along the top of the header is a beat bar. The beats are taller marks, and the step playing is lit. Under it is a coil, the slinky's spring, which stretches on each kick. A piece waiting for the next bar shows as `>08` beside the key and mode.
 

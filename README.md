@@ -122,7 +122,7 @@ The manual ([docs/MANUAL.md](docs/MANUAL.md), or the page on the site with scree
 The screen is drawn in one look (warm black, one colour per voice: the pad bone, the bass crimson, the acid lime,
 the pluck ice-teal, the drums pink) in six palettes, chosen on the Global page.
 
-<p align="center"><img src="docs/img/readme-palettes.png" width="760" alt="The home screen in the six palettes: Imp, Synth, Acid, Ice, Ember and Phosphor."></p>
+<p align="center"><img src="docs/img/readme-palettes.png" width="760" alt="The home screen in the six palettes: Sea, Synth, Acid, Ice, Ember and Phosphor."></p>
 
 ## Install
 

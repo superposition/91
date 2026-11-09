@@ -53,7 +53,7 @@ Only a few. The rest can wait.
 
 **6. Tap SAVE: a breakdown.** At the next bar the drums drop out and the music gets softer and dreamier.
 
-![A breakdown: the circle thins out and the eye closes](img/perf-screen-breakdown.png)
+![A breakdown: the circle thins out and the waves flatten](img/perf-screen-breakdown.png)
 
 **7. Tap SAVE again: the build and the drop.** The drums come back climbing for a few bars, there is a short silence, and then everything hits at once. This is the moment DJs live for. Tap SAVE, wait, tap SAVE, and you have done it.
 
