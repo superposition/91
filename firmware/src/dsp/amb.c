@@ -423,6 +423,14 @@ void en_piece_g(int g, int i, int16_t *par, uint16_t *pool)
             par[P_VOICING] = 1;                                  /* open: drop 2, jazzier */
             par[P_CM_DEC] = (int16_t)(64 + (i % 3) * 8);         /* the lead rings too */
             par[P_CM_STYLE] = (int16_t)(i % 3 == 0 ? 0 : i % 3 == 1 ? 5 : 2);   /* up, thirds, up-down */
+            {   /* NAIWAN 91: a warmer bass — round voices, the filter low, a little body, no grit */
+                static const uint8_t WARM[5] = {1, 9, 7, 18, 12};   /* Warm, Sub, Organ, Tine, Fifths */
+                par[P_DR_INST] = (int16_t)WARM[i % 5];
+                par[P_DR_CUT] = 38;
+                par[P_DR_RES] = 12;
+                par[P_DRIVE] = 18;
+                par[P_DETUNE] = 26;
+            }
             par[P_DRIFT] = 82;                                   /* chords twice as long: four bars, not two */
             par[P_SWING] = (int16_t)(par[P_SWING] + 8 > 64 ? 64 : par[P_SWING] + 8);   /* the timing sits back */
             par[P_HUMAN] = (int16_t)(par[P_HUMAN] + 10 > 60 ? 60 : par[P_HUMAN] + 10);
@@ -452,6 +460,7 @@ void en_piece_g(int g, int i, int16_t *par, uint16_t *pool)
         par[P_RV_TYPE] = 1;
         par[P_RV_X] = 30;
         par[P_BRIGHT] = (int16_t)(par[P_BRIGHT] > 30 ? par[P_BRIGHT] - 10 : 20);
+        par[P_DRIFT] = 10;                             /* time, not bars: about half a minute a chord */
         par[P_BL_MODE] = 3;                            /* eighths: a pop bass, not a breakbeat riff */
         par[P_BL_LEN] = 46;
         par[P_BL_MOVE] = 14;                           /* roots, fifths and octaves, no wandering */
@@ -1954,7 +1963,7 @@ static void bass_to(int pc)
 static float drift_left, drift_total, evolve;   /* evolve: Evolve, 0..1 */
 static uint8_t change_pending, fifth_done;
 static int hr_left;                             /* a harmonic rhythm: the chord's bars left after this one (the bar line counts; 0 otherwise) */
-static int hr_bars(void) { return pg_on ? 1 << pg_bars[pg_i] : hr_bars_v(par[P_DRIFT]); }   /* (a progression set by hand: its slot's bars) */
+static int hr_bars(void) { return pg_on && drift_unit != 2 ? 1 << pg_bars[pg_i] : hr_bars_v(par[P_DRIFT]); }   /* (unit 2: the clock, not the slot) */   /* (a progression set by hand: its slot's bars) */
 
 static void drift_reset(void)
 {
@@ -2083,6 +2092,7 @@ static void naiwan_prog(int which)
     for (s = 0; s < 8; s++)
         en_prg_put(b, 24 + 2 * s, 2, 1);              /* two bars a chord */
     en_prg_put(b, 40, 1, 1);                           /* Play */
+    en_prg_put(b, 41, 2, 2);                           /* the unit: seconds, by Drift — not bars */
     en_prog(b);
 }
 static void chord_change(void);
