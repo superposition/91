@@ -16,7 +16,7 @@ expect par5 102
 expect par2 78
 expect par71 2
 expect par48 0
-expect pool 1453
+expect pool 1709
 expect lane5 8738
 expect pats0_0 0x1111
 expect pats5_0 4369
@@ -26,7 +26,7 @@ shot piece02.png
 turn PRESET 1
 expect piece 2
 expect par1 30
-expect par72 0
+expect par72 2
 expect lane0 4369
 wait 10000
 expect pad_level >0

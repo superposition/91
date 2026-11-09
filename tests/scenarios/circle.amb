@@ -9,7 +9,7 @@ wait 600
 release EDIT
 wait 100
 expect view 5
-expect pool 1709
+expect pool 2741
 shot circle_page.png
 # the chosen slot's bars (slot 1: 4 bars heard, one step up: 8) go to every chord of the fill
 turn K3 1

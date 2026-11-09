@@ -59,10 +59,10 @@ tap LFO
 tapkey w3
 wait 50
 expect held 0
-expect pool <1706
+expect pool <2738
 tapkey w3
 wait 50
-expect pool 1709
+expect pool 2741
 # SEL + ENV on the drone's page: the drone off the algorithm (silent but for the keys); now its keys play it,
 # the scale untouched
 press SEL
@@ -76,7 +76,7 @@ expect bass_level <5
 key w2 down
 wait 300
 expect held 1
-expect pool 1709
+expect pool 2741
 expect bass_level >50
 shot playing_drone.png
 key w2 up
@@ -105,7 +105,7 @@ key w0 up
 key w4 up
 wait 100
 expect held 0
-expect pool 1709
+expect pool 2741
 press SEL
 tap ENV
 release SEL
@@ -146,7 +146,7 @@ expect held 0
 tapkey w1
 wait 50
 expect held 0
-expect pool 685
+expect pool 3765
 # back on the algorithm while a key is held: the note let go
 tap ARP
 key w9 down

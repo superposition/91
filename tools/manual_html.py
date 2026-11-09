@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-only
-"""docs/MANUAL.md -> docs/manual.html (PERF-1's page: the mascot's colours, the slinky logo and favicon
+"""docs/MANUAL.md -> docs/manual.html (NAIWAN 91's page: the mascot's colours, the slinky logo and favicon
 embedded from web/img). The Markdown is the source; run this after editing it.
 
   tools/manual_html.py [IN.md [OUT.html]] [--fragment]
@@ -21,7 +21,7 @@ SRC = Path(__file__).resolve().parents[1]
 PART_COLOURS = {}                                     # (X0X marks its parts with a swatch; AMB-1 has none)
 
 CSS = """
-/* PERF-1's page: the mascot's colours (the slinky on the boot card): a warm black ground, crimson, light pink,
+/* NAIWAN 91's page: the mascot's colours (the slinky on the boot card): a warm black ground, crimson, light pink,
    ember yellow for what is live, cream. (The names below are inherited from AMB-1: paper the ground, sheet the
    cards, river the crimson, ink the text.) */
 :root {
@@ -127,9 +127,9 @@ def slug(title):
     return f"s{m.group(1)}" if m else re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
 
 
-NAME = "PERF-1"
+NAME = "NAIWAN 91"
 WEB_IMG = SRC / "web" / "img"                         # the slinky (logo) and its favicon, embedded: the page stays one file
-REPO = os.environ.get("REPO_URL", "https://github.com/deamonSLINKY/PERF-1")
+REPO = os.environ.get("REPO_URL", "https://github.com/superposition/91")
 IMG_BASE = SRC / "docs"
 EMBED = False                                         # --fragment: images as data URIs
 
@@ -196,12 +196,12 @@ def convert(md):
             t = ln[2:].strip()
             if t == NAME:                               # the site's header (home, the other pages), then the title
                 out.append('<p class="kofi" style="margin:0 0 .5rem;text-align:right;font-size:.88rem"><a href="https://ko-fi.com/deamonslinky" target="_blank" rel="noopener">☕ Buy me a coffee</a></p>')
-                out.append('<header class="site"><a class="home" href="../"><img src="' + data_uri(WEB_IMG / "slinky.png") + '" width="46" height="46" alt="">PERF-1</a><nav><a href="../emu/">Emulator</a><a href="../editor/">Editor</a><a href="../install/">Install</a><a href="../manual/" aria-current="page">Manual</a></nav></header>')
+                out.append('<header class="site"><a class="home" href="../"><img src="' + data_uri(WEB_IMG / "slinky.png") + '" width="46" height="46" alt="">NAIWAN 91</a><nav><a href="../emu/">Emulator</a><a href="../editor/">Editor</a><a href="../install/">Install</a><a href="../manual/" aria-current="page">Manual</a></nav></header>')
                 out.append('<h1>Manual</h1>')
-                out.append('<p class="printable">Printable: <a href="PERF-1-manual.pdf" download>the full manual (PDF)</a> &middot; <a href="PERF-1-quick-manual.pdf" download>the quick manual (PDF, eight A4 pages)</a> &middot; <a href="PERF-1-beginners-guide.pdf" download>the beginner\'s guide (PDF)</a></p>')
+                out.append('<p class="printable">Printable: <a href="NAIWAN 91-manual.pdf" download>the full manual (PDF)</a> &middot; <a href="NAIWAN 91-quick-manual.pdf" download>the quick manual (PDF, eight A4 pages)</a> &middot; <a href="NAIWAN 91-beginners-guide.pdf" download>the beginner\'s guide (PDF)</a></p>')
             else:
                 out.append(f'<a class="home" href="../">{NAME}</a>\n<h1>{inline(t)}</h1>')
-                out.append('<p class="printable">Printable: <a href="PERF-1-manual.pdf" download>the full manual (PDF)</a> &middot; <a href="PERF-1-quick-manual.pdf" download>the quick manual (PDF, eight A4 pages)</a> &middot; <a href="PERF-1-beginners-guide.pdf" download>the beginner\'s guide (PDF)</a></p>')
+                out.append('<p class="printable">Printable: <a href="NAIWAN 91-manual.pdf" download>the full manual (PDF)</a> &middot; <a href="NAIWAN 91-quick-manual.pdf" download>the quick manual (PDF, eight A4 pages)</a> &middot; <a href="NAIWAN 91-beginners-guide.pdf" download>the beginner\'s guide (PDF)</a></p>')
         elif ln.startswith("## "):
             t = ln[3:].strip()
             m = re.match(r"(\d+)\. (.+)", t)

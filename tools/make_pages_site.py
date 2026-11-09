@@ -95,7 +95,7 @@ img.logo{{width:96px;height:auto;display:block;margin:0 0 12px}}h1{{margin:0;fon
 p.small{{color:var(--dim);font-size:.88rem}}a{{color:var(--acc)}}
 </style></head><body><main>
 <img class="logo" src="img/slinky.png" alt="the NAIWAN 91 slinky">
-<h1>PERF<span>-1</span></h1>
+<h1>NAIWAN<span> 91</span></h1>
 <p class="tag">Free firmware that turns the M-VAVE FM-1 into a groovebox that plays by itself. By deamonSLINKY. Version <span class="v">{ver}</span>.</p>
 <p>Switch it on and music starts: drums, bass, a pad, an acid line and a plucked melody, in nineteen styles from techno to psytrance. You steer it with the buttons and keys: change the chords, break it down and drop it back in, mute parts, throw on effects, or let the auto-DJ run the show. When you want more, nearly everything can be edited and saved. New here? Start with the beginner's guide.</p>
 <div class="grid">

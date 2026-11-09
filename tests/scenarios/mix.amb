@@ -57,7 +57,7 @@ release GLO
 expect trkmute 0
 # the keys are still the scale with GLO let go
 tapkey 1
-expect pool 1197
+expect pool 2229
 tapkey 1
 # FX menu (0.15.19): the first page's C5 mutes all four drums while held (the single drums' mutes are on the BEAT FX bank), momentary, not latched
 tap FX

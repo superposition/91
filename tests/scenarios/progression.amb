@@ -12,7 +12,7 @@ expect progpos -1
 expect prgplay 0
 expect prgslot0 0
 # the seeded piece is in A natural minor (pool 0x5AD): I is Am (root 9), VI F (5), IV Dm (2), V Em (4)
-expect pool 1709
+expect pool 2741
 shot progression_heard.png
 # slot 1 (K1, Chord, at 1): I; slot 2 (a white key): VI; slot 3: IV; slot 4: V; eight bars each, so EDIT steps through them
 turn K1 -8
@@ -80,7 +80,7 @@ wait 2500
 tap EDIT
 wait 2500
 expect progpos 0
-expect chordiv 1061
+expect chordiv 2085
 shot progression_types.png
 # Walk: the genre's chords again (the slots kept)
 turn K4 -1

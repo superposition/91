@@ -8,7 +8,7 @@ wait 600
 release EDIT
 wait 100
 expect view 5
-expect pool 1709
+expect pool 2741
 turn K1 -8
 turn K1 1
 turn K3 4

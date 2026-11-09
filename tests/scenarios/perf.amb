@@ -10,7 +10,7 @@ tapkey 0
 tapkey 2
 wait 100
 expect trkmute 3
-expect pool 1709
+expect pool 2741
 # G#3 solo of the hats track (key 3), A#3... (key 5: solo snare), then reset all (E5, key 23)
 tapkey 3
 wait 100
@@ -49,7 +49,7 @@ tap HOME
 wait 100
 expect view 0
 tapkey 1
-expect pool 1197
+expect pool 2229
 tapkey 1
 # the dial from the perform screen goes on to the next page (HOME twice quickly would be the visualizers)
 wait 600

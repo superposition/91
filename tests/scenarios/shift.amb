@@ -2,12 +2,12 @@
 # the sequencer, black keys 1-6 copy the pattern there, OCT- clears the drum's lane, OCT+ puts it back
 wait 500
 expect pat 0
-expect pool 1709
+expect pool 2741
 # SEL + white key 3 (B3 is key 4... white keys: 0 2 4 6 7 9 11 12 ...): pattern 3, on the bar
 press SEL
 tapkey w2
 expect par48 2
-expect pool 1709
+expect pool 2741
 wait 20
 expect patnext 2
 leds
@@ -16,7 +16,7 @@ release SEL
 wait 2500
 expect pat 2
 # the key was a pattern, not a note: the scale is as it was; SEL let go did nothing more
-expect pool 1709
+expect pool 2741
 expect view 0
 # SEL + PRESETS: the piece waits for the bar; plain PRESETS is at once
 press SEL

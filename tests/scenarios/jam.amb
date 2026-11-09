@@ -18,7 +18,7 @@ expect jamv 1
 key 13 down
 wait 200
 expect held 1
-expect pool 1709
+expect pool 2741
 shot jam_held.png
 key 13 up
 wait 100
@@ -42,7 +42,7 @@ wait 200
 expect held 1
 key 0 up
 wait 100
-expect pool 1709
+expect pool 2741
 # the answer: three notes on the pluck, then silence: it keeps them (3), and plays them back on a bar line, then forgets
 spin K2 -2
 spin K1 -1

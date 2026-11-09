@@ -67,7 +67,7 @@ turn K4 1
 expect par150 3
 tap EDIT
 wait 2500
-expect chordroot 4
+expect chordroot 6
 tap EDIT
 wait 2500
 expect chordroot 9
@@ -79,7 +79,7 @@ wait 2500
 expect chordroot 7
 tap EDIT
 wait 2500
-expect chordroot 0
+expect chordroot 1
 tap EDIT
 wait 2500
-expect chordroot 4
+expect chordroot 5

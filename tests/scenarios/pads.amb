@@ -47,7 +47,7 @@ expect padnote0 0
 # bank C pad 3 (note 70): the bass on the scale's third tone (C4 = 60, played two octaves up the key: 84)
 midi 90 46 64
 wait 50
-expect padnote18 84
+expect padnote18 85
 midi 90 46 00
 wait 50
 expect padnote18 0

@@ -8,7 +8,7 @@ wait 600
 release EDIT
 wait 100
 expect view 5
-expect pool 1709
+expect pool 2741
 # one bar a chord, the whole circle (A minor: Am Dm G C F Bdim Em Am)
 turn K3 -2
 tapkey b4
@@ -40,9 +40,9 @@ tapkey w9
 wait 300
 expect chordroot 2
 expect padheld0 9
-expect padheld1 0
+expect padheld1 1
 expect padheld2 4
-expect padheld3 7
+expect padheld3 8
 shot pedal_pad.png
 # back to following: the bass on G
 tapkey w8

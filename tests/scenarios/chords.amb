@@ -1,7 +1,7 @@
 # the Chords page (ENV four times): the kind of chord, the voicing; Drift and Root as on their own pages.
 # Hypnos (01) is A Aeolian on its home chord: Am7 (A C E G).
 wait 800
-expect chordiv 0x489
+expect chordiv 2193
 tap ENV
 tap ENV
 tap ENV
@@ -19,12 +19,12 @@ shot chords_9ths.png
 turn K1 -2
 expect par92 3
 wait 200
-expect chordiv 1037
+expect chordiv 2069
 # dub: the minor 9 shape, the same on any chord (EDIT: the next chord)
 turn K1 4
 expect par92 7
 wait 200
-expect chordiv 1061
+expect chordiv 2117
 tap EDIT
 wait 4000
 expect chordiv 1061

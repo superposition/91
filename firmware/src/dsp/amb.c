@@ -104,42 +104,12 @@ volatile uint8_t en_mod[EN_NLANE][16];          /* a piece's step tricks, a byte
 #define EN_NBLFIG 9                             /* the bass line's figures by name (modes 7 ..; the table BL_FIG is with the bass line) */
 static const char *const BL_FIG_NAME[EN_NBLFIG] = {"Octaves", "Two-step", "One-drop", "Log drum", "Skippy", "Funk", "Big beat", "Dub", "Gallop"};
 
-/* the pieces: each the defaults above with a few changed (a parameter, its value; -1 ends), its own
- * kit's sound (the lanes) among them. Numbered on the screen; the names are for reading here. */
+/* the library columns' piece macros (base recipes only; GEN_OVR in the NAIWAN block expands its own kits) */
 #define LV(l) P_LANE_LVL(l)
 #define TU(l) P_LANE_TUNE(l)
 #define DE(l) P_LANE_DEC(l)
 #define KIT(k) P_KIT_KICK, k, P_KIT_SNARE, k, P_KIT_HAT, k, P_KIT_PERC, k   /* all four drums from kit k */
-static const int16_t PC_HYPNOS[] = {-1};
-static const int16_t PC_UNDERTOW[] = {P_TEMPO, 124, P_ROOT, 2, P_MODE, 1, P_PAD, 30, P_ACID, 45, P_BASS, 80, P_NOISE, 25,
-    P_NZ_COLOR, 2, P_BASSOCT, -1, P_DR_RES, 60, P_DL_DEPTH, 70, P_AC_CUT, 25, P_AC_DENS, 45, P_AC_LEN, 13,
-    P_PATTERN, 1, P_ECHO, 55, P_BRIGHT, 20, TU(0), -10, DE(0), 65, LV(5), 60, -1};
-static const int16_t PC_MONOLITH[] = {P_KIT_KICK, 2, P_TEMPO, 132, P_ROOT, 4, P_MODE, 2, P_PAD, 20, P_ACID, 60, P_BASS, 75,
-    P_AC_RES, 80, P_AC_ENV, 70, P_AC_DENS, 70, P_DRIVE, 60, P_NOISE, 15, P_REVERB, 25, P_SIZE, 60, P_PATTERN, 1,
-    LV(0), 90, LV(2), 70, DE(3), 25, -1};
-static const int16_t PC_ASCENSION[] = {P_PADTONE, 9, P_AC_WAVE, 8, P_TEMPO, 138, P_ROOT, 7, P_PAD, 60, P_BRIGHT, 60, P_ACID, 45, P_BASS, 60,
-    P_AC_LEN, 12, P_PATTERN, 1, P_REVERB, 55, P_SIZE, 85, P_MOTION, 80, P_NZ_COLOR, 0, P_NOISE, 15, P_PL_DEPTH, 40,
-    LV(4), 60, LV(2), 70, -1};
-static const int16_t PC_NIGHT_DRIVE[] = {P_KIT_PERC, 3, P_TEMPO, 130, P_ROOT, 9, P_MODE, 1, P_PAD, 35, P_ACID, 65, P_AC_CUT, 45,
-    P_AC_RES, 75, P_AC_WAVE, 1, P_AC_SLIDE, 50, P_AC_DENS, 55, P_AC_LEN, 14, P_PATTERN, 1, P_NZ_COLOR, 4, P_NOISE, 12,
-    P_SWING, 15, TU(5), 20, LV(5), 55, -1};
-static const int16_t PC_DUB_CHAMBER[] = {P_DR_INST, 12, P_TEMPO, 120, P_ROOT, 5, P_MODE, 7, P_PAD, 70, P_CHORD, EN_CH_DUB, P_PADTONE, 8, P_ACID, 40, P_AC_CUT, 20,
-    P_AC_DEC, 60, P_ECHO, 80, P_SIZE, 90, P_AC_LEN, 7, P_AC_DENS, 35, P_PATTERN, 1, P_NZ_COLOR, 6, P_NOISE, 35,
-    P_DE_TRIG, 1, P_SWING, 20, TU(1), 25, DE(1), 25, DE(0), 70, -1};
-static const int16_t PC_GLASS_TUNNEL[] = {P_TEMPO, 134, P_ROOT, 11, P_MODE, 6, P_PAD, 30, P_BRIGHT, 55, P_ACID, 55,
-    P_AC_LEN, 10, P_AC_DENS, 65, P_AC_MUT, 40, P_PATTERN, 1, P_NZ_COLOR, 7, P_NOISE, 20, P_PL_RATE, 3, P_PL_DEPTH, 50,
-    P_PL_DEST, 2, TU(5), 30, DE(5), 25, DE(3), 25, -1};
-static const int16_t PC_TIDAL[] = {P_KIT_PERC, 10, P_TEMPO, 126, P_ROOT, 10, P_MODE, 4, P_PAD, 50, P_ACID, 50, P_BASS, 75,
-    P_DL_DEPTH, 85, P_DL_RATE, 5, P_MOTION, 95, P_EVOLVE, 75, P_AC_LEN, 15, P_PATTERN, 1, P_NZ_COLOR, 3, P_NOISE, 15,
-    P_DE_TRIG, 3, P_DE_AMT, 60, TU(5), -25, DE(5), 60, LV(5), 60, -1};
-static const int16_t PC_WAREHOUSE[] = {P_TEMPO, 136, P_ROOT, 0, P_MODE, 2, P_PAD, 15, P_ACID, 55, P_BASS, 80,
-    P_DRIVE, 75, P_AC_RES, 85, P_AC_ENV, 75, P_AC_DENS, 75, P_EVOLVE, 55, P_MOTION, 50, P_DL_DEPTH, 65,
-    P_NOISE, 20, P_NZ_COLOR, 5, P_REVERB, 30, P_SIZE, 55, P_ECHO, 30, P_PATTERN, 1, KIT(2), P_PADTONE, 7, P_DR_INST, 2,
-    LV(0), 90, DE(0), 60, LV(4), 60, DE(4), 60, -1};
-static const int16_t PC_DEEP_FIELD[] = {P_TEMPO, 118, P_ROOT, 3, P_PAD, 60, P_BRIGHT, 30, P_PE_ATK, 60, P_PE_REL, 70,
-    P_ACID, 35, P_AC_CUT, 25, P_AC_DENS, 40, P_AC_LEN, 11, P_AC_MUT, 40, P_BASS, 60, P_NOISE, 30, P_NZ_COLOR, 1,
-    P_REVERB, 60, P_SIZE, 85, P_ECHO, 60, P_ETIME, 2, P_PATTERN, 1, P_SWING, 25, P_MOTION, 85, P_DRIFT, 75,
-    TU(1), -10, DE(1), 60, DE(0), 60, -1};
+
 /* LOFI: ten pieces, 68 .. 94 beats a minute, swung, the Rhodes in sevenths and ninths over a warm bass, a soft sparse lead, the
  * dusty kit; each piece the base with a few changed (its key, mode, sounds and tempo). The patterns are made below. */
 #define LOFI_BASE P_CM_VU, 50, P_GHOST, 60, P_HUMAN, 35,  P_BL_MODE, 1, P_BL_LEN, 65, P_BL_MOVE, 20, P_PADTONE, 0, P_PAD, 54, P_BRIGHT, 30, P_DETUNE, 35, P_CHORD, EN_CH_7TH, P_VOICING, 1, P_PE_ATK, 25, P_PE_REL, 50, \
@@ -242,23 +212,6 @@ static const uint16_t PSY_DOWN[6][6] = {
     {0x0101, 0x1010, 0x0000, 0x5555, 0x0000, 0x0820}, {0x0901, 0x1010, 0x0000, 0x5555, 0x4000, 0x0000}, {0x1111, 0x0000, 0x1010, 0x4444, 0x0000, 0x2020},
     {0x0121, 0x1010, 0x0000, 0xDDDD, 0x0000, 0x0808}, {0x0101, 0x0000, 0x1010, 0x5555, 0x0040, 0x8080}, {0x1111, 0x1010, 0x0000, 0x5555, 0x4444, 0x0000}};
 static int psy_slow(int g, int i) { return g == 17 && (i == 0 || i == 1 || i == 9); }   /* the library's PSY column, which SANDS uses */
-static const char *const XNAME[15][10] = {
-    {"V01", "V02", "V03", "V04", "V05", "V06", "V07", "V08", "V09", "V10"},
-    {"N01", "N02", "N03", "N04", "N05", "N06", "N07", "N08", "N09", "N10"},
-    {"B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B09", "B10"},
-    {"G01", "G02", "G03", "G04", "G05", "G06", "G07", "G08", "G09", "G10"},
-    {"E01", "E02", "E03", "E04", "E05", "E06", "E07", "E08", "E09", "E10"},
-    {"T01", "T02", "T03", "T04", "T05", "T06", "T07", "T08", "T09", "T10"},
-    {"S01", "S02", "S03", "S04", "S05", "S06", "S07", "S08", "S09", "S10"},
-    {"F01", "F02", "F03", "F04", "F05", "F06", "F07", "F08", "F09", "F10"},
-    {"R01", "R02", "R03", "R04", "R05", "R06", "R07", "R08", "R09", "R10"},
-    {"W01", "W02", "W03", "W04", "W05", "W06", "W07", "W08", "W09", "W10"},
-    {"A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08", "A09", "A10"},
-    {"P01", "P02", "P03", "P04", "P05", "P06", "P07", "P08", "P09", "P10"},
-    {"I01", "I02", "I03", "I04", "I05", "I06", "I07", "I08", "I09", "I10"},
-    {"Y01", "Y02", "Y03", "Y04", "Y05", "Y06", "Y07", "Y08", "Y09", "Y10"},
-    {"O01", "O02", "O03", "O04", "O05", "O06", "O07", "O08", "O09", "O10"},
-};
 static void x_pats(int g, int i, uint16_t pats[EN_NPAT][EN_NLANE])
 {
     int p, l;
@@ -299,26 +252,25 @@ static const int16_t GO_SANDS[] = {P_SWING,12,P_BASS,66,P_ACID,20,P_AC_DENS,18,P
 static const int16_t *const GEN_OVR[EN_NGENRE] = {GO_CITYPOP, GO_SUNSET, GO_AOR, GO_SHIBUYA, GO_BOOGIE, GO_YACHT, GO_TAPE, GO_NEON, GO_KAYO, GO_LOUNGE, GO_SURF, GO_BALEAR, GO_TROPIC, GO_SUMMER, GO_MARINA, GO_CALYPSO, GO_ISLAND, GO_SEASIDE, GO_SANDS};
 /* the ten pieces' tempo, root, mode; chord, pad tone, drone and acid wave come from the donor row */
 static const uint8_t GEN_TR[EN_NGENRE][EN_NPIECES][3] = {
-    {{104, 9, 1}, {102, 2, 5}, {108, 0, 0}, {99, 5, 1}, {106, 7, 4}, {110, 4, 0}, {97, 11, 5}, {103, 0, 0}, {101, 3, 1}, {107, 10, 4}},   /* CITYPOP */
-    {{106, 9, 1}, {104, 0, 5}, {108, 5, 0}, {110, 2, 1}, {102, 7, 4}, {107, 4, 5}, {105, 11, 0}, {109, 1, 1}, {103, 6, 4}, {111, 10, 0}},   /* SUNSET */
-    {{96, 4, 0}, {98, 9, 4}, {94, 0, 1}, {100, 2, 5}, {102, 7, 0}, {92, 5, 4}, {97, 11, 1}, {99, 3, 0}, {104, 6, 5}, {95, 1, 4}},   /* AOR */
-    {{118, 0, 0}, {120, 5, 1}, {116, 9, 4}, {122, 2, 0}, {114, 7, 5}, {124, 4, 1}, {119, 11, 0}, {121, 1, 4}, {117, 6, 5}, {126, 10, 1}},   /* SHIBUYA */
-    {{116, 9, 1}, {118, 2, 4}, {114, 0, 5}, {120, 7, 1}, {122, 4, 0}, {112, 11, 4}, {117, 5, 1}, {119, 1, 5}, {123, 6, 0}, {124, 10, 4}},   /* BOOGIE */
-    {{88, 4, 0}, {90, 9, 4}, {86, 0, 1}, {92, 2, 5}, {94, 7, 0}, {84, 5, 4}, {89, 11, 1}, {91, 3, 0}, {96, 6, 5}, {87, 1, 4}},   /* YACHT */
-    {{96, 0, 1}, {94, 5, 5}, {98, 9, 4}, {92, 2, 0}, {100, 7, 1}, {97, 4, 5}, {95, 11, 4}, {99, 3, 0}, {93, 6, 1}, {101, 10, 5}},   /* TAPE */
-    {{112, 9, 1}, {114, 2, 5}, {110, 0, 4}, {116, 7, 1}, {118, 4, 0}, {108, 11, 5}, {113, 5, 1}, {115, 1, 4}, {117, 6, 5}, {120, 10, 0}},   /* NEON */
-    {{76, 4, 0}, {78, 9, 4}, {74, 0, 5}, {80, 2, 1}, {82, 7, 0}, {72, 5, 4}, {77, 11, 5}, {79, 3, 1}, {84, 6, 0}, {75, 1, 4}},   /* KAYO */
-    {{92, 0, 1}, {94, 5, 4}, {90, 9, 0}, {96, 2, 5}, {98, 7, 1}, {88, 4, 4}, {93, 11, 0}, {95, 1, 5}, {99, 6, 1}, {91, 10, 4}},   /* LOUNGE */
-    {{140, 9, 4}, {144, 2, 0}, {136, 0, 1}, {148, 7, 4}, {132, 4, 0}, {146, 11, 1}, {142, 5, 4}, {150, 1, 0}, {138, 6, 1}, {152, 10, 4}},   /* SURF */
-    {{100, 0, 1}, {102, 5, 4}, {98, 9, 0}, {104, 2, 5}, {106, 7, 1}, {96, 4, 4}, {101, 11, 0}, {103, 1, 1}, {108, 6, 4}, {99, 10, 0}},   /* BALEAR */
-    {{112, 0, 0}, {114, 5, 1}, {110, 9, 4}, {116, 2, 0}, {108, 7, 5}, {117, 4, 1}, {113, 11, 0}, {115, 1, 4}, {111, 6, 1}, {118, 10, 0}},   /* TROPIC */
-    {{108, 9, 1}, {110, 2, 4}, {106, 0, 0}, {112, 7, 5}, {114, 4, 1}, {104, 11, 0}, {109, 5, 4}, {111, 1, 1}, {115, 6, 0}, {116, 10, 5}},   /* SUMMER */
-    {{96, 2, 1}, {98, 7, 4}, {94, 0, 5}, {100, 4, 0}, {102, 9, 1}, {92, 5, 4}, {97, 11, 5}, {99, 1, 0}, {103, 6, 1}, {95, 10, 4}},   /* MARINA */
-    {{124, 9, 0}, {122, 2, 4}, {126, 0, 1}, {128, 5, 0}, {120, 7, 4}, {130, 4, 1}, {125, 11, 0}, {127, 1, 4}, {129, 6, 1}, {132, 10, 0}},   /* CALYPSO */
-    {{80, 0, 0}, {78, 5, 4}, {82, 9, 1}, {76, 2, 0}, {84, 7, 4}, {74, 4, 1}, {81, 11, 0}, {79, 1, 4}, {86, 6, 0}, {77, 10, 1}},   /* ISLAND */
-    {{118, 9, 1}, {120, 2, 4}, {116, 0, 0}, {122, 5, 1}, {124, 7, 4}, {126, 4, 0}, {119, 11, 1}, {121, 1, 4}, {117, 6, 0}, {123, 10, 1}},   /* SEASIDE */
-    {{72, 0, 1}, {74, 5, 5}, {70, 9, 4}, {76, 2, 0}, {78, 7, 1}, {68, 4, 5}, {73, 11, 4}, {75, 1, 0}, {80, 6, 1}, {71, 10, 5}},   /* SANDS */
-};
+    {{104, 9, 0}, {102, 2, 1}, {108, 0, 2}, {99, 5, 3}, {106, 7, 4}, {110, 4, 5}, {97, 11, 0}, {103, 0, 1}, {101, 3, 2}, {107, 10, 3}},   /* CITYPOP */
+    {{106, 9, 4}, {104, 0, 5}, {108, 5, 0}, {110, 2, 1}, {102, 7, 2}, {107, 4, 3}, {105, 11, 4}, {109, 1, 5}, {103, 6, 0}, {111, 10, 1}},   /* SUNSET */
+    {{96, 4, 2}, {98, 9, 3}, {94, 0, 4}, {100, 2, 5}, {102, 7, 0}, {92, 5, 1}, {97, 11, 2}, {99, 3, 3}, {104, 6, 4}, {95, 1, 1}},   /* AOR */
+    {{118, 0, 0}, {120, 5, 1}, {116, 9, 2}, {122, 2, 3}, {114, 7, 4}, {124, 4, 5}, {119, 11, 0}, {121, 1, 1}, {117, 6, 2}, {126, 10, 3}},   /* SHIBUYA */
+    {{116, 9, 4}, {118, 2, 5}, {114, 0, 0}, {120, 7, 1}, {122, 4, 2}, {112, 11, 3}, {117, 5, 4}, {119, 1, 5}, {123, 6, 0}, {124, 10, 1}},   /* BOOGIE */
+    {{88, 4, 2}, {90, 9, 3}, {86, 0, 4}, {92, 2, 5}, {94, 7, 0}, {84, 5, 1}, {89, 11, 2}, {91, 3, 3}, {96, 6, 4}, {87, 1, 5}},   /* YACHT */
+    {{96, 0, 0}, {94, 5, 1}, {98, 9, 2}, {92, 2, 3}, {100, 7, 4}, {97, 4, 5}, {95, 11, 0}, {99, 3, 1}, {93, 6, 2}, {101, 10, 3}},   /* TAPE */
+    {{112, 9, 4}, {114, 2, 5}, {110, 0, 0}, {116, 7, 1}, {118, 4, 2}, {108, 11, 3}, {113, 5, 4}, {115, 1, 5}, {117, 6, 4}, {120, 10, 1}},   /* NEON */
+    {{76, 4, 2}, {78, 9, 3}, {74, 0, 4}, {80, 2, 5}, {82, 7, 0}, {72, 5, 1}, {77, 11, 2}, {79, 3, 3}, {84, 6, 4}, {75, 1, 5}},   /* KAYO */
+    {{92, 0, 0}, {94, 5, 1}, {90, 9, 2}, {96, 2, 3}, {98, 7, 3}, {88, 4, 5}, {93, 11, 0}, {95, 1, 5}, {99, 6, 2}, {91, 10, 3}},   /* LOUNGE */
+    {{140, 9, 4}, {144, 2, 5}, {136, 0, 0}, {148, 7, 1}, {132, 4, 2}, {146, 11, 3}, {142, 5, 4}, {150, 1, 5}, {138, 6, 0}, {152, 10, 1}},   /* SURF */
+    {{100, 0, 2}, {102, 5, 3}, {98, 9, 4}, {104, 2, 5}, {106, 7, 0}, {96, 4, 1}, {101, 11, 2}, {103, 1, 3}, {108, 6, 4}, {99, 10, 5}},   /* BALEAR */
+    {{112, 0, 0}, {114, 5, 1}, {110, 9, 2}, {116, 2, 3}, {108, 7, 4}, {117, 4, 5}, {113, 11, 0}, {115, 1, 1}, {111, 6, 2}, {118, 10, 3}},   /* TROPIC */
+    {{108, 9, 4}, {110, 2, 5}, {106, 0, 0}, {112, 7, 1}, {114, 4, 2}, {104, 11, 3}, {109, 5, 4}, {111, 1, 5}, {115, 6, 0}, {116, 10, 1}},   /* SUMMER */
+    {{96, 2, 2}, {98, 7, 4}, {94, 0, 4}, {100, 4, 5}, {102, 9, 0}, {92, 5, 1}, {97, 11, 2}, {99, 1, 3}, {103, 6, 4}, {95, 10, 5}},   /* MARINA */
+    {{124, 9, 0}, {122, 2, 1}, {126, 0, 2}, {128, 5, 3}, {120, 7, 4}, {130, 4, 5}, {125, 11, 0}, {127, 1, 1}, {129, 6, 2}, {132, 10, 3}},   /* CALYPSO */
+    {{80, 0, 4}, {78, 5, 5}, {82, 9, 0}, {76, 2, 1}, {84, 7, 2}, {74, 4, 3}, {81, 11, 4}, {79, 1, 5}, {86, 6, 0}, {77, 10, 1}},   /* ISLAND */
+    {{118, 9, 2}, {120, 2, 3}, {116, 0, 4}, {122, 5, 5}, {124, 7, 0}, {126, 4, 1}, {119, 11, 2}, {121, 1, 3}, {117, 6, 0}, {123, 10, 5}},   /* SEASIDE */
+    {{72, 0, 0}, {74, 5, 1}, {70, 9, 2}, {76, 2, 3}, {78, 7, 4}, {68, 4, 5}, {73, 11, 0}, {75, 1, 1}, {80, 6, 2}, {71, 10, 3}},   /* SANDS */};
 static const uint8_t GEN_PLUCK[EN_NGENRE][5] = {
     {2, 12, 24, 19, 7},   /* CITYPOP */
     {2, 12, 25, 19, 5},   /* SUNSET */
@@ -438,6 +390,7 @@ void en_piece_g(int g, int i, int16_t *par, uint16_t *pool)
         par[P_AC_WAVE] = r[6];
         vary(d, i, par);                        /* the donor's palette, rate and pad shift */
         par[P_CM_SND] = (int16_t)GEN_PLUCK[g][(i * 4 + d) % 5];   /* the genre's own five pluck sounds */
+        par[P_PADTONE] = (int16_t)PALETTE[d].pad[i % 5];          /* shift 0: pieces i and i+6 never share a pad */
     }
     if (psy_slow(g, i)) {                       /* psy-ambient, psychill: the bass held, the pluck in eighths, the acid thin, a wide shimmer, the pad up */
         par[P_BL_MODE] = 0;

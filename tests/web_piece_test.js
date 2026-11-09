@@ -164,7 +164,7 @@ const voiceOf = (name, k) => { const v = new Uint8Array(128).map((_, i) => (i * 
   check("the firmware's about answer", ab && ab.ver === 1 && ab.npar === 176 && ab.genres === 19 && ab.voices === 5);
   check("something else is not", M.pcParseAbout([0xF0, 0x7D, 0x50, 0x44, 1, 2, 3, 0xF7]) === null);
 
-  // the whole way, in the simulator: save 01 (Tempo 132, Evolve 43), share it as a piece made before the last six settings with its own voice, add it as 04
+  // the whole way, in the simulator: save 01 (Tempo 108, Evolve 38), share it as a piece made before the last six settings with its own voice, add it as 04
   const host = process.argv[2];
   if (host) {
     const dir = path.join("build", "webpiece");
@@ -175,7 +175,7 @@ const voiceOf = (name, k) => { const v = new Uint8Array(128).map((_, i) => (i * 
       try { execFileSync(host, [f, path.join(dir, name)], { stdio: "pipe" }); return true; } catch (e) { console.log(String(e.stdout || "").split("\n").filter((l) => /FAIL/.test(l)).join("\n")); return false; }
     };
     const bin = path.join(dir, "bank0.bin");
-    check("the simulator saves 01", run("save", ["seed 0", "wait 3000", "tap GLO", "tap HOME", "wait 100", "spin K1 4", "spin K2 3", "wait 200", "expect tempo 132",
+    check("the simulator saves 01", run("save", ["seed 0", "wait 3000", "tap GLO", "tap HOME", "wait 100", "spin K1 4", "spin K2 3", "wait 200", "expect tempo 108",
       "tap GLO", "tap SAVE", "wait 500", "expect saved 1", "dumpobj 0 " + bin]));
     const saved = new Uint8Array(fs.readFileSync(bin));
     const shared = await M.pcFromCode(await M.pcToCode({ ...M.pcFromBank(saved, 0, 0), voice: voiceOf("SCREAMER", 9) }));
@@ -189,7 +189,7 @@ const voiceOf = (name, k) => { const v = new Uint8Array(128).map((_, i) => (i * 
     fs.writeFileSync(path.join(dir, "knd_new.bin"), M.pcKindsWith(new Uint8Array(0), 0, 3, Uint8Array.from([0x2A, 0x00, 0x00]), 19));   // slot 1 type 2, slot 2 type 5
     check("the simulator plays it as 04, with its voice, the settings it predates its recipe's", vplan.kind === "free" && vplan.slot === 0 && run("load", [
       "loadobj 0 " + path.join(dir, "bank_new.bin"), "loadobj 3 " + path.join(dir, "vox_new.bin"), "loadobj 23 " + path.join(dir, "knd_new.bin"), "seed 0", "reboot", "wait 2000", "expect saved 8", "expect uservoices 1",
-      "turn PRESET 3", "wait 1500", "expect piece 3", "expect tempo 132", "expect par" + P_EVOLVE + " 43", "expect par" + P_CM_SND + " " + (NPLAIN + NFMFACT), "expect parsbad 0",
+      "turn PRESET 3", "wait 1500", "expect piece 3", "expect tempo 108", "expect par" + P_EVOLVE + " 38", "expect par" + P_CM_SND + " " + (NPLAIN + NFMFACT), "expect parsbad 0",
       "expect prgtype0 2", "expect prgtype1 5", "expect prgtype2 0"]));
     // the same piece with its extras as 0.16.28 keeps them (PCX1): its types, FILTERS and SCREAM; a piece without any plays the defaults
     fs.writeFileSync(path.join(dir, "px_new.bin"), M.pcExtrasWith(new Uint8Array(0), 0, 3, Uint8Array.from([0x2A, 0x00, 0x00]), Uint8Array.from([2, 1, 3, 70, 40, 20, 1]), 19));
