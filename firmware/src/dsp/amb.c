@@ -366,6 +366,16 @@ static void vary(int g, int i, int16_t *par)
     par[P_PAN3] = (int16_t)(50 + ((i & 1) ? -14 : 14));    /* the pluck a little off the middle, the acid the other way */
     par[P_PAN2] = (int16_t)(50 + ((i & 1) ? 8 : -8));
 }
+/* NAIWAN 91: the boot turnaround — a diminished 7th, drop 2, on the pluck's bell; the same shape a semitone up
+ * leans back into the piece. Fired where the pluck is certainly rendering. */
+static void naiwan_bing(int root, int up)
+{
+    static const int V[4] = {-6, 0, 3, 9};             /* the 7th dropped an octave, root, b3, b5 */
+    static const int ACC1[4] = {66, 78, 72, 86}, ACC2[4] = {70, 84, 74, 92};
+    int k;
+    for (k = 0; k < 4; k++)
+        en_note_v(EN_V_PLUCK, 48 + root + up + V[k], up ? ACC2[k] : ACC1[k]);
+}
 static void naiwan_prog(int which);
 static int8_t naiwan_pending = -1;      /* which loop the next chord change applies */   /* NAIWAN 91: a piece's hand-set progression (defined below) */
 void en_piece_g(int g, int i, int16_t *par, uint16_t *pool)
@@ -2235,6 +2245,8 @@ static void chord_change(void)                  /* to another degree: the progre
         const int w = naiwan_pending;
         naiwan_pending = -1;
         naiwan_prog(w);
+        naiwan_bing((int)(en_chord_root % 12), 0);     /* the first chord: dim7 drop 2 */
+        naiwan_bing((int)(en_chord_root % 12), 1);     /* and a semitone up, leaning back into it */
     }
     int i, bor;
     alt_clear();
