@@ -735,7 +735,7 @@ idleRelease(() => writing || !!stTimer, () => { port = null; log("MIDI port rele
 (async () => {
   if (!navigator.requestMIDIAccess) { sayK("nomidi"); return; }
   try {
-    const r = await fetch(meta.pkg);
+    const r = await fetch(meta.pkg + "?v=" + (meta.sha || meta.version), { cache: "no-store" });   /* never the cached copy */
     if (!r.ok) throw new Error(`${meta.pkg}: HTTP ${r.status}`);
     const pkg = new Uint8Array(await r.arrayBuffer());
     if (productOf(pkg) !== meta.product) { sayK("badpkg"); return; }

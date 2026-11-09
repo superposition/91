@@ -135,7 +135,8 @@ def logical_image(raw):
 
 
 def model_of(text):
-    return text.split("_")[0].removeprefix("ota-")
+    head = text.split("_")[0]
+    return head[4:] if head.startswith("ota-") else head   # (removeprefix: Python 3.9+)
 
 
 # ------------------------------------------------------------------ MIDI ---

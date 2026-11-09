@@ -8,6 +8,7 @@ OUTDIR gets index.html (the landing page), install/ (the web installer with the 
 emu/ (the browser emulator), editor/ (the parameter and DX7 voice editor), pieces/ and library/ (sharing), manual/ and firmware/perf1-VERSION.fwsc.
   --no-sharing   leaves out pieces/ and library/ and their links (a release whose sharing pages are not ready: 0.16.1)
 All links are relative, so it works at any path (https://USER.github.io/91/ and a local server alike)."""
+import hashlib
 import json
 import re
 import shutil
@@ -25,6 +26,9 @@ OUT = Path(args[1] if len(args) > 1 else SRC / "build" / "site")
 REPO = ""   # local-only build: no share-link host
 pkg = SRC / "build" / f"naiwan91-{ver}.fwsc"
 raw = pkg.read_bytes()
+app = SRC / "build" / "amb.bin"
+if app.exists() and pkg.stat().st_mtime < app.stat().st_mtime:
+    sys.exit(f"{pkg}: older than build/amb.bin — the package is stale: run ./build.sh --release {ver} first")
 product = product_of(raw)
 if not re.fullmatch(r"FM-1_7\d{6}", product):
     sys.exit(f"{pkg}: identity {product!r}: make a release build (tools/release.sh {ver})")
@@ -44,7 +48,8 @@ shutil.copy(SRC / "web" / "img" / "favicon.png", OUT / "img" / "favicon.png")
 
 page = (SRC / "web" / "amb_installer.html").read_text(encoding="utf-8")
 lib = strip_module((SRC / "web" / "fm1pkg.js").read_text(encoding="utf-8")) + "\n" + strip_module((SRC / "web" / "fm1ota.js").read_text(encoding="utf-8")) + "\n" + strip_module((SRC / "web" / "fm1backup.js").read_text(encoding="utf-8")) + "\n" + strip_module((SRC / "web" / "fm1idle.js").read_text(encoding="utf-8"))
-meta = json.dumps({"version": ver, "product": product, "pkg": "../firmware/" + name})
+sha = hashlib.sha256(raw).hexdigest()
+meta = json.dumps({"version": ver, "product": product, "pkg": "../firmware/" + name, "sha": sha[:16]})
 page = page.replace("/*LIB*/", lib).replace("/*META*/", meta).replace("<h1>Install NAIWAN 91</h1>", f"<h1>Install NAIWAN 91 {ver}</h1>")
 (OUT / "install" / "index.html").write_text(page, encoding="utf-8", newline="\n")
 
@@ -107,7 +112,7 @@ body{{font-family:"Nunito","Segoe UI",system-ui,sans-serif!important}}h1,h2,h3,b
 <a class="card" href="pieces/"><b>Library &amp; pieces</b><span>Pieces and sets made by players: hear them in your browser and add them to your FM-1. Submit your own, one or many at once.</span></a>
 <a class="card" href="manual/"><b>Manual</b><span>Starts with a beginner's guide, then explains every button and page.</span></a>
 {quick_card}
-<a class="card" href="firmware/{name}"><b>Download the firmware file</b><span>{name} ({len(raw) // 1024} KB). You only need this if you install another way than the page above.</span></a>
+<a class="card" href="firmware/{name}?v={sha}"><b>Download the firmware file</b><span>{name} ({len(raw) // 1024} KB, SHA-256 {sha}). You only need this if you install another way than the page above.</span></a>
 <a class="card" href="{REPO}/issues/new/choose"><b>Ideas and problems</b><span>Tell me what you'd like next, or what went wrong. Most new features started as someone's idea.</span></a>
 <a class="card" href="{REPO}"><b>Source code</b><span>Free and open source (GPL-3.0), on GitHub.</span></a>
 </div>
