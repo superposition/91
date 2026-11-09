@@ -423,14 +423,6 @@ void en_piece_g(int g, int i, int16_t *par, uint16_t *pool)
             par[P_VOICING] = 1;                                  /* open: drop 2, jazzier */
             par[P_CM_DEC] = (int16_t)(64 + (i % 3) * 8);         /* the lead rings too */
             par[P_CM_STYLE] = (int16_t)(i % 3 == 0 ? 0 : i % 3 == 1 ? 5 : 2);   /* up, thirds, up-down */
-            {   /* NAIWAN 91: a warmer bass — round voices, the filter low, a little body, no grit */
-                static const uint8_t WARM[5] = {1, 9, 7, 18, 12};   /* Warm, Sub, Organ, Tine, Fifths */
-                par[P_DR_INST] = (int16_t)WARM[i % 5];
-                par[P_DR_CUT] = 38;
-                par[P_DR_RES] = 12;
-                par[P_DRIVE] = 18;
-                par[P_DETUNE] = 26;
-            }
             par[P_DRIFT] = 82;                                   /* chords twice as long: four bars, not two */
             par[P_SWING] = (int16_t)(par[P_SWING] + 8 > 64 ? 64 : par[P_SWING] + 8);   /* the timing sits back */
             par[P_HUMAN] = (int16_t)(par[P_HUMAN] + 10 > 60 ? 60 : par[P_HUMAN] + 10);
@@ -482,6 +474,16 @@ void en_piece_g(int g, int i, int16_t *par, uint16_t *pool)
         par[P_DRIFT] = 45;                             /* two bars a chord again */
         par[P_ACID] = 45;
         par[P_AC_DENS] = 45;
+    }
+    {   /* NAIWAN 91: a pulse bass that growls — last, so no piece or genre value wins over it */
+        static const uint8_t GRR[5] = {5, 10, 5, 9, 10};   /* Pulse, Square, Pulse, Sub, Square */
+        par[P_DR_INST] = (int16_t)GRR[i % 5];
+        par[P_DR_CUT] = 42;
+        par[P_DR_RES] = 28;
+        par[P_DRIVE] = 42;
+        par[P_DETUNE] = 18;
+        par[P_BASS] = 86;
+        par[P_BASSOCT] = -1;
     }
     *pool = EN_MODE_POOL[par[P_MODE]];
 }
