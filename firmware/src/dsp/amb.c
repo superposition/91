@@ -241,7 +241,7 @@ static const uint16_t XPAT[15][6][6] = {
 static const uint16_t PSY_DOWN[6][6] = {
     {0x0101, 0x1010, 0x0000, 0x5555, 0x0000, 0x0820}, {0x0901, 0x1010, 0x0000, 0x5555, 0x4000, 0x0000}, {0x1111, 0x0000, 0x1010, 0x4444, 0x0000, 0x2020},
     {0x0121, 0x1010, 0x0000, 0xDDDD, 0x0000, 0x0808}, {0x0101, 0x0000, 0x1010, 0x5555, 0x0040, 0x8080}, {0x1111, 0x1010, 0x0000, 0x5555, 0x4444, 0x0000}};
-static int psy_slow(int g, int i) { return g == 18 && (i == 0 || i == 1 || i == 9); }   /* SANDS: its three slow pieces */
+static int psy_slow(int g, int i) { return g == 17 && (i == 0 || i == 1 || i == 9); }   /* the library's PSY column, which SANDS uses */
 static const char *const XNAME[15][10] = {
     {"V01", "V02", "V03", "V04", "V05", "V06", "V07", "V08", "V09", "V10"},
     {"N01", "N02", "N03", "N04", "N05", "N06", "N07", "N08", "N09", "N10"},
@@ -423,7 +423,7 @@ void en_piece_g(int g, int i, int16_t *par, uint16_t *pool)
     for (p = 0; p < P_NPARAMS; p++)
         par[p] = PARAMS[p].def;
     {   /* the genre's donor column: its recipe, this genre's own answer on top, then the piece's row */
-        const int d = gx(g);
+        const int d = gx(g) - 4;               /* the library column (XBASE/XROW hold genres 4..18) */
         const uint8_t *r = XROW[d][i];
         for (c = XBASE[d]; c[0] >= 0; c += 2)
             par[c[0]] = c[1];
@@ -468,7 +468,7 @@ void en_piece(int i, int16_t *par, uint16_t *pool) { en_piece_g(0, i, par, pool)
 void en_piece_pats_g(int g, int i, uint16_t pats[EN_NPAT][EN_NLANE])
 {
     i = (unsigned)i < EN_NPIECES ? i : 0;
-    x_pats(gx(g), i, pats);
+    x_pats(gx(g) - 4, i, pats);             /* the library column */
 }
 void en_piece_pats(int i, uint16_t pats[EN_NPAT][EN_NLANE]) { en_piece_pats_g(0, i, pats); }
 /* A genre's factory step tricks (en_mod; the same for each of its pieces): the feel a genre has that a grid of hits cannot say. Byte: ratchet | push << 3 | level << 6.
