@@ -1979,7 +1979,7 @@ The **Pieces** page on the NAIWAN 91 website shares one piece at a time: you sen
 The **Global** page (**GLO**) has four knobs:
 
 - **Root**: the key the music is in.
-- **Theme**: the colours. Choose Sea, Synth, Acid, Ice, Ember or Phosphor.
+- **Theme**: the colours. Choose Beach, Synth, Acid, Ice, Ember or Phosphor.
 - **Tune**: fine tuning, +-50 cents (a cent is a hundredth of a semitone).
 - **Genre**: the bank of pieces, the same as **GLO** + **PRESETS**.
 
@@ -1989,7 +1989,7 @@ Synth is a look of its own. A night sky sits behind the sigil, with a striped su
 
 ![The Synth look: the home screen](img/perf-screen-home-synth.png)
 
-All the other themes are colour versions of the Sea look. The background is a warm black, and each voice keeps one colour everywhere. In Sea, the pad is bone white, the bass crimson, the acid lime, the pluck ice-teal and the drums pink. The ember colour marks whatever is happening right now.
+All the other themes are colour versions of the Beach look. The background is a warm black, and each voice keeps one colour everywhere. In Beach, the pad is bone white, the bass crimson, the acid lime, the pluck ice-teal and the drums pink. The ember colour marks whatever is happening right now.
 
 Along the top of the header is a beat bar. The beats are taller marks, and the step playing is lit. Under it is a coil, the slinky's spring, which stretches on each kick. A piece waiting for the next bar shows as `>08` beside the key and mode.
 

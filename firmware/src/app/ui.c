@@ -408,10 +408,10 @@ typedef struct {
     uint16_t bg, panel, line, dim, text, acc, pad, pad_t, acid, acid_t, bass, bass_t, pulse, pulse_t, frost, pluck;
 } theme_t;
 static const theme_t THEMES[EN_NTHEME] = {
-    /* Imp: warm black, bone, crimson, lime, pink; ember is for "now" (the playhead, the knob you touched) */
-    {RGB(20, 14, 12), RGB(42, 30, 27), RGB(78, 56, 49), RGB(166, 140, 126), RGB(244, 232, 200), RGB(255, 212, 71),
-     RGB(242, 230, 196), RGB(86, 78, 62), RGB(182, 242, 60), RGB(60, 80, 22), RGB(224, 52, 79), RGB(84, 22, 32),
-     RGB(255, 143, 143), RGB(88, 52, 52), RGB(150, 210, 255), RGB(111, 224, 210)},
+    /* Beach: bright sky blue, sea, sand and palm; deep navy for text, coral for "now" (the playhead, the knob you touched) */
+    {RGB(64, 176, 240), RGB(38, 128, 200), RGB(24, 96, 164), RGB(16, 64, 112), RGB(8, 24, 48), RGB(255, 92, 84),
+     RGB(255, 214, 110), RGB(122, 96, 40), RGB(46, 200, 120), RGB(20, 90, 56), RGB(232, 48, 66), RGB(110, 18, 28),
+     RGB(255, 255, 255), RGB(150, 210, 240), RGB(20, 100, 190), RGB(120, 230, 255)},
     /* Synth (Synth Imp, 0.14.18): demon synthwave: a night sky, crimson to magenta neon, a banded sun on the horizon behind the sigil, the imp in tube light */
     {RGB(12, 3, 24), RGB(28, 6, 32), RGB(69, 18, 63), RGB(154, 95, 134), RGB(255, 233, 242), RGB(255, 225, 74),
      RGB(192, 140, 255), RGB(60, 36, 96), RGB(182, 255, 46), RGB(50, 80, 16), RGB(255, 47, 95), RGB(84, 16, 36),
@@ -4219,15 +4219,14 @@ static void imp_header(void)
     const float kg = fm_clampf(en_drum_glow[0], 0.0f, 1.0f);
     const float amp = 1.0f + 2.2f * kg;
     const float ph = (float)(plat_ms() % 1200u) * (FM_TWO_PI / 1200.0f);
-    const uint16_t cc = mix(K_LINE, K_BASS, 7 + q16(kg) * 9 / 16);
     int32_t x;
     int i;
     for (i = 0; i < 16; i++)                     /* the bar's sixteen steps */
         cv_rect(i * 15 + 1, 0, 13, i % 4 ? 1 : 2, en_playing && i == (int)en_drum_pos ? K_ACC : K_LINE);
-    for (x = 0; x < 240; x++) {                  /* the wave: one crest along the header, taller on the kick */
+    for (x = 0; x < 240; x++) {                  /* the wave: one low crest along the header, a little taller on the kick */
         const float u = (float)x * 0.26f + ph;
-        const int32_t y = 26 + (int32_t)(amp * 1.6f * fm_sinf(u) + (fm_sinf(u) < 0.0f ? -0.5f : 0.5f));
-        cv_pset(x, y, cc);
+        const int32_t y = 26 + (int32_t)(amp * 0.9f * fm_sinf(u) + (fm_sinf(u) < 0.0f ? -0.5f : 0.5f));
+        cv_pset(x, y, mix(K_BG, K_TEXT, 4 + q16(kg) * 4 / 16));
     }
 }
 
@@ -4565,20 +4564,18 @@ static void draw_sigil(void)
                     if (SEA[sg.rn[i].kind][r] >> (4 - c) & 1u)
                         cv_pset(x - 2 + c, y - 2 + r, mix(K_BG, K_ACC, 16 - (int)(age * 16u / 700u)));
         }
-    {   /* the wave: three crests sweeping at the tempo; calm in a breakdown, choppy in a build, a flash on the drop */
+    {   /* the wave: two low crests on a slow swell, a faint tint so the chord figure stays the figure */
         const uint32_t dage = now - sg.drop_t;
         const int flash = play && sg.drop_t && dage < 450u;
-        const int amp = flash ? 6 : !play ? 1 : en_sec == EN_SEC_BREAK ? 2 : en_sec == EN_SEC_BUILD ? 6 : 4;
-        const int tempo = proj.par[P_TEMPO] > 0 ? proj.par[P_TEMPO] : 120, per = 120000 / tempo;
+        const int amp = flash ? 4 : !play ? 1 : en_sec == EN_SEC_BREAK ? 1 : en_sec == EN_SEC_BUILD ? 4 : 2;
+        const int tempo = proj.par[P_TEMPO] > 0 ? proj.par[P_TEMPO] : 120, per = 240000 / tempo;
         const float ph = play ? (float)(now % (uint32_t)per) * (FM_TWO_PI / (float)per) : 0.0f;
         int r, x, j;
-        cv_rect(CX - 18, CY - 13, 37, 27, K_BG);  /* a dark surround, so the figure never runs through it */
-        for (r = 0; r < 3; r++)
-            for (x = -16; x <= 16; x++) {
-                const int y = CY - 7 + r * 7 + (int)((float)amp * fm_sinf((float)x * 0.32f + ph + (float)r * 0.9f));
-                const uint16_t c = flash ? K_TEXT : mix(K_BG, K_ACC, 12 - r * 2);
-                cv_pset(CX + x, y, c);
-                cv_pset(CX + x, y + 1, c);
+        for (r = 0; r < 2; r++)
+            for (x = -14; x <= 14; x++) {
+                const int y = CY + (r ? 5 : -4) + (int)((float)amp * fm_sinf((float)x * 0.24f + ph + (float)r * 0.7f));
+                if (x * x / 4 < 60)               /* the crests fade out towards the ring */
+                    cv_pset(CX + x, y, flash ? K_TEXT : mix(K_BG, K_TEXT, 5));
             }
         if (flash) {                              /* the shock ring */
             const float rr = 20.0f + (float)dage * (40.0f / 450.0f);
@@ -7417,15 +7414,30 @@ static uint16_t mascot_color(char ch)
 
 static void draw_splash(void)
 {
-    int i;
+    int i, x;
     lcd_fill(0, 0, 240, 240, K_BG);
-    cv_begin(240, 132, K_BG);                    /* the name, the rings, and what's next */
-    text_c(120, 0, &FONT_L, "NAIWAN", RGB(242, 230, 196));
-    text_c(120, 36, &FONT_L, "91", RGB(255, 143, 143));
+    cv_begin(240, 108, K_BG);                    /* the beach: sun, sea, sand and a palm */
+    cv_disc(196, 30, 20, RGB(255, 206, 64));
+    cv_disc(196, 30, 14, RGB(255, 238, 150));
+    for (i = 0; i < 8; i++)                      /* rays, fading out */
+        cv_rect(196 - 34 - i * 3, 30, 10, 1, mix(K_BG, RGB(255, 236, 140), 12 - i));
+    cv_rect(0, 72, 240, 26, RGB(30, 122, 200));  /* the sea */
+    for (x = 0; x < 240; x += 3) {               /* its crests */
+        const int y = 76 + (int)(2.0f * fm_sinf((float)x * 0.18f));
+        cv_rect(x, y, 3, 1, RGB(196, 238, 255));
+    }
+    cv_rect(0, 98, 240, 10, RGB(242, 206, 116)); /* the sand */
+    cv_rect(10, 52, 3, 46, RGB(150, 96, 52));    /* a palm */
+    for (i = 0; i < 4; i++)
+        cv_rect(4 + i * 3, 52 - i * 6, 32 - i * 6, 3, RGB(36, 150, 84));
+    cv_blit(0, 0);
+    cv_begin(240, 132, K_BG);                    /* the name, and what is next */
+    text_c(120, 0, &FONT_L, "NAIWAN", RGB(8, 24, 48));
+    text_c(120, 36, &FONT_L, "91", RGB(232, 48, 66));
     for (i = 0; i < 9; i++)
-        cv_rect(48 + i * 16, 86, 12, 6, i & 1 ? RGB(224, 52, 79) : RGB(156, 29, 58));
-    cv_frame(40, 80, 160, 18, K_LINE);
-    text_c(120, 110, &FONT_XS, "PRESENTS", K_DIM);
+        cv_rect(48 + i * 16, 86, 12, 6, i & 1 ? RGB(46, 200, 120) : RGB(255, 214, 110));
+    cv_frame(40, 80, 160, 18, RGB(8, 24, 48));
+    text_c(120, 110, &FONT_XS, "PRESENTS", RGB(8, 24, 48));
     cv_blit(0, 108);
 }
 
@@ -7443,7 +7455,7 @@ static const uint8_t BIG_GLYPH[BIG_N][7] = {
 #define SPLASH_STEP_Y 184
 static void draw_hyp(void)
 {
-    int g, r, c, pass;
+    int g, r, c, pass, i;
     lcd_fill(0, 0, 240, 240, K_BG);
     cv_begin(240, 140, K_BG);
     for (pass = 0; pass < 2; pass++)             /* the shadow, then the letters */
@@ -7452,14 +7464,26 @@ static void draw_hyp(void)
                 for (c = 0; c < 5; c++)
                     if (BIG_GLYPH[g][r] >> (4 - c) & 1u)
                         cv_rect(12 + (g * 6 + c) * BIG_PX + (pass ? 0 : 3), 24 + r * BIG_PX + (pass ? 0 : 3), BIG_PX, BIG_PX,
-                                pass ? K_PAD : K_ACC);
-    text_c(120, 86, &FONT_S, "GENERATIVE  //  LIVE", K_TEXT);
+                                pass ? RGB(255, 255, 255) : RGB(8, 24, 48));
+    text_c(120, 86, &FONT_S, "GENERATIVE  //  LIVE", RGB(8, 24, 48));
+    cv_disc(206, 20, 15, RGB(255, 206, 64));     /* the sun */
+    cv_disc(206, 20, 10, RGB(255, 238, 150));
+    cv_rect(0, 104, 240, 22, RGB(30, 122, 200)); /* the sea */
+    for (i = 0; i < 240; i += 3) {
+        const int y = 108 + (int)(2.0f * fm_sinf((float)i * 0.18f));
+        cv_rect(i, y, 3, 1, RGB(196, 238, 255));
+    }
     cv_blit(0, 6);
     cv_begin(240, 52, K_BG);                     /* (a canvas is at most 144 rows) */
     text_c(120, 0, &FONT_XS, EN_VERSION[0] == 'D' ? "NAIWAN 91  //  FM-1 FIRMWARE" : "NAIWAN 91  //  " EN_VERSION, K_TEXT);
     text_c(120, 16, &FONT_XS, "CITY POP  //  THE COAST", K_TEXT);
-    text_c(120, 32, &FONT_XS, "AFTER PERF-1 BY DEAMONSLINKY", K_DIM);
+    text_c(120, 32, &FONT_XS, "AFTER PERF-1 BY DEAMONSLINKY", RGB(16, 64, 112));
     cv_blit(0, 120);
+    lcd_fill(0, SPLASH_STEP_Y - 14, 240, 12, RGB(242, 206, 116));   /* the sand under the last line */
+    for (i = 0; i < 240; i += 3) {                                  /* its edge, softly wave-cut */
+        const int y = SPLASH_STEP_Y - 15 + (int)(1.5f * fm_sinf((float)i * 0.2f));
+        lcd_fill(i, y, 3, 2, RGB(30, 122, 200));
+    }
     for (c = 0; c < 16; c++)
         lcd_fill(8 + c * 14, SPLASH_STEP_Y, 11, 11, K_PANEL);
 }
