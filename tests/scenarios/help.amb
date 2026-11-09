@@ -1,7 +1,7 @@
 # help cards and the knobs (X0X's ways): a held button shows its card and then does nothing; a few
 # quick clicks are exact, a quick spin sweeps
 wait 300
-expect par0 45
+expect par0 52
 press REC
 wait 1000
 shot help_rec.png
@@ -16,10 +16,10 @@ wait 200
 expect frozen 0
 tap ENV
 turn K1 3 10
-expect par0 48
+expect par0 55
 wait 500
 turn K1 -3 30
-expect par0 45
+expect par0 52
 wait 500
 turn K1 -12 10
 expect par0 0
@@ -38,5 +38,5 @@ expect view 1
 press HOME
 turn SELECT 3 100
 release HOME
-expect par5 131
+expect par5 107
 expect view 1

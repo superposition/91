@@ -143,7 +143,7 @@ body.stream .ctl.knob.sv-turn > circle:first-child { stroke: #ff9a3c; stroke-wid
 <main>
 <p class="kofi" style="margin:0 0 .5rem;text-align:right;font-size:.88rem"><a href="https://ko-fi.com/deamonslinky" target="_blank" rel="noopener">☕ Buy me a coffee</a></p>
 <header>
-  <h1><a href="../"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFwAAABcCAYAAADj79JYAAACGklEQVR42u2dMUoEMQBF/4iFjSCCKCgIooWCJ9DCwjtYKLLgGawXL+ANbMQtxM5SLCxc7BW0UIQFBcVG8ABr60SYEJNMMuP73bLMbPL5PLN/krWQRbMTC8Ofr18/nws1WKnnMyIkDMdwFEqFjXEP98el95dXdtUkpuc2HxIOUjAcxWR405me+3hJOEjBcBRQo64X3N5ceDE1tGwMdh0vCQcpCMPbtA63Mfn0aKf0/tbeSel1f3E16gTWnu7kMp7U3xNIOIZjOErZpZhMnt/eqLx+0LvKasIm8+lSQArC8DY/07Qx22S0yUhTvuvy0Pevm+kkHKRgOFLCPty2rn65Xqq+vuM34Nj3J+EgBWF4mxlu09z6Y9Q+fNAZq1xHx+7fSThIQRjeJIZfvn94fcDk+b6q9va5ytwrKON+vuNV5DNDJBykYDhSwmeabZNr/217XmDr10k4SMFwlLJL8d2XYnsmadPB+IzX9d2vN4Vktjn/fk/GfDUk4SAFw1Eu63Bfhm5OTzntc5HjvpTY624SDlIQhrfpjE/d62jzb4AS7w+nDwcpCMOVcZcS+oyP7zqahCMMx3D09z78176PwzOF7NNz61JIOEhBGC66FLWlS/H9/XESDlIwHNGlqLH/M4KEgxQMR3QpoktBGI7hiC6lduaTcJCC4YguRcnOaZJwkIIwnDM+6boUGA5SEIbTpejf/D4KCQcpCMMz1jcYZfe1K9DPsQAAAABJRU5ErkJggg==" width="46" height="46" alt="" style="image-rendering:pixelated;vertical-align:middle;margin-right:.5rem">NAIWAN 91</a></h1>
+  <h1 data-pack="NAIWAN-91"><a href="../"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFwAAABcCAYAAADj79JYAAACGklEQVR42u2dMUoEMQBF/4iFjSCCKCgIooWCJ9DCwjtYKLLgGawXL+ANbMQtxM5SLCxc7BW0UIQFBcVG8ABr60SYEJNMMuP73bLMbPL5PLN/krWQRbMTC8Ofr18/nws1WKnnMyIkDMdwFEqFjXEP98el95dXdtUkpuc2HxIOUjAcxWR405me+3hJOEjBcBRQo64X3N5ceDE1tGwMdh0vCQcpCMPbtA63Mfn0aKf0/tbeSel1f3E16gTWnu7kMp7U3xNIOIZjOErZpZhMnt/eqLx+0LvKasIm8+lSQArC8DY/07Qx22S0yUhTvuvy0Pevm+kkHKRgOFLCPty2rn65Xqq+vuM34Nj3J+EgBWF4mxlu09z6Y9Q+fNAZq1xHx+7fSThIQRjeJIZfvn94fcDk+b6q9va5ytwrKON+vuNV5DNDJBykYDhSwmeabZNr/217XmDr10k4SMFwlLJL8d2XYnsmadPB+IzX9d2vN4Vktjn/fk/GfDUk4SAFw1Eu63Bfhm5OTzntc5HjvpTY624SDlIQhrfpjE/d62jzb4AS7w+nDwcpCMOVcZcS+oyP7zqahCMMx3D09z78176PwzOF7NNz61JIOEhBGC66FLWlS/H9/XESDlIwHNGlqLH/M4KEgxQMR3QpoktBGI7hiC6lduaTcJCC4YguRcnOaZJwkIIwnDM+6boUGA5SEIbTpejf/D4KCQcpCMMz1jcYZfe1K9DPsQAAAABJRU5ErkJggg==" width="46" height="46" alt="" style="image-rendering:pixelated;vertical-align:middle;margin-right:.5rem">NAIWAN 91</a></h1>
   <p>a live-performance generative instrument for the FM-1, in the browser: the same code the FM-1 runs</p>
   <nav><a href="../">Home</a><a href="../install/">Install</a><a href="../editor/">Editor</a><a href="../pieces/">Library &amp; pieces</a><a href="../manual/">Manual</a></nav>
 </header>
@@ -1021,7 +1021,8 @@ document.getElementById("forget").addEventListener("click", () => {
   const PACK = { "NAIWAN-91": ["#2f9ea8", "city pop, sunsets, an endless summer"], "HYP-1": ["#b06cff", "hypnotic techno + acid"], "LOF-1": ["#e8873a", "a lofi groovebox: you play, the band follows"],
                  "ECO-1": ["#76c35e", "a plant plays the FM-1"], "GRAV-1": ["#f2b84b", "a star and its planets play the FM-1"] };
   const NOTE = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-  const name = (document.querySelector("h1").textContent.match(/[A-Z]+-1/) || ["FM-1"])[0];
+  const h1 = document.querySelector("h1");
+  const name = h1.getAttribute("data-pack") || (h1.textContent.match(/[A-Z]+-1/) || ["FM-1"])[0];
   const [acc, tag] = PACK[name] || ["#e8873a", ""];
   const dev = document.getElementById("device"), home = dev.parentNode, after = dev.nextSibling;
   const stage = document.createElement("div");

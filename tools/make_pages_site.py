@@ -7,7 +7,7 @@
 OUTDIR gets index.html (the landing page), install/ (the web installer with the package in it),
 emu/ (the browser emulator), editor/ (the parameter and DX7 voice editor), pieces/ and library/ (sharing), manual/ and firmware/perf1-VERSION.fwsc.
   --no-sharing   leaves out pieces/ and library/ and their links (a release whose sharing pages are not ready: 0.16.1)
-All links are relative, so it works at any path (https://USER.github.io/NAIWAN 91/ and a local server alike)."""
+All links are relative, so it works at any path (https://USER.github.io/91/ and a local server alike)."""
 import json
 import re
 import shutil

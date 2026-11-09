@@ -40,7 +40,7 @@ expect par5 122
 midi B0 0F 00
 wait 100
 expect par72 0
-expect pool 0xAB5
+expect pool 2741
 # the pad's level, 1 up / 127 down, from the FX menu
 setpar 0 50
 tap FX

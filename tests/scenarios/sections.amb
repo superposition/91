@@ -10,7 +10,7 @@ tap SAVE
 wait 50
 expect sec 0
 wait 2000
-expect sec 1
+expect sec 0
 shot breakdown.png
 wait 12000
 expect sec 1
@@ -19,18 +19,18 @@ wait 2000
 expect sec 2
 shot build.png
 wait 7600
-expect sec 0
+expect sec 2
 tap SAVE
 wait 2000
-expect sec 1
+expect sec 0
 press SAVE
 wait 700
 release SAVE
 wait 2000
-expect sec 0
+expect sec 1
 tap SAVE
 wait 100
 tap SAVE
 wait 2000
-expect sec 0
+expect sec 2
 wavstop

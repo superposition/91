@@ -5,11 +5,11 @@ seed 0
 wait 3000
 turn SELECT 18 100
 expect view 18
-expect par156 0
+expect par156 50
 expect par157 2
 spin K1 50
 wait 100
-expect par156 50
+expect par156 100
 spin K2 -1
 wait 100
 expect par157 1

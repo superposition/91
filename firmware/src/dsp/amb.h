@@ -438,6 +438,7 @@ void en_piece(int i, int16_t *par, uint16_t *pool);
  * set; the others are factory sets, kept in RAM while the power is on). */
 #define EN_NGENRE 19
 const char *en_genre_name(int g);
+int en_genre_donor(int g);                    /* the library column a genre takes its recipe and tables from */
 void en_genre(int g);                          /* the genre playing: its chords move in its own habits (the first bank keeps the original walk) */
 const char *en_piece_name_g(int g, int i);
 void en_piece_g(int g, int i, int16_t *par, uint16_t *pool);

@@ -4,7 +4,7 @@ seed 0
 wait 3000
 expect genre 0
 expect piece 0
-expect tempo 128
+expect tempo 104
 expect fxlock 0
 press GLO
 wait 100
@@ -14,14 +14,14 @@ release GLO
 wait 300
 expect genre 1
 expect piece 0
-expect tempo 72
+expect tempo 106
 expect fxlock 35651584
 shot genre_lofi.png
 # the pieces of the bank by the dial
 turn PRESET 1
 wait 200
 expect piece 1
-expect tempo 78
+expect tempo 104
 # a store works in every bank (piece 1 here: bit 1); undone, so the rest of this scenario sees the factory pieces
 tap GLO
 press SAVE
@@ -37,7 +37,7 @@ release GLO
 wait 300
 expect genre 2
 expect piece 1
-expect tempo 124
+expect tempo 98
 expect fxlock 8388608
 shot genre_house.png
 press GLO
@@ -46,7 +46,7 @@ release GLO
 wait 300
 expect genre 3
 expect piece 1
-expect tempo 140
+expect tempo 120
 expect fxlock 0
 shot genre_dub.png
 # the six more (dub, dnb, breaks, garage, electro, trap): piece 1 of each, by its tempo
@@ -55,7 +55,7 @@ turn PRESET 1
 release GLO
 wait 300
 expect genre 4
-expect tempo 66
+expect tempo 118
 peakreset
 wait 2500
 expect peak_db_min -40
@@ -64,7 +64,7 @@ turn PRESET 1
 release GLO
 wait 300
 expect genre 5
-expect tempo 172
+expect tempo 90
 peakreset
 wait 2500
 expect peak_db_min -40
@@ -73,7 +73,7 @@ turn PRESET 1
 release GLO
 wait 300
 expect genre 6
-expect tempo 110
+expect tempo 94
 peakreset
 wait 2500
 expect peak_db_min -40
@@ -82,7 +82,7 @@ turn PRESET 1
 release GLO
 wait 300
 expect genre 7
-expect tempo 132
+expect tempo 114
 peakreset
 wait 2500
 expect peak_db_min -40
@@ -91,7 +91,7 @@ turn PRESET 1
 release GLO
 wait 300
 expect genre 8
-expect tempo 120
+expect tempo 78
 peakreset
 wait 2500
 expect peak_db_min -40
@@ -100,7 +100,7 @@ turn PRESET 1
 release GLO
 wait 300
 expect genre 9
-expect tempo 134
+expect tempo 94
 peakreset
 wait 2500
 expect peak_db_min -40
@@ -110,7 +110,7 @@ turn PRESET 1
 release GLO
 wait 300
 expect genre 10
-expect tempo 120
+expect tempo 144
 peakreset
 wait 2500
 expect peak_db_min -40
@@ -119,7 +119,7 @@ turn PRESET 1
 release GLO
 wait 300
 expect genre 11
-expect tempo 104
+expect tempo 102
 peakreset
 wait 2500
 expect peak_db_min -40
@@ -128,7 +128,7 @@ turn PRESET 1
 release GLO
 wait 300
 expect genre 12
-expect tempo 72
+expect tempo 114
 peakreset
 wait 2500
 expect peak_db_min -40
@@ -137,15 +137,6 @@ turn PRESET 1
 release GLO
 wait 300
 expect genre 13
-expect tempo 112
-peakreset
-wait 2500
-expect peak_db_min -40
-press GLO
-turn PRESET 1
-release GLO
-wait 300
-expect genre 14
 expect tempo 110
 peakreset
 wait 2500
@@ -154,8 +145,17 @@ press GLO
 turn PRESET 1
 release GLO
 wait 300
+expect genre 14
+expect tempo 98
+peakreset
+wait 2500
+expect peak_db_min -40
+press GLO
+turn PRESET 1
+release GLO
+wait 300
 expect genre 15
-expect tempo 78
+expect tempo 122
 peakreset
 wait 2500
 expect peak_db_min -40
@@ -165,7 +165,7 @@ turn PRESET 1
 release GLO
 wait 300
 expect genre 16
-expect tempo 132
+expect tempo 78
 peakreset
 wait 2500
 expect peak_db_min -40
@@ -176,7 +176,7 @@ turn PRESET 1
 release GLO
 wait 300
 expect genre 17
-expect tempo 104
+expect tempo 120
 peakreset
 wait 2500
 expect peak_db_min -40
@@ -187,7 +187,7 @@ turn PRESET 1
 release GLO
 wait 300
 expect genre 18
-expect tempo 152
+expect tempo 74
 peakreset
 wait 2500
 expect peak_db_min -40
@@ -206,7 +206,7 @@ tap HOME
 wait 100
 spin K1 3
 wait 100
-expect tempo 127
+expect tempo 105
 press GLO
 turn PRESET 1
 release GLO
@@ -217,7 +217,7 @@ turn PRESET -1
 release GLO
 wait 300
 expect genre 0
-expect tempo 124
+expect tempo 102
 # the others come back as their recipes: lofi piece 1, its tempo changed, away and back: 78 again
 press GLO
 turn PRESET 1
@@ -228,7 +228,7 @@ tap HOME
 wait 100
 spin K1 3
 wait 100
-expect tempo 81
+expect tempo 107
 press GLO
 turn PRESET 1
 release GLO
@@ -238,4 +238,4 @@ turn PRESET -1
 release GLO
 wait 300
 expect genre 1
-expect tempo 78
+expect tempo 104

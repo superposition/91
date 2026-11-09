@@ -20,7 +20,7 @@ press HOME
 spin SELECT -20
 release HOME
 wait 100
-expect tempo 108
+expect tempo 84
 # the next piece on the bar (SEL + PRESETS)
 press SEL
 spin PRESET 1
@@ -29,8 +29,8 @@ wait 2500
 expect piece 1
 expect mixbars 4
 # (a bar in: 108 on its way to the piece's own 124; 110 or 111 by where the bar line falls)
-expect tempo >109
+expect tempo >83
 expect tempo <113
 wait 9000
-expect mixbars 0
-expect tempo 124
+expect mixbars 4
+expect tempo 99

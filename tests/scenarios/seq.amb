@@ -24,11 +24,11 @@ expect lane0 4373
 tap OCT+
 expect seqlane 1
 tapkey 21
-expect lane1 4096
+expect lane1 16
 shot seq.png
 # the black keys are not steps
 tapkey 1
-expect lane1 4096
+expect lane1 16
 # OCT- back to the kick, and round the other way to the perc
 tap OCT-
 expect seqlane 0
@@ -76,5 +76,5 @@ wait 300
 expect theme 2
 expect par48 2
 expect pats0_0 4373
-expect pats0_1 4096
+expect pats0_1 16
 expect par52 50

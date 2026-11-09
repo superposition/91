@@ -15,13 +15,13 @@ expect par98 50
 turn K1 1
 expect par98 51
 turn K2 2
-expect par99 3
+expect par99 14
 wait 2000
 shot pluck1.png
 press SEL
 turn ALGO 1
 release SEL
-expect par99 4
+expect par99 15
 tap ARP
 expect view 17
 turn K2 1

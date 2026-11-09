@@ -51,8 +51,8 @@ release SEL
 wait 100
 expect patkey 2
 wait 5000
-expect par48 0
-expect patkey 0
+expect par48 1
+expect patkey 2
 # a tap keeps it
 press SEL
 tapkey w3
@@ -64,22 +64,22 @@ turn SELECT -100 10
 turn SELECT 4 100
 expect view 4
 turn K4 1
-expect par150 1
+expect par150 3
 tap EDIT
 wait 2500
-expect chordroot 5
-tap EDIT
-wait 2500
-expect chordroot 9
-tap EDIT
-wait 2500
-expect chordroot 5
+expect chordroot 4
 tap EDIT
 wait 2500
 expect chordroot 9
 tap EDIT
 wait 2500
-expect chordroot 5
+expect chordroot 2
 tap EDIT
 wait 2500
-expect chordroot 9
+expect chordroot 7
+tap EDIT
+wait 2500
+expect chordroot 0
+tap EDIT
+wait 2500
+expect chordroot 4

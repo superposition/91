@@ -20,7 +20,7 @@ wait 100
 expect gxpat 0x524B
 expect gxpreset 12
 # the keys are not the scale, not effects
-expect pool 0x5AD
+expect pool 1709
 # the pattern knob back to the first, then one on: TRES (steps 0 3 6, a loop of 8)
 spin K1 -12
 wait 100
@@ -228,7 +228,7 @@ wait 100
 expect fxon 0
 # the keys are the scale again
 tapkey 1
-expect pool 0x7AD
+expect pool 1197
 # the settings' own walk (0.16.1): HOME held opens it; the dial goes FILTERS, SCREAM (first since 0.16.28: the piece's), SETTINGS (the drop's
 # key change), AUTO DJ, SET, USB & MIDI, MIDI IN, SCREEN, SAMPLE and stops there
 press HOME

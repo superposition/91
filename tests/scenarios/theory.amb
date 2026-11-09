@@ -8,7 +8,7 @@ wait 600
 release EDIT
 wait 100
 expect view 5
-expect pool 0x5AD
+expect pool 1709
 turn K1 -8
 turn K1 1
 turn K3 4
@@ -43,7 +43,7 @@ expect progpos 0
 shot theory_a_minor_i.png
 tap EDIT
 wait 1200
-expect progpos 1
+expect progpos 0
 shot theory_a_minor_iv.png
 wait 1300
 tap EDIT

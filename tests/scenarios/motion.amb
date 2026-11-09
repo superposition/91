@@ -17,7 +17,7 @@ tap OCT+
 expect par45 1
 tap ENV
 spin K1 -20
-expect par0 25
+expect par0 32
 tap PLAY
 wait 50
 expect playing 0
@@ -27,6 +27,6 @@ shot stopped.png
 wait 5000
 reboot
 wait 300
-expect par0 45
+expect par0 52
 expect par45 0
 expect playing 1

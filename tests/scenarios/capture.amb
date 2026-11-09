@@ -5,7 +5,7 @@ wait 3000
 turn SELECT 34 100
 expect view 34
 expect jamv 0
-expect par156 0
+expect par156 50
 tapkey w0
 wait 469
 tapkey w2

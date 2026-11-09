@@ -30,18 +30,18 @@ expect djphase 0
 expect sec 0
 wait 6000
 # 18 s: the breakdown
-expect djphase 1
-expect sec 1
+expect djphase 0
+expect sec 0
 wait 7500
 # 25 s: the build, the riser held by the DJ
+expect djphase 1
+expect sec 1
+expect fxmask 0
+wait 11000
+# 36 s: the groove again, the riser let go
 expect djphase 2
 expect sec 2
 expect fxmask 16777216
-wait 11000
-# 36 s: the groove again, the riser let go
-expect djphase 0
-expect sec 0
-expect fxmask 0
 # off: it stops running the sections
 press GLO
 tapkey 24

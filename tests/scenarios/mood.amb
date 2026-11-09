@@ -3,23 +3,23 @@
 seed 0
 wait 3000
 expect mood 50
-expect moodacid 60
+expect moodacid 35
 tap HOME
 wait 100
 expect view 36
 turn ALGO 5
 wait 100
 expect mood 60
-expect moodacid 66
+expect moodacid 41
 turn ALGO 20
 wait 100
 expect mood 100
-expect moodacid 90
+expect moodacid 65
 shot mood_peak.png
 turn ALGO -50
 wait 100
 expect mood 0
-expect moodacid 30
+expect moodacid 5
 shot mood_chill.png
 # off the perform screen the dial is the mode again, the mood stays
 tap HOME
@@ -33,4 +33,4 @@ tap HOME
 turn ALGO 25
 wait 100
 expect mood 50
-expect moodacid 60
+expect moodacid 35

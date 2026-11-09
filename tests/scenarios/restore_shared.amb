@@ -5,12 +5,12 @@ wait 3000
 tap GLO
 tap HOME
 wait 100
-expect tempo 128
+expect tempo 104
 spin K1 4
 spin K2 3
 wait 200
-expect tempo 132
-expect par6 43
+expect tempo 108
+expect par6 38
 tap GLO
 tap SAVE
 wait 500
@@ -22,6 +22,6 @@ expect rsstate 2
 reboot
 wait 3000
 expect saved 1
-expect tempo 128
-expect par6 43
+expect tempo 104
+expect par6 38
 expect parwide 0

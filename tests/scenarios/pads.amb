@@ -26,7 +26,7 @@ wait 200
 # the seeded piece is A natural minor: bank E pad 6 (note 105) is VI, F
 midi 90 69 64
 wait 300
-expect chordroot 5
+expect chordroot 6
 midi 80 69 00
 # bank E pad 1 (note 100): home, A
 midi 90 64 64
@@ -78,10 +78,10 @@ tap FX
 wait 200
 midi 90 69 64
 wait 300
-expect chordroot 9
+expect chordroot 2
 midi 91 69 64
 wait 300
-expect chordroot 5
+expect chordroot 2
 # kept with the settings
 tap PLAY
 wait 5000

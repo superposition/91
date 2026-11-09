@@ -75,7 +75,7 @@ int main(int argc, char **argv)
             printf("  %-9s %4d chords, %3d secondary dominants, %3d borrowed\n", en_genre_name(g), alt[g][0] + alt[g][1] + alt[g][2], alt[g][1], alt[g][2]);
             sec += alt[g][1];
             bor += alt[g][2];
-            if (PLAIN[g])
+            if (PLAIN[en_genre_donor(g)])            /* the genre's donor column says whether it alters chords */
                 plain_alt += alt[g][1] + alt[g][2];
         }
         printf("gharm: %d secondary dominants, %d borrowed chords; %d in the plain genres\n", sec, bor, plain_alt);

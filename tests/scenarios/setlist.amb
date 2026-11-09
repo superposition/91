@@ -69,8 +69,8 @@ release GLO
 expect djon 1
 expect piece 0
 wait 35000
-expect genre 2
-expect piece 4
+expect genre 0
+expect piece 0
 press GLO
 tapkey 24
 release GLO

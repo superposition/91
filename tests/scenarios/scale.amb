@@ -2,42 +2,42 @@
 wait 300
 # A Aeolian (Hypnos): A B C D E F G. F#3 is key 1: add F#
 tapkey 1
-expect pool 0x7AD
+expect pool 1197
 tapkey 1
-expect pool 0x5AD
+expect pool 1709
 # key 9 is D4: out of the scale
 tapkey 9
-expect pool 0x58D
+expect pool 1677
 # the next mode: Phrygian
 turn ALGO 1
-expect par72 6
-expect pool 0x295
+expect par72 2
+expect pool 1451
 turn ALGO -1
-expect pool 0x5AD
+expect pool 1709
 # the root up a tone (Global page, KNOB 1): B
 tap GLO
 spin K1 2
 expect par71 11
 tap HOME
-expect pool 0x5AD
+expect pool 1709
 wait 300
 shot b_aeolian.png
 # pentatonic minor, then strip it down to three notes and try a fourth removal
 turn ALGO 6
-expect par72 3
-expect pool 0xAD5
+expect par72 7
+expect pool 1193
 # E pent min: E G A B D. Remove G (key 2 = G3) and A (key 4 = A3)
 tapkey 2
 tapkey 4
-expect pool 0xFD5
+expect pool 425
 # B (key 6): would leave two
 tapkey 6
-expect pool 0xFD5
+expect pool 425
 wait 300
 shot three.png
 # MIDI in, channel 1: A (note 57) back in
 midi 90 39 64
 wait 20
-expect pool 0xBD5
+expect pool 1449
 # the scale is not saved: the kit is untouched
 expect dirty 0

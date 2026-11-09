@@ -32,4 +32,4 @@ reboot
 wait 300
 expect theme 3
 expect saved 1
-expect par0 35
+expect par0 42

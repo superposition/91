@@ -457,6 +457,7 @@ void en_piece_g(int g, int i, int16_t *par, uint16_t *pool)
     *pool = EN_MODE_POOL[par[P_MODE]];
 }
 const char *en_genre_name(int g) { return GENRE_NAME[(unsigned)g < EN_NGENRE ? g : 0]; }
+int en_genre_donor(int g) { return gx(g); }
 const char *en_piece_name_g(int g, int i)
 {
     i = (unsigned)i < EN_NPIECES ? i : 0;

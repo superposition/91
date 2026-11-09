@@ -2,16 +2,16 @@
 # pages the whole kit); each voice's Sound knob; the Kit page (SEQ three times), a sound for each drum.
 # Keys on a voice's pages play it (the scale stays as it is); on any other page they edit the scale.
 wait 500
-expect par10 1
+expect par10 6
 # the pad: SEL + ALGORITHM, then its Sound knob (KNOB 3)
 tap ENV
 press SEL
 turn ALGO 1
 release SEL
-expect par10 2
+expect par10 7
 expect edited 1
 turn K3 1
-expect par10 3
+expect par10 8
 wait 1500
 shot sound_pad.png
 # the drone: round past the first to the last; its Sound knob is KNOB 2
@@ -19,9 +19,9 @@ tap LFO
 press SEL
 turn ALGO -1
 release SEL
-expect par84 23
+expect par84 1
 turn K2 -3
-expect par84 20
+expect par84 0
 wait 1500
 shot sound_drone.png
 # the acid: its Sound is KNOB 4 on Acid env
@@ -29,22 +29,22 @@ tap ARP
 tap ARP
 expect view 12
 turn K4 2
-expect par40 2
+expect par40 5
 # the kit: SEQ three times; one drum, then all four at once with SEL + ALGORITHM
 tap SEQ
 tap SEQ
 tap SEQ
 expect view 22
 turn K1 1
-expect par85 1
-expect par86 0
+expect par85 5
+expect par86 4
 press SEL
 turn ALGO 2
 release SEL
-expect par85 3
-expect par86 3
-expect par87 3
-expect par88 3
+expect par85 7
+expect par86 7
+expect par87 7
+expect par88 7
 wait 1500
 shot kit.png
 # a page with no voice: nothing changes
@@ -52,17 +52,17 @@ tap HOME
 press SEL
 turn ALGO 1
 release SEL
-expect par10 3
-expect par84 20
+expect par10 8
+expect par84 0
 # keys on a voice's page still edit the scale while it plays with the music, as everywhere
 tap LFO
 tapkey w3
 wait 50
 expect held 0
-expect pool <0x5AD
+expect pool <1706
 tapkey w3
 wait 50
-expect pool 0x5AD
+expect pool 1709
 # SEL + ENV on the drone's page: the drone off the algorithm (silent but for the keys); now its keys play it,
 # the scale untouched
 press SEL
@@ -76,7 +76,7 @@ expect bass_level <5
 key w2 down
 wait 300
 expect held 1
-expect pool 0x5AD
+expect pool 1709
 expect bass_level >50
 shot playing_drone.png
 key w2 up
@@ -105,7 +105,7 @@ key w0 up
 key w4 up
 wait 100
 expect held 0
-expect pool 0x5AD
+expect pool 1709
 press SEL
 tap ENV
 release SEL
@@ -146,7 +146,7 @@ expect held 0
 tapkey w1
 wait 50
 expect held 0
-expect pool 0x1AD
+expect pool 685
 # back on the algorithm while a key is held: the note let go
 tap ARP
 key w9 down

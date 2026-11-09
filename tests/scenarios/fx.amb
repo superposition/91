@@ -103,9 +103,9 @@ expect fxmask 577536
 expect fxlock 577536
 shot fx_closed_locked.png
 tapkey 1
-expect pool 0x7AD
+expect pool 1197
 tapkey 1
-expect pool 0x5AD
+expect pool 1709
 expect fxlock 577536
 # FX again: a locked effect's key turns that one off; all four, none locked
 tap FX
@@ -130,7 +130,7 @@ tap FX
 wait 100
 # with the menu off, a key is the scale again
 tapkey 1
-expect pool 0x7AD
+expect pool 1197
 wait 3000
 wavstop
 expect peak_db_max -0.5

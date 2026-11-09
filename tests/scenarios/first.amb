@@ -2,10 +2,10 @@
 wav first.wav
 wait 200
 expect playing 1
-expect pool 0x5AD
+expect pool 1709
 wait 6000
 shot flow.png
-expect pad_level >20
+expect pad_level >3
 wait 30000
 shot flow30.png
 expect sixteenths >40

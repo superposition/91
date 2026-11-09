@@ -1,6 +1,6 @@
-# Building PERF-1
+# Building NAIWAN 91
 
-PERF-1 builds on Linux x86-64 (or macOS/Windows through Docker or WSL: JieLi's toolchain is Linux x86-64 only). A release build makes:
+NAIWAN 91 builds on Linux x86-64 (or macOS/Windows through Docker or WSL: JieLi's toolchain is Linux x86-64 only). A release build makes:
 
 | File | What |
 | --- | --- |
@@ -35,7 +35,7 @@ The tests run, on the build machine: the maths library against libm; the instrum
 
 The build fails if a soft-double routine is linked (a `double` crept in) and checks the image, RAM and pool sizes. Build options: `EN_CORE2=0` builds single-core (the reverb on the second core is the default), `EN_CDC=1` adds Felucca's USB serial function, `EN_DIAG=1` adds the status log's third frame (timers inside the render's stages, the chunk sizes, the work between chunks) for a performance hunt.
 
-The DY voices (`firmware/src/dsp/fm6_dy.h`) are generated from DX7 bank files that are not in this tree: `python3 -I tools/gen_fm6_dy.py tools/fm6_dy.txt BANKS --rom ROMDIR` reads the manifest (slot, name, bank file, voice, source), writes the header, `build/fm6_dy.bin` and the test bank `build/PERF-1-test-voices.syx`, and refuses a voice whose operators match a Yamaha ROM voice in ROMDIR. `tests/host/dycal FILE` (built like the other host tools) prints each voice's level and the gain it would need against the plain sounds; `FM_GAIN_DY` in `amb.c` is set from it and `fmcal`'s rms column so each DY voice sits where its DX voice does.
+The DY voices (`firmware/src/dsp/fm6_dy.h`) are generated from DX7 bank files that are not in this tree: `python3 -I tools/gen_fm6_dy.py tools/fm6_dy.txt BANKS --rom ROMDIR` reads the manifest (slot, name, bank file, voice, source), writes the header, `build/fm6_dy.bin` and the test bank `build/NAIWAN 91-test-voices.syx`, and refuses a voice whose operators match a Yamaha ROM voice in ROMDIR. `tests/host/dycal FILE` (built like the other host tools) prints each voice's level and the gain it would need against the plain sounds; `FM_GAIN_DY` in `amb.c` is set from it and `fmcal`'s rms column so each DY voice sits where its DX voice does.
 
 ## The site
 
@@ -45,7 +45,7 @@ python3 tools/make_pages_site.py 0.14.0 build/site
 
 makes the landing page, the web installer with the package in it, the emulator, the editor and the manual as a static folder with relative links. Publish it with GitHub Pages (a `gh-pages` branch holding the folder's contents works) or any static host.
 
-The printable quick manual (`docs/QUICK.md`, eight A4 pages) is made by `python tools/make_quick_manual.py` on Windows, which prints its HTML to `build/quick-manual.pdf` with Microsoft Edge; the site build copies the PDF to `manual/PERF-1-quick-manual.pdf` when it is there. Bump the footer line at the top of `QUICK.md` with each release.
+The printable quick manual (`docs/QUICK.md`, eight A4 pages) is made by `python tools/make_quick_manual.py` on Windows, which prints its HTML to `build/quick-manual.pdf` with Microsoft Edge; the site build copies the PDF to `manual/NAIWAN 91-quick-manual.pdf` when it is there. Bump the footer line at the top of `QUICK.md` with each release.
 
 ## Install
 

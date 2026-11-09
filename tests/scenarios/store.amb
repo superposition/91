@@ -52,25 +52,25 @@ reboot
 wait 300
 expect piece 0
 expect saved 1
-expect par0 35
+expect par0 42
 expect lane0 0x1115
 expect par52 50
 expect theme 2
 turn PRESET 1
 expect par71 2
-expect par5 124
+expect par5 102
 turn PRESET -1
 # a stored piece is not nudged at power-on: seed 3 lands on 08; store it, then come back to it
 seed 3
 reboot
 wait 300
 expect piece 7
-expect tempo 129
+expect tempo 106
 # (HOME on the tempo page is the perform screen now: to the tempo page by way of Global)
 tap GLO
 tap HOME
 spin K1 5
-expect tempo 134
+expect tempo 111
 tap GLO
 tap SAVE
 wait 300
@@ -81,7 +81,7 @@ wait 300
 expect piece 7
 expect saved 0x81
 # as stored, not nudged again
-expect tempo 134
+expect tempo 111
 seed 0
 reboot
 wait 300
@@ -94,7 +94,7 @@ shot global_hold.png
 wait 1000
 release SAVE
 release SEL
-expect par0 45
+expect par0 52
 expect lane0 0x1111
 expect par52 60
 expect saved 0x80
@@ -106,7 +106,7 @@ expect playing 1
 reboot
 wait 300
 expect saved 0x80
-expect par0 45
+expect par0 52
 # SAVE elsewhere is still the breakdown
 tap HOME
 tap SAVE
