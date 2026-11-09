@@ -366,6 +366,8 @@ static void vary(int g, int i, int16_t *par)
     par[P_PAN3] = (int16_t)(50 + ((i & 1) ? -14 : 14));    /* the pluck a little off the middle, the acid the other way */
     par[P_PAN2] = (int16_t)(50 + ((i & 1) ? 8 : -8));
 }
+static void naiwan_prog(int which);
+static int8_t naiwan_pending = -1;      /* which loop the next chord change applies */   /* NAIWAN 91: a piece's hand-set progression (defined below) */
 void en_piece_g(int g, int i, int16_t *par, uint16_t *pool)
 {
     int p;
@@ -431,6 +433,16 @@ void en_piece_g(int g, int i, int16_t *par, uint16_t *pool)
         par[P_SWING] = 10;
         par[P_EVOLVE] = 35;
         par[P_BASS] = 68;                       /* (0.16.6: held, at 85 it was as loud as the whole mix) */
+    }
+    if (g == 0) {                                      /* CITYPOP: dreamy — a slow swell, a long tail, a shimmer */
+        par[P_PE_ATK] = 14;
+        par[P_PE_REL] = 76;
+        par[P_REVERB] = 58;
+        par[P_SIZE] = 82;
+        par[P_RV_TYPE] = 1;
+        par[P_RV_X] = 30;
+        par[P_BRIGHT] = (int16_t)(par[P_BRIGHT] > 30 ? par[P_BRIGHT] - 10 : 20);
+        naiwan_pending = (int8_t)(i % 3);                            /* and the records' own turns */
     }
     *pool = EN_MODE_POOL[par[P_MODE]];
 }
@@ -2023,6 +2035,26 @@ void en_prog_capture(uint8_t *b)
         en_prg_put(b, 24 + 2 * s, 2, bc);
     }
 }
+/* NAIWAN 91: the city-pop loops as pieces' progressions (degrees are 0-based, stored +1; two bars a chord).
+ *   0  IV V iii vi   the "Stay With Me" turn (真夜中のドア / Miki Matsubara), also Ride On Time's chorus move
+ *   1  i bVII bVI V  the descending minor loop (Anri, 悲しみがとまらない)
+ *   2  I iii IV V    the summer lift (Anri, Remember Summer Days) */
+static void naiwan_prog(int which)
+{
+    static const uint8_t LOOP[3][8] = {
+        {4, 5, 3, 6, 4, 5, 3, 6},
+        {1, 7, 6, 5, 1, 7, 6, 5},
+        {1, 3, 4, 5, 1, 3, 4, 5},
+    };
+    uint8_t b[6] = {0};
+    int s;
+    for (s = 0; s < 8; s++)
+        en_prg_put(b, 3 * s, 3, LOOP[which][s]);
+    for (s = 0; s < 8; s++)
+        en_prg_put(b, 24 + 2 * s, 2, 1);              /* two bars a chord */
+    en_prg_put(b, 40, 1, 1);                           /* Play */
+    en_prog(b);
+}
 static void chord_change(void);
 static void prog_take(uint32_t lo, uint32_t hi) /* the progression from the page or the piece (en_prog) */
 {
@@ -2179,6 +2211,11 @@ static int walk_pick(void)                      /* the walk's next degree from w
 }
 static void chord_change(void)                  /* to another degree: the progression set by hand, or the walk (its next chosen a chord ahead) */
 {
+    if (naiwan_pending >= 0) {                         /* NAIWAN 91: after the piece is loaded, its loop takes over */
+        const int w = naiwan_pending;
+        naiwan_pending = -1;
+        naiwan_prog(w);
+    }
     int i, bor;
     alt_clear();
     if (pg_on) {                                /* the progression set by hand: its next slot (the drop: its first); an empty slot keeps the chord for its bars */
