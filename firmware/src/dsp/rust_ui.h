@@ -7,4 +7,5 @@
 int32_t fm1_rust_ui_initialize(fm1_ui_state*,const int16_t*,uint16_t);
 uint32_t fm1_rust_ui_layout(const fm1_ui_state*,uint32_t*,uint32_t);
 int32_t fm1_rust_ui_accel(fm1_ui_state*,uint32_t,int32_t,int32_t,uint32_t,uint32_t,int32_t*);
+int32_t fm1_rust_ui_classify(uint32_t,int32_t);
 #endif

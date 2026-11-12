@@ -28,7 +28,7 @@ pub struct Group {
     pub count: u8,
 }
 const _: [(); 18] = [(); core::mem::size_of::<[Group; 6]>()];
-pub const GROUPS: [Group; 6] = [
+pub static GROUPS: [Group; 6] = [
     Group {
         button: 6,
         first: 0,

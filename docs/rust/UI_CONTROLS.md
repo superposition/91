@@ -34,3 +34,11 @@ and framebuffer bytes; an oversized malformed detent is refused and a valid
 subsequent turn still works. This is source-level WASM execution, not browser,
 MIDI or device QA. Button, key and remaining input/page policies are still
 separate work under #15.
+
+Page classification also runs through safe Rust for the actual C `voice_of`,
+`kit_view`, `oct_par` and `group_of` consumers. Octave choices return the existing
+shared `ParamId`; unknown pages keep the legacy fallbacks. Six immutable group
+records are shared by Rust policy helpers. Classification invokes no callback
+or diagnostic mutation and runs outside IRQ exclusion. Its independent R01,
+current-C and Rust native/WASM corpus covers all byte-sized pages, negative
+values and both signed extremes (770 records), plus unknown-operation probes.

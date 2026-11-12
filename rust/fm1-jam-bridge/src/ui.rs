@@ -1,6 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-only
 use fm1_app::controller::{self, Action, FrameState, Port, Query, Views};
 use fm1_app::ui::{State, EFFECT_SETTINGS};
+#[no_mangle]
+pub extern "C" fn fm1_rust_ui_classify(operation: u32, view: i32) -> i32 {
+    match operation {
+        0 => fm1_app::controls::voice_of(view).map_or(-1, i32::from),
+        1 => i32::from(fm1_app::controls::kit_view(view)),
+        2 => fm1_app::controls::octave_parameter(view).index() as i32,
+        3 => fm1_app::controls::group_of(view).map_or(-1, |index| index as i32),
+        _ => -1,
+    }
+}
 /// # Safety
 /// UI is initialized/aligned, foreground-owned and disjoint from immutable
 /// defaults96. No concurrent/reentrant UI access, callback or retained borrow.

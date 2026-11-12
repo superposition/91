@@ -1,0 +1,36 @@
+{
+  "scope": "actual voice/kit/octave/group helper consumers",
+  "toolchain": "Rust1.94.1;GCC11;Clang22WASM",
+  "corpus": {
+    "views": 770,
+    "classified_outputs": 3080,
+    "bytes": 15400,
+    "sha256": "ef57ef0c1f9a2cae846a8f8e8b753e9f203cebc23385f9a7043234914d0a891d",
+    "targets": [
+      "R01/C0/Rust native",
+      "R01/C0/Rust WASM"
+    ],
+    "unknown_operation_guards": 97,
+    "R01_source_manifest_verified": 440
+  },
+  "button_regression": {
+    "cases": 28896,
+    "bytes": 48835104,
+    "sha256": "8a14104a25a1af3cf274cdc71db36562fe9b5f4e232e93cc57dceb545cdbf5f9"
+  },
+  "native_regression": {
+    "scenarios": 8,
+    "artifacts": 32,
+    "status": "exact five-way including original failure fingerprints"
+  },
+  "wasm_instrument": {
+    "compared_samples_controls_runner_http": 6036286,
+    "exports": 24,
+    "memory_bytes": 33554432,
+    "bytes": 2350551,
+    "sha256": "37f672fa8355411e604e70d15f846c2d07291035e5c3838988da0ae0ceee848f"
+  },
+  "mutable_RAM_delta": 0,
+  "physical_device": "not accessed",
+  "remaining": "held/key routing, helpers, rendering and target qualification"
+}

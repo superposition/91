@@ -2749,6 +2749,9 @@ static void set_view(int v)
 
 static int voice_of(int v)                      /* the voice page v belongs to (EN_V_*), or -1 */
 {
+#if EN_RUST_APP
+    return fm1_rust_ui_classify(0,v);
+#else
     if (v >= V_PAD && v <= V_CHORDS)
         return EN_V_PAD;
     if (v >= V_DRONE && v <= V_BLSTEP)
@@ -2756,11 +2759,18 @@ static int voice_of(int v)                      /* the voice page v belongs to (
     if (v >= V_ACID && v <= V_ACLINE)
         return EN_V_ACID;
     return -1;
+#endif
 }
 static const int SOUND_PAR[3] = {P_PADTONE, P_DR_INST, P_AC_WAVE};
 static const int HAND_PAR[3] = {P_PAD_MAN, P_DR_MAN, P_AC_MAN};   /* off the algorithm: played by hand */
 static int by_hand(int vc) { return vc >= 0 && proj.par[HAND_PAR[vc]] != 0; }
-static int kit_view(int v) { return v == V_DRUMS || v == V_LINKS || v == V_KIT || v == V_SEQ; }
+static int kit_view(int v) {
+#if EN_RUST_APP
+    return fm1_rust_ui_classify(1,v);
+#else
+    return v == V_DRUMS || v == V_LINKS || v == V_KIT || v == V_SEQ;
+#endif
+}
 
 static void shift_sound(int d)                  /* SEL + ALGORITHM: the voice's next sound, or the whole kit's */
 {
@@ -2794,6 +2804,9 @@ static void shift_sound(int d)                  /* SEL + ALGORITHM: the voice's 
 
 static int oct_par(int v)                       /* what OCT moves on page v */
 {
+#if EN_RUST_APP
+    return fm1_rust_ui_classify(2,v);
+#else
     if (v >= V_PAD && v <= V_CHORDS)
         return P_PAD_OCT;
     if (v >= V_DRONE && v <= V_BLSTEP)
@@ -2803,15 +2816,20 @@ static int oct_par(int v)                       /* what OCT moves on page v */
     if (v == V_CMEL || v == V_CMEL2 || v == V_CMVU || v == V_CMSTEP)
         return P_CM_OCT;
     return P_OCT;
+#endif
 }
 
 static int group_of(int v)
 {
+#if EN_RUST_APP
+    return fm1_rust_ui_classify(3,v);
+#else
     int g;
     for (g = 0; g < NGROUP; g++)
         if (v >= GROUP[g].first && v < GROUP[g].first + GROUP[g].n)
             return g;
     return -1;
+#endif
 }
 
 static void jam_down(int i);
@@ -2834,6 +2852,7 @@ static int key_locked(int k)                    /* ... and latched */
 #if EN_RUST_APP
 static uint32_t ui_button_port(uint32_t op,uint32_t a,uint32_t b)
 {
+    if(op==UIBQ_OCTAVE_PARAMETER)return (uint32_t)oct_par((int)a); /* pure metadata outside IRQ exclusion */
     if(op>=UIBQ_NOW && op<UIBN_SESSION_SAVED) {
         uint32_t value=0;
 #if !defined(EN_HOST) && !defined(EN_WEB)
@@ -2847,7 +2866,6 @@ static uint32_t ui_button_port(uint32_t op,uint32_t a,uint32_t b)
         case UIBQ_SECTION:value=en_sec;break;
         case UIBQ_SECTION_REQUESTED:value=en_sec_req;break;
         case UIBQ_JAM_HOLD: {jp_settings_t s;en_jam_get(&s);value=s.hold;break;}
-        case UIBQ_OCTAVE_PARAMETER:value=(uint32_t)oct_par((int)a);break;
         case UIBQ_PARAMETER:if(a<P_NPARAMS)value=(uint32_t)(int32_t)proj.par[a];break;
         }
 #if !defined(EN_HOST) && !defined(EN_WEB)

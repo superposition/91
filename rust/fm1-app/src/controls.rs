@@ -1,6 +1,40 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! Bounded panel-control policy over the existing foreground UI fields.
 use crate::ui::State;
+use fm1_types::ParamId;
+
+pub fn voice_of(view: i32) -> Option<u8> {
+    if (1..=4).contains(&view) {
+        Some(0)
+    } else if (6..=10).contains(&view) {
+        Some(1)
+    } else if (11..=13).contains(&view) {
+        Some(2)
+    } else {
+        None
+    }
+}
+pub fn kit_view(view: i32) -> bool {
+    matches!(view, 20 | 21 | 22 | 35)
+}
+pub fn octave_parameter(view: i32) -> ParamId {
+    if (1..=4).contains(&view) {
+        ParamId::PAD_OCT
+    } else if (6..=10).contains(&view) {
+        ParamId::BASSOCT
+    } else if (11..=13).contains(&view) || view == 15 {
+        ParamId::AC_OCT
+    } else if (16..=19).contains(&view) {
+        ParamId::CM_OCT
+    } else {
+        ParamId::OCT
+    }
+}
+pub fn group_of(view: i32) -> Option<usize> {
+    crate::buttons::GROUPS
+        .iter()
+        .position(|g| view >= i32::from(g.first) && view < i32::from(g.first) + i32::from(g.count))
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Error {
