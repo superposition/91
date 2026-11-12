@@ -9,6 +9,7 @@ use fm1_formats::jam::JamPack;
 use fm1_formats::session::JamSession;
 use fm1_rt::atomic::{AtomicU32, Ordering};
 mod commands;
+mod dj;
 mod effects;
 mod factory;
 mod fm6;
@@ -297,6 +298,7 @@ pub extern "C" fn fm1_rust_jam_stat(index: u32) -> u32 {
         36..=39 => formats::stat(index),
         40..=47 => voices::stat(index),
         48..=55 => fm6::stat(index),
+        72..=73 => dj::stat(index),
         _ => 0,
     }
 }

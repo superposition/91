@@ -6214,6 +6214,9 @@ static void flx_tick(int st)                    /* on every sixteenth */
  * the sounds that go on (horns, sirens, the dub siren, the riser, the roll) sound as long as the key is down; the others play out. One shot: every one plays
  * out (the long ones for at most a second or so). Pitch: the page's octave, up or down. Echo: how much of them goes to the echo and the reverb. Level. */
 enum { DJ_HORN, DJ_SIREN, DJ_LASER, DJ_ZAP, DJ_BEEP, DJ_DBL, DJ_WHOOP, DJ_DUB, DJ_DROP, DJ_RISER, DJ_REWIND, DJ_CRASH, DJ_STAB, DJ_BELL, DJ_ROLL, DJ_BLAST, DJ_RAVE, DJ_RSTAB };
+#if EN_RUST_VOICES
+const char *en_dj_name(int key) { return (const char *)fm1_rust_voice_dj_name(key); }
+#else
 static const struct { uint8_t type; float hz, aux; const char *name; } DJS[27] = {
     {DJ_HORN, 466.0f, 0.0f, "AIR HORN"}, {DJ_BLAST, 466.0f, 0.0f, "AIR BLAST"}, {DJ_HORN, 466.0f, 1.0f, "HORN MIN"}, {DJ_RAVE, 233.0f, 0.0f, "RAVE HORN"},
     {DJ_SIREN, 900.0f, 1.2f, "SIREN"}, {DJ_SIREN, 1100.0f, 3.0f, "SIREN 2"}, {DJ_SIREN, 700.0f, 0.4f, "SIREN 3"},
@@ -6226,13 +6229,21 @@ static const struct { uint8_t type; float hz, aux; const char *name; } DJS[27] =
     {DJ_RISER, 0.0f, 3.0f, "RISER"}, {DJ_REWIND, 2200.0f, 0.7f, "REWIND"}, {DJ_CRASH, 0.0f, 0.9f, "CRASH"},
     {DJ_RSTAB, 233.0f, 0.0f, "RAVE STAB"}, {DJ_BELL, 880.0f, 0.0f, "BELL"}, {DJ_ROLL, 0.0f, 2.5f, "SNR ROLL"}};
 const char *en_dj_name(int key) { return DJS[(unsigned)key < 27u ? key : 0].name; }
+#endif
+#if EN_RUST_VOICES
+typedef fm1_voice_dj_t dj_t;
+#else
 typedef struct { uint8_t on, held, key, type, hold_mode; float hz, aux, t, ph, ph2, ph3, env, z, z2; uint32_t age; } dj_t;
+#endif
 static dj_t djv[4];
 static uint32_t dj_age;
 volatile uint8_t en_smp_active;                 /* the snips sounding */
 
 static void smp_note(int key, int on)
 {
+#if EN_RUST_VOICES
+    fm1_rust_voice_dj_note(djv,&dj_age,key,(uint32_t)on,fxs_v[EN_FXS_SM_MODE],(uint32_t)fxs_v[EN_FXS_SM_LOOP]);
+#else
     int i, v = -1;
     if (key < 0 || key > 26)
         return;
@@ -6266,8 +6277,10 @@ static void smp_note(int key, int on)
         d->t = d->ph = d->ph2 = d->ph3 = d->env = d->z = d->z2 = 0.0f;
         d->age = ++dj_age;
     }
+#endif
 }
 
+#if !EN_RUST_VOICES
 static inline float dj_wrap(float p) { return p - (float)(int)p; }
 /* one sample of a voice: its signal and its own envelope; it ends itself (on = 0) when its sound is over */
 static float dj_voice(dj_t *v, float *amp)
@@ -6458,6 +6471,8 @@ static float dj_voice(dj_t *v, float *amp)
     *amp = a;
     return y;
 }
+
+#endif
 
 /* a brake, a spin-back, half time: the ring read at a rate that slides to its target (0; backwards; a half or less)
  * while the live mix goes on being written; a low-pass follows the rate down. Let go: the rate slides back to 1 and
@@ -8074,6 +8089,10 @@ static void render_bass(uint32_t n)
 
 static void render_dj(uint32_t n)               /* the snips, into the mix and its sends, before the sidechain */
 {
+#if EN_RUST_VOICES
+    const fm1_voice_dj_config_t c={fxs_v[EN_FXS_SM_MIX],fxs_v[EN_FXS_SM_LEN],trk_g[TR_ACID],trk_g1[TR_ACID],tg_inv};
+    float *const outputs[4]={mixl,mixr,rsend,esend};en_smp_active=(uint8_t)fm1_rust_voice_dj(djv,&c,&rng,SINT,outputs,n);
+#else
     static const float ES[3][2] = {{0.0f, 0.0f}, {0.25f, 0.35f}, {0.6f, 0.9f}};          /* the reverb's and the echo's share */
     const int ec = fxs_v[EN_FXS_SM_LEN] < 0 ? 0 : fxs_v[EN_FXS_SM_LEN] > 2 ? 2 : fxs_v[EN_FXS_SM_LEN];
     const float gain = 0.01f * (float)fm_clampf((float)fxs_v[EN_FXS_SM_MIX], 0.0f, 100.0f) * 0.5f;
@@ -8102,6 +8121,7 @@ static void render_dj(uint32_t n)               /* the snips, into the mix and i
         live += d->on;
     }
     en_smp_active = (uint8_t)live;
+#endif
 }
 
 /* the DX voices (the pluck's sounds from CM_NPLAIN): a stage of the chunk's job, with the pad's, into their own buffers */

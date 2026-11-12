@@ -27,6 +27,8 @@ node tests/host/emu_factory_test.mjs "$out/reference.wasm" "$out/rust.wasm" > "$
 cat "$out/factory-lines.json"
 node tests/host/emu_fm6_test.mjs "$out/reference.wasm" "$out/rust.wasm" > "$out/fm6.json"
 cat "$out/fm6.json"
+node tests/host/emu_dj_test.mjs "$out/reference.wasm" "$out/rust.wasm" > "$out/dj.json"
+cat "$out/dj.json"
 node tests/host/emu_effects_test.mjs "$out/reference.wasm" "$out/rust.wasm" > "$out/effects.json"
 cat "$out/effects.json"
 sha256sum "$out/reference.wasm" "$out/rust.wasm" > "$out/sha256.txt"

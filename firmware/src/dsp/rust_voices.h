@@ -79,3 +79,9 @@ _Static_assert(sizeof(fm1_voice_links_t)==8 && sizeof(fm1_voice_lfo_routes_t)==3
 extern void fm1_rust_voice_links_hit(fm1_voice_links_t *,uint32_t,float,uint32_t);
 extern void fm1_rust_voice_links_step(fm1_voice_links_t *,uint32_t,int32_t,int32_t,uint32_t);
 extern void fm1_rust_voice_lfo_routes(const int16_t *,const fm1_voice_lfo_t *,const fm1_voice_lfo_t *,fm1_voice_lfo_routes_t *);
+typedef struct {uint8_t on,held,key,type,hold_mode,padding[3];float hz,aux,t,ph,ph2,ph3,env,z,z2;uint32_t age;} fm1_voice_dj_t;
+typedef struct {int32_t mix,echo;float gain0,gain1,inverse;} fm1_voice_dj_config_t;
+_Static_assert(sizeof(fm1_voice_dj_t)==48 && sizeof(fm1_voice_dj_config_t)==20,"DJ voice ABI");
+extern const uint8_t *fm1_rust_voice_dj_name(int32_t);
+extern void fm1_rust_voice_dj_note(fm1_voice_dj_t *,uint32_t *,int32_t,uint32_t,int32_t,uint32_t);
+extern uint32_t fm1_rust_voice_dj(fm1_voice_dj_t *,const fm1_voice_dj_config_t *,uint32_t *,const float *,float *const *,uint32_t);

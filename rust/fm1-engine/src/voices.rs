@@ -4,6 +4,7 @@ use crate::effects::math::{flush, max, min, tanh};
 pub mod acid;
 pub mod config;
 pub mod data;
+pub mod dj;
 pub mod drone;
 pub mod pad;
 pub mod parameters;
