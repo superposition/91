@@ -1,0 +1,54 @@
+{
+  "scope": "foreground frame orchestration, load-shedding and manual voice/capture decisions",
+  "toolchain": "Rust1.94.1; GCC11 native; Clang22 WASM",
+  "reference": {
+    "source": "immutable R01 ui_frame plus original page IDs",
+    "source_manifest_files_verified": 440,
+    "cases": 8192,
+    "bytes": 14176176,
+    "sha256": "21e45cf98bed52b02bb1e5405fe74cf1cda6839da07ca14f249ae8e3f3cfe152",
+    "targets": [
+      "native C/Rust",
+      "WASM C/Rust"
+    ],
+    "production_callback_executed": true,
+    "additional_guards": [
+      "null UI",
+      "null frame",
+      "null callback",
+      "refused Songbook snapshot",
+      "borrow escape fails to compile",
+      "calm interval edges",
+      "clock/counter wrap"
+    ]
+  },
+  "native": {
+    "scenarios": 97,
+    "artifacts": 538,
+    "pngs": 238,
+    "fresh_process_repeats": 3,
+    "status": "exact five-way incl original failure fingerprints"
+  },
+  "wasm": {
+    "compared_samples_including_http": 59030760,
+    "exports": 24,
+    "memory_bytes": 33554432,
+    "bytes": 2348932,
+    "sha256": "2d4da079d0e07779f419c24ab1005114524f30aceef9465010ddaaa59d3a2698",
+    "application_rejections": 0
+  },
+  "storage_busy_regression": "actual complete UI C0/all-Rust plus1024 query combinations pass",
+  "footprint": {
+    "frame_aux_bytes_replacing_old_statics": 28,
+    "extra_ui_objects": 0,
+    "extra_payloads": 0,
+    "extra_counters": 0,
+    "target_RAM_ROM": "requires actual adopted-compiler target gate"
+  },
+  "remaining_scope": [
+    "button/key/encoder helper implementations",
+    "page/widgets/theme/help composition",
+    "visualizer policy and union state"
+  ],
+  "physical_testing": "not performed"
+}

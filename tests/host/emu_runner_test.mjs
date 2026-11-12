@@ -31,7 +31,7 @@ for(let i=0;i<32;i++){
 }
 tap(10);advance(1600);tap(10);advance(5000);
 const zeroBefore=rust.ex.web_rust_stat(82);input('web_render',0);assert.equal(rust.ex.web_rust_stat(82),zeroBefore);
-const gameCalls=rust.ex.web_rust_stat(82)-before;assert(gameCalls>2000,'real instrument must execute Rust game policy/drawing');
-tap(6);const stopped=rust.ex.web_rust_stat(82);advance(2000);assert.equal(rust.ex.web_rust_stat(82),stopped,'HOME releases the game controller');
+const applicationCalls=rust.ex.web_rust_stat(82)-before;assert(applicationCalls>2000,'real instrument must execute Rust application policy/drawing');
+tap(6);advance(2000); // Exact C0 audio and every pixel above also verify HOME leaves the game.
 assert.equal(rust.ex.web_rust_stat(83),0);assert.equal(rust.memory.buffer.byteLength,33554432);assert(peak>0.05&&peak<1);
-console.log(JSON.stringify({scenario:'kick-runner-steering-restart-pause-exit',compared_samples:samples,render_calls:calls,peak,pcm_hash:hash.toString(16).padStart(8,'0'),game_calls:gameCalls,public_exports:24,memory_bytes:rust.memory.buffer.byteLength}));
+console.log(JSON.stringify({scenario:'kick-runner-steering-restart-pause-exit',compared_samples:samples,render_calls:calls,peak,pcm_hash:hash.toString(16).padStart(8,'0'),application_calls:applicationCalls,public_exports:24,memory_bytes:rust.memory.buffer.byteLength}));

@@ -481,6 +481,10 @@ uint32_t ui_splash_ms = 3200u;           /* the boot cards: RedtailWorks, then H
 
 #if EN_RUST_APP
 #include "../dsp/rust_ui.h"
+#include "../dsp/rust_ui_controller.h"
+#if !defined(EN_HOST) && !defined(EN_WEB)
+#include "../../hal/fm1_irq_state.h"
+#endif
 static fm1_ui_state ui;
 #else
 static struct {
@@ -8006,6 +8010,87 @@ static void jam_helper_sync(void)
     ui.jam_active=en_jam_on;
 }
 
+#if EN_RUST_APP
+/* Seven original frame-local words, one in-place carrier. No UI/aux borrow is
+ * retained while this callback invokes application code or stopped commands. */
+static fm1_ui_frame_state ui_frame_state;
+static uint32_t ui_frame_port(uint32_t op,uint32_t a,uint32_t b)
+{
+    if(op>=UIQ_NOW) {
+        uint32_t value=0;
+#if !defined(EN_HOST) && !defined(EN_WEB)
+        const uint32_t irq=fm1_irq_state_save();
+#endif
+        switch(op) {
+        case UIQ_NOW:value=plat_ms();break;
+        case UIQ_BUTTONS:value=plat_buttons();break;
+        case UIQ_KEYS:value=plat_keys();break;
+        case UIQ_SPLASH_DURATION:value=ui_splash_ms;break;
+        case UIQ_THEME:value=(uint32_t)proj.par[P_THEME];break;
+        case UIQ_PLAYING:value=en_playing;break;
+        case UIQ_DRIFT_CHANGES:value=en_dd_changes;break;
+        case UIQ_NEXT_PATTERN:value=en_pat_next;break;
+        case UIQ_JAM_ON:value=en_jam_on;break;
+        case UIQ_XRUNS:value=plat_xruns();break;
+        case UIQ_LATE:value=plat_late();break;
+        case UIQ_SHED_LEVEL:value=en_shed_level;break;
+        case UIQ_GAME_ON:value=kr.on;break;
+        }
+#if !defined(EN_HOST) && !defined(EN_WEB)
+        fm1_irq_state_restore(irq);
+#endif
+        return value; /* no waits, private worker data, callbacks or Rust work masked */
+    }
+    switch(op) {
+    case UIA_SPLASH:splash_tick();break;
+    case UIA_CLEAR_SCREEN:lcd_fill(0,0,240,240,K_BG);break;
+    case UIA_PLAY:en_play(1);break;
+    case UIA_THEME:th=&THEMES[a<EN_NTHEME?a:0];lcd_fill(0,0,240,240,K_BG);break;
+    case UIA_STORE:store_tick(0);break;
+    case UIA_DRIFT: {
+        char t[12]="PATTERN ";proj.par[P_PATTERN]=(int16_t)a;
+        t[8]=(char)('1'+a%10u);t[9]=0;
+        if(plat_ms()>=ui.msg_until)say("DRUM DRIFT",t);break;
+    }
+    case UIA_REMOTE:
+        if(rm.on)rm_tick();
+        if(rm.on) {plat_glow(1);plat_leds(rm.lit_b,rm.lit_k);return 1;}break;
+    case UIA_JAM_SYNC:jam_helper_sync();break;
+    case UIA_INPUT:input();break;
+    case UIA_SCENE:scene_tick();break;
+    case UIA_DJ:dj_tick();break;
+    case UIA_AUTO_FX:af_tick();break;
+    case UIA_MIX:mix_tick();break;
+    case UIA_SAMPLE:smp_tick();break;
+    case UIA_KEY:key_tick();break;
+    case UIA_GLIDE:glide_tick();break;
+    case UIA_SAVER:saver_tick();break;
+    case UIA_JAM:jam_tick();break;
+    case UIA_SHED:en_shed((int)a);break;
+    case UIA_MANUAL_VOICE: {
+        static const uint8_t man[4]={P_CM_MAN,P_PAD_MAN,P_AC_MAN,P_DR_MAN};
+        if(a<4)en_set(man[a],b?1:proj.par[man[a]]);break;
+    }
+    case UIA_AUTOSAVE:autosave();break;
+    case UIA_GAME_UPDATE:runner_update();break;
+    case UIA_GAME_DRAW:runner_draw((int)a);cv_blit(0,a?120:0);break;
+    case UIA_GAME_LEDS:runner_leds();break;
+    case UIA_SCAN:cv_scan=(uint8_t)a;break;
+    case UIA_JAM_SNAPSHOT:
+#if EN_RUST_HANDOFF
+        return en_jam_snapshot(&jam_view)!=0;
+#else
+        return 1;
+#endif
+    case UIA_HEADER:draw_header();break;
+    case UIA_MAIN:draw_main();break;
+    case UIA_KNOBS:draw_knobs();break;
+    case UIA_LEDS:leds();break;
+    }
+    return 0;
+}
+#endif
+
 void ui_frame(void)
 {
     ui_io_retry();
@@ -8016,6 +8101,10 @@ void ui_frame(void)
         if(ui.splash) {ui.splash=1;ui.splash_step=0;} /* retry the full card */
     }
 #endif
+#if EN_RUST_APP
+    (void)fm1_rust_ui_frame(&ui,&ui_frame_state,ui_frame_port,
+        (uint32_t)V_JAM|((uint32_t)V_JAMHELP<<8)|((uint32_t)V_JAMARR<<16)|((uint32_t)V_JAMSWELL<<24));
+#else
     if (ui.splash) {
         uint32_t held = plat_buttons() | plat_keys();
         if (plat_ms() - ui.boot_t < ui_splash_ms && !held) {
@@ -8139,6 +8228,7 @@ void ui_frame(void)
         draw_knobs();
     leds();
     ui.frame++;
+#endif
 }
 
 void ui_input_only(void)
