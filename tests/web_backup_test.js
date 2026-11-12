@@ -3,7 +3,7 @@
 // frame): a frame parses, a damaged one does not, a chunk is what the firmware's parser takes, and a backup file comes back as it went. node tests/web_backup_test.js
 const fs = require("fs");
 const path = require("path");
-const src = fs.readFileSync(path.join(__dirname, "..", "web", "fm1backup.js"), "utf8").replace(/^export /gm, "");
+const src = fs.readFileSync(path.join(__dirname, "..", "web", "device-data.js"), "utf8").replace(/^export /gm, "") + fs.readFileSync(path.join(__dirname, "..", "web", "fm1backup.js"), "utf8").replace(/^export /gm, "").replace(/^import .*;\r?\n/gm, "");
 const M = new Function(src + "; return { bkObjects, bkJamCaps, bkJamCapsMsg, BK_CHUNK, BK_FRAME, BK_MAX, BK_OBJECTS, bkName, bkSum, bkChunkMsg, bkReadMsg, bkCommitMsg, bkRestartMsg, bkParseFrame, bkParseAck, bkCrc32, bkEncode, bkDecode, MM_OBJ, MM_LEN, mmEncode, mmDecode };")();
 let bad = 0;
 const check = (name, ok) => { console.log((ok ? "  ok   " : "  FAIL ") + name); if (!ok) bad++; };

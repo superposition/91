@@ -65,7 +65,7 @@ for name in routes:
     assert not retired&set(parsed.ids),f'retired engineering UI returned: {name}'
     expected=set(required.get(name,[]))-retired
     assert expected<=set(parsed.ids),f'missing original control IDs in {name}: {expected-set(parsed.ids)}'
-    assert not re.search(r'@@[A-Z_]+@@|/\*(?:PARAMS|META|LIB|LIBRARY|RELAY)\*/',text),f'unresolved build data: {name}'
+    assert not re.search(r'@@[A-Z_]+@@|/\*(?:PARAMS|META|LIB|LIBRARY|RELAY|DEVICE)\*/',text),f'unresolved build data: {name}'
     assert any('site.css' in link for link in parsed.links),f'missing shared theme: {name}'
     assert 'fonts.googleapis.com' not in text,f'external font dependency: {name}'
     for style in parsed.styles:assert '{{' not in style,f'invalid doubled-opening-brace CSS: {name}'

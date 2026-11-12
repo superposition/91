@@ -175,10 +175,23 @@
 <script type="application/json" id="pdata">/*PARAMS*/</script>
 <script>
 "use strict";
+/*DEVICE*/
 const $ = (id) => document.getElementById(id);
 const D = JSON.parse($("pdata").textContent);
 const P = D.params;
-const NPARAMS = P.length;
+const NPARAMS = DEVICE_DATA.parameters.count, NSLOTS = DEVICE_DATA.parameters.userSlots, USER_VOICE_BASE = DEVICE_DATA.parameters.userVoiceBase;
+let parametersReady = false, parameterCount = 0;
+const device = createDeviceClient(DEVICE_DATA, {
+  requestMidi: navigator.requestMIDIAccess ? () => navigator.requestMIDIAccess({ sysex: true }) : null,
+  onMessage: onMidi,
+  onDisconnect: (_session, error) => {
+    port = null; parametersReady = false; parameterCount = 0; clearPendingEdits();
+    for (const finish of waiters.splice(0)) finish(null);
+    if (voiceWait) { const finish = voiceWait; voiceWait = null; finish(null); }
+    $("conn").textContent = error.message; $("conn").className = ""; updateButtons(); renderRows();
+  },
+});
+window.addEventListener("pagehide", () => { device.close(); port = null; parametersReady = false; clearPendingEdits(); updateButtons(); renderRows(); });
 const val = P.map((q) => q.def);                 /* what the FM-1 has, as far as we know */
 const say = (txt) => { $("msg").textContent = txt || ""; };
 
@@ -187,23 +200,11 @@ let port = null, flushTimer = null;
 const pend = new Map();
 const waiters = [];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-async function openPort() {
-  if (port && port.inp.state !== "disconnected" && port.out.state !== "disconnected") return port;
-  if (!navigator.requestMIDIAccess) throw new Error("This browser cannot do MIDI. Use Chrome or Edge.");
-  let midi;
-  try { midi = await navigator.requestMIDIAccess({ sysex: true }); } catch (e) { throw new Error("MIDI (SysEx) access was not allowed: allow it in the site settings."); }
-  const pick = (m) => [...m.values()].find((x) => /fm-?1/i.test(x.name) && !/ota/i.test(x.name) && x.state !== "disconnected");
-  const inp = pick(midi.inputs), out = pick(midi.outputs);
-  if (!inp || !out) throw new Error("The FM-1 was not found. Check the USB cable and close other programs that use its MIDI port.");
-  port = { inp, out };
-  inp.onmidimessage = onMidi;
-  return port;
-}
+async function openPort() { port = await device.open(); return port; }
 function onMidi(ev) {
   const d = ev.data;
   if (d[0] !== 0xF0 || d[1] !== 0x7D || d[2] !== 0x50) return;
   if (d[3] === 0x57) { const w = waiters.shift(); if (w) w({ kind: d[4], n: d[5] }); }
-  else if (d[3] === 0x51) onDump(d);
   else if (d[3] === 0x58) onVoiceReply(d);
 }
 function waitFor(ms) {
@@ -216,29 +217,28 @@ function waitFor(ms) {
 const send = (bytes) => { try { port.out.send(bytes); return true; } catch (e) { return false; } };
 
 /* ===================================================================== the parameters */
+function clearPendingEdits() {
+  clearTimeout(flushTimer); flushTimer = null; pend.clear();
+}
 function setParam(p, v) {
+  if (port && (!parametersReady || p >= parameterCount)) { say(device.text("unsupported")); return; }
   val[p] = v;
+  if (!port) return;
   pend.set(p, v);
   if (!flushTimer) flushTimer = setTimeout(flush, 25);
 }
 function flush() {
   flushTimer = null;
-  if (!port) { pend.clear(); return; }
+  if (!port || !parametersReady) { pend.clear(); return; }
   let n = 0;
   for (const [p, v] of pend) {
+    if (p >= parameterCount) { pend.delete(p); continue; }
     const u = v + 8192;
     send([0xF0, 0x7D, 0x50, 0x50, 0x01, p >> 7, p & 127, (u >> 7) & 127, u & 127, 0xF7]);
     pend.delete(p);
     if (++n >= 6) break;
   }
   if (pend.size) flushTimer = setTimeout(flush, 25);
-}
-let dumpGot = 0;
-function onDump(d) {                              /* F0 7D 50 51 first-hi first-lo count (hi lo)* F7 */
-  const first = (d[4] << 7) | d[5], n = d[6];
-  for (let k = 0; k < n; k++) val[first + k] = (((d[7 + 2 * k] << 7) | d[8 + 2 * k]) & 0x3FFF) - 8192;
-  dumpGot = Math.max(dumpGot, first + n);
-  if (dumpGot >= NPARAMS) { renderRows(); $("conn").textContent = "Connected: " + port.inp.name + ". Read " + NPARAMS + " parameters."; }
 }
 const PAGES = D.tabs;                             /* a tab a voice (all of the pad together, all of the drums together), in sections */
 let page = 0;
@@ -298,6 +298,7 @@ function paramRow(k) {
   cc.className = "cc" + (src ? " on" : "");
   cc.textContent = src ? ctlShort(src) : "";
   cc.title = src ? ctlSrcName(src) + " (learned)" : "";
+  ctl.disabled = rst.disabled = !!port && (!parametersReady || k.p >= parameterCount);
   row.append(lab, ctl, out, rst, cc);
   row.addEventListener("pointerdown", (e) => {       /* learning: a click picks the setting (its controls do nothing meanwhile) */
     if (!ctlLearning) return;
@@ -382,8 +383,7 @@ function ctlMidiIn(e, input) {
   if (r) { r.ctl.value = x; if (r.ctl.tagName !== "SELECT") r.out.textContent = r.text(x); }
 }
 async function ctlConnect() {
-  if (!navigator.requestMIDIAccess) { ctlStat("This browser cannot do MIDI. Use Chrome or Edge."); return; }
-  try { ctlMidi = await navigator.requestMIDIAccess({ sysex: true }); } catch (e) { ctlStat("MIDI access was not allowed: allow it in the site settings."); return; }
+  try { ctlMidi = await device.access(); } catch (error) { ctlStat(error.message); return; }
   const attach = () => {
     const ins = [];
     for (const inp of ctlMidi.inputs.values()) {
@@ -539,14 +539,14 @@ function drawAlg() {
 
 /* ===================================================================== the voice editor */
 let voice = initVoice(), slot = 0, nloaded = 0, opSel = 1, live = true;
-const slots = new Array(16).fill(null);          /* {v: the 155 bytes} of what the FM-1 holds, once read */
+const slots = new Array(NSLOTS).fill(null);          /* {v: the 155 bytes} of what the FM-1 holds, once read */
 const library = [];                              /* voices read from .syx files */
 let sendTimer = null, sending = false, again = false;
 
 function renderSlots() {
   const box = $("slots");
   box.textContent = "";
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < NSLOTS; i++) {
     const b = document.createElement("button");
     const s = slots[i];
     b.textContent = (i + 1) + (s ? "  " + nameOf(s) : i <= nloaded ? "  (new)" : "");
@@ -558,7 +558,7 @@ function renderSlots() {
   }
 }
 function updateButtons() {
-  const on = !!port;
+  const on = !!port && parametersReady;
   $("vread").disabled = !on; $("vsend").disabled = !on; $("vplay").disabled = !on; $("readall").disabled = !on;
 }
 function renderVoice() {
@@ -652,47 +652,52 @@ function postEdit() {                            /* a change: to the FM-1 soon (
   sendTimer = setTimeout(sendVoice, 120);
 }
 async function sendVoice() {
-  if (!port) return;
+  if (!port || !parametersReady) return;
   if (sending) { again = true; return; }
+  if (device.busy) { say(device.text("busy")); return; }
   sending = true;
-  do {
-    again = false;
-    if (slot > nloaded) { say("Slots fill in order: send to the next free slot (" + (nloaded + 1) + ") first."); break; }
-    const b = packVoice(voice);
-    send([0xF0, 0x7D, 0x50, 0x56, slot, ...b, checksum(b), 0xF7]);
-    const a = await waitFor(1200);
-    if (!a) { say("The FM-1 did not answer (is it running a compatible NAIWAN 91 build?)."); break; }
-    if (a.n === 0x7F) { say("The FM-1 did not take the voice."); break; }
-    slots[slot] = Uint8Array.from(voice);
-    if (slot === nloaded) nloaded++;
-    say("");
-    renderSlotsSoon();
-  } while (again);
-  sending = false;
+  try {
+    await device.run(async () => {
+      do {
+        again = false;
+        if (slot > nloaded) { say("Slots fill in order: send to the next free slot (" + (nloaded + 1) + ") first."); break; }
+        const b = packVoice(voice);
+        send([0xF0, 0x7D, 0x50, 0x56, slot, ...b, checksum(b), 0xF7]);
+        const a = await waitFor(1200);
+        if (!a) { say(device.text("unsupported")); break; }
+        if (a.n === 0x7F) { say("The FM-1 did not take the voice."); break; }
+        slots[slot] = Uint8Array.from(voice);
+        if (slot === nloaded) nloaded++;
+        say(""); renderSlotsSoon();
+      } while (again);
+    });
+  } catch (error) { say(error.message); }
+  finally { sending = false; }
 }
 let slotsTimer = null;
 function renderSlotsSoon() { clearTimeout(slotsTimer); slotsTimer = setTimeout(renderSlots, 200); }
 
 /* reading the slots back from the FM-1 */
-let voiceWait = null;
-function onVoiceReply(d) {                       /* F0 7D 50 58 slot loaded [128 bytes, checksum] F7 */
+let voiceWait = null, voiceRequested = -1;
+function onVoiceReply(d) {
   if (!voiceWait) return;
-  const w = voiceWait; voiceWait = null;
-  const have = d.length > 8;
-  w({ slot: d[4], loaded: d[5], data: have ? Uint8Array.from(d.slice(6, 134)) : null });
+  const reply = deviceParseVoice(d, NSLOTS, voiceRequested);
+  if (!reply) return;
+  const finish = voiceWait; voiceWait = null; finish(reply);
 }
 async function readSlots() {
   say("Reading the voices…");
   nloaded = 0;
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < NSLOTS; i++) {
     const r = await new Promise((res) => {
       voiceWait = res;
+      voiceRequested = i;
       send([0xF0, 0x7D, 0x50, 0x56, 0x7E, i, 0xF7]);
       setTimeout(() => { if (voiceWait === res) { voiceWait = null; res(null); } }, 1500);
     });
-    if (!r) { say("The FM-1 did not answer."); break; }
+    if (!r) { say(device.text("unsupported")); return; }
     nloaded = r.loaded;
-    if (i >= r.loaded) { for (let j = i; j < 16; j++) slots[j] = null; break; }
+    if (i >= r.loaded) { for (let j = i; j < NSLOTS; j++) slots[j] = null; break; }
     slots[i] = unpackVoice(r.data);
   }
   if (slots[slot]) voice = Uint8Array.from(slots[slot]);
@@ -702,7 +707,7 @@ async function readSlots() {
 }
 function syncPluckNames() {                      /* the pluck's Sound lists the loaded voices by name */
   const q = P[D.enum.P_CM_SND];
-  for (let i = 0; i < 16; i++) q.t[12 + 22 + i] = slots[i] ? "DX " + nameOf(slots[i]) : "(empty)";
+  for (let i = 0; i < NSLOTS; i++) q.t[USER_VOICE_BASE + i] = slots[i] ? "DX " + nameOf(slots[i]) : "(empty)";
   renderRows();
 }
 
@@ -766,10 +771,10 @@ $("valg").addEventListener("change", (e) => { voice[FP.ALG] = +e.target.value; r
 $("vlive").addEventListener("change", (e) => { live = e.target.checked; });
 $("vnew").addEventListener("click", () => { voice = initVoice(); renderVoice(); changed(); postEdit(); say("An init voice: only OP1 sounds, a plain sine."); });
 $("vsend").addEventListener("click", () => { say(""); sendVoice(); });
-$("vread").addEventListener("click", readSlots);
+$("vread").addEventListener("click", deviceAction(device, readSlots, say));
 $("vplay").addEventListener("click", () => {
   const p = D.enum.P_CM_SND;
-  setParam(p, 12 + 22 + slot);
+  setParam(p, USER_VOICE_BASE + slot);
   if (val[D.enum.P_CM_LVL] < 40) setParam(D.enum.P_CM_LVL, 60);
   renderRows();
   say("The pluck now plays slot " + (slot + 1) + ".");
@@ -777,18 +782,21 @@ $("vplay").addEventListener("click", () => {
 
 /* connecting */
 async function connect() {
+  clearPendingEdits(); parametersReady = false; parameterCount = 0; updateButtons(); renderRows(); $("conn").textContent = device.text("connecting");
   try {
-    await openPort();
-    $("conn").textContent = "Connected: " + port.inp.name + ".";
-    $("conn").className = "ok";
-    updateButtons();
-    dumpGot = 0;
-    send([0xF0, 0x7D, 0x50, 0x50, 0x02, 0xF7]);
-    $("connect").textContent = "Reconnect";
-  } catch (e) { $("conn").textContent = e.message; $("conn").className = ""; }
+    const session = await openPort();
+    renderRows();
+    const about = await device.about(session);
+    const count = Math.min(NPARAMS, deviceCapabilities(about).parameters || NPARAMS);
+    const read = await deviceReadParameters(device, session, count, (entries) => { for (const [index, value] of entries) val[index] = value; });
+    if (!read) throw device.error("unsupported");
+    parameterCount = count; parametersReady = true; renderRows(); updateButtons();
+    $("conn").textContent = device.text("connected", session.inp.name) + ". Read " + count + " settings.";
+    $("conn").className = "ok"; $("connect").textContent = "Reconnect";
+  } catch (error) { device.close(); port = null; parametersReady = false; parameterCount = 0; clearPendingEdits(); updateButtons(); renderRows(); $("conn").textContent = error.message; $("conn").className = ""; }
 }
-$("connect").addEventListener("click", () => { port = null; connect(); });
-$("readall").addEventListener("click", () => { dumpGot = 0; send([0xF0, 0x7D, 0x50, 0x50, 0x02, 0xF7]); if (!$("p-voice").hidden) readSlots(); });
+$("connect").addEventListener("click", deviceAction(device, async () => { device.close(); port = null; await connect(); }, (message) => $("conn").textContent = message));
+$("readall").addEventListener("click", deviceAction(device, async () => { await connect(); if (parametersReady && !$("p-voice").hidden) await readSlots(); }, say));
 
 /* tabs */
 function tab(name) {
@@ -797,7 +805,7 @@ function tab(name) {
     $("tab-" + t).setAttribute("aria-selected", t === name ? "true" : "false");
   }
 }
-for (const t of ["sound", "voice", "about"]) $("tab-" + t).addEventListener("click", () => { tab(t); if (t === "voice" && port && !slots[0] && nloaded === 0) readSlots(); });
+for (const t of ["sound", "voice", "about"]) $("tab-" + t).addEventListener("click", () => { tab(t); if (t === "voice" && parametersReady && !slots[0] && nloaded === 0) void deviceAction(device, readSlots, say)(); });
 
 renderPages(); renderRows(); renderSlots(); renderVoice(); updateButtons();
 if (location.hash === "#voices") tab("voice");
