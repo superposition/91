@@ -9,6 +9,7 @@ float truncf(float); double trunc(double);
 float roundf(float); double round(double);
 float fabsf(float); double fabs(double);
 float fmodf(float,float); double fmod(double,double);
+float remainderf(float,float); double remainder(double,double);
 float copysignf(float,float); double copysign(double,double);
 float fmaf(float,float,float); double fma(double,double,double);
 float powf(float,float); double pow(double,double);
