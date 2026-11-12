@@ -12,7 +12,11 @@
 #endif
 
 static void web_audio(const int32_t *blk, uint32_t n);
+#if EN_RUST_WEB
+#include "../../host/rust_web_app.c"
+#else
 #include "../../host/amb_host.c"
+#endif
 
 #undef __attribute__
 #define WEB_EXPORT(name) __attribute__((used, visibility("default"), export_name(#name)))
@@ -80,33 +84,96 @@ WEB_EXPORT(web_render) void web_render(uint32_t n)
 WEB_EXPORT(web_boot) void web_boot(void)
 {
     ui_splash_ms = 3200u;                        /* the boot cards, as on the FM-1 */
+#if EN_RUST_WEB
+    fm1_rust_web_boot(&web_callbacks);
+#else
     boot();
+#endif
 }
-WEB_EXPORT(web_seed) void web_seed(uint32_t s) { host_seed = s; }   /* before web_boot */
-WEB_EXPORT(web_buttons) void web_buttons(uint32_t m) { held_btn = m; }
-WEB_EXPORT(web_keys) void web_keys(uint32_t m) { held_keys = m; }
+WEB_EXPORT(web_seed) void web_seed(uint32_t s) {
+#if EN_RUST_WEB
+    fm1_rust_web_set(0,s,0);
+#else
+    host_seed=s;
+#endif
+}
+WEB_EXPORT(web_buttons) void web_buttons(uint32_t m) {
+#if EN_RUST_WEB
+    fm1_rust_web_set(1,m,0);
+#else
+    held_btn=m;
+#endif
+}
+WEB_EXPORT(web_keys) void web_keys(uint32_t m) {
+#if EN_RUST_WEB
+    fm1_rust_web_set(2,m,0);
+#else
+    held_keys=m;
+#endif
+}
 WEB_EXPORT(web_enc) void web_enc(int role, int32_t n)
 {
     if (role >= 0 && role < NE)
+#if EN_RUST_WEB
+        fm1_rust_web_set(4,(uint32_t)role,(uint32_t)n);
+#else
         enc_acc[role] += n;
+#endif
 }
-WEB_EXPORT(web_master) void web_master(uint32_t v) { master = v > 4096u ? 4096u : v; }
-WEB_EXPORT(web_lit_buttons) uint32_t web_lit_buttons(void) { return lit_btn; }
-WEB_EXPORT(web_lit_keys) uint32_t web_lit_keys(void) { return lit_keys; }
-WEB_EXPORT(web_fb) uint16_t *web_fb(void) { return fb; }
-WEB_EXPORT(web_blits) uint32_t web_blits(void) { return blits; }
-WEB_EXPORT(web_now) uint32_t web_now(void) { return now_ms; }
-WEB_EXPORT(web_cpu) uint32_t web_cpu(void) { return cpu_pct; }
+WEB_EXPORT(web_master) void web_master(uint32_t v) {
+#if EN_RUST_WEB
+    fm1_rust_web_set(3,v,0);
+#else
+    master=v>4096u?4096u:v;
+#endif
+}
+#if EN_RUST_WEB
+WEB_EXPORT(web_lit_buttons) uint32_t web_lit_buttons(void) {return fm1_rust_web_get(6);}
+WEB_EXPORT(web_lit_keys) uint32_t web_lit_keys(void) {return fm1_rust_web_get(7);}
+WEB_EXPORT(web_fb) uint16_t *web_fb(void) {return fm1_rust_web_frame();}
+WEB_EXPORT(web_blits) uint32_t web_blits(void) {return fm1_rust_web_get(8);}
+WEB_EXPORT(web_now) uint32_t web_now(void) {return fm1_rust_web_get(0);}
+WEB_EXPORT(web_cpu) uint32_t web_cpu(void) {return fm1_rust_web_get(10);}
+#else
+WEB_EXPORT(web_lit_buttons) uint32_t web_lit_buttons(void) {return lit_btn;}
+WEB_EXPORT(web_lit_keys) uint32_t web_lit_keys(void) {return lit_keys;}
+WEB_EXPORT(web_fb) uint16_t *web_fb(void) {return fb;}
+WEB_EXPORT(web_blits) uint32_t web_blits(void) {return blits;}
+WEB_EXPORT(web_now) uint32_t web_now(void) {return now_ms;}
+WEB_EXPORT(web_cpu) uint32_t web_cpu(void) {return cpu_pct;}
+#endif
 
 /* saved objects: the page keeps them (localStorage) and gives them back before boot */
-WEB_EXPORT(web_store) uint8_t *web_store(uint32_t obj) { return obj < OBJ_NOBJ ? store[obj] : 0; }
-WEB_EXPORT(web_store_len) int web_store_len(uint32_t obj) { return obj < OBJ_NOBJ ? store_len[obj] : -1; }
+WEB_EXPORT(web_store) uint8_t *web_store(uint32_t obj) {
+#if EN_RUST_WEB
+    return fm1_rust_web_store_ptr(obj);
+#else
+    return obj<OBJ_NOBJ?store[obj]:0;
+#endif
+}
+WEB_EXPORT(web_store_len) int web_store_len(uint32_t obj) {
+#if EN_RUST_WEB
+    return fm1_rust_web_store_len(obj);
+#else
+    return obj<OBJ_NOBJ?store_len[obj]:-1;
+#endif
+}
 WEB_EXPORT(web_store_set_len) void web_store_set_len(uint32_t obj, int n)
 {
+#if EN_RUST_WEB
+    fm1_rust_web_store_set_len(obj,n);
+#else
     if (obj < OBJ_NOBJ)
         store_len[obj] = n < 0 ? -1 : n > (int)PLAT_STORE_MAX ? (int)PLAT_STORE_MAX : n;
+#endif
 }
-WEB_EXPORT(web_store_writes) uint32_t web_store_writes(void) { return store_writes; }
+WEB_EXPORT(web_store_writes) uint32_t web_store_writes(void) {
+#if EN_RUST_WEB
+    return fm1_rust_web_store_writes();
+#else
+    return store_writes;
+#endif
+}
 WEB_EXPORT(web_nobj) uint32_t web_nobj(void) { return OBJ_NOBJ; }
 WEB_EXPORT(web_store_max) uint32_t web_store_max(void) { return PLAT_STORE_MAX; }
 

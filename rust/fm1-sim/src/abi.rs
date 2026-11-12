@@ -87,23 +87,43 @@ pub extern "C" fn en_midi_out(status: u32, a: u32, b: u32) {
 }
 #[no_mangle]
 pub unsafe extern "C" fn plat_store_load(object: u32, dst: *mut u8, max: u32) -> i32 {
-    if object >= 31 {
-        return -1;
-    }
-    let len = platform(|p| p.store.lengths[object as usize]);
-    if len < 0 {
-        return -1;
-    }
-    let n = (len as u32).min(max);
-    if n == 0 {
-        return 0;
-    }
-    // C promises writable actual-copy bytes, disjoint from the host store.
+    // C output may be uninitialized. A raw copy initializes only the returned
+    // prefix; never form a Rust reference into that foreign destination.
     platform(|p| {
-        p.store.load(object, unsafe {
-            core::slice::from_raw_parts_mut(dst, n as usize)
-        })
+        let n = match p.store.load_length(object, max as usize) {
+            Ok(n) => n,
+            Err(error) => return error,
+        };
+        if n != 0 {
+            // SAFETY: caller supplies n writable bytes disjoint from host store;
+            // load_length checks object/capacity and the source is initialized.
+            unsafe {
+                core::ptr::copy_nonoverlapping(p.store.bytes[object as usize].as_ptr(), dst, n)
+            };
+        }
+        n as i32
     })
+}
+
+#[cfg(test)]
+mod store_output_tests {
+    use super::*;
+    use core::mem::MaybeUninit;
+    #[test]
+    fn foreign_uninitialized_destination_gets_only_verified_store_bytes() {
+        platform(|p| {
+            assert_eq!(p.store.save(4, &[1, 2, 3, 4, 5], false), 0);
+        });
+        let mut destination = MaybeUninit::<[u8; 4]>::uninit();
+        // SAFETY: four writable, disjoint bytes; successful load initializes all.
+        unsafe {
+            assert_eq!(plat_store_load(4, destination.as_mut_ptr().cast(), 4), 4);
+            assert_eq!(destination.assume_init(), [1, 2, 3, 4]);
+            assert_eq!(plat_store_load(0, core::ptr::null_mut(), 99), -1);
+            assert_eq!(plat_store_load(31, core::ptr::null_mut(), 99), -1);
+            assert_eq!(plat_store_load(30, core::ptr::null_mut(), 99), 0);
+        }
+    }
 }
 unsafe fn store(object: u32, src: *const u8, n: u32, restore: bool) -> i32 {
     if object >= 31 || n as usize > STORE_MAX {

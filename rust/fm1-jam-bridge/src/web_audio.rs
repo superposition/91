@@ -16,6 +16,17 @@ static LEFT: Owner<[f32; MAX_RENDER]> = Owner(UnsafeCell::new([0.0; MAX_RENDER])
 static RIGHT: Owner<[f32; MAX_RENDER]> = Owner(UnsafeCell::new([0.0; MAX_RENDER]));
 static BACKGROUND: Owner<[f32; 12]> = Owner(UnsafeCell::new([0.0; 12]));
 
+#[cfg(test)]
+unsafe fn reset_test_audio() {
+    // SAFETY: the caller holds TEST_OWNER and no foreign audio views are live.
+    unsafe {
+        *AUDIO.0.get() = Audio::new();
+        *LEFT.0.get() = [0.0; MAX_RENDER];
+        *RIGHT.0.get() = [0.0; MAX_RENDER];
+        *BACKGROUND.0.get() = [0.0; 12];
+    }
+}
+
 /// # Safety
 /// Serialize this call with every other browser audio call/view access.
 #[no_mangle]
@@ -91,9 +102,11 @@ mod tests {
     use super::*;
     #[test]
     fn retained_raw_views_remain_valid_between_exclusive_updates() {
-        // SAFETY: this is the only test accessing this private audio instance;
+        let _owner = crate::web_platform::TEST_OWNER.lock().unwrap();
+        // SAFETY: TEST_OWNER serializes tests sharing this audio instance;
         // every call/read is serialized and no temporary Rust borrow is held.
         unsafe {
+            reset_test_audio();
             let left = fm1_rust_web_out_l();
             let right = fm1_rust_web_out_r();
             assert_eq!(fm1_rust_web_push(core::ptr::null(), 1), -1);

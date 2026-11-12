@@ -9,12 +9,18 @@ export function createAudioSession({
   wasmURL = new URL("../amb.wasm", import.meta.url),
   workletURL = new URL("../worklet.js?v=" + Date.now(), import.meta.url),
   startupTimeout = 30000,
+  setInterval = globalThis.setInterval,
+  clearInterval = globalThis.clearInterval,
 } = {}) {
   let context = null, node = null, pending = null, disposed = false;
   let controller = null, cancelStartup = null, generation = 0, teardown = null;
+  let observationTimer = null;
+  const poll = { type: "poll" };
 
   async function release() {
     generation++;
+    if (observationTimer !== null) clearInterval(observationTimer);
+    observationTimer = null;
     controller?.abort(); controller = null;
     cancelStartup?.(); cancelStartup = null;
     const oldNode = node, oldContext = context;
@@ -83,6 +89,12 @@ export function createAudioSession({
         node.connect(context.destination);
         node.port.postMessage({ type: "load", wasm, store, master, seed }, [wasm]);
         await Promise.race([ready, interrupted]);
+        if (disposed || token !== generation) throw new Error("The instrument has closed.");
+        // Main-thread polling keeps frame copies and structured-clone work out
+        // of the render callback on both secure and HTTP audio paths.
+        observationTimer = setInterval(() => {
+          if (!disposed && node === audioNode) audioNode.port.postMessage(poll);
+        }, 1000 / 30);
         return node;
       } catch (error) {
         await release();

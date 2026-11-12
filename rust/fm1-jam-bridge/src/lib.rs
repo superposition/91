@@ -47,6 +47,8 @@ mod voice_parameters;
 mod voices;
 #[cfg(feature = "web")]
 mod web_audio;
+#[cfg(feature = "web")]
+mod web_platform;
 mod wire_formats;
 mod worker;
 

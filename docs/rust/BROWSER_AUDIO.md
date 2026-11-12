@@ -11,8 +11,8 @@ heap allocation, per-render sample packet or callback is introduced. Position
 arithmetic wraps as unsigned 32-bit arithmetic; legacy overwrite on an abnormal
 ring overrun is preserved. Normal rendering requests at most 1,024 frames and
 produces blocks of 256, leaving at most 1,279 waiting frames. Short reads reject
-without consuming or clearing output tails. The C adapter releases each Rust
-borrow before advancing the device clock, which can call back to publish audio.
+without consuming or clearing output tails. The bridge releases each audio
+borrow before advancing the Rust device clock, which can publish more audio.
 
 ## Retained output addresses
 
@@ -39,12 +39,26 @@ HTTP fallback also reuses its input/output array wrappers. WASI's DataView is
 cached. The WASM maximum equals its initial 32 MiB; attempted memory growth is
 rejected, preserving cached views. Existing exports and messages remain intact.
 
-The focused constructor check covers audio copies/WASI views with frame
-publication disabled. Frame/store message construction, copies and browser
-structured-clone transport remain binding work; this checkpoint does not claim
-that the entire JavaScript processor allocates nothing. The C browser clock,
-platform controls/frame/store accessors and application adapter remain for the
-rest of ticket #17 and the controller migration.
+Frame/store message construction, copies and browser structured-clone transport
+run in a polled MessagePort task, outside `process`. The page owns one 30 Hz
+observation timer, starts it after successful boot and releases it on shutdown
+or failed startup. Polls coalesce observations if the page is busy or its timers
+are throttled; they do not advance or pause the instrument's audio clock. Frame
+message fields and persisted bytes retain their existing format. Bindings now
+send the additional private `poll` request; direct processor clients must poll
+to receive display/save observations.
+
+WASI clock writes split the rounded nanosecond Number into two little-endian
+u32 words, avoiding BigInt creation during rendering. Twelve clock values,
+including the 32-bit carry and long-running times, match the previous u64 bytes.
+The focused check advances real virtual time, dirties store observations and
+covers 15 render sizes over 665,856 exact stereo values. It detects no owned
+array/view/BigInt construction or IPC during `process`, while frame/store
+snapshots still publish in the separate tasks. It does not claim that browser
+internals or the entire processor lifetime allocate nothing. Platform state,
+frame/store access and clock orchestration now use the shared Rust host model;
+the C application ABI adapter remains for the controller migration. See
+[HOST_PLATFORM.md](HOST_PLATFORM.md) for callback and pointer contracts.
 
 ## Reproduction
 
@@ -53,6 +67,7 @@ sh tests/rust_web_audio.sh /absolute/frozen-R01/source
 sh tests/rust_emulator_parity.sh
 node tests/host/emu_browser_test.mjs build/emu/amb.wasm
 node tests/host/emu_audio_views_test.mjs build/emu-parity/reference.wasm build/emu-parity/rust.wasm
+node tests/host/emu_clock_test.mjs build/emu/amb.wasm
 sh tests/rust_web_audio_miri.sh
 ```
 

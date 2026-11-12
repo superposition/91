@@ -1,0 +1,88 @@
+{
+  "tested_source": "a0c3023aa3673fe2bc2dc25e9f9f935aa9ed2e7b",
+  "wasm_source": "67220891977203126576acc47e90af4dcaab8469",
+  "wasm": {
+    "reference.wasm": {
+      "bytes": 1945215,
+      "sha256": "3a2c4f8ec46fd3b20efea9a2b8cdc6d99e9af5d487aeac2d0f2757147ec04145"
+    },
+    "rust.wasm": {
+      "bytes": 2385996,
+      "sha256": "18e8cbfdbfb9aea20c1aa44b8d76435f45b22745f0c891f3ea22d91ba797e42b"
+    }
+  },
+  "checks": [
+    {
+      "command": [
+        "node",
+        "tests/host/emu_http_test.mjs"
+      ],
+      "result": {
+        "http_fallback": "pass",
+        "compared_samples": 1048576,
+        "peak": 0.19218111038208008,
+        "frame_messages": 1
+      }
+    },
+    {
+      "command": [
+        "node",
+        "tests/host/emu_browser_test.mjs"
+      ],
+      "result": {
+        "browser_api_contract": "pass",
+        "secure_http_boot_and_pcm": true,
+        "startup_cancel_timeout_retry": true,
+        "input_midi_stream_storage_lifecycle": true,
+        "interactive_browser_qa": "not run"
+      }
+    },
+    {
+      "command": [
+        "node",
+        "tests/host/emu_audio_views_test.mjs"
+      ],
+      "result": {
+        "variable_render_sizes": [
+          0,
+          1,
+          3,
+          31,
+          127,
+          128,
+          129,
+          255,
+          256,
+          257,
+          1023,
+          1024,
+          1025,
+          2048,
+          4097
+        ],
+        "compared_values": 665856,
+        "audio_constructor_allocations": 0,
+        "render_ipc_calls": 0,
+        "memory_growth": "rejected",
+        "scope": "Owned audio copying and WASI clock; frame/store serialization and IPC run in polled MessagePort tasks"
+      }
+    },
+    {
+      "command": [
+        "node",
+        "tests/host/emu_clock_test.mjs"
+      ],
+      "result": {
+        "wasi_clock_cases": 12,
+        "legacy_u64_bytes": "exact",
+        "clock_bigint_construction": 0
+      }
+    }
+  ],
+  "scope": {
+    "process": "Owned PCM copying and WASI timestamp conversion contain no array/view/BigInt construction or IPC; fixed memory refuses growth.",
+    "observations": "Existing frame/store payloads are copied and posted in polled MessagePort tasks outside rendering; one main-thread timer is owned/released per successful session.",
+    "validation": "Both real C0/Rust WASM artifacts,irregular quanta,dirty store observations,HTTP and secure-path API doubles,poll lifecycle,and12 exact legacy u64 timestamp cases pass.",
+    "limits": "Browser-native allocation/scheduling,actual AudioWorklet/audio-device timing,desktop/mobile and persisted save/restart acceptance remain open. Direct processor users must send the additional poll request. Page timer throttling coalesces observations without pausing audio."
+  }
+}

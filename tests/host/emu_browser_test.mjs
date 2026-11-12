@@ -19,7 +19,7 @@ const deferred = () => { let resolve; const promise = new Promise((done) => { re
 const config = { store: {}, seed: 91, master: 2800 };
 
 function audioEnvironment({ secure = false, fetch, module = Promise.resolve(), resume = Promise.resolve(), startupTimeout = 2000 } = {}) {
-  const contexts = [], nodes = [], frames = [];
+  const contexts = [], nodes = [], frames = [], polls = new Map();
   function makeNode(context) {
     const channel = new MessageChannel();
     const processor = new worklet.Amb({ port: channel.port1, audioTime: () => context.currentTime });
@@ -39,8 +39,10 @@ function audioEnvironment({ secure = false, fetch, module = Promise.resolve(), r
   const session = createAudioSession({ AudioContext: Context, AudioWorkletNode: function(context) { return makeNode(context); },
     fetch: fetch || (async () => ({ ok: true, arrayBuffer: async () => wasm.buffer.slice(wasm.byteOffset, wasm.byteOffset + wasm.byteLength) })),
     loadHttp: async () => { await module; return { createHttpAudioNode: makeNode }; },
-    onFrame: (frame) => frames.push(frame), startupTimeout });
-  return { session, contexts, nodes, frames };
+    onFrame: (frame) => frames.push(frame), startupTimeout,
+    setInterval(callback, ms) { assert.equal(ms,1000/30);const id={};polls.set(id,callback);return id; },
+    clearInterval(id) { assert(polls.delete(id),'owned poll timer is released exactly once'); } });
+  return { session, contexts, nodes, frames, polls };
 }
 
 // Boot both selections through the real processor, then close all owned resources.
@@ -56,6 +58,8 @@ for (const secure of [true, false]) {
   for (let block = 0; block < 4096; block++) {
     for (const channel of node.render()) { samples.push(...channel); for (const value of channel) peak = Math.max(peak, Math.abs(value)); }
   }
+  assert.equal(env.polls.size,1,'one observation timer after successful startup');
+  for (const poll of env.polls.values()) poll();
   await flush();
   assert(peak > 0.001);
   assert(env.frames.some((frame) => frame.fb?.length === 240 * 240));
@@ -64,6 +68,7 @@ for (const secure of [true, false]) {
   if (secure) securePCM = samples; else assert.deepEqual(samples, securePCM);
   await env.session.dispose(); await env.session.dispose(); await flush();
   assert.equal(env.contexts[0].closes, 1);
+  assert.equal(env.polls.size,0,'disposing releases the observation timer');
   assert.equal(node.port.onmessage, null);
   assert.equal(node.processor.ex, null);
   assert.equal(node.processor.process([], [[new Float32Array(128)]]), false);
