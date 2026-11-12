@@ -370,18 +370,15 @@ pub fn dispatch(
             packet[..3].copy_from_slice(&[0xf0, 0x7d, 0x50]);
             let length = match arg(0)? {
                 0 => {
-                    packet[3..6].copy_from_slice(&[0x42, 1, byte(1)?]);
+                    packet[3..6].copy_from_slice(&[0x42, 1, (arg(1)? & 127) as u8]);
                     7
                 }
                 1 => {
-                    let length = arg(2)?;
-                    if length > 16383 {
-                        return Err(CodecError::Range);
-                    }
+                    let length = arg(2)? & 16383;
                     packet[3..8].copy_from_slice(&[
                         0x42,
                         4,
-                        byte(1)?,
+                        (arg(1)? & 127) as u8,
                         (length >> 7) as u8,
                         (length & 127) as u8,
                     ]);
@@ -452,13 +449,28 @@ pub fn dispatch(
         }
         94 => {
             let mut scratch = [0u8; 640];
-            let message = wire::decode_ota(data, &mut scratch)?;
+            if data.len() < 2 {
+                return Err(CodecError::Length);
+            }
+            let length = unpack7_prefix(&data[1..data.len() - 1], &mut scratch)?;
             match arg(0)? {
                 0 => {
-                    let body = message.body();
-                    if message.command() != 0x30 || body.len() != 8 {
+                    if data[0] != 0xf0 || data[data.len() - 1] != 0xf7 {
+                        return Err(CodecError::Magic);
+                    }
+                    if length != 15 || scratch[..3] != [0, 0x59, 0x30] {
                         return Err(CodecError::Length);
                     }
+                    // Original updater validates payload checksum, but does
+                    // not consume the decoded header's length field.
+                    if !scratch[6..14]
+                        .iter()
+                        .fold(0u8, |sum, b| sum.wrapping_add(*b))
+                        != scratch[14]
+                    {
+                        return Err(CodecError::Checksum);
+                    }
+                    let body = &scratch[6..14];
                     scalar(
                         output,
                         &[
@@ -471,13 +483,16 @@ pub fn dispatch(
                     )
                 }
                 1 => {
-                    if message.command() != 0x11 || message.body().len() != 27 {
+                    // Explicit legacy discovery profile: historical browser
+                    // identities ignore outer framing, header length and CRC.
+                    // Strict device messages still use wire::decode_ota.
+                    if length != 34 || scratch[..3] != [0, 0x59, 0x11] {
                         return Err(CodecError::Length);
                     }
                     if output.len() < 27 {
                         return Err(CodecError::Capacity);
                     }
-                    output[..27].copy_from_slice(message.body());
+                    output[..27].copy_from_slice(&scratch[6..33]);
                     Ok(27)
                 }
                 _ => Err(CodecError::Index),
@@ -502,6 +517,29 @@ pub fn dispatch(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn legacy_browser_discovery_and_masked_short_requests() {
+        let mut raw = [0u8; 34];
+        raw[..3].copy_from_slice(&[0, 0x59, 0x11]);
+        raw[3] = 99; // Historical identity decoder ignores this length.
+        raw[6..20].copy_from_slice(b"FM-1_7000302\0\0");
+        raw[33] = 42; // Historical identity decoder also ignores checksum.
+        let mut packet = [0u8; 64];
+        let n = wire::pack7(&raw, &mut packet[1..]).unwrap() + 2;
+        packet[0] = 1;
+        packet[n - 1] = 2; // Outer bytes are ignored only by identity discovery.
+        let mut out = [0u8; 64];
+        assert_eq!(dispatch(94, &[1], &packet[..n], &mut out), Ok(27));
+        assert_eq!(&out[..27], &raw[6..33]);
+        assert_eq!(
+            dispatch(94, &[0], &packet[..n], &mut out),
+            Err(CodecError::Magic)
+        );
+        assert_eq!(dispatch(92, &[0, 255], &[], &mut out), Ok(7));
+        assert_eq!(&out[..7], &[0xf0, 0x7d, 0x50, 0x42, 1, 127, 0xf7]);
+        assert_eq!(dispatch(92, &[1, 255, 0x8123], &[], &mut out), Ok(9));
+        assert_eq!(&out[..9], &[0xf0, 0x7d, 0x50, 0x42, 4, 127, 2, 35, 0xf7]);
+    }
     #[test]
     fn telemetry_continuous_word_stream() {
         let words = [0x12345678, u32::MAX, 0, 0x80000001];
