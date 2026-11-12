@@ -1,0 +1,639 @@
+{
+  "ticket": "https://github.com/superposition/91/issues/18",
+  "base": "a57e95ee3643995ccf96c9820021a1cf0da11b78",
+  "independent_api_commits": [
+    "dc1f9a29e8af2f9763bfc387ab7ddc0cd43b98e6",
+    "20e4e139866272abc05415c8ce612345ed9917fc",
+    "310caf5e06fe6c47bd09ff61219e8f043138b946"
+  ],
+  "rust": "1.94.1",
+  "miri": "nightly-2026-08-28 -Zmiri-strict-provenance",
+  "hardware_accessed": false,
+  "physical_backend_qualified": false,
+  "new_hal_image_link_qualified": false,
+  "hal_default_enabled": false,
+  "source_sha256": {
+    "Cargo.lock": "3f562e563fcf36638ae0babb9025de1fedcb06141f66e335d1dc8f1feb66536b",
+    "Cargo.toml": "11667df2b756f061484913721b1615151b9b680b3950ab6a50661565086ae93f",
+    "firmware/hal/fm1_adc.h": "8be742ce8ccefc3f2313aea15491ee096f02c503ad212c796df7cede48c75ceb",
+    "firmware/hal/fm1_audio.h": "047459093780d571d1a5153e5c5326dc79266c1f166b78eb047416068178d290",
+    "firmware/hal/fm1_flash.h": "782f5942b22e8523fb8f3f94583c319492cc742efaf378a696e066ef3ff9ad81",
+    "firmware/hal/fm1_flash_admission.h": "04563d2775a0413137bbdf1c4e17e6d508503a9fa91334c97b33715328de82bc",
+    "firmware/hal/fm1_irq_state.h": "b37141dc3516761b8b441e79e030557646f776a4055c879bf18b2178f9089b85",
+    "firmware/hal/fm1_lcd_hw.h": "9fd7bfc00f4dcaa39207ca84694e98b14a7293740e8925d44302ab84b5d78746",
+    "firmware/hal/fm1_rust_hal.h": "a126049d8fedb7d9a2755095dfa7483141a5ece3f4a44296f422eb0a86c11cc7",
+    "firmware/hal/fm1_sys.h": "7843b1ea05cb046896df693161becf0dc18f128f88e1c81e382bd667f3da9743",
+    "firmware/hal/fm1_time.h": "e2c714bcc0f22f4b1048818732d3b671d2ab1c590afdaed3b28a860372d4b275",
+    "firmware/hal/fm1_timer.h": "35c07fe80555133f93014843c982da235f503275aa57304e6eccdd9def14a3b2",
+    "firmware/src/app/app.h": "869da07f35d89c2968bb630ee572212400a19444079b8330a6dea1c06a8489c2",
+    "firmware/src/app/jam_session.c": "26f6b778c4c58bdbcdc337e641f50e3e0795606e26ee89e9f2663eb77564013c",
+    "firmware/src/app/main_fm1.c": "611f3f9bfc926cba9ce8e98ca3853d56d1ac20ba4aad8482189c8808233ec8d4",
+    "firmware/src/app/panel.c": "f989d1f6072b7f4c9a455e6a0726af70ea25f3dd19c10984b3753347adf4a1dd",
+    "firmware/src/app/plat.h": "1469f904e1ffc44c9e7782533abc1b7d05cf2d8c386293f3a5d503f039262369",
+    "firmware/src/app/plat_fm1.c": "36ac56915a001c97eb12f5dfc83107a817c1474c2ec9380fb182c4142543760a",
+    "firmware/src/app/project.c": "6631b218a31c46506391857c9acd5d5f54d859a6815592130c316010cd2155d4",
+    "firmware/src/dsp/amb.c": "765039a3d5dd6e78e2a90890bf3462f6a85b559cd918df6582dcf3517076f6c8",
+    "firmware/src/dsp/amb.h": "b169964e98a2ad9826f53e0b44e6c9d8f969a81412a137c05dbf8564f6cb75b7",
+    "firmware/src/dsp/rust_worker.inc": "8c3145022218724d84145cec99c511c51c35842f77fc9de00f0d9416ced60207",
+    "firmware/src/lcd.c": "006beb86c973e356c43b0e51e28ae8d3ebdb132d7ef538468b6901cd37065a42",
+    "firmware/src/main.c": "33d239fc72e1b6098e376e9d3efc6e962ef1e55f72127ea237653bb900d30314",
+    "firmware/src/storage.c": "9e5d8b22beccfd3e30319bb1faab5f8c1ee6e7683dde68dcba73176c8eb9f1a5",
+    "rust/fm1-engine/src/effects/config.rs": "a4db0aeba94d39a76430d91d5baa4664c65f1724a698159259c3f1ec9ded19d9",
+    "rust/fm1-engine/src/effects/mod.rs": "9311bf9fde9a3d0a4ba8583127d723c568f88c259d2ae6e86ee33ff0f7128c1e",
+    "rust/fm1-engine/src/persistence.rs": "66fab0b9690f3a97fa8401706e272ec8c4719c6f673b17004810123fda4ac90a",
+    "rust/fm1-engine/src/project.rs": "ccd3b82bf0fcb91eb39864a471bc9e22522e528367f6181aa31146ddf641a501",
+    "rust/fm1-engine/tests/persistence.rs": "a91f483536e3583827e88f97b6f2d5821153f5a0cc9a23216b93e6eaa96bb4f4",
+    "rust/fm1-hal/Cargo.toml": "49aa3a6a9b5733621478776c24e38b87c1a5be9f166dd20c4a1b00fba4aba3d0",
+    "rust/fm1-hal/examples/hal_oracle.rs": "c91ba0a9587a1c148c48d06adf1ebc013d6b6213e4838b3915887c22d26ba4a7",
+    "rust/fm1-hal/src/boot.rs": "36f1147166cdbefec1ce85bd695b5c4dcc204d16d32dd27a314d9e3aef687299",
+    "rust/fm1-hal/src/dma.rs": "cf2b882362e375a1961d91f4b9d324f284c35cd8cbdf3a0e6075cba18d22de95",
+    "rust/fm1-hal/src/drivers.rs": "62fecf1824fb47fb485a475f3af364c6c6bb842ce27e716473b6582944a8dcc7",
+    "rust/fm1-hal/src/flash.rs": "cda5691c1c06939b6810be9e2615a888a87a133298f76ad8ce70f33ffc9c45aa",
+    "rust/fm1-hal/src/io.rs": "4c4278c903f8f2a2d4305a89bd9689da124207687a2af089e99e973ac60ff3af",
+    "rust/fm1-hal/src/lib.rs": "2e0017d3198ff3b91cc95354be2e1af31a88f2ee62fab6421f1da21b4cb20b6e",
+    "rust/fm1-hal/tests/dma.rs": "dbf5f6e1df55df042fd83131bceac67e39a905a3fa9ba1045044a13bf9f86505",
+    "rust/fm1-hal/tests/readiness.rs": "0362c25cf9b521fa0614794ab94534b71537e03ce9b3d979c963645066648a39",
+    "rust/fm1-hal/tests/registers-golden.jsonl": "99ad789f8c98acf9ef376bcbd77ce487b53554504c65e86a5154f5b7d882c931",
+    "rust/fm1-hal/tests/registers.rs": "45a55e1036e531e280f4d37d8000dae0d963246c5abd9adf94008c67bf9c65f6",
+    "rust/fm1-hal/tests/support/bus.rs": "e020f5ba4da4487b9845c807192ef708df63d95c17c8d77d054752e1ba8ce15a",
+    "rust/fm1-jam-bridge/Cargo.toml": "142eee9ffd71ad239f21c6432ce6741135eecfb09952b8df2fdc66735763fce2",
+    "rust/fm1-jam-bridge/src/effects.rs": "0adc2434aae4306c3cd96dc1f08ec685b29e05458a95db3f2b9af228c3ce998b",
+    "rust/fm1-jam-bridge/src/lib.rs": "a8393114816579b94545029f67a0be58c34b79a1f55ed0cc910eb7ad44979200",
+    "rust/fm1-jam-bridge/src/persistence.rs": "b5c69d269f615a6b7823ba3a05341507da512151d43150a970c7e3411a467e71",
+    "rust/fm1-jam-bridge/src/plain_output.rs": "a007d5270fdedfc345a08c7fb7f367e3e20ab3f73a746d473da903956efe8bda",
+    "rust/fm1-jam-bridge/src/platform.rs": "6a90ced8f358141dca9f7f96b63d030feae1a6d544f6bc4e134a2d576be31bc0",
+    "rust/fm1-jam-bridge/src/raw_output.rs": "907d5ee70aaac3c3311fc49c7081546030cad279290042215033144fee2ac1ea",
+    "tests/compile_hal_target.sh": "8bcf352dc680f86640cad879262a5be5dbac014cebf9a3bca43326ce13f3ead0",
+    "tests/host/hal_audio_fault_test.c": "6cd372b17f10b92fe5f97633d2ac2373be14e0b6c40aaa3ebc7cee244dfe18ef",
+    "tests/host/hal_flash_idle_test.c": "f4a83fe28067717ff6e71be10b32fd48b0810fbe0dd9cb04375c9a457d131cfe",
+    "tests/host/hal_flash_quarantine_test.c": "f0a5bb8a460eccada9355e559cb8330405af31f8f02c42763ac68a9cd0d6f9cd",
+    "tests/host/hal_irq_state_test.c": "cd15dcf928ce714c62edf4fd7fd87bec1efc5f5cb0976b6040ba49e8e224618c",
+    "tests/host/hal_project_busy_test.c": "073b19b3a78127aa2740b2b1c2b2c1961cd2400a7aa653d950276ded5cc9304e",
+    "tests/host/hal_store_busy_test.c": "b602a4ef0e028364ac7f4c9a684f7bf6eeb27c60fd609b6914b94150c53e3c95",
+    "tests/reference/effects_reference.c": "0772b79886e7fbced4192ae141c5c3a17906ca6f477d12fc6aacdd440285eb21",
+    "tests/reference/hal_audio_reference.c": "524372f1348bb0c0563e37c106f5333d8417a5eebaf1ab08986657a924c57c5c",
+    "tests/reference/hal_boot_reference.c": "932872f46a593dc5279ab1a87e62da826791d87421d203729143d4dcc48c2cf5",
+    "tests/reference/hal_display_test.cpp": "89fa7523832c1b4d490db7a43eaed16100b6480860db7a6ded9853ec82574646",
+    "tests/reference/hal_flash_workers.c": "6b4275f4b191c23a5d30fac717d94b67616f2a9901acadfd09965935076940ba",
+    "tests/reference/hal_readable_reference.c": "2827bd52195e8ab9a0e42fd217a9d7a122436fccab5e3802b2fd5c507b89e3ee",
+    "tests/reference/hal_reference.cpp": "81683fa34d123bc01f62bd0197030a75d807886ad558584a72714c036549c6f2",
+    "tests/rust_hal_audio_parity.sh": "a4e4ed073cc1ad76473cac352a7cb9f0847d6dab984f88a64db1facb5c297f79",
+    "tests/rust_hal_parity.sh": "db260b7a7d73ca1a382334739e8ffef5a1a008bfc753ef964c2ebbddd0ec1ecd",
+    "tests/rust_hal_store_admission.sh": "cf31dadaaf6aed7063f0d1bb1bc938f9bba6a453670e0bcc26bfe38c1acd0cc3",
+    "tests/rust_hal_wasm_frozen.sh": "da1e495edaec60393f3aedf47a53c91d3abba421ca4baf43c8cf5eaa0f67e071",
+    "tools/hal_reference.py": "465e2d382aafd66613cc4c706858aa2cf5bc8707970eac36d6cc1c91bff9232b"
+  },
+  "workspace_release_tests": {
+    "linux": 133,
+    "windows": 133,
+    "hal_backend_suite": 9,
+    "mcu_facade_runtime_suite": 16
+  },
+  "hal": {
+    "register_cases": 320,
+    "readable_cases": 33890,
+    "startup_cases_each_core": 96,
+    "irq_states": 65536,
+    "audio_fault_boundaries": 3608,
+    "lcd_safe_readiness_tests": 2,
+    "staging_payload_bytes_unchanged": 3840,
+    "added_audio_pixel_payload_bytes": 0,
+    "hal32bit_source_state_bytes": 32
+  },
+  "flash_admission": {
+    "busy": -10,
+    "direct_header_cases": 256,
+    "ab_busy_boundaries": 25,
+    "project_session_denied_ops_each_implementation": 13,
+    "real_quarantined_stopped_pthread": true,
+    "frozen_full_engine_cases": 2,
+    "frames_each": 564151,
+    "renders_each": 6000,
+    "nested_serial_intervals_each": 1765,
+    "final_backend_jobs": [
+      4598,
+      4602
+    ],
+    "early_rust_completed_denied": true,
+    "confirmed_hold_does_not_reclaim_worker": true
+  },
+  "dma_full_engine": {
+    "half_words": [
+      512,
+      1024
+    ],
+    "modes": [
+      3,
+      8
+    ],
+    "implementations": [
+      "frozen-C",
+      "fresh-C0",
+      "Rust-DSP-HAL",
+      "C-DSP-HAL"
+    ],
+    "frames_each": 564151,
+    "calls_each": 6000,
+    "guarded_publications_each": 2020494,
+    "normal_stop_fences": 0
+  },
+  "frozen_storage": {
+    "cases": 47709,
+    "bytes": 2671736,
+    "sha256": "8d398663bfee5443f576cd2da7a8489a0eae639324a4561f40f6e74c07f9226e"
+  },
+  "frozen_project": {
+    "cases": 3199,
+    "bytes": 204744,
+    "sha256": "5600647c3aa19f68ab38eca6378dd640113a1676bb73e220e359395b18e264b4"
+  },
+  "emulator": {
+    "exports": 24,
+    "memory": 33554432,
+    "fresh_and_immutable_frozen_parity": true,
+    "reproducible_final_bytes": true,
+    "artifacts": [
+      {
+        "path": "build/emu-parity/reference.wasm",
+        "bytes": 1943597,
+        "sha256": "8b7dd006baecf88ed4f297f20e1397b35076ac01dbb7592ae6aa73a960e0c424"
+      },
+      {
+        "path": "build/emu-parity/rust.wasm",
+        "bytes": 2368557,
+        "sha256": "e410e6398e3ba3cd852d0e7d9f1bede938b51f377972c99041d957136b5deb9c"
+      },
+      {
+        "path": "../baseline-2026-11-11/source/build/emu/amb.wasm",
+        "bytes": 1937404,
+        "sha256": "a3d08947713bda76b64f76ed39b55aa26bdd182a65bf88fbd1efe0cbc12f8036"
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "path": "build/hal-parity/reference.trace",
+      "bytes": 3901280,
+      "sha256": "3c2aa830a1e85a4206737d80897e715fdba7950516ece79f645130b2df90dabc"
+    },
+    {
+      "path": "build/hal-parity/readable-reference.bin",
+      "bytes": 135560,
+      "sha256": "2c7c4d2ea3e451567145c0a8193ff834c79c71b55fbfda6f4d69273f7ad7c390"
+    },
+    {
+      "path": "build/hal-parity/boot-rust-0.trace",
+      "bytes": 24960,
+      "sha256": "23770c973ff0530f8a4b0fe03365cbd635465cf15887e810f8fa14bd9a7f4491"
+    },
+    {
+      "path": "build/hal-parity/boot-rust-1.trace",
+      "bytes": 26464,
+      "sha256": "12b7d37ccc53878315cd45dea1742851400e583fa3180c67c95cc8c21c274534"
+    },
+    {
+      "path": "build/hal-target/main.o",
+      "bytes": 478724,
+      "sha256": "0d64332442023ca247bf7988ccedd973c3da7d98fc559afc111203da138e0e92"
+    },
+    {
+      "path": "build/hal-target/engine.o",
+      "bytes": 416456,
+      "sha256": "501cf9244dd4ffe17427474f878c74b766eff6b49284f10c7f0c5a84034a8a92"
+    }
+  ],
+  "retained_logs": [
+    {
+      "path": "build/hal-final/rust.log",
+      "bytes": 25095,
+      "sha256": "70f4bbcffbe744b77073487d88e0b984026d107ff4d50dd0f7fd5d8d816eef69"
+    },
+    {
+      "path": "build/hal-final/windows.log",
+      "bytes": 40952,
+      "sha256": "0e81136db18895c1e6973214fa310ec6828b5792c61d30c3d6f9dd7d12574c33"
+    },
+    {
+      "path": "build/hal-final/hal.log",
+      "bytes": 960,
+      "sha256": "b759fabba3dc0b2d37f9e0bc5899a70f49fedf55b4c3053bf25d263f4513d94c"
+    },
+    {
+      "path": "build/hal-final/audio.log",
+      "bytes": 1169,
+      "sha256": "ff133f484a9c95f3752316f56cb1295e6c0da14c76748822e71c76b0367cbe68"
+    },
+    {
+      "path": "build/hal-final/store.log",
+      "bytes": 1151,
+      "sha256": "fa3ccdb4b6929596ad937336eda1c63012b0ef04d306d277b0de04ceee9f85ea"
+    },
+    {
+      "path": "build/hal-final/persistence.log",
+      "bytes": 1033,
+      "sha256": "98a015e879ec4f276578eedc5696c556e53b48523331bd93219aa553feede06f"
+    },
+    {
+      "path": "build/hal-final/project.log",
+      "bytes": 661,
+      "sha256": "ce5fe835c98e93f7e7986abf3fa56e5ccf081e362c9b875ecd8ff0a279113465"
+    },
+    {
+      "path": "build/hal-final/effects.log",
+      "bytes": 970,
+      "sha256": "8075a47b12b661540c9eaa56ae590817a6803ad18985e0c7feb627841bfeabe2"
+    },
+    {
+      "path": "build/hal-final/extra.log",
+      "bytes": 1212,
+      "sha256": "88052f297ca05a86ebaf982b9fceed9d55dbd4fcf8761fc6a38ed85b47056b24"
+    },
+    {
+      "path": "build/hal-final/controls.log",
+      "bytes": 741,
+      "sha256": "2e96f8080c1a3415f346f7234680d3b116eb8c6901f2b0802a8b1bbceac8712c"
+    },
+    {
+      "path": "build/hal-final/fx-workers.log",
+      "bytes": 1222,
+      "sha256": "31c76c77578e5cee65bca4e027cb0cd3abce91c57327eb285d246ffd9115eb2a"
+    },
+    {
+      "path": "build/hal-final/fm-workers.log",
+      "bytes": 1016,
+      "sha256": "6fbe3920f1ccb1b8b88191040d04fab8777c3cd4f755418ab4e24d3107451d42"
+    },
+    {
+      "path": "build/hal-final/workers.log",
+      "bytes": 5752,
+      "sha256": "1b2e86f24aa449dc20962c8940425dcb660a1dd0ed3f4d1bd2f58387daa47380"
+    },
+    {
+      "path": "build/hal-final/wasm.log",
+      "bytes": 5316,
+      "sha256": "870be3fd7b6f1ed9205c2012485b711ffd1681284eab95b52d34f8a00650a9f9"
+    },
+    {
+      "path": "build/hal-final/frozen-wasm.log",
+      "bytes": 4424,
+      "sha256": "ee2c325e0deb9ac273b9ea84e0e56c95999e50d2dbd8f35fdb100456ffe1d7b8"
+    },
+    {
+      "path": "build/hal-final/miri.log",
+      "bytes": 885,
+      "sha256": "27d2a3d0c084b1bd0bf14c2e36c0b7427137e596c9c41e726de083dc4a6ef7d9"
+    },
+    {
+      "path": "build/hal-final/target.log",
+      "bytes": 103,
+      "sha256": "8df83d5b23da4bfb36552a6b702c1c6f8a949d181aa562d639f14c2642ce3942"
+    },
+    {
+      "path": "build/hal-final/repro.log",
+      "bytes": 241,
+      "sha256": "0ea2a5f3a8c775ec52598e3733da8101a6eb3e967a874ca0e04e85159c3a5612"
+    }
+  ],
+  "pre_hal_link_inventory": [
+    {
+      "label": "full",
+      "path": "C:/Users/ericm/fm1/rust-migration/proof-compiler-adopted/source/build/amb.elf",
+      "sections": [
+        {
+          "name": ".text",
+          "address": "0x2001000",
+          "bytes": 563568,
+          "end": "0x208a970"
+        },
+        {
+          "name": ".ram_text",
+          "address": "0x1c00000",
+          "bytes": 4704,
+          "end": "0x1c01260"
+        },
+        {
+          "name": ".dsp_text",
+          "address": "0x1c01260",
+          "bytes": 204,
+          "end": "0x1c0132c"
+        },
+        {
+          "name": ".ram_hot",
+          "address": "0x1c0132c",
+          "bytes": 1060,
+          "end": "0x1c01750"
+        },
+        {
+          "name": ".cpu1_stacks",
+          "address": "0x1c01760",
+          "bytes": 8192,
+          "end": "0x1c03760"
+        },
+        {
+          "name": ".data",
+          "address": "0x1c08000",
+          "bytes": 1360,
+          "end": "0x1c08550"
+        },
+        {
+          "name": ".bss",
+          "address": "0x1c08560",
+          "bytes": 96612,
+          "end": "0x1c1fec4"
+        },
+        {
+          "name": ".pool",
+          "address": "0x1c20000",
+          "bytes": 339404,
+          "end": "0x1c72dcc"
+        },
+        {
+          "name": ".noinit",
+          "address": "0x1c7c020",
+          "bytes": 176,
+          "end": "0x1c7c0d0"
+        }
+      ],
+      "loads": [
+        {
+          "vaddr": "0x1c20000",
+          "load": "0x1c20000",
+          "file_bytes": 0,
+          "memory_bytes": 339404,
+          "load_end": "0x1c20000"
+        },
+        {
+          "vaddr": "0x1c7c020",
+          "load": "0x1c7c020",
+          "file_bytes": 0,
+          "memory_bytes": 176,
+          "load_end": "0x1c7c020"
+        },
+        {
+          "vaddr": "0x2001000",
+          "load": "0x2001000",
+          "file_bytes": 563568,
+          "memory_bytes": 563568,
+          "load_end": "0x208a970"
+        },
+        {
+          "vaddr": "0x1c00000",
+          "load": "0x208a970",
+          "file_bytes": 5968,
+          "memory_bytes": 5968,
+          "load_end": "0x208c0c0"
+        },
+        {
+          "vaddr": "0x1c01760",
+          "load": "0x208c0c0",
+          "file_bytes": 0,
+          "memory_bytes": 8192,
+          "load_end": "0x208c0c0"
+        },
+        {
+          "vaddr": "0x1c08000",
+          "load": "0x208c0c0",
+          "file_bytes": 1360,
+          "memory_bytes": 1360,
+          "load_end": "0x208c610"
+        },
+        {
+          "vaddr": "0x1c08560",
+          "load": "0x208c610",
+          "file_bytes": 0,
+          "memory_bytes": 96612,
+          "load_end": "0x208c610"
+        }
+      ]
+    },
+    {
+      "label": "working0.3.3",
+      "path": "C:/Users/ericm/fm1/rust-migration/proof-atomic-instrument/source/build/amb.elf",
+      "sections": [
+        {
+          "name": ".text",
+          "address": "0x2001000",
+          "bytes": 501052,
+          "end": "0x207b53c"
+        },
+        {
+          "name": ".ram_text",
+          "address": "0x1c00000",
+          "bytes": 4704,
+          "end": "0x1c01260"
+        },
+        {
+          "name": ".dsp_text",
+          "address": "0x1c01260",
+          "bytes": 204,
+          "end": "0x1c0132c"
+        },
+        {
+          "name": ".ram_hot",
+          "address": "0x1c0132c",
+          "bytes": 1100,
+          "end": "0x1c01778"
+        },
+        {
+          "name": ".cpu1_stacks",
+          "address": "0x1c01780",
+          "bytes": 8192,
+          "end": "0x1c03780"
+        },
+        {
+          "name": ".data",
+          "address": "0x1c08000",
+          "bytes": 1620,
+          "end": "0x1c08654"
+        },
+        {
+          "name": ".bss",
+          "address": "0x1c08660",
+          "bytes": 95764,
+          "end": "0x1c1fc74"
+        },
+        {
+          "name": ".pool",
+          "address": "0x1c20000",
+          "bytes": 339420,
+          "end": "0x1c72ddc"
+        },
+        {
+          "name": ".noinit",
+          "address": "0x1c7c020",
+          "bytes": 176,
+          "end": "0x1c7c0d0"
+        }
+      ],
+      "loads": [
+        {
+          "vaddr": "0x1c20000",
+          "load": "0x1c20000",
+          "file_bytes": 0,
+          "memory_bytes": 339420,
+          "load_end": "0x1c20000"
+        },
+        {
+          "vaddr": "0x1c7c020",
+          "load": "0x1c7c020",
+          "file_bytes": 0,
+          "memory_bytes": 176,
+          "load_end": "0x1c7c020"
+        },
+        {
+          "vaddr": "0x2001000",
+          "load": "0x2001000",
+          "file_bytes": 501052,
+          "memory_bytes": 501052,
+          "load_end": "0x207b53c"
+        },
+        {
+          "vaddr": "0x1c00000",
+          "load": "0x207b53c",
+          "file_bytes": 6008,
+          "memory_bytes": 6008,
+          "load_end": "0x207ccb4"
+        },
+        {
+          "vaddr": "0x1c01780",
+          "load": "0x207ccb4",
+          "file_bytes": 0,
+          "memory_bytes": 8192,
+          "load_end": "0x207ccb4"
+        },
+        {
+          "vaddr": "0x1c08000",
+          "load": "0x207ccb4",
+          "file_bytes": 1620,
+          "memory_bytes": 1620,
+          "load_end": "0x207d308"
+        },
+        {
+          "vaddr": "0x1c08660",
+          "load": "0x207d308",
+          "file_bytes": 0,
+          "memory_bytes": 95764,
+          "load_end": "0x207d308"
+        }
+      ]
+    },
+    {
+      "label": "experimental0.3.4",
+      "path": "C:/Users/ericm/fm1/rust-migration/proof-rust-dsp-lto/source/build/amb.elf",
+      "sections": [
+        {
+          "name": ".text",
+          "address": "0x2001000",
+          "bytes": 535568,
+          "end": "0x2083c10"
+        },
+        {
+          "name": ".ram_text",
+          "address": "0x1c00000",
+          "bytes": 4704,
+          "end": "0x1c01260"
+        },
+        {
+          "name": ".dsp_text",
+          "address": "0x1c01260",
+          "bytes": 204,
+          "end": "0x1c0132c"
+        },
+        {
+          "name": ".ram_hot",
+          "address": "0x1c0132c",
+          "bytes": 1080,
+          "end": "0x1c01764"
+        },
+        {
+          "name": ".cpu1_stacks",
+          "address": "0x1c01780",
+          "bytes": 8192,
+          "end": "0x1c03780"
+        },
+        {
+          "name": ".data",
+          "address": "0x1c08000",
+          "bytes": 1360,
+          "end": "0x1c08550"
+        },
+        {
+          "name": ".bss",
+          "address": "0x1c08560",
+          "bytes": 96600,
+          "end": "0x1c1feb8"
+        },
+        {
+          "name": ".pool",
+          "address": "0x1c20000",
+          "bytes": 339404,
+          "end": "0x1c72dcc"
+        },
+        {
+          "name": ".noinit",
+          "address": "0x1c7c020",
+          "bytes": 176,
+          "end": "0x1c7c0d0"
+        }
+      ],
+      "loads": [
+        {
+          "vaddr": "0x1c20000",
+          "load": "0x1c20000",
+          "file_bytes": 0,
+          "memory_bytes": 339404,
+          "load_end": "0x1c20000"
+        },
+        {
+          "vaddr": "0x1c7c020",
+          "load": "0x1c7c020",
+          "file_bytes": 0,
+          "memory_bytes": 176,
+          "load_end": "0x1c7c020"
+        },
+        {
+          "vaddr": "0x2001000",
+          "load": "0x2001000",
+          "file_bytes": 535568,
+          "memory_bytes": 535568,
+          "load_end": "0x2083c10"
+        },
+        {
+          "vaddr": "0x1c00000",
+          "load": "0x2083c10",
+          "file_bytes": 5988,
+          "memory_bytes": 5988,
+          "load_end": "0x2085374"
+        },
+        {
+          "vaddr": "0x1c01780",
+          "load": "0x2085374",
+          "file_bytes": 0,
+          "memory_bytes": 8192,
+          "load_end": "0x2085374"
+        },
+        {
+          "vaddr": "0x1c08000",
+          "load": "0x2085374",
+          "file_bytes": 1360,
+          "memory_bytes": 1360,
+          "load_end": "0x20858c4"
+        },
+        {
+          "vaddr": "0x1c08560",
+          "load": "0x20858c4",
+          "file_bytes": 0,
+          "memory_bytes": 96600,
+          "load_end": "0x20858c4"
+        }
+      ]
+    }
+  ],
+  "remaining": [
+    "Physical boot/ALNK/display/CPU1 stop providers and serial deadline cost",
+    "Combined UI, wire, OTA Busy retries and retained-LCD guards",
+    "mrustc emission and full MCU link, address/RAM-to-XIP/soft-double/stack/pool limits",
+    "Clocks/reset/P33/watchdog, IRQ-bank/fatal/guards, general GPIO/input scanning, RAM flash/cache/SPI and startup memory orchestration",
+    "Electrical device and watchdog/recovery qualification; no crash cause inferred"
+  ]
+}

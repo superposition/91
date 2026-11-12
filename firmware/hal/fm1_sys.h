@@ -17,6 +17,9 @@
  */
 #pragma once
 #include <stdint.h>
+#if EN_RUST_HAL
+#include "fm1_rust_hal.h"
+#endif
 #include "fm1_cc.h"
 #include "fm1_core1_stop.h"
 
@@ -171,7 +174,12 @@ FM1_INLINE void fm1_mailbox_clear(void)   /* before fm1_guard_enable (it write-p
 /* RAM and the XIP window only: SFR reads can have side effects */
 static int fm1_mem_readable(uint32_t a, uint32_t n)
 {
+#if EN_RUST_HAL
+    return (int)fm1_rust_hal_readable(a,n);
+#else
     return (a >= 0x01C00000u && a + n <= 0x01C80000u && a + n >= a) ||
            (a >= 0x02000000u && a + n <= 0x02100000u && a + n >= a);
+
+#endif
 }
 FM1_INLINE uint8_t fm1_peek8(uint32_t a) { return *(const volatile uint8_t *)a; }

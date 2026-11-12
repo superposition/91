@@ -4,7 +4,12 @@
 static void plate_init(void);
 static void worker_silence(int32_t *out,int16_t *usb,uint32_t n)
 {
+#if EN_RUST_HAL
+    fm1_rust_hal_audio_silence(out,n);
+    if(usb)for(uint32_t i=0;i<2u*n;i++)usb[i]=0;
+#else
     uint32_t i;for(i=0;i<n;i++){out[2*i]=out[2*i+1]=0;if(usb)usb[2*i]=usb[2*i+1]=0;}
+#endif
 }
 static int worker_join_status(void)
 {
@@ -57,7 +62,11 @@ static int worker_dispatch(void)
         worker_unknown=1;(void)fm1_rust_worker_quarantine(worker_generation);return -1;
     }
     worker_generation=prepared;
-    if(c2_submit&&c2_join&&c2_submit(chunk_job,(void *)(uintptr_t)prepared)>0){en_c2_jobs++;return 1;}
+    if(
+#if EN_RUST_HAL
+       !flash_serial()&&
+#endif
+       c2_submit&&c2_join&&c2_submit(chunk_job,(void *)(uintptr_t)prepared)>0){en_c2_jobs++;return 1;}
     fm1_rust_worker_refused();chunk_job((void *)(uintptr_t)prepared);
     if(!fm1_rust_worker_completed(prepared)){worker_unknown=1;(void)fm1_rust_worker_quarantine(prepared);return -1;}
     return 0;

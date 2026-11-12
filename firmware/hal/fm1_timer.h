@@ -9,6 +9,9 @@
  */
 #pragma once
 #include <stdint.h>
+#if EN_RUST_HAL
+#include "fm1_rust_hal.h"
+#endif
 #include "fm1_cc.h"
 #include "fm1_irq.h"
 
@@ -18,11 +21,16 @@
 
 FM1_INLINE void fm1_timer5_start(void (*isr)(void), uint32_t prio)   /* IRQs off */
 {
+#if EN_RUST_HAL
+    (void)fm1_rust_hal_io(1,(uint32_t)(uintptr_t)isr,prio,0,0);
+#else
     FM1_T5_CON = 0x4000u;
     FM1_T5_CNT = 0;
     FM1_T5_PRD = 600u;
     fm1_irq_attach(FM1_IRQ_TIMER5, isr, prio);
     FM1_T5_CON = 0x4019u;
+
+#endif
 }
 
 FM1_INLINE void fm1_timer5_ack(void) { FM1_T5_CON |= 0x4000u; }

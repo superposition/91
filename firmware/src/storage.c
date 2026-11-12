@@ -62,8 +62,8 @@ static const fm1_store_hooks st_rust_hooks = {st_read, st_erase, st_prog};
 
 static int st_head(uint32_t obj, uint32_t copy, st_hdr_t *h)   /* commit record valid: 0 */
 {
-    if (st_read(st_sector(obj, copy), h, sizeof *h))
-        return -1;
+    const int rc=st_read(st_sector(obj,copy),h,sizeof *h);
+    if(rc)return rc==PLAT_STORE_BUSY?rc:-1;
     if (h->magic != ST_MAGIC || h->type != obj || h->len > ST_PAYLOAD_MAX ||
         h->hcrc != st_crc32(h, sizeof *h - 4u))
         return -1;
@@ -72,7 +72,9 @@ static int st_head(uint32_t obj, uint32_t copy, st_hdr_t *h)   /* commit record 
 
 static int st_body(uint32_t obj, uint32_t copy, const st_hdr_t *h)   /* payload -> st_buf, CRC ok: 0 */
 {
-    if (st_read(st_sector(obj, copy) + ST_PAYLOAD_OFF, st_buf, h->len) || st_crc32(st_buf, h->len) != h->crc)
+    const int rc=st_read(st_sector(obj,copy)+ST_PAYLOAD_OFF,st_buf,h->len);
+    if(rc==PLAT_STORE_BUSY)return rc;
+    if (rc || st_crc32(st_buf, h->len) != h->crc)
         return -1;
     return 0;
 }
@@ -83,19 +85,25 @@ static int st_body(uint32_t obj, uint32_t copy, const st_hdr_t *h)   /* payload 
 static int st_current(uint32_t obj, st_hdr_t *h)
 {
     st_hdr_t a, b;
-    int va = st_head(obj, 0, &a) == 0, vb = st_head(obj, 1, &b) == 0;
+    int ra=st_head(obj,0,&a),rb,va,vb,rc;
+    if(ra==PLAT_STORE_BUSY)return ra;
+    rb=st_head(obj,1,&b);if(rb==PLAT_STORE_BUSY)return rb;
+    va=ra==0;vb=rb==0;
     if (vb && (!va || b.seq > a.seq)) {
-        if (st_body(obj, 1, &b) == 0) {
+        rc=st_body(obj,1,&b);if(rc==PLAT_STORE_BUSY)return rc;
+        if (rc == 0) {
             *h = b;
             return 1;
         }
         vb = 0;
     }
-    if (va && st_body(obj, 0, &a) == 0) {
+    rc=va?st_body(obj,0,&a):-1;if(rc==PLAT_STORE_BUSY)return rc;
+    if (va && rc == 0) {
         *h = a;
         return 0;
     }
-    if (vb && st_body(obj, 1, &b) == 0) {
+    rc=vb?st_body(obj,1,&b):-1;if(rc==PLAT_STORE_BUSY)return rc;
+    if (vb && rc == 0) {
         *h = b;
         return 1;
     }
@@ -110,8 +118,7 @@ static int st_load(uint32_t obj, void *dst, uint32_t max)
 #else
     uint32_t i;
     st_hdr_t h;
-    if (st_current(obj, &h) < 0)
-        return -1;
+    {int cur=st_current(obj,&h);if(cur<0)return cur;}
     if (h.len > max)
         h.len = max;
     for (i = 0; i < h.len; i++)
@@ -131,6 +138,7 @@ static int st_save(uint32_t obj, const void *src, uint32_t len)
     if (len > ST_PAYLOAD_MAX)
         return -1;
     cur = st_current(obj, &h);
+    if(cur==PLAT_STORE_BUSY)return cur;
     seq = cur < 0 ? 0u : h.seq;
     base = st_sector(obj, cur == 0 ? 1u : 0u);       /* write the other copy */
     for (off = 0; off < len; off++)
@@ -155,8 +163,10 @@ static int st_save(uint32_t obj, const void *src, uint32_t len)
     {   /* read back: a write-protected or failing part must not report SAVED */
         st_hdr_t chk;
         uint32_t c = cur == 0 ? 1u : 0u;
-        if (st_head(obj, c, &chk) || chk.seq != h.seq || st_body(obj, c, &chk))
-            return -7;
+        rc=st_head(obj,c,&chk);if(rc==PLAT_STORE_BUSY)return rc;
+        if(rc || chk.seq!=h.seq)return -7;
+        rc=st_body(obj,c,&chk);if(rc==PLAT_STORE_BUSY)return rc;
+        if(rc)return -7;
     }
     return 0;
 #endif

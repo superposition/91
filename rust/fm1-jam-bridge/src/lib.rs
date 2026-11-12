@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! Transitional C ABI for exercising the portable Rust planner in the instrument.
-//! No input borrow or engine pointer survives a call. Remove this seam after the
-//! application and render owner have migrated to Rust.
+//! No input borrow survives a call. The HAL registry alone retains a stable raw
+//! external DMA address until confirmed stop; it never creates a DMA reference.
+//! Application/DSP packet pointers are not retained by their scoped adapters.
 #![cfg_attr(not(feature = "std"), no_std)]
 
+#[cfg(all(feature = "hal-test", feature = "pi32v2"))]
+compile_error!("fake HAL backend is forbidden in the physical PI32v2 build");
 use fm1_engine::planner::{bass_event, plan_into, Phrase, Seed, Settings};
 use fm1_formats::jam::JamPack;
 use fm1_formats::session::JamSession;
@@ -22,7 +25,13 @@ mod mcu;
 mod melodic;
 mod object_formats;
 mod persistence;
+mod platform;
 mod project;
+#[cfg(not(feature = "hal"))]
+#[path = "plain_output.rs"]
+mod raw_output;
+#[cfg(feature = "hal")]
+mod raw_output;
 mod runner;
 mod sequencer;
 mod transport;

@@ -10,6 +10,19 @@ static void harmony_pad_retarget(void);
 static int harmony_preview(int,int,int *);
 static void harmony_capture(uint8_t *);
 #endif
+#if !EN_RUST_HAL
+/* No DMA descriptor is registered on hosted/C0-HAL builds. These leaf bindings
+ * remain conservative if reached; normal output never calls them. */
+void fm1_hal_audio_stop_fence(void) {}
+uint32_t fm1_hal_audio_stop_confirm(void) {return 0;}
+#endif
+#if EN_RUST_HAL
+extern void fm1_rust_hal_audio_silence(int32_t *,uint32_t);
+extern void fm1_rust_hal_audio_write_word(int32_t *,int32_t);
+#define MAIN_OUTPUT_STORE(p,value) fm1_rust_hal_audio_write_word((p),(value))
+#else
+#define MAIN_OUTPUT_STORE(p,value) (*(p)=(value))
+#endif
 #if EN_RUST_WORKER
 #include "rust_worker.h"
 #endif
@@ -5178,6 +5191,33 @@ static int worker_unknown;
 #else
 static volatile uint32_t stage_done, stage2_done, stage3_done;   /* the job's first stage (the pad) is done: its outputs may be read; the second (the drone, the acid); the third (the reverb's tank) */
 #endif
+#if EN_RUST_HAL
+extern uint32_t fm1_rust_hal_flash(uint32_t,uint32_t,uint32_t);
+/* CPU0 only: foreground updates under saved IRQ exclusion; en_render owns the
+ * active bit until its FINAL backend join, including every early return. */
+static volatile uint32_t flash_transaction;
+static uint32_t flash_worker_unknown(void)
+{
+#if EN_RUST_WORKER
+    return (uint32_t)worker_unknown;
+#else
+    /* The legacy C worker has no unknown-completion quarantine contract. It
+     * cannot qualify physical flash concurrency merely by clearing IRQs. */
+    return c2_submit!=0;
+#endif
+}
+int en_flash_begin(int confirmed_stopped)
+{
+    /* Physical hold grants XIP-off execution only. The worker's Rust lease and
+     * private spans remain quarantined until the separate retirement protocol. */
+    const uint32_t next=fm1_rust_hal_flash(0,flash_transaction,confirmed_stopped?0:flash_worker_unknown());
+    if(!next)return 0;
+    flash_transaction=next;return 1;
+}
+void en_flash_end(void) {flash_transaction=fm1_rust_hal_flash(1,flash_transaction,0);}
+int en_flash_window_ready(int confirmed_stopped) {return (int)fm1_rust_hal_flash(4,flash_transaction,confirmed_stopped?0:flash_worker_unknown());}
+static int flash_serial(void) {return (int)fm1_rust_hal_flash(5,flash_transaction,0);}
+#endif
 static void render_pad(uint32_t n);
 static void pad_publish(uint32_t w, uint32_t n);
 static void render_bass(uint32_t n);
@@ -9508,11 +9548,11 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
 #else
     for (j = 0; j < n; j++) {                   /* the master gain and the soft clip */
         if (shed3) {                            /* the cheap clip (a rational tanh) */
-            out[2 * j] = (int32_t)(soft_sat(mixl[j] * gain) * 8300000.0f);
-            out[2 * j + 1] = (int32_t)(soft_sat(mixr[j] * gain) * 8300000.0f);
+            MAIN_OUTPUT_STORE(out+(2 * j),(int32_t)(soft_sat(mixl[j] * gain) * 8300000.0f));
+            MAIN_OUTPUT_STORE(out+(2 * j + 1),(int32_t)(soft_sat(mixr[j] * gain) * 8300000.0f));
         } else {
-            out[2 * j] = (int32_t)(fm_tanhf(mixl[j] * gain) * 8300000.0f);
-            out[2 * j + 1] = (int32_t)(fm_tanhf(mixr[j] * gain) * 8300000.0f);
+            MAIN_OUTPUT_STORE(out+(2 * j),(int32_t)(fm_tanhf(mixl[j] * gain) * 8300000.0f));
+            MAIN_OUTPUT_STORE(out+(2 * j + 1),(int32_t)(fm_tanhf(mixr[j] * gain) * 8300000.0f));
         }
     }
     if (usb_cur)                                /* the USB audio at its fixed level (the Settings' USB page), only while a computer records: the same clip, unity gain,
@@ -9789,7 +9829,11 @@ static void control(uint32_t n)                 /* once a chunk: the slow things
 #if !EN_RUST_TRANSPORT
 static uint32_t ctl_acc;                        /* frames since control() last ran */
 #endif
+#if EN_RUST_HAL
+static void en_render_body(int32_t *out, uint32_t n, uint32_t gain_q12)
+#else
 void en_render(int32_t *out, uint32_t n, uint32_t gain_q12)
+#endif
 {
     float gain;
     int32_t *const out0 = out;
@@ -9904,8 +9948,8 @@ void en_render(int32_t *out, uint32_t n, uint32_t gain_q12)
         uint32_t j;
         for (j = 0; j < n0; j++) {
             gap_g = gap_on ? fm_maxf(gap_g - 1.0f / (0.006f * EN_SR), 0.0f) : fm_minf(gap_g + 1.0f / (0.001f * EN_SR), 1.0f);
-            out0[2 * j] = (int32_t)((float)out0[2 * j] * gap_g);
-            out0[2 * j + 1] = (int32_t)((float)out0[2 * j + 1] * gap_g);
+            MAIN_OUTPUT_STORE(out0+(2 * j),(int32_t)((float)out0[2 * j] * gap_g));
+            MAIN_OUTPUT_STORE(out0+(2 * j + 1),(int32_t)((float)out0[2 * j + 1] * gap_g));
             if (en_usb_out) {
                 en_usb_out[2 * j] = (int16_t)((float)en_usb_out[2 * j] * gap_g);
                 en_usb_out[2 * j + 1] = (int16_t)((float)en_usb_out[2 * j + 1] * gap_g);
@@ -9917,8 +9961,8 @@ void en_render(int32_t *out, uint32_t n, uint32_t gain_q12)
         uint32_t j;
         for (j = 0; j < n0; j++) {
             hush_g = tgt > hush_g ? fm_minf(hush_g + step, 1.0f) : fm_maxf(hush_g - step, 0.0f);
-            out0[2 * j] = (int32_t)((float)out0[2 * j] * hush_g);
-            out0[2 * j + 1] = (int32_t)((float)out0[2 * j + 1] * hush_g);
+            MAIN_OUTPUT_STORE(out0+(2 * j),(int32_t)((float)out0[2 * j] * hush_g));
+            MAIN_OUTPUT_STORE(out0+(2 * j + 1),(int32_t)((float)out0[2 * j + 1] * hush_g));
             if (en_usb_out) {
                 en_usb_out[2 * j] = (int16_t)((float)en_usb_out[2 * j] * hush_g);
                 en_usb_out[2 * j + 1] = (int16_t)((float)en_usb_out[2 * j + 1] * hush_g);
@@ -9928,3 +9972,11 @@ void en_render(int32_t *out, uint32_t n, uint32_t gain_q12)
     en_hushed = (uint8_t)(hush && hush_g <= 0.0f);
 #endif
 }
+#if EN_RUST_HAL
+void en_render(int32_t *out,uint32_t n,uint32_t gain_q12)
+{
+    flash_transaction=fm1_rust_hal_flash(2,flash_transaction,0);
+    en_render_body(out,n,gain_q12);
+    flash_transaction=fm1_rust_hal_flash(3,flash_transaction,0);
+}
+#endif

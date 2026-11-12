@@ -54,8 +54,11 @@ pub unsafe extern "C" fn fm1_rust_fx_gains(
 }
 /// # Safety
 /// State provides two initialized exclusively writable f32s. Output/optional
-/// non-null USB cover 2*n initialized i32/i16s. All spans are aligned, disjoint
-/// and exclusively held until return; no outstanding worker accesses them.
+/// non-null USB cover 2*n initialized i32/i16s. Output is a raw external span,
+/// not a Rust reference; an active DMA reader is permitted by the sealed sink.
+/// DSP/state/USB spans are aligned, disjoint and exclusively held; in hardware
+/// mode the caller obeys the CPU0 HAL registration/render contract. No worker
+/// accesses these regions and the sink never reenters engine/UI code.
 #[no_mangle]
 pub unsafe extern "C" fn fm1_rust_fx_fades(
     state: *mut f32,
@@ -65,18 +68,31 @@ pub unsafe extern "C" fn fm1_rust_fx_fades(
     usb: *mut i16,
     n: u32,
 ) -> u32 {
-    let n = n as usize * 2;
-    let usb = if usb.is_null() {
+    let frames = n as usize;
+    let mut sink = unsafe { crate::raw_output::Sink::new(out, frames * 2) };
+    let mut usb = if usb.is_null() {
         None
     } else {
-        Some(unsafe { core::slice::from_raw_parts_mut(usb, n) })
+        Some(unsafe { core::slice::from_raw_parts_mut(usb, frames * 2) })
     };
-    u32::from(effects::config::fades(
+    u32::from(effects::config::fades_each(
         unsafe { &mut *state.cast::<[f32; 2]>() },
         gap != 0,
         hush != 0,
-        unsafe { core::slice::from_raw_parts_mut(out, n) },
-        usb,
+        frames,
+        |j, gain| {
+            for ch in 0..2 {
+                let index = 2 * j + ch;
+                if let Some(word) = sink.read(index) {
+                    sink.write(index, (word as f32 * gain) as i32);
+                }
+            }
+            if let Some(b) = &mut usb {
+                for ch in 0..2 {
+                    b[2 * j + ch] = (b[2 * j + ch] as f32 * gain) as i16;
+                }
+            }
+        },
     ))
 }
 
@@ -656,8 +672,10 @@ pub unsafe extern "C" fn fm1_rust_fx_mixer_end(
 }
 /// # Safety
 /// Inputs are `n` initialized readable aligned f32s; out is `2*n` writable i32s
-/// and optional non-null USB is `2*n` writable i16s. All regions are pairwise
-/// disjoint, live and not concurrently accessed. Engine gain/state is finite.
+/// and optional non-null USB is `2*n` writable i16s. Output stays a raw span,
+/// with no Rust reference live; an active DMA reader is allowed by the sealed
+/// sink. DSP/USB regions are pairwise disjoint and exclusively held. In hardware
+/// mode the CPU0 HAL registration/render contract holds. Gain/state is finite.
 #[no_mangle]
 pub unsafe extern "C" fn fm1_rust_fx_output(
     left: *const f32,
@@ -670,20 +688,22 @@ pub unsafe extern "C" fn fm1_rust_fx_output(
     shed: u32,
 ) {
     let n = n as usize;
-    let usb = if usb.is_null() {
-        None
-    } else {
-        Some(unsafe { core::slice::from_raw_parts_mut(usb, n * 2) })
-    };
-    effects::output(
-        unsafe { core::slice::from_raw_parts(left, n) },
-        unsafe { core::slice::from_raw_parts(right, n) },
-        unsafe { core::slice::from_raw_parts_mut(out, n * 2) },
-        usb,
-        gain,
-        usb_gain,
-        shed != 0,
-    );
+    let left = unsafe { core::slice::from_raw_parts(left, n) };
+    let right = unsafe { core::slice::from_raw_parts(right, n) };
+    let mut sink = unsafe { crate::raw_output::Sink::new(out, n * 2) };
+    for j in 0..n {
+        let words = effects::output_frame(left[j], right[j], gain, shed != 0);
+        sink.write(2 * j, words[0]);
+        sink.write(2 * j + 1, words[1]);
+    }
+    if !usb.is_null() {
+        let usb = unsafe { core::slice::from_raw_parts_mut(usb, n * 2) };
+        for j in 0..n {
+            let words = effects::usb_frame(left[j], right[j], usb_gain);
+            usb[2 * j] = words[0];
+            usb[2 * j + 1] = words[1];
+        }
+    }
 }
 pub fn stat(index: u32) -> u32 {
     match index {

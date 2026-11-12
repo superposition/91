@@ -4,6 +4,7 @@ struct Flash {
     bytes: Vec<u8>,
     calls: Vec<(u8, u32, usize)>,
     fail: Option<usize>,
+    fail_code: i32,
 }
 impl Flash {
     fn new() -> Self {
@@ -11,6 +12,7 @@ impl Flash {
             bytes: vec![255; 0x100000],
             calls: vec![],
             fail: None,
+            fail_code: -9,
         }
     }
 }
@@ -18,7 +20,7 @@ impl Nor for Flash {
     fn read(&mut self, off: u32, out: &mut [u8]) -> i32 {
         self.calls.push((0, off, out.len()));
         if self.fail == Some(self.calls.len()) {
-            return -9;
+            return self.fail_code;
         }
         let Some(b) = self.bytes.get(off as usize..off as usize + out.len()) else {
             return -8;
@@ -29,7 +31,7 @@ impl Nor for Flash {
     fn erase(&mut self, off: u32) -> i32 {
         self.calls.push((1, off, 4096));
         if self.fail == Some(self.calls.len()) {
-            return -9;
+            return self.fail_code;
         }
         self.bytes[off as usize..off as usize + 4096].fill(255);
         0
@@ -37,7 +39,7 @@ impl Nor for Flash {
     fn program(&mut self, off: u32, input: &[u8]) -> i32 {
         self.calls.push((2, off, input.len()));
         if self.fail == Some(self.calls.len()) {
-            return -9;
+            return self.fail_code;
         }
         assert!((off & 255) as usize + input.len() <= 256);
         for (a, b) in self.bytes[off as usize..].iter_mut().zip(input) {
@@ -120,5 +122,43 @@ fn object_pairs_are_disjoint_and_fixed() {
     for (o, base) in expected.iter().enumerate() {
         assert_eq!(sector(o as u32, 0), *base);
         assert_eq!(sector(o as u32, 1), base + 4096);
+    }
+}
+
+#[test]
+fn busy_is_not_a_missing_or_damaged_record() {
+    for cut in 1..=22 {
+        let mut scratch = [0; MAX];
+        let mut store = Store::new(Flash::new(), &mut scratch);
+        let old = [91; MAX];
+        assert_eq!(store.save(0, &old), 0);
+        store.io.calls.clear();
+        store.io.fail = Some(cut);
+        store.io.fail_code = BUSY;
+        let prior = store.io.bytes.clone();
+        store.counts = Counts::default();
+        assert_eq!(store.save(0, &[37; MAX]), BUSY, "boundary {cut}");
+        assert_eq!(store.counts.missing, 0);
+        assert_eq!(store.counts.verify_failed, 0);
+        if cut <= 3 {
+            assert_eq!(store.io.bytes, prior);
+        }
+        store.io.fail = None;
+        let mut output = [0; MAX];
+        assert_eq!(store.load(0, &mut output), MAX as i32);
+        assert!(output == old || output == [37; MAX]);
+    }
+    for cut in 1..=3 {
+        let mut scratch = [0; MAX];
+        let mut store = Store::new(Flash::new(), &mut scratch);
+        assert_eq!(store.save(0, &[91; MAX]), 0);
+        store.io.calls.clear();
+        store.io.fail = Some(cut);
+        store.io.fail_code = BUSY;
+        let mut output = [73; MAX];
+        let missing = store.counts.missing;
+        assert_eq!(store.load(0, &mut output), BUSY);
+        assert_eq!(output, [73; MAX]);
+        assert_eq!(store.counts.missing, missing);
     }
 }

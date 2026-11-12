@@ -66,12 +66,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "fm1-hal"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+]
+
+[[package]]
 name = "fm1-jam-bridge"
 version = "0.1.0"
 dependencies = [
  "fm1-app",
  "fm1-engine",
  "fm1-formats",
+ "fm1-hal",
  "fm1-rt",
  "fm1-types",
 ]

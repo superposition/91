@@ -37,7 +37,9 @@ static int panel_valid(const panel_t *p)
 static void panel_init(void)
 {
     panel_t p;
-    if (plat_store_load(OBJ_PANEL, &p, sizeof p) == (int)sizeof p && panel_valid(&p))
+    const int n=plat_store_load(OBJ_PANEL,&p,sizeof p);
+    if(n==PLAT_STORE_BUSY)return; /* boot caller must defer before using unknown calibration */
+    if (n == (int)sizeof p && panel_valid(&p))
         panel = p;
     if (!panel_valid(&panel))
         panel = PANEL_DEFAULT;

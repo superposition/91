@@ -81,9 +81,15 @@ static void render_block(int32_t *o)                /* ALNK0: one half, measured
 #if FELUCCA_UAC
             en_usb_out = en_usb_fixed && uac.feed ? usb_buf : 0;   /* the Settings' USB page says FIXED and a computer is recording: a second output at unity */
             en_render(o + 2u * k, REND_FRAMES, master_q12);
+#if EN_RUST_HAL
+            if(!fm1_rust_hal_audio_rendering())break;
+#endif
             uac_tap(o + 2u * k, en_usb_out ? usb_buf : 0, REND_FRAMES);   /* the USB audio input: the master output, or that */
 #else
             en_render(o + 2u * k, REND_FRAMES, master_q12);
+#if EN_RUST_HAL
+            if(!fm1_rust_hal_audio_rendering())break;
+#endif
 #endif
         }
     }
@@ -136,8 +142,16 @@ void fm1_alnk0_irq(void)                            /* via isr_alnk0 (hal/fm1_is
         if (half == last_half)
             audio_xruns++;                          /* two ends went by in one render, or the interrupts were off: a half was never rendered */
         last_half = half;
+#if EN_RUST_HAL
+        const uint32_t generation=fm1_rust_hal_audio_begin(half);
+        if(!generation){audio_xruns++;return;}
+#endif
         render_block(&abuf[half * HALF_WORDS]);
+#if EN_RUST_HAL
+        if(!fm1_rust_hal_audio_end(generation)) {
+#else
         if (fm1_audio_free_half() != half) {
+#endif
             en_dbg.late++;                         /* the DMA moved on while we rendered: the next render is due already, nothing is lost */
             audio_late++;
         }
@@ -148,6 +162,11 @@ extern void isr_alnk0(void);
 static void audio_init(void)
 {
     uint32_t i;
+#if EN_RUST_HAL
+    /* cstart proved peripheral quiescence before initializing any RAM state.
+     * Reinit is refused while a previous descriptor remains quarantined. */
+    if(!fm1_rust_hal_audio_config(abuf,HALF_WORDS,1))return;
+#endif
     for (i = 0; i < 2u * HALF_WORDS; i++)
         abuf[i] = 0;
     fm1_audio_init(abuf, HALF_WORDS, isr_alnk0, 3);
@@ -156,8 +175,16 @@ static void audio_init(void)
 static void audio_silence(void)                     /* IRQs off (flash erase): the DMA would loop stale audio */
 {
     uint32_t i;
+#if EN_RUST_HAL
+    const uint32_t flags=irq_save();
+    if(!fm1_rust_hal_audio_pause()){irq_restore(flags);return;}
+#endif
     for (i = 0; i < sizeof abuf / sizeof abuf[0]; i++)
         abuf[i] = 0;
+#if EN_RUST_HAL
+    if(fm1_rust_hal_audio_restart())fm1_audio_resume();
+    irq_restore(flags);
+#endif
 }
 
 /* ------------------------------------------------------------ timer --- */
@@ -829,13 +856,25 @@ static void fm1_main(void)
     int32_t knob = 512 * 16;
     uint32_t last_frame = 0;
     {
+        const int admitted=plat_store_begin()==0;
+#if EN_RUST_HAL
+        /* Unknown CPU1 XIP ownership is not an absent flash chip. Do not boot
+         * defaults or mutate application state after a denied boot read. */
+        if(!admitted)fm1_enter_uboot();
+#endif
         uint32_t f = irq_save();
-        const uint32_t id = FL_FAR(fl_jedec_ram)();
+        uint32_t id=0;
+#if EN_RUST_HAL
+        if(admitted && fm1_flash_window_ready()) id=FL_FAR(fl_jedec_ram)();
+#else
+        id=FL_FAR(fl_jedec_ram)();
+#endif
         flash_ok = FL_JEDEC_OK(id);                       /* the Puya of the first units or the UC25HQ80 of the newer ones (0.16.23) */
         flash_chip = (uint8_t)FL_CHIP(id);
         if (flash_ok)
             FL_FAR(fl_resume_ram)();                      /* (an erase left suspended by a reset finishes) */   /* the expected 1 MiB part, else RAM only */
         irq_restore(f);
+        if(admitted)plat_store_end();
         if (flash_ok)
             ota_boot_cleanup();
     }
@@ -1008,6 +1047,13 @@ void fm1_cstart(void)
     wdt = fm1_boot.wdt_con;
     fm1_wdt_arm(0x0D);
     fm1_core1_stop();                               /* a CPU1 left running by the last boot: hold it before RAM is cleared */
+#if EN_RUST_HAL
+    {uint32_t words[4]={bootguard.magic,bootguard.failed,bootguard.pending,0};
+     (void)fm1_rust_hal_boot(words,0,0);
+     bootguard.magic=words[0];bootguard.failed=words[1];bootguard.pending=words[2];
+     if(words[3]==2u)fm1_enter_uboot();
+     p3|=(words[3]==1u)<<8;}
+#else
     if (bootguard.magic != BOOTGUARD_MAGIC) {
         bootguard.magic = BOOTGUARD_MAGIC;
         bootguard.failed = 0;
@@ -1022,7 +1068,13 @@ void fm1_cstart(void)
         fm1_enter_uboot();
     }
     p3 |= (bootguard.failed >= 2u) << 8;            /* two failed boots: safe mode (kept past the .bss clear) */
+#endif
     fm1_irq_init();
+#if EN_RUST_HAL
+    /* A warm/core-only reset cannot erase the DMA ownership record first.
+     * Unknown ALNK/SPI stop goes to chip update reset before BSS/pool reuse. */
+    if(!fm1_hal_dma_boot_quiescent())fm1_enter_uboot();
+#endif
     for (d = _bss_start; d < _bss_end; d++)
         *d = 0;
     for (d = _pool_start; d < _pool_end; d++)

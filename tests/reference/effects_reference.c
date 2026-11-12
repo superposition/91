@@ -29,6 +29,9 @@ static void output(float *l,float *r,unsigned n,int32_t *out,int16_t *usb,float 
     if(usb)for(i=0;i<n;i++){usb[2*i]=(int16_t)(fm_tanhf(l[i]*ug)*32421.0f);usb[2*i+1]=(int16_t)(fm_tanhf(r[i]*ug)*32421.0f);}
 #endif
 }
+#ifndef TEST_RENDER
+#define TEST_RENDER en_render
+#endif
 int main(int argc,char **argv)
 {
     const unsigned sizes[]={1,3,4,5,63,64,127,128,129,255,256};
@@ -111,7 +114,7 @@ int main(int argc,char **argv)
             if(block==5400){en_play(1);en_shed_level=0;}
             if(block==4200){en_fx(0);en_trk(0,0);en_fxk(EN_FXK_THROW,0);en_fxk(EN_FXK_WASH,0);}
             if(mode==8&&block==2600)en_freeze(1);if(mode==8&&block==3600)en_freeze(0);
-            en_usb_out=usb;en_render(pcm,n,block%17==0?0:2048);record(pcm,n*8);record(usb,n*4);state();total+=n;
+            en_usb_out=usb;TEST_RENDER(pcm,n,block%17==0?0:2048);record(pcm,n*8);record(usb,n*4);state();total+=n;
             if(block%100==0){record(rb,sizeof rb);record(tape,sizeof tape);record(plex,sizeof plex);record(pl_buf,sizeof pl_buf);record(sh_buf,sizeof sh_buf);record(ch_buf,sizeof ch_buf);}
             for(j=0;j<n*2;j++){assert(pcm[j]>=-8300000&&pcm[j]<=8300000);peak=fm_maxf(peak,(float)(pcm[j]<0?-pcm[j]:pcm[j])/8388608.0f);}
         }

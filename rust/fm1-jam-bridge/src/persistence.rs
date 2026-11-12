@@ -56,9 +56,10 @@ impl Nor for Platform<'_> {
 }
 /// # Safety
 /// Hooks are valid synchronous functions, may not re-enter the store or retain
-/// any pointer. scratch covers MAX writable bytes, exclusively owned this call;
+/// any pointer. scratch covers MAX initialized writable bytes, exclusively owned this call;
 /// data covers length bytes and is disjoint from scratch/hooks. For load it is
-/// writable, for save initialized readable. No pointer survives this call.
+/// writable (possibly uninitialized), for save initialized readable. No pointer
+/// survives this call. A denied load does not read or write the destination.
 #[no_mangle]
 pub unsafe extern "C" fn fm1_rust_store(
     save: u32,
@@ -91,17 +92,93 @@ pub unsafe extern "C" fn fm1_rust_store(
             },
         )
     } else {
-        // No load can write more than MAX even if the caller offers more space.
-        // SAFETY: caller guarantees this writable span and exclusive access.
-        store.load(
-            object,
-            if length == 0 {
-                &mut []
-            } else {
-                unsafe { core::slice::from_raw_parts_mut(data, (length as usize).min(MAX)) }
-            },
-        )
+        // C commonly supplies an uninitialized automatic struct. Never create
+        // a typed reference into it: verification uses initialized st_buf only.
+        match store.load_bytes(object, (length as usize).min(MAX)) {
+            Err(rc) => rc,
+            Ok(bytes) => {
+                if !bytes.is_empty() {
+                    // SAFETY: initialized verified source; caller's destination
+                    // covers length writable bytes and is disjoint from scratch.
+                    unsafe { core::ptr::copy_nonoverlapping(bytes.as_ptr(), data, bytes.len()) };
+                }
+                bytes.len() as i32
+            }
+        }
     };
     record(store.counts);
     result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use fm1_engine::persistence::{sector, Header, BUSY, HEADER_LEN, PAYLOAD_OFFSET};
+    unsafe extern "C" fn read(offset: u32, output: *mut u8, length: u32) -> i32 {
+        let bytes = if offset == sector(0, 0) {
+            Header {
+                kind: 0,
+                length: 16,
+                checksum: fm1_formats::crc32(&[13; 16]),
+                ..Header::default()
+            }
+            .encode()
+        } else if offset == sector(0, 1) {
+            [255; HEADER_LEN]
+        } else {
+            assert_eq!(offset, sector(0, 0) + PAYLOAD_OFFSET);
+            [13; HEADER_LEN]
+        };
+        assert!(length as usize <= bytes.len());
+        // SAFETY: synchronous hook receives the caller's live bounded scratch.
+        unsafe { core::ptr::copy_nonoverlapping(bytes.as_ptr(), output, length as usize) };
+        0
+    }
+    unsafe extern "C" fn busy(_: u32, _: *mut u8, _: u32) -> i32 {
+        BUSY
+    }
+    unsafe extern "C" fn erase(_: u32) -> i32 {
+        panic!("load tried to erase")
+    }
+    unsafe extern "C" fn program(_: u32, _: *const u8, _: u32) -> i32 {
+        panic!("load tried to program")
+    }
+    #[test]
+    fn foreign_uninitialized_load_is_initialized_only_after_verified_success() {
+        let mut destination = core::mem::MaybeUninit::<[u8; 16]>::uninit();
+        let mut scratch = [0; MAX];
+        let mut hooks = Hooks {
+            read: busy,
+            erase,
+            program,
+        };
+        // SAFETY: disjoint live output (initially uninitialized), initialized
+        // scratch and synchronous hooks. No reference into output is formed.
+        unsafe {
+            assert_eq!(
+                fm1_rust_store(
+                    0,
+                    0,
+                    destination.as_mut_ptr().cast(),
+                    16,
+                    scratch.as_mut_ptr(),
+                    &hooks
+                ),
+                BUSY
+            );
+            hooks.read = read;
+            assert_eq!(
+                fm1_rust_store(
+                    0,
+                    0,
+                    destination.as_mut_ptr().cast(),
+                    16,
+                    scratch.as_mut_ptr(),
+                    &hooks
+                ),
+                16
+            );
+            assert_eq!(destination.assume_init(), [13; 16]);
+        }
+    }
 }

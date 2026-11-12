@@ -9,6 +9,9 @@
  */
 #pragma once
 #include <stdint.h>
+#if EN_RUST_HAL
+#include "fm1_rust_hal.h"
+#endif
 
 #define FM1_T4_CON (*(volatile uint32_t *)0x10800u)
 #define FM1_T4_CNT (*(volatile uint32_t *)0x10804u)
@@ -19,12 +22,17 @@
  * RAM-run jumps. */
 static inline void fm1_time_init(void)
 {
+#if EN_RUST_HAL
+    (void)fm1_rust_hal_io(0,0,0,0,0);
+#else
     if ((FM1_T4_CON & 0xFu) == ((2u << 2) | 1u))
         return;
     FM1_T4_CON = 0;
     FM1_T4_PRD = 0xFFFFFFFFu;
     FM1_T4_CNT = 0;
     FM1_T4_CON = (2u << 2) | 1u | (1u << 14);
+
+#endif
 }
 
 static inline __attribute__((always_inline)) uint32_t fm1_ticks(void) { return FM1_T4_CNT; }   /* (always: the RAM timer ISR reads it, 0.16.22) */

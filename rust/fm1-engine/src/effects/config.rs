@@ -65,40 +65,47 @@ pub fn fades(
     if let Some(b) = &usb {
         assert_eq!(out.len(), b.len());
     }
+    fades_each(state, gap, hush, out.len() / 2, |j, gain| {
+        for ch in 0..2 {
+            out[2 * j + ch] = (out[2 * j + ch] as f32 * gain) as i32;
+        }
+        if let Some(b) = &mut usb {
+            for ch in 0..2 {
+                b[2 * j + ch] = (b[2 * j + ch] as f32 * gain) as i16;
+            }
+        }
+    })
+}
+
+/// Gap traversal precedes hush traversal. The sealed sink receives one scalar
+/// coefficient; no state packet, output reference or allocation is required.
+pub fn fades_each(
+    state: &mut [f32; 2],
+    gap: bool,
+    hush: bool,
+    frames: usize,
+    mut apply: impl FnMut(usize, f32),
+) -> bool {
     if gap || state[0] < 1.0 {
-        for j in 0..out.len() / 2 {
+        for j in 0..frames {
             state[0] = if gap {
                 max(state[0] - 1.0 / (0.006 * 44100.0), 0.0)
             } else {
                 min(state[0] + 1.0 / (0.001 * 44100.0), 1.0)
             };
-            for ch in 0..2 {
-                out[2 * j + ch] = (out[2 * j + ch] as f32 * state[0]) as i32;
-            }
-            if let Some(b) = &mut usb {
-                for ch in 0..2 {
-                    b[2 * j + ch] = (b[2 * j + ch] as f32 * state[0]) as i16;
-                }
-            }
+            apply(j, state[0]);
         }
     }
     if hush || state[1] < 1.0 {
         let step = 1.0 / (0.006 * 44100.0);
         let target = if hush { 0.0 } else { 1.0 };
-        for j in 0..out.len() / 2 {
+        for j in 0..frames {
             state[1] = if target > state[1] {
                 min(state[1] + step, 1.0)
             } else {
                 max(state[1] - step, 0.0)
             };
-            for ch in 0..2 {
-                out[2 * j + ch] = (out[2 * j + ch] as f32 * state[1]) as i32;
-            }
-            if let Some(b) = &mut usb {
-                for ch in 0..2 {
-                    b[2 * j + ch] = (b[2 * j + ch] as f32 * state[1]) as i16;
-                }
-            }
+            apply(j, state[1]);
         }
     }
     hush && state[1] <= 0.0

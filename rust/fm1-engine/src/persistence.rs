@@ -7,6 +7,8 @@ pub const PAYLOAD_OFFSET: u32 = 256;
 pub const MAX: usize = 3840;
 pub const MAGIC: u32 = 0x3058_3058;
 pub const HEADER_LEN: usize = 32;
+/// Transient admission denial, distinct from an invalid or absent record.
+pub const BUSY: i32 = -10;
 /// 1 means lock before attempting a restore. A failed restore remains locked.
 pub const fn access(available: bool, locked: bool, restore: bool) -> i32 {
     if !available {
@@ -119,63 +121,86 @@ impl<'a, N: Nor> Store<'a, N> {
             counts: Counts::default(),
         }
     }
-    fn head(&mut self, object: u32, copy: u32) -> Option<Header> {
+    fn head(&mut self, object: u32, copy: u32) -> Result<Option<Header>, i32> {
         let mut bytes = [0; HEADER_LEN];
-        if self.io.read(sector(object, copy), &mut bytes) != 0 {
-            return None;
+        let rc = self.io.read(sector(object, copy), &mut bytes);
+        if rc == BUSY {
+            return Err(BUSY);
         }
-        Header::decode(object, &bytes)
+        Ok(if rc == 0 {
+            Header::decode(object, &bytes)
+        } else {
+            None
+        })
     }
-    fn body(&mut self, object: u32, copy: u32, header: Header) -> bool {
+    fn body(&mut self, object: u32, copy: u32, header: Header) -> Result<bool, i32> {
         let bytes = &mut self.scratch[..header.length as usize];
-        self.io
-            .read(sector(object, copy).wrapping_add(PAYLOAD_OFFSET), bytes)
-            == 0
-            && crc32(bytes) == header.checksum
+        let rc = self
+            .io
+            .read(sector(object, copy).wrapping_add(PAYLOAD_OFFSET), bytes);
+        if rc == BUSY {
+            return Err(BUSY);
+        }
+        Ok(rc == 0 && crc32(bytes) == header.checksum)
     }
-    pub fn current(&mut self, object: u32) -> Option<(u32, Header)> {
-        let a = self.head(object, 0);
-        let mut b = self.head(object, 1);
+    pub fn current(&mut self, object: u32) -> Result<Option<(u32, Header)>, i32> {
+        let a = self.head(object, 0)?;
+        let mut b = self.head(object, 1)?;
         if let Some(h) = b {
             if a.is_none_or(|a| h.sequence > a.sequence) {
-                if self.body(object, 1, h) {
+                if self.body(object, 1, h)? {
                     self.counts.selected_b = self.counts.selected_b.wrapping_add(1);
-                    return Some((1, h));
+                    return Ok(Some((1, h)));
                 }
                 b = None;
             }
         }
         if let Some(h) = a {
-            if self.body(object, 0, h) {
+            if self.body(object, 0, h)? {
                 self.counts.selected_a = self.counts.selected_a.wrapping_add(1);
-                return Some((0, h));
+                return Ok(Some((0, h)));
             }
         }
         if let Some(h) = b {
-            if self.body(object, 1, h) {
+            if self.body(object, 1, h)? {
                 self.counts.selected_b = self.counts.selected_b.wrapping_add(1);
-                return Some((1, h));
+                return Ok(Some((1, h)));
             }
         }
         self.counts.missing = self.counts.missing.wrapping_add(1);
-        None
+        Ok(None)
     }
     pub fn load(&mut self, object: u32, output: &mut [u8]) -> i32 {
-        self.counts.loads = self.counts.loads.wrapping_add(1);
-        let Some((_, header)) = self.current(object) else {
-            return -1;
+        let bytes = match self.load_bytes(object, output.len()) {
+            Ok(bytes) => bytes,
+            Err(rc) => return rc,
         };
-        let n = (header.length as usize).min(output.len());
-        output[..n].copy_from_slice(&self.scratch[..n]);
+        output[..bytes.len()].copy_from_slice(bytes);
+        bytes.len() as i32
+    }
+    /// Initialized verified prefix in the existing scratch, with no borrow of
+    /// the foreign destination. The bridge can initialize C automatic storage
+    /// using a raw copy only after every read succeeds.
+    pub fn load_bytes(&mut self, object: u32, capacity: usize) -> Result<&[u8], i32> {
+        self.counts.loads = self.counts.loads.wrapping_add(1);
+        let header = match self.current(object) {
+            Ok(Some((_, header))) => header,
+            Ok(None) => return Err(-1),
+            Err(rc) => return Err(rc),
+        };
+        let n = (header.length as usize).min(capacity);
         self.counts.bytes = self.counts.bytes.wrapping_add(n as u32);
-        n as i32
+        Ok(&self.scratch[..n])
     }
     pub fn save(&mut self, object: u32, input: &[u8]) -> i32 {
         self.counts.saves = self.counts.saves.wrapping_add(1);
         if input.len() > MAX {
             return -1;
         }
-        let current = self.current(object);
+        let current = match self.current(object) {
+            Ok(value) => value,
+            Err(rc) => return rc,
+        };
         let target = u32::from(current.is_some_and(|(copy, _)| copy == 0));
         let sequence = current
             .map_or(0, |(_, header)| header.sequence)
@@ -210,10 +235,15 @@ impl<'a, N: Nor> Store<'a, N> {
         if rc != 0 {
             return rc;
         }
-        if !self
-            .head(object, target)
-            .is_some_and(|h| h.sequence == sequence && self.body(object, target, h))
-        {
+        let verified = match self.head(object, target) {
+            Err(rc) => return rc,
+            Ok(Some(h)) if h.sequence == sequence => match self.body(object, target, h) {
+                Ok(valid) => valid,
+                Err(rc) => return rc,
+            },
+            _ => false,
+        };
+        if !verified {
             self.counts.verify_failed = self.counts.verify_failed.wrapping_add(1);
             return -7;
         }

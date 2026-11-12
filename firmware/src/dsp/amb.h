@@ -156,6 +156,12 @@ void en_init(void);
  * silence until a later bounded join confirms completion/stop. attach and init
  * require no outstanding job. A timeout alone never grants buffer reuse. */
 void en_core2_attach(int (*submit)(void (*fn)(void *), void *ctx), int (*join)(void), void (*fence)(void), int (*alive)(void));
+#if EN_RUST_HAL
+/* CPU0 only, with exact IRQ exclusion. No wait or worker-buffer access. */
+int en_flash_begin(int confirmed_stopped);
+void en_flash_end(void);
+int en_flash_window_ready(int confirmed_stopped);
+#endif
 extern volatile float en_comp_gr, en_lim_gr, en_out_peak;   /* the master bus now: the compressor's and the limiter's gain reduction (dB, positive), the output's peak (0..1 of full scale) */
 void en_shed(int level);                       /* the load is too high: 0 none, 1 the DX voices to four and no chorus, 2 to two, 3 also no Echoplex, no vinyl noise and the cheap output clip (the UI watches the CPU and says) */
 extern volatile uint8_t en_shed_level;

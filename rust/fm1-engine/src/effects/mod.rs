@@ -48,15 +48,31 @@ pub fn output(
     assert_eq!(left.len(), right.len());
     assert_eq!(out.len(), left.len() * 2);
     for j in 0..left.len() {
-        let clip = if shed { math::soft_sat } else { math::tanh };
-        out[2 * j] = (clip(left[j] * gain) * 8_300_000.0) as i32;
-        out[2 * j + 1] = (clip(right[j] * gain) * 8_300_000.0) as i32;
+        let words = output_frame(left[j], right[j], gain, shed);
+        out[2 * j] = words[0];
+        out[2 * j + 1] = words[1];
     }
     if let Some(usb) = usb {
         assert_eq!(usb.len(), left.len() * 2);
         for j in 0..left.len() {
-            usb[2 * j] = (math::tanh(left[j] * usb_gain) * 32_421.0) as i16;
-            usb[2 * j + 1] = (math::tanh(right[j] * usb_gain) * 32_421.0) as i16;
+            let words = usb_frame(left[j], right[j], usb_gain);
+            usb[2 * j] = words[0];
+            usb[2 * j + 1] = words[1];
         }
     }
+}
+
+/// Quantized values, not a reference to the final DMA allocation.
+pub fn output_frame(left: f32, right: f32, gain: f32, shed: bool) -> [i32; 2] {
+    let clip = if shed { math::soft_sat } else { math::tanh };
+    [
+        (clip(left * gain) * 8_300_000.0) as i32,
+        (clip(right * gain) * 8_300_000.0) as i32,
+    ]
+}
+pub fn usb_frame(left: f32, right: f32, gain: f32) -> [i16; 2] {
+    [
+        (math::tanh(left * gain) * 32_421.0) as i16,
+        (math::tanh(right * gain) * 32_421.0) as i16,
+    ]
 }

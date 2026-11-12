@@ -15,6 +15,10 @@
 #include "fm1_audio.h"
 #include "fm1_adc.h"
 #include "fm1_lcd_hw.h"
+#if EN_RUST_HAL
+static int fm1_flash_window_ready(void);
+#define FL_ADMIT() fm1_flash_window_ready()
+#endif
 #include "fm1_flash.h"
 #include "fm1_xip.h"
 #include "fm1_perf.h"
@@ -29,6 +33,7 @@ static volatile uint32_t fm1_ms;  /* milliseconds since boot (TIMER4-based, TIME
 static inline int32_t clamp(int32_t v, int32_t lo, int32_t hi) { return v < lo ? lo : v > hi ? hi : v; }
 
 #include "app/plat.h"
+#include "fm1_flash_admission.h"
 
 #define FELUCCA_OTA 1             /* M-UPGRADE update entry: keeps the web installer working */
 #ifndef EN_CDC
@@ -58,12 +63,17 @@ static uint8_t flash_ok;          /* JEDEC id matched at boot */
 static uint8_t flash_chip;        /* which part (fm1_flash_id.h FL_CHIP): the status log says it */
 static uint8_t boot_head;         /* the startup code (0.16.25): 0 not read, 1 M-VAVE's V15, 2 V16 (12.5% slower), 3 another */
 static void audio_silence(void);
-static int st_read(uint32_t off, void *dst, uint32_t n)   /* 256-byte IRQ-off windows: audio keeps up */
+static int st_read_body(uint32_t off, void *dst, uint32_t n)   /* 256-byte IRQ-off windows: audio keeps up */
 {
     uint8_t *d = dst;
     while (n) {
         uint32_t k = n > 256u ? 256u : n, f = irq_save();
-        int rc = FL_FAR(fl_read_ram)(off, d, k);
+        int rc;
+#if EN_RUST_HAL
+        rc = fm1_flash_window_ready() ? FL_FAR(fl_read_ram)(off, d, k) : PLAT_STORE_BUSY;
+#else
+        rc = FL_FAR(fl_read_ram)(off, d, k);
+#endif
         irq_restore(f);
         if (rc)
             return rc;
@@ -73,9 +83,14 @@ static int st_read(uint32_t off, void *dst, uint32_t n)   /* 256-byte IRQ-off wi
     }
     return 0;
 }
+static int st_read(uint32_t off,void *dst,uint32_t n)
+{
+    int rc=plat_store_begin();if(rc)return rc;
+    rc=st_read_body(off,dst,n);plat_store_end();return rc;
+}
 static uint8_t susp_bad;                          /* the part did not suspend an erase: back to the blocking one, with the audio stopped */
 static uint8_t susp_used;                         /* an erase has been sliced (the first one is the test: if the part cannot, that one is heard) */
-static int st_erase(uint32_t off)
+static int st_erase_body(uint32_t off)
 {
     uint32_t took;
     if (!FL_STORE_OK(off, 0x1000u))
@@ -85,7 +100,11 @@ static int st_erase(uint32_t off)
         int rc;
         for (;;) {
             uint32_t f = irq_save();
+#if EN_RUST_HAL
+            rc = fm1_flash_window_ready() ? FL_FAR(fl_erase_slice_ram)(off, first, 1200u) : PLAT_STORE_BUSY;
+#else
             rc = FL_FAR(fl_erase_slice_ram)(off, first, 1200u);
+#endif
             irq_restore(f);
             first = 0u;
             susp_used = 1;
@@ -104,11 +123,17 @@ static int st_erase(uint32_t off)
     audio_silence();
     return fl_erase4k(off, &took);
 }
+static int st_erase(uint32_t off)
+{
+    int rc=plat_store_begin();if(rc)return rc;
+    rc=st_erase_body(off);plat_store_end();return rc;
+}
 static int st_prog(uint32_t off, const void *src, uint32_t n)
 {
     if (!FL_STORE_OK(off, n))
         return -8;
-    return fl_write(off, src, n);
+    {int rc=plat_store_begin();if(rc)return rc;
+     rc=fl_write(off,src,n);plat_store_end();return rc;}
 }
 #include "storage.c"
 
@@ -123,14 +148,15 @@ static int ota_erase(uint32_t off)
     uint32_t took;
     if (!ota_in_area(off, 0x1000u) || (off & 0xFFFu))
         return -8;
-    audio_silence();
-    return fl_erase4k(off, &took);
+    {int rc=plat_store_begin();if(rc)return rc;
+     audio_silence();rc=fl_erase4k(off,&took);plat_store_end();return rc;}
 }
 static int ota_prog(uint32_t off, const void *p, uint32_t n)
 {
     if (!ota_in_area(off, n))
         return -8;
-    return fl_write(off, p, n);
+    {int rc=plat_store_begin();if(rc)return rc;
+     rc=fl_write(off,p,n);plat_store_end();return rc;}
 }
 static int ota_fread(uint32_t off, void *p, uint32_t n) { return st_read(off, p, n); }
 static void ota_show(uint32_t step, int32_t code)

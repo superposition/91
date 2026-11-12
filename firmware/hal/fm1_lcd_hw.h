@@ -12,6 +12,9 @@
  */
 #pragma once
 #include <stdint.h>
+#if EN_RUST_HAL
+#include "fm1_rust_hal.h"
+#endif
 #include "fm1_cc.h"
 
 #define FM1_LCD_PC_OUT (*(volatile uint32_t *)0x50080u)
@@ -35,6 +38,9 @@ static uint32_t fm1_lcd_timeouts;
 
 FM1_INLINE void fm1_lcd_hw_init(void)
 {
+#if EN_RUST_HAL
+    (void)fm1_rust_hal_io(5,0,0,0,0);
+#else
     FM1_LCD_PA_OUT &= ~FM1_LCD_BL;
     FM1_LCD_PA_DIR &= ~FM1_LCD_BL;
     FM1_LCD_IOMAP_CON1 |= 0x10u;
@@ -43,9 +49,27 @@ FM1_INLINE void fm1_lcd_hw_init(void)
     FM1_LCD_PC_DIR &= ~(FM1_LCD_CS | FM1_LCD_DC | FM1_LCD_CLK | FM1_LCD_DO);
     FM1_LCD_SPI_CON = 0x4021u;
     FM1_LCD_SPI_BAUD = 4u;
+
+#endif
 }
 
-FM1_INLINE void fm1_lcd_baud(uint32_t b) { FM1_LCD_SPI_BAUD = b; }
+FM1_INLINE void fm1_lcd_baud(uint32_t b) {
+#if EN_RUST_HAL
+    (void)fm1_rust_hal_io(6,b,0,0,0);
+#else
+    FM1_LCD_SPI_BAUD = b;
+#endif
+}
+
+#if EN_RUST_HAL
+/* false means retained/unknown DMA ownership; it is never completion. */
+FM1_INLINE int fm1_lcd_wait_ready(uint32_t single)
+{
+    const int ready=(int)fm1_rust_hal_io(9,single,0,0,0);
+    if(!ready&&!single)fm1_lcd_timeouts++;
+    return ready;
+}
+#endif
 
 static void fm1_lcd_wait(void)
 {
@@ -61,17 +85,27 @@ FM1_INLINE void fm1_lcd_deselect(void) { FM1_LCD_PC_OUT |= FM1_LCD_CS; }
 
 FM1_INLINE void fm1_lcd_send_cmd(uint8_t c)
 {
+#if EN_RUST_HAL
+    (void)fm1_rust_hal_io(7,c,0,0,0);
+#else
     FM1_LCD_PC_OUT &= ~FM1_LCD_DC;
     FM1_LCD_PC_OUT &= ~FM1_LCD_CS;
     FM1_LCD_SPI_CON |= 0x4000u;
     FM1_LCD_SPI_BUF = c;
+
+#endif
 }
 
 FM1_INLINE void fm1_lcd_send_data(const void *p, uint32_t n)
 {
+#if EN_RUST_HAL
+    (void)fm1_rust_hal_io(8,(uint32_t)(uintptr_t)p,n,0,0);
+#else
     FM1_LCD_PC_OUT |= FM1_LCD_DC;
     FM1_LCD_PC_OUT &= ~FM1_LCD_CS;
     FM1_LCD_SPI_CON |= 0x4000u;
     FM1_LCD_SPI_ADR = (uint32_t)(uintptr_t)p;
     FM1_LCD_SPI_CNT = n;
+
+#endif
 }

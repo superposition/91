@@ -119,7 +119,12 @@ void en_midi_out(uint32_t st, uint32_t d1, uint32_t d2) { plat_midi_out(st >> 4 
 #if EN_RUST_STORAGE
 #include "../dsp/rust_persistence.h"
 #endif
-int plat_store_load(uint32_t obj, void *dst, uint32_t max) { return flash_ok ? st_load(obj, dst, max) : -1; }
+int plat_store_load(uint32_t obj, void *dst, uint32_t max)
+{
+    int rc;if(!flash_ok)return -1;
+    rc=plat_store_begin();if(rc)return rc;
+    rc=st_load(obj,dst,max);plat_store_end();return rc;
+}
 static volatile uint32_t tel_stores, tel_store_us;       /* telemetry: flash writes so far, and how long the last one stopped the chip */
 static uint8_t store_lock;                               /* a backup was restored: what is in RAM is out of date, so nothing more is written until the restart */
 int plat_store_locked(void) { return store_lock; }
@@ -202,17 +207,21 @@ int plat_store_save(uint32_t obj, const void *src, uint32_t len)
     if (store_lock)
         return -8;
 #endif
+    {int gate=plat_store_begin();if(gate)return gate;}
     t0 = fm1_ticks();
     r = (uint32_t)st_save(obj, src, len);
     tel_store_us = (fm1_ticks() - t0) / FM1_TICKS_PER_US;
     tel_stores++;
+    plat_store_end();
     return (int)r;
 }
 int plat_store_restore(uint32_t obj, const void *src, uint32_t len)
 {
     int r;
+    if(!flash_ok)return -9;
+    r=plat_store_begin();if(r)return r; /* Busy never latches the restore lock. */
 #if EN_RUST_STORAGE
-    { int gate=fm1_rust_store_access((uint32_t)flash_ok,store_lock,1); if(gate<0) return gate; store_lock=(uint8_t)gate; }
+    { int gate=fm1_rust_store_access((uint32_t)flash_ok,store_lock,1); if(gate<0){plat_store_end();return gate;} store_lock=(uint8_t)gate; }
 #else
     if (!flash_ok)
         return -9;
@@ -220,6 +229,7 @@ int plat_store_restore(uint32_t obj, const void *src, uint32_t len)
 #endif
     r = st_save(obj, src, len);
     tel_stores++;
+    plat_store_end();
     return r;
 }
 

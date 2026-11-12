@@ -23,6 +23,18 @@ static void lcd_spin(uint32_t n)
         ;
 }
 
+#if EN_RUST_HAL
+/* 0 idle,1 active,2 unknown/quarantined. A later completed status can release
+ * the span, but the graphics owner must begin a fresh frame before reuse. */
+static int lcd_ready(void)
+{
+    if(!lcd_busy)return 1;
+    if(!fm1_lcd_wait_ready(lcd_busy==2u)){lcd_busy=2;return 0;}
+    fm1_lcd_deselect();lcd_busy=0;return 1;
+}
+#define LCD_READY() lcd_ready()
+static void lcd_sync(void) {(void)lcd_ready();}
+#else
 static void lcd_sync(void)          /* finish the running transfer (before touching its buffer) */
 {
     if (!lcd_busy)
@@ -32,26 +44,43 @@ static void lcd_sync(void)          /* finish the running transfer (before touch
     lcd_busy = 0;
 }
 
+#endif
+
 static void lcd_cmd(uint8_t c)
 {
+#if EN_RUST_HAL
+    if(!lcd_ready())return;
+    fm1_lcd_send_cmd(c);
+    if(!fm1_lcd_wait_ready(0)){lcd_busy=2;return;}
+    fm1_lcd_deselect();
+#else
     lcd_sync();
     fm1_lcd_send_cmd(c);
     fm1_lcd_wait();
     fm1_lcd_deselect();
+#endif
 }
 
 static void lcd_data(const void *p, uint32_t n)
 {
     if (!n)
         return;                    /* SPI_CNT = 0 never completes */
+#if EN_RUST_HAL
+    if(!lcd_ready())return;
+#else
     lcd_sync();
+#endif
     fm1_lcd_send_data(p, n);
     lcd_busy = 1;                  /* completed by lcd_sync */
 }
 
 static void lcd_window(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1)
 {
+#if EN_RUST_HAL
+    if(!lcd_ready())return;
+#else
     lcd_sync();
+#endif
     lcd_small[0] = (uint8_t)(x0 >> 8);
     lcd_small[1] = (uint8_t)x0;
     lcd_small[2] = (uint8_t)(x1 >> 8);
@@ -78,7 +107,11 @@ static void lcd_fill(uint32_t x, uint32_t y, uint32_t w, uint32_t h, uint16_t c)
         w = 240u - x;
     if (y + h > 240u)
         h = 240u - y;
+#if EN_RUST_HAL
+    if(!lcd_ready())return;
+#else
     lcd_sync();
+#endif
     k = 240u / w * w;                       /* whole rows per transfer (narrow fills: one DMA) */
     for (i = 0; i < k; i++)
         lcd_fillbuf[i] = (uint16_t)sw;
@@ -115,6 +148,9 @@ static const uint8_t LCD_SEQ[] = {
 static void lcd_init(void)
 {
     uint32_t r, x;
+#if EN_RUST_HAL
+    if(!lcd_ready())return;
+#endif
     fm1_lcd_hw_init();
     lcd_spin(2000000u);
     for (r = 0; r < sizeof LCD_SEQ; r += 2u + LCD_SEQ[r + 1u]) {
@@ -122,7 +158,13 @@ static void lcd_init(void)
             lcd_spin(LCD_SEQ[r + 2u] * 25000u);          /* ~1 ms per unit (lcd_spin(3000000) ~ 120 ms) */
             continue;
         }
+#if EN_RUST_HAL
+        if(!lcd_ready())return;
+#endif
         lcd_cmd(LCD_SEQ[r]);
+#if EN_RUST_HAL
+        if(!lcd_ready())return;
+#endif
         for (x = 0; x < LCD_SEQ[r + 1u]; x++)
             lcd_small[x] = LCD_SEQ[r + 2u + x];
         if (LCD_SEQ[r + 1u])
