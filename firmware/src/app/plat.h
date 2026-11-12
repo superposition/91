@@ -47,7 +47,19 @@ void plat_usb_host_diag(char *b);      /* what its last search found, in a few w
 enum { PLAT_UH_NONE, PLAT_UH_ON, PLAT_UH_OFF, PLAT_UH_MIDI, PLAT_UH_NOMIDI, PLAT_UH_LOW, PLAT_UH_LOST };   /* (usb_host.c's UH_MSG_*) */
 
 /* persistent storage (Felucca storage.c objects: A/B sectors, CRC, torn-write safe) */
-int plat_store_load(uint32_t obj, void *dst, uint32_t max);   /* bytes loaded, < 0 = none / bad */
+#define PLAT_STORE_BUSY (-10)          /* transient denial: preserve state and retry; never missing/corrupt */
+/* A successful begin returns 0. The physical HAL admits only a confirmed-idle
+ * whole worker, then uses serial DSP until the balanced end. No IRQ-off wait.
+ * Begin before mutating state in a multi-object operation; nesting is bounded.
+ * Busy loads leave dst unchanged; Busy restore does not latch the store lock. */
+#if (EN_RUST_HAL && !defined(EN_HOST) && !defined(EN_WEB)) || defined(FM1_STORE_ADMISSION_TEST)
+int plat_store_begin(void);
+void plat_store_end(void);
+#else
+static inline int plat_store_begin(void) { return 0; }
+static inline void plat_store_end(void) {}
+#endif
+int plat_store_load(uint32_t obj, void *dst, uint32_t max);   /* bytes loaded, BUSY, or < 0 = none / bad */
 int plat_store_save(uint32_t obj, const void *src, uint32_t len);   /* 0 = ok */
 int plat_store_restore(uint32_t obj, const void *src, uint32_t len);   /* a restored backup's object: written, and no other store is written after it (the unit restarts) */
 int plat_store_locked(void);
