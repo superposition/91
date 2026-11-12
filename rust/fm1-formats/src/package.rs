@@ -87,7 +87,9 @@ impl<'a> Fwsc<'a> {
         self.bytes.len() - 20
     }
     pub fn product(self, output: &mut [u8]) -> Result<usize, CodecError> {
-        let n = (0..20).filter(|i| self.bytes[i * 48 + 47] != 125).count();
+        let n = (0usize..20)
+            .filter(|i| self.bytes[i * 48 + 47] != 125)
+            .count();
         if output.len() < n {
             return Err(CodecError::Capacity);
         }
