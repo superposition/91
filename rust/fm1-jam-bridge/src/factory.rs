@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! Copy-only musical payload seam plus immutable metadata/string C ABI views.
-use core::sync::atomic::{AtomicU32, Ordering};
 use fm1_engine::factory;
+use fm1_rt::atomic::{AtomicU32, Ordering};
 use fm1_types::{AcidLine, AcidStep, GenreId, PieceId, PluckLine, PluckStep, StepId};
 static ACCESSES: AtomicU32 = AtomicU32::new(0);
 static CODECS: AtomicU32 = AtomicU32::new(0);

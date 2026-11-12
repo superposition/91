@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! FM block-owner adapters. Buffers/state remain caller-owned; no pointer or
 //! callback is retained across the reviewed render/worker ownership boundary.
-use core::sync::atomic::{AtomicU32, Ordering};
 use fm1_engine::fm6::frames;
 use fm1_engine::fm6::{self, pool, program, types::*, voice};
+use fm1_rt::atomic::{AtomicU32, Ordering};
 
 /// # Safety
 /// Selection/output are initialized, aligned, exclusive and disjoint. Output

@@ -70,7 +70,7 @@ pub fn density(mask: u16, amount: i32) -> u16 {
         let mut count = (pop * (50 - amount) + 25) / 50;
         for step in IMP.iter().rev() {
             if count > 0 && bits >> step & 1 != 0 {
-                bits &= !(1 << step);
+                bits &= !(1u32 << step);
                 count -= 1;
             }
         }
@@ -78,7 +78,7 @@ pub fn density(mask: u16, amount: i32) -> u16 {
         let mut count = ((16 - pop) * (amount - 50) + 50) / 100;
         for step in IMP {
             if count > 0 && bits >> step & 1 == 0 {
-                bits |= 1 << step;
+                bits |= 1u32 << step;
                 count -= 1;
             }
         }

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! Bounded copies and an exclusive staging lease. Neither operation waits.
+use crate::atomic::{AtomicU32, Ordering};
 use core::cell::UnsafeCell;
-use core::sync::atomic::{AtomicU32, Ordering};
 
 /// A small copied view. A contended read/publication returns immediately.
 /// This protects its own storage; the publisher must separately own its source.

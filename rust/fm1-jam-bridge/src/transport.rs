@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! Scoped ABI calls into the render-owned transport; no pointer is retained.
-use core::sync::atomic::{AtomicU32, Ordering};
 use fm1_engine::transport::{self, Transport};
+use fm1_rt::atomic::{AtomicU32, Ordering};
 
 static PULSES: AtomicU32 = AtomicU32::new(0);
 static CHUNKS: AtomicU32 = AtomicU32::new(0);

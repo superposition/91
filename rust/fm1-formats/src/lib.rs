@@ -4,6 +4,7 @@
 #![forbid(unsafe_code)]
 
 pub mod containers;
+pub mod device_wire;
 pub mod jam;
 pub mod package;
 pub mod session;

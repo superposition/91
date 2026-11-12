@@ -1,0 +1,233 @@
+{
+  "scope": "R02 physical generated-C compiler proof, original C instrument plus current Rust types/formats/planner probe",
+  "date": "2026-11-12",
+  "source": {
+    "base": "4f4e970c375f04498d8122784b07b6c72e77f2bd",
+    "explicit_integer_type_patch": "5cfbf29881dd0362d7825834de45f5d3a4e2e411",
+    "recovery_stub_version": 3,
+    "recovery_stub_padded_sha256": "baee55ed142fe1cc336099902fa544d8844ba72182abf669f15cc78fc6bee87c"
+  },
+  "toolchain": {
+    "mrustc": "5205980b25d4d15494abdb45103e59e8dc309970",
+    "core": "Rust 1.90",
+    "borrow_type_authority": "Rust 1.94.1 including wasm32-unknown-unknown",
+    "vendor_clang": "4.0.1 pi32v2 r3 fprev1",
+    "float_contract": "off",
+    "link": "final-image LTO, GC sections"
+  },
+  "build": {
+    "image_bytes": 510144,
+    "ordinary_ram_bytes": 97264,
+    "ordinary_ram_capacity": 98304,
+    "pool_bytes": 339420,
+    "pool_capacity": 344064,
+    "loader_bytes": 8095,
+    "package": {
+      "identity": "FM-1_7000302",
+      "checks": [
+        "installer fake-device suite",
+        "actual-package OTA simulated-NOR suite",
+        "locked v3 recovery stub unchanged",
+        "app prefix matches recovery stub",
+        "build memory/size/no-soft-double gates"
+      ],
+      "files": {
+        "build/naiwan91-0.3.2.fwsc": {
+          "bytes": 611251,
+          "sha256": "f76cd37f42ef6f118c56d4d98b04bfa31410003f83572a720df86b9cac79fad3"
+        },
+        "build/amb.bin": {
+          "bytes": 510144,
+          "sha256": "2add28f7f022a888a5c65f5dc86c267c2aae6a7cf8df26ec76117c091329f37a"
+        },
+        "build/amb.elf": {
+          "bytes": 569880,
+          "sha256": "26c22f114ce82aabd87ab441edff3c3ea2a27fe20fc2091776ac73c19503a308"
+        },
+        "build/loader/ota.bin": {
+          "bytes": 8095,
+          "sha256": "fb264969d35b09657af9277527710c80af8dcc164de4946fa298da61420f2e85"
+        },
+        "build/stub/stub.bin": {
+          "bytes": 2268,
+          "sha256": "4e33bfbb5ebdadc6245a8ba36aff087231e42e66507df8a1e0dea0e620d098ef"
+        },
+        "build/host-proof/installer.log": {
+          "bytes": 1842,
+          "sha256": "88ff8930fad534415c326983f6f83e977fa31f2e8d88d03f01fcdd5638802edd"
+        },
+        "build/host-proof/ota.log": {
+          "bytes": 1155,
+          "sha256": "adb70f19c776996c82cfe9cc6ead1a077fcb3edcd4c4c908f5d02dafa0e65d5c"
+        }
+      }
+    },
+    "runtime_helpers": {
+      "allocator": false,
+      "soft_double": false,
+      "unwind_tables": false,
+      "explicit_abort_compatibility_stub": {
+        "bytes": 6,
+        "behavior": "calls explicit audio-stop/abort handler then loops; no stack unwinding",
+        "disassembly": " 2001cba:    bf ea f8 ff       \tcall -16 <abort : 2001cae >\n 2001cbe:    f7 9f             \tgoto -2 <_Unwind_Resume+0x4 : 2001cbe >"
+      }
+    }
+  },
+  "physical_probe": {
+    "planner_hash": 3766679758,
+    "planner_us": 652,
+    "f32_bits": 0,
+    "callback": 3213793708,
+    "pool_address": 29830604,
+    "pool_byte": 0,
+    "mutable_static": 18,
+    "timer_before": 13991536,
+    "timer_rust": 13991552,
+    "timer_after": 13991554,
+    "expected_planner_hash": 3766679758,
+    "checks": {
+      "planner": true,
+      "float_no_contraction": true,
+      "callback": true,
+      "pool": true,
+      "interior_mutability": true,
+      "volatile_timer": true,
+      "timed_planner": true
+    }
+  },
+  "capture": {
+    "before": {
+      "on": 1,
+      "bars": 8,
+      "bar": 0,
+      "beat": 0,
+      "hold": 0,
+      "pending": 0,
+      "slot": 2,
+      "crc32": "28246895",
+      "revision": 1,
+      "xruns": 0,
+      "key": 6,
+      "minor": 1,
+      "form": 0,
+      "movement": 3,
+      "energy": 60,
+      "playing": 1
+    },
+    "after": {
+      "on": 1,
+      "bars": 8,
+      "bar": 0,
+      "beat": 1,
+      "hold": 0,
+      "pending": 0,
+      "slot": 2,
+      "crc32": "28246895",
+      "revision": 1,
+      "xruns": 0,
+      "key": 6,
+      "minor": 1,
+      "form": 0,
+      "movement": 3,
+      "energy": 60,
+      "playing": 1
+    },
+    "seconds": 60.05,
+    "audio_device": 24,
+    "peak": 4569,
+    "rms": 914.8676709515968,
+    "capture_flags": [],
+    "telemetry_frames": 246,
+    "deltas": {
+      "xruns": 0,
+      "late": 0,
+      "crashes": 0
+    },
+    "render_max_us": 11246,
+    "budget_us": 11609,
+    "cpu_max": 80,
+    "shed": 0,
+    "main_stack": 6176,
+    "irq_stack": 2184
+  },
+  "persistent_objects": {
+    "count": 30,
+    "bytes": 8077,
+    "verified_before_twice": true,
+    "verified_after_byte_exact": true,
+    "panel_calibration": "device-owned; not writable through this backup protocol"
+  },
+  "artifacts": [
+    {
+      "path": "workspace:proof-current-instrument/final-symbols.txt",
+      "bytes": 99150,
+      "sha256": "2cc9ffc9af7f5c59cc81263d9d5f8d8e6eb91963f26869cbc110431ad5ffbf0a"
+    },
+    {
+      "path": "workspace:proof-current-instrument/build.log",
+      "bytes": 1145,
+      "sha256": "f48cd9d4f64a6a44f898a0e6b2aefd63b4a96861defc53dadada78aed9925141"
+    },
+    {
+      "path": "workspace:proof-current-instrument/qualified-package.json",
+      "bytes": 1273,
+      "sha256": "d9323c68ec5656250419b3f595b136a84f2f243aa4f999f1ade6efebf7f60572"
+    },
+    {
+      "path": "workspace:goal-hardware-proof-20261112/probe.json",
+      "bytes": 510,
+      "sha256": "6f8e31432f1e7b4d62554c4dd6b42200e0619c440bc541e33abfb2e12e0e31a4"
+    },
+    {
+      "path": "workspace:goal-hardware-proof-20261112/capture/report.json",
+      "bytes": 947,
+      "sha256": "36409b8f1a88a674489d433cf296bac99439a2853b30421b21b977fc1f5a7bca"
+    },
+    {
+      "path": "workspace:goal-hardware-proof-20261112/capture/device.wav",
+      "bytes": 10592864,
+      "sha256": "89ca57200da091969fe81ba15bb1ec757d1c0a1bbb28c9bbe156fb1e40004c8f"
+    },
+    {
+      "path": "toolchain-proof:output-goal-current/libfm1_probe.rlib.c",
+      "bytes": 130506,
+      "sha256": "eb181149eb4d54308439556abc7310331563f9d0698e35f177a790adfc72770b"
+    },
+    {
+      "path": "toolchain-proof:output-goal-current/libfm1_engine.rlib.c",
+      "bytes": 3559313,
+      "sha256": "2c17393526da4bcdf86e069ebc6112cc288c94eef3d1ad31b76847b6e0ffb6c9"
+    },
+    {
+      "path": "toolchain-proof:output-goal-current/libfm1_types.rlib.c",
+      "bytes": 689579,
+      "sha256": "6d71ab212ec82847c62a034df3336f6e87e04eb056e64129edff8204ea4c0664"
+    },
+    {
+      "path": "toolchain-proof:output-goal-current/libfm1_formats.rlib.c",
+      "bytes": 2647909,
+      "sha256": "7bfb64be15558d9e9b9d2005050e6e5b9e876545961fb1aa5f615fb43549f946"
+    },
+    {
+      "path": "toolchain-proof:output-goal-current/libfm1_types.rlib.o",
+      "bytes": 61424,
+      "sha256": "2cb5cc291052ba09cb219ca69c16a51ef21f9c24fc52beb12fdd52ddbc6ac54e"
+    },
+    {
+      "path": "toolchain-proof:output-goal-current/libfm1_formats.rlib.o",
+      "bytes": 139860,
+      "sha256": "d90265511b1387c128718ecbb7bcb894b2224af83f2d06bf8a026ff10516ba36"
+    },
+    {
+      "path": "toolchain-proof:output-goal-current/libfm1_engine.rlib.o",
+      "bytes": 308288,
+      "sha256": "8fc45083d7004467573d224a1602d2f9851b954bbd5129e98b83b56b8d09218b"
+    },
+    {
+      "path": "toolchain-proof:output-goal-current/libfm1_probe.rlib.o",
+      "bytes": 5276,
+      "sha256": "e57f776f59b4e789130ccb6f1e80a9e08077fed27f4815e149c846d4d9437033"
+    }
+  ],
+  "remaining": "Full Rust engine MCU atomics, link, RAM/pool, stack, worker, timing and output acceptance are separate tickets; this probe runs once before IRQ/audio initialization."
+}
