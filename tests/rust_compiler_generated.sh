@@ -61,9 +61,10 @@ cp tests/reference/ui_frame_frozen.inc build/gen/ui_frame_frozen.inc
 "$out/c0-ui-frame" > "$out/c0-ui-frame.bin"
 "$out/generated-ui-frame" > "$out/generated-ui-frame.bin"
 cmp "$out/c0-ui-frame.bin" "$out/generated-ui-frame.bin"
+python3 tests/reference/ui_frame_extract.py . build/gen/ui_accel_current.inc accel
 for profile in ui_controls usb_trs;do
     options=()
-    if [ "$profile" = ui_controls ];then options+=(-DEN_RUST_APP=1);else options+=(-DEN_RUST_USB=1);fi
+    if [ "$profile" = ui_controls ];then options+=(-DEN_RUST_APP=1 '-DUI_ACCEL_SOURCE="ui_accel_current.inc"');else options+=(-DEN_RUST_USB=1);fi
     "$zig" cc "${native[@]}" "${common[@]}" tests/reference/${profile}_reference.c -lm -o "$out/c0-$profile"
     "$zig" cc "${native[@]}" "${common[@]}" "${options[@]}" tests/reference/${profile}_reference.c "$abi" "${objects[@]}" "$out/core.o" -lm -o "$out/generated-$profile"
     "$out/c0-$profile" > "$out/c0-$profile.bin"
