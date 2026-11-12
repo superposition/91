@@ -12,6 +12,9 @@
 #pragma once
 #include <stdint.h>
 #include "fm1_xip.h"
+#if EN_RUST_HAL
+#include "fm1_irq_state.h"
+#endif
 
 #define RAMFN  __attribute__((section(".ram_text"), noinline, used))
 #define RAMINL static inline __attribute__((always_inline))
@@ -282,13 +285,24 @@ static void fl_plain_window_init(void)
     SFCENC_UNENC_L = FL_XIP(0x93000u);            /* 0x0208F000 */
     SFCENC_UNENC_H = 0x07FFFFFFu;
     SFCENC_CON |= 2u;
+#if EN_RUST_HAL
+    const uint32_t flags=fm1_irq_state_save();
+    fl_inval(0x93000u, 0x100000u - 0x93000u);
+    fm1_irq_state_restore(flags);
+#else
     __asm__ volatile("cli" ::: "memory");
     fl_inval(0x93000u, 0x100000u - 0x93000u);     /* drop any decrypted lines */
     __asm__ volatile("csync\n\tsti" ::: "memory");
+#endif
 }
 
+#if EN_RUST_HAL
+static inline uint32_t irq_save(void) {return fm1_irq_state_save();}
+static inline void irq_restore(uint32_t f) {fm1_irq_state_restore(f);}
+#else
 static inline uint32_t irq_save(void) { __asm__ volatile("cli" ::: "memory"); return 0; }
 static inline void irq_restore(uint32_t f) { (void)f; __asm__ volatile("csync\n\tsti" ::: "memory"); }
+#endif
 
 static int fl_erase4k(uint32_t off, uint32_t *took_us)
 {
