@@ -33,10 +33,13 @@ export class Amb extends ProcessorBase {
     if (m.type === "dispose") { this.dispose(); return; }
     if (this.disposed) return;
     if (m.type === "load") {
-      const now = () => BigInt(Math.round(this.audioTime() * 1e9));
       const wasi = {
         clock_time_get: (id, prec, out) => {
-          this.dataView.setBigUint64(out, now(), true);
+          // Split the same rounded Number directly into WASI's little-endian
+          // u64. BigInt construction would allocate on every render block.
+          const ns = Math.round(this.audioTime() * 1e9);
+          this.dataView.setUint32(out, ns % 4294967296, true);
+          this.dataView.setUint32(out + 4, Math.floor(ns / 4294967296), true);
           return 0;
         },
         fd_write: (fd, iov, n, out) => { this.dataView.setUint32(out, 0, true); return 0; },
@@ -80,6 +83,14 @@ export class Amb extends ProcessorBase {
       this.ex.web_enc(m.role, m.n | 0);
     } else if (m.type === "master") {
       this.ex.web_master(m.value | 0);
+    } else if (m.type === "poll") {
+      // Frame/store serialization runs in a MessagePort task, outside process.
+      // A delayed page coalesces observations without delaying PCM production.
+      const now = this.audioTime();
+      if (now - this.lastFrame >= 1 / 30) {
+        this.lastFrame = now;
+        this.publish();
+      }
     }
   }
 
@@ -156,10 +167,6 @@ export class Amb extends ProcessorBase {
     }
     this.busy += clock() - t0;
     this.frames += n;
-    if (this.audioTime() - this.lastFrame >= 1 / 30) {
-      this.lastFrame = this.audioTime();
-      this.publish();
-    }
     return true;
   }
 }

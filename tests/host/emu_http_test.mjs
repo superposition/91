@@ -28,6 +28,7 @@ const channels=[new Float32Array(1024),new Float32Array(1024)];
 for(let block=0;block<512;block++) {
   context.currentTime=block*1024/44100;
   node.onaudioprocess({outputBuffer:{getChannelData(index){return channels[index];}}});
+  node.port.postMessage({type:'poll'});
   const expected=[new Float32Array(1024),new Float32Array(1024)];
   for(let quantum=0;quantum<8;quantum++) {
     time=(block*1024+quantum*128)/44100;

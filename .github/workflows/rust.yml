@@ -172,6 +172,8 @@ jobs:
         run: node tests/host/emu_browser_test.mjs build/emu/amb.wasm
       - name: Cached audio views, irregular quanta and fixed memory
         run: node tests/host/emu_audio_views_test.mjs build/emu-parity/reference.wasm build/emu-parity/rust.wasm
+      - name: Allocation-free WASI timestamp encoding
+        run: node tests/host/emu_clock_test.mjs build/emu/amb.wasm
       - name: Browser audio ring, output and background compatibility
         run: sh tests/rust_web_audio.sh
       - name: Browser platform metadata, stores and framebuffer compatibility
