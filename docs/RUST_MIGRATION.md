@@ -4,7 +4,7 @@ Execution is tracked in [epic #1](https://github.com/superposition/91/issues/1).
 
 ## Compatibility and ownership
 
-The browser build now runs Rust command publication/consumption, Songbook validation, session encoding/validation, phrase planning, bass decisions, sample-clock cadence, Songbook display snapshots and staging arbitration inside the existing instrument. Musical event dispatch, synthesis, application state and UI drawing remain C. The physical firmware still uses its original C path. The current working-tree Songbook/DX7 changes are part of the baseline. Do not reset them to the Git HEAD baseline.
+The browser build now runs Rust command publication/consumption, Songbook validation, session encoding/validation, phrase planning, bass decisions, sample-clock cadence, bounded drum scheduling/drift/deadlines, Songbook display snapshots and staging arbitration inside the existing instrument. Musical event dispatch, remaining melodic/harmonic scheduling, synthesis, application state and UI drawing remain C. The physical firmware still uses its original C path. The current working-tree Songbook/DX7 changes are part of the baseline. Do not reset them to the Git HEAD baseline.
 
 The device uses 256-frame render calls and 512-frame DMA halves at 44.1 kHz, allowing approximately 11,609 microseconds per half. Ordinary RAM is limited to 98,304 bytes, and the 344,064-byte pool must retain 4,096 bytes of reserve.
 
@@ -50,7 +50,7 @@ The workspace currently contains:
 | --- | --- |
 | `fm1-types` | Stable parameter IDs and metadata, Songbook settings, step/scale masks, packed modifiers and command words |
 | `fm1-formats` | CRC-32, validated borrowed Jam Pack v1/v2 views, sound-parameter validation and the 20-byte session codec |
-| `fm1-engine` | v1/v2 phrase planning, deterministic random state, bass events and sample-clock/render cadence |
+| `fm1-engine` | v1/v2 phrase planning, deterministic random state, bass events, sample-clock cadence and bounded drum/phrase scheduling decisions |
 | `fm1-rt` | Fixed SPSC command ring, bounded copied snapshots and staging lease arbitration |
 | `fm1-cli` | Layout reporting, parameter export, pack inspection/validation and phrase-plan inspection |
 | `fm1-jam-bridge` | Audited transitional C ABI used by the browser instrument; diagnostics count execution, rejection and C fallback |
@@ -71,6 +71,7 @@ The synthesis engine, full application, hardware layer, remaining browser logic 
 | Sample-clock state replacing four C scalars | 16 bytes |
 | Songbook display view / gated cell | 220 / 224 bytes |
 | Staging lease state, excluding the retained C buffer | 4 bytes |
+| Per-lane scheduling request / bounded three-action result | 136 / 80 bytes |
 
 The planner preserves candidate scoring/tie order, random-number consumption, cadence decisions and delayed following-section behavior. Fixed arrays and borrowed pack bytes keep allocation and expanded graph storage out of the musical core. Rust's native struct layout is never used as a stored or wire format.
 
@@ -101,15 +102,18 @@ flowchart LR
   ABI --> Pack[Rust borrowed pack / session codecs]
   ABI --> Plan[Rust phrase planner]
   ABI --> Bass[Rust bass decisions]
+  ABI --> Seq[Rust drum scheduler]
   Plan --> Phrase[C-owned 388-byte phrase]
   Bass --> Event[4-byte bass event]
   Phrase --> Timing[Rust clock and render cadence]
   Timing --> DSP[C musical dispatch and synthesis]
   Event --> DSP
+  Seq --> Hits[Bounded actions and deadlines]
+  Hits --> DSP
   DSP --> WASM[WASM / AudioWorklet]
 ```
 
-`EN_RUST_JAM=1` is the browser default and also enables `EN_RUST_COMMANDS=1`, `EN_RUST_TRANSPORT=1` and `EN_RUST_HANDOFF=1`. `EN_RUST_JAM=0` builds the C reference. The normal hardware build does not enable these bridges. No caller reference or pointer survives a Rust call. A previous/output phrase may alias; the bridge first copies its initialized header and active beats, avoiding uninitialized C tails. The bridge uses stack copies, so its device stack cost still requires hardware qualification.
+`EN_RUST_JAM=1` is the browser default and also enables `EN_RUST_COMMANDS=1`, `EN_RUST_TRANSPORT=1`, `EN_RUST_HANDOFF=1` and `EN_RUST_SCHEDULER=1`. `EN_RUST_JAM=0` builds the C reference. The normal hardware build does not enable these bridges. No caller reference or pointer survives a Rust call. A previous/output phrase may alias; the bridge first copies its initialized header and active beats, avoiding uninitialized C tails. The bridge uses stack copies, so its device stack cost still requires hardware qualification.
 
 The current Rust unsafe inventory is confined to three packages. `fm1-jam-bridge` checks nullable/bounded pointers, copies initialized inputs, supports the documented phrase alias, and requires disjoint output/settings/pack/seed storage without concurrent mutation. Its command calls require one serialized producer, one render consumer and exclusive boot-time reset. Its relaxed counters are telemetry, not synchronization. `fm1-rt` uses acquire/release publication and slot reuse; safe Rust obtains non-clonable producer/consumer handles from one exclusive `split`. `fm1-probe` owns the experimental callback, `UnsafeCell`, section-placement and volatile-MMIO boundaries; its mutable cell requires exclusive boot-time access before audio/interrupt use. The musical/format/type libraries forbid unsafe code. Hardware and multicore ownership still need their own reviewed boundaries as those tickets are implemented.
 
@@ -123,7 +127,9 @@ In three full instrument scenarios the Rust queue accepts/consumes 961, 751 and 
 
 The [Songbook handoff checkpoint](rust/songbook-handoff.md) adds one 220-byte view per UI frame and lease arbitration over the existing 3,840-byte staging buffer. Its destination gate protects the Rust copy; the serialized emulator caller must still exclude changes to the C source. The lease preserves receive, activation and readback lifetimes without allocating a second payload. These unsafe ABI contracts are separate from the safe portable APIs.
 
-The [clock checkpoint](rust/TRANSPORT.md) replaces four C scalars with a 16-byte Rust state for 24-PPQN subdivision, sample phase, external-clock expiry, chunk limits and control cadence. C dispatch remains between scoped Rust calls in its original order, including tempo changes during a musical tick. Swing, lane/ratchet/polymeter decisions and synthesis still run in C. Focused proof files record each checkpoint's independent frozen-reference comparisons.
+The [clock checkpoint](rust/TRANSPORT.md) replaces four C scalars with a 16-byte Rust state for 24-PPQN subdivision, sample phase, external-clock expiry, chunk limits and control cadence. C dispatch remains between scoped Rust calls in its original order, including tempo changes during a musical tick. At that checkpoint, swing, lane/ratchet/polymeter decisions and synthesis still ran in C. Focused proof files record each checkpoint's independent frozen-reference comparisons.
+
+The subsequent [drum scheduler checkpoint](rust/SEQUENCER.md) moves swing/humanization, density/conditions/time/slices/polymeter, fills/ghosts/ratchets, drift mutations, deadlines and Songbook boundary decisions into Rust. Each lane passes a 136-byte request and receives at most three actions in an 80-byte result. The common xorshift RNG word is passed through each call, preserving draw order around the C callbacks; the planner keeps its separate LCG. Twenty-seven frozen-C native scenarios match all timing/MIDI/PCM/RNG/mask/pending fields. Four WASM scenarios compare 37,288,700 Float32 values, including a new F4 legacy piece/genre run also checked against the original R01 WASM. Legacy acid/pluck/bass note generation, remaining harmonic/bar/FX orchestration, pattern-source selection and voice cleanup still require R09 work.
 
 `tests/rust_emulator_parity.sh` builds both variants from one checkout. Two 159.64-second playback runs compare **28,160,000 stereo Float32 values bit-for-bit**, sampled full framebuffers and LEDs, and frozen R01 PCM fingerprints. A third 74.5-second scenario restores a saved v2 pack, holds a phrase for 60 seconds without additional planning, requests New Idea, stops, saves and boots a fresh instance from the saved bytes. Its irregular render requests span **1 to 1,024 frames**, adding **6,570,900 matching audio values**.
 
