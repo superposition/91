@@ -63,8 +63,17 @@ jobs:
           echo "$HOME/shim" >> "$GITHUB_PATH"
       - name: Full-instrument C/Rust differential playback
         run: sh tests/rust_emulator_parity.sh
+      - name: Native transport, external clock and chunk trace parity
+        run: sh tests/rust_transport_parity.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: emulator-parity
           path: build/emu-parity/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: transport-parity
+          path: |
+            build/transport-parity/*.json
+            build/transport-parity/source-verification.log
