@@ -1,0 +1,56 @@
+{
+  "action": "Restored the last known working0.3.3 package at explicit user request",
+  "identity": "FM-1_7000303",
+  "restarted_and_identity_verified": true,
+  "package": {
+    "bytes": 611251,
+    "sha256": "a6004e3acb7e1ffbd5f5b40d6f18c64afdfc1ac8fa0f4732374af0d72401d2a1"
+  },
+  "transport": "Felucca Update1209:0002, identity ota-FM-1_900, input Felucca Update0/output1",
+  "saved_objects": {
+    "count": 30,
+    "result": "Byte-for-byte equal to the fresh before-DSP snapshot; panel calibration is excluded from backup by the firmware"
+  },
+  "playback": {
+    "seconds": 30.01,
+    "peak": 4514,
+    "rms": 985.2284416407547,
+    "capture_flags": [],
+    "telemetry_frames": 123,
+    "deltas": {
+      "xruns": 0,
+      "late": 0,
+      "crashes": 0
+    },
+    "render_max_us": 11161,
+    "budget_us": 11609,
+    "cpu_max": 80,
+    "shed": 0,
+    "main_stack": 6176,
+    "irq_stack": 2184
+  },
+  "active_after_capture": true,
+  "evidence": {
+    "restore-0.3.3-from-felucca-loader.log": {
+      "bytes": 18618,
+      "sha256": "88b2d95459f27eee4317464ebbfc40eef4e1ff26d812083e3d413648e214d95a"
+    },
+    "restore-0.3.3-stores-verified.log": {
+      "bytes": 633,
+      "sha256": "2d543b5b380ec65738d8b46bd51f6318f54b06c085a51cc15dd25dab3082bb89"
+    },
+    "restore-0.3.3-status.json": {
+      "bytes": 1349,
+      "sha256": "4adb8f55d3c0c1206d86bcc25a1fdd98dc0678f594625e4a1aefa784c9cdacf7"
+    },
+    "restored-0.3.3-audio/report.json": {
+      "bytes": 948,
+      "sha256": "dc08f5b3be5f63af103de8d8dc084eb62ef6d0f5937fe9346823da37f3db6ddf"
+    }
+  },
+  "limits": [
+    "This requalifies the previously working compiler/atomic-probe image with C DSP; it does not qualify current full Rust DSP or default-off HAL1/APP1.",
+    "Cumulative crash records can survive warm resets; the fresh30-second capture has zero crash/late/underrun deltas.",
+    "Saved object payloads and captured audio remain local; this record includes outcome metadata only."
+  ]
+}

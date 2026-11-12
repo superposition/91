@@ -1,0 +1,632 @@
+{
+  "source": "235626afa1417e3e08c4607258e9a49e7c9650e8",
+  "generated_source": "1736dc1",
+  "harness_followups": "42cdb08 verifies editor dispatch before asynchronous engine application;892de1f/927ebba/235626a measure the vendor UI carrier using production dimensions and pinned objcopy syntax.",
+  "windows_tests": 157,
+  "native": {
+    "cases": 97,
+    "historical_cases": 94,
+    "known_failures": 19,
+    "artifact_count": 538,
+    "audio_frames": 80748288,
+    "artifact_bytes": 753826710
+  },
+  "target_ui": {
+    "fields": 193,
+    "bytes": 1320,
+    "alignment": 4,
+    "layout": {
+      "bytes": 1552,
+      "sha256": "0a4bdc438a4763d6988c823b338e6c88dd7ab41ddaebaf75dae3c0544ebd7cfc"
+    },
+    "all_offsets_and_sizes_match_generated_rust": true
+  },
+  "wasm": [
+    {
+      "file": "audio-views.json",
+      "proof": {
+        "variable_render_sizes": [
+          0,
+          1,
+          3,
+          31,
+          127,
+          128,
+          129,
+          255,
+          256,
+          257,
+          1023,
+          1024,
+          1025,
+          2048,
+          4097
+        ],
+        "compared_values": 665856,
+        "audio_view_allocations": 0,
+        "memory_growth": "rejected",
+        "scope": "Audio copying/WASI views; frame and store message serialization remains browser binding work"
+      }
+    },
+    {
+      "file": "dj.json",
+      "proof": {
+        "scenario": "all27-dj-keys-polyphony-release-and-stop",
+        "compared_samples": 2651292,
+        "render_calls": 6312,
+        "peak": 0.6429266929626465,
+        "pcm_hash": "34cf7253",
+        "dj": {
+          "accepted_notes": 36,
+          "voice_samples": 1522343
+        },
+        "memory_bytes": 33554432,
+        "public_exports": 24
+      }
+    },
+    {
+      "file": "effects.json",
+      "proof": {
+        "scenario": "panel-effects-banks-release-tails",
+        "compared_samples": 2769480,
+        "render_calls": 5160,
+        "peak": 0.4538612365722656,
+        "pcm_hash": "fd659ab9",
+        "effects": {
+          "master_samples": 1384960,
+          "echo_samples": 1384960,
+          "tank_samples": 1384960,
+          "colour_sample_calls": 4154880
+        },
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "factory-lines.json",
+      "proof": {
+        "scenario": "stored-frozen-acid-pluck-save",
+        "compared_samples": 970200,
+        "render_calls": 1613,
+        "saved_bytes": 3836,
+        "factory": {
+          "accesses": 1184,
+          "codecs": 6,
+          "rejections": 0,
+          "copied_bytes": 230
+        },
+        "formats": {
+          "decodes": 0,
+          "encodes": 0,
+          "rejections": 0,
+          "copied_bytes": 0
+        },
+        "persistence": {
+          "project_calls": 12,
+          "object_saves": 2,
+          "bytes": 6884
+        },
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "factory.json",
+      "proof": {
+        "initial_pack": "factory",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "baeff971",
+        "peak": 0.3714040517807007,
+        "blits": 4679,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 0,
+          "plans": 8,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1037,
+          "sessions": 1,
+          "commands": {
+            "accepted": 961,
+            "consumed": 961,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6215,
+            "chunks": 28982,
+            "controls": 27668
+          },
+          "sequencer": {
+            "lanes": 6222,
+            "mutations": 0,
+            "waits": 463712,
+            "boundaries": 1037
+          },
+          "factory": {
+            "accesses": 13390,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 72
+          }
+        }
+      }
+    },
+    {
+      "file": "fm6.json",
+      "proof": {
+        "scenario": "loaded-user-FM6-algorithms-key-retrigger-stop-tails",
+        "cases": [
+          {
+            "algorithm": 0,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.47700321674346924,
+            "pcm_hash": "d393a85d",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 3,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.4807950258255005,
+            "pcm_hash": "d9669c55",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 5,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.5013117790222168,
+            "pcm_hash": "abebadf5",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 31,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.48351776599884033,
+            "pcm_hash": "cafdb8b9",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "file": "handoff.json",
+      "proof": {
+        "snapshot_bytes": 220,
+        "published": 134,
+        "copied": 134,
+        "detail_pages": 4,
+        "staging_claims": 0,
+        "staging_activations": 0,
+        "staging_rejections": 0,
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "project.json",
+      "proof": {
+        "legacy_project": [
+          {
+            "scenario": "recipes",
+            "compared_samples": 904050,
+            "render_calls": 1494,
+            "pcm_hash": "d5eb8651",
+            "project_calls": 7,
+            "object_saves": 0
+          },
+          {
+            "scenario": "corrupt-record",
+            "compared_samples": 904050,
+            "render_calls": 1494,
+            "pcm_hash": "d5eb8651",
+            "project_calls": 7,
+            "object_saves": 0
+          },
+          {
+            "scenario": "saved-factory-reset",
+            "compared_samples": 1177470,
+            "render_calls": 1950,
+            "pcm_hash": "d23160e5",
+            "project_calls": 10,
+            "object_saves": 2
+          }
+        ],
+        "frozen_reference": null
+      }
+    },
+    {
+      "file": "runner.json",
+      "proof": {
+        "scenario": "kick-runner-steering-restart-pause-exit",
+        "compared_samples": 4368546,
+        "render_calls": 10512,
+        "peak": 0.20634067058563232,
+        "pcm_hash": "cdcd5715",
+        "game_calls": 132885,
+        "public_exports": 24,
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "saved-v1.json",
+      "proof": {
+        "initial_pack": "rust/fm1-engine/tests/packs/harris-citypop.jmp",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "28722449",
+        "peak": 0.4303741455078125,
+        "blits": 4673,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 1,
+          "plans": 10,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1033,
+          "sessions": 1,
+          "commands": {
+            "accepted": 751,
+            "consumed": 751,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6192,
+            "chunks": 34155,
+            "controls": 27682
+          },
+          "sequencer": {
+            "lanes": 6198,
+            "mutations": 0,
+            "waits": 546480,
+            "boundaries": 1033
+          },
+          "factory": {
+            "accesses": 13656,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 72
+          }
+        }
+      }
+    },
+    {
+      "file": "sequencer.json",
+      "proof": {
+        "scenario": "legacy-f4-piece-genre-transport",
+        "compared_samples": 3475080,
+        "render_calls": 5744,
+        "peak": 0.4515293836593628,
+        "sequencer": {
+          "lanes": 1320,
+          "waits": 134032,
+          "boundaries": 21
+        },
+        "melodic": {
+          "acid": 227,
+          "mutations": 27,
+          "pluck": 227,
+          "bass": 227,
+          "bar": 6017,
+          "midi_transport": 67070
+        },
+        "voices": {
+          "drums": 8377,
+          "pluck": 8377,
+          "drone": 7287,
+          "acid": 8377,
+          "pad": 8377,
+          "pad_bus": 8377,
+          "controls": 6880,
+          "configs": 40795
+        },
+        "factory": {
+          "accesses": 3950,
+          "codecs": 0,
+          "rejections": 0,
+          "copied_bytes": 72
+        },
+        "harmony": [
+          6986,
+          35,
+          2,
+          0
+        ],
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "session.json",
+      "proof": {
+        "scenario": "v2-hold-idea-save-restart",
+        "render_calls": 11663,
+        "compared_samples": 6570900,
+        "seconds": 74.5,
+        "peak": 0.22903597354888916,
+        "memory_bytes": 33554432,
+        "saved_session": [
+          74,
+          83,
+          77,
+          1,
+          1,
+          11,
+          1,
+          8,
+          2,
+          1,
+          83,
+          0,
+          7,
+          1,
+          190,
+          0,
+          3,
+          83,
+          0,
+          0
+        ],
+        "rust": {
+          "validations": 1,
+          "plans": 9,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 804,
+          "sessions": 2,
+          "commands": {
+            "accepted": 319,
+            "consumed": 319,
+            "dropped": 0,
+            "high_water": 208
+          },
+          "transport": {
+            "pulses": 4819,
+            "chunks": 12684,
+            "controls": 11829
+          },
+          "sequencer": {
+            "lanes": 4824,
+            "mutations": 0,
+            "waits": 202944,
+            "boundaries": 804
+          },
+          "factory": {
+            "accesses": 1103,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 72
+          }
+        }
+      }
+    },
+    {
+      "file": "worker.json",
+      "proof": {
+        "scenario": "serialized-generation-stage-ownership",
+        "compared_samples": 1278900,
+        "render_calls": 2361,
+        "peak": 0.47122979164123535,
+        "pcm_hash": "f99f9451",
+        "worker": [
+          2710,
+          2710,
+          5420,
+          2710,
+          2710,
+          0,
+          0,
+          0
+        ],
+        "memory_bytes": 33554432
+      }
+    }
+  ],
+  "artifacts": {
+    "build/round15-windows.log": {
+      "bytes": 27363,
+      "sha256": "103ef805b8f8c433297f6820dd85976d9f73e2c150ad3b7ea8f5528c9ce155f5"
+    },
+    "build/round15-hal-linux-retry.log": {
+      "bytes": 6431,
+      "sha256": "fb1de2a511abc05a814979cd8d5fd8ee75f97c9b6eaff9a21b83c483cee48fae"
+    },
+    "build/round15-compiler.log": {
+      "bytes": 1000,
+      "sha256": "11e5625585f36a64857cf8a1e22530f97823f23092eba5ccec7f2c131b9ad1fc"
+    },
+    "build/round15-runtime.log": {
+      "bytes": 5489,
+      "sha256": "a6f4daf0fc689d8b018af689360a22a58da2f98936471f21bfcb63d92449d348"
+    },
+    "build/round15-runtime-finish.log": {
+      "bytes": 73699,
+      "sha256": "e3435ad8ed467456ac5233939740d98b818f1313ed9a0ac6f4576853b726a859"
+    },
+    "build/simulator/results.json": {
+      "bytes": 85751,
+      "sha256": "96160e11317ba808656457924158dabc06aa6a54b99ad69ebaec55680c85ec0e"
+    },
+    "build/simulator/repeat-results.json": {
+      "bytes": 3532,
+      "sha256": "55eb0568e9ca51f75889c66a055403518fd5c885564f6ae228f69a96dda1b422"
+    },
+    "build/emu-parity/rust.wasm": {
+      "bytes": 2348030,
+      "sha256": "162030f41e28776461001a2cd98e43acec843bde843f6f9d36bc2978380f20e0"
+    },
+    "build/emu-parity/reference.wasm": {
+      "bytes": 1945180,
+      "sha256": "3b41272ae64bab17d0e92e23fc277b562bca3f331ebbac1fcf38017bfa74e199"
+    },
+    "build/storage-dispatch/sources.json": {
+      "bytes": 390,
+      "sha256": "4c4d255c6800bc1f4834e14f310773d1fa342d3fad6b40095e6a0914e48c94d1"
+    },
+    "build/storage-dispatch/results.txt": {
+      "bytes": 89,
+      "sha256": "1b2bfdb114a5f77a66d5938c058fa28a7feb40be7e420b5522fe0b1152816621"
+    },
+    "build/storage-dispatch/results-rust.txt": {
+      "bytes": 89,
+      "sha256": "1b2bfdb114a5f77a66d5938c058fa28a7feb40be7e420b5522fe0b1152816621"
+    },
+    "build/hal-parity/bridge.trace": {
+      "bytes": 3901280,
+      "sha256": "3c2aa830a1e85a4206737d80897e715fdba7950516ece79f645130b2df90dabc"
+    },
+    "build/hal-parity/readable-bridge.bin": {
+      "bytes": 135560,
+      "sha256": "2c7c4d2ea3e451567145c0a8193ff834c79c71b55fbfda6f4d69273f7ad7c390"
+    },
+    "build/hal-audio/results.jsonl": {
+      "bytes": 342,
+      "sha256": "63be50b666bd569337a78836e07cee7b643860bdea56dd69b9ae3e0ab4be18f9"
+    },
+    "build/hal-target/main.o": {
+      "bytes": 481824,
+      "sha256": "9dfea72e24f8c7762dea80a10da82c721d5a36ec678dd3d0a31380a7791372bb"
+    },
+    "build/hal-target/engine.o": {
+      "bytes": 412960,
+      "sha256": "fc1067003f789ee28f5dafd4bfcac576633b2a7ae7963b09153ca36099b4853f"
+    },
+    "build/hal-target/main-app.o": {
+      "bytes": 484936,
+      "sha256": "5458066182e78d9fa87ca8aef734cecab41ab866e545b8e782f2a4c994041778"
+    },
+    "build/hal-target/engine-app.o": {
+      "bytes": 412960,
+      "sha256": "fc1067003f789ee28f5dafd4bfcac576633b2a7ae7963b09153ca36099b4853f"
+    },
+    "build/compiler-generated-hal-ui/generated-ui-state.bin": {
+      "bytes": 1329680,
+      "sha256": "d66288aa69af60e1eeea057e7c01b7f7b1af0491b47e9fea477c0e974541b1c4"
+    },
+    "build/compiler-generated-hal-ui/generated.pcm": {
+      "bytes": 56320000,
+      "sha256": "35acfb5303480d4f657aef1c7e902f40427a06cde79f9aefd5e57d5408b53f53"
+    },
+    "build/compiler-generated-hal-ui/generated-runner-policy.bin": {
+      "bytes": 43026432,
+      "sha256": "7907db2ba4280e8624e6621ef508ffee75b63836ccf0461ce7e5a2845317fe42"
+    },
+    "build/compiler-generated-hal-ui/generated-runner-draw.bin": {
+      "bytes": 59015168,
+      "sha256": "aa8dbf8c3be2c5f4355385674d9d357f7c3eeb20ad95e1dcd406a71012cc1e44"
+    }
+  },
+  "generated_compilers": {
+    "plain": {
+      "libfm1_types.rlib.o": {
+        "bytes": 83776,
+        "sha256": "3ff2964ec1fef2fd715ab671a6e64060463ee6b5b47162b530cf737bc026f412"
+      },
+      "libfm1_rt.rlib.o": {
+        "bytes": 28248,
+        "sha256": "54f9015920b0fa165594744dfcd0f93d3d44da7154cc8f2f87ce86a2d9be1940"
+      },
+      "libfm1_hal.rlib.o": {
+        "bytes": 24608,
+        "sha256": "7ee4e1bc575e72d0a38b7a443ac29559b58f9022667e1803e802f22a6f031071"
+      },
+      "libfm1_formats.rlib.o": {
+        "bytes": 349792,
+        "sha256": "d7763be83a5dec7b82a3383f64c04bd68dd4437c66c15e03bc898dab862585bd"
+      },
+      "libfm1_engine.rlib.o": {
+        "bytes": 901244,
+        "sha256": "7a40f8fd8d887ea17416c04dc82501473ee7d11cc0e93a693028b10e629fc0f4"
+      },
+      "libfm1_app.rlib.o": {
+        "bytes": 101788,
+        "sha256": "940424668aa2a2dec37179296bd5b3be606e2b54e1d63cbaa938d49f446b091f"
+      },
+      "libfm1_jam_bridge.rlib.o": {
+        "bytes": 356384,
+        "sha256": "5d4dd66ab588c751216e1e6be13eee88ebef9b702a2c7b097ce0f44537e9a49b"
+      }
+    },
+    "enabled": {
+      "libfm1_types.rlib.o": {
+        "bytes": 83776,
+        "sha256": "d858629c66709d7ff2f009ff8cfcbcec8820924293dbb216c6b733d569e69666"
+      },
+      "libfm1_rt.rlib.o": {
+        "bytes": 28248,
+        "sha256": "a06859597d6a6ec45b51e362aefc9edeab03e7d77859ce3d484f98d3d48e0a93"
+      },
+      "libfm1_hal.rlib.o": {
+        "bytes": 24608,
+        "sha256": "d9f525c3a0aebae657c16b197bf3dc7a38367c8a532ebd0edb5e59d22817e31f"
+      },
+      "libfm1_formats.rlib.o": {
+        "bytes": 349796,
+        "sha256": "45d591b046419e4309796326226e45f633c37d0df549e90373fd33706270452f"
+      },
+      "libfm1_engine.rlib.o": {
+        "bytes": 901244,
+        "sha256": "0a6334ea92c85772b609553d692e49955c390d423f37b266c5a1893807d68c9c"
+      },
+      "libfm1_app.rlib.o": {
+        "bytes": 101788,
+        "sha256": "83ce36296273c3d0358ab799e01ab8867afdfdb6d73ae4e146d6cbb6146206f7"
+      },
+      "libfm1_jam_bridge.rlib.o": {
+        "bytes": 364508,
+        "sha256": "1a397b3833e0e5428b1d26ec8c248b49a7059b08b2c21a311ca4f3ec68cc56d8"
+      }
+    }
+  },
+  "qualification": {
+    "compiler": "Seven crates emitted and vendor LTO-compiled with HAL0 and explicit HAL1;natural32 factory/12 effects/Runner policy+pixels/UI defaults match C0.",
+    "target_units": "Vendor PI32v2 main+engine compile with HAL1/APP0 and HAL1/APP1;APP1/HAL0 correctly rejects missing LCD_READY.",
+    "lifetimes": "Real header/readable-register/startup/IRQ/retained-DMA faults,25 A/B+13 project denials,true stopped-pthread quarantine admission,actual UI Busy and foreground dispatch gates pass;both strict-provenance Miri cases pass.",
+    "runtime_harness_fix": "Full WASM/browser/Miri passed before metadata test found missing build/params.json. Generated required metadata,ran metadata gate and full native corpus;no repeated full WASM run was needed."
+  },
+  "limits": [
+    "No image link or physical qualification of HAL1/APP1.",
+    "HAL1 remains default off and requires positive boot/audio/CPU1/USB/UART/LCD stop facts.",
+    "Remaining C clock/reset/P33/watchdog/IRQ/fault/guard/GPIO/input/RAM SPI/cache/startup orchestration stays explicit under18.",
+    "Restored physical firmware is the previously qualified0.3.3,not this checkpoint."
+  ]
+}
