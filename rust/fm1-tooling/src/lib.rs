@@ -220,7 +220,7 @@ pub fn cli(args: &[String]) -> Result<()> {
         }
         _ => {
             return Err(Error::value(
-                "usage: fm1-rs tools package-info PACKAGE [--force] | decode KIND RAW-SYSEX-DATA | summary TELEMETRY.csv | rescue-plan V15-PACKAGE SNAPSHOT | debug-plan peek|poke|clock A [B] | sine | patterns",
+                "usage: fm1-rs tools package-info PACKAGE [--force] | decode KIND RAW-SYSEX-DATA | summary TELEMETRY.csv | rescue-plan V15-PACKAGE SNAPSHOT | debug-plan peek|poke|clock A [B] | sine | patterns | lz4-compress IN OUT | lz4-decompress IN OUT | loader-wrap IN OUT",
             ))
         }
     }

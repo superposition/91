@@ -31,6 +31,8 @@ jobs:
         run: bash tests/rust_rescue.sh build/r01-source
       - name: Loader block compression and package wrappers
         run: python3 tests/rust_build_policy.py build/r01-source
+      - name: Font, pattern and sine generator compatibility
+        run: bash tests/rust_assets.sh build/r01-source
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -278,6 +280,8 @@ jobs:
         run: python3 tools/frozen_source.py build/r01-source
       - name: Retained SysEx extent under unrelated incoming starts
         run: sh tests/rust_usb_busy_dispatch.sh build/r01-source
+      - name: Full application held controls, keys and encoder routing
+        run: sh tests/rust_ui_input.sh build/r01-source
       - name: USB descriptors, collectors and interrupt-safe MIDI queues
         run: |
           sh tests/rust_usb_control.sh build/r01-source

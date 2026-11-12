@@ -84,6 +84,13 @@ for profile in buttons classify;do
     "$out/generated-ui-$profile" > "$out/generated-ui-$profile.bin"
     cmp "$out/c0-ui-$profile.bin" "$out/generated-ui-$profile.bin"
 done
+python3 tools/ui_input_abi.py --check
+python3 tests/reference/ui_input_host.py . build/gen/ui_input_current.inc
+"$zig" cc "${native[@]}" "${common[@]}" -DEN_WEB '-DEN_VERSION="0.3.0"' tests/reference/ui_input_reference.c firmware/src/dsp/amb.c -lm -o "$out/c0-ui-input"
+"$zig" cc "${native[@]}" "${common[@]}" -DEN_WEB '-DEN_VERSION="0.3.0"' "${rust[@]}" tests/reference/ui_input_reference.c firmware/src/dsp/amb.c "$abi" "${objects[@]}" "$out/core.o" -lm -o "$out/generated-ui-input"
+"$out/c0-ui-input" > "$out/c0-ui-input.bin"
+"$out/generated-ui-input" > "$out/generated-ui-input.bin"
+cmp "$out/c0-ui-input.bin" "$out/generated-ui-input.bin"
 python3 tools/usb_reference.py . "$out/usb-source"
 python3 tests/reference/usb_queue_reference.py . "$out/queue-source"
 for profile in control transport queues;do
