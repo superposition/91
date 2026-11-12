@@ -103,6 +103,8 @@ jobs:
         run: sh tests/rust_voice_setup.sh
       - name: Voice block coefficients and raw capture compatibility
         run: sh tests/rust_voice_config.sh
+      - name: Voice parameter application, note conversion and reinitialization
+        run: sh tests/rust_voice_parameters.sh
       - name: FM6 tables and operator components
         run: sh tests/rust_fm6_tables.sh
       - name: FM6 allocator, FIFO and voice lifecycle
@@ -152,6 +154,8 @@ jobs:
             build/voice-setup/source-verification.log
             build/voice-config/*.json
             build/voice-config/source-verification.log
+            build/voice-parameters/*.json
+            build/voice-parameters/source-verification.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:

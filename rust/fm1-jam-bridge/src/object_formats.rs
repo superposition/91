@@ -29,7 +29,7 @@ pub unsafe extern "C" fn fm1_rust_formats_object_header(
     output: *mut u8,
     capacity: u32,
 ) -> i32 {
-    if output.is_null() {
+    if output.is_null() || genre > 19 || parameters > 65535 || saved > 65535 {
         return rejected();
     }
     let mut b = [0u8; 16];

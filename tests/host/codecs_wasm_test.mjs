@@ -7,6 +7,7 @@ const originalMemory=codecs.memoryBytes();let attempts=0;
 for(const v of vectors){const actual=codecs.call(v.op,v.args,v.blobs);assert.deepEqual(Array.from(actual),v.expected,v.name);assert(codecs.guards(),v.name);attempts++;}
 const python=JSON.parse(fs.readFileSync('rust/fm1-formats/tests/formats/python-reference.json'));
 const pack=Uint8Array.from(python.package),logical=codecs.call(15,[],[pack]);
+assert.deepEqual(codecs.call(99,[],[python.flash,python.ota,new TextEncoder().encode('FM-1_7000300')]),pack);
 assert.deepEqual(codecs.call(16,[],[logical,new TextEncoder().encode('FM-1_7000300')]),pack);
 const directory=codecs.call(19,[],[pack]);assert.equal(codecWords(directory.slice(0,8))[0],2);
 let keyHash=2166136261;
@@ -32,5 +33,6 @@ assert.equal(codecs.memoryBytes(),originalMemory,'memory is fixed; no growth');
 for(const op of [20,21,25,27,29,41,48,50,51,52,53,54,55,56,57,58,59,70,71,72,73,93])assert(codecs.counter(op)>0,'executed opcode'+op);
 assert.throws(()=>codecs.call(1,[],[new Uint8Array(1_100_000)]),{name:'CodecError'});
 assert.throws(()=>codecs.call(127),{name:'CodecError'});
+for(const [op,args]of [[104,[2,7,65536]],[104,[1,256]],[60,[256]]])assert.throws(()=>codecs.call(op,args),{name:'CodecError'});
 const schema=codecWords(codecs.call(0));assert.equal(schema[2],376);
 console.log(JSON.stringify({vectors:vectors.length,attempts,dxFieldMutations:72448,keyBlobs:65536,memoryBytes:originalMemory,guards:codecs.guards()}));

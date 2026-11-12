@@ -8,18 +8,18 @@ This is the verified implementation slice for [R05 / #6](https://github.com/supe
 | --- | --- | --- |
 | HYP3 records/banks, `firmware/src/app/project.c` | `storage::Record`, `RecordValues`, `Bank` | `pack_slot` and `unpack_slot` call the Rust copy bridge |
 | HYP2 signed records, same source | `storage::LegacyRecord`, `LegacyValues` | `old_bank_load` calls Rust before the original C musical migration policy |
-| HYP1 kit, PMGL globals, SET1 settings, VOX1 voices, KND1 / PCX1 extras, BSQ1 bass steps, MAP1/2 maps; `project.c` / `ui.c` | `LegacyKit`, `ObjectView`, `Settings`, `restore_valid`, `midi_map_valid` | Restore, MIDI-map and settings-load validation call Rust; existing record constructors remain C |
-| P1PC pieces / P1ST sets, `web/fm1piece.js` | `containers::PieceFile`, `PieceParts`, `SetFile`, `SetParts` | Shared native/WASM-capable library; browser keeps its existing JS helper |
-| P1BK backups, `web/fm1backup.js` | `BackupFile`, `BackupObject`, `backup_encode` | Shared library, checked against frozen JS; existing browser file helper retained |
+| HYP1 kit, PMGL globals, SET1 settings, VOX1 voices, KND1 / PCX1 extras, BSQ1 bass steps, MAP1/2 maps; `project.c` / `ui.c` | `LegacyKit`, `ObjectView`, `Settings`, `restore_valid`, `midi_map_valid` | Restore, MIDI-map and settings-load validation call Rust; typed constructors select Rust for real saves (see the completing extension) |
+| P1PC pieces / P1ST sets, `web/fm1piece.js` | `containers::PieceFile`, `PieceParts`, `SetFile`, `SetParts` | Actual browser helper calls the shared Rust WASM sidecar |
+| P1BK backups, `web/fm1backup.js` | `BackupFile`, `BackupObject`, `backup_encode` | Actual browser helper calls the shared Rust WASM sidecar |
 | DX7 VMEM128 / VCED155, `dsp/fm6.inc` | `voice::PackedVoice`, `Voice`, `pack`, `unpack`, `sanitize`, `maximum` | The actual `fm6_pack` / `fm6_unpack` functions select Rust, including loaded-voice playback |
 | Yamaha bulk/single and custom slot/clear SysEx, `usb.c` / `main_fm1.c` | `voice::DxMessage`, `IncomingKind`, `classify_legacy`, bounded encoders | `usb.c::dx_end` selects the Rust structural classifier; collection/publication and service policy stay C |
 | Backup/editor frames, `backup_proto.h` / `dx_proto.h` | `wire` nibble/checksum, frame/chunk, dump/voice, ack/about codecs and typed views | C frame builders, chunk parser and shared checksum select Rust |
-| Jam envelopes, `app/jam_usb.h`, browser capability query | `wire::JamRequest`, `JamReply`, `jam_reply` | Bounded library views; current transfer operation/state service retained |
-| OTA framing, `ota.c` / `web/fm1ota.js` | `wire::pack7`, `unpack7`, `OtaMessage`, `encode_ota`, `decode_ota` | Differential library coverage; C update service still uses its existing primitives |
-| Package primitives, `tools/fm1pkg_make.py` / `web/fm1pkg.js` | `package` CRC16, ENC/SFC, chip key, FWSC logical addressing, UFW directory, JLFS entry, body marker and compensation | Differential library coverage; existing SDK package assembly and recovery path retained |
+| Jam envelopes, `app/jam_usb.h`, browser capability query | `wire::JamRequest`, `JamReply`, `jam_reply` | Actual C/browser/Python byte helpers call Rust; transfer state/service policy remains separately owned |
+| OTA framing, `ota.c` / `web/fm1ota.js` | `wire::pack7`, `unpack7`, `OtaMessage`, `encode_ota`, `decode_ota` | Actual C OTA primitive bodies and browser/Python updater helpers call Rust |
+| Package primitives, `tools/fm1pkg_make.py` / `web/fm1pkg.js` | `package` CRC16, ENC/SFC, chip key, FWSC logical addressing, UFW directory, JLFS entry, body marker and compensation | Actual SDK packager/loader/site/recovery byte helpers call Rust; SDK assembly and recovery policy remain |
 | Jam v1/v2 packs and 20-byte session | Existing `jam` / `session` modules | Existing Rust validation/planning/session integration, unchanged by this slice |
 
-`EN_RUST_FORMATS=1` is an independent emulator build flag: `EN_RUST_FACTORY=0` does not disable it. `EN_RUST_FORMATS=0` retains the C codec path with the other Rust slices enabled; `EN_RUST_JAM=0` retains the all-C reference. Hardware defaults remain C. No new public WASM export is added.
+`EN_RUST_FORMATS=1` is an independent emulator build flag: `EN_RUST_FACTORY=0` does not disable it. `EN_RUST_FORMATS=0` retains the C codec path with the other Rust slices enabled; `EN_RUST_JAM=0` retains the all-C reference. Hardware enablement is qualified under R02/#19. The instrument's 24 public WASM exports remain unchanged; the browser codec module has a separate bounded ABI.
 
 ## Byte layouts and compatibility
 
@@ -75,11 +75,11 @@ The immutable R01 source is verified against all 440 file hashes before C/JS/Pyt
 
 The actual WASM saved-piece test loads an HYP3 bank and VOX1 user voice, plays the legacy page, saves and compares PCM, screen and the 3,836-byte saved bank against C0. It witnesses Rust format decode/encode calls, rather than checking only duplicate library functions. The original factory/saved-v1 fingerprints, v2 session lifecycle, legacy flow, snapshot handoff and HTTP audio fallback remain exact. Full counters, binary/fixture hashes, test totals and linked footprint measurements are in [shared-codecs-proof.json](rust/shared-codecs-proof.json).
 
-With only `EN_RUST_FORMATS` toggled, this checkout's linked WASM changes from 2,534,254 to 2,531,838 bytes: file **−2,416**, code section **+4,719**, data section **+544**, custom sections **−7,711**. File shrinkage includes metadata changes and is not an MCU flash or timing claim. These measurements cover the codecs actually linked into the emulator; unused package/tool APIs are not charged as live emulator code. Linear memory remains 32 MiB without growth.
+At the original `eea079c` checkpoint, with only `EN_RUST_FORMATS` toggled, the linked WASM changes from 2,534,254 to 2,531,838 bytes: file **−2,416**, code section **+4,719**, data section **+544**, custom sections **−7,711**. File shrinkage includes metadata changes and is not an MCU flash or timing claim. These measurements cover the codecs actually linked into the emulator; unused package/tool APIs are not charged as live emulator code. Linear memory remains 32 MiB without growth.
 
 ## Completion audit
 
-The browser/constructor extension is documented in [RUST_BROWSER_CODECS.md](RUST_BROWSER_CODECS.md). It supplies typed new-save construction, browser WASM execution, and OTA/Jam/telemetry primitive bindings. The SDK packager's remaining Python primitive bindings are being qualified separately; it retains its existing package assembly and recovery policy. Physical USB/IRQ/driver behavior belongs to #19, browser application policy to #23, and project/storage transaction policy to #7. Browser audio/device QA is not implied by Node execution.
+The completing extension is documented in [RUST_BROWSER_CODECS.md](RUST_BROWSER_CODECS.md). It supplies typed new-save construction, browser WASM execution, OTA/Jam/telemetry bindings and actual Python package/tool consumers through the same Rust dispatcher. Full packages match the independently frozen Python writer. SDK assembly/recovery policy remains in its existing tooling. Physical USB/IRQ/driver behavior belongs to #19, browser application policy to #23, and project/storage transaction policy to #7. Browser audio/device QA is not implied by Node execution.
 
 ## Reproduce
 

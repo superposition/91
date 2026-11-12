@@ -1,5 +1,7 @@
 # R10 block configuration arithmetic
 
+This document records its implementation checkpoint. The current qualified family/control boundary and remaining call map are in [VOICES_PARAMETERS.md](VOICES_PARAMETERS.md).
+
 This follows [VOICES_SETUP.md](VOICES_SETUP.md) after merging canonical pad, FM6, formats and mixer work at `72a4c6658f3c81d531761cd7a613a553c4f94926`. The live drone, acid, pad, pad-bus, drum and pluck adapters now capture existing values and ask [voices/config.rs](../../rust/fm1-engine/src/voices/config.rs) to calculate their fixed block configurations. Gain, modulation routing, resonance/drive normalization, glide selection, bend, sound fallback, stab selection and envelope-time conversion retain the original binary32 association.
 
 The bridge borrows the existing 176-value parameter array; it does not copy that array. Scalar captures are 100 bytes for drone, 60 for acid, 104 for pad, 32 for pad bus, 84 for drums and 28 for pluck. Each is built once per block. Existing output configuration sizes and all voice capacities remain unchanged. There is one additional bounded configuration FFI call per block, no per-sample packet, no allocator, no persistent cache and no new state/diagnostic storage. Read-only recipe references point to the same exported immutable arrays already used by C; the portable builders do not instantiate a second production table bank.

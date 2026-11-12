@@ -6,6 +6,7 @@ pub mod config;
 pub mod data;
 pub mod drone;
 pub mod pad;
+pub mod parameters;
 pub mod setup;
 
 pub fn blep_saw(t: f32, dt: f32) -> f32 {

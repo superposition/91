@@ -115,7 +115,19 @@ Use pinned Rust 1.94.1 and the immutable R01 source checkout:
 
 ```sh
 RUSTUP_TOOLCHAIN=1.94.1 cargo test -p fm1-rt --locked
+RUSTUP_TOOLCHAIN=1.94.1 cargo test -p fm1-rt --features pi32v2 --locked
 RUSTUP_TOOLCHAIN=1.94.1 sh tests/rust_worker_handoff.sh ../baseline-2026-11-11/source
+RUSTUP_TOOLCHAIN=1.94.1 sh tests/rust_effects_parity.sh ../baseline-2026-11-11/source
+RUSTUP_TOOLCHAIN=1.94.1 sh tests/rust_effects_parity.sh ../baseline-2026-11-11/source extra-genres
+RUSTUP_TOOLCHAIN=1.94.1 sh tests/rust_effects_workers.sh ../baseline-2026-11-11/source
+RUSTUP_TOOLCHAIN=1.94.1 sh tests/rust_fm6_workers.sh ../baseline-2026-11-11/source
+RUSTUP_TOOLCHAIN=1.94.1 sh tests/rust_melodic_parity.sh ../baseline-2026-11-11/source
+RUSTUP_TOOLCHAIN=1.94.1 sh tests/rust_handoff.sh ../baseline-2026-11-11/source
+RUSTUP_TOOLCHAIN=1.94.1 sh tests/rust_emulator_parity.sh
+node tests/host/emu_worker_test.mjs ../baseline-2026-11-11/source/build/emu/amb.wasm build/emu-parity/rust.wasm --audio-only
+node tests/host/emu_fm6_test.mjs ../baseline-2026-11-11/source/build/emu/amb.wasm build/emu-parity/rust.wasm --audio-only
+node tests/host/emu_effects_test.mjs ../baseline-2026-11-11/source/build/emu/amb.wasm build/emu-parity/rust.wasm --audio-only
+node tests/host/emu_browser_test.mjs build/emu-parity/rust.wasm
 ```
 
 The six runtime tests cover one-shot inline dispatch, stale tokens, dropped
@@ -138,7 +150,46 @@ Fault tests pause only at a real stage boundary after kernel borrows end, then
 request cooperative stop and `pthread_join` before returning stopped. They never
 declare a live writer dead. This establishes the software ownership protocol;
 it does not claim a physical asynchronous stop inside a DSP instruction.
-`worker-handoff-proof.json` records the checkpoint results. Combined regression
-and the platform atomic/stop qualification are tracked independently during
-integration; remaining physical stack/cache/deadline/link qualification must
-not be inferred from the hosted checks.
+`worker-handoff-proof.json` records the final combined software qualification
+of implementation merge `6a12561a9928e11fa355dab65b252f7e6099387a`, including the
+canonical codecs, wire adapters, voice configuration and atomic facade. The
+workspace passes 99 tests; the opaque PI32v2 atomic ABI test backend passes 14
+runtime tests, including the six job tests. Format, warnings-denied Clippy and
+release `no_std` checks pass with Rust 1.94.1.
+
+The handoff harness passes 36 cases and 8,353,800 frames. Separate full-render
+regressions pass 23 effects cases, 48 effects worker placements and 32 FM6
+worker placements. The expanded melodic regression matches 43 frozen/fresh-C0/
+Rust traces: 80,844,411 frames and 209,246 MIDI messages, with recorded/motif/
+alternate/inverted/restated/answer paths and all eight MIDI gates exercised.
+These full-render scripts explicitly enable `EN_RUST_WORKER=1`; isolated direct
+operator/configuration oracles retain their narrower kernel scope. USB staging,
+busy/readback/save/reboot checks retain response hash `eff97ff8`.
+
+The final 2,397,205-byte WASM artifact has SHA-256
+`2445a51f7aabddc3bdff79dcb320720967dbb95248b7192d957b7f9dbdac0c68`.
+It retains 24 exports and 32 MiB memory. The expanded suite compares 47,059,496
+Float32 values with fresh C0; HTTP boot adds 1,048,576 values. Independent frozen
+C checks also match the worker, loaded-user-FM6 and effects scenarios against
+that exact artifact. The worker scenario compares 1,278,900 values, has nonzero
+peak 0.47123 and fingerprint `f99f9451`, and observes 2,710 prepared/claimed/
+completed inline jobs plus 5,420 stage publications, with no retirement, stale
+operation or quarantine. Browser API/lifecycle mocks pass; this is not manual
+desktop/mobile/audio/MIDI qualification.
+
+## Remaining platform boundary
+
+The C render traversal still chooses placements, calls the DSP stages, mixes
+their released spans and drains foreground callbacks. Platform submit/join
+implementations must provide the return/stop guarantees in the table above;
+the Rust mailbox cannot manufacture those guarantees for foreign execution.
+The actual stop/cache/IRQ implementation and stopped atomic-lock-owner recovery
+remain platform work. The opaque hosted ABI test validates the interface, not
+the MCU hardware backend. See [MCU_ATOMICS.md](MCU_ATOMICS.md) and
+[PI32V2.md](PI32V2.md) for separately scoped compiler/backend evidence.
+
+Physical link/map/pool/stack, cache visibility, stopped nested callback borrows,
+cycle/deadline and audio output qualification remain required on the integrated
+firmware image. No physical firmware flag or hardware acceptance is inferred
+from this software report. The retained C0 path also remains outside the new
+Rust lifetime/synchronization proof.

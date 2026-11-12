@@ -9,6 +9,7 @@ a few register and RAM ranges). Needs mido with python-rtmidi.
   fm1_debug.py clock [ITERATIONS]     time a fixed loop against the 24 MHz timer (IRQs off)
 """
 import sys
+import rust_codecs as _codecs
 import time
 
 import mido
@@ -18,11 +19,11 @@ PEEK, POKE, CLOCK = 40, 41, 42
 
 
 def w35(v):
-    return [(v >> (7 * k)) & 0x7F for k in range(5)]
+    return list(_codecs.call(101, [v & 0xffffffff, (v >> 32) & 7]))
 
 
 def r35(b, i):
-    return sum(b[i + k] << (7 * k) for k in range(5)) & 0xFFFFFFFF
+    return _codecs.scalar(102, [], [b[i:i + 5]])
 
 
 def ask(cmd, args, timeout=3.0):

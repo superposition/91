@@ -163,7 +163,7 @@ work placements, serial/deferred/pthread/busy submissions and irregular chunks.
 Synthetic abandoned-live-thread tests remain excluded. This qualifies the host
 completion model, not a physical worker exclusion/retirement guarantee.
 
-Full WASM regression retains the original 40,058,180 compared Float32 values,
+Full WASM regression retains the original 41,028,380 compared Float32 values,
 framebuffers, saves/restarts and 1,048,576-value HTTP fallback. Four additional
 loaded-user algorithm tests compare 4,752,216 values against fresh C0 and R01.
 They use a saved legacy/off session and seed 0: default Songbook boot refuses

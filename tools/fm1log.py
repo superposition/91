@@ -12,6 +12,7 @@ The device sends nothing until this program asks (F0 7D 50 46 01 F7, repeated ev
 ten seconds without one and it stops. Needs: pip install mido python-rtmidi
 """
 import argparse
+import rust_codecs as _codecs
 import csv
 import os
 import struct
@@ -26,39 +27,17 @@ FIELDS = ["seq", "ms", "cpu", "cpu1", "core2", "xruns", "late", "max_us", "last_
 
 
 def pack7(data):
-    acc = nb = 0
-    out = []
-    for b in data:
-        acc |= b << nb
-        nb += 8
-        while nb >= 7:
-            out.append(acc & 0x7F)
-            acc >>= 7
-            nb -= 7
-    if nb:
-        out.append(acc & 0x7F)
-    return out
-
+    return list(_codecs.call(72, [], [data]))
 
 def unpack7(data):
-    acc = nb = 0
-    out = []
-    for b in data:
-        acc |= (b & 0x7F) << nb
-        nb += 7
-        if nb >= 8:
-            out.append(acc & 0xFF)
-            acc >>= 8
-            nb -= 8
-    return out
-
+    return list(_codecs.call(73, [1_100_000], [data])[4:])
 
 def decode(msg):
     """msg: the SysEx data bytes without F0/F7. Returns a dict, or None if it is not a status frame."""
     msg = list(msg)
     if msg[:3] != PREFIX:
         return None
-    raw = unpack7(msg[3:])
+    raw = _codecs.call(103, [msg[2], len(FIELDS)], [msg])
     k = min(len(FIELDS), len(raw) // 4)          # (an older firmware sends fewer: the rest read 0)
     if k < 35:
         return None
@@ -95,7 +74,7 @@ def decode_diag(msg):
     msg = list(msg)
     if msg[:3] != [0x7D, 0x50, 0x5B]:
         return None
-    raw = unpack7(msg[3:])
+    raw = _codecs.call(103, [msg[2], len(DIAG)], [msg])
     n = min(len(DIAG), len(raw) // 4)
     if n < 36:
         return None
@@ -112,7 +91,7 @@ def decode_extra(msg):
     msg = list(msg)
     if msg[:3] != [0x7D, 0x50, 0x5A]:
         return None
-    raw = unpack7(msg[3:])
+    raw = _codecs.call(103, [msg[2], len(EXTRA)], [msg])
     n = min(len(EXTRA), len(raw) // 4)
     if n < 20:
         return None
@@ -126,7 +105,7 @@ def decode_bench(msg):
     msg = list(msg)
     if msg[:3] != [0x7D, 0x50, 0x47]:
         return None
-    raw = unpack7(msg[3:])
+    raw = _codecs.call(103, [msg[2], 16], [msg])
     if len(raw) < 64:
         return None
     return struct.unpack("<16I", bytes(raw[:64]))
@@ -192,11 +171,12 @@ def main():
     pin, pout = pick(ins), pick(outs)
     if not pin or not pout:
         sys.exit("no FM-1 MIDI port found (ports: in %s, out %s). Use --port NAME." % (ins, outs))
+    _codecs.executable()  # finish dependency startup before arming the logger
     out = a.out or os.path.join("telemetry", time.strftime("fm1_%Y%m%d_%H%M%S.csv"))
     print("in:", pin, "| out:", pout, "| csv:", out)
     if a.bench:
         fin, fout = mido.open_input(pin), mido.open_output(pout)
-        fout.send(mido.Message("sysex", data=PREFIX + [0x02]))
+        fout.send(mido.Message("sysex", data=_codecs.call(106, [2])[1:-1]))
         t_end = time.time() + 5
         while time.time() < t_end:
             for m in fin.iter_pending():
@@ -208,7 +188,7 @@ def main():
         sys.exit("no answer (is it the build with the bench?)")
     os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
     fin, fout = mido.open_input(pin), mido.open_output(pout)
-    arm = mido.Message("sysex", data=PREFIX + [0x01])
+    arm = mido.Message("sysex", data=_codecs.call(106, [1])[1:-1])
     last_arm = 0.0
     prev = None
     extra = {}
@@ -268,7 +248,7 @@ def main():
             pass
         finally:
             try:
-                fout.send(mido.Message("sysex", data=PREFIX + [0x00]))
+                fout.send(mido.Message("sysex", data=_codecs.call(106, [0])[1:-1]))
             except Exception:
                 pass
     print("\nwritten:", out)

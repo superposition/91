@@ -1,5 +1,7 @@
 # Pad worker and bus checkpoint
 
+This document records its implementation checkpoint. The current qualified family/control boundary and remaining call map are in [VOICES_PARAMETERS.md](VOICES_PARAMETERS.md).
+
 This continues [R10 / #11](https://github.com/superposition/91/issues/11) after the [percussion/pluck](VOICES.md) and [drone/acid](VOICES_TONAL.md) checkpoints. The Rust-enabled emulator now executes the pad's complete sample loop, 32-sample control updates, breathing envelopes, handoff/key-release behavior, pitch/vowel coefficients and intrinsic low-pass bus. Rare application calls to `pad_breathe` share the same Rust implementation. The original C0 functions and default physical build remain selectable.
 
 The [portable pad module](../../rust/fm1-engine/src/voices/pad.rs) uses four existing 148-byte voices, a 24-byte runtime containing the existing gain/stab envelope and four control counters, and the existing read-only sine table. A 164-byte parameter packet is captured once per block; a 28-byte publication reports which note/level fields changed. The bus borrows its four filter values, two inputs, two outputs and the existing 512-frame dry ring. It uses the shared fast-math exponential's original split-ln2 reduction. No allocator, parallel voice bank, per-sample packet or additional diagnostic storage is introduced. Counters 42 and 46 use the previously reserved slots for pad and bus blocks.

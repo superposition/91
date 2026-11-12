@@ -19,7 +19,7 @@ fi
 cc -O2 -ffp-contract=off -std=gnu99 -DEN_HOST -I"$baseline/firmware/src/dsp" -o "$out/reference" tests/reference/effects_reference.c -lm
 cc -O2 -ffp-contract=off -std=gnu99 -DEN_HOST -Ifirmware/src/dsp -o "$out/c0" tests/reference/effects_reference.c -lm
 cargo build --release --locked -p fm1-jam-bridge --target-dir "$out/rust-build"
-cc -O2 -ffp-contract=off -std=gnu99 -DEN_HOST -DEN_RUST_JAM=1 -DEN_RUST_COMMANDS=1 -DEN_RUST_TRANSPORT=1 -DEN_RUST_HANDOFF=1 -DEN_RUST_SCHEDULER=1 -DEN_RUST_MELODIC=1 -DEN_RUST_EFFECTS=1 -DEN_RUST_FACTORY=1 -DEN_RUST_VOICES=1 -DEN_RUST_FM6=1 -DEN_RUST_FORMATS=1 \
+cc -O2 -ffp-contract=off -std=gnu99 -DEN_HOST -DEN_RUST_JAM=1 -DEN_RUST_COMMANDS=1 -DEN_RUST_TRANSPORT=1 -DEN_RUST_HANDOFF=1 -DEN_RUST_SCHEDULER=1 -DEN_RUST_MELODIC=1 -DEN_RUST_EFFECTS=1 -DEN_RUST_FACTORY=1 -DEN_RUST_VOICES=1 -DEN_RUST_FM6=1 -DEN_RUST_FORMATS=1 -DEN_RUST_WORKER=1 \
     -Ifirmware/src/dsp -o "$out/rust" tests/reference/effects_reference.c "$out/rust-build/release/libfm1_jam_bridge.a" -lpthread -ldl -lm
 : > "$out/results.jsonl"
 cases=${EFFECTS_CASES:-0 1 2 3 4 5 6 7 8 20 30 31}

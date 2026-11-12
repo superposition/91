@@ -225,6 +225,22 @@ pub fn breath(params: &Params, playing: u32, sounds: &[data::PadSound; 24]) -> p
         oscillator: sounds[sound(p(params, P::PADTONE), 24)].osc as u32,
     }
 }
+pub fn pad_identity(params: &Params, jam: u32, sounds: &[data::PadSound; 24]) -> (u32, u32) {
+    let s = &sounds[sound(p(params, P::PADTONE), 24)];
+    let comp = p(params, P::PAD_COMP);
+    (
+        if jam != 0 {
+            1
+        } else if comp == 1 {
+            0
+        } else if comp >= 2 {
+            1
+        } else {
+            s.stabs as u32
+        },
+        s.osc as u32,
+    )
+}
 #[repr(C)]
 #[derive(Clone, Copy, Default)]
 pub struct PadInput {
@@ -259,16 +275,7 @@ pub fn pad(
     vowels: &[[f32; 2]; 4],
 ) -> pad::Config {
     let sound = &sounds[sound(p(params, P::PADTONE), 24)];
-    let comp = p(params, P::PAD_COMP);
-    let stabs = if r.jam != 0 {
-        1
-    } else if comp == 1 {
-        0
-    } else if comp >= 2 {
-        1
-    } else {
-        sound.stabs as u32
-    };
+    let stabs = pad_identity(params, r.jam, sounds).0;
     pad::Config {
         breath: breath(params, r.playing, sounds),
         gain: r.volume

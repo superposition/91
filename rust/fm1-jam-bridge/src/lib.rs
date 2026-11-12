@@ -21,6 +21,7 @@ mod object_formats;
 mod sequencer;
 mod transport;
 mod voice_config;
+mod voice_parameters;
 mod voices;
 mod wire_formats;
 mod worker;

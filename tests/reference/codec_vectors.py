@@ -53,6 +53,7 @@ for i,p in enumerate(js['ota']):
 for seed,v in enumerate(py['vectors']):
  b=raw(seed*2,seed);add(f'PY-crc16-{seed}',70,[seed*257],[b],words([v['crc']]));add(f'PY-enc-{seed}',71,[seed*257],[b],v['enc']);add(f'PY-sfc-{seed}',9,[seed,0,0x980f],[b],v['sfc']);add(f'PY-key-{seed}',10,[],[raw(32,seed)],words([v['key']]));add(f'PY-marker-{seed}',12,[],[b],v['marker'])
 add('PY-product',14,[],[py['package']],b'FM-1_7000300')
+add('PY-full-package',99,[],[py['flash'],py['ota'],b'FM-1_7000300'],py['package'])
 for seed,b in enumerate(py['entries']):add(f'PY-entry-{seed}',18,[seed*2053,0x12345678+seed*4096,0x100+seed,seed,255-seed,seed*1993],[raw(16,seed)],b)
 for i,v in enumerate(py['compensation']):add(f'PY-compensate-{i}',13,[v['offset'],v['want']],[v['app']],v['bytes'])
 def seven(data):
@@ -86,5 +87,6 @@ for seed,frame in enumerate(c['frames']):add(f'C-frame-parse-{seed}',30,[],[fram
 add('C-dump-parse',26,[],[c['dump']],words([130,24,*[i*9-100 if i!=23 else 8000 for i in range(24)]]))
 for i,b in enumerate(js['chunks']):add(f'JS-chunk-parse-{i}',32,[],[b[1:-1]],words([23,0,3840])+raw([1,2,48,255,256][i]))
 for seed,b in enumerate(py['entries']):add(f'PY-entry-parse-{seed}',17,[],[b],words([seed*2053,0x12345678+seed*4096,0x100+seed,seed,255-seed,seed*1993])+raw(16,seed))
+vectors.extend(get(fixtures/'tool-reference.json'))
 (ROOT/'rust/fm1-codecs-wasm/tests/vectors.json').write_text(json.dumps(vectors,separators=(',',':'))+'\n')
 print(len(vectors),'independent constructor/C/JS/Python vectors')
