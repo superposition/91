@@ -4,10 +4,16 @@
 const fs = require("fs");
 const path = require("path");
 const src = fs.readFileSync(path.join(__dirname, "..", "web", "fm1backup.js"), "utf8").replace(/^export /gm, "");
-const M = new Function(src + "; return { BK_CHUNK, BK_FRAME, BK_MAX, BK_OBJECTS, bkName, bkSum, bkChunkMsg, bkReadMsg, bkCommitMsg, bkRestartMsg, bkParseFrame, bkParseAck, bkCrc32, bkEncode, bkDecode, MM_OBJ, MM_LEN, mmEncode, mmDecode };")();
+const M = new Function(src + "; return { bkObjects, bkJamCaps, bkJamCapsMsg, BK_CHUNK, BK_FRAME, BK_MAX, BK_OBJECTS, bkName, bkSum, bkChunkMsg, bkReadMsg, bkCommitMsg, bkRestartMsg, bkParseFrame, bkParseAck, bkCrc32, bkEncode, bkDecode, MM_OBJ, MM_LEN, mmEncode, mmDecode };")();
 let bad = 0;
 const check = (name, ok) => { console.log((ok ? "  ok   " : "  FAIL ") + name); if (!ok) bad++; };
 const eq = (a, b) => JSON.stringify(Array.from(a)) === JSON.stringify(Array.from(b));
+
+const capraw=[1,0,15,4,26,30], capbody=[1,0,0,...capraw.flatMap(x=>[x>>4,x&15])];
+const caps=M.bkJamCaps([240,125,80,97,...capbody,M.bkSum(capbody),247]);
+check("Jam capability includes four packs and a session", caps && M.bkObjects(caps).length===M.BK_OBJECTS.length+5 && M.bkObjects(caps).at(-1).id===30);
+check("legacy backup list stays unchanged", M.bkObjects(null)===M.BK_OBJECTS);
+check("Jam capability request",eq(M.bkJamCapsMsg(),[240,125,80,96,1,0,127,247]));
 
 // the frame bk_build_frame(f, 3, 1, 100, {0x12, 0xAB}, 2) makes (tests/host/dxproto_test.c checks the same bytes)
 const vec = [0xF0, 0x7D, 0x50, 0x43, 0x03, 0x00, 0x01, 0x00, 0x64, 0x00, 0x02, 0x01, 0x02, 0x0A, 0x0B, 0x7E, 0xF7];

@@ -378,6 +378,7 @@ async function openPort() {
     else if (d[3] === 0x46 && port.onstatus) port.onstatus(d);                                      /* a status frame */
     else if (d[3] === 0x5A && port.onextra) port.onextra(d);                                        /* the slowest chunk of the window, and the histogram of renders */
     else if (d[3] === 0x5B && port.ondiag) port.ondiag(d);                                          /* the diagnostic pieces */
+    else if (d[3] === 0x61 && port.onjam) port.onjam(d);
     else if (d[3] === 0x43 && port.onframe) port.onframe(d);                                        /* a frame of an object being backed up */
     else if (d[3] === 0x44) { const w = port.bkwait.shift(); if (w) w(bkParseAck(Array.from(d))); }   /* the answer to a chunk or a write */
   };
@@ -546,6 +547,13 @@ $("vclear").addEventListener("click", async () => {
 });
 
 /* ---- backup and restore: everything the FM-1 has stored, to a file and back (web/fm1backup.js; the protocol is in firmware/src/backup_proto.h) */
+function jamCapabilities(p) {
+  return new Promise(resolve => {
+    const tm=setTimeout(()=>{p.onjam=null;resolve(null);},600);
+    p.onjam=d=>{const c=bkJamCaps(Array.from(d));if(c){clearTimeout(tm);p.onjam=null;resolve(c);}};
+    p.out.send(bkJamCapsMsg());
+  });
+}
 function waitBk(ms) {
   return new Promise((res) => {
     const w = (a) => { clearTimeout(tm); res(a); };
@@ -586,13 +594,13 @@ $("bksave").addEventListener("click", async () => {
   try {
     const p = await openPort();
     $("bksave").disabled = true;
-    const objs = [];
-    for (let i = 0; i < BK_OBJECTS.length; i++) {
-      $("bkstatus").textContent = t("bkreading") + BK_OBJECTS[i].name;
-      bkProgress(i, BK_OBJECTS.length);
-      const d = await bkReadObject(p, BK_OBJECTS[i].id);
+    const objs = [], objects = bkObjects(await jamCapabilities(p));
+    for (let i = 0; i < objects.length; i++) {
+      $("bkstatus").textContent = t("bkreading") + objects[i].name;
+      bkProgress(i, objects.length);
+      const d = await bkReadObject(p, objects[i].id);
       if (d === undefined) throw new Error(t("bknoans"));
-      if (d.length) objs.push({ id: BK_OBJECTS[i].id, data: d });                 /* (nothing stored there: left out) */
+      if (d.length) objs.push({ id: objects[i].id, data: d });                 /* (nothing stored there: left out) */
     }
     bkProgress(1, 1);
     if (!objs.length) throw new Error(t("bkempty"));

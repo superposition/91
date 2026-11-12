@@ -168,8 +168,8 @@ img.logo{{display:none}}
 <div class="bar">
   <span id="status">Off. Sound starts when you switch it on.</span>
   <span class="cpu" id="cpu"></span>
-  <button id="reset" type="button" title="Power off and on: a new piece at random (stored pieces kept)">New start</button>
-  <button id="forget" type="button" title="Forget every stored piece and the theme">Forget stored</button>
+  <button id="reset" type="button" title="Restart using the saved Jam session (stored packs and pieces kept)">New start</button>
+  <button id="forget" type="button" title="Forget stored packs, session, pieces and settings">Forget stored</button>
 </div>
 
 <section class="midi" id="midi" aria-labelledby="midi-h">
@@ -193,7 +193,8 @@ img.logo{{display:none}}
 <section class="help">
   <div class="knobs">
     <h2>Pages and knobs</h2>
-    <p>SELECT steps through the 23 pages in this order, and stops at the ends: Tempo, Pad, Pad env, Pad LFO, Chords, Mixer, Bass, Bass env, Bass LFO, Acid, Acid env, Acid line, Pluck, Pluck 2, Drums, Links, Kit, Drum drift, Space, Reverb, Master, Global, Jam. The line above the knobs shows the page's name and a dot per page at its right, and at its left the voice's sound plus BY HAND, +LINK or an octave (OCT+1, or SONG+1) when they apply. The buttons jump to a group of pages; pressing the same button again steps through the group, and from another page it comes back to where you were in that group. KNOB 1 is a voice's level on its first page. There are ten genres of ten pieces (PRESETS picks piece 01 to 10, GLO + PRESETS the genre), each piece with its own settings and six drum patterns. Changes last until the power goes off unless you store the piece (Global, SAVE; the HYPNO genre only).</p>
+    <p>Jam Helper starts with Harris Citypop: moving chords over 8 or 16 bars, bass and drums, and a fixed home key. <b>PRESETS</b> queues a form; <b>knobs 1-4</b> set key, tempo, phrase length and movement. <b>ALGORITHM</b> sets energy. <b>F3 / REC</b> holds the phrase, <b>G3 / EDIT</b> requests a related idea, <b>A3</b> changes the bass feel, and <b>B3</b> queues a fill. <b>SAVE</b> stores the session while stopped. The factory tone uses mellow keys, a rounded bass and a short, quiet plate.</p>
+    <p><b>HOME</b> returns to Jam Helper. <b>SELECT</b> opens the detailed voice and effects pages below. <b>F4</b> returns to the legacy pieces, where PRESETS selects a piece and GLO + PRESETS selects a genre. To return to Jam Helper, turn SELECT past the keyboard Jam page. Key, form and phrase-length changes wait for the current phrase to end.</p>
     <div class="pages">
       <div>
         <h3>Tempo <span>HOME</span></h3>

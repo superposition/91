@@ -170,5 +170,6 @@ static void ota_commit(const uint8_t *parm)
 #include "backup_proto.h"
 #include "app/plat_fm1.c"
 #include "app/project.c"
+#include "app/jam_session.c"
 #include "app/ui.c"
 #include "app/main_fm1.c"

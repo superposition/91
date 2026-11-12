@@ -13,6 +13,16 @@ export const BK_OBJECTS = [
   { id: 5 + BK_GENRES.length + 1, name: "bass steps" },          // (0.16.29: the pieces' bass steps, plat.h OBJ_BSTEP)
 ];
 
+// New objects are requested only after the separate Jam capability probe succeeds.
+export const BK_JAM_OBJECTS = [{id:26,name:"Jam pack 1"},{id:27,name:"Jam pack 2"},{id:28,name:"Jam pack 3"},{id:29,name:"Jam pack 4"},{id:30,name:"Jam session"}];
+export const bkJamCapsMsg = () => [0xF0,0x7D,0x50,0x60,1,0,127,0xF7];
+export function bkJamCaps(d) {
+  if(d.length!==21 || d[0]!==0xF0 || d[3]!==0x61 || d[4]!==1 || d[5]!==0 || d[6]!==0 || d[20]!==0xF7 || bkSum(d.slice(4,-2))!==d[19]) return null;
+  const b=[];for(let i=7;i<19;i+=2) {if(d[i]>15 || d[i+1]>15)return null;b.push(d[i]*16+d[i+1]);}
+  return b[0]===1 && b[3]===4 && b[4]===26 && b[5]===30 ? {version:1,slots:4,max:b[1]|b[2]<<8}:null;
+}
+export const bkObjects = (jam) => jam ? [...BK_OBJECTS,...BK_JAM_OBJECTS] : BK_OBJECTS;
+
 // the player's MIDI map (0.16.11, ui.c mm_*): the emulator's learned controls ({"c:ch:cc" | "n:ch:note": {t: "b<button>" | "k<key>" | "e<knob>" | "m", mode}})
 // as the firmware keeps them: "MAP1", the count, 3 pad bytes, then 48 entries of 3 bytes (the channel | 0x10 a CC | how a knob counts << 5, the number,
 // the control: a button 0-13, 32 + a key, 64 + a knob). MASTER is the hardware's alone: not sent. The .perfmap file is the learned list as JSON.
@@ -45,7 +55,7 @@ export function mmDecode(b) {                                        // the lear
   }
   return maps;
 }
-export const bkName = (id) => (BK_OBJECTS.find((o) => o.id === id) || { name: "object " + id }).name;
+export const bkName = (id) => ([...BK_OBJECTS,...BK_JAM_OBJECTS].find((o) => o.id === id) || { name: "object " + id }).name;
 
 // the checksum: 128 minus the sum of the data bytes, modulo 128
 export function bkSum(a) {

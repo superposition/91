@@ -1,0 +1,761 @@
+{
+  "version": 1,
+  "name": "Harris Citypop",
+  "scales": [
+    [
+      0,
+      2,
+      4,
+      5,
+      7,
+      8,
+      9,
+      11
+    ],
+    [
+      0,
+      2,
+      3,
+      5,
+      7,
+      8,
+      9,
+      11
+    ]
+  ],
+  "nodes": [
+    {
+      "bass": 0,
+      "sixth": 0,
+      "scale": 0,
+      "label": 0,
+      "mode": 0,
+      "emphasis": 0
+    },
+    {
+      "bass": 2,
+      "sixth": 5,
+      "scale": 0,
+      "label": 1,
+      "mode": 0,
+      "emphasis": 4
+    },
+    {
+      "bass": 4,
+      "sixth": 7,
+      "scale": 0,
+      "label": 1,
+      "mode": 0,
+      "emphasis": 4
+    },
+    {
+      "bass": 5,
+      "sixth": 5,
+      "scale": 0,
+      "label": 0,
+      "mode": 0,
+      "emphasis": 10
+    },
+    {
+      "bass": 7,
+      "sixth": 2,
+      "scale": 1,
+      "label": 3,
+      "mode": 0,
+      "emphasis": 0
+    },
+    {
+      "bass": 9,
+      "sixth": 0,
+      "scale": 0,
+      "label": 1,
+      "mode": 0,
+      "emphasis": 10
+    },
+    {
+      "bass": 11,
+      "sixth": 2,
+      "scale": 1,
+      "label": 2,
+      "mode": 0,
+      "emphasis": 0
+    },
+    {
+      "bass": 0,
+      "sixth": 0,
+      "scale": 1,
+      "label": 4,
+      "mode": 1,
+      "emphasis": 0
+    },
+    {
+      "bass": 2,
+      "sixth": 5,
+      "scale": 1,
+      "label": 2,
+      "mode": 1,
+      "emphasis": 4
+    },
+    {
+      "bass": 3,
+      "sixth": 3,
+      "scale": 0,
+      "label": 0,
+      "mode": 1,
+      "emphasis": 4
+    },
+    {
+      "bass": 5,
+      "sixth": 8,
+      "scale": 0,
+      "label": 1,
+      "mode": 1,
+      "emphasis": 10
+    },
+    {
+      "bass": 7,
+      "sixth": 2,
+      "scale": 1,
+      "label": 3,
+      "mode": 1,
+      "emphasis": 0
+    },
+    {
+      "bass": 8,
+      "sixth": 8,
+      "scale": 0,
+      "label": 0,
+      "mode": 1,
+      "emphasis": 10
+    },
+    {
+      "bass": 11,
+      "sixth": 2,
+      "scale": 1,
+      "label": 2,
+      "mode": 1,
+      "emphasis": 0
+    }
+  ],
+  "cadence": [
+    [
+      0,
+      1,
+      4
+    ],
+    [
+      7,
+      8,
+      11
+    ]
+  ],
+  "transitions": [
+    [
+      0,
+      4,
+      0,
+      4,
+      0,
+      5,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      12,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      3,
+      0,
+      10,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      3,
+      7,
+      0,
+      0,
+      6,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      12,
+      0,
+      0,
+      0,
+      0,
+      3,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      10,
+      0,
+      3,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      3,
+      0,
+      0,
+      0,
+      10,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      4,
+      0,
+      4,
+      0,
+      5,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      12,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      3,
+      0,
+      10,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      3,
+      7,
+      0,
+      0,
+      6,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      12,
+      0,
+      0,
+      0,
+      0,
+      3,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      10,
+      0,
+      3,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      3,
+      0,
+      0,
+      0,
+      10,
+      0,
+      0
+    ]
+  ],
+  "forms": [
+    {
+      "name": "Vamp",
+      "roles": [
+        0
+      ]
+    },
+    {
+      "name": "Verse / Chorus",
+      "roles": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "AABA",
+      "roles": [
+        0,
+        0,
+        2,
+        0
+      ]
+    },
+    {
+      "name": "Journey",
+      "roles": [
+        0,
+        1,
+        2,
+        3
+      ]
+    }
+  ],
+  "bass": [
+    {
+      "notes": [
+        0,
+        -128,
+        -128,
+        -125,
+        -128,
+        -128,
+        0,
+        -128,
+        -126,
+        -128,
+        -125,
+        -128,
+        -128,
+        -128,
+        -127,
+        -128
+      ],
+      "velocity": [
+        100,
+        0,
+        0,
+        72,
+        0,
+        0,
+        72,
+        0,
+        88,
+        0,
+        72,
+        0,
+        0,
+        0,
+        72,
+        0
+      ],
+      "gate": 58
+    },
+    {
+      "notes": [
+        0,
+        -128,
+        0,
+        -128,
+        -128,
+        -128,
+        -125,
+        -128,
+        0,
+        -128,
+        -128,
+        -126,
+        -128,
+        -128,
+        -127,
+        -128
+      ],
+      "velocity": [
+        100,
+        0,
+        72,
+        0,
+        0,
+        0,
+        72,
+        0,
+        88,
+        0,
+        0,
+        72,
+        0,
+        0,
+        72,
+        0
+      ],
+      "gate": 58
+    },
+    {
+      "notes": [
+        0,
+        -128,
+        -128,
+        -128,
+        -126,
+        -128,
+        -125,
+        -128,
+        0,
+        -128,
+        12,
+        -128,
+        -128,
+        -128,
+        -128,
+        -127
+      ],
+      "velocity": [
+        100,
+        0,
+        0,
+        0,
+        88,
+        0,
+        72,
+        0,
+        88,
+        0,
+        72,
+        0,
+        0,
+        0,
+        0,
+        72
+      ],
+      "gate": 58
+    },
+    {
+      "notes": [
+        0,
+        -128,
+        -128,
+        0,
+        -128,
+        -128,
+        -125,
+        -128,
+        -126,
+        -128,
+        -128,
+        -128,
+        -125,
+        -128,
+        -127,
+        -128
+      ],
+      "velocity": [
+        100,
+        0,
+        0,
+        72,
+        0,
+        0,
+        72,
+        0,
+        88,
+        0,
+        0,
+        0,
+        88,
+        0,
+        72,
+        0
+      ],
+      "gate": 58
+    }
+  ],
+  "drums": [
+    {
+      "lanes": [
+        1089,
+        4112,
+        0,
+        21845,
+        1024,
+        32768
+      ],
+      "comp": 4369
+    },
+    {
+      "lanes": [
+        17729,
+        4112,
+        4096,
+        21845,
+        16448,
+        32768
+      ],
+      "comp": 4369
+    }
+  ],
+  "sounds": [
+    {
+      "parameter": 0,
+      "value": 56,
+      "name": "P_PAD"
+    },
+    {
+      "parameter": 2,
+      "value": 72,
+      "name": "P_BASS"
+    },
+    {
+      "parameter": 3,
+      "value": 60,
+      "name": "P_PULSE"
+    },
+    {
+      "parameter": 10,
+      "value": 0,
+      "name": "P_PADTONE"
+    },
+    {
+      "parameter": 9,
+      "value": 18,
+      "name": "P_BRIGHT"
+    },
+    {
+      "parameter": 12,
+      "value": 6,
+      "name": "P_PE_ATK"
+    },
+    {
+      "parameter": 14,
+      "value": 32,
+      "name": "P_PE_REL"
+    },
+    {
+      "parameter": 84,
+      "value": 23,
+      "name": "P_DR_INST"
+    },
+    {
+      "parameter": 24,
+      "value": 42,
+      "name": "P_DR_CUT"
+    },
+    {
+      "parameter": 25,
+      "value": 8,
+      "name": "P_DR_RES"
+    },
+    {
+      "parameter": 27,
+      "value": 0,
+      "name": "P_DE_ATK"
+    },
+    {
+      "parameter": 28,
+      "value": 25,
+      "name": "P_DE_DEC"
+    },
+    {
+      "parameter": 29,
+      "value": 6,
+      "name": "P_DE_AMT"
+    },
+    {
+      "parameter": 46,
+      "value": 0,
+      "name": "P_DRIVE"
+    },
+    {
+      "parameter": 11,
+      "value": 0,
+      "name": "P_DETUNE"
+    },
+    {
+      "parameter": 17,
+      "value": 0,
+      "name": "P_PL_DEPTH"
+    },
+    {
+      "parameter": 31,
+      "value": 0,
+      "name": "P_DL_DEPTH"
+    },
+    {
+      "parameter": 127,
+      "value": 0,
+      "name": "P_PL_CHO"
+    },
+    {
+      "parameter": 153,
+      "value": 45,
+      "name": "P_BL_LEN"
+    },
+    {
+      "parameter": 155,
+      "value": 0,
+      "name": "P_BL_GLIDE"
+    },
+    {
+      "parameter": 69,
+      "value": 10,
+      "name": "P_REVERB"
+    },
+    {
+      "parameter": 70,
+      "value": 12,
+      "name": "P_SIZE"
+    },
+    {
+      "parameter": 123,
+      "value": 0,
+      "name": "P_RV_TYPE"
+    },
+    {
+      "parameter": 124,
+      "value": 75,
+      "name": "P_RV_DAMP"
+    },
+    {
+      "parameter": 67,
+      "value": 0,
+      "name": "P_ECHO"
+    },
+    {
+      "parameter": 7,
+      "value": 0,
+      "name": "P_MOTION"
+    },
+    {
+      "parameter": 163,
+      "value": 12,
+      "name": "P_HUMAN"
+    },
+    {
+      "parameter": 47,
+      "value": 8,
+      "name": "P_SWING"
+    },
+    {
+      "parameter": 85,
+      "value": 4,
+      "name": "P_KIT_KICK"
+    },
+    {
+      "parameter": 86,
+      "value": 4,
+      "name": "P_KIT_SNARE"
+    },
+    {
+      "parameter": 87,
+      "value": 4,
+      "name": "P_KIT_HAT"
+    },
+    {
+      "parameter": 88,
+      "value": 4,
+      "name": "P_KIT_PERC"
+    }
+  ],
+  "sources": [
+    "Original generated accompaniment; Barry Harris sixth-diminished framework.",
+    "https://github.com/aaelony/barry-harris-exercises",
+    "https://github.com/BenjaminPoilve/minichord/issues/37",
+    "Free MIDI reference (not copied into this factory pack): https://www.patreon.com/musicianparadise/posts/gospel-scripts-150853281"
+  ]
+}

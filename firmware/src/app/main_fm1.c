@@ -451,7 +451,11 @@ static void bench_run(uint32_t *w)
  * the object is checked as its loader would take it, and written when the page says it is complete; after any write nothing else is stored (plat_store_restore)
  * and the page asks for a restart, which loads everything afresh. */
 static uint8_t bk_buf[BK_MAX] __attribute__((section(".pool.bk")));
+#include "jam_usb.h"
+static uint8_t ju_ack[148];
+static unsigned ju_ack_n;
 static bk_sess_t bk_sess;
+static uint32_t bk_touched;
 static uint8_t bk_restored;                      /* an object was written: a restart may follow */
 static uint8_t bk_ack[8], bk_ack_n;              /* an answer waiting for room in the USB queue */
 static uint32_t bk_rd_obj = 0xFFFFFFFFu, bk_rd_i, bk_rd_len;   /* an object being sent: which, how far, how long */
@@ -469,14 +473,20 @@ static void dx_service(void)
     if (dx_state != 2u)
         return;
     RING_PUBLISH();
+    if(ju_ack_n) return; /* backpressure: do not overwrite an unsent response */
     kind = dx_kind;
+    if(kind==6) {
+        ju_ack_n=ju_request(dx_buf,dx_pos,bk_buf,bk_sess.mask || bk_rd_obj!=0xffffffffu || bk_wait_obj!=0xffffffffu || ui_restore_state()==1,ju_ack);
+        dx_state=0; return;
+    }
     if (kind == 5) {                                 /* a chunk of a restore: taken into bk_buf, answered */
         bk_chunk_t c;
         uint8_t f[8];
         int st = bk_parse_chunk(dx_buf, dx_pos, &c);
         const uint32_t obj = dx_pos > 4u ? dx_buf[4] & 0x7Fu : 0u;
-        if (st == 0 && (!bk_obj_ok(c.obj) || ui_restore_state() == 1 || bk_accept(&bk_sess, bk_buf, &c) != 0))
+        if (st == 0 && (!bk_obj_ok(c.obj) || ju_busy() || bk_rd_obj!=0xffffffffu || ui_restore_state() == 1 || bk_accept(&bk_sess, bk_buf, &c) != 0))
             st = 2;
+        bk_touched=fm1_ms;
         dx_state = 0;
         usb_sysex_try(f, bk_build_ack(f, obj, st == 0 ? c.idx : 0x7Eu, (uint32_t)st));
         return;
@@ -525,6 +535,10 @@ static void px_service(void)
     static uint32_t dump_i = 0xFFFFFFFFu, vox_req = 0xFFFFFFFFu;
     static uint8_t about_req;                        /* the pieces page asked what this firmware is */
     uint8_t f[PX_FRAME_MAX];                         /* the longest frame (a voice) fits: dx_proto.h, checked by tests/host/dxproto_test.c */
+    ju_song_service(bk_buf,bk_sess.mask || bk_rd_obj!=0xffffffffu || bk_wait_obj!=0xffffffffu || ui_restore_state()==1);
+    ju_poll();
+    if(fm1_ms-bk_touched>30000u && ui_restore_state()!=1) {bk_sess.mask=0;bk_rd_obj=0xffffffffu;}
+    if(ju_ack_n && usb_sysex_try(ju_ack,ju_ack_n)==0) ju_ack_n=0;
     while (px_r != px_w) {
         const uint32_t e = px_q[px_r % PX_N];
         RING_PUBLISH();
@@ -537,16 +551,17 @@ static void px_service(void)
             vox_req = e & 0x7Fu;
         else if (e >> 28 == 4u) {                        /* backup: send an object (a restore under way is dropped) */
             const uint32_t obj = e & 0x7Fu;
-            if (bk_obj_ok(obj) && bk_rd_obj == 0xFFFFFFFFu && ui_restore_state() != 1) {
+            if (!ju_busy() && bk_obj_ok(obj) && bk_rd_obj == 0xFFFFFFFFu && ui_restore_state() != 1) {
                 const int n = plat_store_load(obj, bk_buf, BK_MAX);
                 bk_sess.mask = 0;
                 bk_rd_len = n > 0 ? (uint32_t)n : 0u;
                 bk_rd_i = 0;
                 bk_rd_obj = obj;
+                bk_touched=fm1_ms;
             }
         } else if (e >> 28 == 5u) {                      /* restore: the object is complete: check it, write it */
             const uint32_t obj = e >> 14 & 0x1Fu, len = e & 0x3FFFu;
-            if (!bk_obj_ok(obj) || !bk_complete(&bk_sess, obj, len) || ui_restore_state() == 1)
+            if (ju_busy() || !bk_obj_ok(obj) || !bk_complete(&bk_sess, obj, len) || ui_restore_state() == 1)
                 bk_ack_put(obj, 0x7Fu, 1u);
             else if (!ui_restore_valid(obj, bk_buf, len))
                 bk_ack_put(obj, 0x7Fu, 2u);
@@ -575,6 +590,7 @@ static void px_service(void)
     if (bk_rd_obj != 0xFFFFFFFFu) {                      /* an object going out, a frame a turn of the loop as the queue has room */
         const uint32_t n = bk_rd_len - bk_rd_i > BK_FRAME ? BK_FRAME : bk_rd_len - bk_rd_i;
         if (usb_sysex_try(f, bk_build_frame(f, bk_rd_obj, bk_rd_i / BK_FRAME, bk_rd_len, bk_buf + bk_rd_i, n)) == 0) {
+            bk_touched=fm1_ms;
             bk_rd_i += n;
             if (bk_rd_i >= bk_rd_len)
                 bk_rd_obj = 0xFFFFFFFFu;
@@ -822,6 +838,7 @@ static void fm1_main(void)
 #endif
     project_start(plat_seed());                     /* a piece at random, a little changed */
     project_apply();
+    jam_session_load();
     audio_init();
     usb_start();
 #if EN_TRS

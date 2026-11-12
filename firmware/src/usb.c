@@ -647,6 +647,7 @@ static void dx_end(void)
     } else if (n >= 12u && m[0] == 0x7Du && m[1] == 0x50u && m[2] == 0x42u && m[3] == 0x03u) {   /* a chunk of a restore (backup_proto.h) */
         kind = 5;
     }
+    if(n>=6u && m[0]==0x7du && m[1]==0x50u && m[2]==0x60u) kind=6;
     dx_on = 0;
     if (kind) {
         dx_kind = kind;

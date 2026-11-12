@@ -10,6 +10,26 @@
 #endif
 #define BARRIER() __asm__ volatile("" ::: "memory")
 
+#include "jam_factory.inc"
+#include "song_factory.inc"
+static uint8_t jp_active[JP_MAX]; /* BSS: preserve the pool's 4 KiB reserve. */
+static const uint8_t *jp_data=JP_SONG_0;
+static const uint8_t * volatile jp_upload;
+static uint8_t jp_upload_source=255;
+volatile int8_t en_jam_load=-1;
+static uint16_t jp_len=sizeof JP_SONG_0, jp_upload_n, jp_pos, jp_plan_wait;
+static jp_phrase_t jp_phrase[2];
+static jp_settings_t jp_want={0,0,0,16,0,3,60,0,0,0}, jp_now;
+static uint8_t jp_current, jp_upload_prepared;
+static uint32_t jp_seed=91, jp_section, jp_midi_gate, jp_pad_gate;
+static float jp_swell_phase=1.0f,jp_swell_env;
+static uint8_t jp_patch_dirty;
+static uint8_t jp_swell_amount=30,jp_variation=1,jp_song=0;
+_Static_assert(sizeof jp_active + sizeof jp_phrase + sizeof jp_want + sizeof jp_now + 320 <= 5500, "Jam static-memory budget");
+static int jp_dx(void) {return en_jam_on && jp_v2(jp_data);}
+volatile uint8_t en_jam_on,en_jam_bar,en_jam_beat,en_jam_section,en_jam_pending,en_jam_length=16;
+volatile uint32_t en_jam_revision;
+
 const char *const EN_NOTE_NAME[12] = {"C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"};
 const char *const EN_MODE_NAME[EN_NMODES] = {"Ionian", "Dorian", "Phrygian", "Lydian", "Mixolyd.", "Aeolian",
                                              "Pent maj", "Pent min"};
@@ -963,7 +983,7 @@ out:
 }
 
 /* ------------------------------------------------------------ commands --- */
-enum { C_SET, C_POOL, C_PLAY, C_NEXT, C_FREEZE, C_SEED, C_PANIC, C_CLOCK, C_REGROW, C_SECTION, C_FX, C_MUTE, C_NOTE, C_HUSH, C_FXK, C_TRK, C_GATEPAT, C_FXS, C_FILLQ, C_DJSYNC, C_FLXH, C_SHED, C_USERVOICE, C_USERCLEAR, C_ACSTEP, C_ACCAP, C_CMCAP, C_INTRO, C_CMSTEP, C_PROG, C_PROG2, C_PROGK, C_MAP, C_DTAP, C_DEG, C_BEND, C_PEDAL, C_BSSTEP };
+enum { C_SET, C_POOL, C_PLAY, C_NEXT, C_FREEZE, C_SEED, C_PANIC, C_CLOCK, C_REGROW, C_SECTION, C_FX, C_MUTE, C_NOTE, C_HUSH, C_FXK, C_TRK, C_GATEPAT, C_FXS, C_FILLQ, C_DJSYNC, C_FLXH, C_SHED, C_USERVOICE, C_USERCLEAR, C_ACSTEP, C_ACCAP, C_CMCAP, C_INTRO, C_CMSTEP, C_PROG, C_PROG2, C_PROGK, C_MAP, C_DTAP, C_DEG, C_BEND, C_PEDAL, C_BSSTEP, C_JAM };
 static uint8_t muted;                            /* remote: no sound, no MIDI (C_MUTE, after what's queued) */
 static uint8_t hush;                             /* a store while playing: fade out, hold, fade back in (C_HUSH) */
 static float hush_g = 1.0f;                      /* its gain, 0..1 */
@@ -1399,6 +1419,7 @@ static int pad_snd(void) { return (unsigned)par[P_PADTONE] < EN_NSOUND ? par[P_P
 static int pad_stabs(void)                      /* Comp: Hold never stabs, a rhythm always does, Auto as the sound is */
 {
     const int c = par[P_PAD_COMP];
+    if(en_jam_on) return 1;
     return c == 1 ? 0 : c >= 2 ? 1 : PAD_SOUND[pad_snd()].stabs;
 }
 static int pad_osc(void) { return PAD_SOUND[pad_snd()].osc; }
@@ -1620,6 +1641,7 @@ static void pad_leave(void)
 static void pad_coefs(pad_t *v, int i)          /* every 32 samples: the breath, pitch, the vowel */
 {
     float f, vw, f1, f2;
+    const float spread = en_jam_on && !par[P_DETUNE] ? 0.0f : detune;
     int a;
     if (v->hand == 1) {                         /* out of the old key */
         v->hf -= HAND_STEP;
@@ -1662,10 +1684,10 @@ static void pad_coefs(pad_t *v, int i)          /* every 32 samples: the breath,
     if (v->vib >= 1.0f)
         v->vib -= 1.0f;
     f = mtof(v->note + 0.08f * motion * mod[i].v + pad_pitch);              /* a slow drift, as tape; the LFO */
-    v->inc[0] = f * (1.0f - detune) * (1.0f / EN_SR);   /* Detune: 2.5 .. 25 cents either way */
-    v->inc[1] = f * (1.0f + detune) * (1.0f / EN_SR);
-    v->inc[2] = f * (1.0f - 0.45f * detune) * (1.0f / EN_SR);   /* the inner pair, a little less apart: four saws, no two beating alike */
-    v->inc[3] = f * (1.0f + 0.45f * detune) * (1.0f / EN_SR);
+    v->inc[0] = f * (1.0f - spread) * (1.0f / EN_SR);   /* Detune: 2.5 .. 25 cents either way */
+    v->inc[1] = f * (1.0f + spread) * (1.0f / EN_SR);
+    v->inc[2] = f * (1.0f - 0.45f * spread) * (1.0f / EN_SR);   /* the inner pair, a little less apart: four saws, no two beating alike */
+    v->inc[3] = f * (1.0f + 0.45f * spread) * (1.0f / EN_SR);
     vw = fm_clampf((float)bright * 0.01f + 0.25f * arcm + 0.2f * motion * mod[(i + 2) % NMOD_PAD].v + 0.4f * pad_filt,
                    0.0f, 1.0f) * 2.999f;
     a = (int)vw;
@@ -3628,6 +3650,7 @@ static const uint16_t COMP_GENRE[EN_NGENRE] = {0x4444, 0x0041, 0x4949, 0x0401, 0
 static uint16_t comp_mask(void)
 {
     const int c = par[P_PAD_COMP];
+    if(en_jam_on) return 1;
     return c >= 2 ? COMP_MASK[c - 2] : COMP_GENRE[chord_genre];
 }
 static int comp_hit(int st) { return comp_mask() >> st & 1; }
@@ -3680,6 +3703,8 @@ static int cond_ok(int l, int fill)              /* the lane's condition (bars c
     }
 }
 
+#include "jam_runtime.inc"
+
 static void tick(void)
 {
     static const uint8_t TRIG_BARS[6] = {0, 1, 2, 4, 8, 0};
@@ -3689,6 +3714,7 @@ static void tick(void)
     const float chop = KK->chop * (0.4f + 0.6f * evolve);   /* breakcore: how much the drums are chopped */
     int perc_hit = 0;
     step_t = 0;
+    jp_tick(st);
     if (scat_arm) {                             /* the scatter too */
         scat_engage();
         scat_arm = 0;
@@ -3780,6 +3806,11 @@ static void tick(void)
         const int llen = par[P_LLEN + l] < 16 && par[P_LLEN + l] >= 1 ? par[P_LLEN + l] : 16;
         const int ls = llen < 16 ? (int)(sixteenth % (uint32_t)llen) : st;   /* a shorter lane runs against the bar: polymeter */
         int hit = pat_bit(en_lane_mask(l, lane_src[l], par[P_DENS + l]), ls, llen < 16) && (!par[P_COND + l] || cond_ok(l, fill_hold || fill_bar || (dd_fill && st >= 8))), dbl = 0;   /* dbl: a roll's extra hits (1: one at half a step; 2: two, in triplets; 3: a flam) */
+        if(en_jam_on) {
+            const jp_phrase_t *ph=&jp_phrase[jp_current];
+            unsigned pat=(ph->role+(en_jam_bar==ph->bars-1u))%jp_data[7];
+            hit=(int)(jp_u16(jp_data+JP_DRUM+pat*16+(unsigned)l*2)>>st&1u);
+        }
         en_lane_pos[l] = (uint8_t)ls;
         const uint64_t fxm = fx_on;
         float vel = 0.9f;
@@ -3881,7 +3912,7 @@ static void tick(void)
             dbl = 3;
         if (hit && l == L_KICK && (fxm & FXB(FX_DBLKICK)))                  /* DBL KICK: and again half a step on */
             dbl = 1;
-        if (hit && sec == SEC_GROOVE && !fill_hold && !fill_bar && !(dd_fill && st >= 8) && !drop_imp) {   /* the step's tricks: its level, push and ratchet (not in a fill, a build or the drop's own hits) */
+        if (!en_jam_on && hit && sec == SEC_GROOVE && !fill_hold && !fill_bar && !(dd_fill && st >= 8) && !drop_imp) {   /* the step's tricks: its level, push and ratchet (not in a fill, a build or the drop's own hits) */
             static const float LV[4] = {1.0f, 0.4f, 0.7f, 1.12f};
             const uint32_t md = en_mod[l][ls & 15];
             vel = fm_clampf(vel * (1.0f + (LV[md >> 6 & 3u] - 1.0f) * (float)par[P_ACCENT] * 0.02f), 0.05f, 1.0f);   /* (Accents 50: as marked) */
@@ -3908,6 +3939,7 @@ static void tick(void)
                 drum_fire(l, drum[l].pend2);
             }
             vel *= l == L_HAT || l == L_OHAT ? pa : 1.0f;
+            if(en_jam_on) vel*=0.65f+0.005f*(float)jp_now.energy;
             if (dbl == 3) {                     /* a flam: the grace note now, the hit 20 ms on */
                 drum_fire(l, vel * 0.4f);
                 drum[l].wait = (int32_t)(0.02f * EN_SR);
@@ -3931,8 +3963,8 @@ static void tick(void)
             }
         }
     }
-    bl_step(st, loose(sw, 4.0f));
-    if (pad_stabs() && !par[P_PAD_MAN] && en_playing &&   /* the pad's stabs: a rhythm (Comp; Auto: the genre's), the off-beats with more with Evolve; in a breakdown
+    if (!en_jam_on) bl_step(st, loose(sw, 4.0f));
+    if (!en_jam_on && pad_stabs() && !par[P_PAD_MAN] && en_playing &&   /* the pad's stabs: a rhythm (Comp; Auto: the genre's), the off-beats with more with Evolve; in a breakdown
                                                            * the rhythm alone, softer (0.15.4: none fired there, so an all-stab genre had the pluck alone) */
         (comp_hit(st) || (sec != SEC_BREAK && comp_mask() == 0x4444u && par[P_PAD_COMP] == 0 && (st == 7 || st == 15) && frand() < 0.35f * evolve))) {
         const int32_t w = loose(sw, 8.0f);
@@ -3952,18 +3984,18 @@ static void tick(void)
     drop_imp = 0;
     if (links_on() && par[P_LK_PERC] && sec == SEC_GROOVE) {
         if (perc_hit)
-            acid_step(loose(sw, 6.0f));         /* the links: the perc lane is the acid's clock */
+            if(!en_jam_on) acid_step(loose(sw, 6.0f));         /* the links: the perc lane is the acid's clock */
     } else {
-        acid_step(loose(sw, 6.0f));
+        if(!en_jam_on) acid_step(loose(sw, 6.0f));
     }
-    cm_step(st, sw);
-    if (st == 0 && change_pending && !en_frozen) {   /* chords move on the bar */
+    if(!en_jam_on) cm_step(st, sw);
+    if (!en_jam_on && st == 0 && change_pending && !en_frozen) {   /* chords move on the bar */
         change_pending = 0;
         chord_change();
         if (!par[P_DD_EVERY] && (par[P_DD_CHANGE] || par[P_DD_MUTATE]) && dd_in < 0)
             dd_in = 2;                          /* drum drift with the chord: a fill next bar, the change after */
     }
-    if (st == 0 && en_playing && !en_frozen && hr_bars()) {   /* the genre's harmonic rhythm: this bar counted; the chord's last bar asks for the change on the next bar line */
+    if (!en_jam_on && st == 0 && en_playing && !en_frozen && hr_bars()) {   /* the genre's harmonic rhythm: this bar counted; the chord's last bar asks for the change on the next bar line */
         if (hr_left > 0)
             hr_left--;
         if (hr_left == 0)
@@ -4184,8 +4216,10 @@ static void fm_job(const rv_job_t *c)           /* the DX voices' samples for th
             fm_fifo[(c->fm_w + (uint32_t)j) & (FM_R - 1)] = 0.0f;
         return;
     }
-    for (j = 0; j < c->n; j++)
+    for (j = 0; j < c->n; j++) {
         fm_fifo[(c->fm_w + (uint32_t)j) & (FM_R - 1)] = fm_next();
+        if(jp_dx())fm_bass_fifo[(c->fm_w+(uint32_t)j)&(FM_R-1)]=fm_bass_sample;
+    }
 }
 /* what the other core does in a chunk: the pad's voices (the stage the first core waits for, before it mixes), then the reverb's tank (the first core needs its
  * output at the end of the chunk), then the DX voices (needed a chunk on, so nothing waits for them) */
@@ -4741,6 +4775,10 @@ static void master_dyn_reset(void);
 void en_init(void)
 {
     int i, l;
+    en_jam_on=0; jp_upload=0; jp_data=JP_SONG_0; jp_len=sizeof JP_SONG_0;
+    en_jam_load=-1;jp_song=0;jp_patch_dirty=0;jp_swell_phase=1.0f;jp_plan_wait=0;
+    for(i=0;i<2;i++)jp_phrase[i].bars=0;
+    jp_want=(jp_settings_t){0,0,0,16,0,3,60,0,0,0}; jp_now=jp_want; jp_pos=0; jp_seed=91; jp_midi_gate=jp_pad_gate=0; en_jam_length=16; jp_upload_prepared=0;
     plate_init();
     fm_init();
     fm_reset();
@@ -4814,6 +4852,7 @@ static void play_start(int from_top)
 {
     int i;
     if (from_top) {
+        jp_pos=0;
         pulse = 0;
         sixteenth = 0;
         bars = 0;
@@ -4829,7 +4868,7 @@ static void play_start(int from_top)
     en_playing = 1;
     pad_gate = 1.0f;
     for (i = 0; i < EN_NPAD; i++)               /* from silence: the breaths start over, overlapping */
-        if (pad[i].amp < 1e-4f) {
+        if (!en_jam_on && pad[i].amp < 1e-4f) {
             pad[i].t = START_T[i];
             pad[i].midi_note = 0;
             pad_breathe(&pad[i], i);
@@ -4837,7 +4876,7 @@ static void play_start(int from_top)
     if (bass.amp < 1e-4f)
         bass.note = bass.target;
     bass.env_up = 1;
-    midi(0x92, bass.midi_note, 80);
+    if(!en_jam_on) midi(0x92, bass.midi_note, 80);
     if (!en_ext)
         midi(from_top ? 0xFA : 0xFB, 0, 0);
 }
@@ -4849,6 +4888,8 @@ static void play_stop(void)
         drum[d].wait = drum[d].wait2 = 0, drum[d].rn = 0;        /* a swung hit still waiting stays unplayed */
     cm_wait = ac_wait = bl_wait = stab_wait = 0;   /* and the swung pluck, acid, bass and stab notes */
     en_playing = 0;
+    jp_midi_gate=jp_pad_gate=0;jp_swell_phase=1.0f;
+    for(d=0;d<2;d++){if(pad[d].pnote)midi(0x84,pad[d].pnote,0);pad[d].pnote=0;}
     pad_gate = 0.0f;
     acid.amp_t = 0.0f;
     acid.gate_left = 0;
@@ -5566,7 +5607,7 @@ static void fx_control(uint32_t n)              /* once a chunk: what the held e
          * (each over a seventh of it), so a set can be mixed in under a pad and a hat rather than everything at once */
         static const uint8_t IN_AT[EN_NTRACK] = {40, 6, 52, 20, 62, 86, 0, 92};   /* kick, hats, snare, perc, bass, acid, pad, pluck: hundredths of the intro where each starts */
         float k = 1.0f;
-        if (intro_len > 0 && en_playing) {
+        if (!en_jam_on && intro_len > 0 && en_playing) {
             if (intro_t < intro_len)
                 intro_t += (int32_t)n;
             k = intro_t >= intro_len ? 1.0f : (float)intro_t / (float)intro_len;
@@ -6319,14 +6360,31 @@ static inline void fx_master(float *pl, float *pr)   /* one sample of the master
     *pr = r;
 }
 
+/* Entering a pack clears the old piece's latched processing. Held panel FX
+ * can be applied again afterwards; no previous shimmer or pitch effect leaks in. */
+static void jp_performance_reset(void)
+{
+    unsigned i;
+    fx_req=fx_on=0; trk_mute=trk_solo=0;
+    for(i=0;i<EN_NFXK;i++) fxk_v[i]=0;
+    for(i=0;i<EN_NFXS;i++) fxs_v[i]=EN_FXS_DEF[i];
+    sec=SEC_GROOVE; sec_req=0; brk=0.0f; dd_fill=0; dj_sync=0;
+    chord_genre=0; wob_rate=-1;
+    pl_decay=pl_decay_t;
+    hb_bend=hb_mod=hb_semi=0.0f; hb_pf=1.0f;
+}
+
 static void drain(void)
 {
+    if(jp_upload && !en_playing) jp_activate(1);
+    else if(jp_upload && !jp_upload_prepared && en_jam_on) {jp_prepare(0);jp_upload_prepared=1;}
     while (q_r != q_w) {
         uint32_t c = q[q_r % QN];
         int a = (int)(c >> 16 & 0xFFu), b = (int)(int16_t)(c & 0xFFFFu);
         BARRIER();
         q_r++;
         switch (c >> 24) {
+        case C_JAM: jp_control(a,b); break;
         case C_SET:
             if (a < P_NPARAMS)
                 apply(a, b);
@@ -6616,7 +6674,7 @@ static void render_pad(uint32_t n)
                     tgt = 0.0f;
                     ar = 0.0004f;
                 } else if (pad_stabs()) {        /* a stab: the shared envelope */
-                    br = se;
+                    br = jp_dx() ? (i<2?jp_swell_env:0.0f):se;
                     se *= stab_k;
                     tgt = br * 0.85f * pad_gain;
                 } else {
@@ -6755,6 +6813,11 @@ static void render_pad(uint32_t n)
  * cannot reach the flash from RAM (R_PI32V2_LONG_JUMP_23M2 truncated), so it needs those helpers inlined or in RAM with it first.) */
 static void render_bass(uint32_t n)
 {
+    if(jp_dx()) {
+        uint32_t k;float peak=0.0f,g=bass_vol*0.5f*FM_OUT*(float)jp_data[JP2_HEAD+9]*0.01f;
+        for(k=0;k<n;k++){float x=fm_bass_fifo[(rv_job.fm_w-FM_D+k)&(FM_R-1)]*g;bass_o[k]=x;peak=fm_maxf(peak,fm_fabsf(x));}
+        en_bass_level=peak;return;
+    }
     const int ft_bass = fxs_v[EN_FXS_FT_BASS];
     uint32_t j;
     const drone_snd_t *DS = &DRONE_SOUND[(unsigned)par[P_DR_INST] < EN_NSOUND ? par[P_DR_INST] : 0];
@@ -6940,9 +7003,9 @@ static void render_dj(uint32_t n)               /* the snips, into the mix and i
 /* the DX voices (the pluck's sounds from CM_NPLAIN): a stage of the chunk's job, with the pad's, into their own buffers */
 static void render_fm(uint32_t n)
 {
-    const int on = par[P_CM_SND] >= CM_NPLAIN && cm_vol > 0.0f;
+    const int on = jp_dx() || (par[P_CM_SND] >= CM_NPLAIN && cm_vol > 0.0f);
     const int cur = on && fm_cur >= 0 ? fm_cur : 0;   /* (the voice that is loaded: an empty user slot plays the first built-in one, at its own gain) */
-    const float g = cm_vol * 0.5f * FM_OUT * (fm_dy_cur && cur < EN_NFMFACT ? FM_GAIN_DY[cur] : FM_GAIN[cur]);
+    const float g = jp_dx() ? pad_vol*0.5f*FM_OUT*(float)jp_data[JP2_HEAD+8]*0.01f : cm_vol * 0.5f * FM_OUT * (fm_dy_cur && cur < EN_NFMFACT ? FM_GAIN_DY[cur] : FM_GAIN[cur]);
     uint32_t j;
     float lvl = 0.0f;
     if (!on) {
@@ -6953,7 +7016,7 @@ static void render_fm(uint32_t n)
     }
     for (j = 0; j < n; j++) {
         float x = fm_fifo[(fm_ctr - FM_D + j) & (FM_R - 1)];   /* (rendered a chunk ago, by the other core) */
-        const float y = (x < -16.0f ? -16.0f : x > 16.0f ? 16.0f : x) * g * TG(TR_CM, j);
+        const float y = (x < -16.0f ? -16.0f : x > 16.0f ? 16.0f : x) * g * TG(jp_dx()?TR_PAD:TR_CM, j);
         fm_ol[j] = y;
         fm_or[j] = y;
         fm_rs[j] = y * 0.35f;
@@ -7608,7 +7671,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
         const dl_t *pd = &dl[L_PRE];
         rv_job.n = (int)n;
         rv_job.r0 = pd->i >= rv_pre ? pd->i - rv_pre : pd->i - rv_pre + pd->n;
-        rv_job.fm_on = par[P_CM_SND] >= CM_NPLAIN && cm_vol > 0.0f;
+        rv_job.fm_on = jp_dx() || (par[P_CM_SND] >= CM_NPLAIN && cm_vol > 0.0f);
         rv_job.fm_w = fm_ctr & (FM_R - 1);
         rv_job.pad_w = pad_ctr & (PAD_R - 1);
         pad_lk = lk_snare;
@@ -7974,10 +8037,34 @@ static uint32_t arc_left;
 static void control(uint32_t n)                 /* once a chunk: the slow things */
 {
     int i;
+    if(en_jam_on && en_playing) {
+        if(jp_midi_gate) {
+            if(jp_midi_gate<=n) {midi(0x82,bass.midi_note,0);bass.midi_note=0;jp_midi_gate=0;}
+            else jp_midi_gate-=n;
+        }
+        if(jp_pad_gate) {
+            if(jp_pad_gate<=n) {
+                for(i=0;i<EN_NPAD;i++) {if(pad[i].midi_note)midi(0x80,pad[i].midi_note,0);pad[i].midi_note=0;}
+                jp_pad_gate=0;
+            } else jp_pad_gate-=n;
+        }
+    }
+    if(jp_dx()) {
+        jp_swell_phase=fm_minf(jp_swell_phase+(float)n/(step_len*8.0f),1.0f);
+        if(jp_swell_phase>=1.0f)for(i=0;i<2;i++)if(pad[i].pnote){midi(0x84,pad[i].pnote,0);pad[i].pnote=0;}
+        jp_swell_env=fm_sinf(FM_PI*jp_swell_phase)*(float)jp_swell_amount*0.0016f;
+    } else jp_swell_env=0.0f;
     mods_step(n);
     heads_step(n);
     fx_control(n);
-    if (par[P_CM_SND] >= CM_NPLAIN)             /* the DX voices: the patch, the tune, the keys' time */
+    if(jp_dx() && jp_patch_dirty) {
+        unsigned part;
+        for(part=0;part<2;part++)if(jp_patch_dirty>>(part)&1u) {
+            int k,busy=0;for(k=0;k<FM_NV;k++)if(fmx[k].used && fmx[k].part==part)busy=1;
+            if(!busy){fm_jam_program(jp_data,part);jp_patch_dirty&=(uint8_t)~(1u<<part);}
+        }
+    }
+    if (!jp_dx() && par[P_CM_SND] >= CM_NPLAIN)             /* the DX voices: the patch, the tune, the keys' time */
         fm_set_patch(par[P_CM_SND] - CM_NPLAIN);
     fm_tune = par[P_TUNE] * 13981;
     {   /* how long a DX note may ring on after its key is up: 0.35 s .. 2.5 s by the pluck's Decay (a bell's tail would go on for many) */
@@ -8006,7 +8093,7 @@ static void control(uint32_t n)                 /* once a chunk: the slow things
     pl_decay += ((en_frozen ? 0.9995f : pl_decay_t) - pl_decay) * 0.002f;
     pl_dd2 = fm_clampf(pl_decay + 0.15f, 0.25f, 0.5f);
     rev_in_gain += ((en_frozen ? 0.0f : 1.0f) - rev_in_gain) * 0.01f;
-    if (en_playing && !en_frozen) {
+    if (!en_jam_on && en_playing && !en_frozen) {
         const int hr = hr_bars();
         if (!change_pending || hr) {
             drift_left -= (float)n;
@@ -8068,6 +8155,10 @@ void en_render(int32_t *out, uint32_t n, uint32_t gain_q12)
     int32_t *const out0 = out;
     const uint32_t n0 = n;
     RT(32, drain());
+    if(jp_plan_wait) {
+        if(n>=jp_plan_wait){jp_plan_wait=0;jp_prepare(0);}
+        else jp_plan_wait-=(uint16_t)n;
+    }
     gain = muted ? 0.0f : (float)gain_q12 * (1.0f / 4096.0f) * 2.0f;
     usb_gain = muted ? 0.0f : 1.0f;             /* the USB audio at a fixed level (en_usb_out): unity, the knob at about three quarters */
     trim_k += (trim_to - trim_k) * 0.15f;       /* the piece's level (en_trim), over about 40 ms */
@@ -8083,8 +8174,15 @@ void en_render(int32_t *out, uint32_t n, uint32_t gain_q12)
                 RT(34, clock_pulse());
                 pulse_left += step_len * (1.0f / 6.0f);
             }
-            if ((float)k > pulse_left)
-                k = (uint32_t)pulse_left + 1u;
+            {
+                float boundary=pulse_left;
+                /* V2 keeps musical sixteenths sample-timed. Intermediate MIDI
+                 * clock pulses may go out at the next audio chunk (<=5.8 ms),
+                 * retaining their absolute phase. Splitting the whole six-DX
+                 * pipeline for all 24 PPQN clocks exhausted its render budget. */
+                if(jp_dx() && pulse)boundary+=(float)(6-pulse)*step_len*(1.0f/6.0f);
+                if((float)k>boundary)k=(uint32_t)boundary+1u;
+            }
         }
         if (k > n)
             k = n;

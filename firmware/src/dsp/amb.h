@@ -445,3 +445,27 @@ void en_piece_g(int g, int i, int16_t *par, uint16_t *pool);
 void en_piece_pats_g(int g, int i, uint16_t pats[EN_NPAT][EN_NLANE]);
 void en_piece_mods_g(int g, int i, uint8_t mod[EN_NLANE][16]);   /* its factory step tricks (en_mod) */
 void en_piece_pats(int i, uint16_t pats[EN_NPAT][EN_NLANE]);   /* its factory drum patterns */
+
+/* Extensible accompaniment: separate from saved-piece parameter numbering. */
+#include "jam.h"
+enum { JAM_ON, JAM_KEY, JAM_BARS, JAM_FORM, JAM_MOVE, JAM_ENERGY, JAM_HOLD, JAM_BASS, JAM_IDEA, JAM_SLOT, JAM_TRANSPORT, JAM_SONG, JAM_SWELL, JAM_VARIATION, JAM_KEYS_PROGRAM, JAM_BASS_PROGRAM, JAM_TOUCH, JAM_RELEASE, JAM_BASS_GATE, JAM_SWELL_VOICE, JAM_BASS_ATTACK, JAM_BRIGHTNESS };
+extern volatile uint8_t en_jam_on, en_jam_bar, en_jam_beat, en_jam_section, en_jam_pending, en_jam_length;
+extern volatile uint32_t en_jam_revision;
+void en_jam_set(int field,int value);
+void en_jam_get(jp_settings_t *s);
+int en_jam_valid(const uint8_t *p,unsigned n);
+int en_jam_upload(const uint8_t *p,unsigned n);
+int en_jam_busy(void);
+const uint8_t *en_jam_data(unsigned *n);
+void en_jam_name(int next,char *b);
+const char *en_jam_form(int pending);
+uint8_t *en_jam_boot_buffer(void); /* only before the first render */
+
+extern volatile int8_t en_jam_load;
+int en_jam_source(void);
+const uint8_t *en_jam_builtin(int song,unsigned *n);
+int en_jam_upload_from(const uint8_t *p,unsigned n,int source);
+
+int en_jam_option(int field);
+
+const char *en_jam_pending_title(void);

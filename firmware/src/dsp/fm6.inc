@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-only
  * Copyright (C) 2026 Kerem Kilic (Ellic Studio)
- * Portions Copyright (C) 2026 Leo Kuroshita (@kurogedelic), Hügelton Instruments */
+ * Portions Copyright (C) 2026 Leo Kuroshita (@kurogedelic), HÃƒÂ¼gelton Instruments */
 /* The six-operator FM voices of the counter-melody (and the JAM page): a polyphonic DX7 on Melodee's core (fm6_core.inc), twenty-four
  * patches (Melodee's factory voices), played from the pluck's sequencer and by hand. The control path (envelopes, LFO, pitch, the
  * routing) follows Melodee's eng_fm6.c without its controllers, portamento, MONO and per-track settings; the voice handling is
@@ -180,7 +180,7 @@ static void fm6_keyed(fm6_voice_t *s, const uint8_t *ed, uint32_t note)
 #define FM_NV 6                                  /* six voices: each is up to 6 operators a sample (the other core renders them, a chunk ahead) */
 typedef struct {
     fm6_voice_t s;
-    uint8_t used, gate;
+    uint8_t used, gate, part;
     uint32_t age;                                /* the order the notes came in: the oldest is taken */
     int32_t gate_left;                           /* samples until the key goes up */
     int32_t kill_left;                           /* after the key is up: samples the note may ring on, then it is faded out (the heavy patches ring for seconds) */
@@ -195,7 +195,9 @@ static void fm_zero(void *p, uint32_t n)         /* (the unit has no libc) */
 }
 static uint8_t fm_ed[FP_SIZE + 1u];              /* the patch all voices play */
 static int fm_cur = -1;
-static fm6_lfo_t fm_lfo;
+static fm6_lfo_t fm_lfo, fm_bass_lfo;
+static uint8_t fm_bass_ed[FP_SIZE+1u], fm_trigger_part;
+static float fm_bass_sample;
 static uint32_t fm_age;
 static uint32_t fm_ams_amd, fm_ams_pt[4];
 static uint8_t fm_ams_ok;
@@ -235,7 +237,11 @@ static const uint8_t FM_MAP[EN_NFMFACT] = {0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12
 /* the voices a patch may use at once: the heaviest (six operators ringing, bells, strings, pads) three; the middle four or five; the rest all six */
 static const uint8_t FM_CAP[EN_NCMFM] = {4, 3, 6, 3, 3, 6, 6, 6, 4, 6, 3, 6, 6, 3, 3, 4, 6, 6, 4, 6, 5, 3, 6, 6, 6, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4};   /* (a loaded voice: four) */
 /* the player's voices: 128-byte packed records. The main loop fills a staging slot and posts C_USERVOICE; the engine copies it in between chunks. */
-static uint8_t fm_user[EN_NUSER][128] EN_POOL, fm_stage[EN_NUSER][128] EN_POOL;
+static uint8_t fm_user[EN_NUSER][128] EN_POOL;
+/* Jam uses the inactive legacy voice-upload staging area as its bass ring. */
+static union {uint8_t voices[EN_NUSER][128];float bass[512];} fm_staging EN_POOL;
+#define fm_stage fm_staging.voices
+#define fm_bass_fifo fm_staging.bass
 static volatile uint16_t fm_stage_pend;
 static volatile uint8_t fm_user_n;
 static char fm_uname[EN_NUSER][16];
@@ -258,6 +264,7 @@ static void fm_user_name(int slot)               /* "DX " and the voice's ten ch
 static void fm_user_take(int slot)               /* C_USERVOICE, in the engine's own time */
 {
     int k;
+    if (jp_dx()) return;
     if ((unsigned)slot >= EN_NUSER || !(fm_stage_pend >> slot & 1u))
         return;
     for (k = 0; k < 128; k++)
@@ -282,6 +289,7 @@ static uint8_t fm_req_n;                         /* the main loop's view of how 
 int en_user_voice(int slot, const uint8_t *p)
 {
     int k;
+    if (jp_dx()) return 0;
     if ((unsigned)slot >= EN_NUSER || slot > (int)fm_req_n || (fm_stage_pend >> slot & 1u))
         return 0;
     if (slot == (int)fm_req_n)
@@ -335,6 +343,27 @@ static void fm_set_patch(int idx)                /* between chunks: a new patch 
     fm_pos = FM6_N;
 }
 
+static void fm_jam_program(const uint8_t *p,unsigned part)
+{
+    uint8_t *ed=part?fm_bass_ed:fm_ed;unsigned op;
+    fm6_unpack(p+JP2_VOICE+p[JP2_HEAD+5+part]*128u,ed);
+    ed[FP_LPMD]=0;
+    for(op=0;op<6;op++) {
+        if(!part) {
+            ed[op*FP_OP+FP_KVS]=(uint8_t)(p[JP2_HEAD+18]*7u/100u);
+            ed[op*FP_OP+FP_R1+3]=(uint8_t)clamp(ed[op*FP_OP+FP_R1+3]+(65-(int)p[JP2_HEAD+16])/2,0,99);
+            if(!fm6_carrier(ed[FP_ALG],6u-op))ed[op*FP_OP+FP_OL]=(uint8_t)clamp(ed[op*FP_OP+FP_OL]+((int)p[JP2_HEAD+19]-50)/4,0,99);
+        } else if(p[JP2_HEAD+20])ed[op*FP_OP+FP_R1]=(uint8_t)(99-p[JP2_HEAD+20]*60u/100u);
+    }
+}
+static void fm_jam_load(const uint8_t *p)
+{
+    fm_reset();fm_cur=0;fm_trigger_part=0;fm_stage_pend=0;
+    fm_jam_program(p,0);fm_jam_program(p,1);
+    fm_zero(&fm_bass_lfo,sizeof fm_bass_lfo);
+    fm_zero(fm_bass_fifo,sizeof fm_staging.bass);
+}
+
 void en_fm_set_dy(int on)                        /* the main loop: the set, and the names the pluck's sound list shows */
 {
     int i;
@@ -350,17 +379,20 @@ static void fm_note_on(int note, float vel, int32_t gate)
     uint32_t oldest = 0xFFFFFFFFu;
     fm_slot_t *x;
     fm6_voice_t *s;
-    const uint8_t *ed = fm_ed;
+    const uint8_t *ed = jp_dx() && fm_trigger_part ? fm_bass_ed:fm_ed;
+    fm6_lfo_t *lfo = jp_dx() && fm_trigger_part ? &fm_bass_lfo:&fm_lfo;
     if (fm_cur < 0)
         return;
     {   /* a free voice, unless the load has capped them (shed: 4, then 2): then the oldest is taken */
         int cap = en_shed_level == 0 ? FM_NV : en_shed_level == 1 ? 4 : 2;
-        if (fm_cur >= 0 && FM_CAP[fm_cur] < cap)
+        if (!jp_dx() && fm_cur >= 0 && FM_CAP[fm_cur] < cap)
             cap = FM_CAP[fm_cur];                /* (the patch's own: the heavy ones fewer) */
         int used = 0;
+        if(jp_dx())cap=fm_trigger_part?1:5;
         for (k = 0; k < FM_NV; k++)
-            used += fmx[k].used;
+            used += fmx[k].used && (!jp_dx() || fmx[k].part==fm_trigger_part);
         for (k = 0; k < FM_NV; k++) {
+            if(jp_dx() && ((k==4)!=(fm_trigger_part!=0)))continue;
             if (!fmx[k].used && used < cap) {
                 best = k;
                 steal = 0;
@@ -373,14 +405,15 @@ static void fm_note_on(int note, float vel, int32_t gate)
         }
     }
     x = &fmx[best];
+    x->part=jp_dx()?fm_trigger_part:0;
     s = &x->s;
     for (k = 0; k < FM_NV; k++)                  /* the first key down: the LFO restarts */
-        if (fmx[k].used && fmx[k].gate)
+        if (fmx[k].used && fmx[k].gate && (!jp_dx() || fmx[k].part==fm_trigger_part))
             break;
     if (k == FM_NV) {
         if (ed[FP_LKS])
-            fm_lfo.ph = (1u << 31) - 1u;
-        fm_lfo.dly = 0;
+            lfo->ph = (1u << 31) - 1u;
+        lfo->dly = 0;
     }
     s->vel = (uint8_t)clamp((int32_t)(vel * 127.0f), 1, 127);
     s->note = (uint8_t)note;
@@ -408,6 +441,17 @@ static void fm_note_on(int note, float vel, int32_t gate)
     x->age = ++fm_age;
 }
 
+static void fm_jam_note(unsigned part,int note,float velocity,int32_t gate)
+{
+    if(jp_patch_dirty>>part&1u) {
+        /* Commit at this part's next attack. Retire its old tails together;
+         * never reinterpret them with a different DX program or touch bass. */
+        int k;for(k=0;k<FM_NV;k++)if(fmx[k].part==part)fmx[k].used=0;
+        fm_jam_program(jp_data,part);jp_patch_dirty&=(uint8_t)~(1u<<part);
+    }
+    fm_trigger_part=(uint8_t)part;fm_note_on(note,velocity,gate);fm_trigger_part=0;
+}
+
 static void fm_gates(uint32_t n, int32_t tail)  /* once a chunk, on the first core: the keys whose time is up; a note that has been let go for tail samples is faded out */
 {
     int k;
@@ -431,9 +475,10 @@ static void fm_gates(uint32_t n, int32_t tail)  /* once a chunk, on the first co
 static void fm_control(fm_slot_t *x)
 {
     fm6_voice_t *s = &x->s;
-    const uint8_t *ed = fm_ed;
+    const uint8_t *ed = jp_dx() && x->part ? fm_bass_ed:fm_ed;
     uint32_t alg = (uint32_t)ed[FP_ALG] & 31u, k, dead = 1;
-    int32_t lv[6], lfo = fm_lfo.val, dly = fm_lfo.depth, pm, sens, amd, a1, fbv;
+    fm6_lfo_t *part_lfo=jp_dx() && x->part ? &fm_bass_lfo:&fm_lfo;
+    int32_t lv[6], lfo = part_lfo->val, dly = part_lfo->depth, pm, sens, amd, a1, fbv;
     const uint32_t pmd = ((uint32_t)ed[FP_LPMD] * 165u) >> 6;
     if (!x->gate && s->down) {                   /* key up: every envelope to its fourth segment */
         s->down = 0;
@@ -501,18 +546,30 @@ static void fm_block(void)                       /* the next 64 samples of all t
     if (fm_cur < 0)
         return;
     fm6_lfo_step(&fm_lfo, fm_ed);
+    if(jp_dx())fm6_lfo_step(&fm_bass_lfo,fm_bass_ed);
     for (k = 0; k < FM_NV; k++) {
-        fm_slot_t *x = &fmx[k];
-        if (!x->used)
+        int ix=jp_dx() ? (k==4?5:k==5?4:k):k;
+        fm_slot_t *x = &fmx[ix];
+        if (!x->used) {
+            if(jp_dx() && ix==4)fm_zero(fm6_sum,sizeof fm6_sum);
             continue;
+        }
         fm_control(x);
         if (x->s.quiet >= 2u && !x->gate) {      /* over: released, and every output operator gone */
             x->used = 0;
+            if(jp_dx() && ix==4)fm_zero(fm6_sum,sizeof fm6_sum);
             continue;
         }
         fm6_run(&x->s, FM6_N);
+        if(jp_dx() && x->part) {
+            if(x->fade<1.0f) {
+                for(j=0;j<FM6_N;j++)fm6_sum[j]*=fm_maxf(x->fade,0.0f);
+                x->fade-=1.0f/103.0f;if(x->fade<=0.0f)x->used=0;
+            }
+            continue; /* bass is rendered last; its samples remain in sum */
+        }
         if (x->fade < 1.0f) {                    /* faded out over 0.15 s: the ring-on is over */
-            const float g0 = x->fade, g1 = g0 - 1.0f / 103.0f;
+            const float g0 = x->fade, g1 = g0 - (jp_dx()?1.0f/35.0f:1.0f/103.0f);
             for (j = 0; j < FM6_N; j++)
                 fm_blk[j] += fm6_sum[j] * (g0 + (g1 - g0) * (float)j * (1.0f / (float)FM6_N));
             x->fade = g1;
@@ -532,6 +589,7 @@ static inline float fm_next(void)                /* one sample, clipped as the D
         fm_block();
         fm_pos = 0;
     }
+    fm_bass_sample=jp_dx()?fm6_sum[fm_pos]:0.0f;
     y = fm_blk[fm_pos++];
     return y < -16.0f ? -16.0f : y > 16.0f ? 16.0f : y;
 }

@@ -18,6 +18,14 @@ The installer, editor and manual are on the same site: <https://superposition.gi
 
 *The Perform screen, the auto-DJ's build, the effects and the genre sets.*
 
+## DX7 Citypop Songbook (0.3.0 local build)
+
+Three original Harris-informed Citypop songs provide 32/64-bar forms from 8/16-bar sections, with a stable home key, voice-led sixth/diminished chords, independent DX keys and bass, and phrase-timed swells. PRESETS chooses songs; SELECT opens Arrangement, DX Keys, DX Bass and Swells. The four main knobs control key, tempo, section length and activity. F3 holds a section, G3 requests a related idea, and F4 returns to the legacy instrument.
+
+[Songbook and Jam Packs](docs/JAM_PACKS.md) documents controls, musical data, MIDI/DX voice import and USB updates. Songs and up to eight embedded DX programs can be auditioned and saved to four slots without another firmware rewrite. V1 packs and all legacy parameter indices remain supported. The [fm1-jam skill](skills/fm1-jam/SKILL.md) uses the same CLI. These local changes have not been deployed to the public links above.
+
+[Local validation](docs/SONGBOOK_VALIDATION.md) records the ten-minute FM-1 test, saved-pack restart check and existing baseline test failures.
+
 ## What's in 0.1.0
 
 **Nineteen genres, one mechanism.** Every genre is a donor column of the engine's library plus its own ten

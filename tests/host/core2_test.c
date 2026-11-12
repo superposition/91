@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "amb.h"
+#include "../../firmware/src/dsp/jam_factory.inc"
 
 void en_midi_out(uint32_t st, uint32_t d1, uint32_t d2) { (void)st; (void)d1; (void)d2; }
 
@@ -114,6 +115,9 @@ int main(int argc, char **argv)
     en_set(P_RV_X, 60);
     en_fm_float_path(argc > 5 ? atoi(argv[5]) : 0);   /* argv[5] 1: the DX voices on the float buses */
     en_balance_force(argc > 4 ? atoi(argv[4]) : -1);   /* argv[4]: where the pad's chorus runs (0 the other core's, 1 the first's) */
+    if(argc>6 && atoi(argv[6])==2){unsigned n;const uint8_t *p=en_jam_builtin(0,&n);en_jam_upload(p,n);}
+    else if(argc>6 && atoi(argv[6])==1)en_jam_upload(JP_FACTORY,sizeof JP_FACTORY);
+    if (argc > 6 && atoi(argv[6])) en_jam_set(JAM_ON,1);
     if (mode > 0) {
         en_core2_attach(submit, join, fence, alive);
         if (mode != 1)

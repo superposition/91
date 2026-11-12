@@ -5,6 +5,8 @@
 # screenshots and audio in build/scenarios/.
 #   tests/run_tests.sh
 set -u
+# Existing scenarios exercise the legacy saved-piece startup. Jam has its own scenarios.
+export AMB_LEGACY_BOOT=1
 cd "$(dirname "$0")/.."
 CC="${CC:-cc}"
 FAIL=0
@@ -21,6 +23,11 @@ run() {
     fi
 }
 run fastmath sh -c "$CC -O2 -ffp-contract=off -Wall -Wextra -Werror -o $OUT/fastmath_test tests/host/fastmath_test.c -lm && $OUT/fastmath_test"
+run jamtools python3 tests/jam_tools_test.py
+run jam sh -c "$CC -O2 -ffp-contract=off -std=c99 -Wall -Wextra -Werror -DEN_HOST -Ifirmware/src/dsp -o $OUT/jam_test tests/host/jam_test.c -lm && $OUT/jam_test"
+run songbook sh -c "$CC -O2 -ffp-contract=off -std=c99 -Wall -Wextra -Werror -DEN_HOST -Ifirmware/src/dsp -o $OUT/songbook_test tests/host/songbook_test.c -lm && $OUT/songbook_test"
+run jamusb sh -c "$CC -O2 -ffp-contract=off -std=c99 -D_POSIX_C_SOURCE=200809L -Wno-unused-function -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen -o $OUT/jam_usb_test tests/host/jam_usb_test.c firmware/src/dsp/amb.c -lm && env -u AMB_LEGACY_BOOT $OUT/jam_usb_test"
+run jamtransport sh -c "$CC -O2 -ffp-contract=off -std=c99 -D_POSIX_C_SOURCE=200809L -Wno-unused-function -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen -o $OUT/jam_transport_bridge tests/host/jam_transport_bridge.c firmware/src/dsp/amb.c -lm && python3 tests/jam_transport_test.py"
 run encoder sh -c "$CC -O2 -w -Ifirmware/hal -o $OUT/encoder_test tests/host/encoder_test.c && $OUT/encoder_test"
 run uac sh -c "$CC -O2 -w -Ifirmware/src -Ifirmware/hal -o $OUT/uac_test tests/host/uac_test.c -lm && $OUT/uac_test"
 run trs sh -c "$CC -O2 -w -Ifirmware/src -Ifirmware/hal -o $OUT/trs_test tests/host/trs_test.c && $OUT/trs_test"
@@ -45,6 +52,8 @@ run core2 sh -c "$CC -O2 -ffp-contract=off -std=c11 -Wall -Wextra -DEN_HOST -Ifi
     [ \"\$($OUT/core2_test 0 | cut -d' ' -f2)\" = \"\$($OUT/core2_test 0 - 0 -1 1 | cut -d' ' -f2)\" ] && \
     [ \"\$($OUT/core2_test 0 - 1 | cut -d' ' -f2)\" = \"\$($OUT/core2_test 0 - 1 -1 1 | cut -d' ' -f2)\" ] && \
     [ \"\${s#* }\" = \"\${d#* }\" ] && [ \"\${s#* }\" = \"\${t#* }\" ] && [ \"\${s#* }\" = \"\${m#* }\" ] && echo \$s \$d \$t \$m"
+run jamcore2 sh -c "s=\$($OUT/core2_test 0 - 0 -1 0 1) && d=\$($OUT/core2_test 1 - 0 -1 0 1) && t=\$($OUT/core2_test 2 - 0 -1 0 1) && m=\$($OUT/core2_test 3 - 0 -1 0 1) && [ \"\${s#* }\" = \"\${d#* }\" ] && [ \"\${s#* }\" = \"\${t#* }\" ] && [ \"\${s#* }\" = \"\${m#* }\" ] && echo \$s \$d \$t \$m"
+run songcore2 sh -c "s=\$($OUT/core2_test 0 - 0 -1 0 2) && d=\$($OUT/core2_test 1 - 0 -1 0 2) && t=\$($OUT/core2_test 2 - 0 -1 0 2) && m=\$($OUT/core2_test 3 - 0 -1 0 2) && [ \"\${s#* }\" = \"\${d#* }\" ] && [ \"\${s#* }\" = \"\${t#* }\" ] && [ \"\${s#* }\" = \"\${m#* }\" ] && echo \$s \$d \$t \$m"
 run storage sh -c "$CC -O2 -o $OUT/storage_test tests/storage_test.c && $OUT/storage_test"
 if command -v node >/dev/null 2>&1; then run websyx node tests/web_syx_test.js; fi
 if command -v node >/dev/null 2>&1; then run webbackup node tests/web_backup_test.js; fi

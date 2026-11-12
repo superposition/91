@@ -18,5 +18,13 @@ for (let i = 0; i < 1600; i++) {             // 4.6 s
   const l = new Float32Array(mem.buffer, ex.web_out_l(), 128);
   for (const v of l) peak = Math.max(peak, Math.abs(v));
 }
+// Songbook's four detail pages must render and accept their own knobs.
+// These exercise the full UI, catching missing view/knob table entries.
+for (let page = 0; page < 4; page++) {
+  ex.web_enc(0, 1);
+  for (let i = 0; i < 24; i++) ex.web_render(128);
+  ex.web_enc(4, 1);
+  for (let i = 0; i < 24; i++) ex.web_render(128);
+}
 console.log("peak", peak.toFixed(3), "blits", ex.web_blits());
 process.exit(peak > 0.05 && peak < 1 ? 0 : 1);

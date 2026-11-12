@@ -80,3 +80,7 @@ void ui_say(const char *a, const char *b);
 void ui_param_set(int p, int v);                 /* the editor: a parameter, as its knob sets it */
 int ui_param_get(int p);
 void ui_voices_changed(int n, int kind);   /* the player's DX7 voices changed (main_fm1.c dx_service): say so, and keep them (kind 1 bulk, 2 single, 3 one slot, 4 cleared; n: the voices taken, -1 a bad checksum, -2 not taken) */
+
+void jam_session_load(void);
+int jam_session_save(void);
+int jam_session_valid(const uint8_t *p,unsigned n);

@@ -194,6 +194,7 @@ uint32_t plat_core2(void) { return 0; }
 /* -------------------------------------------------------------- app --- */
 #include "../firmware/src/app/app.h"
 #include "../firmware/src/app/project.c"
+#include "../firmware/src/app/jam_session.c"
 #include "../firmware/src/app/ui.c"
 
 /* Kick Runner's autopilot (videos only): SELECT turned a notch at a time, as a player would, toward the
@@ -384,16 +385,24 @@ static void boot(void)
     en_init();
     project_start(plat_seed());
     project_apply();
+    jam_boot_on=0;
+#ifndef EN_WEB
+    if(!getenv("AMB_LEGACY_BOOT"))
+#endif
+        jam_session_load();
     lcd_fill(0, 0, 240, 240, 0);
     ui_init();
 }
 
+#include "../firmware/src/app/jam_usb.h"
+static uint8_t host_jam_scratch[JP_MAX];
 static void run_ms(uint32_t ms)
 {
     static int32_t blk[512];
     uint32_t i, k;
     for (i = 0; i < ms; i++) {
         now_ms++;
+        ju_song_service(host_jam_scratch,0);
         while (audio_due_ms <= (double)now_ms) {      /* 256-frame blocks, as the device renders them */
             double t0 = now_ns(), dt;
             en_render(blk, 256, master);
@@ -460,7 +469,21 @@ static int expect_quiet;                         /* (waitfor: the tries before t
 static int expect(const char *what, const char *val)
 {
     int got;
-    if (!strcmp(what, "playing"))
+    if(!strncmp(what,"jam_",4)) {
+        jp_settings_t s;en_jam_get(&s);
+        if(!strcmp(what,"jam_on"))got=en_jam_on;
+        else if(!strcmp(what,"jam_length"))got=en_jam_length;
+        else if(!strcmp(what,"jam_key"))got=s.key+12*s.minor;
+        else if(!strcmp(what,"jam_form"))got=s.form;
+        else if(!strcmp(what,"jam_hold"))got=s.hold;
+        else if(!strcmp(what,"jam_pending"))got=en_jam_pending;
+        else if(!strcmp(what,"jam_song"))got=en_jam_source();
+        else if(!strcmp(what,"jam_version")){unsigned n;got=en_jam_data(&n)[4];}
+        else if(!strcmp(what,"jam_swell"))got=en_jam_option(JAM_SWELL);
+        else if(!strcmp(what,"jam_touch"))got=en_jam_option(JAM_TOUCH);
+        else return 1;
+    }
+    else if (!strcmp(what, "playing"))
         got = en_playing;
     else if (!strcmp(what, "frozen"))
         got = en_frozen;
@@ -846,7 +869,16 @@ int main(int argc, char **argv)
         lineno++;
         if (line[0] == '#' || sscanf(line, "%31s %255s %63s %63s", cmd, a, b, c) < 1)
             continue;
-        if (!strcmp(cmd, "wait"))
+        if(!strcmp(cmd,"jamboot")) {unsetenv("AMB_LEGACY_BOOT");boot();}
+        else if(!strcmp(cmd,"jam")) {en_jam_set(atoi(a),atoi(b));run_ms(40);}
+        else if(!strcmp(cmd,"jamstop")) {en_play(0);run_ms(40);}
+        else if(!strcmp(cmd,"jampack")) {
+            static uint8_t pack[JP_MAX]; FILE *f=fopen(a,"rb");size_t n;
+            if(!f) {perror(a);return 2;} n=fread(pack,1,JP_MAX,f);fclose(f);
+            if(!en_jam_upload(pack,(unsigned)n)) {fprintf(stderr,"invalid jam pack\n");return 2;}
+            run_ms(40);
+        }
+        else if (!strcmp(cmd, "wait"))
             run_ms((uint32_t)atoi(a));
         else if (!strcmp(cmd, "press") || !strcmp(cmd, "release") || !strcmp(cmd, "tap")) {
             int i = find_name(BTN_N, NB, a);

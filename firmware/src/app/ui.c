@@ -38,10 +38,10 @@
 
 /* --------------------------------------------------------------- pages --- */
 enum { V_TEMPO, V_PAD, V_PADENV, V_PADLFO, V_CHORDS, V_PROG, V_DRONE, V_DRENV, V_DRLFO, V_DRBASS, V_BLSTEP, V_ACID, V_ACENV, V_ACLINE, V_ACANS, V_ACSTEP, V_CMEL, V_CMEL2, V_CMVU, V_CMSTEP,
-       V_DRUMS, V_LINKS, V_KIT, V_DDRIFT, V_GROOVE, V_STEPS, V_FEEL, V_PHRASE, V_SPACE, V_REVERB, V_MASTER, V_MIXER, V_GLOBAL, V_SETL, V_JAM, NDIAL, V_SEQ = NDIAL, V_PERF, V_VIZ, NVIEWS };   /* V_PERF: the second home screen; V_VIZ: the visualizers */
+       V_DRUMS, V_LINKS, V_KIT, V_DDRIFT, V_GROOVE, V_STEPS, V_FEEL, V_PHRASE, V_SPACE, V_REVERB, V_MASTER, V_MIXER, V_GLOBAL, V_SETL, V_JAM, NDIAL, V_SEQ = NDIAL, V_PERF, V_VIZ, V_JAMHELP, V_JAMARR, V_JAMKEYS, V_JAMBASS, V_JAMSWELL, NVIEWS };   /* V_PERF: the second home screen; V_VIZ: the visualizers */
 static const char *const VIEW_NAME[NVIEWS] = {"Tempo", "Pad", "Pad env", "Pad LFO", "Chords", "Progression", "Bass", "Bass env",
                                               "Bass LFO", "Bass line", "Bass steps", "Acid", "Acid env", "Acid line", "Acid answer", "Acid steps", "Pluck", "Pluck 2", "Deja vu", "Pluck steps", "Drums", "Links", "Kit", "Drum drift", "Groove", "Steps", "Feel", "Phrase", "Space", "Reverb", "Comp/Limit", "Mixer", "Global", "Set list", "Jam",
-                                              "Sequencer", "Perform", "Visual"};
+                                              "Sequencer", "Perform", "Visual", "Songbook", "Arrangement", "DX Keys", "DX Bass", "Swells"};
 enum { VZ_PLASMA, VZ_KALEIDO, VZ_BARS, VZ_FLUX, VZ_DISCO, VZ_LIFE, VZ_ORBIT, VZ_TRIP, VZ_THEORY, VZ_AUTO, VZ_N };   /* the visualizers (viz.c; TRIP and THEORY 0.16.10, THEORY not in AUTO's turn) */
 static const char *const VZ_NAME[VZ_N] = {"PLASMA", "KALEIDO", "BARS", "FLUX", "DISCO", "LIFE", "ORBIT", "TRIP", "THEORY", "AUTO"};
 /* the knobs of each page: a parameter, or one of these (the sequencer's: the lane's) */
@@ -460,6 +460,8 @@ static struct {
     uint8_t enc_run[NE];               /* detents in the current quick run, per knob (accel) */
     uint32_t down_t[NB];               /* when each button went down */
     uint32_t turn_t;                   /* the last knob turn */
+    uint8_t jam_active;
+    uint32_t jam_revision;
     uint8_t help;                      /* a button's card is up: the button + 1 */
     uint8_t save_held;                 /* SAVE held long enough: the drop was asked for this hold */
     uint8_t seq_held;                  /* SEQ held long enough: the sequencer opened this hold */
@@ -850,6 +852,7 @@ static void mood_apply(void)
 /* the knobs now: the page's, or with the FX menu on, the FX knobs */
 static int view_knob(int i)
 {
+    if(ui.view>=V_JAMHELP && ui.view<=V_JAMSWELL && !ui.fx_menu) return K_NONE;
     if (ui.view == V_JAM && !ui.fx_menu)
         return K_FXP + 4 * (NFXP - 1) + i;      /* the JAM page: the last of the FXP table's pages */
     if (ui.fx_menu) {
@@ -861,6 +864,7 @@ static int view_knob(int i)
 }
 static const char *view_label(int i)
 {
+    if(ui.view>=V_JAMHELP && ui.view<=V_JAMSWELL && !ui.fx_menu) return "";
     if (ui.view == V_JAM && !ui.fx_menu)
         return FXP[NFXP - 1].c[i].label;
     if (ui.fx_menu)
@@ -1229,7 +1233,11 @@ static int knob_get(int k)
         return fxp_get(k);
     if (k >= K_FXF)
         return ui.fxk[k - K_FXF];
-    return p >= 0 ? proj.par[p] : 0;
+    if(en_jam_on && (p==P_ROOT || p==P_MODE)) {
+        jp_settings_t j;en_jam_get(&j);
+        return p==P_ROOT ? j.key : j.minor ? MODE_AEOLIAN:MODE_IONIAN;
+    }
+    return p >= 0 ? (en_jam_on ? en_par_now(p):proj.par[p]) : 0;
 }
 static void knob_range(int k, int *lo, int *hi)
 {
@@ -1474,14 +1482,14 @@ static void knob_text(int k, char *b)
         b[n++] = s[0];
         b[n++] = s[1] ? s[1] : ' ';
         b[n++] = ' ';
-        en_param_text(p, proj.par[p], c);
+        en_param_text(p, en_jam_on ? en_par_now(p):proj.par[p], c);
         for (k = 0; c[k] && n < 9; k++)
             b[n++] = c[k];
         b[n] = 0;
         return;
     }
     if (p >= 0)
-        en_param_text(p, proj.par[p], b);
+        en_param_text(p, en_jam_on ? en_par_now(p):proj.par[p], b);
     else
         b[0] = 0;
 }
@@ -1654,10 +1662,19 @@ static void knob_set(int k, int v)
         return;
     knob_range(k, &lo, &hi);
     v = v < lo ? lo : v > hi ? hi : v;
-    if (v == proj.par[p])
+    if(en_jam_on && p!=P_TEMPO && !en_par_global(p)) {
+        if(p==P_ROOT || p==P_MODE) {
+            jp_settings_t j;int key,minor;en_jam_get(&j);
+            key=p==P_ROOT ? v:(int)j.key;
+            minor=p==P_ROOT ? (int)j.minor:(int)((EN_MODE_POOL[v]>>3)&1u);
+            en_jam_set(JAM_KEY,key+12*minor);
+        } else if(v!=en_par_now(p)) en_set(p,v);
+        return;                                 /* a live Jam edit never rewrites the old piece */
+    }
+    if (v == (en_jam_on ? en_par_now(p):proj.par[p]))
         return;
     proj.par[p] = (int16_t)v;
-    en_set(p, mood_val(p, v));
+    en_set(p, en_jam_on ? v:mood_val(p, v));
     if (en_par_global(p))
         project_globals();                       /* the player's: stored at once */
     else
@@ -1817,6 +1834,7 @@ static void mix_start(int from)
 static void mix_tick(void)                       /* each frame: the glide, by the bar and the step */
 {
     int t;
+    if (en_jam_on) {ui.mx_bars=0;return;}
     if (!ui.mx_bars)
         return;
     if (!en_playing || proj.par[P_TEMPO] != ui.mx_last) {
@@ -1926,7 +1944,7 @@ static void dj_tick(void)                    /* each new bar while playing: a sc
             }
         }
     }
-    if (!en_playing) {
+    if (en_jam_on || !en_playing) {
         last = 255;
         ui.scene_q = 0;
         return;
@@ -2023,9 +2041,9 @@ static void af_tick(void)
         }
         ui.af_sec = en_sec;
     }
-    if (!amt || !en_playing || ui.fx_menu || ui.af_user || en_intro_k < 1.0f) {
+    if (en_jam_on || !amt || !en_playing || ui.fx_menu || ui.af_user || en_intro_k < 1.0f) {
         ui.af_live = 0;
-        if (!amt || !en_playing || ui.af_user)
+        if (en_jam_on || !amt || !en_playing || ui.af_user)
             ui.af_end = 0;                      /* (by hand: the one under way ends, and no other till the next line) */
         ui.af_bar = bar;
         return;
@@ -2079,6 +2097,7 @@ static void af_tick(void)
  * own root (the Global page) stays. */
 static void key_tick(void)
 {
+    if (en_jam_on) {ui.key_on=0;ui.sec_last=en_sec;return;}
     const int sec = en_playing ? en_sec : EN_SEC_GROOVE, sh = KEY_SH[ui.key_set % 5];
     if (sec != ui.sec_last) {
         if (sec == EN_SEC_GROOVE && ui.sec_last != EN_SEC_GROOVE && sh && en_playing && !ui.key_on) {
@@ -2121,6 +2140,7 @@ static void toggle_note(int pc)                 /* a key: its note in or out of 
 static void set_mode(int m)
 {
     m = (m % EN_NMODES + EN_NMODES) % EN_NMODES;
+    if(en_jam_on) {knob_set(P_MODE,m);return;}
     proj.par[P_MODE] = (int16_t)m;
     proj.pool = EN_MODE_POOL[m];
     en_set(P_MODE, m);
@@ -2727,6 +2747,13 @@ static int key_locked(int k)                    /* ... and latched */
 static void button(int b)
 {
     int g;
+    if(ui.view>=V_JAMHELP && ui.view<=V_JAMSWELL && !ui.fx_menu && b==B_SAVE) {
+        say(jam_session_save()==0?"SESSION SAVED":"STOP TO SAVE",0); return;
+    }
+    if(ui.view==V_JAMHELP && !ui.fx_menu && (b==B_REC || b==B_EDIT)) {
+        jp_settings_t s; en_jam_get(&s); en_jam_set(b==B_REC?JAM_HOLD:JAM_IDEA,b==B_REC?!s.hold:1); return;
+    }
+    if (b == B_HOME && en_jam_on) { set_view(V_JAMHELP); return; }
     if (b == B_HOME) {                           /* HOME: the tempo page; again, the perform screen; and back; twice quickly, the visualizers */
         const uint32_t now = plat_ms();
         if (ui.fx_menu) {                        /* HOME leaves the FX menu too (0.14.7; latched effects play on), then does its usual */
@@ -3212,7 +3239,7 @@ static void mm_set(int p, uint32_t mode, uint32_t v)   /* a learned setting (0.1
         x = knob_get(p) + d * ((hi - lo) / 100 > 1 ? (hi - lo) / 100 : 1);
     }
     x = x < lo ? lo : x > hi ? hi : x;
-    if (x == proj.par[p])
+    if (x == knob_get(p))
         return;
     if (p == P_MODE)                             /* (the scale: its notes too, as the ALGORITHM dial sets it) */
         set_mode(x);
@@ -3226,7 +3253,7 @@ static void mm_set(int p, uint32_t mode, uint32_t v)   /* a learned setting (0.1
             return;
         }
     if (p != P_MODE) {                           /* elsewhere: its name and value a moment */
-        en_param_text(p, proj.par[p], t);
+        en_param_text(p, knob_get(p), t);
         say(en_param_info(p)->name, t);
     }
 }
@@ -3854,6 +3881,13 @@ static void input(void)
                     for (s = 0; s < 16; s++)
                         if (WHITE_KEY[s] == i)
                             ui.stp = (uint8_t)s;
+                } else if(ui.view==V_JAMHELP) {
+                    jp_settings_t s; en_jam_get(&s);
+                    if(i==WHITE_KEY[0]) en_jam_set(JAM_HOLD,!s.hold);
+                    if(i==WHITE_KEY[1]) en_jam_set(JAM_IDEA,1);
+                    if(i==WHITE_KEY[2]) en_jam_set(JAM_BASS,s.bass+1);
+                    if(i==WHITE_KEY[3]) en_fill_next();
+                    if(i==WHITE_KEY[7]) {en_jam_set(JAM_ON,0);project_apply();set_view(V_PERF);}
                 } else if (ui.view == V_JAM) {   /* the JAM page: the key plays the voice chosen */
                     jam_down((int)i);
                 } else if (by_hand(voice_of(ui.view))) {   /* a voice off the algorithm, its page: the key plays it */
@@ -3907,13 +3941,18 @@ static void input(void)
             say("VISUAL", VZ_NAME[ui.viz]);
         } else {
             int v = (ui.view == V_SEQ ? V_DRUMS : ui.view == V_PERF ? V_TEMPO : (int)ui.view) + (e > 0 ? 1 : -1);   /* (out of the sequencer and the perform screen too) */
-            if (v >= 0 && v < NDIAL)
-                set_view(v);
+            if(ui.view==V_JAM && e>0) {set_view(V_JAMHELP);en_jam_set(JAM_ON,1);}
+            else if(ui.view>=V_JAMHELP && ui.view<=V_JAMSWELL) {
+                int next=(int)ui.view+(e>0?1:-1);set_view(next>V_JAMSWELL?V_TEMPO:next<V_JAMHELP?V_JAM:next);
+            }
+            else if (v >= 0 && v < NDIAL) set_view(v);
         }
         ui.turn_t = plat_ms();
     }
     if ((e = plat_enc(EN_ALGO)) != 0) {
-        if (perf_like() && !ui.fx_menu && !(btn >> B_SEL & 1u)) {   /* the perform screen (and the visualizers): the mood */
+        if(ui.view>=V_JAMHELP && ui.view<=V_JAMSWELL && !ui.fx_menu) {
+            jp_settings_t s; en_jam_get(&s); en_jam_set(JAM_ENERGY,s.energy+e*5);
+        } else if (perf_like() && !ui.fx_menu && !(btn >> B_SEL & 1u)) {   /* the perform screen (and the visualizers): the mood */
             int m = ui.mood + 2 * e;
             char t[8];
             ui.mood = (uint8_t)(m < 0 ? 0 : m > 100 ? 100 : m);
@@ -3929,7 +3968,10 @@ static void input(void)
         ui.turn_t = plat_ms();
     }
     if ((e = plat_enc(EN_PRESET)) != 0) {
-        if ((btn >> B_GLO & 1u) && !(btn >> B_SEL & 1u)) {   /* GLO held: the genre */
+        if(ui.view==V_JAMHELP && !ui.fx_menu) {
+            jp_settings_t s; en_jam_get(&s); if(btn>>B_GLO&1u) {ui.btn_used|=1u<<B_GLO;en_jam_set(JAM_FORM,s.form+(e>0?1:-1));}
+            else en_jam_set(JAM_SONG,(en_jam_source()+(e>0?1:6))%7);
+        } else if ((btn >> B_GLO & 1u) && !(btn >> B_SEL & 1u)) {   /* GLO held: the genre */
             ui.btn_used |= 1u << B_GLO;
             genre_step(e > 0 ? 1 : -1);
         } else if (sl_play()) {                   /* the set list playing: its next or last slot (SEL, playing: on the next bar) */
@@ -4008,6 +4050,25 @@ static void input(void)
     }
     for (i = 0; i < 4; i++)
         if ((e = plat_enc(EN_K1 + (int)i)) != 0) {
+            if(ui.view>=V_JAMARR && ui.view<=V_JAMSWELL && !ui.fx_menu) {
+                static const int fields[4][4]={{JAM_FORM,JAM_BARS,JAM_VARIATION,JAM_SWELL},
+                    {JAM_KEYS_PROGRAM,JAM_TOUCH,JAM_BRIGHTNESS,JAM_RELEASE},
+                    {JAM_BASS_PROGRAM,JAM_BASS_ATTACK,JAM_BASS_GATE,JAM_ENERGY},
+                    {JAM_SWELL_VOICE,JAM_SWELL,JAM_VARIATION,JAM_MOVE}};
+                int field=fields[ui.view-V_JAMARR][i],cur=en_jam_option(field);jp_settings_t state;en_jam_get(&state);
+                if(field==JAM_FORM)cur=state.form;
+                if(field==JAM_MOVE)cur=state.movement;
+                if(field==JAM_ENERGY)cur=state.energy;
+                en_jam_set(field,field==JAM_BARS?(e>0?16:8):cur+e);ui.act_t=ui.turn_t=plat_ms();continue;
+            }
+            if(ui.view==V_JAMHELP && !ui.fx_menu) {
+                jp_settings_t s; en_jam_get(&s);
+                if(i==0) en_jam_set(JAM_KEY,((s.key+12*s.minor+e)%24+24)%24);
+                if(i==1) knob_set(P_TEMPO,proj.par[P_TEMPO]+e);
+                if(i==2) en_jam_set(JAM_BARS,e>0?16:8);
+                if(i==3) en_jam_set(JAM_MOVE,s.movement+(e>0?1:-1));
+                ui.act_t=ui.turn_t=plat_ms(); continue;
+            }
             if (ui.view == V_SEQ && (btn >> B_SEL & 1u)) {   /* the sequencer's tricks, SEL + a knob: a Euclidean pattern (hits, rotation), the lane's probability and length */
                 ui.btn_used |= 1u << B_SEL;
                 seq_trick((int)i, e);
@@ -4235,6 +4296,15 @@ static void draw_header(void)
     char t[24];
     int msg = plat_ms() < ui.msg_until;
     uint32_t h;
+    if(ui.view==V_JAMHELP && !ui.fx_menu && !msg) {
+        unsigned n;const uint8_t *p=en_jam_data(&n);(void)n;
+        uint32_t jh=hash(0x4a414d34u,en_jam_revision | en_playing<<24);
+        if(jh==ui.sig[0])return;
+        ui.sig[0]=jh;
+        cv_begin(240,HDR_H,K_BG);cv_text(8,5,&FONT_B,(const char *)p+16,K_PAD);
+        cv_text(193,7,&FONT_XS,en_playing?"PLAY":"STOP",K_ACC);
+        cv_rect(8,26,224,1,K_LINE);cv_blit(0,0);return;
+    }
     mascot_step();
     if (ui.frame % 2u)                          /* (the spring moves every frame; the header is redrawn thirty times a second) */
         return;
@@ -6340,6 +6410,65 @@ static void draw_main(void)
         }
         return;
     }
+    if(ui.view>=V_JAMARR && ui.view<=V_JAMSWELL) {
+        static const char *const titles[]={"ARRANGEMENT","DX KEYS","DX BASS","SWELLS"};
+        static const char *const names[4][4]={{"FORM","SECTION BARS","VARIATION","SWELL AMOUNT"},
+          {"PROGRAM","TOUCH","BRIGHTNESS","GATE / RELEASE"},{"PROGRAM","ATTACK","GATE","ENERGY"},
+          {"TEXTURE","AMOUNT","VARIATION","ACTIVITY"}};
+        static const int fields[4][4]={{JAM_FORM,JAM_BARS,JAM_VARIATION,JAM_SWELL},{JAM_KEYS_PROGRAM,JAM_TOUCH,JAM_BRIGHTNESS,JAM_RELEASE},
+          {JAM_BASS_PROGRAM,JAM_BASS_ATTACK,JAM_BASS_GATE,JAM_ENERGY},{JAM_SWELL_VOICE,JAM_SWELL,JAM_VARIATION,JAM_MOVE}};
+        unsigned row=(unsigned)(ui.view-V_JAMARR),k;char text[32];jp_settings_t state;en_jam_get(&state);
+        h=hash(0x534f4e47u,ui.view);h=hash(h,en_jam_revision);h=hash(h,en_jam_beat);
+        for(k=0;k<sizeof state;k++)h=hash(h,((const uint8_t *)&state)[k]);
+        if(h==ui.sig[1])return;
+        ui.sig[1]=h;
+        cv_begin(240,MAIN_H,K_BG);cv_text(8,4,&FONT_B,titles[row],K_ACC);
+        for(k=0;k<4;k++) {
+            int field=fields[row][k],value=en_jam_option(field);
+            if(field==JAM_FORM)value=state.form;
+                if(field==JAM_BARS)value=state.bars;
+            if(field==JAM_MOVE)value=state.movement;
+                if(field==JAM_ENERGY)value=state.energy;
+            cv_text(8,34+(int)k*29,&FONT_XS,names[row][k],K_DIM);
+            if(field==JAM_FORM)cv_text(118,34+(int)k*29,&FONT_XS,en_jam_form(1),K_FROST);
+            else if(field==JAM_KEYS_PROGRAM || field==JAM_BASS_PROGRAM) {
+                unsigned n;const uint8_t *p=en_jam_data(&n);(void)n;
+                if(p[4]==2){unsigned q;for(q=0;q<10;q++)text[q]=(char)p[JP2_VOICE+value*128+118+q];text[10]=0;}
+                else {text[0]='-';text[1]=0;}
+                cv_text(100,34+(int)k*29,&FONT_XS,text,K_FROST);
+            } else {itoa_u((unsigned)value,text);cv_text(174,34+(int)k*29,&FONT_B,text,K_FROST);}
+        }
+        cv_blit(0,MAIN_Y);return;
+    }
+    if(ui.view==V_JAMHELP) {
+        jp_settings_t s; char a[32],b[32],t[32],root[2]; unsigned k;
+        static const char *const role[]={"VERSE","CHORUS","BRIDGE","RETURN"};
+        en_jam_get(&s);
+        h=hash(0x4a414d32u,en_jam_beat | en_jam_length<<8 | en_jam_pending<<16 | en_jam_busy()<<17 | (uint32_t)(en_jam_load+1)<<18 | (uint32_t)en_jam_source()<<22);
+        h=hash(h,en_jam_revision);h=hash(h,(unsigned)proj.par[P_TEMPO]);
+        for(k=0;k<sizeof s;k++) h=hash(h,((const uint8_t *)&s)[k]);
+        if(h==ui.sig[1]) return;
+        ui.sig[1]=h;
+        en_jam_name(0,a); en_jam_name(1,b); root[0]=a[0];root[1]=0;
+        cv_begin(240,MAIN_H,K_BG);
+        {unsigned n;cv_text(8,2,&FONT_XS,(const char *)en_jam_data(&n)+16,K_ACC);}
+        cv_text(8,22,&FONT_L,root,K_FROST); cv_text(34,36,&FONT_B,a+1,K_FROST);
+        cv_text(142,24,&FONT_XS,"NEXT",K_DIM); cv_text(142,41,&FONT_B,b,K_PAD);
+        for(k=0;k<en_jam_length;k++) cv_rect(8+(int)k*(224/en_jam_length),72,224/en_jam_length-3,6,k==en_jam_bar?K_ACC:K_DIM);
+        itoa_u(en_jam_bar+1,t); cv_text(8,86,&FONT_XS,t,K_FROST);
+        cv_text(32,86,&FONT_XS,role[en_jam_section%4],K_DIM);
+        cv_text(160,86,&FONT_XS,s.hold?"HELD":"EVOLVING",K_ACC);
+        if(en_jam_pending || en_jam_busy() || en_jam_load>=0) {
+            cv_text(8,105,&FONT_XS,(en_jam_busy() || en_jam_load>=0)?en_jam_pending_title():en_jam_form(1),K_ACC);
+            itoa_u(en_jam_length-en_jam_bar,t); cv_text(8,122,&FONT_XS,t,K_ACC);
+            cv_text(29,122,&FONT_XS,"BARS TO CHANGE",K_DIM);
+        } else {
+            cv_text(8,105,&FONT_XS,"PRESETS: SONG / SEL: DETAILS",K_DIM);
+            itoa_u(s.energy,t);cv_text(8,122,&FONT_XS,"ENERGY",K_DIM);cv_text(61,122,&FONT_XS,t,K_ACC);
+            cv_text(105,122,&FONT_XS,"SAVE WHEN STOPPED",K_DIM);
+        }
+        cv_blit(0,MAIN_Y); return;
+    }
     if (ui.view == V_JAM) {                      /* the JAM page: the keyboard, its scale, what is held */
         h = hash(hash(0x4A414D31u, ui.keys | (uint32_t)ui.jam_voice << 27 | (uint32_t)ui.theme << 29), pool_abs() | (uint32_t)ui.jam_mode << 12 | (uint32_t)ui.jam_oct << 14 |
                                                                                                         (uint32_t)ui.jam_ans << 17 | (uint32_t)ui.ans_cnt << 18 | (uint32_t)ui.ans_playing << 22 | (uint32_t)ui.ans_i << 23);
@@ -6550,6 +6679,36 @@ static void imp_tabs(void)
 
 static void draw_knobs(void)
 {
+    if(ui.view>=V_JAMARR && ui.view<=V_JAMSWELL && !ui.fx_menu) {
+        if(ui.sig[2]==0x534f4e47u)return;
+        ui.sig[2]=0x534f4e47u;cv_begin(240,KNB_H,K_BG);
+        cv_rect(8,0,224,1,K_LINE);
+        cv_text(8,12,&FONT_XS,"KNOBS 1-4: ROWS TOP TO BOTTOM",K_DIM);
+        cv_text(8,36,&FONT_XS,"HOME: SONG / SELECT: NEXT PAGE",K_DIM);
+        cv_blit(0,KNB_Y);return;
+    }
+    if(ui.view==V_JAMHELP && !ui.fx_menu) {
+        jp_settings_t s; char t[16]; unsigned k;
+        static const char *const names[]={"KEY","BPM","BARS","MOVE"};
+        static const char *const movement[]={"OFF","SPARSE","FLOW","ACTIVE"};
+        uint32_t jh=hash(0x4a414d33u,(unsigned)proj.par[P_TEMPO]);
+        en_jam_get(&s);for(k=0;k<sizeof s;k++)jh=hash(jh,((const uint8_t *)&s)[k]);
+        if(jh==ui.sig[2])return;
+        ui.sig[2]=jh;
+        cv_begin(240,KNB_H,K_BG);
+        cv_rect(8,0,224,1,K_LINE);
+        cv_text(8,3,&FONT_XS,"F:HOLD G:IDEA A:BASS B:FILL",K_DIM);
+        for(k=0;k<4;k++) {
+            int x=8+(int)k*59;
+            cv_text(x,24,&FONT_XS,names[k],K_DIM);
+            if(k==0) {cv_text(x,42,&FONT_B,EN_NOTE_NAME[s.key],K_PAD);cv_text(x+24,45,&FONT_XS,s.minor?"m":"",K_PAD);}
+            if(k==1) {itoa_u((unsigned)proj.par[P_TEMPO],t);cv_text(x,42,&FONT_B,t,K_TEXT);}
+            if(k==2) {itoa_u(s.bars,t);cv_text(x,42,&FONT_B,t,K_TEXT);}
+            if(k==3) cv_text(x,45,&FONT_XS,movement[s.movement],K_ACC);
+        }
+        cv_blit(0,KNB_Y);return;
+    }
+
     uint32_t h = hash(2166136261u, ui.view | (uint32_t)ui.touched << 8 | (uint32_t)ui.lane << 16 | (uint32_t)ui.theme << 24), i;
     h = hash(h, (uint32_t)proj.par[P_PADTONE] | (uint32_t)proj.par[P_DR_INST] << 3 | (uint32_t)proj.par[P_AC_WAVE] << 6 |
                 (uint32_t)(proj.par[P_KIT_KICK] | proj.par[P_KIT_SNARE] << 3 | proj.par[P_KIT_HAT] << 6) << 9 |
@@ -7177,6 +7336,8 @@ static void voices_load(void)
 }
 int ui_restore_valid(uint32_t obj, const uint8_t *b, uint32_t len)
 {
+    if(obj>=OBJ_JAM0 && obj<=OBJ_JAM3) return en_jam_valid(b,len);
+    if(obj==OBJ_JSESSION) return jam_session_valid(b,len);
     if (obj == OBJ_PROJ || (obj >= OBJ_G1 && obj <= OBJ_G18)) {   /* a genre's pieces (the original genre's may still be the old bank) */
         const int g = obj == OBJ_PROJ ? 0 : (int)(obj - OBJ_G1) + 1;
         if (obj >= OBJ_NOBJ || g >= EN_NGENRE || len < 20u)
@@ -7220,7 +7381,7 @@ void ui_param_set(int p, int v)               /* the editor (main_fm1.c px_servi
         ui.act_t = plat_ms();
     }
 }
-int ui_param_get(int p) { return (unsigned)p < (unsigned)P_NPARAMS ? proj.par[p] : 0; }
+int ui_param_get(int p) { return (unsigned)p < (unsigned)P_NPARAMS ? knob_get(p) : 0; }
 void ui_voices_changed(int n, int kind)
 {
     char t[16] = "";
@@ -7615,6 +7776,7 @@ void ui_init(void)
     ui.form = (uint8_t)(glob.sl_rsv[2] >> 2 & 1u);   /* and Form (0.16.26: bit 2; 0, the records before it, is Song) */
     en_song = (uint8_t)!ui.form;
     ui.sl_pos = (uint8_t)sl_find();              /* the set list: the slot of the piece playing (0xFF none) */
+    ui.view=jam_boot_on?V_JAMHELP:V_TEMPO;
     ui.touched = -1;
     ui.boot_t = plat_ms();
     ui.theme = (uint8_t)proj.par[P_THEME];
@@ -7627,6 +7789,23 @@ void ui_init(void)
         if (!en_playing)
             en_play(1);                          /* it plays from the start */
     }
+}
+
+/* Clear legacy performance state on entry or pack activation, including the
+ * settings queued by ui_init after the audio core loaded the session. */
+static void jam_helper_sync(void)
+{
+    unsigned i;
+    if(en_jam_on && (!ui.jam_active || ui.jam_revision!=en_jam_revision)) {
+        ui.fx_lock=ui.fx_mask=0;ui.af_live=0;ui.af_end=0;
+        ui.trk_m=ui.trk_s=ui.key_on=ui.scene_q=ui.glide_on=0;
+        ui.piece_q=ui.sl_q=ui.mx_bars=0;
+        for(i=0;i<4;i++) {ui.fxk[i]=0;en_fxk((int)i,0);}
+        for(i=0;i<EN_NFXS;i++) {ui.fxs[i]=(uint8_t)EN_FXS_DEF[i];en_fxs((int)i,EN_FXS_DEF[i]);}
+        en_fx(0);en_trk(0,0);
+        ui.jam_revision=en_jam_revision;
+    }
+    ui.jam_active=en_jam_on;
 }
 
 void ui_frame(void)
@@ -7673,8 +7852,9 @@ void ui_frame(void)
             return;
         }
     }
+    jam_helper_sync();
     input();
-    scene_tick();
+    if(!en_jam_on) scene_tick();
     dj_tick();
     af_tick();
     mix_tick();
