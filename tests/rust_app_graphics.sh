@@ -22,6 +22,8 @@ cmp "$out/c0.bin" "$out/rust.bin"
 cmp "$out/frozen.bin" "$out/rust.bin"
 cc $flags -o "$out/dma" tests/host/app_dma_test.c "$out/native/release/libfm1_jam_bridge.a" -lm -ldl -lpthread
 "$out/dma"
+cc $flags -DEN_RUST_APP=0 -o "$out/dma-c0" tests/host/app_dma_test.c "$out/native/release/libfm1_jam_bridge.a" -lm -ldl -lpthread
+"$out/dma-c0"
 if [ "$#" -gt 0 ];then
     baseline=$(CDPATH= cd -- "$1" && pwd)
     (cd "$baseline" && sha256sum -c "$repo/tests/reference/source.sha256") > "$out/r01-verification.log"

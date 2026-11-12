@@ -39,11 +39,14 @@ The physical build must supply the confirmed-ready hook; otherwise enabling
 `EN_RUST_APP` produces a compile error. Native/web software frontends have
 synchronous display sinks and use their existing sync hook. Hardware stop,
 timeout latency and recovery qualification remain part of the HAL work.
+When the physical provider is present, C0 drawing also respects the same
+quarantine. Thus `HAL=1, APP=0` can remain selectable without overwriting a
+retained source; the original `HAL=0, APP=0` path has unchanged behavior.
 
 The DMA double retains the actual source pointer, checks its bytes until
 completion and exercises failed begin, failed scan-before-blit, late completion
-and fresh-begin recovery. It also verifies that quarantined operations never
-enter the Rust canvas bridge.
+and fresh-begin recovery in both C0 and Rust graphics profiles. It also verifies
+that quarantined operations never enter the Rust canvas bridge.
 
 ## Memory and interface
 

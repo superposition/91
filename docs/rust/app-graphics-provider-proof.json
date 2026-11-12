@@ -1,0 +1,47 @@
+{
+  "checkpoint": "Confirmed-ready display provider also protects selectable C0 renderer",
+  "graphicsCheckpoint": "709221e8234c44d5873083e47f06dbfee71583f1",
+  "profiles": {
+    "APP1/provider1": "retained/failed/late-complete double passed",
+    "APP0/provider1": "same retained/failed/late-complete double passed",
+    "APP0/provider0": "frozen pixel/sync corpus unchanged"
+  },
+  "retainedSourceGuards": [
+    "begin",
+    "pixel",
+    "rectangle",
+    "line through pixel",
+    "alpha pixel",
+    "glyph coverage",
+    "scanline",
+    "known quarantined blit/partial blit",
+    "next-frame redraw retry"
+  ],
+  "sourceMutationOnFailedReady": false,
+  "newPixelBuffers": 0,
+  "frozenCorpus": {
+    "cases": 78353,
+    "bytes": 51694092,
+    "sha256": "2ab1f5e8f5f52ef156df08c21f156328f1be1942f3abdc1c9c994376f97f8a8b",
+    "native": [
+      "verified R01 C",
+      "captured C",
+      "current C0",
+      "Rust adapter"
+    ],
+    "wasm": [
+      "captured C",
+      "current C0",
+      "Rust adapter"
+    ]
+  },
+  "fullInstrumentAndNativeReplay": "Qualified at predecessor graphics checkpoint; this follow-up changes only the explicit-provider C0 branch, then rechecks shared graphics/DMA paths",
+  "physicalHal": "Provider supplied by HAL ticket; physical abort/completion latency not qualified here",
+  "sourceSha256Lf": {
+    "docs/RUST_APP.md": "cfc3ea9e4c6d2c2014250447ae2c7a8f623d3cfcc05933fd33820bfa148446c5",
+    "firmware/src/gfx.c": "f2d8d1e098135588adcb52ce04bd5b6078a0ad3b2e340e326faec975d2130af0",
+    "firmware/src/app/ui.c": "a0daef47df279a16e13f078aa98c714e9f1294c72720e3850fb598fe25e7b35c",
+    "tests/host/app_dma_test.c": "78bac71ecd07d37ad9728e5e22710c83ad36b47b9fb9d61470d948c5d1aef463",
+    "tests/rust_app_graphics.sh": "6855a29284d5e6d588267a4a0edd787146c41a790bc258ac1943e546d4eaa05c"
+  }
+}
