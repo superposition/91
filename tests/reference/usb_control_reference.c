@@ -127,7 +127,8 @@ int usb_control_run(void){
         for(uint32_t offset=0;offset<length;offset+=64){
             const uint32_t n=length-offset>64?64:length-offset;
 #if EN_RUST_USB
-            assert(fm1_rust_usb_descriptor_copy(USB_DESCRIPTOR_FLAGS,FELUCCA_USB_PID,request,offset,ep0buf,n)==(int32_t)n);
+            const int32_t copied=fm1_rust_usb_descriptor_copy(USB_DESCRIPTOR_FLAGS,FELUCCA_USB_PID,request,offset,ep0buf,n);
+            assert(copied==(int32_t)n);
 #else
             memcpy(ep0buf,data+offset,n);
 #endif

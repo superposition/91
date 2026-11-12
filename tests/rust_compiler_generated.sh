@@ -17,7 +17,7 @@ for package in hal types formats engine rt app jam_bridge;do
     "$zig" cc "${native[@]}" -c "$bridge/libfm1_$package.rlib.c" -o "$out/$package.o"
     objects+=("$out/$package.o")
 done
-common=(-DEN_HOST -D_POSIX_C_SOURCE=200809L -Ibuild/gen -Ifirmware/src -Ifirmware/src/dsp -Wl,--gc-sections -static)
+common=(-UNDEBUG -include tests/reference/compiler_assertions.h -DEN_HOST -D_POSIX_C_SOURCE=200809L -Ibuild/gen -Ifirmware/src -Ifirmware/src/dsp -Wl,--gc-sections -static)
 rust=(-DEN_RUST_JAM=1 -DEN_RUST_COMMANDS=1 -DEN_RUST_HANDOFF=1 -DEN_RUST_TRANSPORT=1 -DEN_RUST_SCHEDULER=1 -DEN_RUST_MELODIC=1 -DEN_RUST_EFFECTS=1 -DEN_RUST_VOICES=1 -DEN_RUST_WORKER=1 -DEN_RUST_FM6=1 -DEN_RUST_FACTORY=1 -DEN_RUST_FORMATS=1 -DEN_RUST_STORAGE=1 -DEN_RUST_HARMONY=1 -DEN_RUST_APP=1)
 web=(tests/reference/compiler_web_trace.c tests/reference/compiler_engine_observer.c)
 abi=tests/reference/compiler_serial_abi.c
