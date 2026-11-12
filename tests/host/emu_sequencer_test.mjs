@@ -40,6 +40,9 @@ input('web_buttons',1<<5);advance(100);input('web_enc',2,1);advance(100);input('
 assert.equal(rust.ex.web_rust_stat(21),boundary,'F4 leaves Songbook boundary scheduling');
 assert(rust.ex.web_rust_stat(18)>lanes,'legacy drum decisions execute in Rust');
 assert(rust.ex.web_rust_stat(20)>0,'legacy delayed-hit deadlines execute in Rust');
+const melodic=Array.from({length:6},(_,index)=>rust.ex.web_rust_stat(22+index));
+assert(melodic.every(value=>value>0),'acid, mutation, pluck, bass, bar and MIDI/transport paths execute in Rust');
 assert.equal(rust.memory.buffer.byteLength,33554432);assert(peak>0.05 && peak<1);
 console.log(JSON.stringify({scenario:'legacy-f4-piece-genre-transport',compared_samples:samples,render_calls:calls,peak,
-  sequencer:{lanes:rust.ex.web_rust_stat(18)-lanes,waits:rust.ex.web_rust_stat(20),boundaries:boundary},memory_bytes:rust.memory.buffer.byteLength}));
+  sequencer:{lanes:rust.ex.web_rust_stat(18)-lanes,waits:rust.ex.web_rust_stat(20),boundaries:boundary},
+  melodic:{acid:melodic[0],mutations:melodic[1],pluck:melodic[2],bass:melodic[3],bar:melodic[4],midi_transport:melodic[5]},memory_bytes:rust.memory.buffer.byteLength}));

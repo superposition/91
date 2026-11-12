@@ -15,26 +15,21 @@ cc -O2 -ffp-contract=off -std=gnu99 -DEN_HOST \
     -I"$baseline/firmware/src/dsp" -o "$out/reference" tests/reference/transport_reference.c -lm
 cargo build --release --locked -p fm1-jam-bridge --target-dir "$out/rust-build"
 cc -O2 -ffp-contract=off -std=gnu99 -DEN_HOST \
-    -DEN_RUST_JAM=1 -DEN_RUST_COMMANDS=1 -DEN_RUST_TRANSPORT=1 -DEN_RUST_HANDOFF=1 -DEN_RUST_SCHEDULER=1 \
+    -DEN_RUST_JAM=1 -DEN_RUST_COMMANDS=1 -DEN_RUST_TRANSPORT=1 -DEN_RUST_HANDOFF=1 -DEN_RUST_SCHEDULER=1 -DEN_RUST_MELODIC=1 \
     -Ifirmware/src/dsp -o "$out/rust" tests/reference/transport_reference.c \
     "$out/rust-build/release/libfm1_jam_bridge.a" -lpthread -ldl -lm
 "$out/reference" 8 > "$out/tempo.json"
 cmp "$out/tempo.json" rust/fm1-engine/tests/transport-tempo.json
 "$out/rust" 8 > "$out/tempo-rust.json"
 cmp "$out/tempo.json" "$out/tempo-rust.json"
-for oracle in 9 10; do
+for oracle in 9 10 11; do
     corpus=sequencer-density
     [ "$oracle" = 9 ] || corpus=sequencer-mutation
+    [ "$oracle" != 11 ] || corpus=melodic-acid
     "$out/reference" "$oracle" > "$out/$corpus.json"
     cmp "$out/$corpus.json" "rust/fm1-engine/tests/$corpus.json"
     "$out/rust" "$oracle" > "$out/$corpus-rust.json"
     cmp "$out/$corpus.json" "$out/$corpus-rust.json"
 done
-for scenario in 0 1 2 3 4 5 6 7 ${SEQUENCER_CASES:-}; do
-    "$out/reference" "$scenario" "$out/reference-$scenario.trace" > "$out/reference-$scenario.json"
-    "$out/rust" "$scenario" "$out/rust-$scenario.trace" > "$out/rust-$scenario.json"
-    cmp "$out/reference-$scenario.trace" "$out/rust-$scenario.trace"
-    cmp "$out/reference-$scenario.json" "$out/rust-$scenario.json"
-    cat "$out/rust-$scenario.json"
-done
+python3 tests/reference/transport_compare.py "$out" 0 1 2 3 4 5 6 7 ${SEQUENCER_CASES:-}
 echo 'Native transport phase/chunk/control/MIDI/PCM traces match.'

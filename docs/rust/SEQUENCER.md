@@ -20,7 +20,7 @@ The signed deadlines still live beside the existing C voice state. Rust chooses 
 
 The common musical RNG is xorshift32, distinct from the Songbook planner's LCG. The C adapter passes its current word into each scoped scheduling call and receives the final word back. Short-circuit conditions, candidate order, integer truncation and binary32 multiplication order are preserved. Voice firing does not consume this common stream, which permits one lane's decisions to be returned before its C dispatch while preserving the interleaving with other lanes and tick clients. Changing that voice contract later requires revisiting this boundary.
 
-The C adapter still selects the source pattern ID at a bar boundary and supplies its mask and modification byte. Rust decides whether and how that step sounds. The surrounding C tick also orchestrates harmonic changes, acid-answer bars and performance-FX callbacks. Those are explicit remaining work, rather than claims hidden behind the new module name.
+At this checkpoint the C adapter still selected the source pattern ID and supplied its mask and modification byte. The subsequent [melodic checkpoint](MELODIC.md) moves source selection and the acid/pluck/bass and bar/FX decisions into Rust; its call map identifies the remaining harmonic and voice boundaries.
 
 ## Verification
 
@@ -44,6 +44,6 @@ RUSTUP_TOOLCHAIN=1.94.1 sh tests/rust_handoff.sh /absolute/R01/source
 
 ## Remaining R09 work
 
-Legacy `acid_step`/acid mutation, `cm_step`/motif and bass-line note generation still contain C sequencing decisions. Some harmonic/bar counters and FX orchestration, source-ID selection and Start/Stop voice cleanup also remain C. The borrowed pack/session/planner work and these drum decisions do not constitute a complete port of every musical scheduling path. The whole-ticket acceptance therefore remains open.
+The subsequent [melodic checkpoint](MELODIC.md) ports `acid_step`/mutation/answer, `cm_step`/motif and bass-line note decisions, source selection, bar/FX orchestration, free-drift expiry and Start/Stop scheduler reset/cancellation. Its current call map distinguishes retained harmonic construction, application effects and voice cleanup. This document and its proof remain the evidence for the earlier drum checkpoint.
 
 The new request/results use bounded stack storage; four diagnostic counters add 16 bytes to the Rust-enabled image. This is emulator evidence with fixed 32 MiB memory, not a hardware deadline, stack or ordinary-RAM qualification. No physical firmware was flashed and no hardware interaction was required.

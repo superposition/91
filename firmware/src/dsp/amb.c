@@ -2,6 +2,9 @@
 /* The instrument (amb.h). One compilation unit, -O2. */
 #include "amb.h"
 #include "fastmath.h"
+#if EN_RUST_MELODIC
+#include "rust_melodic.h"
+#endif
 #if EN_RUST_SCHEDULER
 #include "rust_sequencer.h"
 #endif
@@ -1847,6 +1850,27 @@ static uint32_t ac_loop;                        /* the times round the line */
 static uint32_t ac_bar0, ac_loop0;               /* the bar and the loop the answer's counting starts from (the beginning of the next bar, of the next loop, after its settings change) */
 static uint8_t ac_resync_bar, ac_resync_loop;
 volatile uint8_t en_acid_ans;                   /* the answer sounding now, for the screen */
+
+#if EN_RUST_MELODIC
+static float evolve; /* render control value declared with the harmony state below */
+static void melodic_harmony(fm1_harmony_t *h,uint32_t held)
+{
+    unsigned i;for(i=0;i<12;i++)h->steps[i]=steps[i];for(i=0;i<4;i++)h->pcs[i]=chord_pcs[i];
+    h->nsteps=nsteps;h->chord_count=chord_nt;h->degree=deg;h->root=par[P_ROOT];h->song_octave=par[P_OCT];h->pool=pool;h->pedal=held;
+}
+static void melodic_acid_get(fm1_acid_t *s,fm1_acid_config_t *c)
+{
+    unsigned i;for(i=0;i<16;i++){s->offsets[i]=ac_off[i];s->octaves[i]=ac_oct[i];}
+    s->gate=ac_gate;s->accent=ac_accent;s->slide=ac_slide;s->position=ac_pos;s->loops=ac_loop;s->origin=ac_loop0;s->resync=ac_resync_loop;s->answer=ac_ans_loop;
+    *c=(fm1_acid_config_t){par[P_AC_LEN],par[P_AC_DENS],par[P_AC_RANGE],par[P_AC_SLIDE],par[P_AC_MUT],par[P_AC_CHG],par[P_AC_LOCK],par[P_AC_CHANCE],par[P_AC_RESP],par[P_AC_EVERY],par[P_DD_CHANGE],par[P_AC_OCT],par[P_AC_MAN],evolve};
+}
+static void melodic_acid_put(const fm1_acid_t *s)
+{
+    unsigned i;for(i=0;i<16;i++){ac_off[i]=s->offsets[i];ac_oct[i]=s->octaves[i];}
+    ac_gate=(uint16_t)s->gate;ac_accent=(uint16_t)s->accent;ac_slide=(uint16_t)s->slide;ac_pos=s->position;ac_loop=s->loops;ac_loop0=s->origin;ac_resync_loop=(uint8_t)s->resync;ac_ans_loop=(uint8_t)s->answer;
+}
+#endif
+
 static int acid_raw(int s, int dd)              /* step s's note, the chord's degree moved dd degrees, in the register (no answer) */
 {
     int d = deg + ac_off[s] + dd, o, n;
@@ -1874,6 +1898,9 @@ static int ac_centre(void)                      /* the middle of the line's note
  * next note of the scale up, the fifth, takes its place. Minor chords keep their sixths and seconds (the acid's dark colours). */
 static int avoid_fix(int n)
 {
+#if EN_RUST_MELODIC
+fm1_harmony_t h;melodic_harmony(&h,0);return fm1_rust_melodic_avoid(n,&h);
+#else
     int k, maj = 0, mnr = 0;
     if (chord_nt < 2)
         return n;
@@ -1883,6 +1910,7 @@ static int avoid_fix(int n)
         mnr |= d == 3;
     }
     return maj && !mnr && ((n - chord_pcs[0]) % 12 + 12) % 12 == 5 && n + 2 <= 96 ? n + 2 : n;
+#endif
 }
 static int acid_note(int s, int v)              /* acid step s's note, as the call (v 0) or as answer v plays it */
 {
@@ -1927,10 +1955,14 @@ static int acid_gate(int st, int len, int v)
 }
 int en_acid_preview(int st, int v)
 {
+#if EN_RUST_MELODIC
+fm1_acid_t s;fm1_acid_config_t c;fm1_harmony_t h;melodic_acid_get(&s,&c);melodic_harmony(&h,0);return fm1_rust_acid_preview(&s,&c,&h,st,v);
+#else
     const int len = par[P_AC_LEN] < 1 ? 1 : par[P_AC_LEN] > EN_NSTEP ? EN_NSTEP : par[P_AC_LEN], n = (unsigned)st < EN_NSTEP ? st : 0;
     if (n >= len || nsteps < 1 || !acid_gate(n, len, v))
         return -1;
     return acid_note(acid_src(n, len, v / 5), v);
+#endif
 }
 
 /* PEDAL (0.16.21, Steven's "harmonic drone followers", issue #3): a voice either follows the chords (as always) or holds the key's root
@@ -2485,6 +2517,9 @@ void en_pluck_unpack(const uint8_t *b)
 }
 static void ac_roll_w(int st, int what)         /* a step made anew: what 0 all of it, 1 the note, 2 the rhythm (whether it sounds), 3 the accent and the slide */
 {
+#if EN_RUST_MELODIC
+fm1_acid_t s;fm1_acid_config_t c;fm1_harmony_t h;melodic_acid_get(&s,&c);melodic_harmony(&h,0);fm1_rust_acid_roll(&s,&c,&h,(uint32_t)st,(uint32_t)what,&rng);melodic_acid_put(&s);
+#else
     float dens = (float)par[P_AC_DENS] * 0.01f;
     uint16_t m = (uint16_t)(1u << st);
     if (what == 0 || what == 2) {
@@ -2507,6 +2542,7 @@ static void ac_roll_w(int st, int what)         /* a step made anew: what 0 all 
         else
             ac_slide &= (uint16_t)~m;
     }
+#endif
 }
 static void ac_roll(int st) { ac_roll_w(st, 0); }
 
@@ -2526,6 +2562,9 @@ static void ac_publish(void)
 }
 static void ac_step_set(int s, int off, int oct, int gate, int accent, int slide)   /* the player's edit of a step */
 {
+#if EN_RUST_MELODIC
+fm1_acid_t state;fm1_acid_config_t c;melodic_acid_get(&state,&c);fm1_rust_acid_edit(&state,(uint32_t)s,off,oct,(uint32_t)gate,(uint32_t)accent,(uint32_t)slide);melodic_acid_put(&state);ac_publish();
+#else
     const uint16_t m = (uint16_t)(1u << s);
     ac_off[s] = (int8_t)off;
     ac_oct[s] = (int8_t)oct;
@@ -2533,10 +2572,14 @@ static void ac_step_set(int s, int off, int oct, int gate, int accent, int slide
     ac_accent = (uint16_t)(accent ? ac_accent | m : ac_accent & ~m);
     ac_slide = (uint16_t)(slide ? ac_slide | m : ac_slide & ~m);
     ac_publish();
+#endif
 }
 
 static void ac_capture(int s, int note, int accent, int slide)   /* Capture: a note played by hand into step s, as the offset and octave nearest it under the chord and scale of now (the line then follows the chords) */
 {
+#if EN_RUST_MELODIC
+fm1_acid_t state;fm1_acid_config_t c;fm1_harmony_t h;int32_t off,oct;melodic_acid_get(&state,&c);melodic_harmony(&h,0);fm1_rust_acid_capture(&c,&h,note,&off,&oct);ac_step_set(s,off,oct,1,accent,slide);
+#else
     int off, oct, bo = 0, bc = 0, best = 999;
     for (oct = 0; oct < 4; oct++)
         for (off = 0; off < 12 && off < 2 * nsteps; off++) {
@@ -2552,18 +2595,26 @@ static void ac_capture(int s, int note, int accent, int slide)   /* Capture: a n
             }
         }
     ac_step_set(s, bo, bc, 1, accent, slide);
+#endif
 }
 
 static void ac_regrow(void)
 {
+#if EN_RUST_MELODIC
+fm1_acid_t s;fm1_acid_config_t c;fm1_harmony_t h;melodic_acid_get(&s,&c);melodic_harmony(&h,0);fm1_rust_acid_regrow(&s,&c,&h,&rng);melodic_acid_put(&s);ac_publish();
+#else
     int st;
     for (st = 0; st < EN_NSTEP; st++)
         ac_roll(st);
     ac_publish();
+#endif
 }
 
 static void ac_mutate(void)                     /* the loop's end: Mutate (a deja-vu knob) re-rolls steps: 0 holds the line, 100 renews it every loop */
 {
+#if EN_RUST_MELODIC
+fm1_acid_t s;fm1_acid_config_t c;fm1_harmony_t h;melodic_acid_get(&s,&c);melodic_harmony(&h,0);fm1_rust_acid_mutate(&s,&c,&h,&rng);melodic_acid_put(&s);ac_publish();
+#else
     if (par[P_AC_LOCK]) {                       /* frozen: the line as it is */
         ac_publish();
         return;
@@ -2575,6 +2626,7 @@ static void ac_mutate(void)                     /* the loop's end: Mutate (a dej
         if (frand() < m)
             ac_roll_w(st, par[P_AC_CHG] > 0 && par[P_AC_CHG] < 4 ? par[P_AC_CHG] : 0);
     ac_publish();
+#endif
 }
 
 /* the acid's note, as the sixteenth chose it, played when its time comes: on the tick, or after the swing and the looseness (ac_wait: samples; the
@@ -2612,6 +2664,20 @@ static void acid_fire(void)
 }
 static void acid_step(int32_t wait)             /* a sixteenth of the acid line (wait: the swing and the looseness, samples) */
 {
+#if EN_RUST_MELODIC
+fm1_acid_t s;fm1_acid_config_t c;fm1_harmony_t h;fm1_acid_note_t result;
+    melodic_acid_get(&s,&c);melodic_harmony(&h,0);
+    fm1_rust_acid_step(&s,&c,&h,ac_ans_bar,ac_fill_bar,acid.play,(uint32_t)(acid.gate_left<0),&result);
+    melodic_acid_put(&s);if(s.position==0 && c.chance)en_acid_ans=(uint8_t)s.answer;en_acid_pos=(uint8_t)result.position;
+    if(result.action==1){
+        if(ac_wait>0){ac_wait=0;acid_fire();}
+        ac_pend.n=result.note;ac_pend.beat=(uint8_t)result.beat;ac_pend.slid_ok=(uint8_t)result.slid_ok;
+        ac_pend.dec=0.06f*fm_exp2f((float)par[P_AC_DEC]*0.05f);ac_pend.acc=(uint8_t)result.accent;
+        ac_pend.hat=(uint8_t)(lk_hat&&links_on());ac_pend.slide=(uint8_t)result.slide;
+        if(wait>0)ac_wait=wait;else acid_fire();
+    }else if(result.action==2){acid.gate_left=0;acid.amp_t=0.0f;}
+    if(fm1_rust_acid_advance(&s,c.length)){melodic_acid_put(&s);ac_mutate();}else melodic_acid_put(&s);
+#else
     const int len = par[P_AC_LEN], st = ac_pos;
     int v, type;
     if (st == 0 && ac_resync_loop) {            /* the answer's settings changed: its count starts at this loop */
@@ -2656,6 +2722,7 @@ static void acid_step(int32_t wait)             /* a sixteenth of the acid line 
         ac_loop++;
         ac_mutate();
     }
+#endif
 }
 
 /* ---------------------------------------------------------------- drums --- */
@@ -3064,6 +3131,12 @@ static void cm_midi_off(int k)
 }
 static void cm_midi_on(int note, uint32_t vel, int32_t len)
 {
+#if EN_RUST_MELODIC
+const uint32_t plan=fm1_rust_mel_midi_slot(cm_mn,cm_moff,note);int k,slot=(int)(plan>>8);
+    _Static_assert(CM_MN==8,"Rust MIDI gate count");
+    for(k=0;k<CM_MN;k++)if(plan>>k&1u)cm_midi_off(k);
+    cm_mn[slot]=(uint8_t)note;cm_moff[slot]=len;midi(0x91,(uint32_t)note,vel);
+#else
     int k, slot = -1, oldest = -1;
     for (k = 0; k < CM_MN; k++) {
         if (cm_mn[k] == note)
@@ -3082,13 +3155,18 @@ static void cm_midi_on(int note, uint32_t vel, int32_t len)
     cm_mn[slot] = (uint8_t)note;
     cm_moff[slot] = len;
     midi(0x91, (uint32_t)note, vel);
+#endif
 }
 static void cm_midi_step(int32_t k)             /* k samples went by */
 {
+#if EN_RUST_MELODIC
+int i;for(i=0;i<CM_MN;i++)if(fm1_rust_mel_midi_due(cm_mn[i],&cm_moff[i],k))cm_midi_off(i);
+#else
     int i;
     for (i = 0; i < CM_MN; i++)
         if (cm_mn[i] && (cm_moff[i] -= k) <= 0)
             cm_midi_off(i);
+#endif
 }
 static void cm_midi_flush(void)
 {
@@ -3270,8 +3348,29 @@ static void cm_play(int key, float vg)          /* a note played by hand (the JA
     cm_trigger(note, fm_minf(0.95f * vg, 1.15f));
 }
 
+
+#if EN_RUST_MELODIC
+static void melodic_pluck_get(fm1_pluck_t *s,fm1_pluck_config_t *c)
+{
+    unsigned i;for(i=0;i<32;i++){s->found[i]=cm_f[i];s->gate[i]=cm_g[i];s->index[i]=cm_ix[i];s->velocity[i]=cm_vl[i];}
+    for(i=0;i<16;i++)s->intervals[i]=mo_k[i];
+    s->cursor=cm_i;s->slot=cm_k;s->sync=cm_sync;s->motif=mo_play;s->last=mo_last;s->valid=mo_valid;s->recording=mo_rec;
+    s->on=mo_on;s->inverted=mo_inv;s->alternate=mo_alt;s->restate=mo_restate;s->first=mo_first;s->first_index=mo_idx0;s->previous=mo_prev;
+    *c=(fm1_pluck_config_t){par[P_CM_RATE],par[P_CM_LVL],par[P_CM_MAN],par[P_CM_RANGE],par[P_CM_OCT],par[P_CM_LOOP],par[P_CM_VU],par[P_CM_DENS],par[P_CM_MOTIF],par[P_CM_STYLE],par[P_CM_LEAP],par[P_CM_LOCK]};
+}
+static void melodic_pluck_put(const fm1_pluck_t *s)
+{
+    unsigned i;for(i=0;i<32;i++){cm_f[i]=s->found[i];cm_g[i]=s->gate[i];cm_ix[i]=s->index[i];cm_vl[i]=s->velocity[i];}for(i=0;i<16;i++)mo_k[i]=s->intervals[i];
+    cm_i=s->cursor;cm_k=s->slot;cm_sync=(uint8_t)s->sync;mo_play=(uint16_t)s->motif;mo_last=(int8_t)s->last;mo_valid=(uint8_t)s->valid;mo_rec=(uint8_t)s->recording;
+    mo_on=(uint8_t)s->on;mo_inv=(uint8_t)s->inverted;mo_alt=(uint8_t)s->alternate;mo_restate=(uint8_t)s->restate;mo_first=(uint8_t)s->first;mo_idx0=(uint8_t)s->first_index;mo_prev=(uint8_t)s->previous;
+}
+#endif
+
 static int cm_ladder(int *arp)                  /* the chord's tones over the pluck's octaves, low to high: the ladder a slot's index points into */
 {
+#if EN_RUST_MELODIC
+fm1_pluck_t s;fm1_pluck_config_t c;fm1_harmony_t h;int32_t n;melodic_pluck_get(&s,&c);melodic_harmony(&h,0);fm1_rust_pluck_ladder(&c,&h,arp,&n);return n;
+#else
     const int range = par[P_CM_RANGE] < 1 ? 1 : par[P_CM_RANGE] > 3 ? 3 : par[P_CM_RANGE], base = 60 + 12 * (par[P_OCT] + par[P_CM_OCT]);
     int n = 0, k, o, t;
     for (o = 0; o < range; o++)
@@ -3284,10 +3383,14 @@ static int cm_ladder(int *arp)                  /* the chord's tones over the pl
         arp[o + 1] = t;
     }
     return n;
+#endif
 }
 
 static void cm_capture(int slot, int note)      /* Capture: a note played by hand (or a rest, note < 0) into a slot of the loop, as the nearest rung of the ladder of now, an octave's leap allowed */
 {
+#if EN_RUST_MELODIC
+fm1_pluck_t s;fm1_pluck_config_t c;fm1_harmony_t h;melodic_pluck_get(&s,&c);melodic_harmony(&h,0);fm1_rust_pluck_capture(&s,&c,&h,(uint32_t)slot,note);melodic_pluck_put(&s);
+#else
     int arp[12], n, k, best = 0, leap = 0, bd = 999;
     cm_f[slot] = 1;
     cm_g[slot] = (uint8_t)(note >= 0);
@@ -3308,6 +3411,7 @@ static void cm_capture(int slot, int note)      /* Capture: a note played by han
     }
     cm_ix[slot] = (uint8_t)(best | (leap > 0 ? 32 : leap < 0 ? 64 : 0) | 128);
     cm_vl[slot] = 230;
+#endif
 }
 
 static void cm_publish(void)                    /* the loop's first sixteen slots, for the screen and the record */
@@ -3321,14 +3425,25 @@ static void cm_publish(void)                    /* the loop's first sixteen slot
 }
 static void cm_step_set(int s, int rung, int level)   /* the player's edit of a step */
 {
+#if EN_RUST_MELODIC
+fm1_pluck_t state;fm1_pluck_config_t c;melodic_pluck_get(&state,&c);fm1_rust_pluck_edit(&state,(uint32_t)s,rung,level);melodic_pluck_put(&state);cm_publish();
+#else
     cm_f[s] = 1;
     cm_g[s] = (uint8_t)(level > 0);
     cm_ix[s] = (uint8_t)((rung > 11 ? 11 : rung) | 128);
     cm_vl[s] = (uint8_t)(level <= 1 ? 110 : level == 2 ? 190 : 255);
     cm_publish();
+#endif
 }
 static void cm_step(int st, int32_t sw)         /* a sixteenth of the counter-melody: st its place in the bar, sw the swing's delay (samples) */
 {
+#if EN_RUST_MELODIC
+fm1_pluck_t s;fm1_pluck_config_t c;fm1_harmony_t h;fm1_pluck_note_t result;unsigned i;
+    melodic_pluck_get(&s,&c);melodic_harmony(&h,0);fm1_rust_pluck_step(&s,&c,&h,st,bars,sec,&rng,&result);melodic_pluck_put(&s);
+    if(result.publish)for(i=0;i<16;i++){en_cm_rung[i]=result.rungs[i];en_cm_lvl[i]=result.levels[i];}
+    if(result.slot>=0)en_cm_pos=(uint8_t)result.slot;
+    if(result.fire){if(sw>0){cm_wait=sw;cm_pnote=result.note;cm_pvel=result.velocity;}else cm_trigger(result.note,result.velocity);}
+#else
     static const uint8_t RATE[4] = {4, 3, 2, 1};   /* sixteenths between notes, by the Rate knob */
     const int ri = par[P_CM_RATE] < 0 ? 0 : par[P_CM_RATE] > 3 ? 3 : par[P_CM_RATE];
     int arp[12], n = 0, note, idx, slot, replay, leap = 0;
@@ -3467,6 +3582,7 @@ static void cm_step(int st, int32_t sw)         /* a sixteenth of the counter-me
     } else {
         cm_trigger(note, vel);
     }
+#endif
 }
 
 
@@ -3511,15 +3627,34 @@ static void bs_publish(void)
     for (s = 0; s < 16; s++)
         en_bs[s] = bs[s];
 }
+
+#if EN_RUST_MELODIC
+static void melodic_bass_get(fm1_bass_t *s)
+{
+    unsigned i;for(i=0;i<16;i++){s->steps[i]=bs[i];s->history[i]=bs_hist[i];}s->set=bs_set;s->beat=bl_beat;s->position=en_bs_pos;
+}
+static void melodic_bass_put(const fm1_bass_t *s)
+{
+    unsigned i;for(i=0;i<16;i++){bs[i]=s->steps[i];bs_hist[i]=s->history[i];}bs_set=(uint8_t)s->set;bl_beat=(uint8_t)s->beat;en_bs_pos=(int8_t)s->position;
+}
+#endif
+
 static int bs_semis(int k)                      /* k steps of the scale above the chord's root (the key's, on pedal), in semitones */
 {
+#if EN_RUST_MELODIC
+fm1_harmony_t h;melodic_harmony(&h,pedal);return fm1_rust_bass_semis(k,&h);
+#else
     const int m = nsteps > 0 ? nsteps : 7, d0 = pedal & 1u ? 0 : deg, d = d0 + k;
     return steps[d % m] + 12 * (d / m) - (steps[d0 % m] + 12 * (d0 / m));
+#endif
 }
 void en_bass_step(int s, int v) { post(C_BSSTEP, s & 15, v & 0xFF); }
 void en_bass_capture(void) { post(C_BSSTEP, 0x20, 0); }   /* none set: the bar the line played last (the page opened) */
 static void bs_capture(void)
 {
+#if EN_RUST_MELODIC
+fm1_bass_t s;melodic_bass_get(&s);fm1_rust_bass_capture(&s);melodic_bass_put(&s);bs_publish();
+#else
     int k, v = 0;
     for (k = 0; k < 16; k++)
         v |= bs[k] = bs_hist[k];
@@ -3527,6 +3662,7 @@ static void bs_capture(void)
         bs[0] = 1 | 1 << 6;                     /* (it played none: a root on the one) */
     bs_set = 1;
     bs_publish();
+#endif
 }
 void en_bass_steps_set(const uint8_t *b)       /* a piece's sixteen (all rests: none set, the next Steps starts from the line heard) */
 {
@@ -3542,11 +3678,15 @@ void en_bass_steps_get(uint8_t *b)
 }
 static int bl_fit(int n)
 {
+#if EN_RUST_MELODIC
+return fm1_rust_melodic_fold(n,24,83);
+#else
     while (n < 24)
         n += 12;
     while (n > 83)
         n -= 12;
     return n;
+#endif
 }
 static int bl_below(int root)                   /* the scale note just below the root (a semitone below if the scale has none within two) */
 {
@@ -3590,6 +3730,9 @@ static void bl_go_f(int n, int32_t w, int fl)
 }
 static void bl_rec(int st, int n, int root)     /* the line as heard, as steps: the note's scale steps above the root and its octave (the nearest) */
 {
+#if EN_RUST_MELODIC
+fm1_bass_t s;fm1_harmony_t h;melodic_bass_get(&s);melodic_harmony(&h,pedal);fm1_rust_bass_record(&s,&h,st,n,root);melodic_bass_put(&s);
+#else
     int iv = n - root, o = 1, k, best = 0, bd = 99;
     while (iv < 0 && o > 0)
         iv += 12, o--;
@@ -3601,6 +3744,7 @@ static void bl_rec(int st, int n, int root)     /* the line as heard, as steps: 
             bd = ad, best = k;
     }
     bs_hist[st & 15] = (uint8_t)(1 | best << 3 | o << 6);
+#endif
 }
 static void bl_go(int n, int32_t w) { bl_go_f(n, w, 0); }
 static int bl_fifth(void)                       /* the fifth above the root, semitones: the chord's altered fifth if it has one (diminished, augmented), else the perfect fifth (a 9th chord leaves it out of the voicing, not the harmony), or the scale's if that is not in the scale */
@@ -3617,6 +3761,15 @@ static int bl_fifth(void)                       /* the fifth above the root, sem
 }
 static void bl_step(int st, int32_t w)
 {
+#if EN_RUST_MELODIC
+fm1_bass_t s;fm1_bass_config_t c;fm1_harmony_t h;fm1_bass_note_t result;unsigned i;const int mode=par[P_BL_MODE],g=chord_genre;
+    const bl_fig_t *figure=mode==6?&BL_RIFF[gx(g)]:&BL_FIG[(mode>6?mode-7:0)%EN_NBLFIG];
+    melodic_bass_get(&s);melodic_harmony(&h,pedal);
+    c=(fm1_bass_config_t){mode,par[P_DR_MAN],bass.play,en_playing,sec,SECT[gx(g)].bass,BL_ROOT[gx(g)],figure->mask,{0,0,0,0},par[P_BL_MOVE],par[P_BASSOCT],drop_imp,bl_kick};
+    for(i=0;i<4;i++)c.intervals[i]=figure->iv[i];
+    fm1_rust_bass_step(&s,&c,&h,st,&rng,&result);melodic_bass_put(&s);if(result.publish)bs_publish();
+    if(result.fire)bl_go_f(result.note,w,(int)result.flags);
+#else
     const int mode = par[P_BL_MODE], g = chord_genre;
     int hit = 0, iv = 0, root;
     if (!mode || bass.play || par[P_DR_MAN] || !en_playing || !nsteps)
@@ -3683,6 +3836,7 @@ static void bl_step(int st, int32_t w)
     bl_rec(st, root + iv, root);
     bl_go(root + iv, w);
     bl_beat++;
+#endif
 }
 
 static void stab_fire(float envv)
@@ -3804,6 +3958,17 @@ static void tick(void)
     int perc_hit = 0;
     step_t = 0;
     jp_tick(st);
+#if EN_RUST_MELODIC
+    {uint32_t actions[5];unsigned i;fm1_rust_mel_tick_actions(scat_arm,rvs_arm,var_exit,rpt_arm,actions);
+    for(i=0;i<5;i++)switch(actions[i]&255u){
+    case 1:scat_engage();scat_arm=0;break;
+    case 2:rvs_engage();rvs_arm=0;break;
+    case 3:flx_tick(st);break;
+    case 4:var_leave();var_exit=0;break;
+    case 5:rpt_engage((int)(actions[i]>>8));rpt_arm=0;break;
+    case 6:rpt_refresh(st);break;
+    }}
+#else
     if (scat_arm) {                             /* the scatter too */
         scat_engage();
         scat_arm = 0;
@@ -3823,6 +3988,7 @@ static void tick(void)
     } else {
         rpt_refresh(st);                        /* the slip refresh: a repeat's slice is the newest again on the beat (or the bar) */
     }
+#endif
     if (st == 0) {                              /* a bar */
         int tb = TRIG_BARS[(unsigned)par[P_DE_TRIG] < 6u ? par[P_DE_TRIG] : 0];
         fill_bar = fill_q;                      /* the fill the DJ asked for a bar ahead */
@@ -3838,33 +4004,57 @@ static void tick(void)
             fill_kind = (uint8_t)k;
 #endif
         }
+#if EN_RUST_MELODIC
+        {uint32_t action=fm1_rust_mel_dj(dj_sync,sec,en_playing,en_frozen,(uint32_t)change_pending,hr_bars(),hr_left,drift_total,drift_left,step_len);
+        if(action==1)section_cmd(EN_CMD_BREAK);else if(action==2)fill_bar=1;}
+#else
         if (dj_sync && sec == SEC_GROOVE && en_playing && !en_frozen) {   /* the DJ follows the chords: the bar before a change is a fill, the change's bar a breakdown */
             if (change_pending)
                 section_cmd(EN_CMD_BREAK);
             else if (hr_bars() ? hr_left == 1 : drift_total > 0.0f && drift_left <= step_len * 16.0f)
                 fill_bar = 1;
         }
+#endif
+#if EN_RUST_MELODIC
+        if(fm1_rust_mel_build(sec,&sec_bars))
+#else
         if (sec == SEC_BUILD && --sec_bars <= 0)
+#endif
             section_cmd(EN_CMD_DROP);           /* the build's end: the drop */
         if (sec_req) {
             section_cmd(sec_req - 1);
             sec_req = 0;
         }
+#if EN_RUST_MELODIC
+        grv_bars=(uint8_t)fm1_rust_mel_groove(sec,grv_bars);
+#else
         if (sec == SEC_GROOVE && grv_bars < 255u)
             grv_bars++;                         /* (the drop set it to 0: its first bar is 1) */
+#endif
         gap_on = 0;
         {   /* the wobble after a dubstep drop: the drone's LFO a different fast rate each bar for 8 bars */
+#if EN_RUST_MELODIC
+            wob_rate=(int8_t)fm1_rust_mel_wobble(SECT[chord_genre].fl,sec,grv_bars,bars);
+#else
             static const int8_t WR[4] = {8, 10, 9, 1};   /* 1/8, 1/16, 1/8T, 1/2 */
             wob_rate = (int8_t)((SECT[chord_genre].fl & SF_WOB) && sec == SEC_GROOVE && grv_bars >= 1u && grv_bars <= 8u ? WR[(bars * 3u + grv_bars) % 4u] : -1);
+#endif
         }
         dd_bar();                               /* drum drift: a fill coming, or a change now */
         {   /* the acid's answer, Sync: Bar: this bar? (every 2nd .. 8th bar, or the bar before the drums change); Sync: Loop is decided where the line starts (acid_step) */
             const int rv = par[P_AC_RESP], ev = par[P_AC_EVERY];
+#if EN_RUST_MELODIC
+            ac_bar0=fm1_rust_mel_origin(bars,ac_bar0,ac_resync_bar);ac_resync_bar=0;
+#else
             if (ac_resync_bar) {                /* the answer's settings changed: its count starts at this bar */
                 ac_bar0 = bars;
                 ac_resync_bar = 0;
             }
+#endif
             ac_fill_bar = dd_fill;
+#if EN_RUST_MELODIC
+            if(!par[P_AC_CHANCE])ac_ans_bar=en_acid_ans=(uint8_t)fm1_rust_acid_answer(rv,ev,bars,ac_bar0,dd_fill,par[P_DD_CHANGE]);
+#else
             if (!par[P_AC_CHANCE]) {
                 int due = 0;
                 if (rv >= 5) {
@@ -3875,6 +4065,7 @@ static void tick(void)
                 }
                 ac_ans_bar = en_acid_ans = (uint8_t)due;
             }
+#endif
         }
         if (par[P_CHAIN] > 0 && par[P_CHAIN] <= 9) {   /* the chain: this bar's pattern, whatever was asked */
 #if EN_RUST_SCHEDULER
@@ -3892,17 +4083,29 @@ static void tick(void)
 #endif
         pat_now = pat_next;                     /* a new pattern: on the bar */
         for (l = 0; l < EN_NLANE; l++)          /* each lane's own source, from this bar */
+#if EN_RUST_MELODIC
+            en_lane_src[l]=lane_src[l]=(uint8_t)fm1_rust_mel_source(par[P_LSRC+l],pat_now);
+#else
             en_lane_src[l] = lane_src[l] = (uint8_t)(par[P_LSRC + l] ? par[P_LSRC + l] - 1 : pat_now);
+#endif
         if (tb && bars % (uint32_t)tb == 0u)
             bass.env_up = 1;                    /* the drone's envelope: every 1 .. 8 bars */
         bars++;
     }
     drum_publish();
     lk_hat = 0;
+#if EN_RUST_MELODIC
+    snr_rise=fm1_rust_mel_snare(sec,sec_n,sec_bars,st);
+#else
     snr_rise = sec == SEC_BUILD ? 7.0f * (float)((sec_n - sec_bars) * 16 + st) / (float)(sec_n * 16) : 0.0f;   /* the snare climbs a fifth through a build */
+#endif
     if (sec == SEC_BUILD && sec_bars == 1 && st >= 12 && (SECT[chord_genre].fl & SF_GAP))
         gap_on = 1;                             /* the drop gap: the beat before the drop, silence */
+#if EN_RUST_MELODIC
+    perc_fall=fm1_rust_mel_perc(fill_hold,fill_bar,dd_fill,sec,fill_kind,st);
+#else
     perc_fall = (fill_hold || fill_bar || (dd_fill && sec == SEC_GROOVE)) && fill_kind == 7 && st >= 8 ? -0.9f * (float)(st - 8) : 0.0f;
+#endif
     for (l = 0; l < EN_NDRUM; l++) {
 #if EN_RUST_SCHEDULER
         fm1_lane_t request;fm1_hit_t result;unsigned a;uint32_t jam_mask=0;
@@ -4097,11 +4300,20 @@ static void tick(void)
 #endif
     }
     if (!en_jam_on) bl_step(st, loose(sw, 4.0f));
+#if EN_RUST_MELODIC
+    {const float pe=fm1_rust_mel_pad(en_jam_on,(uint32_t)pad_stabs(),(uint32_t)par[P_PAD_MAN],en_playing,comp_mask(),st,sec,par[P_PAD_COMP],evolve,&rng);
+    if(pe>0.0f){
+#else
     if (!en_jam_on && pad_stabs() && !par[P_PAD_MAN] && en_playing &&   /* the pad's stabs: a rhythm (Comp; Auto: the genre's), the off-beats with more with Evolve; in a breakdown
                                                            * the rhythm alone, softer (0.15.4: none fired there, so an all-stab genre had the pluck alone) */
         (comp_hit(st) || (sec != SEC_BREAK && comp_mask() == 0x4444u && par[P_PAD_COMP] == 0 && (st == 7 || st == 15) && frand() < 0.35f * evolve))) {
+#endif
         const int32_t w = loose(sw, 8.0f);
+#if EN_RUST_MELODIC
+        /* pe was returned with the scheduling decision. */
+#else
         const float pe = (st & 1 ? 0.7f : 1.0f) * (sec == SEC_BREAK ? 0.8f : 1.0f);
+#endif
         if (stab_wait > 0) {                    /* the last stab is still waiting: it sounds now */
             stab_wait = 0;
             stab_fire(stab_pe);
@@ -4113,21 +4325,39 @@ static void tick(void)
             stab_fire(pe);
         }
     }
+#if EN_RUST_MELODIC
+    }
+#endif
     en_drum_pos = (uint8_t)st;
     drop_imp = 0;
+#if EN_RUST_MELODIC
+    if(fm1_rust_mel_acid_link(en_jam_on,(uint32_t)links_on(),(uint32_t)par[P_LK_PERC],sec,(uint32_t)perc_hit))acid_step(loose(sw,6.0f));
+#else
     if (links_on() && par[P_LK_PERC] && sec == SEC_GROOVE) {
         if (perc_hit)
             if(!en_jam_on) acid_step(loose(sw, 6.0f));         /* the links: the perc lane is the acid's clock */
     } else {
         if(!en_jam_on) acid_step(loose(sw, 6.0f));
     }
+#endif
     if(!en_jam_on) cm_step(st, sw);
+#if EN_RUST_MELODIC
+    if(fm1_rust_mel_harmonic_due(en_jam_on,st,(uint32_t)change_pending,en_frozen)){
+#else
     if (!en_jam_on && st == 0 && change_pending && !en_frozen) {   /* chords move on the bar */
+#endif
         change_pending = 0;
         chord_change();
+#if EN_RUST_MELODIC
+        dd_in=(int8_t)fm1_rust_mel_drift_arm(par[P_DD_EVERY],par[P_DD_CHANGE],par[P_DD_MUTATE],dd_in);
+#else
         if (!par[P_DD_EVERY] && (par[P_DD_CHANGE] || par[P_DD_MUTATE]) && dd_in < 0)
             dd_in = 2;                          /* drum drift with the chord: a fill next bar, the change after */
+#endif
     }
+#if EN_RUST_MELODIC
+    {uint32_t action=fm1_rust_mel_harmonic(en_jam_on,st,en_playing,en_frozen,hr_bars(),&hr_left,step_len,&drift_total,&drift_left);if(action&1u)change_pending=1;}
+#else
     if (!en_jam_on && st == 0 && en_playing && !en_frozen && hr_bars()) {   /* the genre's harmonic rhythm: this bar counted; the chord's last bar asks for the change on the next bar line */
         if (hr_left > 0)
             hr_left--;
@@ -4136,6 +4366,7 @@ static void tick(void)
         drift_total = (float)hr_bars() * 16.0f * step_len;   /* the way to the next chord, for the screen and the DJ */
         drift_left = (float)(hr_left + 1) * 16.0f * step_len;
     }
+#endif
     sixteenth++;
     en_bars = sixteenth;
 }
@@ -4576,7 +4807,13 @@ static void apply(int p, int v)
     case P_PULSE: pulse_vol = (float)(v * v) * 0.0001f; break;
     case P_NOISE: noise_vol = (float)(v * v) * 0.0001f; break;
     case P_DETUNE: detune = 0.00144f * fm_exp2f((float)v * 0.0332f); break;   /* 2.5 .. 25 cents */
-    case P_CM_LOCK: if (v) cm_sync = 1; break;  /* frozen: the line starts with the bar */
+    case P_CM_LOCK:
+#if EN_RUST_MELODIC
+        {fm1_pluck_t s;fm1_pluck_config_t c;melodic_pluck_get(&s,&c);fm1_rust_pluck_parameter(&s,1,v);melodic_pluck_put(&s);}
+#else
+        if(v)cm_sync=1;
+#endif
+        break;  /* frozen: the line starts with the bar */
     case P_NZ_COLOR: nz_color = v; break;
     case P_NZ_PUMP: nz_pump = (float)v * 0.01f; break;
     case P_BASSOCT:
@@ -4601,6 +4838,9 @@ static void apply(int p, int v)
         chain_i = 0;
         break;
     case P_CM_LOOP:                              /* a new length (or a new piece): the loop is forgotten, the next notes are heard afresh */
+#if EN_RUST_MELODIC
+        {fm1_pluck_t s;fm1_pluck_config_t c;melodic_pluck_get(&s,&c);fm1_rust_pluck_parameter(&s,0,par[P_CM_LOCK]);melodic_pluck_put(&s);}
+#else
         if (par[P_CM_LOCK]) {                   /* a frozen pluck line is the piece's own: kept, from the bar */
             cm_sync = 1;
         } else {
@@ -4610,6 +4850,7 @@ static void apply(int p, int v)
             cm_k = 0;
             mo_valid = mo_on = mo_rec = 0;      /* (and the motif: a new piece, a new idea) */
         }
+#endif
         cm_publish();
         break;
     case P_BL_MODE:                              /* back to the drone: the root again; a line starts from silence */
@@ -4621,8 +4862,12 @@ static void apply(int p, int v)
         break;
     case P_DR_RES: reso_k = 1.5f - 0.0138f * (float)v; break;   /* none .. near singing (k 1.5 .. 0.12) */
     case P_AC_LEN:
+#if EN_RUST_MELODIC
+        {fm1_acid_t s;fm1_acid_config_t c;melodic_acid_get(&s,&c);fm1_rust_acid_length(&s,v);melodic_acid_put(&s);}
+#else
         if (ac_pos >= v)
             ac_pos = 0;
+#endif
         en_acid_len = (uint8_t)v;
         break;
     case P_AC_DENS: case P_AC_RANGE:             /* heard at once: the line made again */
@@ -5006,6 +5251,13 @@ static void play_start(int from_top)
     fm1_rust_transport_start(&transport, (uint32_t)from_top);
 #endif
     if (from_top) {
+#if EN_RUST_MELODIC
+        fm1_start_t state={jp_pos,sixteenth,bars,ac_pos,chain_i,slice_perm,pat_now};fm1_rust_mel_start(&state,pat_next);
+        jp_pos=(uint16_t)state.song_position;sixteenth=state.sixteenth;bars=state.bars;ac_pos=state.acid_position;chain_i=(uint8_t)state.chain;slice_perm=(uint8_t)state.slice;pat_now=state.pattern;
+#if !EN_RUST_TRANSPORT
+        pulse=0;
+#endif
+#else
         jp_pos=0;
 #if !EN_RUST_TRANSPORT
         pulse = 0;
@@ -5016,8 +5268,13 @@ static void play_start(int from_top)
         chain_i = 0;
         slice_perm = 0;
         pat_now = pat_next;
+#endif
         for (i = 0; i < EN_NLANE; i++)
+#if EN_RUST_MELODIC
+            en_lane_src[i]=lane_src[i]=(uint8_t)fm1_rust_mel_source(par[P_LSRC+i],pat_now);
+#else
             en_lane_src[i] = lane_src[i] = (uint8_t)(par[P_LSRC + i] ? par[P_LSRC + i] - 1 : pat_now);
+#endif
         pad_lfo.ph = drone_lfo.ph = 0.0f;
     }
 #if !EN_RUST_TRANSPORT
@@ -5035,24 +5292,39 @@ static void play_start(int from_top)
         bass.note = bass.target;
     bass.env_up = 1;
     if(!en_jam_on) midi(0x92, bass.midi_note, 80);
+#if EN_RUST_MELODIC
+    {uint32_t status=fm1_rust_mel_message(en_ext,(uint32_t)from_top,0);if(status)midi(status,0,0);}
+#else
     if (!en_ext)
         midi(from_top ? 0xFA : 0xFB, 0, 0);
+#endif
 }
 
 static void play_stop(void)
 {
     int d;
+#if EN_RUST_MELODIC
+    {int32_t waits[16]={cm_wait,ac_wait,bl_wait,stab_wait};uint32_t ratchets[6];
+    for(d=0;d<EN_NDRUM;d++){waits[4+d*2]=drum[d].wait;waits[5+d*2]=drum[d].wait2;ratchets[d]=drum[d].rn;}
+    fm1_rust_mel_cancel(waits,ratchets);cm_wait=waits[0];ac_wait=waits[1];bl_wait=waits[2];stab_wait=waits[3];
+    for(d=0;d<EN_NDRUM;d++){drum[d].wait=waits[4+d*2];drum[d].wait2=waits[5+d*2];drum[d].rn=(uint8_t)ratchets[d];}}
+#else
     for (d = 0; d < EN_NDRUM; d++)
         drum[d].wait = drum[d].wait2 = 0, drum[d].rn = 0;        /* a swung hit still waiting stays unplayed */
     cm_wait = ac_wait = bl_wait = stab_wait = 0;   /* and the swung pluck, acid, bass and stab notes */
+#endif
     en_playing = 0;
     jp_midi_gate=jp_pad_gate=0;jp_swell_phase=1.0f;
     for(d=0;d<2;d++){if(pad[d].pnote)midi(0x84,pad[d].pnote,0);pad[d].pnote=0;}
     pad_gate = 0.0f;
     acid.amp_t = 0.0f;
     acid.gate_left = 0;
+#if EN_RUST_MELODIC
+    {uint32_t status=fm1_rust_mel_message(en_ext,0,1);if(status)midi(status,0,0);}
+#else
     if (!en_ext)
         midi(0xFC, 0, 0);
+#endif
     notes_off();
 }
 
@@ -6631,6 +6903,10 @@ static void drain(void)
         case C_CMCAP: cm_capture(a & 15, b & 128 ? -1 : b & 127); cm_publish(); break;
         case C_CMSTEP: cm_step_set(a & 15, b & 15, b >> 4 & 3); break;
         case C_BSSTEP:                          /* a bass step (the page), or a piece's (bit 4 of a: a rest of a piece's that set none); 0x20: capture */
+#if EN_RUST_MELODIC
+            {fm1_bass_t state;melodic_bass_get(&state);uint32_t publish=fm1_rust_bass_edit(&state,(uint32_t)a,(uint32_t)b);melodic_bass_put(&state);if(publish)bs_publish();}
+            break;
+#else
             if (a & 0x20) {
                 if (!bs_set)
                     bs_capture();
@@ -6643,6 +6919,7 @@ static void drain(void)
                 bs_set = 0;
             bs_publish();
             break;
+#endif
         case C_PROG: pg_lo = (uint32_t)a | ((uint32_t)b & 0xFFFFu) << 8; break;
         case C_DTAP:
             if ((unsigned)a < (unsigned)EN_NDRUM)
@@ -8255,6 +8532,9 @@ static void control(uint32_t n)                 /* once a chunk: the slow things
     rev_in_gain += ((en_frozen ? 0.0f : 1.0f) - rev_in_gain) * 0.01f;
     if (!en_jam_on && en_playing && !en_frozen) {
         const int hr = hr_bars();
+#if EN_RUST_MELODIC
+        change_pending=(uint8_t)fm1_rust_mel_harmonic_samples(change_pending,(uint32_t)hr,&drift_left,n);
+#else
         if (!change_pending || hr) {
             drift_left -= (float)n;
             if (drift_left <= 0.0f) {
@@ -8264,6 +8544,7 @@ static void control(uint32_t n)                 /* once a chunk: the slow things
                     change_pending = 1;
             }
         }
+#endif
     }
     en_drift_bars = drift_total > 0.0f && step_len > 1.0f ? fm_minf(drift_left / (step_len * 16.0f), 99.0f) : 99.0f;
     en_drift = drift_total > 0.0f ? 1.0f - fm_clampf(drift_left / drift_total, 0.0f, 1.0f) : 0.0f;
