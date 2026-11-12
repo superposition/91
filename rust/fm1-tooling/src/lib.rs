@@ -2,8 +2,10 @@
 //! Offline installer and diagnostic policy. Actual ports and clocks are supplied
 //! by an explicit synchronous adapter; this crate never opens a device.
 #![forbid(unsafe_code)]
+pub mod build;
 pub mod debugger;
 pub mod installer;
+pub mod lz4;
 pub mod rescue;
 pub mod summary;
 pub mod telemetry;
@@ -87,7 +89,9 @@ pub fn number(v: &Value) -> Result<f64> {
 }
 pub fn request(v: &Value, io: &mut impl Adapter) -> Result<Value> {
     let method = text(&v["method"])?;
-    if let Some(method) = method.strip_prefix("install.") {
+    if let Some(method) = method.strip_prefix("build.") {
+        build::request(method, v)
+    } else if let Some(method) = method.strip_prefix("install.") {
         installer::request(method, v, io)
     } else if let Some(method) = method.strip_prefix("rescue.") {
         rescue::request(method, v, io)
@@ -162,6 +166,15 @@ pub fn stream() -> Result<()> {
 }
 pub fn cli(args: &[String]) -> Result<()> {
     match args.first().map(String::as_str) {
+        Some("loader-wrap") if args.len()==3 => {
+            let image=read_file(&args[1],1_100_000)?;
+            std::fs::write(&args[2],build::loader_wrap(&image)?)?;
+        }
+        Some("lz4-compress"|"lz4-decompress") if args.len()==3 => {
+            let image=read_file(&args[1],1_110_000)?;
+            let output=if args[0]=="lz4-compress" {lz4::compress(&image)?}else{lz4::decompress(&image,&[])?};
+            std::fs::write(&args[2],output)?;
+        }
         Some("rescue-plan") if args.len()==3=>{
             let image=rescue::stock(&read_file(&args[1],1_100_000)?,&args[1])?;
             let now=read_file(&args[2],rescue::FLASH_SIZE)?;

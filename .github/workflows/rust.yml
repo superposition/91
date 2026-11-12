@@ -29,6 +29,8 @@ jobs:
         run: bash tests/rust_authoring.sh build/r01-source
       - name: Rescue and debugger policy over virtual USB endpoints
         run: bash tests/rust_rescue.sh build/r01-source
+      - name: Loader block compression and package wrappers
+        run: python3 tests/rust_build_policy.py build/r01-source
       - uses: actions/upload-artifact@v4
         if: always()
         with:
