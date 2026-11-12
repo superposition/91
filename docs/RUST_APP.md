@@ -3,6 +3,8 @@
 The first `EN_RUST_APP` checkpoint replaces the production strip renderer with
 `fm1-app::graphics`. The subsequent Kick Runner slice ports its fixed state,
 decisions and drawing composition as documented in `rust/KICK_RUNNER.md`.
+The shared UI carrier and in-place initialization are described in
+`rust/UI_CONTROLLER.md`.
 The page controller, shared input bookkeeping and visualizers still keep
 issue #15 open.
 
@@ -61,8 +63,8 @@ stored in safe application state. MCU code size, stack and final memory maps
 require the generated-C target qualification; WASM sizes are not MCU estimates.
 
 The instrument keeps its 24 public WASM exports and 32 MiB memory. Stats 80
-and 81 show real instrument canvas calls/pixel writes, 82 counts game
-policy/draw calls and 83 counts rejected calls. Diagnostics stay out
+and 81 show real instrument canvas calls/pixel writes, 82 counts application
+policy calls (including game and initialization), and 83 counts rejected calls. Diagnostics stay out
 of the player-facing UI.
 
 ## Independent proof
@@ -102,7 +104,7 @@ artifacts.
 | Area | Current state | Required boundary |
 | --- | --- | --- |
 | Strip/text raster, palette, alpha | Rust production path | Confirmed-ready LCD ownership |
-| 43 views and 35 dial pages | C controller | Explicit initialized UI state and engine observations |
+| 43 views and 35 dial pages | C controller over shared Rust/C carrier | Scoped UI state and engine observations |
 | Buttons, keys, encoders and LEDs | C policy | Bounded actions; preserve cadence and held/tapped edges |
 | Themes/help/layout widgets | C composition | Bounded text and same primitive order |
 | Visualizers | C state and algorithms | Reuse existing 7,200-byte union; no extra feedback canvas |

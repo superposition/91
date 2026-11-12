@@ -479,6 +479,10 @@ static const theme_t *th = &THEMES[0];
 
 uint32_t ui_splash_ms = 3200u;           /* the boot cards: RedtailWorks, then HYP-1 (the host's tests set 0) */
 
+#if EN_RUST_APP
+#include "../dsp/rust_ui.h"
+static fm1_ui_state ui;
+#else
 static struct {
     uint8_t view, last_dial;
     uint32_t btn, keys, btn_used;
@@ -608,6 +612,7 @@ static struct {
     uint32_t frame;
     uint32_t sig[3];                   /* what each band shows: redrawn when it changes */
 } ui;
+#endif
 
 static void say(const char *a, const char *b)
 {
@@ -7861,8 +7866,15 @@ void ui_init(void)
     if (rm.on)
         en_mute(0);
     memset(&rm, 0, sizeof rm);
+#if EN_RUST_APP
+    if(fm1_rust_ui_initialize(&ui,EN_FXS_DEF,GX_PRE[0].pat)<0)return;
+#else
     memset(&ui, 0, sizeof ui);
+#endif
     rs_state = 0;
+#if EN_RUST_APP
+    en_fm_set_dy(1);
+#else
     ui.pat_key = -1;                             /* (no pattern key held) */
     ui.gr_all = 50;
     ui.smp_gap = 1;                              /* (the SAMPLE page: a second between sounds; none playing) */
@@ -7883,6 +7895,7 @@ void ui_init(void)
         ui.fm_dy = 1;                          /* the DY voices (0.14.21): the human-made set by default */
         en_fm_set_dy(1);
     }
+#endif
     settings_load();                             /* the effects' and performing settings as you left them */
     voices_load();                               /* and the player's DX7 voices */
     mm_load();                                   /* and their MIDI map (0.16.11) */

@@ -26,6 +26,9 @@ mod project;
 mod runner;
 mod sequencer;
 mod transport;
+mod ui;
+#[rustfmt::skip]
+mod ui_layout;
 mod voice_config;
 mod voice_parameters;
 mod voices;

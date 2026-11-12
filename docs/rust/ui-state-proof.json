@@ -1,0 +1,142 @@
+{
+  "ticket": "https://github.com/superposition/91/issues/15",
+  "scope": "Complete UI carrier and in-place initialization foundation; frame/input/pages/viz still open",
+  "base": "d7fd923dff8846ae1dc7a3e027a9c9975cb909c1",
+  "compiler": "Rust 1.94.1; no FP contraction",
+  "fields": 193,
+  "effectsSettings": 96,
+  "native": {
+    "size": 1328,
+    "align": 8,
+    "all193OffsetsAndFieldSizes": "exact original C vs Rust"
+  },
+  "wasm": {
+    "size": 1328,
+    "align": 8,
+    "all193OffsetsAndFieldSizes": "exact original C vs Rust"
+  },
+  "expectedPi32v2FromConfiguredAlignments": {
+    "size": 1320,
+    "align": 4,
+    "targetExecutionClaimed": false
+  },
+  "initializationCorpus": {
+    "cases": 1024,
+    "bytes": 1329680,
+    "sha256": "a28b196160d8c2f320f9dd03437d147a91622a3167baa46851facd284cccca14",
+    "executions": [
+      "hash-checked R01 C native",
+      "Rust production adapter native",
+      "hash-checked R01 C WASM",
+      "Rust production adapter WASM"
+    ],
+    "paddingSerialized": false,
+    "callbackReentryAfterBorrow": "pass",
+    "arbitraryInitialBytesAndSignedDefaultCasting": "pass"
+  },
+  "boundaries": {
+    "nullState": true,
+    "nullDefaults": true,
+    "nullLayoutOutput": true,
+    "shortLayoutCapacity": true,
+    "stateAndOutputCanariesUnchanged": true
+  },
+  "originalCarrierAndCurrentCFieldsIdentical": true,
+  "frozenManifest": "tests/reference/ui-state.sha256",
+  "actualConsumer": "ui_init through fm1_rust_ui_initialize before callbacks",
+  "nativeScenarios": {
+    "cases": 4,
+    "names": [
+      "first",
+      "runner",
+      "store",
+      "theme"
+    ],
+    "flavors": [
+      "reference",
+      "c0",
+      "frozen-runner",
+      "c0-runner",
+      "rust"
+    ],
+    "matchingHistoricalFailureCases": 2,
+    "results": {
+      "path": "build/ui-state-scenarios/results.json",
+      "bytes": 4863,
+      "sha256": "dcf60807f0bb91f8e25e30eccc985fc3a95b2bc6a96fb9f404913f0312f5d355"
+    }
+  },
+  "instrument": {
+    "artifact": {
+      "path": "build/emu-parity/rust.wasm",
+      "bytes": 2346106,
+      "sha256": "29a5095ce9f0c95e670c0d1e7eb37eceeda6856d714ae3b40f395198851b0966"
+    },
+    "publicExports": 24,
+    "memoryBytes": 33554432,
+    "comparedPcmPositionsIncludingHttp": 59030760,
+    "httpPositions": 1048576,
+    "appRejections": 0
+  },
+  "footprint": {
+    "app_disabled": {
+      "path": "build/app-graphics/app-disabled.wasm",
+      "bytes": 2366304,
+      "sha256": "a2c486da55090214c77fe5fa72847f9a344d29c64e10cb67cee9b16bed54c974",
+      "code_bytes": 691602,
+      "data_section_bytes": 161972,
+      "custom_section_bytes": 1510913
+    },
+    "app_enabled": {
+      "path": "build/emu-parity/rust.wasm",
+      "bytes": 2346106,
+      "sha256": "29a5095ce9f0c95e670c0d1e7eb37eceeda6856d714ae3b40f395198851b0966",
+      "code_bytes": 694935,
+      "data_section_bytes": 162340,
+      "custom_section_bytes": 1486936
+    },
+    "delta": {
+      "file_bytes": -20198,
+      "code_bytes": 3333,
+      "data_section_bytes": 368,
+      "custom_section_bytes": -23977
+    },
+    "note": "same Rust engine, toggle only EN_RUST_APP; WASM accounting is not an MCU RAM or flash estimate"
+  },
+  "memory": {
+    "uiObjects": 1,
+    "addedUiObjects": 0,
+    "wholeUiTemporaryBytes": 0,
+    "addedPayloadBufferBytes": 0,
+    "paddingRead": false,
+    "allocator": false
+  },
+  "remaining": [
+    "scoped frame/input/page controller",
+    "visualizers",
+    "busy read/write/deferred genre retry policy",
+    "complete coherent engine observation packets",
+    "target/UI timing and physical validation"
+  ],
+  "physicalDeviceWrites": false,
+  "liveServerChanges": false,
+  "sourceSha256Lf": {
+    "docs/RUST_APP.md": "1d1f86f10f4fa0f91d109a637e25446d3285649e696f0d8a96ead5ab433d6b77",
+    "docs/rust/UI_CONTROLLER.md": "84bbd0e92cb8d8e4d0b42a6584f747b7a1d5eee3fbd58063250675858fba2af5",
+    "firmware/src/app/ui.c": "261efba9068622a4884d753a6e7e12b0b92ce513d2200f52a4b1b4b8d3fd0646",
+    "firmware/src/dsp/rust_ui.h": "be06ea53f194ad30d5da4da168feabf12b42cde0007b5c310053a0e3e0f3d23c",
+    "firmware/src/dsp/rust_ui_state.h": "9750b64c50d0e2d229c3b3b9816247b119e2a52bca2cbcd922f9b3f791b863a7",
+    "rust/fm1-app/src/lib.rs": "02b30fdd09feb778d0831f76b73d1b677b312b129acde6adef66051dd5a3bfd8",
+    "rust/fm1-app/src/ui.rs": "6d1cc041791dd5ef3af0f81f46927db72fd19505ea249be926fc7cd6e502ec8a",
+    "rust/fm1-app/src/ui_state.rs": "21d54134e5c69fd03cc1ce301b4941efb3e03e7377a78a066a08759c29a2be6e",
+    "rust/fm1-jam-bridge/src/lib.rs": "dc7a7178e5244c1b2c421ae4ba5d0910db3f5b6bc7737e103db81dff055f4efa",
+    "rust/fm1-jam-bridge/src/ui.rs": "def39eb911052738c027598d22799a5c93b176f63b654d80ddba52f37f6dc687",
+    "rust/fm1-jam-bridge/src/ui_layout.rs": "21099911dd19fb2146f58e973362478f19dd9fa59db5518ce6fb01ebd0c27fcf",
+    "tests/reference/ui-state.sha256": "c641d3d6f4f941c2b89fcd680521a01a100197f8e6bd05ca975ea2b54028453c",
+    "tests/reference/ui_init_frozen.inc": "ff35aaf8f0ec1a00b05fd9ee4e6246415a2dd0f11db59d31e09232720d08af9b",
+    "tests/reference/ui_state_frozen.inc": "8ff69db0b087c9df9df12e5133450accfb333b866fcffc4b7bb0230a633a3dbb",
+    "tests/reference/ui_state_reference.c": "bbc36bcb4752d508f143190686b2eb88e551f470db3a122159439840586538c2",
+    "tests/rust_ui_state.sh": "5dc4c8047fbf12716e99163459f943c167c75ca2f60a07041f7df55a2b2d8ed5",
+    "tools/ui_abi.py": "9d237953cad95e4278095bae33147c7a7a65d6ef6d23dec7c85f7fa8995a5d38"
+  }
+}
