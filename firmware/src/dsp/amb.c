@@ -2,6 +2,9 @@
 /* The instrument (amb.h). One compilation unit, -O2. */
 #include "amb.h"
 #include "fastmath.h"
+#if EN_RUST_FM6
+#include "rust_fm6.h"
+#endif
 #if EN_RUST_VOICES
 #include "rust_voices.h"
 #endif
@@ -4762,6 +4765,22 @@ static void reverb_job(void *p)
 }
 static void fm_job(const rv_job_t *c)           /* the DX voices' samples for this chunk, into the ring (they are played a chunk later) */
 {
+#if EN_RUST_FM6
+    uint32_t at=c->fm_w&(FM_R-1),left=(uint32_t)c->n;
+    if(!c->fm_on){
+        (void)fm1_rust_fm6_pool((fm1_fm6_slot_t *)fmx,0,0);
+        while(left){uint32_t count=left<FM_R-at?left:FM_R-at;fm_zero(fm_fifo+at,count*sizeof(float));left-=count;at=0;}
+        return;
+    }
+    const fm1_fm6_tables_t t=RUST_FM_TABLES;const fm1_fm6_scratch_t b=RUST_FM_SCRATCH;
+    const fm1_fm6_config_t config={(uint32_t)jp_dx(),fm_cur,fm_engine,(uint32_t)fm6_float_path,fm_tune,fm_bend};
+    fm1_fm6_ams_t cache={fm_ams_amd,{fm_ams_pt[0],fm_ams_pt[1],fm_ams_pt[2],fm_ams_pt[3]},fm_ams_ok};
+    const fm1_fm6_render_t r={(fm1_fm6_slot_t *)fmx,(fm1_fm6_lfo_t *)&fm_lfo,(fm1_fm6_lfo_t *)&fm_bass_lfo,fm_ed,fm_bass_ed,&config,&cache,&t,&b,fm_blk,&fm_pos,&fm_bass_sample};
+    /* Only exact write spans are borrowed; the foreground reads 256 frames
+     * behind. The inactive legacy upload/bass union is never borrowed. */
+    while(left){uint32_t count=left<FM_R-at?left:FM_R-at;fm1_rust_fm6_render(&r,fm_fifo+at,config.jam?fm_bass_fifo+at:0,count);left-=count;at=0;}
+    fm_ams_amd=cache.amd;fm_ams_ok=cache.valid;fm_ams_pt[0]=cache.points[0];fm_ams_pt[1]=cache.points[1];fm_ams_pt[2]=cache.points[2];fm_ams_pt[3]=cache.points[3];
+#else
     int j;
     if (!c->fm_on) {                             /* not the pluck's sound: the voices let go, nothing sounds */
         for (j = 0; j < FM_NV; j++)
@@ -4774,6 +4793,7 @@ static void fm_job(const rv_job_t *c)           /* the DX voices' samples for th
         fm_fifo[(c->fm_w + (uint32_t)j) & (FM_R - 1)] = fm_next();
         if(jp_dx())fm_bass_fifo[(c->fm_w+(uint32_t)j)&(FM_R-1)]=fm_bass_sample;
     }
+#endif
 }
 /* what the other core does in a chunk: the pad's voices (the stage the first core waits for, before it mixes), then the reverb's tank (the first core needs its
  * output at the end of the chunk), then the DX voices (needed a chunk on, so nothing waits for them) */
@@ -7586,9 +7606,16 @@ static void render_pad(uint32_t n)
 static void render_bass(uint32_t n)
 {
     if(jp_dx()) {
+#if EN_RUST_FM6
+        uint32_t done=0;float peak=0.0f,g=bass_vol*0.5f*FM_OUT*(float)jp_data[JP2_HEAD+9]*0.01f;
+        while(done<n){uint32_t at=(rv_job.fm_w-FM_D+done)&(FM_R-1),count=n-done;if(count>FM_R-at)count=FM_R-at;
+            peak=fm_maxf(peak,fm1_rust_fm6_bass_output(fm_bass_fifo+at,bass_o+done,g,count));done+=count;}
+        en_bass_level=peak;return;
+#else
         uint32_t k;float peak=0.0f,g=bass_vol*0.5f*FM_OUT*(float)jp_data[JP2_HEAD+9]*0.01f;
         for(k=0;k<n;k++){float x=fm_bass_fifo[(rv_job.fm_w-FM_D+k)&(FM_R-1)]*g;bass_o[k]=x;peak=fm_maxf(peak,fm_fabsf(x));}
         en_bass_level=peak;return;
+#endif
     }
 #if EN_RUST_VOICES
     const fm1_voice_drone_config_t config=voice_drone_config();
@@ -7782,7 +7809,11 @@ static void render_fm(uint32_t n)
 {
     const int on = jp_dx() || (par[P_CM_SND] >= CM_NPLAIN && cm_vol > 0.0f);
     const int cur = on && fm_cur >= 0 ? fm_cur : 0;   /* (the voice that is loaded: an empty user slot plays the first built-in one, at its own gain) */
+#if EN_RUST_FM6
+    const float g = jp_dx() ? pad_vol*0.5f*FM_OUT*(float)jp_data[JP2_HEAD+8]*0.01f : cm_vol * 0.5f * FM_OUT * fm1_rust_fm6_gain((uint32_t)cur,fm_dy_cur);
+#else
     const float g = jp_dx() ? pad_vol*0.5f*FM_OUT*(float)jp_data[JP2_HEAD+8]*0.01f : cm_vol * 0.5f * FM_OUT * (fm_dy_cur && cur < EN_NFMFACT ? FM_GAIN_DY[cur] : FM_GAIN[cur]);
+#endif
     uint32_t j;
     float lvl = 0.0f;
     if (!on) {
@@ -7791,6 +7822,15 @@ static void render_fm(uint32_t n)
         fm_ctr += n;
         return;
     }
+#if EN_RUST_FM6
+    j=0;
+    while(j<n){
+        const uint32_t at=(fm_ctr-FM_D+j)&(FM_R-1);uint32_t count=n-j;const int track=jp_dx()?TR_PAD:TR_CM;
+        if(count>FM_R-at)count=FM_R-at;
+        const fm1_fm6_output_t c={g,trk_g[track],trk_g1[track],tg_inv,j};float *const outputs[4]={fm_ol+j,fm_or+j,fm_rs+j,fm_es+j};
+        lvl=fm_maxf(lvl,fm1_rust_fm6_output(fm_fifo+at,outputs,&c,count));j+=count;
+    }
+#else
     for (j = 0; j < n; j++) {
         float x = fm_fifo[(fm_ctr - FM_D + j) & (FM_R - 1)];   /* (rendered a chunk ago, by the other core) */
         const float y = (x < -16.0f ? -16.0f : x > 16.0f ? 16.0f : x) * g * TG(jp_dx()?TR_PAD:TR_CM, j);
@@ -7800,6 +7840,7 @@ static void render_fm(uint32_t n)
         fm_es[j] = y * 0.5f;
         lvl = fm_maxf(lvl, y < 0.0f ? -y : y);
     }
+#endif
     en_cm_level = fm_minf(lvl * 4.0f, 1.0f);
     fm_ctr += n;
 }
@@ -8929,7 +8970,11 @@ static void control(uint32_t n)                 /* once a chunk: the slow things
     if(jp_dx() && jp_patch_dirty) {
         unsigned part;
         for(part=0;part<2;part++)if(jp_patch_dirty>>(part)&1u) {
+#if EN_RUST_FM6
+            int busy=(int)fm1_rust_fm6_pool((fm1_fm6_slot_t *)fmx,2,part);
+#else
             int k,busy=0;for(k=0;k<FM_NV;k++)if(fmx[k].used && fmx[k].part==part)busy=1;
+#endif
             if(!busy){fm_jam_program(jp_data,part);jp_patch_dirty&=(uint8_t)~(1u<<part);}
         }
     }

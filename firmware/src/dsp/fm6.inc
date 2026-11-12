@@ -213,23 +213,37 @@ static uint32_t fm_pos = FM6_N;
 static uint32_t fm_engine = FM_ENG;           /* the DX7's own log-sine and exponent tables (MODERN: plain fp32; OPL) */
 static int32_t fm_tune;                          /* the global tune in cents, as a Q24 log */
 static int fm_inited;
+#if EN_RUST_FM6
+_Static_assert(sizeof(fm6_voice_t)==sizeof(fm1_fm6_voice_t) && sizeof(fm_slot_t)==sizeof(fm1_fm6_slot_t) && sizeof(fm6_lfo_t)==sizeof(fm1_fm6_lfo_t),"Rust FM state layout");
+_Static_assert(offsetof(fm6_voice_t,ph)==120 && offsetof(fm6_voice_t,gout)==196 && offsetof(fm6_voice_t,fb)==340 && offsetof(fm6_voice_t,spb)==384 && offsetof(fm_slot_t,age)==392,"Rust FM state offsets");
+#define RUST_FM_TABLES {FM6_SIN,FM6_MKI_LOG,FM6_MKI_EXP,FM6_OPL_LOG,FM6_OPL_EXP}
+#define RUST_FM_SCRATCH {&fm6_bus[0][0],fm6_sum,&fm6_ibus[0][0],fm6_isum}
+#endif
 
 static void fm_init(void)                        /* the tables, once, before anything renders */
 {
     if (!fm_inited) {
+#if EN_RUST_FM6
+        const fm1_fm6_tables_t t=RUST_FM_TABLES;fm1_rust_fm6_init(&t);
+#else
         fm6_tables_init();
+#endif
         fm_inited = 1;
     }
 }
 
 static void fm_reset(void)                       /* a new engine: no voices, no patch, the block queue empty */
 {
+#if EN_RUST_FM6
+    fm1_rust_fm6_reset((fm1_fm6_slot_t *)fmx,(fm1_fm6_lfo_t *)&fm_lfo);
+#else
     int k;
     for (k = 0; k < FM_NV; k++) {
         fmx[k].used = 0;
         fm_zero(&fmx[k].s, sizeof fmx[k].s);
     }
     fm_zero(&fm_lfo, sizeof fm_lfo);
+#endif
     fm_cur = -1;
     fm_pos = FM6_N;
     fm_age = 0;
@@ -267,6 +281,13 @@ static void fm_user_name(int slot)               /* "DX " and the voice's ten ch
 }
 static void fm_user_take(int slot)               /* C_USERVOICE, in the engine's own time */
 {
+#if EN_RUST_FM6
+    if(jp_dx() || (unsigned)slot>=EN_NUSER)return;
+    fm1_fm6_user_t s={fm_stage_pend,fm_user_n,fm_cur};
+    if(!fm1_rust_fm6_user(1,(uint32_t)slot,&s,fm_stage[slot],fm_user[slot],(uint8_t *)fm_uname[slot]))return;
+    fm_stage_pend=(uint16_t)s.pending;fm_user_n=(uint8_t)s.count;fm_cur=s.current;
+    EN_CM_SOUND[12+EN_NFMFACT+slot]=fm_uname[slot];
+#else
     int k;
     if (jp_dx()) return;
     if ((unsigned)slot >= EN_NUSER || !(fm_stage_pend >> slot & 1u))
@@ -279,19 +300,34 @@ static void fm_user_take(int slot)               /* C_USERVOICE, in the engine's
     fm_user_name(slot);
     if (fm_cur == EN_NFMFACT + slot)
         fm_cur = -1;                             /* playing: load it again */
+#endif
 }
 static void fm_user_wipe(void)
 {
     int s;
+#if EN_RUST_FM6
+    fm1_fm6_user_t c={fm_stage_pend,fm_user_n,fm_cur};
+    (void)fm1_rust_fm6_user(2,0,&c,0,0,0);fm_user_n=(uint8_t)c.count;fm_cur=c.current;
+#else
     fm_user_n = 0;
+#endif
     for (s = 0; s < EN_NUSER; s++)
         EN_CM_SOUND[12 + EN_NFMFACT + s] = "(empty)";
+#if !EN_RUST_FM6
     if (fm_cur >= EN_NFMFACT)
         fm_cur = -1;
+#endif
 }
 static uint8_t fm_req_n;                         /* the main loop's view of how many there will be (the engine takes the voices a chunk later) */
 int en_user_voice(int slot, const uint8_t *p)
 {
+#if EN_RUST_FM6
+    if(jp_dx() || (unsigned)slot>=EN_NUSER)return 0;
+    fm1_fm6_user_t s={fm_stage_pend,fm_req_n,0};
+    if(!fm1_rust_fm6_user(0,(uint32_t)slot,&s,p,fm_stage[slot],0))return 0;
+    fm_req_n=(uint8_t)s.count;fm_stage_pend=(uint16_t)s.pending;
+    post(C_USERVOICE,slot,0);return 1;
+#else
     int k;
     if (jp_dx()) return 0;
     if ((unsigned)slot >= EN_NUSER || slot > (int)fm_req_n || (fm_stage_pend >> slot & 1u))
@@ -303,6 +339,7 @@ int en_user_voice(int slot, const uint8_t *p)
     fm_stage_pend |= (uint16_t)(1u << slot);
     post(C_USERVOICE, slot, 0);
     return 1;
+#endif
 }
 void en_user_clear(void)
 {
@@ -315,6 +352,13 @@ int en_user_next(void) { return fm_req_n < EN_NUSER ? fm_req_n : EN_NUSER - 1; }
 const uint8_t *en_user_get(int slot) { return (unsigned)slot < EN_NUSER ? fm_user[slot] : fm_user[0]; }
 static void fm_set_patch(int idx)                /* between chunks: a new patch cuts the notes */
 {
+#if EN_RUST_FM6
+    fm_init();fm1_fm6_selection_t s={idx,fm_cur,fm_dy_cur,en_fm_dy,fm_user_n};
+    const uint32_t changed=fm1_rust_fm6_program(&s,&fm_user[0][0],fm_ed);
+    fm_cur=s.current;fm_dy_cur=(uint8_t)s.dy_current;
+    if(!changed)return;
+    fm1_rust_fm6_reset((fm1_fm6_slot_t *)fmx,(fm1_fm6_lfo_t *)&fm_lfo);fm_pos=FM6_N;
+#else
     int k;
     fm_init();
     if (idx < 0 || idx >= EN_NCMFM)
@@ -345,10 +389,15 @@ static void fm_set_patch(int idx)                /* between chunks: a new patch 
     }
     fm_zero(&fm_lfo, sizeof fm_lfo);
     fm_pos = FM6_N;
+#endif
 }
 
 static void fm_jam_program(const uint8_t *p,unsigned part)
 {
+#if EN_RUST_FM6
+    const fm1_fm6_profile_t c={part,p[JP2_HEAD+18],p[JP2_HEAD+16],p[JP2_HEAD+19],p[JP2_HEAD+20]};
+    fm1_rust_fm6_profile(p+JP2_VOICE+p[JP2_HEAD+5+part]*128u,part?fm_bass_ed:fm_ed,&c);
+#else
     uint8_t *ed=part?fm_bass_ed:fm_ed;unsigned op;
     fm6_unpack(p+JP2_VOICE+p[JP2_HEAD+5+part]*128u,ed);
     ed[FP_LPMD]=0;
@@ -359,6 +408,7 @@ static void fm_jam_program(const uint8_t *p,unsigned part)
             if(!fm6_carrier(ed[FP_ALG],6u-op))ed[op*FP_OP+FP_OL]=(uint8_t)clamp(ed[op*FP_OP+FP_OL]+((int)p[JP2_HEAD+19]-50)/4,0,99);
         } else if(p[JP2_HEAD+20])ed[op*FP_OP+FP_R1]=(uint8_t)(99-p[JP2_HEAD+20]*60u/100u);
     }
+#endif
 }
 static void fm_jam_load(const uint8_t *p)
 {
@@ -373,12 +423,21 @@ void en_fm_set_dy(int on)                        /* the main loop: the set, and 
     int i;
     en_fm_dy = (uint8_t)(on != 0);
     for (i = 0; i < EN_NFMFACT; i++)
+#if EN_RUST_FM6
+        EN_CM_SOUND[12+i]=(const char *)fm1_rust_fm6_name((uint32_t)i,en_fm_dy);
+#else
         EN_CM_SOUND[12 + i] = en_fm_dy ? FM6_DY_NAME[i] : FM_DX_NAME[i];
+#endif
 }
 
 /* a key goes down (Dx7Note::init); the key comes up after gate samples */
 static void fm_note_on(int note, float vel, int32_t gate)
 {
+#if EN_RUST_FM6
+    const uint8_t *ed=jp_dx()&&fm_trigger_part?fm_bass_ed:fm_ed;
+    const fm1_fm6_note_t c={(uint32_t)jp_dx(),fm_trigger_part,fm_cur,en_shed_level};
+    (void)fm1_rust_fm6_note((fm1_fm6_slot_t *)fmx,(fm1_fm6_lfo_t *)&fm_lfo,(fm1_fm6_lfo_t *)&fm_bass_lfo,ed,&c,&fm_age,note,vel,gate);
+#else
     int k, best = 0, steal = 1;
     uint32_t oldest = 0xFFFFFFFFu;
     fm_slot_t *x;
@@ -443,6 +502,7 @@ static void fm_note_on(int note, float vel, int32_t gate)
     x->kill_left = 0x7FFFFFFF;
     x->fade = 1.0f;
     x->age = ++fm_age;
+#endif
 }
 
 static void fm_jam_note(unsigned part,int note,float velocity,int32_t gate)
@@ -450,7 +510,11 @@ static void fm_jam_note(unsigned part,int note,float velocity,int32_t gate)
     if(jp_patch_dirty>>part&1u) {
         /* Commit at this part's next attack. Retire its old tails together;
          * never reinterpret them with a different DX program or touch bass. */
+#if EN_RUST_FM6
+        (void)fm1_rust_fm6_pool((fm1_fm6_slot_t *)fmx,1,part);
+#else
         int k;for(k=0;k<FM_NV;k++)if(fmx[k].part==part)fmx[k].used=0;
+#endif
         fm_jam_program(jp_data,part);jp_patch_dirty&=(uint8_t)~(1u<<part);
     }
     fm_trigger_part=(uint8_t)part;fm_note_on(note,velocity,gate);fm_trigger_part=0;
@@ -458,6 +522,9 @@ static void fm_jam_note(unsigned part,int note,float velocity,int32_t gate)
 
 static void fm_gates(uint32_t n, int32_t tail)  /* once a chunk, on the first core: the keys whose time is up; a note that has been let go for tail samples is faded out */
 {
+#if EN_RUST_FM6
+    fm1_rust_fm6_gates((fm1_fm6_slot_t *)fmx,n,tail);
+#else
     int k;
     for (k = 0; k < FM_NV; k++) {
         if (!fmx[k].used)
@@ -473,8 +540,8 @@ static void fm_gates(uint32_t n, int32_t tail)  /* once a chunk, on the first co
             fmx[k].fade = fmx[k].fade < 1.0f ? fmx[k].fade : 0.9999f;      /* (the fade starts: see fm_block) */
         }
     }
+#endif
 }
-
 /* a new Dexed block for a voice: key-up, the envelopes, pitch and gains (Dx7Note::compute), the routing */
 static void fm_control(fm_slot_t *x)
 {
@@ -543,6 +610,13 @@ static void fm_control(fm_slot_t *x)
 
 static void fm_block(void)                       /* the next 64 samples of all the voices */
 {
+#if EN_RUST_FM6
+    const fm1_fm6_tables_t t=RUST_FM_TABLES;const fm1_fm6_scratch_t b=RUST_FM_SCRATCH;
+    const fm1_fm6_config_t c={(uint32_t)jp_dx(),fm_cur,fm_engine,(uint32_t)fm6_float_path,fm_tune,fm_bend};
+    fm1_fm6_ams_t cache={fm_ams_amd,{fm_ams_pt[0],fm_ams_pt[1],fm_ams_pt[2],fm_ams_pt[3]},fm_ams_ok};
+    fm1_rust_fm6_block((fm1_fm6_slot_t *)fmx,(fm1_fm6_lfo_t *)&fm_lfo,(fm1_fm6_lfo_t *)&fm_bass_lfo,fm_ed,fm_bass_ed,&c,&cache,&t,&b,fm_blk);
+    fm_ams_amd=cache.amd;fm_ams_ok=cache.valid;fm_ams_pt[0]=cache.points[0];fm_ams_pt[1]=cache.points[1];fm_ams_pt[2]=cache.points[2];fm_ams_pt[3]=cache.points[3];
+#else
     int k;
     uint32_t j;
     for (j = 0; j < FM6_N; j++)
@@ -584,6 +658,7 @@ static void fm_block(void)                       /* the next 64 samples of all t
         for (j = 0; j < FM6_N; j++)
             fm_blk[j] += fm6_sum[j];
     }
+#endif
 }
 
 static inline float fm_next(void)                /* one sample, clipped as the DX7 would (+-16 is far past full scale) */
