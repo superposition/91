@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NAIWAN 91 — Songbook and Rust migration</title>
+  <meta name="description" content="Three original city-pop songs, an expressive FM-1 instrument, and a measured migration to Rust. Play the emulator without hardware.">
+  <link rel="stylesheet" href="fonts/fm1-fonts.css">
+  <link rel="stylesheet" href="site.css">
+  <style>
+    *{box-sizing:border-box}body{margin:0;font:16px/1.65 "Nunito","Segoe UI",sans-serif}main{max-width:1100px;margin:auto;padding:28px 20px 60px}
+    .site{display:flex;flex-wrap:wrap;gap:16px;align-items:center;padding-bottom:18px}.site .home{font-size:1.35rem;text-decoration:none;font-weight:800}.site nav{margin-left:auto;display:flex;gap:20px;flex-wrap:wrap}.site nav a{text-decoration:none;font-size:.9rem}
+    .hero{display:grid;grid-template-columns:1.1fr 1fr;gap:44px;align-items:center;padding:56px 0 40px}.hero h1{font-size:clamp(2.5rem,5.5vw,4.6rem);letter-spacing:-.04em;line-height:1.08;margin:12px 0 20px}.hero p{color:var(--color-muted);max-width:54ch}.hero h1 span{color:var(--color-accent-dark)}
+    .actions{display:flex;flex-wrap:wrap;gap:12px;margin:24px 0}.button{display:inline-block;border-radius:9px;padding:12px 18px;text-decoration:none;font-weight:800;background:var(--color-blue-dark);color:white}.button:hover{background:var(--color-accent-dark);color:white}.button.secondary{background:var(--color-surface);color:var(--color-blue-dark);border:1px solid var(--color-border)}
+    .screen-card{background:var(--color-surface);border:1px solid var(--color-border);padding:24px;border-radius:20px;box-shadow:0 20px 50px #14263a0d}.screen-card img{display:block;width:100%;max-width:360px;height:auto;margin:auto;image-rendering:pixelated;border-radius:6px}.screen-card figcaption{margin-top:16px;color:var(--color-muted);font-size:.85rem;text-align:center}
+    .section-head{display:flex;gap:24px;justify-content:space-between;align-items:baseline;margin:36px 0 16px}.section-head h2{margin:0;font-size:1.7rem}.section-head p{margin:0;color:var(--color-muted);font-size:.9rem}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:12px;padding:22px}.card h3{margin:0 0 10px;font-size:1.1rem}.card p{margin:0;color:var(--color-muted)}.card a{font-weight:700}.screens{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.screens figure{margin:0}.screens img{width:100%;height:auto;image-rendering:pixelated;border:1px solid var(--color-border);border-radius:8px}.screens figcaption{font-size:.8rem;color:var(--color-muted);padding-top:6px}
+    .scope{display:grid;grid-template-columns:1fr 1fr;gap:24px}.scope h3{font-size:1rem;margin:0 0 8px}.scope ul{padding-left:20px;margin:0;color:var(--color-muted)}.small{font-size:.85rem;color:var(--color-muted)}footer{border-top:1px solid var(--color-border);margin-top:44px;padding-top:22px}.package{overflow-wrap:anywhere}.quick-links:empty{display:none}.quick-links{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}.quick-links .card{padding:12px 16px}.quick-links span{display:none}
+    @media(max-width:760px){.hero{grid-template-columns:1fr;gap:20px;padding-top:32px}.hero h1{font-size:3rem}.hero .screen-card{max-width:420px;margin:0}.cards{grid-template-columns:1fr}.screens{grid-template-columns:1fr 1fr}.scope{grid-template-columns:1fr}.section-head{display:block}.site nav{margin-left:0;gap:14px}}
+  </style>
+</head>
+<body><main>
+  <header class="site"><a class="home" href="./" aria-current="page">内湾 91 / NAIWAN</a><nav aria-label="Main"><a href="emu/">Play</a><a href="editor/">Editor</a><a href="install/">Install</a><a href="manual/">Manual</a><a href="@@REPO@@">Source</a></nav></header>
+  <section class="hero">
+    <div><span class="site-kicker">Songbook · M-VAVE FM-1 · Rust in progress</span><h1>A small instrument.<br><span>A band to play with.</span></h1>
+      <p>NAIWAN 91 is a city-pop Songbook and performance instrument. Three original songs give you moving harmony, independent DX keys and bass, and phrase-timed swells. Keep a home key, leave space for your instrument, and steer the band.</p>
+      <div class="actions"><a class="button" href="emu/">Play the emulator</a><a class="button secondary" href="@@REPO@@/blob/rust/emulator-first/docs/RUST_MIGRATION.md">Follow the Rust migration</a></div>
+      <p class="small">The emulator runs in your browser. No FM-1 is required. Audio starts only when you press <b>Switch on</b>.</p>
+    </div>
+    <figure class="screen-card"><img src="img/naiwan91-performance.png" width="240" height="240" alt="Current Songbook performance screen, showing Velvet Changes, chord movement, key, tempo and section controls"><figcaption>Actual emulator framebuffer · Velvet Changes · C major · 100 BPM</figcaption></figure>
+  </section>
+  <div class="project-note"><p><b>One instrument, an incremental Rust migration.</b> Songbook planning, bass decisions, pack/session codecs and the bounded command queue run in shared Rust libraries. Synthesis, the application and the instrument UI still run in C. The emulator labels the active Rust path and exposes its counters.</p><small>The downloadable hardware package is @@VERSION@@. Browser migration work and physical firmware qualification are tracked separately.</small></div>
+  <div class="section-head"><h2>Play a song, then shape it</h2><p>Musical controls first. Detailed pages when you need them.</p></div>
+  <section class="cards" aria-label="Songbook features">
+    <article class="card"><h3>Three authored songs</h3><p>Velvet Changes, Afterhours and Neon Turnaround use written destinations, voice-led sixth/diminished harmony and 8/16-bar sections. PRESETS chooses the song.</p></article>
+    <article class="card"><h3>Keys, bass and swells</h3><p>Independent DX roles, gate and release, touch, brightness and texture. SELECT opens Arrangement, DX Keys, DX Bass and Swells.</p></article>
+    <article class="card"><h3>Keep the phrase alive</h3><p>Hold a section, request a related idea, change the bass feel or queue the next section. Key and form changes preserve the phrase boundary.</p></article>
+  </section>
+  <div class="section-head"><h2>The current instrument</h2><p>Captured from the running WASM build.</p></div>
+  <div class="screens">
+    <figure><img src="img/naiwan91-arrangement.png" width="240" height="240" alt="Songbook Arrangement page"><figcaption>Arrangement</figcaption></figure>
+    <figure><img src="img/naiwan91-dx-keys.png" width="240" height="240" alt="DX Keys controls for program, touch, brightness and release"><figcaption>DX Keys</figcaption></figure>
+    <figure><img src="img/naiwan91-dx-bass.png" width="240" height="240" alt="DX Bass controls for program, attack, gate and energy"><figcaption>DX Bass</figcaption></figure>
+    <figure><img src="img/naiwan91-swells.png" width="240" height="240" alt="Swells controls for texture, amount, variation and tail"><figcaption>Swells</figcaption></figure>
+  </div>
+  <div class="section-head"><h2>Build in the open</h2><p>Architecture and data structures, with measured evidence.</p></div>
+  <section class="card scope">
+    <div><h3>What runs in Rust</h3><ul><li>Checked compact musical types and stable parameter metadata</li><li>Borrowed Jam Pack views and explicit session codecs</li><li>Deterministic phrase planning and bass-event decisions</li><li>A bounded 1,024-word command queue and browser integration tested against the C reference</li></ul></div>
+    <div><h3>What comes next</h3><ul><li>Coherent snapshots and application ownership</li><li>Transport, synthesis, effects and UI migration</li><li>Physical compiler/runtime qualification</li><li>A reproducible talk demo and release audit</li></ul></div>
+  </section>
+  <p><a href="@@REPO@@/issues/28">Web refactor tickets</a> · <a href="@@REPO@@/issues/1">Rust migration tickets</a> · <a href="@@REPO@@/pull/27">Current draft implementation</a> · <a href="@@REPO@@/issues/26">“How I did it” talk</a></p>
+  <div class="section-head"><h2>Use it on an FM-1</h2><p>Hardware is optional for the browser instrument.</p></div>
+  <section class="cards">
+    <article class="card"><h3><a href="install/">Install and back up</a></h3><p>The USB-MIDI installer includes saved-object backup, restoration and recovery tools. Read the hardware instructions before installing.</p></article>
+    <article class="card"><h3><a href="editor/">Edit the instrument</a></h3><p>Read and change the existing 176 parameters and inspect DX voices on a connected FM-1. Songbook role profiles remain pack data.</p></article>
+    <article class="card"><h3><a href="manual/">Controls and reference</a></h3><p>The instrument also retains its legacy generative pieces and effects. The manual documents those controls alongside the Songbook guide.</p></article>
+  </section>
+  <div class="quick-links">@@QUICK_CARDS@@</div>
+  <p class="small package"><a href="firmware/@@FIRMWARE_NAME@@?v=@@SHA@@">Download @@FIRMWARE_NAME@@</a> · @@PACKAGE_KB@@ KB · SHA-256 @@SHA@@</p>
+  <footer><p class="small">NAIWAN 91 is independent GPL-3.0-only firmware. Its lineage includes PERF-1, HYP-1 by <a href="https://www.redtail.works">RedtailWorks</a>, AMB-1 by Charles Vestal and Felucca by Leo Kuroshita (Hügelton Instruments). The FM engine descends from Melodee, Dexed and MSFA. Authors, licences and third-party assets are preserved in <a href="@@REPO@@/blob/master/LICENSING.md">LICENSING.md</a>.</p><p class="small">“M-VAVE” and “FM-1” are their owners’ trademarks. NAIWAN 91 is not affiliated with or endorsed by them. <a href="@@REPO@@/issues">Report a problem or contribute</a>.</p></footer>
+</main></body></html>

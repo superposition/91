@@ -5,7 +5,7 @@
 export const BK_CHUNK = 256, BK_FRAME = 64, BK_MAX = 3840;
 
 // the flash objects worth keeping (plat.h OBJ_*; the panel's calibration, 1, is the unit's own and is never saved), in the order they are read and written
-const BK_GENRES = ["HYPNO", "LOFI", "HOUSE", "DUBSTEP", "DUB", "DNB", "BREAKS", "GARAGE", "ELECTRO", "TRAP", "DISCO", "FUNK", "REGGAE", "SYNTHWAVE", "AMAPIANO", "TRIPHOP", "INDUS", "PSY", "FOREST"];
+const BK_GENRES = ["CITYPOP", "SUNSET", "AOR", "SHIBUYA", "BOOGIE", "YACHT", "TAPE", "NEON", "KAYO", "LOUNGE", "SURF", "BALEAR", "TROPIC", "SUMMER", "MARINA", "CALYPSO", "ISLAND", "SEASIDE", "SANDS"];
 export const BK_OBJECTS = [
   { id: 2, name: "settings" }, { id: 3, name: "voices" }, { id: 4, name: "globals" }, { id: 0, name: BK_GENRES[0] },
   ...BK_GENRES.slice(1).map((n, i) => ({ id: 5 + i, name: n })), { id: 5 + BK_GENRES.length - 1, name: "piece extras" },   // (0.16.6: the progression slots' types; 0.16.28: with FILTERS and SCREAM, plat.h OBJ_KINDS)

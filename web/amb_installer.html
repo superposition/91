@@ -1,7 +1,7 @@
 <!doctype html>
 <!-- SPDX-License-Identifier: GPL-3.0-only
      Copyright (C) 2026 Leo Kuroshita (@kurogedelic), Hügelton Instruments
-     HYP-1: Felucca's installer page (web/index_pkg.html, by way of X0X and AMB-1), branded for HYP-1, English first.
+     NAIWAN 91 installer, retaining the compatible Felucca update and backup protocols.
      tools/make_pages.py inlines fm1pkg.js and fm1ota.js and the package's metadata. -->
 <html lang="en">
 <head>
@@ -9,14 +9,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NAIWAN 91 installer</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow+Semi+Condensed:wght@400;500;600&display=swap">
 <style>
-  /* the mascot's colours (the boot card's slinky): crimson body, pink light, cream horns, ember-yellow eyes, on a warm black. (The variable names are older.) */
-  :root { --ground: #130a0e; --card: #211219; --card-2: #2e1822; --ink: #f6ece0; --muted: #bba79a; --rule: #4a2a35;
-          --purple: #e0344f; --purple-2: #ff8f8f; --orange: #ffd447; --rust: #9c1d3a; --horn: #f2e6c4; color-scheme: dark; }
-  * { box-sizing: border-box; }
+  /* Device-tool layout; shared product colours are loaded from ../site.css. */
+    * { box-sizing: border-box; }
   body { margin: 0; background: var(--ground); color: var(--ink);
          font: 400 17px/1.6 "Barlow Semi Condensed", "Helvetica Neue", Arial, sans-serif; }
   main { max-width: 820px; margin: 0 auto; padding: 28px 16px 56px; }
@@ -76,16 +71,8 @@
   footer.mark img { width: 34px; height: 34px; image-rendering: pixelated; opacity: .9; }
 </style>
 <link rel="stylesheet" href="../fonts/fm1-fonts.css">
-<style>
-/* NAIWAN 91: the beach palette in three tiers — sand ground, white surfaces, navy type, coral for "now" */
-:root{{--ground:#FFF6E3;--bg:#FFF6E3;--panel:#FFFFFF;--card:#FFFFFF;--card-2:#FFF1D8;--ink:#14263A;--text:#14263A;
---muted:#6B5A3C;--dim:#6B5A3C;--rule:#E3D3AE;--line:#E3D3AE;--accent:#F2542D;--acc:#F2542D;--red:#E8302E;--orange:#F2542D;
---purple:#1B7FD6;--purple-2:#0F4A80;--rust:#0E9E7E;--horn:#F6E2A8;--green-1:#0E9E7E;--river:#1B7FD6;--river-2:#0F4A80}}
-html,body{{background:var(--ground);color:var(--ink)}}
-body{{font-family:"Nunito","Segoe UI",system-ui,sans-serif}}
-h1,h2,h3,h4,b,strong,.card b,.tag b,nav a,button{{font-family:"Quicksand","Nunito",system-ui,sans-serif;letter-spacing:.01em}}
-img.logo{{display:none}}
-</style>
+<link rel="stylesheet" href="../site.css">
+<link rel="icon" type="image/svg+xml" href="../img/naiwan91-mark.svg">
 </head>
 <body>
 <main>
@@ -359,7 +346,7 @@ const EXTRA = ["pk_clear", "pk_bassacid", "pk_pluck", "pk_w_pad", "pk_merge", "p
 /* the third frame (F0 7D 50 5B, 0.14.3 on): fourteen pieces inside the stages (us; all chunks, then the chunks shorter than 256 frames), the chunk sizes (counts), the work between chunks (us) */
 const DIAG_PIECES = ["bass", "acid", "cm", "fm", "dj", "noise", "padmix", "side", "drums", "bassmix", "echoes", "fxm", "dyn", "clip"];
 const DIAG = DIAG_PIECES.map((p) => "d_" + p).concat(DIAG_PIECES.map((p) => "ds_" + p), ["hc_lt64", "hc_lt128", "hc_lt256", "hc_256", "r_drain", "r_control", "r_pulse", "r_hits"]);
-const GENRES = ["HYPNO", "LOFI", "HOUSE", "DUBSTEP", "DUB", "DNB", "BREAKS", "GARAGE", "ELECTRO", "TRAP", "DISCO", "FUNK", "REGGAE", "SYNTHWAVE", "AMAPIANO", "TRIPHOP", "INDUS", "PSY", "FOREST"];
+const GENRES = ["CITYPOP", "SUNSET", "AOR", "SHIBUYA", "BOOGIE", "YACHT", "TAPE", "NEON", "KAYO", "LOUNGE", "SURF", "BALEAR", "TROPIC", "SUMMER", "MARINA", "CALYPSO", "ISLAND", "SEASIDE", "SANDS"];
 let port = null;
 async function openPort() {
   if (port && port.inp.state !== "disconnected" && port.out.state !== "disconnected") return port;

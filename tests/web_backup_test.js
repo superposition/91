@@ -44,7 +44,7 @@ check("an answer", ack && ack.obj === 7 && ack.idx === 0x7F && ack.status === 0 
 // the objects: the panel's calibration (1) is never among them, every other store is, each once
 const ids = M.BK_OBJECTS.map((o) => o.id);
 check("the objects: 25, no panel, none twice", ids.length === 25 && !ids.includes(1) && new Set(ids).size === 25 && ids.every((i) => i >= 0 && i <= 25));
-check("their names", M.bkName(0) === "HYPNO" && M.bkName(5) === "LOFI" && M.bkName(19) === "TRIPHOP" && M.bkName(20) === "INDUS" && M.bkName(21) === "PSY" && M.bkName(22) === "FOREST" && M.bkName(23) === "piece extras" && M.bkName(24) === "MIDI map" && M.bkName(25) === "bass steps" && M.MM_OBJ === 24);
+check("their names", M.bkName(0) === "CITYPOP" && M.bkName(5) === "SUNSET" && M.bkName(19) === "CALYPSO" && M.bkName(20) === "ISLAND" && M.bkName(21) === "SEASIDE" && M.bkName(22) === "SANDS" && M.bkName(23) === "piece extras" && M.bkName(24) === "MIDI map" && M.bkName(25) === "bass steps" && M.MM_OBJ === 24);
 
 // the file
 const objs = [{ id: 0, data: new Uint8Array(3776).map((_, i) => i & 255) }, { id: 4, data: new Uint8Array(12).fill(7) }, { id: 12, data: new Uint8Array(0) }];

@@ -33,6 +33,10 @@ jobs:
         with:
           python-version: '3.12'
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Python packages
         run: python3 -m pip install --quiet Pillow fonttools
 
@@ -81,6 +85,14 @@ jobs:
           python3 tools/make_params.py
           python3 tools/manual_html.py
           python3 tools/make_pages_site.py "$VERSION" build/site
+
+      - name: Validate web bundle before publication
+        run: |
+          python3 tests/web_site_test.py build/site build/emu
+          node tests/web_syx_test.js
+          node tests/web_backup_test.js
+          node tests/web_ota_test.mjs
+          node tests/web_idle_test.mjs
 
       - uses: actions/upload-pages-artifact@v3
         with:

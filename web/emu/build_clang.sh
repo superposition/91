@@ -19,7 +19,5 @@ clang --target=wasm32 -O2 -ffp-contract=off -std=gnu99 -nostdlib -ffreestanding 
     -Iweb/emu/shim -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen \
     -Wl,--no-entry -Wl,--export-memory -Wl,--initial-memory=33554432 -Wl,-z,stack-size=1048576 \
     -o build/emu/amb.wasm web/emu/amb_web.c firmware/src/dsp/amb.c web/emu/shim/libc.c $RUST_LIB
-cp web/emu/index.html web/emu/worklet.js build/emu/
-# never let a browser keep an old build: the wasm and the worklet are fetched fresh
-sed -i 's|fetch(\"amb.wasm\")|fetch(\"amb.wasm\", { cache: \"no-store\" })|; s|addModule(\"worklet.js\")|addModule(\"worklet.js?v=\" + Date.now())|' build/emu/index.html
+sh web/emu/package.sh
 echo "emu: build/emu ($(wc -c < build/emu/amb.wasm) B wasm)"

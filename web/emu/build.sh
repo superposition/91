@@ -18,5 +18,5 @@ emcc -O2 -ffp-contract=off -std=gnu99 -Wall -Wno-unused-function -Wno-unused-par
     -DEN_HOST -DEN_WEB $RUST_FLAGS "-DEN_VERSION=\"$(printf %s "${EN_VERSION:-DEV}" | tr a-z A-Z)\"" -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen \
     --no-entry -sSTANDALONE_WASM -sSTACK_SIZE=1048576 -sINITIAL_MEMORY=33554432 -sFILESYSTEM=0 \
     -o build/emu/amb.wasm web/emu/amb_web.c firmware/src/dsp/amb.c $RUST_LIB
-cp web/emu/index.html web/emu/worklet.js build/emu/
+sh web/emu/package.sh
 echo "emu: build/emu ($(wc -c < build/emu/amb.wasm) B wasm)"

@@ -1,174 +1,72 @@
 # NAIWAN 91
 
-**内湾 (NAIWAN) 91 — city pop and coastal firmware for the M-VAVE FM-1.** Nineteen genres that play themselves while you steer:
-ten urban (city pop, AOR, boogie, shibuya-kei, yacht rock and more) and nine coastal (surf, balearic, tropic,
-summer, marina, calypso, island, seaside, sands), each a set of ten jam pieces in the vein of the late-70s /
-early-80s records the genre is named for, played on the firmware's own FM, analog and percussion engines. A honu
-turns behind the chord figure, sea glyphs flare on the pluck, and the whole thing runs in the browser as
-WebAssembly.
+**A city-pop Songbook for the M-VAVE FM-1, with an incremental migration to Rust.**
 
-<p align="center"><img src="docs/img/readme-hero.png" width="760" alt="Three screens: the home screen with the honu and the chord figure, the master bus page (the compressor's curve, the limiter and the output meter) and one of the visualizers."></p>
+Play alongside three original arrangements: **Velvet Changes**, **Afterhours** and **Neon Turnaround**. Each keeps a home key while voice-led sixth/diminished harmony, independent DX keys and bass, and phrase-timed swells make room for a live instrument. Steer the band with the panel, mouse, touch or keyboard.
 
-*The home screen, the master bus and a visualizer.*
+<p align="center"><img src="docs/img/naiwan91-performance.png" width="320" alt="Actual current Songbook performance screen: Velvet Changes, moving chords, key, tempo, section length and movement"></p>
 
-**Try it now:** <https://superposition.github.io/91/emu/> — the browser emulator runs the same code with sound.
-The installer, editor and manual are on the same site: <https://superposition.github.io/91/>.
+*The current Songbook performance screen, captured from the WASM instrument.*
 
-<p align="center"><img src="docs/img/readme-tour.png" width="760" alt="A frame from the firmware's own tour: the Perform screen, the auto-DJ's build, effects and genres."></p>
+[Try the published emulator](https://superposition.github.io/91/emu/) · [Current migration draft](https://github.com/superposition/91/pull/27) · [Architecture and evidence](docs/RUST_MIGRATION.md) · [Songbook guide](docs/JAM_PACKS.md)
 
-*The Perform screen, the auto-DJ's build, the effects and the genre sets.*
+The browser emulator needs no FM-1. Audio starts only after **Switch on**. The published site can lag this working branch; the current Rust and web refactor are tracked separately from a hardware release.
 
-## DX7 Citypop Songbook (0.3.0 local build)
+## The instrument now
 
-Three original Harris-informed Citypop songs provide 32/64-bar forms from 8/16-bar sections, with a stable home key, voice-led sixth/diminished chords, independent DX keys and bass, and phrase-timed swells. PRESETS chooses songs; SELECT opens Arrangement, DX Keys, DX Bass and Swells. The four main knobs control key, tempo, section length and activity. F3 holds a section, G3 requests a related idea, and F4 returns to the legacy instrument.
+- **Three authored songs.** 8/16-bar sections combine into 32/64-bar forms, with major/minor realizations, written destinations and a stable home key.
+- **Independent DX roles.** Keys and bass have their own programs, touch/attack, gate and release. Swells follow the phrase rather than a free-running pad cycle.
+- **Performance controls.** PRESETS chooses a song. The main knobs set key, tempo, section length and movement; ALGORITHM sets energy. F3 / REC holds a phrase; G3 / EDIT asks for a related idea.
+- **Editable packs.** Songs and up to eight embedded DX programs can be auditioned and kept in four slots without another firmware rewrite. Session settings save while playback is stopped.
+- **A retained legacy instrument.** F4 opens the existing generative pieces, sequencers, effects and visualizers. Their controls remain documented in the [manual](docs/MANUAL.md).
 
-[Songbook and Jam Packs](docs/JAM_PACKS.md) documents controls, musical data, MIDI/DX voice import and USB updates. Songs and up to eight embedded DX programs can be auditioned and saved to four slots without another firmware rewrite. V1 packs and all legacy parameter indices remain supported. The [fm1-jam skill](skills/fm1-jam/SKILL.md) uses the same CLI. These local changes have not been deployed to the public links above.
+## Current screens
 
-[Local validation](docs/SONGBOOK_VALIDATION.md) records the ten-minute FM-1 test, saved-pack restart check and existing baseline test failures.
+These are fresh captures of the actual Songbook framebuffer, rather than screenshots inherited from the earlier fork.
 
-## Rust migration in progress
+<p align="center"><img src="docs/img/naiwan91-arrangement.png" width="240" alt="Arrangement: form, section bars, variation and swell amount"> <img src="docs/img/naiwan91-dx-keys.png" width="240" alt="DX Keys: program, touch, brightness and release"></p>
+<p align="center"><img src="docs/img/naiwan91-dx-bass.png" width="240" alt="DX Bass: program, attack, gate and energy"> <img src="docs/img/naiwan91-swells.png" width="240" alt="Swells: texture, amount, variation and tail"></p>
 
-The local browser build runs Songbook planning, bass decisions and pack/session codecs in Rust, with the existing C synthesis and UI. [Architecture, layouts and reproduction commands](docs/RUST_MIGRATION.md) document the port and Friday talk evidence. The [migration epic and 25 tickets](https://github.com/superposition/91/issues/1) track the remaining work. This incremental emulator build is not a new physical-device release.
+SELECT opens Arrangement, DX Keys, DX Bass and Swells. Each page has four matching controls, from top to bottom. HOME returns to the Songbook performance page.
 
-## What's in 0.1.0
+Regenerate these images with `node tools/capture_web_screens.mjs build/emu/amb.wasm`. [Capture metadata](docs/img/naiwan91-captures.json) records the WASM hash, seed and image hashes. These captures establish instrument screens; browser layout inspection is a separate check.
 
-**Nineteen genres, one mechanism.** Every genre is a donor column of the engine's library plus its own ten
-tempo / root / mode rows, its own answer on top of the donor's recipe, and its own five pluck sounds. Adding a
-genre is one row in each of those tables; there are no per-genre copies of the drum patterns, the chord habits
-or the section profiles.
+## Rust migration
 
-- **Urban:** CITYPOP (104), SUNSET (106), AOR (96), SHIBUYA (118), BOOGIE (116), YACHT (88), TAPE (96),
-  NEON (112), KAYO (76), LOUNGE (92).
-- **Coastal:** SURF (140), BALEAR (100), TROPIC (112), SUMMER (108), MARINA (96), CALYPSO (124), ISLAND (80),
-  SEASIDE (118), SANDS (72).
+The emulator integrates shared `no_std` Rust libraries for compact musical types, Jam Pack/session codecs, deterministic phrase planning, bass decisions and command queue ownership. The existing C application, command dispatch, transport, synthesis, effects and screen UI remain in use during the port.
 
-**Sea iconography.** The home screen's rotating star is a **honu** — shell, three scutes, four flippers, head and
-tail — and the glyphs that flare on each plucked note are a scallop, a starfish, a fish, a turtle, a jellyfish, the
-sun, an anchor and a palm. The chord figure, the phrase ring, the bar ring and the section-reading eye stay.
+The [migration epic and 25 tickets](https://github.com/superposition/91/issues/1) cover the complete conversion. The final ticket, [How I did it](https://github.com/superposition/91/issues/26), builds the engineering talk from measured decisions and reproducible demos. The [web refactor](docs/WEB_REFACTOR.md) keeps the site, product language and imagery aligned with that work.
 
-**One piece per mode.** No two pieces of a genre share a pad, a mode and a chord kind, so a set of ten sounds like
-ten pieces rather than five played twice; the twins audit runs clean at its threshold.
+| Representation | Size |
+| --- | ---: |
+| Six patterns × six lane masks | 72 bytes |
+| 1,024 packed command words | 4,096 bytes |
+| One phrase / two phrase buffers | 388 / 776 bytes |
+| Stored Songbook session | 20 bytes |
 
-## What it is
+The integrated checkpoint compares **34,730,900 Float32 audio values** with the C reference, including Hold, New Idea, Save, restart and irregular render sizes. All values match, with zero C fallbacks and no WASM memory growth. [Exact evidence and limitations](docs/rust/emulator-proof.json) are retained. This proves the delivered browser slice; physical Rust execution and the full conversion remain open.
 
-NAIWAN 91 is a custom firmware for the M-VAVE FM-1: a 5 track generative groovebox you perform on. You don't write a
-song and press play: you pick a piece, and it plays (a pad, a bass, a 303-style acid line, a pluck, drums), and you
-shape it live: break it down, build it back up, drop it, mute and solo parts, throw effects, change the pattern, take
-the acid somewhere else. Everything is changeable while it plays, and nothing is a loop of audio: the notes are
-generated by the engine on the FM-1 itself, from the key, the scale and the chord it is in. Auto-DJ can run the whole
-arc (groove, fill, breakdown, build, drop) by itself while you change the Mood.
+```sh
+cargo test --workspace --locked
+cargo clippy --workspace --all-targets --locked -- -D warnings
+cargo run -p fm1-cli -- layouts
+cargo run -p fm1-cli -- validate packs/velvet-changes.jmp
+cargo run -p fm1-cli -- plan packs/velvet-changes.jmp 6 1 8
+sh tests/rust_emulator_parity.sh
+```
 
-## Who it's for
+The broad original baseline has **100 passing and 22 failing checks**, recorded before the port. The migration comparisons preserve those fingerprints; they do not turn a known baseline failure into a passing result.
 
-- **If you want to make music without first learning how to build a good song,** NAIWAN 91 is a place to start.
-  Every piece already sounds finished: choose a genre, press play, and you are performing from the first minute,
-  steering a groove that holds together (the chords, the drums, the acid and the effects all follow the same key and
-  tempo). You learn by turning things, not by programming them.
-- **If you already know what you want,** it opens up. The sequencer, the sound pages, the acid line, the scales and
-  the effects can be edited as deeply as you like, a piece you have shaped can be stored, and your own DX7 voices can
-  be loaded.
+## Browser and hardware
 
-## What makes it different
+The [emulator](web/emu/) uses the real instrument compiled to WebAssembly, with a thin browser audio/input/storage layer. AudioWorklet is used on secure origins; a compatible Web Audio callback keeps local-network HTTP previews usable. MIDI controllers are optional. The [web editor](web/editor/) and [installer](web/amb_installer.html) require a connected FM-1 for their device operations.
 
-- **Pieces that evolve.** Each piece is a set of rules (key, mode, tempo, which sounds, which drum patterns), not a
-  recording. The chords move, the acid line mutates a little each time round, the pad breathes, the hats change.
-  Leave it alone and it develops; touch it and it follows you.
-- **A performance instrument, not a preset player.** One button breaks the music down, a second builds it, a third
-  drops it. An **auto-DJ** can run the whole arc by itself and bring in the next piece. Scenes store your mix and
-  effects and recall them on the bar. Effects are played like keys, in four banks (27 effects, 24 beat FX, 15 flex
-  beats and 27 DJ snips, 93 keys in all): tap to latch, hold to play. A **Mood** dial moves a dozen settings at once
-  from chill to peak.
-- **Genres that behave like genres.** Each brings its own tempos, swing, drum kits and patterns, its own effects, its
-  own bass habit, its own pad comping and ghost notes, and its own habits for where the chords go next. Ten pieces
-  each, a hundred and ninety in all.
-- **A real sequencer under the generator.** Six drum lanes, sixteen steps, six patterns. Euclidean fills and
-  rotation, a chance per lane, lanes with their own lengths (polymeter), a **density** control that thins a lane by
-  importance, a **source** per lane, pattern keys that play only while held, and **drum drift**: patterns that change
-  and mutate on their own, with the backbeat protected. Per step, **ratchets** (x2 to x6, flams, swells), **push**
-  and **level**; over bars, **chains** of patterns, **slice** permutations, half and double time, and a **condition**
-  for each lane.
-- **The acid answers itself.** The line asks, then answers: an octave or a fifth up or down, a third within the
-  scale, the contour mirrored, backwards, shifted a beat, thinned, or reduced to its accents. Like the line?
-  **Freeze** it and edit it as sixteen steps.
-- **Effects you edit, not only throw.** Every effect with settings has a page that draws it: the gate's steps, the
-  roll's speed-up, the scratch, the freeze, the phaser, the tape, the vinyl, the pump's targets.
-- **A mixer and a real master bus.** A live meter and fader for every layer and the output, pan and sends per layer;
-  behind it a stereo-linked compressor and a look-ahead brick-wall limiter, each genre bringing its own settings and
-  the screen drawing them as they work.
-- **Jam along.** The Jam page makes the 27 keys an instrument: every key a note of the scale, triads, or a harp up
-  the scale, over the music as it plays; stop, and the pluck can answer your phrase back an octave up.
-- **Real FM voices, and yours.** A six-operator FM engine plays 30 DX7-style voices as the pluck, and you can load
-  up to 16 of your own DX7 voices from a `.syx` file over USB. A browser **editor** shows every parameter and edits
-  DX7 voices with a live preview on the unit.
-- **You keep what you make.** Any piece can be stored; the unit remembers your theme, tuning, effect settings and
-  DX7 voices across power-off, and the installer page backs all of it up to a file and restores it.
-- **Five tracks at once, with a safety net.** The engine is built around not breaking: a second core takes the
-  reverb and, under load, more of the work; a master bus keeps the sum from clipping; and a piece that gets too heavy
-  sheds the least important work before it would drop a sample.
+The hardware Songbook checkpoint is version **0.3.0**. Its [physical validation](docs/SONGBOOK_VALIDATION.md) records the ten-minute USB recording, saved-pack restart and resource measurements. The Rust browser checkpoint is not a new qualified hardware release.
 
-<p align="center"><img src="docs/img/readme-gen.png" width="760" alt="Six screens: the Steps page (ratchets, push and level for each step), the Acid steps page, the Groove page, the Phrase page, the Acid answer page and the Deja vu page."></p>
-
-*Under the generator: ratchets, push and level per step; the acid line frozen into steps; density and source per drum
-lane; chains, slices and half or double time; what the acid answers; the pluck remembering its phrase.*
-
-<p align="center"><img src="docs/img/readme-perf.png" width="760" alt="Six screens: the FX menu, the Flex Beat bank, the Perform screen, the Mixer page, the Jam page and the DJ snips page."></p>
-
-*Playing it: the FX menu (latch or hold), the Flex Beat bank, the Perform screen, the mixer, the Jam page and the DJ
-snips.*
-
-## A first minute
-
-1. Switch on: the boot cards play and a piece starts by itself. Any key skips the cards.
-2. Turn **SELECT** to walk the pages; the four knobs under the screen change what each page shows. Turn **PRESETS**
-   for another piece; hold **GLO** and turn **PRESETS** for another genre.
-3. Tap **SAVE** for a breakdown on the next bar, tap it again for a build and the drop.
-4. Press **FX**: tap a key to latch an effect, hold it to play it. Hold **GLO** for the mute and solo map and the
-   scenes.
-5. Hold **SEQ** for the step sequencer; the white keys are the sixteen steps.
-6. **GLO**, then **SAVE** stores the piece you are in.
-
-The manual ([docs/MANUAL.md](docs/MANUAL.md), or the page on the site with screenshots) covers every control and page.
-
-## The look
-
-The screen is drawn in one look (warm black, one colour per voice: the pad bone, the bass crimson, the acid lime,
-the pluck ice-teal, the drums pink) in six palettes, chosen on the Global page.
-
-<p align="center"><img src="docs/img/readme-palettes.png" width="760" alt="The home screen in the six palettes: Beach, Synth, Acid, Ice, Ember and Phosphor."></p>
-
-## Install
-
-Use the web installer, <https://superposition.github.io/91/install/>, in Chrome or Edge with the FM-1 plugged in.
-**Installing firmware is at your own risk.** The installer checks the package against the unit, can put M-VAVE's own
-firmware back, and an FM-1 that fails to start twice comes up in a safe mode the installer can reach. Read section 1
-of the manual first, and keep a way to restore the stock firmware to hand. NAIWAN 91 keeps its own pieces, settings
-and DX7 voices and does not read the projects or samples of other firmwares; what is stored may be lost when you
-switch either way, so keep copies of anything you care about. `BUILDING.md` ends with what the install does and does
-not protect against.
-
-## Under the hood
-
-- **Hardware:** JieLi AC79 (pi32v2 core, two cores at 240 MHz, a single-precision FPU, 512 KB of RAM, code run in
-  place from flash), 44.1 kHz stereo, the screen drawn in three bands over DMA.
-- **Audio:** the whole instrument renders in 5.8 ms chunks (an 11.6 ms budget for two); the plate reverb, and under
-  load more of the work, runs on the second core and is checked for identical output either way; a master bus with a
-  compressor and a look-ahead limiter; a six-operator FM engine on integer buses.
-- **Genres:** one library of 15 donor columns (recipe, drum patterns, harmony and section tables) and 19 genre rows
-  over it: a donor index, ten tempo / root / mode rows, a recipe delta list and five pluck sounds. Play, patterns,
-  names and palettes all resolve through that mapping, so a genre is data, not code.
-- **Storage:** every genre has its own flash object (A/B sectors with a commit record, so a power cut keeps the
-  previous copy), holding packed 376-byte piece records with room to grow.
-- **Tests:** about 70 scripted scenarios run the whole app in a simulator (`tests/`), alongside tests of the maths,
-  the instrument, the flash code, the SysEx protocol and the editor; a genre-pair audit checks that no two pieces of
-  a genre are too alike.
-- **Source layout and the build:** `BUILDING.md`. **Version history:** `docs/CHANGELOG.md`.
-
-## Feedback, ideas and help
-
-Comments, suggestions, ideas and bug reports are welcome: [open an issue](https://github.com/superposition/91/issues).
-A bug report is most useful with the version (shown on the boot card), the genre and piece, and, for anything about
-load or crackles, a status log (`tools/fm1log.py`, or the "Live status" on the installer page). Code, documentation
-and sound-design contributions are welcome too: see `CONTRIBUTING.md`.
+- [Build and install instructions](BUILDING.md)
+- [Songbook packs, controls and MIDI/DX imports](docs/JAM_PACKS.md)
+- [Architecture, unsafe boundaries and compiler investigation](docs/RUST_MIGRATION.md)
+- [Contributing](CONTRIBUTING.md) · [Issues and ideas](https://github.com/superposition/91/issues)
 
 ## Credits and licence
 

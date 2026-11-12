@@ -23,7 +23,7 @@ SHARING = "--no-sharing" not in sys.argv
 args = [a for a in sys.argv[1:] if a != "--no-sharing"]
 ver = args[0] if args else sys.exit(__doc__)
 OUT = Path(args[1] if len(args) > 1 else SRC / "build" / "site")
-REPO = ""   # local-only build: no share-link host
+REPO = "https://github.com/superposition/91"
 pkg = SRC / "build" / f"naiwan91-{ver}.fwsc"
 raw = pkg.read_bytes()
 app = SRC / "build" / "amb.bin"
@@ -44,7 +44,10 @@ name = f"naiwan91-{ver}.fwsc"
 shutil.copy(pkg, OUT / "firmware" / name)
 shutil.copytree(SRC / "build" / "emu", OUT / "emu")
 shutil.copytree(SRC / "web" / "fonts", OUT / "fonts")   # the site's own typeface
-shutil.copy(SRC / "web" / "img" / "favicon.png", OUT / "img" / "favicon.png")
+shutil.copy(SRC / "web" / "site.css", OUT / "site.css")
+shutil.copy(SRC / "web" / "img" / "naiwan91-mark.svg", OUT / "img" / "naiwan91-mark.svg")
+for capture in (SRC / "docs" / "img").glob("naiwan91-*.png"):
+    shutil.copy(capture, OUT / "img" / capture.name)
 
 page = (SRC / "web" / "amb_installer.html").read_text(encoding="utf-8")
 lib = strip_module((SRC / "web" / "fm1pkg.js").read_text(encoding="utf-8")) + "\n" + strip_module((SRC / "web" / "fm1ota.js").read_text(encoding="utf-8")) + "\n" + strip_module((SRC / "web" / "fm1backup.js").read_text(encoding="utf-8")) + "\n" + strip_module((SRC / "web" / "fm1idle.js").read_text(encoding="utf-8"))
@@ -66,7 +69,14 @@ if params.exists():
         (OUT / d).mkdir(exist_ok=True)
         pg = (SRC / "web" / d / "index.html").read_text(encoding="utf-8").replace("/*PARAMS*/", params.read_text(encoding="utf-8")).replace("/*LIB*/", plib)
         (OUT / d / "index.html").write_text(pg.replace("/*LIBRARY*/", lib_json).replace("/*RELAY*/", relay_json), encoding="utf-8", newline="\n")
-shutil.copy(SRC / "docs" / "manual.html", OUT / "manual" / "index.html")
+manual = (SRC / "docs" / "manual.html").read_text(encoding="utf-8")
+manual = re.sub(r'<link rel="stylesheet" href="https://fonts.googleapis.com[^>]+>\n', "", manual)
+manual = manual.replace("</head>", '<link rel="stylesheet" href="../fonts/fm1-fonts.css">\n<link rel="stylesheet" href="../site.css">\n<style>.site .home img{display:none}</style>\n</head>', 1)
+manual = manual.replace("<main>", '<main><div class="project-note"><p><b>Current Songbook:</b> <a href="../emu/">play the browser instrument</a> or read the <a href="https://github.com/superposition/91/blob/rust/emulator-first/docs/JAM_PACKS.md">Songbook guide</a>. The reference below covers the retained legacy instrument.</p></div>', 1)
+for source_pdf, served_pdf in (("manual.pdf", "NAIWAN 91-manual.pdf"), ("quick-manual.pdf", "NAIWAN 91-quick-manual.pdf"), ("beginners-guide.pdf", "NAIWAN 91-beginners-guide.pdf")):
+    if not (SRC / "build" / source_pdf).exists():
+        manual = re.sub(r'<a\b[^>]*href="' + re.escape(served_pdf) + r'"[^>]*>.*?</a>', "", manual, flags=re.S)
+(OUT / "manual" / "index.html").write_text(manual, encoding="utf-8", newline="\n")
 (OUT / "manual" / "maps").mkdir(exist_ok=True)         # ready MIDI maps the manual links (0.16.18: the Launch Control XL 3's)
 for f in (SRC / "docs" / "maps").glob("*.perfmap"):
     shutil.copy(f, OUT / "manual" / "maps" / f.name)
@@ -83,43 +93,14 @@ if (SRC / "build" / "manual.pdf").exists():         # the whole manual as a PDF 
 for img in [*(SRC / "docs" / "img").glob("perf-screen-*.png"), *(SRC / "docs" / "img").glob("guide-*.png")]:
     shutil.copy(img, OUT / "manual" / "img" / img.name)
 
-(OUT / "index.html").write_text(f'''<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NAIWAN 91</title>
-<meta name="description" content="NAIWAN 91: live-performance firmware for the M-VAVE FM-1: nineteen genres of generative pieces, an auto-DJ, effects, a web editor and DX7 voices.">
-<link rel="stylesheet" href="fonts/fm1-fonts.css">
-<style>
-:root{{--bg:#FFF6E3;--panel:#FFFFFF;--line:#E3D3AE;--text:#14263A;--dim:#6B5A3C;--acc:#F2542D;--red:#E8302E}}
-@media (prefers-color-scheme:light){{:root{{--bg:#FFF6E3;--panel:#FFFFFF;--line:#E3D3AE;--text:#14263A;--dim:#6B5A3C;--acc:#F2542D;--red:#E8302E}}}}
-*{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,"Segoe UI",sans-serif}}
-main{{max-width:760px;margin:0 auto;padding:40px 16px 56px}}
-img.logo{{width:96px;height:auto;display:block;margin:0 0 12px}}h1{{margin:0;font-size:2.4rem;letter-spacing:.02em}}h1 span{{color:var(--red)}}
-.tag{{color:var(--dim);margin:.2rem 0 1.6rem}}.v{{color:var(--acc);font-weight:600}}
-.grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:0 0 28px}}
-.card{{display:block;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;color:inherit;text-decoration:none}}
-.card:hover{{border-color:var(--acc)}}.card b{{display:block;font-size:1.05rem;color:var(--acc)}}.card span{{color:var(--dim);font-size:.92rem}}
-p.small{{color:var(--dim);font-size:.88rem}}a{{color:var(--acc)}}
-body{{font-family:"Nunito","Segoe UI",system-ui,sans-serif!important}}h1,h2,h3,b,strong,.card b,nav a,button{{font-family:"Quicksand","Nunito",system-ui,sans-serif!important}}
-</style></head><body><main>
-<span class="mark">内湾</span>
-<h1>NAIWAN<span> 91</span></h1>
-<p class="tag">Free firmware that turns the M-VAVE FM-1 into a groovebox that plays by itself. Version <span class="v">{ver}</span>.</p>
-<p>Switch it on and music starts: drums, bass, a pad, an acid line and a plucked melody, in nineteen styles, from city pop and AOR to surf, balearic and island dub. You steer it with the buttons and keys: change the chords, break it down and drop it back in, mute parts, throw on effects, or let the auto-DJ run the show. When you want more, nearly everything can be edited and saved. New here? Start with the beginner's guide.</p>
-<div class="grid">
-<a class="card" href="install/"><b>Install</b><span>Install it from this website in Chrome or Edge, with the FM-1 plugged in. You can go back to the original firmware the same way.</span></a>
-<a class="card" href="emu/"><b>Try it in your browser</b><span>Play with NAIWAN 91 on screen, with sound, before you install anything.</span></a>
-<a class="card" href="editor/"><b>Editor</b><span>Change any setting from your computer, and make your own DX7 sounds and hear them on the FM-1.</span></a>
-<a class="card" href="pieces/"><b>Library &amp; pieces</b><span>Pieces and sets made by players: hear them in your browser and add them to your FM-1. Submit your own, one or many at once.</span></a>
-<a class="card" href="manual/"><b>Manual</b><span>Starts with a beginner's guide, then explains every button and page.</span></a>
-{quick_card}
-<a class="card" href="firmware/{name}?v={sha}"><b>Download the firmware file</b><span>{name} ({len(raw) // 1024} KB, SHA-256 {sha}). You only need this if you install another way than the page above.</span></a>
-<a class="card" href="{REPO}/issues/new/choose"><b>Ideas and problems</b><span>Tell me what you'd like next, or what went wrong. Most new features started as someone's idea.</span></a>
-<a class="card" href="{REPO}"><b>Source code</b><span>Free and open source (GPL-3.0), on GitHub.</span></a>
-</div>
-<p class="small">Installing firmware is at your own risk. If something goes wrong, the installer can put the original firmware back, and an FM-1 that fails to start twice in a row starts in a safe mode the installer can reach. Section 1 of the manual explains it all.</p>
-<p class="small">NAIWAN 91 is a fork of HYP-1 by <a href="https://www.redtail.works">RedtailWorks</a>, itself a fork of AMB-1 by Charles Vestal, built on Felucca by Leo Kuroshita (Hügelton Instruments); the six-operator FM engine is Melodee's by Kerem Kilic (Ellic Studio), after Dexed. GPL-3.0-only; see LICENSING.md in the repository. "M-VAVE" and "FM-1" are trademarks of their owners: NAIWAN 91 is independent firmware, not affiliated with or endorsed by them.</p>
-</main></body></html>
-''', encoding="utf-8", newline="\n")
+landing = (SRC / "web" / "index.html").read_text(encoding="utf-8")
+values = {"REPO": REPO, "VERSION": ver, "FIRMWARE_NAME": name, "SHA": sha,
+          "PACKAGE_KB": str(len(raw) // 1024), "QUICK_CARDS": quick_card}
+for key, value in values.items():
+    landing = landing.replace("@@" + key + "@@", value)
+if re.search(r"@@[A-Z_]+@@", landing):
+    sys.exit("unresolved landing-page placeholder")
+(OUT / "index.html").write_text(landing, encoding="utf-8", newline="\n")
 if not SHARING:                                 # the menus and the landing page without them
     for f in OUT.rglob("*.html"):
         t = f.read_text(encoding="utf-8")
