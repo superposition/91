@@ -43,7 +43,9 @@ def local_target(base,link,root):
     return target
 
 routes=['index.html','emu/index.html','install/index.html','editor/index.html','pieces/index.html','library/index.html','manual/index.html']
-required=json.loads((ROOT/'tests/web-required-ids.json').read_text(encoding='utf-8'))['pages']
+id_contract=json.loads((ROOT/'tests/web-required-ids.json').read_text(encoding='utf-8'))
+required=id_contract['pages']
+removed=id_contract.get('intentionally_removed',{})
 scripts=0;links=0;manual_duplicates={}
 for name in routes:
     page=OUT/name;text=page.read_text(encoding='utf-8');parsed=Page(text)
@@ -58,7 +60,11 @@ for name in routes:
         manual_duplicates=baseline
     else:
         assert not duplicates,f'duplicate ids in {name}: {duplicates}'
-    assert set(required.get(name,[]))<=set(parsed.ids),f'missing original control IDs in {name}: {set(required.get(name,[]))-set(parsed.ids)}'
+    retired=set(removed.get(name,{}))
+    assert retired<=set(required.get(name,[])),f'unknown retired IDs: {name}'
+    assert not retired&set(parsed.ids),f'retired engineering UI returned: {name}'
+    expected=set(required.get(name,[]))-retired
+    assert expected<=set(parsed.ids),f'missing original control IDs in {name}: {expected-set(parsed.ids)}'
     assert not re.search(r'@@[A-Z_]+@@|/\*(?:PARAMS|META|LIB|LIBRARY|RELAY)\*/',text),f'unresolved build data: {name}'
     assert any('site.css' in link for link in parsed.links),f'missing shared theme: {name}'
     assert 'fonts.googleapis.com' not in text,f'external font dependency: {name}'
@@ -85,4 +91,4 @@ captures=json.loads((ROOT/'docs/img/naiwan91-captures.json').read_text(encoding=
 assert len(captures['captures'])==5
 for capture in captures['captures']:
     assert (OUT/'img'/capture['file']).read_bytes()==(ROOT/'docs/img'/capture['file']).read_bytes()
-print(json.dumps(dict(routes=len(routes),local_links_and_assets=links,parsed_scripts=scripts,shared_theme=True,standalone_assets=True,current_captures=5,preserved_control_ids=sum(map(len,required.values())),baseline_manual_duplicate_ids=manual_duplicates)))
+print(json.dumps(dict(routes=len(routes),local_links_and_assets=links,parsed_scripts=scripts,shared_theme=True,standalone_assets=True,current_captures=5,preserved_control_ids=sum(map(len,required.values()))-sum(map(len,removed.values())),retired_engineering_ids=sum(map(len,removed.values())),baseline_manual_duplicate_ids=manual_duplicates)))

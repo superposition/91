@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>内湾 91 Emulator</title>
-<meta name="description" content="Play the NAIWAN 91 Songbook in your browser. No FM-1 required. Shared Rust planning and codecs inside the current C instrument.">
+<title>内湾 91 — Play the Songbook</title>
+<meta name="description" content="Choose a song, set your key and tempo, and play along with keys, bass and swells. Play NAIWAN 91 in your browser without an FM-1.">
 
 <style>
 /* Instrument controls and layout; shared web colours are in ../site.css. */
@@ -54,7 +54,6 @@ a { color: var(--ink); text-decoration-color: var(--river-2); text-decoration-th
 .bar button:hover { border-color: var(--accent); color: var(--accent); }
 .bar .btnlike { color: var(--ink); background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: .3em .8em; cursor: pointer; }
 .bar .btnlike:hover { border-color: var(--accent); color: var(--accent); }
-.bar .cpu { font-variant-numeric: tabular-nums; }
 .help h2 { font: 600 1.1rem "Helvetica Neue", Helvetica, Arial, sans-serif; margin: 0 0 .3rem; }
 .help { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem 2rem; margin: 1.6rem 0 0; }
 .help h2 { font: 600 1.1rem "Helvetica Neue", Helvetica, Arial, sans-serif; margin: 0 0 .3rem; }
@@ -138,11 +137,11 @@ body.stream .ctl.knob.sv-turn > circle:first-child { stroke: #ff9a3c; stroke-wid
 <main>
 <header>
   <h1 data-pack="NAIWAN-91"><a href="../">内湾 91</a></h1>
-  <p>Songbook · browser instrument · Rust migration in progress</p>
+  <p>Choose a song. Make it your own.</p>
   <nav><a href="../">Home</a><a href="../install/">Install</a><a href="../editor/">Editor</a><a href="../pieces/">Library &amp; pieces</a><a href="../manual/">Manual</a></nav>
 </header>
 
-<div class="project-note"><p><b>Play here. No FM-1 needed.</b> Press Switch on, then use the panel, mouse, touch or keyboard. Songbook planning, bass decisions and pack/session codecs run in Rust; synthesis and the instrument UI remain C.</p><small>Sound begins only after you switch on. Saved packs and sessions stay in this browser.</small></div>
+<div class="project-note"><p><b>Your band is ready.</b> Press Switch on, choose a song with PRESETS, then find your key and tempo. Play along, hold a phrase or shape the sound with SELECT.</p><small>No FM-1 needed. Use your mouse, touch or keyboard. Saved songs and sessions stay in this browser.</small></div>
 <p class="turn">Turn your phone sideways for bigger controls.</p>
 <div class="device-shell">
 <div class="device" id="device">
@@ -155,8 +154,6 @@ body.stream .ctl.knob.sv-turn > circle:first-child { stroke: #ff9a3c; stroke-wid
 
 <div class="bar">
   <span id="status">Off. Sound starts when you switch it on.</span>
-    <span class="cpu" id="cpu"></span>
-    <span class="cpu" id="migration" hidden title="Shared Rust Songbook core and command queue; synthesis, command dispatch and UI remain C."></span>
   <button id="reset" type="button" title="Restart using the saved Jam session (stored packs and pieces kept)">New start</button>
   <button id="forget" type="button" title="Forget stored packs, session, pieces and settings">Forget stored</button>
 </div>
@@ -198,9 +195,9 @@ body.stream .ctl.knob.sv-turn > circle:first-child { stroke: #ff9a3c; stroke-wid
       <li>Hover a control for a one-line tip. Stream view (a button under the panel, or <code>?stream</code> on the address) shows the FM-1 and its screen large on a 16:9 stage for capturing.</li>
     </ul>
   </div>
-  <div><h2>Saved here, in this browser</h2><p>A new browser starts with Velvet Changes. A saved session restores its key, tempo, section settings and selected pack. New start boots with the objects saved here; Forget stored removes those browser objects. The sound is generated live at 44.1 kHz.</p></div>
-  <div><h2>Legacy instrument</h2><p><b>F4</b> opens the retained generative pieces, sequencers, effects and visualizers. Songbook is the normal starting point. The <a href="../manual/">manual</a> describes the legacy pages; <b>HOME</b> returns to Songbook.</p></div>
-  <div><h2>The current migration</h2><p>Rust owns Songbook planning, bass decisions, pack/session codecs and the command queue. C still owns dispatch, transport, synthesis and the screen UI. The counters above report the active Rust path. <a href="https://github.com/superposition/91/issues/1">Follow the migration tickets</a>.</p></div>
+  <div><h2>Pick up where you left off</h2><p>A new browser starts with Velvet Changes. Stop playback and press <b>SAVE</b> to keep your song, key, tempo and section settings here. <b>New start</b> returns to your saved session. <b>Forget stored</b> clears your saved songs and settings from this browser.</p></div>
+  <div><h2>More sounds to explore</h2><p><b>F4</b> opens generative pieces, sequencers, effects and visualizers. The <a href="../manual/">manual</a> walks through those controls.</p></div>
+  <div><h2>Leave room for your part</h2><p>Set a comfortable tempo and let the accompaniment play while you try a melody. Hold a phrase for another pass, change the bass feel or bring in a swell when you want the music to open up.</p></div>
 </section>
 <footer class="foot"><span>NAIWAN 91 (GPL-3.0), based on HYP-1 by <a href="https://www.redtail.works">RedtailWorks</a> (GPL-3.0)</span><span><a href="https://github.com/superposition/91/issues/new/choose" target="_blank" rel="noopener">Comments, ideas and bug reports</a></span><span><a href="https://github.com/superposition/91" target="_blank" rel="noopener">Source on GitHub</a></span></footer>
 </main>
@@ -694,7 +691,7 @@ function saveStore(store) {
 }
 
 // ---------------------------------------------------------------- switching on
-const status = document.getElementById("status"), cpu = document.getElementById("cpu");
+const status = document.getElementById("status");
 async function switchOn() {
   const go = document.getElementById("go");
   go.disabled = true;
@@ -723,13 +720,6 @@ async function switchOn() {
           drawLights(m.buttons, m.keys);
           midiLights(m.buttons, m.keys);
           window.ambLast = m;
-          if (m.load !== undefined) cpu.textContent = `NAIWAN 91 uses ${m.load}% of this computer's time`;
-          if (m.rust && m.rust.plans) {
-            const migration = document.getElementById("migration");
-            migration.hidden = false;
-            const queue = m.rust.commands?.accepted ? " + command queue" : "";
-            migration.textContent = `Songbook${queue}: Rust (${m.rust.plans} plans) · DSP/UI: C`;
-          }
           if (m.store) saveStore(m.store);
         }
       };
@@ -738,7 +728,7 @@ async function switchOn() {
     await ready;
     await ac.resume();
     document.getElementById("start").hidden = true;
-    status.textContent = ac.sampleRate === 44100 ? "On." : `On (the browser runs audio at ${ac.sampleRate} Hz).`;
+    status.textContent = "On.";
     syncButtons(); syncKeys();
   } catch (err) {
     go.disabled = false;
@@ -763,7 +753,7 @@ document.getElementById("forget").addEventListener("click", () => {
   const NOTE = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
   const name = "NAIWAN 91";
   const acc = getComputedStyle(document.documentElement).getPropertyValue("--color-blue").trim() || "#1b7fd6";
-  const tag = "Songbook · shared Rust core · C synthesis and UI";
+  const tag = "Moving harmony · Keys, bass and swells";
   const dev = document.getElementById("device"), home = dev.parentNode, after = dev.nextSibling;
   const stage = document.createElement("div");
   stage.id = "stage";

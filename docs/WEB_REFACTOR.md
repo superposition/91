@@ -1,6 +1,6 @@
 # NAIWAN 91 web refactor
 
-Tracked in [web epic #28](https://github.com/superposition/91/issues/28), alongside [Rust migration #1](https://github.com/superposition/91/issues/1). The web should present the current Songbook and the measured Rust work rather than the inherited product's interface and screenshots.
+Tracked in [web epic #28](https://github.com/superposition/91/issues/28), alongside [Rust migration #1](https://github.com/superposition/91/issues/1). Public pages introduce the songs, sound and playing controls. Implementation status, measurements and architecture belong in development documentation rather than the player interface.
 
 ## Findings and first changes
 
@@ -13,7 +13,9 @@ Tracked in [web epic #28](https://github.com/superposition/91/issues/28), alongs
 | Backup/telemetry genre labels still showed HYPNO/LOFI while compiled metadata reports CITYPOP/SUNSET. | Align display labels with current `build/params.json`; preserve numeric IDs and saved bytes. |
 | README hero, tour and feature collages depicted the earlier fork. | Replace their references with five fresh, deterministic WASM framebuffer captures. |
 
-The current site is a hybrid instrument: shared Rust planning, bass decisions, pack/session codecs and command queue; C command dispatch, transport, synthesis, effects and screen UI. The web status distinguishes those owners. Hardware is optional for `/emu/`; the installer and connected editor retain their device-specific roles.
+The current build uses Rust planning, bass decisions, pack/session codecs and command queue, with C command dispatch, transport, synthesis, effects and screen UI. These details remain documented here and in the migration notes; they are not product copy. Public pages explain choosing a song, key/tempo, Hold/New Idea and shaping keys/bass/swells. Hardware is optional for `/emu/`; the installer and connected editor retain their device-specific roles.
+
+The public CPU/migration badges were intentionally removed after review. Their two non-interactive DOM IDs are recorded as retired in `tests/web-required-ids.json`; all actual controls remain covered by the original ID contract. Developer telemetry remains available through `window.ambLast` without being displayed to players.
 
 ## Shared color spectrum
 

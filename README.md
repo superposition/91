@@ -1,72 +1,41 @@
 # NAIWAN 91
 
-**A city-pop Songbook for the M-VAVE FM-1, with an incremental migration to Rust.**
+**A city-pop band to play along with, in your browser or on the M-VAVE FM-1.**
 
-Play alongside three original arrangements: **Velvet Changes**, **Afterhours** and **Neon Turnaround**. Each keeps a home key while voice-led sixth/diminished harmony, independent DX keys and bass, and phrase-timed swells make room for a live instrument. Steer the band with the panel, mouse, touch or keyboard.
+Choose **Velvet Changes**, **Afterhours** or **Neon Turnaround**, find your key, and play along. Shape the keys, bass and swells as the song unfolds. Hold a phrase you like, ask for a fresh idea, or change the feel while you keep playing.
 
-<p align="center"><img src="docs/img/naiwan91-performance.png" width="320" alt="Actual current Songbook performance screen: Velvet Changes, moving chords, key, tempo, section length and movement"></p>
+<p align="center"><img src="docs/img/naiwan91-performance.png" width="320" alt="Velvet Changes on the Songbook performance screen"></p>
 
-*The current Songbook performance screen, captured from the WASM instrument.*
+*Velvet Changes on the performance screen.*
 
-[Try the published emulator](https://superposition.github.io/91/emu/) · [Current migration draft](https://github.com/superposition/91/pull/27) · [Architecture and evidence](docs/RUST_MIGRATION.md) · [Songbook guide](docs/JAM_PACKS.md)
+[Play in your browser](https://superposition.github.io/91/emu/) · [Songbook guide](docs/JAM_PACKS.md) · [Controls and manual](docs/MANUAL.md)
 
-The browser emulator needs no FM-1. Audio starts only after **Switch on**. The published site can lag this working branch; the current Rust and web refactor are tracked separately from a hardware release.
+Press **Switch on** to start the browser player. Use your mouse, touch screen or keyboard; an FM-1 is optional. Updates on this branch may not be on the published site yet.
 
-## The instrument now
+## Find your sound
 
-- **Three authored songs.** 8/16-bar sections combine into 32/64-bar forms, with major/minor realizations, written destinations and a stable home key.
-- **Independent DX roles.** Keys and bass have their own programs, touch/attack, gate and release. Swells follow the phrase rather than a free-running pad cycle.
-- **Performance controls.** PRESETS chooses a song. The main knobs set key, tempo, section length and movement; ALGORITHM sets energy. F3 / REC holds a phrase; G3 / EDIT asks for a related idea.
-- **Editable packs.** Songs and up to eight embedded DX programs can be auditioned and kept in four slots without another firmware rewrite. Session settings save while playback is stopped.
-- **A retained legacy instrument.** F4 opens the existing generative pieces, sequencers, effects and visualizers. Their controls remain documented in the [manual](docs/MANUAL.md).
+- **Choose a song.** Turn PRESETS to choose between the three arrangements, then set a comfortable key and tempo.
+- **Shape the band.** Give keys and bass their own sounds, adjust their touch and release, and bring swells in around your playing.
+- **Stay with a phrase.** REC holds the current phrase; EDIT asks for a related idea. The F3 and G3 piano keys do the same.
+- **Change the feel.** Try shorter or longer sections, add movement, or turn ALGORITHM to change the energy.
+- **Explore further.** The F4 piano key opens generative pieces, sequencers, effects and visualizers. The [manual](docs/MANUAL.md) explains their controls.
 
-## Current screens
-
-These are fresh captures of the actual Songbook framebuffer, rather than screenshots inherited from the earlier fork.
+## Shape the song
 
 <p align="center"><img src="docs/img/naiwan91-arrangement.png" width="240" alt="Arrangement: form, section bars, variation and swell amount"> <img src="docs/img/naiwan91-dx-keys.png" width="240" alt="DX Keys: program, touch, brightness and release"></p>
 <p align="center"><img src="docs/img/naiwan91-dx-bass.png" width="240" alt="DX Bass: program, attack, gate and energy"> <img src="docs/img/naiwan91-swells.png" width="240" alt="Swells: texture, amount, variation and tail"></p>
 
 SELECT opens Arrangement, DX Keys, DX Bass and Swells. Each page has four matching controls, from top to bottom. HOME returns to the Songbook performance page.
 
-Regenerate these images with `node tools/capture_web_screens.mjs build/emu/amb.wasm`. [Capture metadata](docs/img/naiwan91-captures.json) records the WASM hash, seed and image hashes. These captures establish instrument screens; browser layout inspection is a separate check.
+## Make it yours
 
-## Rust migration
+Keep your songs and sounds in packs. On an FM-1, save up to four packs and come back to them without a computer. Stop playback before saving your session settings. The [Songbook guide](docs/JAM_PACKS.md) covers creating packs, importing sounds and saving your changes.
 
-The emulator integrates shared `no_std` Rust libraries for compact musical types, Jam Pack/session codecs, deterministic phrase planning, bass decisions and command queue ownership. The existing C application, command dispatch, transport, synthesis, effects and screen UI remain in use during the port.
+If you have an FM-1, the [installer](web/amb_installer.html) includes backup and recovery tools, and the [editor](web/editor/) lets you adjust its sounds from your computer. Read the [install instructions](BUILDING.md) before updating your instrument.
 
-The [migration epic and 25 tickets](https://github.com/superposition/91/issues/1) cover the complete conversion. The final ticket, [How I did it](https://github.com/superposition/91/issues/26), builds the engineering talk from measured decisions and reproducible demos. The [web refactor](docs/WEB_REFACTOR.md) keeps the site, product language and imagery aligned with that work.
+## Development
 
-| Representation | Size |
-| --- | ---: |
-| Six patterns × six lane masks | 72 bytes |
-| 1,024 packed command words | 4,096 bytes |
-| One phrase / two phrase buffers | 388 / 776 bytes |
-| Stored Songbook session | 20 bytes |
-
-The integrated checkpoint compares **34,730,900 Float32 audio values** with the C reference, including Hold, New Idea, Save, restart and irregular render sizes. All values match, with zero C fallbacks and no WASM memory growth. [Exact evidence and limitations](docs/rust/emulator-proof.json) are retained. This proves the delivered browser slice; physical Rust execution and the full conversion remain open.
-
-```sh
-cargo test --workspace --locked
-cargo clippy --workspace --all-targets --locked -- -D warnings
-cargo run -p fm1-cli -- layouts
-cargo run -p fm1-cli -- validate packs/velvet-changes.jmp
-cargo run -p fm1-cli -- plan packs/velvet-changes.jmp 6 1 8
-sh tests/rust_emulator_parity.sh
-```
-
-The broad original baseline has **100 passing and 22 failing checks**, recorded before the port. The migration comparisons preserve those fingerprints; they do not turn a known baseline failure into a passing result.
-
-## Browser and hardware
-
-The [emulator](web/emu/) uses the real instrument compiled to WebAssembly, with a thin browser audio/input/storage layer. AudioWorklet is used on secure origins; a compatible Web Audio callback keeps local-network HTTP previews usable. MIDI controllers are optional. The [web editor](web/editor/) and [installer](web/amb_installer.html) require a connected FM-1 for their device operations.
-
-The hardware Songbook checkpoint is version **0.3.0**. Its [physical validation](docs/SONGBOOK_VALIDATION.md) records the ten-minute USB recording, saved-pack restart and resource measurements. The Rust browser checkpoint is not a new qualified hardware release.
-
-- [Build and install instructions](BUILDING.md)
-- [Songbook packs, controls and MIDI/DX imports](docs/JAM_PACKS.md)
-- [Architecture, unsafe boundaries and compiler investigation](docs/RUST_MIGRATION.md)
-- [Contributing](CONTRIBUTING.md) · [Issues and ideas](https://github.com/superposition/91/issues)
+For building and contributing, see the [build instructions](BUILDING.md), [contributor guide](CONTRIBUTING.md) and [development notes](docs/RUST_MIGRATION.md). Technical measurements and screenshot provenance are kept with the [project documentation](docs/WEB_REFACTOR.md).
 
 ## Credits and licence
 

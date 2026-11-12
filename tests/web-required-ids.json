@@ -163,5 +163,11 @@
       "vsend",
       "vstatus"
     ]
+  },
+  "intentionally_removed": {
+    "emu/index.html": {
+      "cpu": "Removed engineering load display from the player interface.",
+      "migration": "Removed implementation/migration badge from the player interface."
+    }
   }
 }
