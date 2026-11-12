@@ -1,20 +1,25 @@
 #!/usr/bin/env python3
 """Check the built site's real routes/assets and parse its shipped JavaScript.
 
-python3 tests/web_site_test.py build/site-web-review [build/emu]
+python3 tests/web_site_test.py build/site-web-review [build/emu] [--no-sharing]
 """
 from html.parser import HTMLParser
 from collections import Counter
 import json
+import hashlib
 from pathlib import Path
 import re
 import subprocess
 import sys
-from urllib.parse import unquote, urlsplit
+from urllib.parse import unquote, urljoin, urlsplit
 
 ROOT=Path(__file__).resolve().parents[1]
-OUT=Path(sys.argv[1] if len(sys.argv)>1 else ROOT/'build/site-web-review').resolve()
-STANDALONE=Path(sys.argv[2] if len(sys.argv)>2 else ROOT/'build/emu').resolve()
+sys.path.insert(0,str(ROOT/'tools'))
+from web_site_support import product_of, release_identity, verify_owned_site
+arguments=[value for value in sys.argv[1:] if value!='--no-sharing']
+SHARING='--no-sharing' not in sys.argv
+OUT=Path(arguments[0] if arguments else ROOT/'build/site-web-review').resolve()
+STANDALONE=Path(arguments[1] if len(arguments)>1 else ROOT/'build/emu').resolve()
 
 class Page(HTMLParser):
     def __init__(self,text):
@@ -42,9 +47,10 @@ def local_target(base,link,root):
     if parsed.path.endswith('/'):target/= 'index.html'
     return target
 
-routes=['index.html','emu/index.html','install/index.html','editor/index.html','pieces/index.html','library/index.html','manual/index.html']
+routes=['index.html','emu/index.html','install/index.html','editor/index.html','pieces/index.html','library/index.html','manual/index.html','webapp/installer/index.html','webapp/editor/index.html']
+if not SHARING:routes=[name for name in routes if name not in ('pieces/index.html','library/index.html')]
 id_contract=json.loads((ROOT/'tests/web-required-ids.json').read_text(encoding='utf-8'))
-required=id_contract['pages']
+required={name:ids for name,ids in id_contract['pages'].items() if name in routes}
 removed=id_contract.get('intentionally_removed',{})
 scripts=0;links=0;manual_duplicates={}
 for name in routes:
@@ -72,6 +78,8 @@ for name in routes:
     for link in parsed.links:
         target=local_target(page,link,OUT)
         if target is not None:
+            mounted=urljoin('https://example.invalid/nested/91/'+name,link)
+            assert mounted.startswith('https://example.invalid/nested/91/'),f'link escapes hosted subpath in {name}: {link}'
             assert target.is_file(),f'missing asset/route in {name}: {link} -> {target}';links+=1
     for script in parsed.scripts:
         result=subprocess.run(['node','--check','--input-type=module'],input=script.encode(),stdout=subprocess.PIPE,stderr=subprocess.PIPE)
@@ -83,9 +91,12 @@ for location in [OUT/'emu',STANDALONE]:
     page=location/'index.html';parsed=Page(page.read_text(encoding='utf-8'))
     for link in parsed.links:
         if 'site.css' in link or 'fonts/' in link or 'naiwan91-mark.svg' in link:
-            target=local_target(page,link,location)
+            target=local_target(page,link,OUT if location==OUT/'emu' else location)
             assert target and target.is_file(),f'standalone emulator asset missing: {link}'
-    assert (location/'site.css').read_bytes()==css
+    if location==OUT/'emu':
+        assert not (location/'site.css').exists() and not (location/'fonts').exists() and not (location/'img').exists(),'full site must share root assets once'
+    else:
+        assert (location/'site.css').read_bytes()==css
     assert 'src/app.mjs' in parsed.links,'missing emulator module entry point'
     for source in sorted((ROOT/'web/emu/src').glob('*.mjs')):
         bundled=location/'src'/source.name
@@ -97,10 +108,26 @@ for location in [OUT/'emu',STANDALONE]:
             target=local_target(bundled,match.group(2),location)
             assert target and target.is_file(),f'missing module dependency: {bundled}: {match.group(2)}'
         modules+=1
+css_assets=0
+for location in [OUT,STANDALONE]:
+    for stylesheet in location.rglob('*.css'):
+        for asset in re.findall(r'''url\(\s*["']?([^\s)"']+)''',stylesheet.read_text(encoding='utf-8')):
+            target=local_target(stylesheet,asset,location)
+            if target is not None:
+                assert target.is_file(),f'missing CSS dependency: {stylesheet}: {asset}'
+                css_assets+=1
+verify_owned_site(OUT)
+record=json.loads((OUT/'site-build.json').read_text(encoding='utf-8'))
+release=record['release'];package=OUT/'firmware'/release['firmware'];raw=package.read_bytes()
+assert release['firmware']==f"naiwan91-{release['version']}.fwsc",'release filename/version drift'
+assert hashlib.sha256(raw).hexdigest()==release['firmware_sha256'],'release package hash drift'
+assert product_of(raw)==release['product'],'release product identity drift'
+assert release_identity(release['version'])==release['product'],'release version/product drift'
+assert not (OUT/'app').exists(),'archived prototype must not be shipped'
 readme=(ROOT/'README.md').read_text(encoding='utf-8')
 assert 'docs/img/readme-' not in readme,'obsolete README imagery returned'
 captures=json.loads((ROOT/'docs/img/naiwan91-captures.json').read_text(encoding='utf-8'))
 assert len(captures['captures'])==5
 for capture in captures['captures']:
     assert (OUT/'img'/capture['file']).read_bytes()==(ROOT/'docs/img'/capture['file']).read_bytes()
-print(json.dumps(dict(routes=len(routes),local_links_and_assets=links,parsed_scripts=scripts,parsed_module_copies=modules,shared_theme=True,standalone_assets=True,current_captures=5,preserved_control_ids=sum(map(len,required.values()))-sum(map(len,removed.values())),retired_engineering_ids=sum(map(len,removed.values())),baseline_manual_duplicate_ids=manual_duplicates)))
+print(json.dumps(dict(routes=len(routes),local_links_and_assets=links,parsed_scripts=scripts,parsed_module_copies=modules,css_asset_dependencies=css_assets,hosted_subpath=True,manifest_verified=True,shared_theme=True,standalone_assets=True,current_captures=5,preserved_control_ids=sum(map(len,required.values()))-sum(map(len,removed.values())),retired_engineering_ids=sum(map(len,removed.values())),baseline_manual_duplicate_ids=manual_duplicates)))
