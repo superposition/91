@@ -14,6 +14,7 @@ mod factory;
 mod fm6;
 mod formats;
 mod handoff;
+mod harmony;
 mod melodic;
 mod object_formats;
 mod sequencer;
@@ -298,6 +299,7 @@ pub extern "C" fn fm1_rust_jam_stat(index: u32) -> u32 {
         40..=47 => voices::stat(index),
         48..=55 => fm6::stat(index),
         56..=63 => worker::stat(index),
+        76..=79 => harmony::stat(index),
         _ => 0,
     }
 }

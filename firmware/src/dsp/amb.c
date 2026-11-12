@@ -2,6 +2,14 @@
 /* The instrument (amb.h). One compilation unit, -O2. */
 #include "amb.h"
 #include "fastmath.h"
+#if EN_RUST_HARMONY
+#include "rust_harmony.h"
+static uint32_t harmony_transition(uint32_t,uint32_t,uint32_t,uint32_t);
+static int harmony_bars(void);
+static void harmony_pad_retarget(void);
+static int harmony_preview(int,int,int *);
+static void harmony_capture(uint8_t *);
+#endif
 #if EN_RUST_WORKER
 #include "rust_worker.h"
 #endif
@@ -431,11 +439,17 @@ static void vary(int g, int i, int16_t *par)
  * leans back into the piece. Fired where the pluck is certainly rendering. */
 static void naiwan_bing(int root, int up)
 {
+#if EN_RUST_HARMONY
+    fm1_harm_bing_t notes;
+    if(fm1_rust_harm_bing(root,(uint32_t)up,&notes))
+        for(int k=0;k<4;k++)en_note_v(EN_V_PLUCK,notes.keys[k],notes.velocities[k]);
+#else
     static const int V[4] = {-6, 0, 3, 9};             /* the 7th dropped an octave, root, b3, b5 */
     static const int ACC1[4] = {66, 78, 72, 86}, ACC2[4] = {70, 84, 74, 92};
     int k;
     for (k = 0; k < 4; k++)
         en_note_v(EN_V_PLUCK, 48 + root + up + V[k], up ? ACC2[k] : ACC1[k]);
+#endif
 }
 static void naiwan_prog(int which);
 static int8_t naiwan_pending = -1;      /* which loop the next chord change applies */   /* NAIWAN 91: a piece's hand-set progression (defined below) */
@@ -775,7 +789,13 @@ static void secs_text(float s, char *b)          /* "0.25s", "2.4s", "12s" */
     *b = 0;
 }
 
-static float drift_secs(int v) { return 20.0f * fm_exp2f((float)v * 0.039069f); }   /* 20 s .. 5 min */
+static float drift_secs(int v) {
+#if EN_RUST_HARMONY
+    return fm1_rust_harm_time(v);
+#else
+    return 20.0f * fm_exp2f((float)v * 0.039069f);
+#endif
+}   /* 20 s .. 5 min */
 static int hr_bars_v(int v);                    /* the chord's bars in a genre with a harmonic rhythm (0: by Drift's clock) */
 
 void en_param_text(int i, int v, char *b)
@@ -972,12 +992,16 @@ uint32_t en_euclid(int k, int n, int rot)
 
 int en_scale(uint32_t pool, int *steps)
 {
+#if EN_RUST_HARMONY
+    return fm1_rust_harm_scale(pool,steps);
+#else
     int i, m = 0;
     pool |= 1u;
     for (i = 0; i < 12; i++)
         if (pool >> i & 1u)
             steps[m++] = i;
     return m;
+#endif
 }
 
 #if !EN_RUST_FACTORY
@@ -986,6 +1010,9 @@ const char *const EN_CHORD_NAME[EN_NCHORD] = {"Auto", "Triads", "7ths", "9ths", 
 
 int en_chord_kind(uint32_t pool, int root, int deg, int kind, int *pcs)
 {
+#if EN_RUST_HARMONY
+    return fm1_rust_harm_chord(pool,root,deg,kind,pcs);
+#else
     /* the scale steps above the degree to take, in order (then what's left, should they repeat) */
     static const uint8_t OFF[5][7] = {
         {0, 2, 4, 6, 1, 3, 5},                  /* thirds: 1 3 5 7 */
@@ -1018,6 +1045,7 @@ int en_chord_kind(uint32_t pool, int root, int deg, int kind, int *pcs)
             pcs[n++] = pc;
     }
     return n;
+#endif
 }
 int en_chord_tones(uint32_t pool, int root, int deg, int *pcs) { return en_chord_kind(pool, root, deg, EN_CH_AUTO, pcs); }
 
@@ -1035,6 +1063,9 @@ static int nearest(int from, int pc, int lo, int hi)    /* the note of class pc 
 
 void en_voice_lead(const int *from, const int *pcs, int nt, int *to, int lo, int hi)
 {
+#if EN_RUST_HARMONY
+    (void)fm1_rust_harm_voice(from,pcs,nt,to,lo,hi);
+#else
     static const uint8_t PERM[24][4] = {
         {0, 1, 2, 3}, {0, 1, 3, 2}, {0, 2, 1, 3}, {0, 2, 3, 1}, {0, 3, 1, 2}, {0, 3, 2, 1},
         {1, 0, 2, 3}, {1, 0, 3, 2}, {1, 2, 0, 3}, {1, 2, 3, 0}, {1, 3, 0, 2}, {1, 3, 2, 0},
@@ -1059,6 +1090,7 @@ void en_voice_lead(const int *from, const int *pcs, int nt, int *to, int lo, int
                 to[v] = n[v];
         }
     }
+#endif
 }
 
 const char *en_chord_name(const int *pcs, int n, char *buf)
@@ -2105,6 +2137,9 @@ static float rev_in_gain = 1.0f;                /* falls to 0 while frozen */
 /* -------------------------------------------------------------- harmony --- */
 static void scale_set(void)
 {
+#if EN_RUST_HARMONY
+    (void)harmony_transition(0,0,0,0);
+#else
     int k;
     nsteps = en_scale(pool, steps);
     for (k = 0; k < 12; k++)
@@ -2112,6 +2147,7 @@ static void scale_set(void)
     dom_on = 0;                                 /* the natural scale (dom_apply raises the seventh again if the chord is V) */
     en_chord_alt = 0;
     walk_next = en_walk_next = -1;              /* (another scale: the next chord is chosen again) */
+#endif
 }
 
 /* THE ANSWER. The acid line asks (the call) and now and then answers: a value type * 5 + dir (0 off; types 1 octave, 2 fifth, 3 third in the scale,
@@ -2244,9 +2280,18 @@ fm1_acid_t s;fm1_acid_config_t c;fm1_harmony_t h;melodic_acid_get(&s,&c);melodic
  * key's chord, I, while the harmony moves on; en_chord still shows the harmony). A player's switch, not the piece's (the UI keeps it in
  * the global record). */
 static uint8_t pedal;
-static int bass_pc(void) { return pedal & 1u ? par[P_ROOT] % 12 : chord_pcs[0]; }
+static int bass_pc(void) {
+#if EN_RUST_HARMONY
+    return fm1_rust_harm_bass(pedal,par[P_ROOT],chord_pcs[0]);
+#else
+    return pedal & 1u ? par[P_ROOT] % 12 : chord_pcs[0];
+#endif
+}
 static void pad_retarget(void)                  /* the chord's tones to the four voices */
 {
+#if EN_RUST_HARMONY
+    harmony_pad_retarget();
+#else
     int from[4], to[4], i;
     chord_nt = en_chord_kind(pool, par[P_ROOT], deg, pg_on && pg_kind[pg_i] ? pg_kind[pg_i] : par[P_CHORD], chord_pcs);   /* (the slot's own type, when it has one) */
     {   /* the chord's tones as the scale sounds now: the dominant's raised seventh (its third), a secondary dominant's third and seventh, a borrowed
@@ -2297,6 +2342,7 @@ static void pad_retarget(void)                  /* the chord's tones to the four
         pad[i].target = (float)to[i];
     en_chord_root = (uint8_t)chord_pcs[0];
     en_chord_n = (uint8_t)chord_nt;
+#endif
 }
 
 static void bass_to(int pc)
@@ -2324,14 +2370,24 @@ static void bass_to(int pc)
 static float drift_left, drift_total, evolve;   /* evolve: Evolve, 0..1 */
 static uint8_t change_pending, fifth_done;
 static int hr_left;                             /* a harmonic rhythm: the chord's bars left after this one (the bar line counts; 0 otherwise) */
-static int hr_bars(void) { return pg_on && drift_unit != 2 ? 1 << pg_bars[pg_i] : hr_bars_v(par[P_DRIFT]); }   /* (unit 2: the clock, not the slot) */   /* (a progression set by hand: its slot's bars) */
+static int hr_bars(void) {
+#if EN_RUST_HARMONY
+    return harmony_bars();
+#else
+    return pg_on && drift_unit != 2 ? 1 << pg_bars[pg_i] : hr_bars_v(par[P_DRIFT]);
+#endif
+}   /* (unit 2: the clock, not the slot) */   /* (a progression set by hand: its slot's bars) */
 
 static void drift_reset(void)
 {
+#if EN_RUST_HARMONY
+    (void)harmony_transition(7,0,0,0);
+#else
     hr_left = hr_bars();
     drift_total = hr_left ? (float)hr_left * 16.0f * step_len : drift_secs(par[P_DRIFT]) * (0.7f + 0.6f * frand()) * EN_SR;
     drift_left = drift_total;
     fifth_done = 0;
+#endif
 }
 
 /* each genre's chord habits on a 7-note scale (degrees 0..6: I, ii, III, IV, V, VI, VII; the chord is a number of the scale, minor or major): every move to
@@ -2374,6 +2430,9 @@ static volatile uint8_t chord_genre;
 void en_genre(int g) { chord_genre=(uint8_t)gx(g); } /* worker uses its immutable job snapshot */
 static int hr_bars_v(int v)                     /* the genre's bars a chord, by Drift: a quarter below 20, half below 45, double above 80, four times above 95 */
 {
+#if EN_RUST_HARMONY
+    return fm1_rust_harm_bars(chord_genre,drift_unit,v);
+#else
     int b = CHT[chord_genre].hr;
     if (drift_unit == 2 || (!b && drift_unit != 1))
         return 0;                               /* seconds: hypno's way, or the player's choice */
@@ -2381,19 +2440,33 @@ static int hr_bars_v(int v)                     /* the genre's bars a chord, by 
         b = 4;                                  /* bars where the genre counts seconds: four a chord, then Drift as everywhere */
     b = v < 20 ? b >> 2 : v < 45 ? b >> 1 : v > 95 ? b << 2 : v > 80 ? b << 1 : b;
     return b < 1 ? 1 : b;
+#endif
 }
 static int deg_nat(int k) { return steps[k % 7] - (k % 7 == 6 ? dom_on : 0); }   /* the natural scale's step (without the dominant's raise) */
-static int deg_dim(int i) { return nsteps == 7 && (deg_nat(i + 4) - deg_nat(i) + 12) % 12 == 6; }   /* the degree's triad is diminished */
+static int deg_dim(int i) {
+#if EN_RUST_HARMONY
+    return (int)harmony_transition(17,(uint32_t)i,0,0);
+#else
+    return nsteps == 7 && (deg_nat(i + 4) - deg_nat(i) + 12) % 12 == 6;
+#endif
+}   /* the degree's triad is diminished */
 static void dom_apply(void)                     /* the dominant in minor: the seventh degree raised while the chord is V, in a genre that cadences (CHT dom) */
 {
+#if EN_RUST_HARMONY
+    (void)harmony_transition(1,0,0,0);
+#else
     if (nsteps != 7)
         return;
     steps[6] -= dom_on;
     dom_on = (uint8_t)(CHT[chord_genre].dom && deg == 4 && steps[6] - steps[4] == 3 && steps[6] < 11);
     steps[6] += dom_on;
+#endif
 }
 int en_prog_chord(int d, int kind, int *pcs)     /* a degree's chord as chord_change would play it, of a slot's type (0 the piece's: the Progression page) */
 {
+#if EN_RUST_HARMONY
+    return harmony_preview(d,kind,pcs);
+#else
     const int n = en_chord_kind(pool, par[P_ROOT], d, kind ? kind : par[P_CHORD], pcs);
     if (nsteps == 7 && CHT[chord_genre].dom && d % 7 == 4 && deg_nat(6) - deg_nat(4) == 3 && deg_nat(6) < 11) {   /* the cadence's V in minor: its raised seventh */
         const int lt = (par[P_ROOT] + deg_nat(6)) % 12;
@@ -2403,8 +2476,15 @@ int en_prog_chord(int d, int kind, int *pcs)     /* a degree's chord as chord_ch
                 pcs[k] = (lt + 1) % 12;
     }
     return n;
+#endif
 }
-int en_genre_bars(void) { return CHT[chord_genre].hr != 0; }
+int en_genre_bars(void) {
+#if EN_RUST_HARMONY
+    return fm1_rust_harm_bars(chord_genre,0,50)!=0;
+#else
+    return CHT[chord_genre].hr != 0;
+#endif
+}
 void en_prog(const uint8_t *b)                  /* (a command carries 24 bits: the slots' chords, then their bars, Play and the unit) */
 {
     post(C_PROG, b[0], b[1] | b[2] << 8);
@@ -2413,6 +2493,9 @@ void en_prog(const uint8_t *b)                  /* (a command carries 24 bits: t
 void en_prog_kinds(const uint8_t *b) { post(C_PROGK, b[0], b[1] | b[2] << 8); }
 void en_prog_capture(uint8_t *b)
 {
+#if EN_RUST_HARMONY
+    harmony_capture(b);
+#else
     int s, n, bc, hb = hr_bars_v(par[P_DRIFT]);
     uint8_t d[8];
     if (dh_ln && dh_n >= dh_ln) {               /* the chord loop, as it plays */
@@ -2434,6 +2517,7 @@ void en_prog_capture(uint8_t *b)
         en_prg_put(b, 3 * s, 3, s < n ? d[s] + 1 : 0);
         en_prg_put(b, 24 + 2 * s, 2, bc);
     }
+#endif
 }
 /* NAIWAN 91: four arcs, cycled — the dynamics are in the moving on, not in one loop. Kinds: 2 = 7th, 3 = 9th,
  * 4 = sus, 0 = the piece's. Each arc also sets its own clock, so the harmony breathes faster or slower.
@@ -2476,7 +2560,12 @@ static void naiwan_prog(int which)
 #if EN_RUST_FACTORY
     uint8_t b[9];
     if(!fm1_rust_factory_arc(which,b,sizeof b)) return;
-    en_prog(b); en_prog_kinds(b+6); naiwan_left=8;
+    en_prog(b); en_prog_kinds(b+6);
+#if EN_RUST_HARMONY
+    (void)harmony_transition(18,0,0,0);
+#else
+    naiwan_left=8;
+#endif
 #else
 
     uint8_t b[6] = {0}, kb[3] = {0};
@@ -2491,13 +2580,22 @@ static void naiwan_prog(int which)
     en_prg_put(b, 41, 2, 0);                           /* the unit: bars */
     en_prog(b);
     en_prog_kinds(kb);                                 /* each slot's own chord type: the turnarounds rely on it */
+#if EN_RUST_HARMONY
+    (void)harmony_transition(18,0,0,0);
+#else
     naiwan_left = 8;                                 /* eight chords an arc */
+#endif
 
 #endif
 }
 static void chord_change(void);
 static void prog_take(uint32_t lo, uint32_t hi) /* the progression from the page or the piece (en_prog) */
 {
+#if EN_RUST_HARMONY
+    const uint32_t token=harmony_transition(13,lo,hi,0);
+    if(token&0x10000u)chord_change();
+    if(harmony_transition(14,token,0,0))drift_reset();
+#else
     const int was = pg_on, unit = (int)(hi >> 17 & 3u);
     int s;
     pg_len = 0;
@@ -2525,6 +2623,7 @@ static void prog_take(uint32_t lo, uint32_t hi) /* the progression from the page
         drift_unit = (uint8_t)unit;
         drift_reset();
     }
+#endif
 }
 #ifdef EN_HOST
 int en_host_dimwalk;                            /* moves to a diminished chord other than home (the walk never: 0.16.26) */
@@ -2545,17 +2644,32 @@ static int fixed_shape(void) { return par[P_CHORD] == EN_CH_DUB || par[P_CHORD] 
 static int harm_pct(int v) { return v * 3 / 2 > 60 ? 60 : v * 3 / 2; }   /* NAIWAN 91: the genres reharmonise more than their donors */
 static int bor_key(void) { return nsteps == 7 && chord_genre && harm_pct(CH_BOR[chord_genre]) && steps_nat[2] == 4 && !fixed_shape(); }   /* a major key, a genre that borrows */
 static int borrow_vii(int i) { return i == 6 && bor_key(); }
-static int bor_decide(int i) { return bor_key() && (i == 6 || ((i == 3 || i == 5) && frand() * 100.0f < (float)harm_pct(CH_BOR[chord_genre]))); }
+static int bor_decide(int i) {
+#if EN_RUST_HARMONY
+    return (int)harmony_transition(4,(uint32_t)i,0,0);
+#else
+    return bor_key() && (i == 6 || ((i == 3 || i == 5) && frand() * 100.0f < (float)harm_pct(CH_BOR[chord_genre])));
+#endif
+}
 static void alt_clear(void)                     /* the natural scale again (dom_apply and alt_apply set it as the next chord needs) */
 {
+#if EN_RUST_HARMONY
+    (void)harmony_transition(2,0,0,0);
+#else
     int k;
     for (k = 0; k < nsteps; k++)
         steps[k] = steps_nat[k];
     dom_on = 0;
     en_chord_alt = 0;
+#endif
 }
 static void alt_apply(int i, int bor, int n)    /* the chord on degree i (just moved to): borrowed, or the dominant of the next (n) */
 {
+#if EN_RUST_HARMONY
+    if(harmony_transition(5,(uint32_t)i,(uint32_t)bor,(uint32_t)n)){
+        pad_retarget();bass_to(bass_pc());
+    }
+#else
     int k, changed = 0;
     if (nsteps != 7 || !chord_genre || fixed_shape())
         return;
@@ -2579,10 +2693,14 @@ static void alt_apply(int i, int bor, int n)    /* the chord on degree i (just m
         pad_retarget();
         bass_to(bass_pc());
     }
+#endif
 }
 static int walk_ok(int i) { return !(i && deg_dim(i)) || borrow_vii(i); }
 static int walk_pick(void)                      /* the walk's next degree from where it is (the natural scale): the genre's own moves first */
 {
+#if EN_RUST_HARMONY
+    return (int)harmony_transition(3,0,0,0);
+#else
     static const float W7[7] = {4.0f, 2.0f, 1.0f, 3.0f, 3.0f, 3.0f, 0.4f};
     float w[12], sum = 0.0f, r;
     int i, cad_to = 0;
@@ -2648,9 +2766,33 @@ static int walk_pick(void)                      /* the walk's next degree from w
         }
     }
     return i;
+#endif
 }
 static void chord_change(void)                  /* to another degree: the progression set by hand, or the walk (its next chosen a chord ahead) */
 {
+#if EN_RUST_HARMONY
+    uint32_t action=harmony_transition(10,0,0,0);
+    if(action&255u){
+        naiwan_prog((int)(action>>8));
+        if((action&255u)==1u){naiwan_bing((int)(en_chord_root%12),0);naiwan_bing((int)(en_chord_root%12),1);}
+    }
+    action=harmony_transition(11,0,0,0);
+    if((action&255u)==1u){
+#ifdef EN_HOST
+        if(action&0x20000u)en_host_dimwalk++;
+#endif
+        chord_to((int)(action>>8&255u));
+    }else if((action&255u)==2u){drift_reset();}
+    else if((action&255u)==3u){
+        const int degree=(int)(action>>8&255u);
+        chord_to(degree);
+        if(harmony_transition(12,(uint32_t)degree,action>>16&1u,0)){pad_retarget();bass_to(bass_pc());}
+#ifdef EN_HOST
+        if(degree&&deg_dim(degree))en_host_dimwalk++;
+        en_host_alt[en_chord_alt]++;
+#endif
+    }
+#else
     if (naiwan_pending >= 0) {                         /* NAIWAN 91: after the piece is loaded, its loop takes over */
         const int w = naiwan_pending;
         naiwan_pending = -1;
@@ -2704,9 +2846,16 @@ static void chord_change(void)                  /* to another degree: the progre
         en_host_dimwalk++;                      /* (with its alteration: bVII is not diminished) */
     en_host_alt[en_chord_alt]++;
 #endif
+#endif
 }
 static void chord_to(int i)                     /* the chord moves to degree i */
 {
+#if EN_RUST_HARMONY
+    const uint32_t trigger=harmony_transition(6,(uint32_t)i,0,0);
+    pad_retarget();pad_leave();bass_to(bass_pc());
+    if(trigger&1u)bass.env_up=1;
+    drift_reset();
+#else
     int k;
     deg_prev = (uint8_t)deg;
     cad_n =(uint8_t)(i == 0 && nsteps == 7 && chord_genre && cad_n >= CHT[chord_genre].cad_every ? 0 : cad_n + 1);
@@ -2722,7 +2871,12 @@ static void chord_to(int i)                     /* the chord moves to degree i *
     if (par[P_DE_TRIG] == 0)
         bass.env_up = 1;                        /* the drone's envelope: on each chord */
     drift_reset();
+#endif
 }
+#if EN_RUST_HARMONY
+#include "rust_harmony.inc"
+#endif
+
 
 /* ----------------------------------------------------------- the acid line --- */
 int en_acid_pack(uint8_t *b)
@@ -5389,6 +5543,9 @@ static void apply(int p, int v)
         drum_publish();
         break;
     case P_DRIFT:
+#if EN_RUST_HARMONY
+        (void)harmony_transition(16,0,0,0);
+#else
         if (hr_bars()) {                         /* a harmonic rhythm: a shorter chord takes effect now, a longer one from the next chord */
             const int hb = hr_bars();
             if (hr_left >= hb)
@@ -5398,6 +5555,7 @@ static void apply(int p, int v)
             drift_total = drift_secs(v) * EN_SR;
             drift_left = frac * drift_total;
         }
+#endif
         break;
     case P_ECHO:
 #if EN_RUST_EFFECTS
@@ -5477,6 +5635,10 @@ static void apply(int p, int v)
 
 static void pool_set(uint32_t p)
 {
+#if EN_RUST_HARMONY
+    (void)harmony_transition(9,p,0,0);
+    pad_retarget();pad_handoff();bass_to(bass_pc());
+#else
     pool = (p | 1u) & 0xFFFu;
     scale_set();
     if (deg >= nsteps)
@@ -5485,15 +5647,20 @@ static void pool_set(uint32_t p)
     pad_retarget();
     pad_handoff();
     bass_to(bass_pc());
+#endif
 }
 
 static void regrow(void)                        /* a new piece: a fresh acid line, the home chord (or the progression's first), an empty progression loop */
 {
+#if EN_RUST_HARMONY
+    (void)harmony_transition(8,0,0,0);
+#else
     pg_i = pg_start = 0;
     deg = pg_on && pg_deg[0] ? (pg_deg[0] - 1) % (nsteps ? nsteps : 7) : 0;
     en_prog_pos = (int8_t)(pg_on ? 0 : -1);
     dh_n = dh_i = hist_n = 0;
     dom_apply();
+#endif
     pad_retarget();
     pad_handoff();
     bass_to(bass_pc());
@@ -9402,6 +9569,11 @@ static void control(uint32_t n)                 /* once a chunk: the slow things
     en_lim_gr = 8.6859f * gr_hold;               /* 20 log10 of 1/(1 - x), near enough for the small ones: the limiter's reduction in dB */
 #endif
     en_out_peak = pk_hold;
+#if EN_RUST_HARMONY
+    {fm1_harm_mood_t state={arc,arc_tgt,brk,arcm,arc_left};
+     fm1_rust_harm_mood(&state,n,en_playing,motion,sec,&rng);
+     arc=state.arc;arc_tgt=state.arc_tgt;brk=state.brk;arcm=state.arcm;arc_left=state.arc_left;en_arc=arcm;}
+#else
     if (arc_left <= n) {
         float r = frand() * 2.0f - 1.0f;
         arc_tgt = r * (0.6f + 0.4f * frand()) + (r > 0.0f ? 0.25f : -0.25f);   /* away from the middle */
@@ -9417,6 +9589,7 @@ static void control(uint32_t n)                 /* once a chunk: the slow things
         float bt = sec == SEC_BREAK ? 1.0f : sec == SEC_BUILD ? -0.6f : 0.0f;
         brk += (bt - brk) * fm_minf((float)n / ((sec == SEC_BUILD ? 4.0f : 2.0f) * EN_SR), 1.0f);
     }
+#endif
 #if EN_RUST_EFFECTS
     {float s[3]={pl_decay,pl_dd2,rev_in_gain};fm1_rust_fx_decay(s,pl_decay_t,en_frozen);pl_decay=s[0];pl_dd2=s[1];rev_in_gain=s[2];}
 #else

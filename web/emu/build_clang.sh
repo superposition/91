@@ -12,6 +12,7 @@ RUST_LIB=""
 if [ "${EN_RUST_JAM:-1}" = 1 ]; then
     cargo build --release --locked -p fm1-jam-bridge --no-default-features --target wasm32-unknown-unknown --target-dir build/rust-emu
     RUST_FLAGS="-DEN_RUST_JAM=1 -DEN_RUST_COMMANDS=1 -DEN_RUST_TRANSPORT=1 -DEN_RUST_HANDOFF=1 -DEN_RUST_SCHEDULER=1 -DEN_RUST_MELODIC=1 -DEN_RUST_EFFECTS=1 -DEN_RUST_VOICES=1"
+    if [ "${EN_RUST_HARMONY:-1}" = 1 ]; then RUST_FLAGS="$RUST_FLAGS -DEN_RUST_HARMONY=1"; fi
     if [ "${EN_RUST_WORKER:-1}" = 1 ]; then RUST_FLAGS="$RUST_FLAGS -DEN_RUST_WORKER=1"; fi
     if [ "${EN_RUST_FM6:-1}" = 1 ]; then RUST_FLAGS="$RUST_FLAGS -DEN_RUST_FM6=1"; fi
     if [ "${EN_RUST_FACTORY:-1}" = 1 ]; then RUST_FLAGS="$RUST_FLAGS -DEN_RUST_FACTORY=1"; fi
