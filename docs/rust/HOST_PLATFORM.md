@@ -2,8 +2,8 @@
 
 `fm1-app::host_platform`, behind the `host-platform` feature, contains the
 bounded control state, host MIDI queue, store metadata, software framebuffer
-operations and virtual render/UI schedule. The feature is selected by the
-native simulator; physical MCU builds do not select the host clock/model.
+operations and virtual render/UI schedule. Native simulator and browser builds
+select this feature; physical MCU builds do not select the host clock/model.
 
 The native simulator now uses this implementation directly. Its existing boxed
 framebuffer and saved-object byte arrays remain the payload allocations; the
@@ -33,6 +33,21 @@ Validation at this checkpoint:
 - Strict-provenance Miri passes the actual native ABI load into a
   `MaybeUninit<[u8; 4]>`, plus missing/invalid/empty-object cases.
 
-The browser still uses the previous C platform/clock until its adapter change
-lands. This checkpoint establishes the shared implementation and its native
-consumer; it does not claim completion of browser binding work or MCU timing.
+The browser adapter uses the same model through a six-function callback table:
+boot, service, render, frame, input and elapsed-time observation. Its Rust
+schedule advances in one-millisecond steps, renders 256-frame blocks and
+requests a UI frame every 16 milliseconds. Each state borrow ends before a
+callback can reenter the platform. The C layer retains application ABI thunks
+and the `clock_gettime` observation; it has no platform state or clock loop.
+
+Framebuffer, saved-object bytes and the render block have separate private
+`UnsafeCell` roots. Persistent pointers come directly from these roots. Store
+loads copy into raw foreign output, including uninitialized destinations,
+without forming a Rust reference to the destination. Strict-provenance Miri
+covers callback reentry and retained frame/store addresses. The existing 24
+public browser exports and fixed 32 MiB WASM memory remain unchanged.
+
+The inherited clock uses wrapping `u32` milliseconds and an increasing `f64`
+audio deadline. Its approximately 49.7-day epoch limit is preserved; this
+checkpoint does not qualify operation across that wrap. Browser frame/store
+messages and structured-clone copies remain JavaScript binding work.

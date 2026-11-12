@@ -7,7 +7,9 @@
 #include <string.h>
 #define EN_HOST 1
 #define __attribute__(x)
+#ifndef FM1_SIM_SOURCE_SUPPLIED
 #include "sim_source.h"
+#endif
 extern void lcd_sync(void);
 extern void lcd_fill(uint32_t,uint32_t,uint32_t,uint32_t,uint16_t);
 extern void lcd_blit(uint32_t,uint32_t,uint32_t,uint32_t,const uint16_t *);

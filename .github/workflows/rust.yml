@@ -45,6 +45,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: rustup toolchain install nightly-2026-08-28 --profile minimal --component miri --component rust-src
       - run: sh tests/rust_web_audio_miri.sh
+      - run: sh tests/rust_web_platform_miri.sh
       - run: sh tests/rust_hal_miri.sh
       - run: sh tests/rust_sim_store_miri.sh
   native_simulator:
@@ -173,6 +174,8 @@ jobs:
         run: node tests/host/emu_audio_views_test.mjs build/emu-parity/reference.wasm build/emu-parity/rust.wasm
       - name: Browser audio ring, output and background compatibility
         run: sh tests/rust_web_audio.sh
+      - name: Browser platform metadata, stores and framebuffer compatibility
+        run: sh tests/rust_web_platform.sh
       - name: Native clock, melodic/drum scheduling, mutation and event trace parity
         run: sh tests/rust_melodic_parity.sh
       - name: Isolated analog voice state and PCM parity

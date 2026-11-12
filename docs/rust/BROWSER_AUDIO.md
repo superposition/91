@@ -11,8 +11,8 @@ heap allocation, per-render sample packet or callback is introduced. Position
 arithmetic wraps as unsigned 32-bit arithmetic; legacy overwrite on an abnormal
 ring overrun is preserved. Normal rendering requests at most 1,024 frames and
 produces blocks of 256, leaving at most 1,279 waiting frames. Short reads reject
-without consuming or clearing output tails. The C adapter releases each Rust
-borrow before advancing the device clock, which can call back to publish audio.
+without consuming or clearing output tails. The bridge releases each audio
+borrow before advancing the Rust device clock, which can publish more audio.
 
 ## Retained output addresses
 
@@ -42,9 +42,10 @@ rejected, preserving cached views. Existing exports and messages remain intact.
 The focused constructor check covers audio copies/WASI views with frame
 publication disabled. Frame/store message construction, copies and browser
 structured-clone transport remain binding work; this checkpoint does not claim
-that the entire JavaScript processor allocates nothing. The C browser clock,
-platform controls/frame/store accessors and application adapter remain for the
-rest of ticket #17 and the controller migration.
+that the entire JavaScript processor allocates nothing. Platform state,
+frame/store access and clock orchestration now use the shared Rust host model;
+the C application ABI adapter remains for the controller migration. See
+[HOST_PLATFORM.md](HOST_PLATFORM.md) for callback and pointer contracts.
 
 ## Reproduction
 
