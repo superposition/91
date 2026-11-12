@@ -64,4 +64,17 @@ body.stream #stage { color: var(--color-text); background: radial-gradient(ellip
 #stage .sv-big { background: var(--color-surface); border-color: var(--color-border); }
 #stage .sv-moves span,#stage .sv-ctl button { background: var(--color-surface); color: var(--color-text); border-color: var(--color-blue); }
 #stage .sv-link { color: var(--color-text); background: var(--color-surface-soft); box-shadow: none; border: 1px solid var(--color-border); }
+/* Readable text states for the inherited control selectors. */
+header nav a.yt, header.site nav a.yt,
+.bar button:hover, .bar .btnlike:hover,
+.midi .bar button[aria-pressed="true"], .knobs h3 span,
+.tabs button:hover:not(:disabled), .tabs a[aria-selected="true"],
+#conn.ok, .row .val, .row .cc.on,
+.item .title, .info .title, dialog h3, .grid .hot b {
+  color: var(--color-accent-dark);
+}
+.pages button[aria-current="true"], .slots button[aria-current="true"],
+.ops button[aria-current="true"], #libl div:hover, #libl div:hover .muted {
+  color: #fff;
+}
 @media(max-width:600px) { .site nav, header nav { gap: .4rem .9rem; } .device-shell { padding: 4px; border-radius: 10px; } }

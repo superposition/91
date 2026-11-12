@@ -33,6 +33,8 @@ The source of the palette is the firmware's Beach theme in `firmware/src/app/ui.
 
 Web text and small controls use darker derived shades where needed for legibility (`#0F4A80` blue, `#932810` coral, `#087A65` green). The raw instrument framebuffer is never recolored. Its RGB565 quantization can differ slightly from the unquantized CSS values.
 
+The inherited small coral labels and hover states now use the dark accent token, and selected solid controls use white text. Computed contrast for these foreground/background pairs improves from 3.12 to 7.43 on cream and from 2.91 to 5.27 on green selections. The dark accent on sky is 4.97 and muted body text on sky is 4.70. These calculations qualify the selected color pairs; desktop/mobile layout and focus visibility still require actual browser review in #30/#35.
+
 Shared styles cover the landing, emulator, optional device tools, library redirect, stream view and served manual. Fonts are repository-owned assets. The firmware's device-panel geometry, MIDI mappings, storage formats, update/recovery markers and upstream credits remain intact.
 
 `web/emu/package.sh` packages the same stylesheet, local fonts and icon inside standalone `build/emu`, so the emulator can also be served directly from that directory. Full-site output reuses that bundle and copies the shared source stylesheet for the other pages. Missing optional manual PDFs are omitted from the served manual rather than left as broken downloads.
