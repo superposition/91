@@ -17,6 +17,7 @@ mod handoff;
 mod melodic;
 mod sequencer;
 mod transport;
+mod voice_config;
 mod voices;
 mod wire_formats;
 
@@ -421,3 +422,5 @@ mod tests {
         }
     }
 }
+
+mod voice_data;
