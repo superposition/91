@@ -1209,7 +1209,11 @@ static float trim_to = 1.0f, trim_k = 1.0f;
 void en_trim(int g, int piece)
 {
     const int h = (unsigned)g < (unsigned)EN_NGENRE && (unsigned)piece < 10u ? EN_TRIM[gx(g)][piece] : 0;
+#if EN_RUST_EFFECTS
+    trim_to=fm1_rust_fx_setting(2,h);
+#else
     trim_to = fm_exp2f(-0.0830482f * (float)h);   /* (half dB: 2^(-h / 2 / 20 * log2 10)) */
+#endif
 }
 static int32_t intro_len, intro_t;              /* the intro's length and how far it is, samples (0 length: none) */
 volatile float en_drift_bars = 99.0f;
@@ -4825,20 +4829,17 @@ static inline float sh_tap(float d)               /* the shimmer line, d samples
     return sh_buf[i0] + (sh_buf[i0 + 1 >= SH_N ? 0 : i0 + 1] - sh_buf[i0]) * f;
 }
 
+#if EN_RUST_EFFECTS
+#include "rust_reverb.inc"
+#endif
 static inline void reverb_tank(float x, float *ol, float *or_)
 {
 #if EN_RUST_EFFECTS
-    fm1_fx_reverb_t state;int i;float output[2];
+    fm1_fx_reverb_t state;float output[2];
     const fm1_fx_reverb_config_t config={rv_type,rv_damp,rv_gate_hold,rv_shim,pl_decay,pl_dd2};
-    for(i=1;i<L_N;i++)state.positions[i-1]=dl[i].i;
-    state.gate_envelope=rg_env;state.gate_gain=rg_g;state.gate_hold=rg_hold;state.shimmer_feedback=rv_shim_fb;
-    state.shimmer_dc=sh_dc;state.shimmer_phase=sh_ph;state.bandwidth=pl_bw;state.damp_left=pl_damp_l;state.damp_right=pl_damp_r;
-    state.sine=lfo_s;state.cosine=lfo_c;state.shimmer_write=sh_w;
+    rust_reverb_read(&state);
     fm1_rust_fx_reverb(x,&state,&config,pl_buf+PRE_LP,sh_buf,output);
-    for(i=1;i<L_N;i++)dl[i].i=state.positions[i-1];
-    rg_env=state.gate_envelope;rg_g=state.gate_gain;rg_hold=state.gate_hold;rv_shim_fb=state.shimmer_feedback;
-    sh_dc=state.shimmer_dc;sh_ph=state.shimmer_phase;pl_bw=state.bandwidth;pl_damp_l=state.damp_left;pl_damp_r=state.damp_right;
-    lfo_s=state.sine;lfo_c=state.cosine;sh_w=state.shimmer_write;*ol=output[0];*or_=output[1];
+    rust_reverb_write(&state);*ol=output[0];*or_=output[1];
 #else
     float a, b, fb_l = tap(&dl[L_D2R], DS(3163)), fb_r = tap(&dl[L_D2L], DS(3720));
     if (rv_type == 2) {                           /* gated: the input opens it, it stays open for the hold and then closes in ~10 ms */
@@ -4980,11 +4981,20 @@ static void reverb_job(void *p)
     const int16_t *pre = dl[L_PRE].b;
     const int np = dl[L_PRE].n;
     int r = c->r0, j;
+#if EN_RUST_EFFECTS
+    fm1_fx_reverb_t state;
+    const fm1_fx_reverb_config_t config={rv_type,rv_damp,rv_gate_hold,rv_shim,pl_decay,pl_dd2};
+    rust_reverb_read(&state);
+    {const uint32_t first=(uint32_t)(c->n<np-r?c->n:np-r);
+     fm1_rust_fx_reverb_block(&state,&config,pl_buf+PRE_LP,sh_buf,pre+r,first,pre,rv_wl,rv_wr,(uint32_t)c->n);}
+    rust_reverb_write(&state);
+#else
     for (j = 0; j < c->n; j++) {
         reverb_tank((float)pre[r] * (1.0f / RV_Q), &rv_wl[j], &rv_wr[j]);
         if (++r >= np)
             r = 0;
     }
+#endif
 }
 static void fm_job(const rv_job_t *c)           /* the DX voices' samples for this chunk, into the ring (they are played a chunk later) */
 {
@@ -5080,11 +5090,17 @@ static void plate_init(void)
         dl[k].i = 0;
         p += DL_LEN[k];
     }
+#if EN_RUST_EFFECTS
+    {fm1_fx_reverb_t state;rust_reverb_read(&state);
+     fm1_rust_fx_reverb_reset(&state,pl_buf+PRE_LP);rust_reverb_write(&state);}
+    memset(pl_buf,0,PRE_LP*sizeof(pl_buf[0]));
+#else
     for (i = 0; i < DL_TOTAL; i++)
         pl_buf[i] = 0;
     pl_bw = pl_damp_l = pl_damp_r = sh_dc = 0.0f;
     lfo_s = 0.0f;
     lfo_c = 1.0f;
+#endif
 }
 
 /* ------------------------------------------------- echo: tape and Echoplex --- */
@@ -5258,7 +5274,11 @@ static void tempo_set(void)
 #else
     step_len = EN_SR * 60.0f / ((float)par[P_TEMPO] * 4.0f);
 #endif
+#if EN_RUST_EFFECTS
+    duck_dec=fm1_rust_fx_duck_decay(step_len);
+#else
     duck_dec = fm_expf(-4.0f / (step_len * 3.0f));   /* the duck: back up in about three sixteenths */
+#endif
 }
 
 static void apply(int p, int v)
@@ -5295,7 +5315,13 @@ static void apply(int p, int v)
 #endif
         break;  /* frozen: the line starts with the bar */
     case P_NZ_COLOR: nz_color = v; break;
-    case P_NZ_PUMP: nz_pump = (float)v * 0.01f; break;
+    case P_NZ_PUMP:
+#if EN_RUST_EFFECTS
+        nz_pump=fm1_rust_fx_setting(1,v);
+#else
+        nz_pump = (float)v * 0.01f;
+#endif
+        break;
     case P_BASSOCT:
         if (nsteps)
             bass_to(bass.midi_note % 12);
@@ -5373,12 +5399,28 @@ static void apply(int p, int v)
             drift_left = frac * drift_total;
         }
         break;
-    case P_ECHO: echo_send = (float)(v * v) * 0.0001f; break;
+    case P_ECHO:
+#if EN_RUST_EFFECTS
+        echo_send=fm1_rust_fx_setting(0,v);
+#else
+        echo_send = (float)(v * v) * 0.0001f;
+#endif
+        break;
     case P_ETIME: echo_time(); break;
-    case P_REVERB: rev_send = (float)(v * v) * 0.0001f; break;
+    case P_REVERB:
+#if EN_RUST_EFFECTS
+        rev_send=fm1_rust_fx_setting(0,v);
+#else
+        rev_send = (float)(v * v) * 0.0001f;
+#endif
+        break;
     case P_SIZE:
+#if EN_RUST_EFFECTS
+        {float values[2];fm1_rust_fx_size(v,values);pl_decay_t=values[0];echo_fb=values[1];}
+#else
         pl_decay_t = 0.6f + 0.375f * (float)v * 0.01f;     /* to 0.975: a long hall */
         echo_fb = 0.5f + 0.32f * (float)v * 0.01f;
+#endif
         break;
     case P_BRIGHT: bright = (float)v; break;
     case P_EVOLVE: evolve = (float)v * 0.01f; break;
@@ -5673,6 +5715,12 @@ void en_init(void)
     pad_ctr = 0;
     for (i = 0; i < CM_MN; i++)
         cm_mn[i] = 0, cm_moff[i] = 0;          /* (no pluck notes out) */
+#if EN_RUST_EFFECTS
+    {fm1_fx_echo_t s={tape_w,tape_ph,tape_acc,tape_lp,tape_hp,tape_p1,tape_p2,tape_c1,tape_c2,plex_w,plex_lp,plex_lp2,echo_len,head2};
+     fm1_fx_heads_t h={{hg[0],hg[1],hg[2],hg[3]},fb_lean,head2_t,head2_v,head_left};
+     fm1_rust_fx_echo_reset(&s,&h,tape,plex);
+     tape_w=s.tape_write;tape_ph=s.phase;plex_w=s.plex_write;head2=s.head2;head2_t=h.target;head2_v=h.speed;echo_len=s.length;}
+#else
     for (i = 0; i < TAPE_N; i++)
         tape[i] = 0;
     for (i = 0; i < PLEX_N; i++)
@@ -5681,6 +5729,7 @@ void en_init(void)
     head2 = head2_t = 0.75f;
     head2_v = 0.0f;
     echo_len = 0.0f;
+#endif
 #if EN_RUST_COMMANDS
     fm1_rust_commands_reset();
 #else
@@ -5939,6 +5988,7 @@ const char *const EN_FX_NAME[EN_NFX] = {
 
  #if EN_RUST_EFFECTS
 static void rust_fx_engage(int kind,int argument);
+static void rust_fx_grid(int kind,int step);
 #endif
 static void rpt_engage(int r)                   /* the slice that just ended, looped from its start */
 {
@@ -5966,8 +6016,12 @@ static void rpt_engage(int r)                   /* the slice that just ended, lo
 
 static void rpt_refresh(int st)                 /* on a sixteenth: a repeat with Refresh on takes the newest slice again each beat (or bar); the pitch's climb goes on */
 {
+#if EN_RUST_EFFECTS
+    rust_fx_grid(1,st);
+#else
     if (bmode == BM_RPT && rp_ref && rp_ok && (rp_ref == 2 ? st == 0 : (st & 3) == 0))
         rpt_engage(brate);                      /* (the climb goes on: rpt_engage keeps rp_t while a repeat is running) */
+#endif
 }
 
 static inline void rb_read_from(uint32_t sm, float off, float *l, float *r)   /* off samples (44.1 kHz) after the ring index sm (before it, if negative) */
@@ -6166,6 +6220,9 @@ static void flx_engage(void)
 }
 static void flx_tick(int st)                    /* on every sixteenth */
 {
+#if EN_RUST_EFFECTS
+    rust_fx_grid(0,st);
+#else
     if (flx_active && bmode != BM_FLX) {        /* another effect took over */
         flx_active = 0;
         en_flx_state = flx_arm ? 1 : 0;
@@ -6193,6 +6250,7 @@ static void flx_tick(int st)                    /* on every sixteenth */
             flx_engage();
         }
     }
+#endif
 }
 
 /* THE DJ SNIPS (the FX menu's fourth bank; they replaced the sampler): the 27 keys are sounds a DJ throws in, made on the spot: air horns, sirens, lasers,
@@ -6449,7 +6507,14 @@ static float dj_voice(dj_t *v, float *amp)
  * while the live mix goes on being written; a low-pass follows the rate down. Let go: the rate slides back to 1 and
  * the live mix returns on the next sixteenth. It lets go by itself when the ring is used up. */
 static float vr_rate, vr_tgt, vr_c, vr_lp[2], vr_dull;
-static void var_leave(void) { bm_tgt = 0.0f; }
+static void var_leave(void)
+{
+#if EN_RUST_EFFECTS
+    rust_fx_grid(2,0);
+#else
+    bm_tgt=0.0f;
+#endif
+}
 static int vr_which;
 static float vr_time(float v, float base)       /* base * 2 ^ (v * 0.06) seconds, as a slide's coefficient */
 {
@@ -7100,9 +7165,13 @@ static void master_dyn_block(float *pl, float *pr, uint32_t n)
 #if EN_RUST_EFFECTS
 #include "rust_tone.inc"
 #include "rust_sampler.inc"
+#include "rust_fx_render.inc"
 #endif
 static inline void fx_master(float *pl, float *pr)   /* one sample of the master, before the gain */
 {
+#if EN_RUST_EFFECTS
+    fx_render(pl,pr,1);
+#else
     float l = *pl, r = *pr;
 #if EN_RUST_EFFECTS
     fx_sampler(&l,&r);
@@ -7396,6 +7465,7 @@ static inline void fx_master(float *pl, float *pr)   /* one sample of the master
 #endif
     *pl = l;
     *pr = r;
+#endif
 }
 
 /* Entering a pack clears the old piece's latched processing. Held panel FX
@@ -7655,12 +7725,12 @@ static void pad_publish(uint32_t w, uint32_t n)   /* the job's pad (after the ch
 
 static void pad_chorus(uint32_t n)
 {
-    const float a = en_shed_level >= 2 ? 0.0f : (float)par[P_PL_CHO] * 0.01f * 0.55f;   /* (no chorus when the load is far too high: it runs on the pad's core, and the first level answers the first core's time) */
 #if EN_RUST_EFFECTS
     fm1_fx_chorus_t state={ch_i,{ch_ph[0],ch_ph[1],ch_ph[2]}};
-    fm1_rust_fx_chorus(&state,&ch_buf[0][0],pad_ol,pad_or,n,a);
+    fm1_rust_fx_chorus(&state,&ch_buf[0][0],pad_ol,pad_or,n,par[P_PL_CHO],en_shed_level);
     ch_i=state.index;ch_ph[0]=state.phases[0];ch_ph[1]=state.phases[1];ch_ph[2]=state.phases[2];
 #else
+    const float a = en_shed_level >= 2 ? 0.0f : (float)par[P_PL_CHO] * 0.01f * 0.55f;   /* (no chorus when the load is far too high: it runs on the pad's core, and the first level answers the first core's time) */
     const float rate[3] = {0.47f / EN_SR, 0.61f / EN_SR, 0.79f / EN_SR};   /* Hz, the sweeps are slow and unequal */
     uint32_t j;
     int k;
@@ -8478,7 +8548,7 @@ static uint32_t nz_ph;
 static void render_noise(uint32_t n)            /* into its own buffer: the pump ducks it on its own */
 {
 #if EN_RUST_EFFECTS
-    fm1_fx_vinyl_t s;const fm1_fx_vinyl_config_t c={vin_m*vn_g,nz_lp_k,vn_hiss,vn_pop,vn_amp,trk_g[TR_PAD],trk_g1[TR_PAD],tg_inv,en_playing,(uint32_t)shed3};
+    fm1_fx_vinyl_t s;const fm1_fx_vinyl_config_t c={vin_m,vn_g,nz_lp_k,vn_hiss,vn_pop,vn_amp,trk_g[TR_PAD],trk_g1[TR_PAD],tg_inv,en_playing,(uint32_t)shed3};
     _Static_assert(sizeof(nz_t)==sizeof(fm1_fx_vinyl_gen_t),"Rust vinyl generator layout");
     memcpy(s.generators,nz,sizeof nz);s.held[0]=nz_hl;s.held[1]=nz_hr;s.phase=nz_ph;
     fm1_rust_fx_vinyl(&s,&c,nzl,nzr,n);memcpy(nz,s.generators,sizeof nz);nz_hl=s.held[0];nz_hr=s.held[1];nz_ph=s.phase;
@@ -8961,7 +9031,9 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
     if (KK->crush > 0.0f) {                      /* breakcore: the drums crushed (what they add, held and stepped) */
         static float hl, hr;
         static uint32_t hc;
+#if !EN_RUST_EFFECTS
         const uint32_t hold = 2u + (uint32_t)(KK->crush * 4.0f);
+#endif
         const float c = KK->crush, q = 24.0f;
         float *const bl = dsn_l, *const br = dsn_r;   /* (the mix before the drums: what they add is crushed) */
         for (j = 0; j < n; j++) {
@@ -9060,7 +9132,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
         fm1_fx_bus_t s;fm1_fx_bus_config_t c;
         memcpy(s.filter,tf_s,sizeof tf_s);memcpy(s.feedback,tp_fb,sizeof tp_fb);memcpy(s.stages,tp_z,sizeof tp_z);
         memcpy(c.filter,tf_c,sizeof tf_c);memcpy(c.phase,tp_a,sizeof tp_a);
-        c.filter_mix=tfx_m;c.phase_mix=tpx_m;c.wet=(float)fxs_v[EN_FXS_TP_MIX]*0.005f;c.kind=tf_type;
+        c.filter_mix=tfx_m;c.phase_mix=tpx_m;c.mix=fxs_v[EN_FXS_TP_MIX];c.kind=tf_type;
         fm1_rust_fx_bus(&s,&c,busl,busr,mixl,mixr,n);
         memcpy(tf_s,s.filter,sizeof tf_s);memcpy(tp_fb,s.feedback,sizeof tp_fb);memcpy(tp_z,s.stages,sizeof tp_z);
 #else
@@ -9141,7 +9213,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
     DT0();
 #if EN_RUST_EFFECTS
     {float *p[6];rust_mix_pointers(p,0);fm1_rust_mix_tank(p,rv_wl,rv_wr,dk,n);}
-    for(j=0;j<n;j++)fx_master(&mixl[j],&mixr[j]);
+    fx_render(mixl,mixr,n);
 #else
     for (j = 0; j < n; j++) {                   /* the tank's output in, the performance effects */
         float l = mixl[j] + dk[j] * rv_wl[j], r = mixr[j] + dk[j] * rv_wr[j];
@@ -9324,7 +9396,11 @@ static void control(uint32_t n)                 /* once a chunk: the slow things
     }
     master_dyn_set();
     reverb_set();
+#if EN_RUST_EFFECTS
+    en_lim_gr=fm1_rust_fx_reduction(gr_hold);
+#else
     en_lim_gr = 8.6859f * gr_hold;               /* 20 log10 of 1/(1 - x), near enough for the small ones: the limiter's reduction in dB */
+#endif
     en_out_peak = pk_hold;
     if (arc_left <= n) {
         float r = frand() * 2.0f - 1.0f;
@@ -9427,11 +9503,15 @@ void en_render(int32_t *out, uint32_t n, uint32_t gain_q12)
         if(n>=jp_plan_wait){jp_plan_wait=0;jp_prepare(0);}
         else jp_plan_wait-=(uint16_t)n;
     }
+#if EN_RUST_EFFECTS
+    {float values[3];fm1_rust_fx_gains(trim_k,trim_to,muted,gain_q12,values);trim_k=values[0];gain=values[1];usb_gain=values[2];}
+#else
     gain = muted ? 0.0f : (float)gain_q12 * (1.0f / 4096.0f) * 2.0f;
     usb_gain = muted ? 0.0f : 1.0f;             /* the USB audio at a fixed level (en_usb_out): unity, the knob at about three quarters */
     trim_k += (trim_to - trim_k) * 0.15f;       /* the piece's level (en_trim), over about 40 ms */
     gain *= trim_k;
     usb_gain *= trim_k;
+#endif
 #if EN_RUST_TRANSPORT
     if (fm1_rust_transport_expired(&transport, en_ext))
 #else
@@ -9501,9 +9581,13 @@ void en_render(int32_t *out, uint32_t n, uint32_t gain_q12)
 #endif
         } else {
             int t;
+#if EN_RUST_EFFECTS
+            tg_inv=fm1_rust_fx_hold(trk_g,trk_g1,k);
+#else
             tg_inv = 1.0f / (float)k;           /* the tracks' gains hold at their targets through the skipped chunk; the ramp goes on at the next control */
             for (t = 0; t < EN_NTRACK; t++)
                 trk_g[t] = trk_g1[t];
+#endif
         }
         usb_cur = en_usb_out ? en_usb_out + (out - out0) : 0;
         render_chunk(out, k, gain);
@@ -9514,6 +9598,9 @@ void en_render(int32_t *out, uint32_t n, uint32_t gain_q12)
         out += 2 * k;
         n -= k;
     }
+#if EN_RUST_EFFECTS
+    {float state[2]={gap_g,hush_g};en_hushed=(uint8_t)fm1_rust_fx_fades(state,gap_on,hush,out0,en_usb_out,n0);gap_g=state[0];hush_g=state[1];}
+#else
     if (gap_on || gap_g < 1.0f) {               /* the drop gap: out in ~6 ms, back in ~1 ms (the drop's first hit whole) */
         uint32_t j;
         for (j = 0; j < n0; j++) {
@@ -9540,4 +9627,5 @@ void en_render(int32_t *out, uint32_t n, uint32_t gain_q12)
         }
     }
     en_hushed = (uint8_t)(hush && hush_g <= 0.0f);
+#endif
 }

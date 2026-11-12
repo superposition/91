@@ -1,5 +1,9 @@
 # R12 outer mixer follow-up
 
+The subsequent [effect settings/block traversal work](EFFECTS_COMPLETION.md)
+moves remaining effect configuration, traversal and predelay quantization into
+Rust. This file preserves this earlier mixer checkpoint's scope and measurements.
+
 This follow-up to `4bd423b` moves the remaining **outer mixer arithmetic** into
 `fm1-engine::effects::mix`. C still generates voices, traverses the render stages,
 and supplies the existing storage. No audio payload buffer, cache, allocator,

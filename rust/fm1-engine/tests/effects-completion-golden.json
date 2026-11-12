@@ -1,0 +1,32 @@
+{
+  "0": {
+    "mode": 0,
+    "rows": 1276,
+    "frames": 0,
+    "trace_hash": "27723a28"
+  },
+  "1": {
+    "mode": 1,
+    "rows": 42363,
+    "frames": 0,
+    "trace_hash": "98fe6947"
+  },
+  "2": {
+    "mode": 2,
+    "rows": 1100,
+    "frames": 94452,
+    "trace_hash": "62c27989"
+  },
+  "3": {
+    "mode": 3,
+    "rows": 64,
+    "frames": 0,
+    "trace_hash": "fd353cc2"
+  },
+  "4": {
+    "mode": 4,
+    "rows": 505,
+    "frames": 40699,
+    "trace_hash": "1ea84c3a"
+  }
+}

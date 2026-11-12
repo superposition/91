@@ -2,6 +2,19 @@
 //! Quarter-rate tape heads and the full-rate Echoplex. Payload stays caller-owned.
 pub const TAPE: usize = 21800;
 pub const PLEX: usize = 7100;
+/// Historical boot/reset behavior is intentionally partial: filter/history
+/// scalars and head pan/lean/timer survive while payload and these cursors reset.
+pub fn reset(s: &mut State, h: &mut Heads, tape: &mut [i16; TAPE], plex: &mut [i16; PLEX]) {
+    tape.fill(0);
+    plex.fill(0);
+    s.tape_write = 0;
+    s.plex_write = 0;
+    s.phase = 0;
+    s.head2 = 0.75;
+    h.target = 0.75;
+    h.speed = 0.0;
+    s.length = 0.0;
+}
 #[repr(C)]
 pub struct Heads {
     pub pan: [f32; 4],

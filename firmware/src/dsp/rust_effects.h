@@ -5,6 +5,13 @@
 #include <string.h>
 #include "rust_fx_control.h"
 #include "rust_fx_engage.h"
+extern float fm1_rust_fx_setting(uint32_t,int32_t);
+extern float fm1_rust_fx_duck_decay(float);
+extern float fm1_rust_fx_reduction(float);
+extern void fm1_rust_fx_size(int32_t,float *);
+extern void fm1_rust_fx_gains(float,float,uint32_t,uint32_t,float *);
+extern uint32_t fm1_rust_fx_fades(float *,uint32_t,uint32_t,int32_t *,int16_t *,uint32_t);
+extern float fm1_rust_fx_hold(float *,const float *,uint32_t);
 typedef struct {
     float cur,sum,release,envelope,gain,sub_min;
     uint32_t check,index,count,sub_index;
@@ -29,9 +36,11 @@ typedef struct {int32_t positions[12];float gate_envelope,gate_gain,gate_hold,sh
 typedef struct {int32_t kind;float damping,hold,shimmer,decay,diffusion;} fm1_fx_reverb_config_t;
 _Static_assert(sizeof(fm1_fx_reverb_t)==96 && sizeof(fm1_fx_reverb_config_t)==24,"Rust reverb ABI");
 extern void fm1_rust_fx_reverb(float,fm1_fx_reverb_t *,const fm1_fx_reverb_config_t *,int16_t *,float *,float *);
+extern void fm1_rust_fx_reverb_block(fm1_fx_reverb_t *,const fm1_fx_reverb_config_t *,int16_t *,float *,const int16_t *,uint32_t,const int16_t *,float *,float *,uint32_t);
+extern void fm1_rust_fx_reverb_reset(fm1_fx_reverb_t *,int16_t *);
 typedef struct {uint32_t index;float phases[3];} fm1_fx_chorus_t;
 _Static_assert(sizeof(fm1_fx_chorus_t)==16,"Rust chorus ABI");
-extern void fm1_rust_fx_chorus(fm1_fx_chorus_t *,float *,float *,float *,uint32_t,float);
+extern void fm1_rust_fx_chorus(fm1_fx_chorus_t *,float *,float *,float *,uint32_t,int32_t,uint32_t);
 typedef struct {
     float lp_s[4],hp_s[4],sw_s[2][2],sw_s2[2][2],tk_s[2][2][2],wh_s[2][2],wh_c[4],wh_env;
     uint32_t wh_cnt,mod_w;
@@ -53,17 +62,19 @@ typedef struct {
 } fm1_fx_sampler_t;
 typedef struct {
     float rp_step,rp_gatef,rp_t,rp_pit;uint32_t rp_ref,rp_ok;float bm_len,sc_len;int32_t sc_n;
-    float sc_chaos,sc_reverse,scr_w,scr_per;int32_t scr_style;uint32_t flx_live,flx_mute,flx_rev;
+    int32_t sc_chaos,sc_reverse;float scr_w,scr_per;int32_t scr_style;uint32_t flx_live,flx_mute,flx_rev;
     float flx_off,flx_sub,gn_len,gn_region,gn_scale;int32_t gn_n;
     float rv_len,vr_tgt,vr_c,vr_dull,rl_gain,step_length;
 } fm1_fx_sampler_config_t;
 _Static_assert(sizeof(fm1_fx_sampler_t)==136 && sizeof(fm1_fx_sampler_config_t)==116,"Rust performance ring ABI");
 extern void fm1_rust_fx_sampler(fm1_fx_sampler_t *,const fm1_fx_sampler_config_t *,int16_t *,uint32_t *,float,float,float *);
+extern void fm1_rust_fx_render(fm1_fx_sampler_t *,const fm1_fx_sampler_config_t *,fm1_fx_tone_t *,const fm1_fx_tone_config_t *,int16_t *,float *,float *,uint32_t *,float *,float *,uint32_t);
 typedef struct {float filter[4],feedback[2],stages[2][4];} fm1_fx_bus_t;
-typedef struct {float filter[4],phase[2],filter_mix,phase_mix,wet;uint32_t kind;} fm1_fx_bus_config_t;
+typedef struct {float filter[4],phase[2],filter_mix,phase_mix;int32_t mix;uint32_t kind;} fm1_fx_bus_config_t;
 _Static_assert(sizeof(fm1_fx_bus_t)==56 && sizeof(fm1_fx_bus_config_t)==40,"Rust bus ABI");
 extern void fm1_rust_fx_bus(fm1_fx_bus_t *,const fm1_fx_bus_config_t *,float *,float *,float *,float *,uint32_t);
 typedef struct {float pan[4],lean,target,speed;uint32_t left;} fm1_fx_heads_t;
+extern void fm1_rust_fx_echo_reset(fm1_fx_echo_t *,fm1_fx_heads_t *,int16_t *,int16_t *);
 typedef struct {float motion,modulation[3],length,head;uint32_t playing,frozen;} fm1_fx_heads_config_t;
 _Static_assert(sizeof(fm1_fx_heads_t)==32 && sizeof(fm1_fx_heads_config_t)==32,"Rust head control ABI");
 extern void fm1_rust_fx_heads(fm1_fx_heads_t *,const fm1_fx_heads_config_t *,uint32_t,uint32_t *);
@@ -78,8 +89,8 @@ extern void fm1_rust_fx_duck(fm1_fx_duck_t *,const fm1_fx_duck_config_t *,float 
 extern void fm1_rust_fx_crush(fm1_fx_crush_t *,float *,float *,const float *,const float *,uint32_t,float);
 typedef struct {float b0,b1,b2,br,pw,pp,y1,y2,crack,lp,r1,r2;uint32_t rng,cnt;} fm1_fx_vinyl_gen_t;
 typedef struct {fm1_fx_vinyl_gen_t generators[2];float held[2];uint32_t phase;} fm1_fx_vinyl_t;
-typedef struct {float gain,lowpass,hiss,pop,amplitude,gain0,gain1,inverse;uint32_t playing,shed;} fm1_fx_vinyl_config_t;
-_Static_assert(sizeof(fm1_fx_vinyl_t)==124 && sizeof(fm1_fx_vinyl_config_t)==40,"Rust vinyl ABI");
+typedef struct {float fade,level,lowpass,hiss,pop,amplitude,gain0,gain1,inverse;uint32_t playing,shed;} fm1_fx_vinyl_config_t;
+_Static_assert(sizeof(fm1_fx_vinyl_t)==124 && sizeof(fm1_fx_vinyl_config_t)==44,"Rust vinyl ABI");
 _Static_assert(sizeof(fm1_fx_rv_settings_t)==20 && sizeof(fm1_fx_duck_t)==8 && sizeof(fm1_fx_duck_config_t)==36 && sizeof(fm1_fx_crush_t)==12,"Rust FX scalar layout");
 extern void fm1_rust_fx_vinyl(fm1_fx_vinyl_t *,const fm1_fx_vinyl_config_t *,float *,float *,uint32_t);
 typedef struct {float first[3],second[3];uint32_t first_bus,second_bus;} fm1_mix_merge_t;

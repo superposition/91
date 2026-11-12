@@ -1,5 +1,9 @@
 # R12 effects and master-bus checkpoint
 
+The [settings/block traversal completion](EFFECTS_COMPLETION.md) supersedes this
+historical checkpoint's remaining active effect arithmetic and records the final
+software call map. Physical resource/timing acceptance remains separate.
+
 The subsequent [outer mixer follow-up](MIXER.md) moves the mapped outer C mixer
 arithmetic below and records its separate final artifact and worker evidence.
 This file preserves the earlier FX checkpoint's scope and measurements.

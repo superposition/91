@@ -148,9 +148,10 @@ pub struct EchoSends {
     pub wash: f32,
 }
 const _: [(); 28] = [(); core::mem::size_of::<EchoSends>()];
-/// Reuses each now-consumed reverb-send slot for its predelay input. The caller
-/// subsequently commits these values, in order, to disjoint shared predelay
-/// slots. No predelay reference, callback or extra audio payload is needed.
+/// Reuses each now-consumed reverb-send slot for a quantized predelay word.
+/// Every i16 is exactly representable as f32. The caller only casts/stores these
+/// words in order into disjoint shared predelay slots; it performs no DSP math.
+/// No predelay reference, callback or extra audio payload is needed.
 pub fn echoes(
     s: &mut echo::State,
     c: &echo::Config,
@@ -173,6 +174,7 @@ pub fn echoes(
             + (el + er + xl + xr) * 0.35 * sends.reverb_send
             + sends.wash * 0.2 * (b.left[j] + b.right[j]))
             * 0.8;
+        b.reverb[j] = super::reverb::quantize(b.reverb[j]) as f32;
         b.left[j] = (b.left[j] + (0.75 * el + 0.15 * xl) * *duck) * 0.36;
         b.right[j] = (b.right[j] + (0.75 * er + 0.15 * xr) * *duck) * 0.36;
         *duck *= 1.3 * 0.36;
