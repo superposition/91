@@ -26,5 +26,6 @@ wasmflags="--target=wasm32 -O2 -ffp-contract=off -std=gnu99 -nostdlib -ffreestan
 clang $wasmflags -o "$out/c0.wasm" tests/reference/web_audio_reference.c firmware/src/dsp/amb.c web/emu/shim/libc.c
 clang $wasmflags -DEN_RUST_WEB=1 -o "$out/rust.wasm" tests/reference/web_audio_reference.c firmware/src/dsp/amb.c web/emu/shim/libc.c "$out/wasm/wasm32-unknown-unknown/release/libfm1_jam_bridge.a"
 clang $wasmflags "-DWEB_AUDIO_SOURCE=\"$baseline/web/emu/amb_web.c\"" -o "$out/frozen.wasm" tests/reference/web_audio_reference.c "$baseline/firmware/src/dsp/amb.c" web/emu/shim/libc.c
-node tests/host/web_audio_wasm_test.mjs "$out/frozen.bin" "$out/frozen.wasm" "$out/c0.wasm" "$out/rust.wasm"
+node tests/host/web_audio_wasm_test.mjs "$out/frozen.bin" "$out/frozen.wasm" "$out/c0.wasm" "$out/rust.wasm" > "$out/wasm-results.jsonl"
+cat "$out/wasm-results.jsonl"
 echo '4096 ring/output cases and all 65536 RGB565 background colors match frozen/current C on native and WASM.'

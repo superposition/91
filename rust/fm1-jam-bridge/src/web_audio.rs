@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! One instance on one browser audio thread. No callback while Audio is borrowed.
 use core::cell::UnsafeCell;
-use fm1_app::web_audio::Audio;
+use fm1_app::web_audio::{self, Audio, MAX_RENDER};
 
 #[cfg(feature = "pi32v2")]
 compile_error!("The browser audio owner cannot be enabled on the physical MCU");
 
-struct Owner(UnsafeCell<Audio>);
+struct Owner<T>(UnsafeCell<T>);
 // SAFETY: this feature's C adapter is serialized on one worklet thread. It may
 // reenter Rust only after the prior call returns. C/JS output views are read-only
 // and may be accessed only between calls, never by a concurrent worker.
-unsafe impl Sync for Owner {}
-static AUDIO: Owner = Owner(UnsafeCell::new(Audio::new()));
+unsafe impl<T> Sync for Owner<T> {}
+static AUDIO: Owner<Audio> = Owner(UnsafeCell::new(Audio::new()));
+static LEFT: Owner<[f32; MAX_RENDER]> = Owner(UnsafeCell::new([0.0; MAX_RENDER]));
+static RIGHT: Owner<[f32; MAX_RENDER]> = Owner(UnsafeCell::new([0.0; MAX_RENDER]));
+static BACKGROUND: Owner<[f32; 12]> = Owner(UnsafeCell::new([0.0; 12]));
 
 /// # Safety
 /// Serialize this call with every other browser audio call/view access.
@@ -42,22 +45,26 @@ pub unsafe extern "C" fn fm1_rust_web_push(block: *const i32, frames: u32) -> i3
 #[no_mangle]
 pub unsafe extern "C" fn fm1_rust_web_drain(frames: u32) -> i32 {
     // SAFETY: call-local exclusive borrow, released before returning to C.
-    unsafe { (&mut *AUDIO.0.get()).drain(frames).map_or(-1, |n| n as i32) }
+    unsafe {
+        (&mut *AUDIO.0.get())
+            .drain(frames, &mut *LEFT.0.get(), &mut *RIGHT.0.get())
+            .map_or(-1, |n| n as i32)
+    }
 }
 /// # Safety
 /// Serialize the call. The returned 1024-float view is read-only; access it only
 /// between serialized calls, never while Rust borrows Audio or from a worker.
 #[no_mangle]
 pub unsafe extern "C" fn fm1_rust_web_out_l() -> *const f32 {
-    // SAFETY: caller excludes mutation; only a raw pointer survives the call.
-    unsafe { (&*AUDIO.0.get()).left().as_ptr() }
+    // Derive the persistent pointer directly from its UnsafeCell root, never
+    // through a temporary shared/unique reference that a later call invalidates.
+    LEFT.0.get().cast::<f32>()
 }
 /// # Safety
 /// Same read-only view and serialization contract as fm1_rust_web_out_l.
 #[no_mangle]
 pub unsafe extern "C" fn fm1_rust_web_out_r() -> *const f32 {
-    // SAFETY: caller excludes mutation; only a raw pointer survives the call.
-    unsafe { (&*AUDIO.0.get()).right().as_ptr() }
+    RIGHT.0.get().cast::<f32>()
 }
 /// # Safety
 /// Serialize all calls/views. The returned 12-float view is read-only and may
@@ -71,8 +78,38 @@ pub unsafe extern "C" fn fm1_rust_web_bg(
 ) -> *const f32 {
     // SAFETY: exclusive owner access ends before the pointer reaches C/JS.
     unsafe {
-        (&mut *AUDIO.0.get())
-            .background([pad as u16, accent as u16, ground as u16, acid as u16])
-            .as_ptr()
+        web_audio::background(
+            [pad as u16, accent as u16, ground as u16, acid as u16],
+            &mut *BACKGROUND.0.get(),
+        );
+    }
+    BACKGROUND.0.get().cast::<f32>()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn retained_raw_views_remain_valid_between_exclusive_updates() {
+        // SAFETY: this is the only test accessing this private audio instance;
+        // every call/read is serialized and no temporary Rust borrow is held.
+        unsafe {
+            let left = fm1_rust_web_out_l();
+            let right = fm1_rust_web_out_r();
+            assert_eq!(fm1_rust_web_push(core::ptr::null(), 1), -1);
+            assert_eq!(fm1_rust_web_push(core::ptr::null(), 0), 0);
+            let input = [-8388608, 8388607, 7, -7];
+            assert_eq!(fm1_rust_web_push(input.as_ptr(), 2), 1);
+            assert_eq!(fm1_rust_web_drain(3), -1);
+            assert_eq!(*left, 0.0);
+            assert_eq!(fm1_rust_web_drain(2), 2);
+            assert_eq!(*left, -1.0);
+            assert_eq!(*right.add(1), -7.0 / 8388608.0);
+            assert_eq!(left, fm1_rust_web_out_l());
+            let background = fm1_rust_web_bg(0xffff, 0, 0, 0);
+            assert_eq!(*background, 1.0);
+            assert_eq!(background, fm1_rust_web_bg(0, 0, 0, 0));
+            assert_eq!(*background, 0.0);
+        }
     }
 }
