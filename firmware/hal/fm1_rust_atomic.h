@@ -11,6 +11,30 @@ static inline __attribute__((noreturn)) void fm1_mcu_park(void)
 {
     for(;;) __asm__ volatile("nop" ::: "memory");
 }
+static inline uint32_t fm1_rust_irq_mask(void)
+{
+    uint32_t flags,masked;
+    __asm__ volatile("%0 = icfg" : "=r"(flags) :: "memory");
+    masked=flags & ~0x100u;
+    __asm__ volatile("icfg = %0\n\tcsync" :: "r"(masked) : "memory");
+    return flags;
+}
+static inline void fm1_rust_irq_restore(uint32_t flags)
+{
+    __asm__ volatile("csync\n\ticfg = %0\n\tcsync" :: "r"(flags) : "memory");
+}
+/* Foreground and render can both post notes. They are one logical producer
+ * only when the whole publication, including its index loads, is excluded
+ * from CPU0 IRQ preemption. CPU1 must use its existing deferred MIDI path. */
+uint32_t fm1_mcu_command_enter(void)
+{
+    if(fm1_cnum()) fm1_mcu_park();
+    return fm1_rust_irq_mask();
+}
+void fm1_mcu_command_exit(uint32_t flags)
+{
+    fm1_rust_irq_restore(flags);
+}
 static inline uint32_t fm1_rust_atomic_try(void)
 {
     uint32_t acquired;
@@ -43,10 +67,7 @@ static void fm1_rust_atomic_stopped_owner(void)
 void fm1_mcu_fence(void) { __asm__ volatile("csync" ::: "memory"); }
 uint32_t fm1_mcu_atomic(uint32_t op,uint32_t *word,uint32_t expected,uint32_t value)
 {
-    uint32_t flags,masked,old,spins=0;
-    __asm__ volatile("%0 = icfg" : "=r"(flags) :: "memory");
-    masked=flags & ~0x100u;
-    __asm__ volatile("icfg = %0\n\tcsync" :: "r"(masked) : "memory");
+    uint32_t flags=fm1_rust_irq_mask(),old,spins=0;
     while(!fm1_rust_atomic_try()) {
         if(++spins==65536u) {fm1_rust_atomic_stopped_owner();spins=0;}
     }
@@ -65,7 +86,7 @@ uint32_t fm1_mcu_atomic(uint32_t op,uint32_t *word,uint32_t expected,uint32_t va
     }
     __asm__ volatile("csync" ::: "memory");
     fm1_rust_atomic_lock=0;
-    __asm__ volatile("csync\n\ticfg = %0\n\tcsync" :: "r"(flags) : "memory");
+    fm1_rust_irq_restore(flags);
     return old;
 }
 #endif

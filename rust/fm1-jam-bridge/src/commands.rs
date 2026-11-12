@@ -27,8 +27,9 @@ pub unsafe extern "C" fn fm1_rust_commands_reset() {
 /// One serialized producer; no reset and at most one concurrent consumer.
 #[no_mangle]
 pub unsafe extern "C" fn fm1_rust_commands_push(bits: u32) -> i32 {
-    // SAFETY: the C application owner serializes publication. The emulator
-    // executes panel/MIDI/application input on its single render worker.
+    // SAFETY: the emulator serializes input/render. The MCU post adapter masks
+    // CPU0 IRQs for this entire call: render-side Naiwan notes can also post.
+    // CPU1 uses a separate deferred MIDI path and never publishes here.
     match unsafe { QUEUE.push_from_producer(CommandWord::from_bits(bits)) } {
         Ok(depth) => {
             ACCEPTED.fetch_add(1, Ordering::Relaxed);
