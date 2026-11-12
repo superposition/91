@@ -247,6 +247,9 @@ static void ans_old(slot_t *s)                /* the acid answer in the developm
 }
 static void image_header(int g)
 {
+#if EN_RUST_FORMATS
+    (void)fm1_rust_formats_object_header(0,(uint32_t)g,P_NPARAMS,saved,image,IMG_HDR);
+#else
     memset(image, 0, IMG_HDR);
     wr32(image, IMG_MAGIC);
     image[4] = IMG_VER;
@@ -257,6 +260,7 @@ static void image_header(int g)
     image[12] = 1;                           /* 1: the acid answer in its present form (kind * 5 + direction) */
     image[13] = 1;                           /* 1: the pluck's sounds numbered with thirty built-in DX voices (0: twenty-two, the player's own voices from 34, not 42) */
     image[14] = 1;                           /* 1: the progressions follow the records (0.15.6; an older image ends with the records) */
+#endif
 }
 
 /* the old bank (OBJ_PROJ, 16-bit settings): its pieces into the slots, as before: read field by field, so a bank written with fewer
@@ -395,10 +399,14 @@ static int bs_save(void)
         memset(b + n, 0, BS_SIZE - (uint32_t)n);
         diff = 1;
     }
+#if EN_RUST_FORMATS
+    (void)fm1_rust_formats_object_header(2,EN_NGENRE,0,0,b,BS_HDR);
+#else
     wr32(b, BS_MAGIC);
     b[4] = BS_LEN;
     b[5] = EN_NGENRE;
     b[6] = b[7] = 0;
+#endif
     for (i = 0; i < NPIECES; i++)
         if (bs_dirty >> i & 1u) {
             uint8_t *e = b + BS_HDR + ((uint32_t)proj.genre * NPIECES + (uint32_t)i) * BS_LEN;
@@ -452,10 +460,14 @@ static int px_save(void)
     } else if (n < (int)PX_SIZE) {
         memset(b + n, 0, PX_SIZE - (uint32_t)n);   /* (an object of fewer genres) */
     }
+#if EN_RUST_FORMATS
+    (void)fm1_rust_formats_object_header(1,EN_NGENRE,0,0,b,PX_HDR);
+#else
     wr32(b, PX_MAGIC);
     b[4] = PX_LEN;
     b[5] = EN_NGENRE;
     b[6] = b[7] = 0;
+#endif
     memcpy(b + PX_HDR + (uint32_t)proj.genre * NPIECES * PX_LEN, px, sizeof px);
     return plat_store_save(OBJ_KINDS, b, PX_SIZE);
 }
@@ -675,8 +687,13 @@ int project_flush_globals(void)
     if (!pending_glob)
         return 0;
     glob.magic = GLOB_MAGIC;
+#if EN_RUST_FORMATS
+    { uint8_t raw[32];
+      if(fm1_rust_formats_global(&glob.tune,glob.sl,glob.sl_on,glob.sl_rsv,raw,sizeof raw)!=32 || plat_store_save(OBJ_GLOB,raw,sizeof raw)!=0) return -1; }
+#else
     if (plat_store_save(OBJ_GLOB, &glob, sizeof glob) != 0)
         return -1;
+#endif
     pending_glob = 0;
     return 0;
 }

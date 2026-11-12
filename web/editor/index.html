@@ -233,8 +233,7 @@ function flush() {
   let n = 0;
   for (const [p, v] of pend) {
     if (p >= parameterCount) { pend.delete(p); continue; }
-    const u = v + 8192;
-    send([0xF0, 0x7D, 0x50, 0x50, 0x01, p >> 7, p & 127, (u >> 7) & 127, u & 127, 0xF7]);
+    send(Array.from(getCodecs().call(92, [5, p, v])));
     pend.delete(p);
     if (++n >= 6) break;
   }
@@ -425,57 +424,11 @@ ctlRender();
 /* the 155-byte voice: six operators of 21 bytes (OP6 first), then the voice; the 128-byte packed record is what a bank holds (firmware/src/dsp/fm6.inc) */
 const FP = { R1: 0, L1: 4, BP: 8, LD: 9, RD: 10, LC: 11, RC: 12, RS: 13, AMS: 14, KVS: 15, OL: 16, MODE: 17, FC: 18, FF: 19, DET: 20, OP: 21,
   PR1: 126, PL1: 130, ALG: 134, FB: 135, OKS: 136, LFS: 137, LFD: 138, LPMD: 139, LAMD: 140, LKS: 141, LFW: 142, LPMS: 143, TRNSP: 144, NAME: 145, SIZE: 155 };
-const OPMAX = [99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 3, 3, 7, 3, 7, 99, 1, 31, 99, 14];
-const VMAX = [99, 99, 99, 99, 99, 99, 99, 99, 31, 7, 1, 99, 99, 99, 99, 1, 5, 7, 48];
-function vmax(i) { return i < 126 ? OPMAX[i % 21] : i < FP.NAME ? VMAX[i - 126] : 126; }
-function sanitize(v) {
-  for (let i = 0; i < FP.SIZE; i++) {
-    if (i >= FP.NAME) v[i] = v[i] < 32 || v[i] > 126 ? 32 : v[i];
-    else if (v[i] > vmax(i)) v[i] = vmax(i);
-  }
-  return v;
-}
-function unpackVoice(b) {
-  const v = new Uint8Array(FP.SIZE);
-  for (let k = 0; k < 6; k++) {
-    const o = b.subarray(k * 17, k * 17 + 17), d = k * FP.OP;
-    for (let i = 0; i < 11; i++) v[d + i] = o[i] & 127;
-    v[d + FP.LC] = o[11] & 3; v[d + FP.RC] = (o[11] >> 2) & 3;
-    v[d + FP.RS] = o[12] & 7; v[d + FP.DET] = (o[12] >> 3) & 15;
-    v[d + FP.AMS] = o[13] & 3; v[d + FP.KVS] = (o[13] >> 2) & 7;
-    v[d + FP.OL] = o[14] & 127;
-    v[d + FP.MODE] = o[15] & 1; v[d + FP.FC] = (o[15] >> 1) & 31;
-    v[d + FP.FF] = o[16] & 127;
-  }
-  for (let i = 0; i < 9; i++) v[FP.PR1 + i] = b[102 + i] & 127;
-  v[FP.ALG] &= 31;
-  v[FP.FB] = b[111] & 7; v[FP.OKS] = (b[111] >> 3) & 1;
-  for (let i = 0; i < 4; i++) v[FP.LFS + i] = b[112 + i] & 127;
-  v[FP.LKS] = b[116] & 1; v[FP.LFW] = (b[116] >> 1) & 7; v[FP.LPMS] = (b[116] >> 4) & 7;
-  v[FP.TRNSP] = b[117] & 127;
-  for (let i = 0; i < 10; i++) v[FP.NAME + i] = b[118 + i] & 127;
-  return sanitize(v);
-}
-function packVoice(v) {
-  const b = new Uint8Array(128);
-  for (let k = 0; k < 6; k++) {
-    const o = k * 17, d = k * FP.OP;
-    for (let i = 0; i < 11; i++) b[o + i] = v[d + i] & 127;
-    b[o + 11] = (v[d + FP.LC] & 3) | ((v[d + FP.RC] & 3) << 2);
-    b[o + 12] = (v[d + FP.RS] & 7) | ((v[d + FP.DET] & 15) << 3);
-    b[o + 13] = (v[d + FP.AMS] & 3) | ((v[d + FP.KVS] & 7) << 2);
-    b[o + 14] = v[d + FP.OL] & 127;
-    b[o + 15] = (v[d + FP.MODE] & 1) | ((v[d + FP.FC] & 31) << 1);
-    b[o + 16] = v[d + FP.FF] & 127;
-  }
-  for (let i = 0; i < 9; i++) b[102 + i] = v[FP.PR1 + i] & 127;
-  b[111] = (v[FP.FB] & 7) | ((v[FP.OKS] & 1) << 3);
-  for (let i = 0; i < 4; i++) b[112 + i] = v[FP.LFS + i] & 127;
-  b[116] = (v[FP.LKS] & 1) | ((v[FP.LFW] & 7) << 1) | ((v[FP.LPMS] & 7) << 4);
-  b[117] = v[FP.TRNSP] & 127;
-  for (let i = 0; i < 10; i++) b[118 + i] = v[FP.NAME + i] & 127;
-  return b;
-}
+const VOICE_MAX = getCodecs().call(67);
+function vmax(i) { return VOICE_MAX[i]; }
+function sanitize(v) { v.set(getCodecs().call(22, [], [v])); return v; }
+function unpackVoice(b) { return sanitize(getCodecs().call(20, [], [b])); }
+function packVoice(v) { return getCodecs().call(21, [], [v]); }
 function initVoice() {                            /* the DX7's init voice: one operator (OP1) sounding, a plain sine */
   const v = new Uint8Array(FP.SIZE);
   for (let k = 0; k < 6; k++) {
@@ -492,7 +445,7 @@ function initVoice() {                            /* the DX7's init voice: one o
   return v;
 }
 const nameOf = (v) => String.fromCharCode(...Array.from(v.subarray(FP.NAME, FP.NAME + 10)).map((c) => (c < 32 || c > 126 ? 32 : c))).trimEnd();
-const checksum = (a) => { let s = 0; for (const b of a) s += b; return (128 - (s & 127)) & 127; };
+const checksum = a => codecWords(getCodecs().call(84, [], [a]))[0];
 
 /* ===================================================================== the algorithms (the firmware's routing table, FM6_ALG) */
 /* a byte per operator, OP6 first: bits 0-1 the bus it writes (0 the voice: a carrier), bit 2 add to it (else replace), bits 4-5 the bus it reads,
@@ -662,7 +615,7 @@ async function sendVoice() {
         again = false;
         if (slot > nloaded) { say("Slots fill in order: send to the next free slot (" + (nloaded + 1) + ") first."); break; }
         const b = packVoice(voice);
-        send([0xF0, 0x7D, 0x50, 0x56, slot, ...b, checksum(b), 0xF7]);
+        send(Array.from(getCodecs().call(24, [3, slot], [b])));
         const a = await waitFor(1200);
         if (!a) { say(device.text("unsupported")); break; }
         if (a.n === 0x7F) { say("The FM-1 did not take the voice."); break; }
@@ -692,7 +645,7 @@ async function readSlots() {
     const r = await new Promise((res) => {
       voiceWait = res;
       voiceRequested = i;
-      send([0xF0, 0x7D, 0x50, 0x56, 0x7E, i, 0xF7]);
+      send(Array.from(getCodecs().call(92, [6, i])));
       setTimeout(() => { if (voiceWait === res) { voiceWait = null; res(null); } }, 1500);
     });
     if (!r) { say(device.text("unsupported")); return; }
@@ -713,19 +666,8 @@ function syncPluckNames() {                      /* the pluck's Sound lists the 
 
 /* files: .syx banks and single voices */
 function parseSyx(buf, file) {
-  const out = [];
-  const add = (b128) => out.push({ v: unpackVoice(b128), file });
-  if (buf.length === 4096) { for (let i = 0; i < 32; i++) add(buf.subarray(i * 128, i * 128 + 128)); return out; }
-  for (let i = 0; i < buf.length;) {
-    if (buf[i] !== 0xF0) { i++; continue; }
-    let j = i + 1;
-    while (j < buf.length && buf[j] !== 0xF7) j++;
-    const m = buf.subarray(i + 1, j);
-    i = j + 1;
-    if (m.length === 4102 && m[0] === 0x43 && m[2] === 0x09 && m[3] === 0x20 && m[4] === 0x00) for (let v = 0; v < 32; v++) add(m.subarray(5 + v * 128, 5 + (v + 1) * 128));
-    else if (m.length === 161 && m[0] === 0x43 && m[2] === 0x00 && m[3] === 0x01 && m[4] === 0x1B) add(packVoice(sanitize(Uint8Array.from(m.subarray(5, 160)))));
-  }
-  return out;
+  const raw = getCodecs().call(66, [], [buf]);
+  return Array.from({length: raw.length / 155}, (_, i) => ({v: raw.slice(i * 155, (i + 1) * 155), file}));
 }
 function renderLibrary() {
   const box = $("libl");
@@ -752,12 +694,12 @@ function download(name, bytes) {
 }
 $("vsaveone").addEventListener("click", () => {
   const v = sanitize(Uint8Array.from(voice));
-  download((nameOf(v) || "voice").replace(/[^A-Za-z0-9_-]+/g, "_") + ".syx", new Uint8Array([0xF0, 0x43, 0x00, 0x00, 0x01, 0x1B, ...v, checksum(v), 0xF7]));
+  download((nameOf(v) || "voice").replace(/[^A-Za-z0-9_-]+/g, "_") + ".syx", getCodecs().call(24, [2, 0], [v]));
 });
 $("vsavebank").addEventListener("click", () => {
   const body = [];
   for (let i = 0; i < 32; i++) body.push(...packVoice(i < 16 && slots[i] ? slots[i] : initVoice()));
-  download("perf1-voices.syx", new Uint8Array([0xF0, 0x43, 0x00, 0x09, 0x20, 0x00, ...body, checksum(body), 0xF7]));
+  download("perf1-voices.syx", getCodecs().call(24, [1, 0], [body]));
   say("Saved the 16 slots (empty ones as init voices) as a 32-voice bank.");
 });
 

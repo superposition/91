@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["rust/fm1-types", "rust/fm1-formats", "rust/fm1-engine", "rust/fm1-rt", "rust/fm1-cli", "rust/toolchain/probe", "rust/fm1-jam-bridge"]
+members = ["rust/fm1-types", "rust/fm1-formats", "rust/fm1-engine", "rust/fm1-rt", "rust/fm1-cli", "rust/toolchain/probe", "rust/fm1-jam-bridge", "rust/fm1-codecs-wasm"]
 
 [workspace.package]
 version = "0.1.0"

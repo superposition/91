@@ -121,6 +121,11 @@ pub struct PieceParts<'a> {
 impl PieceParts<'_> {
     pub fn encode(&self, output: &mut [u8]) -> Result<usize, CodecError> {
         ids(self.genre, self.slot, self.parameter_count)?;
+        self.encode_compatible(output)
+    }
+    /// Layout-only encoding retains unknown index/count fields during a raw
+    /// file roundtrip; application compatibility is a separate checked policy.
+    pub fn encode_compatible(&self, output: &mut [u8]) -> Result<usize, CodecError> {
         if self.metadata.len() > 65535 {
             return Err(CodecError::Length);
         }
@@ -270,6 +275,12 @@ impl SetParts<'_> {
             if p.voice_index != 255 && p.voice_index as usize >= self.voices.len() {
                 return Err(CodecError::Index);
             }
+        }
+        self.encode_compatible(output)
+    }
+    pub fn encode_compatible(&self, output: &mut [u8]) -> Result<usize, CodecError> {
+        if self.pieces.len() > 255 || self.voices.len() > 255 || self.metadata.len() > 65535 {
+            return Err(CodecError::Length);
         }
         let n =
             27 + self.pieces.len() * SET_RECORD + self.voices.len() * 128 + self.metadata.len() + 4;

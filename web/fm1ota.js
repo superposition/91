@@ -6,11 +6,13 @@
 // loader. Step 2: the loader reads the whole image and writes it. In both steps
 // the device sends cmd 0x30 read requests on the logical image and we answer.
 
-const HS_QUERY = [0xF0, 0x00, 0x32, 0x45, 0x00, 0x00, 0x00, 0x40, 0x7F, 0xF7];
+import { getCodecs, codecWords } from "./codec-runtime.mjs";
+const otaCall = (op, args = [], blobs = []) => getCodecs().call(op, args, blobs);
+const HS_QUERY = Array.from(otaCall(95, [0]));
 // PERF-1 from 0.16.13 answers the plain query with its model and family only ("FM-1_700": M-UPGRADE 3.11 refuses more
 // than three digits), and the whole identity ("FM-1_7001613") to this one, the handshake with the one-byte body 01
 let HS_FULL = null;
-const UPGRADE = [0xF0, 0x22, 0x24, 0x35, 0x7F, 0xF7];
+const UPGRADE = Array.from(otaCall(95, [2]));
 const MAXDATA = 512;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const IS_OTA = (id) => /^ota-/i.test(id.model);
@@ -19,52 +21,22 @@ const IS_OTA = (id) => /^ota-/i.test(id.model);
 // mismatch (detail: the identity the device reports), badreq
 function fail(code, msg, detail = "") { const e = new Error(msg); e.code = code; e.detail = detail; return e; }
 
-export function pack7(data) {
-  const out = []; let acc = 0, nb = 0;
-  for (const b of data) {
-    acc |= b << nb; nb += 8;
-    while (nb >= 7) { out.push(acc & 0x7F); acc >>>= 7; nb -= 7; }
-  }
-  if (nb) out.push(acc & 0x7F);
-  return out;
+export function pack7(data) { return Array.from(otaCall(72, [], [data]));
 }
 
-export function unpack7(s) {
-  const out = []; let acc = 0, nb = 0;
-  for (const b of s) {
-    acc |= (b & 0x7F) << nb; nb += 7;
-    while (nb >= 8) { out.push(acc & 0xFF); acc >>>= 8; nb -= 8; }
-  }
-  return out;
+export function unpack7(s) { return Array.from(otaCall(73, [1100000], [s]).slice(4));
 }
 
-function response(addr, data, fl = 0) {
-  const len = data.length;
-  const body = [0x00, 0x59, 0x30, (len + 8) & 0xFF, ((len + 8) >> 8) & 0xFF, 0, fl,
-    addr & 0xFF, (addr >>> 8) & 0xFF, (addr >>> 16) & 0xFF, (addr >>> 24) & 0xFF,
-    len & 0xFF, (len >> 8) & 0xFF, 0, ...data];
-  let s = 0;
-  for (let i = 6; i < body.length; i++) s += body[i];
-  body.push(~s & 0xFF);
-  return [0xF0, ...pack7(body), 0xF7];
+function response(addr, data, fl = 0) { return Array.from(otaCall(93, [addr, fl], [data]));
 }
 
 function parseRequest(pkt) {
-  if (pkt[0] !== 0xF0 || pkt[pkt.length - 1] !== 0xF7) return null;
-  const u = unpack7(pkt.slice(1, -1));
-  if (u.length !== 15 || u[0] !== 0 || u[1] !== 0x59 || u[2] !== 0x30) return null;
-  let s = 0;
-  for (let i = 6; i < 14; i++) s += u[i];
-  if ((~s & 0xFF) !== u[14]) return null;
-  return { fl: u[6], addr: (u[7] | (u[8] << 8) | (u[9] << 16) | (u[10] << 24)) >>> 0, len: u[11] | (u[12] << 8) | (u[13] << 16) };
+  try { const v = codecWords(otaCall(94, [0], [pkt])); return {fl: v[0], addr: v[1], len: v[2]}; } catch (_) { return null; }
 }
 
 function parseIdentity(pkt) {
-  const d = unpack7(pkt.slice(1, -1));
-  if (d.length !== 34 || d[0] !== 0 || d[1] !== 0x59 || d[2] !== 0x11) return null;
-  const txt = String.fromCharCode(...d.slice(6, 33)).replace(/\0+$/, "");
-  const m = /^([^_]+)_(\d+)$/.exec(txt);
-  return m ? { text: txt, model: m[1], version: parseInt(m[2], 10) } : null;
+  let txt; try { txt = String.fromCharCode(...otaCall(94, [1], [pkt])).replace(/\0+$/, ""); } catch (_) { return null; }
+  const m = /^([^_]+)_(\d+)$/.exec(txt); return m ? {text: txt, model: m[1], version: parseInt(m[2], 10)} : null;
 }
 
 // one MIDI in/out pair with a SysEx queue
@@ -108,7 +80,7 @@ async function ask(link, query, ms) {
 }
 async function handshake(link, tries = 3) {
   link.drain();
-  if (!HS_FULL) HS_FULL = [0xF0, ...pack7([0, 0x59, 0x11, 1, 0, 0, 1, 0xFE]), 0xF7];
+  if (!HS_FULL) HS_FULL = Array.from(otaCall(95, [1]));
   for (let t = 0; t < tries; t++) {
     const id = await ask(link, HS_QUERY, 1000);
     if (id === null) continue;

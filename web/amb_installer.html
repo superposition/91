@@ -371,7 +371,7 @@ function receiveDevice(ev, session) {
     const d = ev.data;
     idleTouch();
     if (d[0] !== 0xF0 || d[1] !== 0x7D || d[2] !== 0x50) return;
-    if (d[3] === 0x57) { const w = session.waiters.shift(); if (w) w({ kind: d[4], n: d[5] }); }       /* the answer to a voice message */
+    if (d[3] === 0x57) { let v; try { v = codecWords(getCodecs().call(35, [], [d])); } catch (_) { return; } const w = session.waiters.shift(); if (w) w({kind: v[1], n: v[2]}); }       /* the answer to a voice message */
     else if (d[3] === 0x46 && session.onstatus) session.onstatus(d);                                      /* a status frame */
     else if (d[3] === 0x5A && session.onextra) session.onextra(d);                                        /* the slowest chunk of the window, and the histogram of renders */
     else if (d[3] === 0x5B && session.ondiag) session.ondiag(d);                                          /* the diagnostic pieces */
@@ -471,24 +471,8 @@ window.mmReady = 1;
 /* ---- the DX7 voices: .syx files -> a list -> up to 16 sent as the firmware takes them (F0 7D 50 56 slot, 128 bytes, a checksum, F7; 7F alone clears) */
 const nameOf = (a, off) => String.fromCharCode(...Array.from(a.slice(off, off + 10)).map((c) => (c < 32 || c > 126 ? 32 : c))).trimEnd() || "(no name)";
 function parseSyx(buf, file) {
-  const out = [];
-  if (buf.length === 4096) {                                       /* a bank without its envelope */
-    for (let v = 0; v < 32; v++) { const p = buf.slice(v * 128, (v + 1) * 128); out.push({ name: nameOf(p, 118), packed: p, file }); }
-    return out;
-  }
-  for (let i = 0; i < buf.length;) {
-    if (buf[i] !== 0xF0) { i++; continue; }
-    let j = i + 1;
-    while (j < buf.length && buf[j] !== 0xF7) j++;
-    const m = buf.slice(i + 1, j), whole = Array.from(buf.slice(i, j + 1));
-    i = j + 1;
-    if (m.length === 4102 && m[0] === 0x43 && m[2] === 0x09 && m[3] === 0x20 && m[4] === 0x00) {
-      for (let v = 0; v < 32; v++) { const p = m.slice(5 + v * 128, 5 + (v + 1) * 128); out.push({ name: nameOf(p, 118), packed: p, file }); }
-    } else if (m.length === 161 && m[0] === 0x43 && m[2] === 0x00 && m[3] === 0x01 && m[4] === 0x1B) {
-      out.push({ name: nameOf(m.slice(5), 145), single: whole, file });
-    }
-  }
-  return out;
+  const v = codecWords(getCodecs().call(96, [], [buf]));
+  return Array.from({length: v[0]}, (_, i) => { const p = 1 + i * 4, bytes = buf.slice(v[p + 1], v[p + 1] + v[p + 2]); return {name: nameOf(buf, v[p + 3]), ...(v[p] ? {packed: bytes} : {single: Array.from(bytes)}), file}; });
 }
 let voices = [];
 function vrender() {
@@ -517,7 +501,7 @@ $("syxfile").addEventListener("change", async (e) => {
   vrender();
   if (!voices.length) $("vstatus").textContent = t("vnone");
 });
-const vmsg = (slot, p) => { let s = 0; for (const b of p) s += b; return [0xF0, 0x7D, 0x50, 0x56, slot, ...p, (128 - (s & 0x7F)) & 0x7F, 0xF7]; };
+const vmsg = (slot, p) => Array.from(getCodecs().call(24, [3, slot], [p]));
 $("vsend").addEventListener("click", deviceAction(device, async () => {
   const pick = [...$("vlist").querySelectorAll("input:checked")].slice(0, 16).map((b) => voices[+b.dataset.i]);
   let msg = "";
@@ -525,7 +509,7 @@ $("vsend").addEventListener("click", deviceAction(device, async () => {
     const p = await openPort();
     $("vsend").disabled = true;
     let ok = 0, silent = 0;
-    p.out.send([0xF0, 0x7D, 0x50, 0x56, 0x7F, 0xF7]);                                  /* clear, then in order */
+    p.out.send(Array.from(getCodecs().call(24, [4])));                                  /* clear, then in order */
     if (!(await waitAck(2000))) silent++;
     for (let k = 0; k < pick.length; k++) {
       $("vstatus").textContent = t("vsending") + pick[k].name;
@@ -541,7 +525,7 @@ $("vsend").addEventListener("click", deviceAction(device, async () => {
 $("vclear").addEventListener("click", deviceAction(device, async () => {
   try {
     const p = await openPort();
-    p.out.send([0xF0, 0x7D, 0x50, 0x56, 0x7F, 0xF7]);
+    p.out.send(Array.from(getCodecs().call(24, [4])));
     $("vstatus").textContent = (await waitAck(2000)) ? t("vcleared") : t("vnoans");
   } catch (err) { $("vstatus").textContent = err.message; }
 }, (message) => $("vstatus").textContent = message));
@@ -686,11 +670,10 @@ function stRender(w) {
   });
 }
 function onStatus(d) {
-  const raw = unpack7(Array.from(d.slice(4, d.length - 1)));
-  const dv = new DataView(new Uint8Array(raw).buffer);
-  const n = Math.min(FIELDS.length, raw.length >> 2), w = {};
+  let words; try { words = codecWords(getCodecs().call(77, [d[3]], [d])); } catch (_) { return; }
+  const n = Math.min(FIELDS.length, words.length), w = {};
   if (n < 22) return;
-  for (let i = 0; i < n; i++) w[FIELDS[i]] = dv.getUint32(i * 4, true);
+  for (let i = 0; i < n; i++) w[FIELDS[i]] = words[i];
   FIELDS.forEach((f) => { if (w[f] === undefined) w[f] = 0; });
   w.t = Date.now();
   frames.push(w);
@@ -699,21 +682,21 @@ function onStatus(d) {
   stRender(w);
 }
 function onExtra(d) {                       /* the second frame follows its status frame at once: it joins that row */
-  const raw = unpack7(Array.from(d.slice(4, d.length - 1)));
-  const dv = new DataView(new Uint8Array(raw).buffer), w = frames[frames.length - 1];
-  if (!w || raw.length < 20 * 4) return;
-  const n = Math.min(EXTRA.length, raw.length >> 2);
-  EXTRA.forEach((f, i) => { w[f] = i < n ? dv.getUint32(i * 4, true) : 0; });
+  let words; try { words = codecWords(getCodecs().call(77, [d[3]], [d])); } catch (_) { return; }
+  const w = frames[frames.length - 1];
+  if (!w || words.length < 20) return;
+  const n = Math.min(EXTRA.length, words.length);
+  EXTRA.forEach((f, i) => { w[f] = i < n ? words[i] : 0; });
 }
 function onDiag(d) {                        /* the third frame follows the second: it joins the same row */
-  const raw = unpack7(Array.from(d.slice(4, d.length - 1)));
-  const dv = new DataView(new Uint8Array(raw).buffer), w = frames[frames.length - 1];
-  if (!w || raw.length < DIAG.length * 4) return;
-  DIAG.forEach((f, i) => { w[f] = dv.getUint32(i * 4, true); });
+  let words; try { words = codecWords(getCodecs().call(77, [d[3]], [d])); } catch (_) { return; }
+  const w = frames[frames.length - 1];
+  if (!w || words.length < DIAG.length) return;
+  DIAG.forEach((f, i) => { w[f] = words[i]; });
 }
 async function stStop() {
   clearInterval(stTimer); stTimer = null;
-  if (port) { try { port.out.send([0xF0, 0x7D, 0x50, 0x46, 0x00, 0xF7]); } catch (_) {} port.onstatus = null; port.onextra = null; port.ondiag = null; }
+  if (port) { try { port.out.send(Array.from(getCodecs().call(92, [7, 0]))); } catch (_) {} port.onstatus = null; port.onextra = null; port.ondiag = null; }
   $("stgo").textContent = t("stgo");
 }
 $("stgo").addEventListener("click", async () => {
@@ -724,7 +707,7 @@ $("stgo").addEventListener("click", async () => {
     p.onstatus = onStatus;
     p.onextra = onExtra;
     p.ondiag = onDiag;
-    const arm = () => { try { p.out.send([0xF0, 0x7D, 0x50, 0x46, 0x01, 0xF7]); } catch (_) { stStop(); } };
+    const arm = () => { try { p.out.send(Array.from(getCodecs().call(92, [7, 1]))); } catch (_) { stStop(); } };
     arm();
     stTimer = setInterval(arm, 3000);
     $("stgo").textContent = t("ststop");
@@ -835,16 +818,16 @@ const sayF = (k) => { $("fsstatus").textContent = t(k); };
 function readHead() {                                             /* one status frame: { head, chip }, or null */
   return new Promise(async (res) => {
     let p, tm;
-    const done = (r) => { clearTimeout(tm); if (p) { try { p.out.send([0xF0, 0x7D, 0x50, 0x46, 0x00, 0xF7]); } catch (_) {} p.onstatus = null; } res(r); };
+    const done = (r) => { clearTimeout(tm); if (p) { try { p.out.send(Array.from(getCodecs().call(92, [7, 0]))); } catch (_) {} p.onstatus = null; } res(r); };
     try { p = await openPort(); } catch (e) { $("fsstatus").textContent = e.message; res(undefined); return; }
     tm = setTimeout(() => done(null), 3000);
     p.onstatus = (d) => {
-      const raw = unpack7(Array.from(d.slice(4, d.length - 1)));
-      if (raw.length < 4 * 11) return;
-      const w = new DataView(new Uint8Array(raw).buffer).getUint32(40, true);   /* word 10: the shed word */
+      let words; try { words = codecWords(getCodecs().call(77, [d[3]], [d])); } catch (_) { return; }
+      if (words.length < 11) return;
+      const w = words[10];   /* word 10: the shed word */
       done({ head: (w >>> 15) & 3, chip: (w >>> 12) & 3 });
     };
-    p.out.send([0xF0, 0x7D, 0x50, 0x46, 0x01, 0xF7]);
+    p.out.send(Array.from(getCodecs().call(92, [7, 1])));
   });
 }
 let fsV15 = null;

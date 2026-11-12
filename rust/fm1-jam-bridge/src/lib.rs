@@ -15,6 +15,7 @@ mod fm6;
 mod formats;
 mod handoff;
 mod melodic;
+mod object_formats;
 mod sequencer;
 mod transport;
 mod voice_config;

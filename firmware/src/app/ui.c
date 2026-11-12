@@ -7345,11 +7345,16 @@ static void voices_save(void)
 {
     vox_t x;
     int i, n = en_user_count();
+#if !EN_RUST_FORMATS
     memset(&x, 0, sizeof x);
     x.magic = VOX_MAGIC;
     x.n = (uint32_t)n;
+#endif
     for (i = 0; i < n; i++)
         memcpy(x.v[i], en_user_get(i), 128);
+#if EN_RUST_FORMATS
+    if(fm1_rust_formats_voices(&x.v[0][0],(uint32_t)n,(uint8_t*)&x,sizeof x)!=(int32_t)sizeof x) return;
+#endif
     plat_store_save(OBJ_VOICES, &x, sizeof x);
 }
 static void voices_load(void)
@@ -7459,11 +7464,20 @@ static void settings_save(void)
     s.gx_pat = ui.gx_pat;
     s.usb = (uint16_t)(ui.usb_fixed | (!ui.fm_dy) << 1 | ui.scan << 2 |   /* (bit 1: the DX set chosen; DY is the default since 0.14.21, so older settings read as DY) */ (ui.dj_rounds & 7) << 3 | (ui.dj_ramp & 7) << 6 | (ui.intro & 7) << 9 | (ui.midi_map & 7) << 12 | (ui.min_pads == 1) << 15);
     s.viz = (uint8_t)((ui.viz >= VZ_TRIP ? 7u : ui.viz) | (ui.min_pads == 2) << 3 | (ui.cc_mode & 3) << 4 | (ui.min_pads == 3) << 6 | ui.centre_imp << 7);   /* (bits 3-6 free before 0.15.22: older records read 0) */
+#if EN_RUST_FORMATS
+    { uint8_t raw[sizeof s];
+      if(fm1_rust_formats_settings(s.fxs,EN_NFXS,s.uiv,&s.gx_preset,s.gx_pat,s.usb,raw,sizeof raw)!=(int32_t)sizeof raw) return;
+      if (plat_store_save(OBJ_SET, raw, sizeof raw) == 0) {
+#else
     if (plat_store_save(OBJ_SET, &s, sizeof s) == 0) {
+#endif
         set_disk = s;
         set_have = 1;
         ui.set_lazy = 0;
     }
+#if EN_RUST_FORMATS
+    }
+#endif
 }
 static void settings_load(void)
 {

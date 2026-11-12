@@ -6,10 +6,12 @@
 pub mod containers;
 pub mod device_wire;
 pub mod jam;
+pub mod objects;
 pub mod package;
 pub mod session;
 pub mod storage;
 pub mod voice;
+pub mod voice_file;
 pub mod wire;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

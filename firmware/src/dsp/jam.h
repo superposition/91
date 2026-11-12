@@ -29,9 +29,14 @@ static inline const uint8_t *jp_node(const uint8_t *p,unsigned n) {return p+(n<1
 static inline unsigned jp_u16(const uint8_t *p) { return p[0] | (unsigned)p[1] << 8; }
 static inline uint32_t jp_crc(const uint8_t *p, unsigned n)
 {
+#if EN_RUST_FORMATS
+    extern uint32_t fm1_rust_formats_crc32(const uint8_t*,uint32_t);
+    return fm1_rust_formats_crc32(p,n);
+#else
     uint32_t c = ~0u; unsigned i;
     while (n--) { c ^= *p++; for (i=0;i<8;i++) c = (c >> 1) ^ (0xedb88320u & (0u-(c&1u))); }
     return ~c;
+#endif
 }
 #if EN_RUST_JAM
 extern int32_t fm1_rust_jam_validate(const uint8_t *, uint32_t);
