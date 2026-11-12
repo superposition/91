@@ -2,11 +2,41 @@
   "scope": "foreground UI storage Busy retries and detach guard",
   "toolchain": "Rust 1.94.1; GCC 11 native",
   "command": "sh tests/rust_ui_busy.sh",
-  "execution": {"actual_complete_ui_c0": "passed", "actual_complete_ui_all_rust": "passed", "actual_query_combinations": 1024},
-  "checks": ["denied init preserves semantic UI, remote, restore, pixels and saved state", "settings/voices/map Busy loads preserve state", "input and default writeback wait for reads", "admission and backend denial retain dirty RAM and saved bytes", "restore and forced flush retain same source until retry", "genre denial precedes all musical actions", "set-list captures slot and entry before retry", "all successful admissions are balanced"],
+  "execution": {
+    "actual_complete_ui_c0": "passed",
+    "actual_complete_ui_all_rust": "passed",
+    "actual_query_combinations": 1024
+  },
+  "checks": [
+    "denied init preserves semantic UI, remote, restore, pixels and saved state",
+    "settings/voices/map Busy loads preserve state",
+    "input and default writeback wait for reads",
+    "admission and backend denial retain dirty RAM and saved bytes",
+    "restore and forced flush retain same source until retry",
+    "genre denial precedes all musical actions",
+    "set-list captures slot and entry before retry",
+    "all successful admissions are balanced"
+  ],
   "persistent_retry_bytes": 3,
   "added_storage_payloads": 0,
   "hardware_validation": "not performed",
-  "healthy_native_wasm_regression": "separate qualification follows this checkpoint",
-  "controller_migration": "in progress"
+  "healthy_native_wasm_regression": {
+    "native": {
+      "scenarios": 97,
+      "artifacts": 538,
+      "pngs": 238,
+      "fresh_process_repeats": 3,
+      "status": "exact five-way; preserved original failed-assertion fingerprints"
+    },
+    "wasm": {
+      "status": "all strict emulator scenarios and HTTP fallback passed",
+      "public_exports": 24,
+      "memory_bytes": 33554432,
+      "application_rejections": 0,
+      "bytes": 2348545,
+      "sha256": "a97b0098b7a63b7c1f691a95611cb3162e8cec5aa49ba73f672939600f4610c2"
+    }
+  },
+  "controller_migration": "in progress",
+  "qualified_commit": "6484aa2"
 }
