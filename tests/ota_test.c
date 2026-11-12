@@ -25,6 +25,7 @@ static int committed;
 static uint8_t committed_parm[112];
 static int32_t last_code;
 static uint8_t *corrupt_at;              /* flip a served byte (loader body) */
+static uint8_t last_sent_message[64];    /* observe the transmitted bytes, not an encoder's private scratch */
 
 static uint32_t pack7(const uint8_t *in, uint32_t n, uint8_t *out)
 {
@@ -62,6 +63,7 @@ static int ota_wire_send(const uint8_t *p, uint32_t n)
     uint32_t d, addr, len, i, s = 0;
     if (p[0] != 0xF0 || p[n - 1] != 0xF7) { printf("bad wire framing\n"); exit(1); }
     d = unpack7h(p + 1, n - 2, u);
+    memcpy(last_sent_message,u,d);
     if (u[2] == 0x11) { ident_replies++; return 0; }
     if (d != 15 || u[2] != 0x30) { printf("unexpected device msg cmd %02x len %u\n", u[2], d); exit(1); }
     addr = u[7] | u[8] << 8 | u[9] << 16 | (uint32_t)u[10] << 24;
@@ -220,8 +222,8 @@ int main(int argc, char **argv)
         ota_service();
         bad += check("handshake answered", ident_replies == 1);
         bad += check("the plain query gets the model and family only (M-UPGRADE 3.11 takes NAME_ + 1-3 digits)",
-                     ota_msg[2] == 0x11 && !memcmp(ota_msg + 6, FELUCCA_ID, 8) && ota_msg[6 + 8] == 0 &&
-                     ota_msg[6 + 4] == '_');
+                     last_sent_message[2] == 0x11 && !memcmp(last_sent_message + 6, FELUCCA_ID, 8) && last_sent_message[6 + 8] == 0 &&
+                     last_sent_message[6 + 4] == '_');
     }
     reset_dev();
     {
@@ -230,8 +232,8 @@ int main(int argc, char **argv)
         ota_service();
         bad += check("asked with 01: answered", ident_replies == 1);
         bad += check("asked with 01: the whole identity " FELUCCA_ID,
-                     ota_msg[2] == 0x11 && !memcmp(ota_msg + 6, FELUCCA_ID, sizeof FELUCCA_ID - 1) &&
-                     ota_msg[6 + sizeof FELUCCA_ID - 1] == 0);
+                     last_sent_message[2] == 0x11 && !memcmp(last_sent_message + 6, FELUCCA_ID, sizeof FELUCCA_ID - 1) &&
+                     last_sent_message[6 + sizeof FELUCCA_ID - 1] == 0);
     }
 
     /* full session */
