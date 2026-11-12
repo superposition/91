@@ -2,6 +2,12 @@
 /* The instrument (amb.h). One compilation unit, -O2. */
 #include "amb.h"
 #include "fastmath.h"
+#if EN_RUST_MELODIC
+#include "rust_melodic.h"
+#endif
+#if EN_RUST_EFFECTS
+#include "rust_effects.h"
+#endif
 #if EN_RUST_SCHEDULER
 #include "rust_sequencer.h"
 #endif
@@ -33,16 +39,25 @@ static int jp_dx(void) {return en_jam_on && jp_v2(jp_data);}
 volatile uint8_t en_jam_on,en_jam_bar,en_jam_beat,en_jam_section,en_jam_pending,en_jam_length=16;
 volatile uint32_t en_jam_revision;
 
+#if !EN_RUST_FACTORY
 const char *const EN_NOTE_NAME[12] = {"C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"};
+#endif
+#if !EN_RUST_FACTORY
 const char *const EN_MODE_NAME[EN_NMODES] = {"Ionian", "Dorian", "Phrygian", "Lydian", "Mixolyd.", "Aeolian",
                                              "Pent maj", "Pent min"};
+#endif
 #define B(a, b, c, d, e, f, g) (1u << (a) | 1u << (b) | 1u << (c) | 1u << (d) | 1u << (e) | 1u << (f) | 1u << (g))
+#if !EN_RUST_FACTORY
 const uint16_t EN_MODE_POOL[EN_NMODES] = {
     B(0, 2, 4, 5, 7, 9, 11), B(0, 2, 3, 5, 7, 9, 10), B(0, 1, 3, 5, 7, 8, 10), B(0, 2, 4, 6, 7, 9, 11),
     B(0, 2, 4, 5, 7, 9, 10), B(0, 2, 3, 5, 7, 8, 10), B(0, 2, 4, 7, 9, 9, 9),  B(0, 3, 5, 7, 10, 10, 10)};
+#endif
 #undef B
+#if !EN_RUST_FACTORY
 const char *const EN_LANE_NAME[EN_NLANE] = {"Kick", "Snare", "Clap", "Hat", "Open hat", "Perc"};
+#endif
 
+#if !EN_RUST_FACTORY
 static const en_param_t PARAMS[P_NPARAMS] = {
     [P_PAD] = {"Pad", 0, 100, 45},          [P_ACID] = {"Acid", 0, 100, 55},       [P_BASS] = {"Bass", 0, 100, 65},
     [P_PULSE] = {"Drums", 0, 100, 75},      [P_NOISE] = {"Vinyl", 0, 100, 20},
@@ -115,6 +130,7 @@ static const en_param_t PARAMS[P_NPARAMS] = {
     [P_AC_LOCK] = {"Frozen", 0, 1, 0},
     [P_BL_MODE] = {"Mode", 0, EN_BL_STEPS, 0},       [P_BL_LEN] = {"Length", 0, 100, 50},  [P_BL_MOVE] = {"Move", 0, 100, 30},  [P_BL_GLIDE] = {"Glide", 0, 100, 0},
 };
+#endif
 const en_param_t *en_param_info(int i) { return (i >= 0 && i < P_NPARAMS) ? &PARAMS[i] : &PARAMS[0]; }
 int en_par_global(int p) { return p == P_TUNE || p == P_MIDI || p == P_THEME; }
 int en_par_sticky(int p) { return en_par_global(p); }   /* (0.16.28: the drum drift is the piece's, no longer the player's) */
@@ -125,7 +141,9 @@ volatile uint16_t en_pats[EN_NPAT][EN_NLANE];
 volatile uint8_t en_mod[EN_NLANE][16];          /* a piece's step tricks, a byte a lane step: ratchet (bits 0-2), push (3-5), level (6-7); 0: none (the UI edits) */
 
 #define EN_NBLFIG 9                             /* the bass line's figures by name (modes 7 ..; the table BL_FIG is with the bass line) */
+#if !EN_RUST_FACTORY
 static const char *const BL_FIG_NAME[EN_NBLFIG] = {"Octaves", "Two-step", "One-drop", "Log drum", "Skippy", "Funk", "Big beat", "Dub", "Gallop"};
+#endif
 
 /* the library columns' piece macros (base recipes only; GEN_OVR in the NAIWAN block expands its own kits) */
 #define LV(l) P_LANE_LVL(l)
@@ -252,7 +270,13 @@ static void x_pats(int g, int i, uint16_t pats[EN_NPAT][EN_NLANE])
  * root / mode rows; GEN_OVR is its own P_* answer on top of the donor's recipe; GEN_PLUCK its five pluck
  * sounds. Adding a genre means one row in each of these tables, nothing else. */
 static const uint8_t GEN_DONOR[EN_NGENRE] = {10, 11, 6, 7, 10, 11, 15, 13, 15, 14, 6, 14, 10, 13, 15, 12, 12, 7, 17};
-static int gx(int g) { return GEN_DONOR[(unsigned)g < EN_NGENRE ? g : 0]; }   /* a genre's donor column */
+static int gx(int g) {
+#if EN_RUST_FACTORY
+    return fm1_rust_factory_donor((unsigned)g < EN_NGENRE ? g : 0);
+#else
+ return GEN_DONOR[(unsigned)g < EN_NGENRE ? g : 0];
+#endif
+}   /* a genre's donor column */
 static const int16_t GO_CITYPOP[] = {P_CH_LOOP,2,P_SWING,22,P_BASS,78,P_BL_MODE,6,P_BL_LEN,32,P_BL_MOVE,18,P_PAD,52,P_PADTONE,6,P_ACID,30,P_AC_DENS,35,P_AC_LEN,16,P_PL_CHO,55,P_ECHO,28,P_REVERB,40,P_SIZE,62,P_RV_TYPE,0,P_MC_RATIO,3,P_MC_THR,46,P_MC_MAKE,32,P_KIT_KICK,4,P_KIT_SNARE,4,P_KIT_HAT,4,P_KIT_PERC,4, -1};
 static const int16_t GO_SUNSET[] = {P_SWING,24,P_BASS,80,P_ACID,35,P_AC_DENS,45,P_GHOST,60,P_HUMAN,25,P_PL_CHO,50,P_ECHO,30,P_REVERB,34,P_SIZE,58,P_KIT_KICK,4,P_KIT_SNARE,4,P_KIT_HAT,4,P_KIT_PERC,4, -1};
 static const int16_t GO_AOR[] = {P_SWING,16,P_DRIVE,30,P_BASS,72,P_ACID,30,P_AC_DENS,40,P_PAD,48,P_REVERB,42,P_SIZE,66,P_RV_TYPE,0,P_KIT_KICK,4,P_KIT_SNARE,4,P_KIT_HAT,4,P_KIT_PERC,4, -1};
@@ -315,6 +339,7 @@ static const uint8_t GEN_PLUCK[EN_NGENRE][5] = {
     {13, 12, 22, 15, 26},
     {18, 26, 12, 25, 30},
 };
+#if !EN_RUST_FACTORY
 static const char *const GEN_PIECE_NAME[EN_NGENRE][EN_NPIECES] = {
     {"C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10"},   /* CITYPOP */
     {"S01", "S02", "S03", "S04", "S05", "S06", "S07", "S08", "S09", "S10"},   /* SUNSET */
@@ -336,7 +361,10 @@ static const char *const GEN_PIECE_NAME[EN_NGENRE][EN_NPIECES] = {
     {"D01", "D02", "D03", "D04", "D05", "D06", "D07", "D08", "D09", "D10"},   /* SEASIDE */
     {"Z01", "Z02", "Z03", "Z04", "Z05", "Z06", "Z07", "Z08", "Z09", "Z10"},   /* SANDS */
 };
+#endif
+#if !EN_RUST_FACTORY
 static const char *const GENRE_NAME[EN_NGENRE] = {"CITYPOP", "SUNSET", "AOR", "SHIBUYA", "BOOGIE", "YACHT", "TAPE", "NEON", "KAYO", "LOUNGE", "SURF", "BALEAR", "TROPIC", "SUMMER", "MARINA", "CALYPSO", "ISLAND", "SEASIDE", "SANDS"};
+#endif
 
 /* Each genre's palette of sounds, five of the pad, drone, acid and pluck (the pluck's from the plain sounds and the DX voices) and three of each drum's kit: a piece takes one of each by its number, with a
  * different stride for each (1, 2, 3, 4 of five; 1, 2 of three), so the pieces of a genre differ in sound as well as in key and tempo, and no two
@@ -403,6 +431,13 @@ static void naiwan_prog(int which);
 static int8_t naiwan_pending = -1;      /* which loop the next chord change applies */   /* NAIWAN 91: a piece's hand-set progression (defined below) */
 void en_piece_g(int g, int i, int16_t *par, uint16_t *pool)
 {
+#if EN_RUST_FACTORY
+    g = (unsigned)g < EN_NGENRE ? g : 0;
+    i = (unsigned)i < EN_NPIECES ? i : 0;
+    fm1_rust_factory_piece(g,i,par,P_NPARAMS,pool);
+    if(g==0) naiwan_pending=(int8_t)i;
+#else
+
     int p;
     const int16_t *c;
     i = (unsigned)i < EN_NPIECES ? i : 0;
@@ -509,21 +544,35 @@ void en_piece_g(int g, int i, int16_t *par, uint16_t *pool)
         par[P_BASSOCT] = -1;
     }
     *pool = EN_MODE_POOL[par[P_MODE]];
+
+#endif
 }
 const char *en_genre_name(int g) { return GENRE_NAME[(unsigned)g < EN_NGENRE ? g : 0]; }
 int en_genre_donor(int g) { return gx(g); }
 const char *en_piece_name_g(int g, int i)
 {
+#if EN_RUST_FACTORY
+    return (const char*)fm1_rust_factory_name(25,((unsigned)g<EN_NGENRE?g:0)*10+((unsigned)i<EN_NPIECES?i:0));
+#else
+
     i = (unsigned)i < EN_NPIECES ? i : 0;
     return GEN_PIECE_NAME[(unsigned)g < EN_NGENRE ? g : 0][i];
+
+#endif
 }
 const char *en_piece_name(int i) { return en_piece_name_g(0, i); }
 
 void en_piece(int i, int16_t *par, uint16_t *pool) { en_piece_g(0, i, par, pool); }
 void en_piece_pats_g(int g, int i, uint16_t pats[EN_NPAT][EN_NLANE])
 {
+#if EN_RUST_FACTORY
+    fm1_rust_factory_bank((unsigned)g<EN_NGENRE?g:0,(unsigned)i<EN_NPIECES?i:0,0,(uint8_t*)pats,72);
+#else
+
     i = (unsigned)i < EN_NPIECES ? i : 0;
     x_pats(gx(g) - 4, i, pats);             /* the library column */
+
+#endif
 }
 void en_piece_pats(int i, uint16_t pats[EN_NPAT][EN_NLANE]) { en_piece_pats_g(0, i, pats); }
 /* A genre's factory step tricks (en_mod; the same for each of its pieces): the feel a genre has that a grid of hits cannot say. Byte: ratchet | push << 3 | level << 6.
@@ -531,6 +580,10 @@ void en_piece_pats(int i, uint16_t pats[EN_NPAT][EN_NLANE]) { en_piece_pats_g(0,
  * on the hat's last beat. The other genres are as the pattern says. A trick on a step with no hit does nothing. */
 void en_piece_mods_g(int g, int i, uint8_t mod[EN_NLANE][16])
 {
+#if EN_RUST_FACTORY
+    fm1_rust_factory_bank((unsigned)g<EN_NGENRE?g:0,(unsigned)i<EN_NPIECES?i:0,1,&mod[0][0],96);
+#else
+
     int s, l;
     g = gx(g);                                  /* the donor's feel */
     for (l = 0; l < EN_NLANE; l++)
@@ -583,34 +636,60 @@ void en_piece_mods_g(int g, int i, uint8_t mod[EN_NLANE][16])
         mod[3][ROLL[a][0]] = (uint8_t)(mod[3][ROLL[a][0]] & ~7u) | ROLL[a][1];
         mod[3][ROLL[b][0]] = (uint8_t)(mod[3][ROLL[b][0]] & ~7u) | ROLL[b][1];
     }
+
+#endif
 }
 
+#if !EN_RUST_FACTORY
 static const char *const ETIME_NAME[6] = {"1/8", "3/16", "1/4", "1/4.", "1/2", "1 bar"};
+#endif
 static const float ETIME_BEATS[6] = {0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 4.0f};
 /* the LFOs' rates (0.15.13: 1/8, 1/8T, 1/16, 1/16T appended for the dubstep wobble; the stored values never renumbered) */
 #define NLFO_RATE 12
+#if !EN_RUST_FACTORY
 static const char *const LFO_RATE_NAME[NLFO_RATE] = {"1/4", "1/2", "1 bar", "2 bars", "4 bars", "8 bars", "16 bars", "32 bars", "1/8", "1/8T", "1/16", "1/16T"};
+#endif
 static const float LFO_RATE_BEATS[NLFO_RATE] = {1.0f, 2.0f, 4.0f, 8.0f, 16.0f, 32.0f, 64.0f, 128.0f, 0.5f, 1.0f / 3.0f, 0.25f, 1.0f / 6.0f};
+#if !EN_RUST_FACTORY
 static const char *const LFO_SHAPE_NAME[6] = {"Sine", "Triangle", "Saw", "Square", "S&H", "Drift"};
-static const char *const PAD_DEST_NAME[8] = {"Filter", "Level", "Pan", "Pitch", "Acid cut", "Acid reso", "Echo time", "Punch cut"};   /* (4-7: 0.16.4, the LFO on other voices and effects) */
+#endif
+#if !EN_RUST_FACTORY
+static const char *const PAD_DEST_NAME[8] = {"Filter", "Level", "Pan", "Pitch", "Acid cut", "Acid reso", "Echo time", "Punch cut"};
+#endif   /* (4-7: 0.16.4, the LFO on other voices and effects) */
+#if !EN_RUST_FACTORY
 static const char *const DRONE_DEST_NAME[8] = {"Cutoff", "Pitch", "Level", "Drive", "Reso", "Acid cut", "Acid reso", "Echo time"};
-static const char *const NOISE_NAME[8] = {"Mint", "Clean", "Light", "Used", "Worn", "Scratched", "Dusty", "Trashed"};   /* the vinyl's wear */
+#endif
+#if !EN_RUST_FACTORY
+static const char *const NOISE_NAME[8] = {"Mint", "Clean", "Light", "Used", "Worn", "Scratched", "Dusty", "Trashed"};
+#endif   /* the vinyl's wear */
+#if !EN_RUST_FACTORY
 static const char *const TRIG_NAME[6] = {"Chord", "1 bar", "2 bars", "4 bars", "8 bars", "Off"};
+#endif
+#if !EN_RUST_FACTORY
 static const char *const THEME_NAME[EN_NTHEME] = {"Beach", "Synth", "Acid", "Ice", "Ember", "Phosphor"};
+#endif
 /* the voice bank: what each voice can play (the sounds themselves: PAD_SOUND, DRONE_SOUND, ACID_SOUND, and
  * the kits: the old styles' drums) */
+#if !EN_RUST_FACTORY
 const char *const EN_PAD_SOUND[EN_NSOUND] = {"Rhodes", "Voices", "Strings", "Glass", "Organ", "Warm", "Stabs", "Dark",
                                              "Dub", "Trance", "Poly", "Hollow", "Pings", "Hits", "Rave", "Sine",
                                              "Ooh", "Wurli", "Mallet", "Brass", "Fat", "Pluck", "Chapel", "Air"};
+#endif
+#if !EN_RUST_FACTORY
 const char *const EN_DRONE_SOUND[EN_NSOUND] = {"Saws", "Warm", "Grit", "Dirty", "Reese", "Pulse", "FM", "Organ",
                                                "Rumble", "Sub", "Square", "Hoover", "Fifths", "Metal", "Sync", "Bright",
                                                "Wub", "Bite", "Tine", "Clang", "Gnarl", "Wide", "Power", "Air"};
+#endif
+#if !EN_RUST_FACTORY
 const char *const EN_ACID_SOUND[EN_NACID] = {"Saw", "Square", "Driven", "Sync", "Pluck", "PWM", "Chip", "Sub",
                                               "Trance", "Bleep", "Fifth", "Bell", "Organ", "Laser", "Fold", "Soft",
                                               "Marimba", "E.Piano", "Kalimba", "Brass", "Gong", "Clav", "Vibes", "Digital",
                                               "Super", "CZ", "Mini", "Hyper", "CZ Pulse", "CZ Bell", "Lead"};
+#endif
+#if !EN_RUST_FACTORY
 const char *const EN_KIT_NAME[EN_NKIT] = {"Hypno", "House", "Techno", "Acid", "Break", "Minimal", "Hard", "808", "Dusty", "Heavy",
                                                    "909", "Electro", "DnB", "Trap"};
+#endif
 
 /* the envelopes' times, from their knobs (0..100), in seconds */
 static float pe_atk_s(int v) { return 0.05f * fm_exp2f((float)v * 0.0764f); }        /* 0.05 .. 10 s */
@@ -863,7 +942,9 @@ int en_scale(uint32_t pool, int *steps)
     return m;
 }
 
+#if !EN_RUST_FACTORY
 const char *const EN_CHORD_NAME[EN_NCHORD] = {"Auto", "Triads", "7ths", "9ths", "Sus", "Dub", "Fourths", "11ths"};
+#endif
 
 int en_chord_kind(uint32_t pool, int root, int deg, int kind, int *pcs)
 {
@@ -1164,7 +1245,9 @@ void en_test_reseed(uint32_t s)                 /* the host tests: a block's ran
  * each drum lane's channel and note (kick, snare, clap, closed hat, open hat, perc). Channels count from 0. */
 #define MAP_OFF 0xFFu
 typedef struct { uint8_t ch[4]; int8_t tr[4]; uint8_t dch[EN_NDRUM], dn[EN_NDRUM]; } midimap_t;
+#if !EN_RUST_FACTORY
 const char *const EN_MAP_NAME[EN_NMAP] = {"GM", "M:Samples", "MPC Sample", "SP-404"};
+#endif
 static const midimap_t MAPS[EN_NMAP] = {
     {{0, 1, 2, 3}, {0, 0, 0, 0}, {9, 9, 9, 9, 9, 9}, {36, 38, 39, 42, 46, 37}},
     /* Model:Samples (manual OS 1.13, 7.5): its six tracks on channels 1-6, the drums one a track at note 36 (the sample's own pitch: 12-60 is -24..+24);
@@ -1847,6 +1930,27 @@ static uint32_t ac_loop;                        /* the times round the line */
 static uint32_t ac_bar0, ac_loop0;               /* the bar and the loop the answer's counting starts from (the beginning of the next bar, of the next loop, after its settings change) */
 static uint8_t ac_resync_bar, ac_resync_loop;
 volatile uint8_t en_acid_ans;                   /* the answer sounding now, for the screen */
+
+#if EN_RUST_MELODIC
+static float evolve; /* render control value declared with the harmony state below */
+static void melodic_harmony(fm1_harmony_t *h,uint32_t held)
+{
+    unsigned i;for(i=0;i<12;i++)h->steps[i]=steps[i];for(i=0;i<4;i++)h->pcs[i]=chord_pcs[i];
+    h->nsteps=nsteps;h->chord_count=chord_nt;h->degree=deg;h->root=par[P_ROOT];h->song_octave=par[P_OCT];h->pool=pool;h->pedal=held;
+}
+static void melodic_acid_get(fm1_acid_t *s,fm1_acid_config_t *c)
+{
+    unsigned i;for(i=0;i<16;i++){s->offsets[i]=ac_off[i];s->octaves[i]=ac_oct[i];}
+    s->gate=ac_gate;s->accent=ac_accent;s->slide=ac_slide;s->position=ac_pos;s->loops=ac_loop;s->origin=ac_loop0;s->resync=ac_resync_loop;s->answer=ac_ans_loop;
+    *c=(fm1_acid_config_t){par[P_AC_LEN],par[P_AC_DENS],par[P_AC_RANGE],par[P_AC_SLIDE],par[P_AC_MUT],par[P_AC_CHG],par[P_AC_LOCK],par[P_AC_CHANCE],par[P_AC_RESP],par[P_AC_EVERY],par[P_DD_CHANGE],par[P_AC_OCT],par[P_AC_MAN],evolve};
+}
+static void melodic_acid_put(const fm1_acid_t *s)
+{
+    unsigned i;for(i=0;i<16;i++){ac_off[i]=s->offsets[i];ac_oct[i]=s->octaves[i];}
+    ac_gate=(uint16_t)s->gate;ac_accent=(uint16_t)s->accent;ac_slide=(uint16_t)s->slide;ac_pos=s->position;ac_loop=s->loops;ac_loop0=s->origin;ac_resync_loop=(uint8_t)s->resync;ac_ans_loop=(uint8_t)s->answer;
+}
+#endif
+
 static int acid_raw(int s, int dd)              /* step s's note, the chord's degree moved dd degrees, in the register (no answer) */
 {
     int d = deg + ac_off[s] + dd, o, n;
@@ -1874,6 +1978,9 @@ static int ac_centre(void)                      /* the middle of the line's note
  * next note of the scale up, the fifth, takes its place. Minor chords keep their sixths and seconds (the acid's dark colours). */
 static int avoid_fix(int n)
 {
+#if EN_RUST_MELODIC
+fm1_harmony_t h;melodic_harmony(&h,0);return fm1_rust_melodic_avoid(n,&h);
+#else
     int k, maj = 0, mnr = 0;
     if (chord_nt < 2)
         return n;
@@ -1883,6 +1990,7 @@ static int avoid_fix(int n)
         mnr |= d == 3;
     }
     return maj && !mnr && ((n - chord_pcs[0]) % 12 + 12) % 12 == 5 && n + 2 <= 96 ? n + 2 : n;
+#endif
 }
 static int acid_note(int s, int v)              /* acid step s's note, as the call (v 0) or as answer v plays it */
 {
@@ -1927,10 +2035,14 @@ static int acid_gate(int st, int len, int v)
 }
 int en_acid_preview(int st, int v)
 {
+#if EN_RUST_MELODIC
+fm1_acid_t s;fm1_acid_config_t c;fm1_harmony_t h;melodic_acid_get(&s,&c);melodic_harmony(&h,0);return fm1_rust_acid_preview(&s,&c,&h,st,v);
+#else
     const int len = par[P_AC_LEN] < 1 ? 1 : par[P_AC_LEN] > EN_NSTEP ? EN_NSTEP : par[P_AC_LEN], n = (unsigned)st < EN_NSTEP ? st : 0;
     if (n >= len || nsteps < 1 || !acid_gate(n, len, v))
         return -1;
     return acid_note(acid_src(n, len, v / 5), v);
+#endif
 }
 
 /* PEDAL (0.16.21, Steven's "harmonic drone followers", issue #3): a voice either follows the chords (as always) or holds the key's root
@@ -2163,6 +2275,12 @@ static uint8_t naiwan_arc, naiwan_left, naiwan_rotate;   /* the arc playing, cho
 
 static void naiwan_prog(int which)
 {
+#if EN_RUST_FACTORY
+    uint8_t b[9];
+    if(!fm1_rust_factory_arc(which,b,sizeof b)) return;
+    en_prog(b); en_prog_kinds(b+6); naiwan_left=8;
+#else
+
     uint8_t b[6] = {0}, kb[3] = {0};
     int s;
     for (s = 0; s < 8; s++) {
@@ -2176,6 +2294,8 @@ static void naiwan_prog(int which)
     en_prog(b);
     en_prog_kinds(kb);                                 /* each slot's own chord type: the turnarounds rely on it */
     naiwan_left = 8;                                 /* eight chords an arc */
+
+#endif
 }
 static void chord_change(void);
 static void prog_take(uint32_t lo, uint32_t hi) /* the progression from the page or the piece (en_prog) */
@@ -2409,6 +2529,12 @@ static void chord_to(int i)                     /* the chord moves to degree i *
 /* ----------------------------------------------------------- the acid line --- */
 int en_acid_pack(uint8_t *b)
 {
+#if EN_RUST_FACTORY
+    uint16_t words[16]; int s;
+    for(s=0;s<16;s++) words[s]=(en_acid_off[s]&15u)|(en_acid_oct[s]&3u)<<4|(en_acid_gate>>s&1u)<<6|(en_acid_acc>>s&1u)<<7|(en_acid_slide>>s&1u)<<8;
+    return fm1_rust_factory_line(0,0,(const uint8_t*)words,sizeof words,b,18);
+#else
+
     uint32_t acc = 0, bits = 0, o = 0;
     int s;
     for (s = 0; s < EN_NSTEP; s++) {
@@ -2423,9 +2549,17 @@ int en_acid_pack(uint8_t *b)
         }
     }
     return (int)o;
+
+#endif
 }
 void en_acid_unpack(const uint8_t *b)
 {
+#if EN_RUST_FACTORY
+    uint16_t words[16]; int s;
+    if(fm1_rust_factory_line(0,1,b,18,(uint8_t*)words,sizeof words)!=32) return;
+    for(s=0;s<16;s++) post(C_ACSTEP,s,words[s]);
+#else
+
     uint32_t acc = 0, bits = 0, i = 0;
     int s;
     for (s = 0; s < EN_NSTEP; s++) {
@@ -2439,6 +2573,8 @@ void en_acid_unpack(const uint8_t *b)
         bits -= 9;
         post(C_ACSTEP, s, (int)((v & 15u) | (v >> 4 & 3u) << 4 | (v >> 6 & 1u) << 6 | (v >> 7 & 1u) << 7 | (v >> 8 & 1u) << 8));
     }
+
+#endif
 }
 void en_acid_step(int s, int off, int oct, int gate, int accent, int slide)
 {
@@ -2452,6 +2588,13 @@ volatile uint8_t en_cm_rung[16], en_cm_lvl[16], en_cm_pos;
 void en_pluck_step(int s, int rung, int level) { post(C_CMSTEP, s & 15, (rung & 15) | (level & 3) << 4); }
 int en_pluck_pack(uint8_t *b)
 {
+#if EN_RUST_FACTORY
+    uint16_t words[16]; int s,any=0;
+    for(s=0;s<16;s++){words[s]=(en_cm_rung[s]&15u)|(en_cm_lvl[s]&3u)<<4;any|=words[s]!=0;}
+    if(fm1_rust_factory_line(1,0,(const uint8_t*)words,sizeof words,b,12)!=12) return 0;
+    return any;
+#else
+
     uint32_t acc = 0, bits = 0, i = 0;
     int s, any = 0;
     for (s = 0; s < 16; s++) {
@@ -2466,9 +2609,17 @@ int en_pluck_pack(uint8_t *b)
         }
     }
     return any;
+
+#endif
 }
 void en_pluck_unpack(const uint8_t *b)
 {
+#if EN_RUST_FACTORY
+    uint16_t words[16]; int s;
+    if(fm1_rust_factory_line(1,1,b,12,(uint8_t*)words,sizeof words)!=32) return;
+    for(s=0;s<16;s++) post(C_CMSTEP,s,words[s]);
+#else
+
     uint32_t acc = 0, bits = 0, i = 0;
     int s;
     for (s = 0; s < 16; s++) {
@@ -2482,9 +2633,14 @@ void en_pluck_unpack(const uint8_t *b)
         bits -= 6;
         post(C_CMSTEP, s, (int)v);
     }
+
+#endif
 }
 static void ac_roll_w(int st, int what)         /* a step made anew: what 0 all of it, 1 the note, 2 the rhythm (whether it sounds), 3 the accent and the slide */
 {
+#if EN_RUST_MELODIC
+fm1_acid_t s;fm1_acid_config_t c;fm1_harmony_t h;melodic_acid_get(&s,&c);melodic_harmony(&h,0);fm1_rust_acid_roll(&s,&c,&h,(uint32_t)st,(uint32_t)what,&rng);melodic_acid_put(&s);
+#else
     float dens = (float)par[P_AC_DENS] * 0.01f;
     uint16_t m = (uint16_t)(1u << st);
     if (what == 0 || what == 2) {
@@ -2507,6 +2663,7 @@ static void ac_roll_w(int st, int what)         /* a step made anew: what 0 all 
         else
             ac_slide &= (uint16_t)~m;
     }
+#endif
 }
 static void ac_roll(int st) { ac_roll_w(st, 0); }
 
@@ -2526,6 +2683,9 @@ static void ac_publish(void)
 }
 static void ac_step_set(int s, int off, int oct, int gate, int accent, int slide)   /* the player's edit of a step */
 {
+#if EN_RUST_MELODIC
+fm1_acid_t state;fm1_acid_config_t c;melodic_acid_get(&state,&c);fm1_rust_acid_edit(&state,(uint32_t)s,off,oct,(uint32_t)gate,(uint32_t)accent,(uint32_t)slide);melodic_acid_put(&state);ac_publish();
+#else
     const uint16_t m = (uint16_t)(1u << s);
     ac_off[s] = (int8_t)off;
     ac_oct[s] = (int8_t)oct;
@@ -2533,10 +2693,14 @@ static void ac_step_set(int s, int off, int oct, int gate, int accent, int slide
     ac_accent = (uint16_t)(accent ? ac_accent | m : ac_accent & ~m);
     ac_slide = (uint16_t)(slide ? ac_slide | m : ac_slide & ~m);
     ac_publish();
+#endif
 }
 
 static void ac_capture(int s, int note, int accent, int slide)   /* Capture: a note played by hand into step s, as the offset and octave nearest it under the chord and scale of now (the line then follows the chords) */
 {
+#if EN_RUST_MELODIC
+fm1_acid_t state;fm1_acid_config_t c;fm1_harmony_t h;int32_t off,oct;melodic_acid_get(&state,&c);melodic_harmony(&h,0);fm1_rust_acid_capture(&c,&h,note,&off,&oct);ac_step_set(s,off,oct,1,accent,slide);
+#else
     int off, oct, bo = 0, bc = 0, best = 999;
     for (oct = 0; oct < 4; oct++)
         for (off = 0; off < 12 && off < 2 * nsteps; off++) {
@@ -2552,18 +2716,26 @@ static void ac_capture(int s, int note, int accent, int slide)   /* Capture: a n
             }
         }
     ac_step_set(s, bo, bc, 1, accent, slide);
+#endif
 }
 
 static void ac_regrow(void)
 {
+#if EN_RUST_MELODIC
+fm1_acid_t s;fm1_acid_config_t c;fm1_harmony_t h;melodic_acid_get(&s,&c);melodic_harmony(&h,0);fm1_rust_acid_regrow(&s,&c,&h,&rng);melodic_acid_put(&s);ac_publish();
+#else
     int st;
     for (st = 0; st < EN_NSTEP; st++)
         ac_roll(st);
     ac_publish();
+#endif
 }
 
 static void ac_mutate(void)                     /* the loop's end: Mutate (a deja-vu knob) re-rolls steps: 0 holds the line, 100 renews it every loop */
 {
+#if EN_RUST_MELODIC
+fm1_acid_t s;fm1_acid_config_t c;fm1_harmony_t h;melodic_acid_get(&s,&c);melodic_harmony(&h,0);fm1_rust_acid_mutate(&s,&c,&h,&rng);melodic_acid_put(&s);ac_publish();
+#else
     if (par[P_AC_LOCK]) {                       /* frozen: the line as it is */
         ac_publish();
         return;
@@ -2575,6 +2747,7 @@ static void ac_mutate(void)                     /* the loop's end: Mutate (a dej
         if (frand() < m)
             ac_roll_w(st, par[P_AC_CHG] > 0 && par[P_AC_CHG] < 4 ? par[P_AC_CHG] : 0);
     ac_publish();
+#endif
 }
 
 /* the acid's note, as the sixteenth chose it, played when its time comes: on the tick, or after the swing and the looseness (ac_wait: samples; the
@@ -2612,6 +2785,20 @@ static void acid_fire(void)
 }
 static void acid_step(int32_t wait)             /* a sixteenth of the acid line (wait: the swing and the looseness, samples) */
 {
+#if EN_RUST_MELODIC
+fm1_acid_t s;fm1_acid_config_t c;fm1_harmony_t h;fm1_acid_note_t result;
+    melodic_acid_get(&s,&c);melodic_harmony(&h,0);
+    fm1_rust_acid_step(&s,&c,&h,ac_ans_bar,ac_fill_bar,acid.play,(uint32_t)(acid.gate_left<0),&result);
+    melodic_acid_put(&s);if(s.position==0 && c.chance)en_acid_ans=(uint8_t)s.answer;en_acid_pos=(uint8_t)result.position;
+    if(result.action==1){
+        if(ac_wait>0){ac_wait=0;acid_fire();}
+        ac_pend.n=result.note;ac_pend.beat=(uint8_t)result.beat;ac_pend.slid_ok=(uint8_t)result.slid_ok;
+        ac_pend.dec=0.06f*fm_exp2f((float)par[P_AC_DEC]*0.05f);ac_pend.acc=(uint8_t)result.accent;
+        ac_pend.hat=(uint8_t)(lk_hat&&links_on());ac_pend.slide=(uint8_t)result.slide;
+        if(wait>0)ac_wait=wait;else acid_fire();
+    }else if(result.action==2){acid.gate_left=0;acid.amp_t=0.0f;}
+    if(fm1_rust_acid_advance(&s,c.length)){melodic_acid_put(&s);ac_mutate();}else melodic_acid_put(&s);
+#else
     const int len = par[P_AC_LEN], st = ac_pos;
     int v, type;
     if (st == 0 && ac_resync_loop) {            /* the answer's settings changed: its count starts at this loop */
@@ -2656,6 +2843,7 @@ static void acid_step(int32_t wait)             /* a sixteenth of the acid line 
         ac_loop++;
         ac_mutate();
     }
+#endif
 }
 
 /* ---------------------------------------------------------------- drums --- */
@@ -2683,6 +2871,9 @@ static uint8_t fill_q, fill_bar, dj_sync, drop_imp;   /* a fill asked for the ne
 enum { SF_ROLL = 1, SF_WOB = 2, SF_HROLL = 4, SF_GAP = 8, SF_PBUILD = 16, SF_PFILL = 32, SF_KDROP = 64 };   /* SF_GAP: the whole mix cut for the build's last beat;
                                                  * SF_PBUILD: the build rolls on the perc, not the snare (genres that don't snare-roll); SF_PFILL: the triplet fill on the perc (garage's rim);
                                                  * SF_KDROP: the kick drops out for the last beat of every 8th bar (techno) */
+#if EN_RUST_MELODIC
+#define SECT FM1_RUST_SECTIONS
+#else
 static const struct { uint8_t kick, hat, build, pad, kret, snare, bass, ft, fl; } SECT[EN_NGENRE] = {
     {1, 0, 4, 90, 1, 0, 0, 0, SF_KDROP}, {0, 0, 2, 60, 0, 0, 0, 0, SF_PBUILD}, {1, 0, 8, 90, 1, 0, 0, 0, SF_GAP}, {0, 0, 8, 80, 0, 0, 0, 8, SF_ROLL | SF_WOB | SF_GAP},
     {1, 1, 4, 40, 0, 1, 1, 0, SF_PBUILD}, {0, 1, 8, 90, 0, 0, 0, 0, SF_ROLL | SF_GAP}, {1, 1, 4, 0, 0, 1, 0, 0, 0}, {0, 0, 4, 80, 0, 0, 0, 0, SF_PFILL},
@@ -2691,12 +2882,17 @@ static const struct { uint8_t kick, hat, build, pad, kret, snare, bass, ft, fl; 
     {0, 1, 4, 50, 1, 0, 0, 0, SF_ROLL | SF_HROLL | SF_GAP},   /* industrial: the hats grind on through the break, the kick back for the build's last bar */
     {0, 0, 8, 90, 0, 0, 0, 0, SF_ROLL | SF_GAP},               /* psy: the break all pad and atmosphere, 8 bars of build, the gap before the drop */
     {0, 1, 4, 70, 1, 0, 0, 0, SF_ROLL | SF_HROLL | SF_GAP}};   /* dark forest: the hats glitch on through the break */
+#endif
 /* (0.15.13, from the genre research: breaks and funk break to the drums alone; house, dubstep, DnB, trap, disco and synthwave cut the mix for the beat
  * before the drop; lofi, dub, reggae, amapiano and trip-hop build on the perc, not with a snare roll; garage's triplet fill is on the rim) */
 /* the fills each genre may use (0.15.13): bit k is fill kind k (0 the ramp, 1-5 FILLS, 6 a triplet roll on the last beat): house and disco ramp and rush,
  * dub and reggae drag and breathe, trap and dubstep roll */
+#if EN_RUST_MELODIC
+#define FILL_OK FM1_RUST_FILL_OK
+#else
 static const uint8_t FILL_OK[EN_NGENRE] = {0x3F, 0x16, 0x07, 0x49, 0x14, 0x7F, 0x7E, 0x5A, 0x3F, 0x64, 0x87, 0x9E, 0x14, 0x87, 0x12, 0x16, 0x70, 0x47, 0x7E};   /* (bit 7: a tom fill, the perc
                                                  * falling: disco, funk, synthwave) */
+#endif
 static uint8_t gap_on;                          /* the drop gap: the mix cut for the build's last beat (SF_GAP) */
 static float gap_g = 1.0f, perc_fall;           /* its gain; a tom fill's pitch, semitones under the perc's */
 static uint8_t grv_bars;                        /* bars of groove since the drop (the time plan) */
@@ -3064,6 +3260,12 @@ static void cm_midi_off(int k)
 }
 static void cm_midi_on(int note, uint32_t vel, int32_t len)
 {
+#if EN_RUST_MELODIC
+const uint32_t plan=fm1_rust_mel_midi_slot(cm_mn,cm_moff,note);int k,slot=(int)(plan>>8);
+    _Static_assert(CM_MN==8,"Rust MIDI gate count");
+    for(k=0;k<CM_MN;k++)if(plan>>k&1u)cm_midi_off(k);
+    cm_mn[slot]=(uint8_t)note;cm_moff[slot]=len;midi(0x91,(uint32_t)note,vel);
+#else
     int k, slot = -1, oldest = -1;
     for (k = 0; k < CM_MN; k++) {
         if (cm_mn[k] == note)
@@ -3082,13 +3284,18 @@ static void cm_midi_on(int note, uint32_t vel, int32_t len)
     cm_mn[slot] = (uint8_t)note;
     cm_moff[slot] = len;
     midi(0x91, (uint32_t)note, vel);
+#endif
 }
 static void cm_midi_step(int32_t k)             /* k samples went by */
 {
+#if EN_RUST_MELODIC
+int i;for(i=0;i<CM_MN;i++)if(fm1_rust_mel_midi_due(cm_mn[i],&cm_moff[i],k))cm_midi_off(i);
+#else
     int i;
     for (i = 0; i < CM_MN; i++)
         if (cm_mn[i] && (cm_moff[i] -= k) <= 0)
             cm_midi_off(i);
+#endif
 }
 static void cm_midi_flush(void)
 {
@@ -3181,14 +3388,24 @@ static const cm_snd_t CM_SOUND[CM_NPLAIN] = {
     {1.0f, 0.0f, 0.0f, 0, 1.15f},    /* Bleep: a plain sine */
     {7.01f, 0.1f, 1.0f, 0, 0.9f},    /* Glass */
 };
+#if EN_RUST_FACTORY
+const char *EN_CM_SOUND[EN_NCMSND];
+#else
 const char *EN_CM_SOUND[EN_NCMSND] = {"Pluck", "Marimba", "E.Piano", "Kalimba", "Bell", "Vibes", "Gong", "Clav", "Digital", "Brass", "Bleep", "Glass",
     "DX Tine EP", "DX Glass Bell", "DX Round Bass", "DX Brass Sect", "DX Soft Pad", "DX Wood Bars", "DX Drawbars", "DX Nylon Pick", "DX Brass 2", "DX Solid Bass", "DX Bells", "DX Marimba", "DX Clavinet", "DX Strings", "DX Glass Pad", "DX Sync Lead", "DX Harp", "DX Kalimba", "DX Flute", "DX Steel Drum", "DX Saw Bass", "DX Tubular", "DX Steel Gtr", "DX Clean Gtr", "DX Muted Gtr", "DX Drive Gtr", "DX Slap Bass", "DX Synth Brass", "DX Sax", "DX Mute Trumpet",
     "(empty)", "(empty)", "(empty)", "(empty)", "(empty)", "(empty)", "(empty)", "(empty)",
     "(empty)", "(empty)", "(empty)", "(empty)", "(empty)", "(empty)", "(empty)", "(empty)"};
+#endif
+#if !EN_RUST_FACTORY
 static const char *const FM_DX_NAME[EN_NFMFACT] = {   /* (the same thirty, to put back when the DY set is switched off: en_fm_set_dy) */
     "DX Tine EP", "DX Glass Bell", "DX Round Bass", "DX Brass Sect", "DX Soft Pad", "DX Wood Bars", "DX Drawbars", "DX Nylon Pick", "DX Brass 2", "DX Solid Bass", "DX Bells", "DX Marimba", "DX Clavinet", "DX Strings", "DX Glass Pad", "DX Sync Lead", "DX Harp", "DX Kalimba", "DX Flute", "DX Steel Drum", "DX Saw Bass", "DX Tubular", "DX Steel Gtr", "DX Clean Gtr", "DX Muted Gtr", "DX Drive Gtr", "DX Slap Bass", "DX Synth Brass", "DX Sax", "DX Mute Trumpet"};
+#endif
+#if !EN_RUST_FACTORY
 const char *const EN_CM_STYLE[EN_NCMSTYLE] = {"Up", "Down", "Up-down", "Random", "Skip", "Thirds"};
-const char *const EN_CM_RATE[4] = {"1/4", "3/16", "1/8", "1/16"};   /* slowest to fastest */
+#endif
+#if !EN_RUST_FACTORY
+const char *const EN_CM_RATE[4] = {"1/4", "3/16", "1/8", "1/16"};
+#endif   /* slowest to fastest */
 static int32_t fm_bend;                          /* a keyboard's bend on the DX pluck, as a Q24 log (fm6's pitch; hb_tick sets it) */
 #include "fm6.inc"
 /* a keyboard's pitch bend and mod wheel (0.15.26: an MPK mini's) on the voice its keys play: the pluck (plain: its phase; DX: fm_bend), the drone, the acid.
@@ -3270,8 +3487,29 @@ static void cm_play(int key, float vg)          /* a note played by hand (the JA
     cm_trigger(note, fm_minf(0.95f * vg, 1.15f));
 }
 
+
+#if EN_RUST_MELODIC
+static void melodic_pluck_get(fm1_pluck_t *s,fm1_pluck_config_t *c)
+{
+    unsigned i;for(i=0;i<32;i++){s->found[i]=cm_f[i];s->gate[i]=cm_g[i];s->index[i]=cm_ix[i];s->velocity[i]=cm_vl[i];}
+    for(i=0;i<16;i++)s->intervals[i]=mo_k[i];
+    s->cursor=cm_i;s->slot=cm_k;s->sync=cm_sync;s->motif=mo_play;s->last=mo_last;s->valid=mo_valid;s->recording=mo_rec;
+    s->on=mo_on;s->inverted=mo_inv;s->alternate=mo_alt;s->restate=mo_restate;s->first=mo_first;s->first_index=mo_idx0;s->previous=mo_prev;
+    *c=(fm1_pluck_config_t){par[P_CM_RATE],par[P_CM_LVL],par[P_CM_MAN],par[P_CM_RANGE],par[P_CM_OCT],par[P_CM_LOOP],par[P_CM_VU],par[P_CM_DENS],par[P_CM_MOTIF],par[P_CM_STYLE],par[P_CM_LEAP],par[P_CM_LOCK]};
+}
+static void melodic_pluck_put(const fm1_pluck_t *s)
+{
+    unsigned i;for(i=0;i<32;i++){cm_f[i]=s->found[i];cm_g[i]=s->gate[i];cm_ix[i]=s->index[i];cm_vl[i]=s->velocity[i];}for(i=0;i<16;i++)mo_k[i]=s->intervals[i];
+    cm_i=s->cursor;cm_k=s->slot;cm_sync=(uint8_t)s->sync;mo_play=(uint16_t)s->motif;mo_last=(int8_t)s->last;mo_valid=(uint8_t)s->valid;mo_rec=(uint8_t)s->recording;
+    mo_on=(uint8_t)s->on;mo_inv=(uint8_t)s->inverted;mo_alt=(uint8_t)s->alternate;mo_restate=(uint8_t)s->restate;mo_first=(uint8_t)s->first;mo_idx0=(uint8_t)s->first_index;mo_prev=(uint8_t)s->previous;
+}
+#endif
+
 static int cm_ladder(int *arp)                  /* the chord's tones over the pluck's octaves, low to high: the ladder a slot's index points into */
 {
+#if EN_RUST_MELODIC
+fm1_pluck_t s;fm1_pluck_config_t c;fm1_harmony_t h;int32_t n;melodic_pluck_get(&s,&c);melodic_harmony(&h,0);fm1_rust_pluck_ladder(&c,&h,arp,&n);return n;
+#else
     const int range = par[P_CM_RANGE] < 1 ? 1 : par[P_CM_RANGE] > 3 ? 3 : par[P_CM_RANGE], base = 60 + 12 * (par[P_OCT] + par[P_CM_OCT]);
     int n = 0, k, o, t;
     for (o = 0; o < range; o++)
@@ -3284,10 +3522,14 @@ static int cm_ladder(int *arp)                  /* the chord's tones over the pl
         arp[o + 1] = t;
     }
     return n;
+#endif
 }
 
 static void cm_capture(int slot, int note)      /* Capture: a note played by hand (or a rest, note < 0) into a slot of the loop, as the nearest rung of the ladder of now, an octave's leap allowed */
 {
+#if EN_RUST_MELODIC
+fm1_pluck_t s;fm1_pluck_config_t c;fm1_harmony_t h;melodic_pluck_get(&s,&c);melodic_harmony(&h,0);fm1_rust_pluck_capture(&s,&c,&h,(uint32_t)slot,note);melodic_pluck_put(&s);
+#else
     int arp[12], n, k, best = 0, leap = 0, bd = 999;
     cm_f[slot] = 1;
     cm_g[slot] = (uint8_t)(note >= 0);
@@ -3308,6 +3550,7 @@ static void cm_capture(int slot, int note)      /* Capture: a note played by han
     }
     cm_ix[slot] = (uint8_t)(best | (leap > 0 ? 32 : leap < 0 ? 64 : 0) | 128);
     cm_vl[slot] = 230;
+#endif
 }
 
 static void cm_publish(void)                    /* the loop's first sixteen slots, for the screen and the record */
@@ -3321,14 +3564,25 @@ static void cm_publish(void)                    /* the loop's first sixteen slot
 }
 static void cm_step_set(int s, int rung, int level)   /* the player's edit of a step */
 {
+#if EN_RUST_MELODIC
+fm1_pluck_t state;fm1_pluck_config_t c;melodic_pluck_get(&state,&c);fm1_rust_pluck_edit(&state,(uint32_t)s,rung,level);melodic_pluck_put(&state);cm_publish();
+#else
     cm_f[s] = 1;
     cm_g[s] = (uint8_t)(level > 0);
     cm_ix[s] = (uint8_t)((rung > 11 ? 11 : rung) | 128);
     cm_vl[s] = (uint8_t)(level <= 1 ? 110 : level == 2 ? 190 : 255);
     cm_publish();
+#endif
 }
 static void cm_step(int st, int32_t sw)         /* a sixteenth of the counter-melody: st its place in the bar, sw the swing's delay (samples) */
 {
+#if EN_RUST_MELODIC
+fm1_pluck_t s;fm1_pluck_config_t c;fm1_harmony_t h;fm1_pluck_note_t result;unsigned i;
+    melodic_pluck_get(&s,&c);melodic_harmony(&h,0);fm1_rust_pluck_step(&s,&c,&h,st,bars,sec,&rng,&result);melodic_pluck_put(&s);
+    if(result.publish)for(i=0;i<16;i++){en_cm_rung[i]=result.rungs[i];en_cm_lvl[i]=result.levels[i];}
+    if(result.slot>=0)en_cm_pos=(uint8_t)result.slot;
+    if(result.fire){if(sw>0){cm_wait=sw;cm_pnote=result.note;cm_pvel=result.velocity;}else cm_trigger(result.note,result.velocity);}
+#else
     static const uint8_t RATE[4] = {4, 3, 2, 1};   /* sixteenths between notes, by the Rate knob */
     const int ri = par[P_CM_RATE] < 0 ? 0 : par[P_CM_RATE] > 3 ? 3 : par[P_CM_RATE];
     int arp[12], n = 0, note, idx, slot, replay, leap = 0;
@@ -3467,6 +3721,7 @@ static void cm_step(int st, int32_t sw)         /* a sixteenth of the counter-me
     } else {
         cm_trigger(note, vel);
     }
+#endif
 }
 
 
@@ -3478,6 +3733,7 @@ static void cm_step(int st, int32_t sw)         /* a sixteenth of the counter-me
  * takes the first again), so a figure of four hits plays the same each bar. Move is how often a note goes up an octave, to the fifth or to the
  * scale note below the root instead. The fifth is the perfect fifth unless the chord has an altered one (bl_fifth; a 9th, Dub or Fourths chord
  * leaves the fifth out of its voicing, and the line used to take the chord's third tone, the seventh, for it). A breakdown plays none. */
+#if !EN_RUST_MELODIC
 static const uint16_t BL_ROOT[EN_NGENRE] = {0x1111, 0x0421, 0x1111, 0x0401, 0x0501, 0x0441, 0x1121, 0x0449, 0x5555, 0x2401, 0x5555, 0x4529, 0x0149, 0x5555, 0x2449, 0x0401, 0x0405, 0xEEEE, 0xEEEE};
 typedef struct { uint16_t mask; int8_t iv[4]; } bl_fig_t;
 static const bl_fig_t BL_RIFF[EN_NGENRE] = {
@@ -3497,6 +3753,7 @@ static const bl_fig_t BL_FIG[EN_NBLFIG] = {      /* the figures by name (the bas
     {0x0501, {0, 0, 7, 5}},                     /* Dub: 1, 3, and-of-3 */
     {0x7777, {0, 0, 0, 12}},                    /* Gallop: three sixteenths a beat, an octave moving through them */
 };
+#endif
 /* THE BASS STEPS (0.16.29, GitHub issue #6): the bass line's mode 16 plays sixteen steps of the player's (the Bass steps page), a byte a step (amb.h
  * EN_BS_*): a rest, a note, an accent (louder, the filter opened by it as a new note), a glide (into it from the note before, legato: no new
  * attack), or both; its note a number of the scale's steps above the chord's root (so the line follows the chords as the acid's steps do) and
@@ -3511,15 +3768,34 @@ static void bs_publish(void)
     for (s = 0; s < 16; s++)
         en_bs[s] = bs[s];
 }
+
+#if EN_RUST_MELODIC
+static void melodic_bass_get(fm1_bass_t *s)
+{
+    unsigned i;for(i=0;i<16;i++){s->steps[i]=bs[i];s->history[i]=bs_hist[i];}s->set=bs_set;s->beat=bl_beat;s->position=en_bs_pos;
+}
+static void melodic_bass_put(const fm1_bass_t *s)
+{
+    unsigned i;for(i=0;i<16;i++){bs[i]=s->steps[i];bs_hist[i]=s->history[i];}bs_set=(uint8_t)s->set;bl_beat=(uint8_t)s->beat;en_bs_pos=(int8_t)s->position;
+}
+#endif
+
 static int bs_semis(int k)                      /* k steps of the scale above the chord's root (the key's, on pedal), in semitones */
 {
+#if EN_RUST_MELODIC
+fm1_harmony_t h;melodic_harmony(&h,pedal);return fm1_rust_bass_semis(k,&h);
+#else
     const int m = nsteps > 0 ? nsteps : 7, d0 = pedal & 1u ? 0 : deg, d = d0 + k;
     return steps[d % m] + 12 * (d / m) - (steps[d0 % m] + 12 * (d0 / m));
+#endif
 }
 void en_bass_step(int s, int v) { post(C_BSSTEP, s & 15, v & 0xFF); }
 void en_bass_capture(void) { post(C_BSSTEP, 0x20, 0); }   /* none set: the bar the line played last (the page opened) */
 static void bs_capture(void)
 {
+#if EN_RUST_MELODIC
+fm1_bass_t s;melodic_bass_get(&s);fm1_rust_bass_capture(&s);melodic_bass_put(&s);bs_publish();
+#else
     int k, v = 0;
     for (k = 0; k < 16; k++)
         v |= bs[k] = bs_hist[k];
@@ -3527,6 +3803,7 @@ static void bs_capture(void)
         bs[0] = 1 | 1 << 6;                     /* (it played none: a root on the one) */
     bs_set = 1;
     bs_publish();
+#endif
 }
 void en_bass_steps_set(const uint8_t *b)       /* a piece's sixteen (all rests: none set, the next Steps starts from the line heard) */
 {
@@ -3542,11 +3819,15 @@ void en_bass_steps_get(uint8_t *b)
 }
 static int bl_fit(int n)
 {
+#if EN_RUST_MELODIC
+return fm1_rust_melodic_fold(n,24,83);
+#else
     while (n < 24)
         n += 12;
     while (n > 83)
         n -= 12;
     return n;
+#endif
 }
 static int bl_below(int root)                   /* the scale note just below the root (a semitone below if the scale has none within two) */
 {
@@ -3590,6 +3871,9 @@ static void bl_go_f(int n, int32_t w, int fl)
 }
 static void bl_rec(int st, int n, int root)     /* the line as heard, as steps: the note's scale steps above the root and its octave (the nearest) */
 {
+#if EN_RUST_MELODIC
+fm1_bass_t s;fm1_harmony_t h;melodic_bass_get(&s);melodic_harmony(&h,pedal);fm1_rust_bass_record(&s,&h,st,n,root);melodic_bass_put(&s);
+#else
     int iv = n - root, o = 1, k, best = 0, bd = 99;
     while (iv < 0 && o > 0)
         iv += 12, o--;
@@ -3601,6 +3885,7 @@ static void bl_rec(int st, int n, int root)     /* the line as heard, as steps: 
             bd = ad, best = k;
     }
     bs_hist[st & 15] = (uint8_t)(1 | best << 3 | o << 6);
+#endif
 }
 static void bl_go(int n, int32_t w) { bl_go_f(n, w, 0); }
 static int bl_fifth(void)                       /* the fifth above the root, semitones: the chord's altered fifth if it has one (diminished, augmented), else the perfect fifth (a 9th chord leaves it out of the voicing, not the harmony), or the scale's if that is not in the scale */
@@ -3617,6 +3902,14 @@ static int bl_fifth(void)                       /* the fifth above the root, sem
 }
 static void bl_step(int st, int32_t w)
 {
+#if EN_RUST_MELODIC
+fm1_bass_t s;fm1_bass_config_t c;fm1_harmony_t h;fm1_bass_note_t result;const int mode=par[P_BL_MODE],g=chord_genre;
+    melodic_bass_get(&s);melodic_harmony(&h,pedal);
+    c=(fm1_bass_config_t){mode,par[P_DR_MAN],bass.play,en_playing,sec,SECT[gx(g)].bass,0,0,{0,0,0,0},par[P_BL_MOVE],par[P_BASSOCT],drop_imp,bl_kick};
+    fm1_rust_bass_recipe(&c,(uint32_t)gx(g));
+    fm1_rust_bass_step(&s,&c,&h,st,&rng,&result);melodic_bass_put(&s);if(result.publish)bs_publish();
+    if(result.fire)bl_go_f(result.note,w,(int)result.flags);
+#else
     const int mode = par[P_BL_MODE], g = chord_genre;
     int hit = 0, iv = 0, root;
     if (!mode || bass.play || par[P_DR_MAN] || !en_playing || !nsteps)
@@ -3683,6 +3976,7 @@ static void bl_step(int st, int32_t w)
     bl_rec(st, root + iv, root);
     bl_go(root + iv, w);
     bl_beat++;
+#endif
 }
 
 static void stab_fire(float envv)
@@ -3730,13 +4024,19 @@ static void rvs_engage(void);
 static void flx_tick(int st);
 static uint64_t fx_on;
 /* The pad's comping: the steps of the bar its stabs fall on. Comp 2 .. 8 chooses one; Auto takes the genre's (hypnotic: the off-beats, as ever). */
+#if !EN_RUST_MELODIC
 static const uint16_t COMP_MASK[7] = {0x4444, 0x1111, 0x4949, 0x0041, 0x2448, 0x0401, 0x5555};   /* off-beat, on-beat, 3-3-2, Charleston, syncopated, sparse, eighths */
 static const uint16_t COMP_GENRE[EN_NGENRE] = {0x4444, 0x0041, 0x4949, 0x0401, 0x4444, 0x0408, 0x0A48, 0x2448, 0x2222, 0x0401, 0x4545, 0x2448, 0x4444, 0x0401, 0x2448, 0x0401, 0x1249, 0x0101, 0x0001};
+#endif
 static uint16_t comp_mask(void)
 {
+#if EN_RUST_MELODIC
+    return (uint16_t)fm1_rust_mel_comp(en_jam_on,par[P_PAD_COMP],(uint32_t)chord_genre);
+#else
     const int c = par[P_PAD_COMP];
     if(en_jam_on) return 1;
     return c >= 2 ? COMP_MASK[c - 2] : COMP_GENRE[chord_genre];
+#endif
 }
 static int comp_hit(int st) { return comp_mask() >> st & 1; }
 
@@ -3804,6 +4104,17 @@ static void tick(void)
     int perc_hit = 0;
     step_t = 0;
     jp_tick(st);
+#if EN_RUST_MELODIC
+    {uint32_t actions[5];unsigned i;fm1_rust_mel_tick_actions(scat_arm,rvs_arm,var_exit,rpt_arm,actions);
+    for(i=0;i<5;i++)switch(actions[i]&255u){
+    case 1:scat_engage();scat_arm=0;break;
+    case 2:rvs_engage();rvs_arm=0;break;
+    case 3:flx_tick(st);break;
+    case 4:var_leave();var_exit=0;break;
+    case 5:rpt_engage((int)(actions[i]>>8));rpt_arm=0;break;
+    case 6:rpt_refresh(st);break;
+    }}
+#else
     if (scat_arm) {                             /* the scatter too */
         scat_engage();
         scat_arm = 0;
@@ -3823,6 +4134,7 @@ static void tick(void)
     } else {
         rpt_refresh(st);                        /* the slip refresh: a repeat's slice is the newest again on the beat (or the bar) */
     }
+#endif
     if (st == 0) {                              /* a bar */
         int tb = TRIG_BARS[(unsigned)par[P_DE_TRIG] < 6u ? par[P_DE_TRIG] : 0];
         fill_bar = fill_q;                      /* the fill the DJ asked for a bar ahead */
@@ -3838,33 +4150,57 @@ static void tick(void)
             fill_kind = (uint8_t)k;
 #endif
         }
+#if EN_RUST_MELODIC
+        {uint32_t action=fm1_rust_mel_dj(dj_sync,sec,en_playing,en_frozen,(uint32_t)change_pending,hr_bars(),hr_left,drift_total,drift_left,step_len);
+        if(action==1)section_cmd(EN_CMD_BREAK);else if(action==2)fill_bar=1;}
+#else
         if (dj_sync && sec == SEC_GROOVE && en_playing && !en_frozen) {   /* the DJ follows the chords: the bar before a change is a fill, the change's bar a breakdown */
             if (change_pending)
                 section_cmd(EN_CMD_BREAK);
             else if (hr_bars() ? hr_left == 1 : drift_total > 0.0f && drift_left <= step_len * 16.0f)
                 fill_bar = 1;
         }
+#endif
+#if EN_RUST_MELODIC
+        if(fm1_rust_mel_build(sec,&sec_bars))
+#else
         if (sec == SEC_BUILD && --sec_bars <= 0)
+#endif
             section_cmd(EN_CMD_DROP);           /* the build's end: the drop */
         if (sec_req) {
             section_cmd(sec_req - 1);
             sec_req = 0;
         }
+#if EN_RUST_MELODIC
+        grv_bars=(uint8_t)fm1_rust_mel_groove(sec,grv_bars);
+#else
         if (sec == SEC_GROOVE && grv_bars < 255u)
             grv_bars++;                         /* (the drop set it to 0: its first bar is 1) */
+#endif
         gap_on = 0;
         {   /* the wobble after a dubstep drop: the drone's LFO a different fast rate each bar for 8 bars */
+#if EN_RUST_MELODIC
+            wob_rate=(int8_t)fm1_rust_mel_wobble(SECT[chord_genre].fl,sec,grv_bars,bars);
+#else
             static const int8_t WR[4] = {8, 10, 9, 1};   /* 1/8, 1/16, 1/8T, 1/2 */
             wob_rate = (int8_t)((SECT[chord_genre].fl & SF_WOB) && sec == SEC_GROOVE && grv_bars >= 1u && grv_bars <= 8u ? WR[(bars * 3u + grv_bars) % 4u] : -1);
+#endif
         }
         dd_bar();                               /* drum drift: a fill coming, or a change now */
         {   /* the acid's answer, Sync: Bar: this bar? (every 2nd .. 8th bar, or the bar before the drums change); Sync: Loop is decided where the line starts (acid_step) */
             const int rv = par[P_AC_RESP], ev = par[P_AC_EVERY];
+#if EN_RUST_MELODIC
+            ac_bar0=fm1_rust_mel_origin(bars,ac_bar0,ac_resync_bar);ac_resync_bar=0;
+#else
             if (ac_resync_bar) {                /* the answer's settings changed: its count starts at this bar */
                 ac_bar0 = bars;
                 ac_resync_bar = 0;
             }
+#endif
             ac_fill_bar = dd_fill;
+#if EN_RUST_MELODIC
+            if(!par[P_AC_CHANCE])ac_ans_bar=en_acid_ans=(uint8_t)fm1_rust_acid_answer(rv,ev,bars,ac_bar0,dd_fill,par[P_DD_CHANGE]);
+#else
             if (!par[P_AC_CHANCE]) {
                 int due = 0;
                 if (rv >= 5) {
@@ -3875,6 +4211,7 @@ static void tick(void)
                 }
                 ac_ans_bar = en_acid_ans = (uint8_t)due;
             }
+#endif
         }
         if (par[P_CHAIN] > 0 && par[P_CHAIN] <= 9) {   /* the chain: this bar's pattern, whatever was asked */
 #if EN_RUST_SCHEDULER
@@ -3892,17 +4229,29 @@ static void tick(void)
 #endif
         pat_now = pat_next;                     /* a new pattern: on the bar */
         for (l = 0; l < EN_NLANE; l++)          /* each lane's own source, from this bar */
+#if EN_RUST_MELODIC
+            en_lane_src[l]=lane_src[l]=(uint8_t)fm1_rust_mel_source(par[P_LSRC+l],pat_now);
+#else
             en_lane_src[l] = lane_src[l] = (uint8_t)(par[P_LSRC + l] ? par[P_LSRC + l] - 1 : pat_now);
+#endif
         if (tb && bars % (uint32_t)tb == 0u)
             bass.env_up = 1;                    /* the drone's envelope: every 1 .. 8 bars */
         bars++;
     }
     drum_publish();
     lk_hat = 0;
+#if EN_RUST_MELODIC
+    snr_rise=fm1_rust_mel_snare(sec,sec_n,sec_bars,st);
+#else
     snr_rise = sec == SEC_BUILD ? 7.0f * (float)((sec_n - sec_bars) * 16 + st) / (float)(sec_n * 16) : 0.0f;   /* the snare climbs a fifth through a build */
+#endif
     if (sec == SEC_BUILD && sec_bars == 1 && st >= 12 && (SECT[chord_genre].fl & SF_GAP))
         gap_on = 1;                             /* the drop gap: the beat before the drop, silence */
+#if EN_RUST_MELODIC
+    perc_fall=fm1_rust_mel_perc(fill_hold,fill_bar,dd_fill,sec,fill_kind,st);
+#else
     perc_fall = (fill_hold || fill_bar || (dd_fill && sec == SEC_GROOVE)) && fill_kind == 7 && st >= 8 ? -0.9f * (float)(st - 8) : 0.0f;
+#endif
     for (l = 0; l < EN_NDRUM; l++) {
 #if EN_RUST_SCHEDULER
         fm1_lane_t request;fm1_hit_t result;unsigned a;uint32_t jam_mask=0;
@@ -4097,11 +4446,20 @@ static void tick(void)
 #endif
     }
     if (!en_jam_on) bl_step(st, loose(sw, 4.0f));
+#if EN_RUST_MELODIC
+    {const float pe=fm1_rust_mel_pad(en_jam_on,(uint32_t)pad_stabs(),(uint32_t)par[P_PAD_MAN],en_playing,comp_mask(),st,sec,par[P_PAD_COMP],evolve,&rng);
+    if(pe>0.0f){
+#else
     if (!en_jam_on && pad_stabs() && !par[P_PAD_MAN] && en_playing &&   /* the pad's stabs: a rhythm (Comp; Auto: the genre's), the off-beats with more with Evolve; in a breakdown
                                                            * the rhythm alone, softer (0.15.4: none fired there, so an all-stab genre had the pluck alone) */
         (comp_hit(st) || (sec != SEC_BREAK && comp_mask() == 0x4444u && par[P_PAD_COMP] == 0 && (st == 7 || st == 15) && frand() < 0.35f * evolve))) {
+#endif
         const int32_t w = loose(sw, 8.0f);
+#if EN_RUST_MELODIC
+        /* pe was returned with the scheduling decision. */
+#else
         const float pe = (st & 1 ? 0.7f : 1.0f) * (sec == SEC_BREAK ? 0.8f : 1.0f);
+#endif
         if (stab_wait > 0) {                    /* the last stab is still waiting: it sounds now */
             stab_wait = 0;
             stab_fire(stab_pe);
@@ -4113,21 +4471,39 @@ static void tick(void)
             stab_fire(pe);
         }
     }
+#if EN_RUST_MELODIC
+    }
+#endif
     en_drum_pos = (uint8_t)st;
     drop_imp = 0;
+#if EN_RUST_MELODIC
+    if(fm1_rust_mel_acid_link(en_jam_on,(uint32_t)links_on(),(uint32_t)par[P_LK_PERC],sec,(uint32_t)perc_hit))acid_step(loose(sw,6.0f));
+#else
     if (links_on() && par[P_LK_PERC] && sec == SEC_GROOVE) {
         if (perc_hit)
             if(!en_jam_on) acid_step(loose(sw, 6.0f));         /* the links: the perc lane is the acid's clock */
     } else {
         if(!en_jam_on) acid_step(loose(sw, 6.0f));
     }
+#endif
     if(!en_jam_on) cm_step(st, sw);
+#if EN_RUST_MELODIC
+    if(fm1_rust_mel_harmonic_due(en_jam_on,st,(uint32_t)change_pending,en_frozen)){
+#else
     if (!en_jam_on && st == 0 && change_pending && !en_frozen) {   /* chords move on the bar */
+#endif
         change_pending = 0;
         chord_change();
+#if EN_RUST_MELODIC
+        dd_in=(int8_t)fm1_rust_mel_drift_arm(par[P_DD_EVERY],par[P_DD_CHANGE],par[P_DD_MUTATE],dd_in);
+#else
         if (!par[P_DD_EVERY] && (par[P_DD_CHANGE] || par[P_DD_MUTATE]) && dd_in < 0)
             dd_in = 2;                          /* drum drift with the chord: a fill next bar, the change after */
+#endif
     }
+#if EN_RUST_MELODIC
+    {uint32_t action=fm1_rust_mel_harmonic(en_jam_on,st,en_playing,en_frozen,hr_bars(),&hr_left,step_len,&drift_total,&drift_left);if(action&1u)change_pending=1;}
+#else
     if (!en_jam_on && st == 0 && en_playing && !en_frozen && hr_bars()) {   /* the genre's harmonic rhythm: this bar counted; the chord's last bar asks for the change on the next bar line */
         if (hr_left > 0)
             hr_left--;
@@ -4136,6 +4512,7 @@ static void tick(void)
         drift_total = (float)hr_bars() * 16.0f * step_len;   /* the way to the next chord, for the screen and the DJ */
         drift_left = (float)(hr_left + 1) * 16.0f * step_len;
     }
+#endif
     sixteenth++;
     en_bars = sixteenth;
 }
@@ -4159,6 +4536,9 @@ static const int DL_LEN[L_N] = {PRE_LP, DS(142), DS(107), DS(379), DS(277), DS(6
  * -78 dBFS, rounded to nearest (a tail below half a step goes quiet rather than hissing). */
 #define RV_Q 16384.0f
 static int16_t pl_buf[DL_TOTAL] EN_POOL;
+#if EN_RUST_EFFECTS
+_Static_assert(DL_TOTAL-PRE_LP==33383,"Rust reverb tank excludes shared predelay");
+#endif
 typedef struct {
     int16_t *b;
     int n, i;
@@ -4213,6 +4593,19 @@ static inline float sh_tap(float d)               /* the shimmer line, d samples
 
 static inline void reverb_tank(float x, float *ol, float *or_)
 {
+#if EN_RUST_EFFECTS
+    fm1_fx_reverb_t state;int i;float output[2];
+    const fm1_fx_reverb_config_t config={rv_type,rv_damp,rv_gate_hold,rv_shim,pl_decay,pl_dd2};
+    for(i=1;i<L_N;i++)state.positions[i-1]=dl[i].i;
+    state.gate_envelope=rg_env;state.gate_gain=rg_g;state.gate_hold=rg_hold;state.shimmer_feedback=rv_shim_fb;
+    state.shimmer_dc=sh_dc;state.shimmer_phase=sh_ph;state.bandwidth=pl_bw;state.damp_left=pl_damp_l;state.damp_right=pl_damp_r;
+    state.sine=lfo_s;state.cosine=lfo_c;state.shimmer_write=sh_w;
+    fm1_rust_fx_reverb(x,&state,&config,pl_buf+PRE_LP,sh_buf,output);
+    for(i=1;i<L_N;i++)dl[i].i=state.positions[i-1];
+    rg_env=state.gate_envelope;rg_g=state.gate_gain;rg_hold=state.gate_hold;rv_shim_fb=state.shimmer_feedback;
+    sh_dc=state.shimmer_dc;sh_ph=state.shimmer_phase;pl_bw=state.bandwidth;pl_damp_l=state.damp_left;pl_damp_r=state.damp_right;
+    lfo_s=state.sine;lfo_c=state.cosine;sh_w=state.shimmer_write;*ol=output[0];*or_=output[1];
+#else
     float a, b, fb_l = tap(&dl[L_D2R], DS(3163)), fb_r = tap(&dl[L_D2L], DS(3720));
     if (rv_type == 2) {                           /* gated: the input opens it, it stays open for the hold and then closes in ~10 ms */
         rg_env = fm_flush(fm_maxf(fm_fabsf(x), rg_env * 0.9995f));
@@ -4269,6 +4662,7 @@ static inline void reverb_tank(float x, float *ol, float *or_)
         *ol += rv_shim_fb * 0.7f;                 /* and heard, the octave up, in the tail */
         *or_ += rv_shim_fb * 0.7f;
     }
+#endif
 }
 
 /* The reverb as a job. The input is written to the predelay line a chunk at a time (render_chunk); the tank
@@ -4444,6 +4838,10 @@ static inline int16_t s16(float x)
 
 static void echo_time(void)
 {
+#if EN_RUST_EFFECTS
+    float values[2];
+    if(fm1_rust_fx_echo_length((uint32_t)par[P_ETIME],par[P_TEMPO],echo_len,ETIME_BEATS,values)){echo_len=values[0];echo_len_t=values[1];}
+#else
     int i = par[P_ETIME];
     float beat, t;
     if (par[P_TEMPO] <= 0)
@@ -4457,11 +4855,17 @@ static void echo_time(void)
     echo_len_t = t * TAPE_SR;
     if (echo_len <= 0.0f)
         echo_len = echo_len_t;
+#endif
 }
 
 /* once a chunk: where the heads sit in the field, how the feedback leans, the second head's slide */
 static void heads_step(uint32_t n)
 {
+#if EN_RUST_EFFECTS
+    fm1_fx_heads_t s={{hg[0],hg[1],hg[2],hg[3]},fb_lean,head2_t,head2_v,head_left};
+    const fm1_fx_heads_config_t c={motion,{mod[6].v,mod[7].v,mod[8].v},echo_len,head2,en_playing,en_frozen};
+    fm1_rust_fx_heads(&s,&c,n,&rng);memcpy(hg,s.pan,sizeof hg);fb_lean=s.lean;head2_t=s.target;head2_v=s.speed;head_left=s.left;
+#else
     float p, want, vmax;
     int i;
     for (i = 0; i < 2; i++) {
@@ -4482,11 +4886,21 @@ static void heads_step(uint32_t n)
     vmax = 0.008f / fm_maxf(echo_len, 100.0f);
     want = fm_clampf((head2_t - head2) * (1.0f / (2.0f * TAPE_SR)), -vmax, vmax);
     head2_v += (want - head2_v) * fm_minf((float)n * (1.0f / EN_SR), 1.0f);
+#endif
 }
 
 /* one sample of both: the input (a mono send) to the tape's heads (el, er) and the Echoplex (xl, xr) */
 static inline void echoes(float in, float *el, float *er, float *xl, float *xr)
 {
+#if EN_RUST_EFFECTS
+    fm1_fx_echo_t state={tape_w,tape_ph,tape_acc,tape_lp,tape_hp,tape_p1,tape_p2,tape_c1,tape_c2,plex_w,plex_lp,plex_lp2,echo_len,head2};
+    const fm1_fx_echo_config_t config={echo_len_t,head2_v,motion,mod[5].v,lfo_echo,fb_lean,echo_fbx,{hg[0],hg[1],hg[2],hg[3]},(uint32_t)shed3};
+    float output[4];fm1_rust_fx_echo(&state,&config,tape,plex,in,output);
+    tape_w=state.tape_write;tape_ph=state.phase;tape_acc=state.accumulator;tape_lp=state.low;tape_hp=state.high;
+    tape_p1=state.previous1;tape_p2=state.previous2;tape_c1=state.current1;tape_c2=state.current2;
+    plex_w=state.plex_write;plex_lp=state.plex_low;plex_lp2=state.plex_low2;echo_len=state.length;head2=state.head2;
+    *el=output[0];*er=output[1];*xl=output[2];*xr=output[3];
+#else
     float y;
     int t = plex_w - PLEX_TAP;
     if (shed3) {                                 /* shed level 3: no Echoplex (the tape alone) */
@@ -4532,6 +4946,7 @@ tape_part:
         *el = hg[0] * h1 + hg[2] * h2;
         *er = hg[1] * h1 + hg[3] * h2;
     }
+#endif
 }
 
 /* ------------------------------------------------------------ parameters --- */
@@ -4576,7 +4991,13 @@ static void apply(int p, int v)
     case P_PULSE: pulse_vol = (float)(v * v) * 0.0001f; break;
     case P_NOISE: noise_vol = (float)(v * v) * 0.0001f; break;
     case P_DETUNE: detune = 0.00144f * fm_exp2f((float)v * 0.0332f); break;   /* 2.5 .. 25 cents */
-    case P_CM_LOCK: if (v) cm_sync = 1; break;  /* frozen: the line starts with the bar */
+    case P_CM_LOCK:
+#if EN_RUST_MELODIC
+        {fm1_pluck_t s;fm1_pluck_config_t c;melodic_pluck_get(&s,&c);fm1_rust_pluck_parameter(&s,1,v);melodic_pluck_put(&s);}
+#else
+        if(v)cm_sync=1;
+#endif
+        break;  /* frozen: the line starts with the bar */
     case P_NZ_COLOR: nz_color = v; break;
     case P_NZ_PUMP: nz_pump = (float)v * 0.01f; break;
     case P_BASSOCT:
@@ -4601,6 +5022,9 @@ static void apply(int p, int v)
         chain_i = 0;
         break;
     case P_CM_LOOP:                              /* a new length (or a new piece): the loop is forgotten, the next notes are heard afresh */
+#if EN_RUST_MELODIC
+        {fm1_pluck_t s;fm1_pluck_config_t c;melodic_pluck_get(&s,&c);fm1_rust_pluck_parameter(&s,0,par[P_CM_LOCK]);melodic_pluck_put(&s);}
+#else
         if (par[P_CM_LOCK]) {                   /* a frozen pluck line is the piece's own: kept, from the bar */
             cm_sync = 1;
         } else {
@@ -4610,6 +5034,7 @@ static void apply(int p, int v)
             cm_k = 0;
             mo_valid = mo_on = mo_rec = 0;      /* (and the motif: a new piece, a new idea) */
         }
+#endif
         cm_publish();
         break;
     case P_BL_MODE:                              /* back to the drone: the root again; a line starts from silence */
@@ -4621,8 +5046,12 @@ static void apply(int p, int v)
         break;
     case P_DR_RES: reso_k = 1.5f - 0.0138f * (float)v; break;   /* none .. near singing (k 1.5 .. 0.12) */
     case P_AC_LEN:
+#if EN_RUST_MELODIC
+        {fm1_acid_t s;fm1_acid_config_t c;melodic_acid_get(&s,&c);fm1_rust_acid_length(&s,v);melodic_acid_put(&s);}
+#else
         if (ac_pos >= v)
             ac_pos = 0;
+#endif
         en_acid_len = (uint8_t)v;
         break;
     case P_AC_DENS: case P_AC_RANGE:             /* heard at once: the line made again */
@@ -4914,6 +5343,12 @@ static void master_dyn_reset(void);
 void en_init(void)
 {
     int i, l;
+#if EN_RUST_FACTORY
+    /* Static C initializers ran once: retain DY/user labels on later engine resets. */
+    if(!EN_CM_SOUND[0])
+        for(i=0;i<EN_NCMSND;i++) EN_CM_SOUND[i]=(const char*)fm1_rust_factory_name(19,(uint32_t)i);
+#endif
+
     en_jam_on=0; jp_upload=0; jp_data=JP_SONG_0; jp_len=sizeof JP_SONG_0;
     en_jam_load=-1;jp_song=0;jp_patch_dirty=0;jp_swell_phase=1.0f;jp_plan_wait=0;
     for(i=0;i<2;i++)jp_phrase[i].bars=0;
@@ -4959,9 +5394,15 @@ void en_init(void)
         pad[i].fh = 0.15f;
         pad[i].fr = 0.35f;
     }
+#if EN_RUST_FACTORY
+    { uint16_t boot[6][6];
+      fm1_rust_factory_bank(0,0,2,(uint8_t*)boot,sizeof boot);
+      for(i=0;i<EN_NPAT;i++)for(l=0;l<EN_NLANE;l++)en_pats[i][l]=boot[i][l]; }
+#else
     for (i = 0; i < EN_NPAT; i++)               /* the factory patterns (the app loads the player's after) */
         for (l = 0; l < EN_NLANE; l++)
             en_pats[i][l] = EN_PIECE_PATS[0][i][l];
+#endif
     arcm = 0.0f;
     pad_gain = 0.0f;
     for (i = 0; i < P_NPARAMS; i++)
@@ -5006,6 +5447,13 @@ static void play_start(int from_top)
     fm1_rust_transport_start(&transport, (uint32_t)from_top);
 #endif
     if (from_top) {
+#if EN_RUST_MELODIC
+        fm1_start_t state={jp_pos,sixteenth,bars,ac_pos,chain_i,slice_perm,pat_now};fm1_rust_mel_start(&state,pat_next);
+        jp_pos=(uint16_t)state.song_position;sixteenth=state.sixteenth;bars=state.bars;ac_pos=state.acid_position;chain_i=(uint8_t)state.chain;slice_perm=(uint8_t)state.slice;pat_now=state.pattern;
+#if !EN_RUST_TRANSPORT
+        pulse=0;
+#endif
+#else
         jp_pos=0;
 #if !EN_RUST_TRANSPORT
         pulse = 0;
@@ -5016,8 +5464,13 @@ static void play_start(int from_top)
         chain_i = 0;
         slice_perm = 0;
         pat_now = pat_next;
+#endif
         for (i = 0; i < EN_NLANE; i++)
+#if EN_RUST_MELODIC
+            en_lane_src[i]=lane_src[i]=(uint8_t)fm1_rust_mel_source(par[P_LSRC+i],pat_now);
+#else
             en_lane_src[i] = lane_src[i] = (uint8_t)(par[P_LSRC + i] ? par[P_LSRC + i] - 1 : pat_now);
+#endif
         pad_lfo.ph = drone_lfo.ph = 0.0f;
     }
 #if !EN_RUST_TRANSPORT
@@ -5035,24 +5488,39 @@ static void play_start(int from_top)
         bass.note = bass.target;
     bass.env_up = 1;
     if(!en_jam_on) midi(0x92, bass.midi_note, 80);
+#if EN_RUST_MELODIC
+    {uint32_t status=fm1_rust_mel_message(en_ext,(uint32_t)from_top,0);if(status)midi(status,0,0);}
+#else
     if (!en_ext)
         midi(from_top ? 0xFA : 0xFB, 0, 0);
+#endif
 }
 
 static void play_stop(void)
 {
     int d;
+#if EN_RUST_MELODIC
+    {int32_t waits[16]={cm_wait,ac_wait,bl_wait,stab_wait};uint32_t ratchets[6];
+    for(d=0;d<EN_NDRUM;d++){waits[4+d*2]=drum[d].wait;waits[5+d*2]=drum[d].wait2;ratchets[d]=drum[d].rn;}
+    fm1_rust_mel_cancel(waits,ratchets);cm_wait=waits[0];ac_wait=waits[1];bl_wait=waits[2];stab_wait=waits[3];
+    for(d=0;d<EN_NDRUM;d++){drum[d].wait=waits[4+d*2];drum[d].wait2=waits[5+d*2];drum[d].rn=(uint8_t)ratchets[d];}}
+#else
     for (d = 0; d < EN_NDRUM; d++)
         drum[d].wait = drum[d].wait2 = 0, drum[d].rn = 0;        /* a swung hit still waiting stays unplayed */
     cm_wait = ac_wait = bl_wait = stab_wait = 0;   /* and the swung pluck, acid, bass and stab notes */
+#endif
     en_playing = 0;
     jp_midi_gate=jp_pad_gate=0;jp_swell_phase=1.0f;
     for(d=0;d<2;d++){if(pad[d].pnote)midi(0x84,pad[d].pnote,0);pad[d].pnote=0;}
     pad_gate = 0.0f;
     acid.amp_t = 0.0f;
     acid.gate_left = 0;
+#if EN_RUST_MELODIC
+    {uint32_t status=fm1_rust_mel_message(en_ext,0,1);if(status)midi(status,0,0);}
+#else
     if (!en_ext)
         midi(0xFC, 0, 0);
+#endif
     notes_off();
 }
 
@@ -5137,7 +5605,9 @@ static float lpk_s, hpk_s, crk_s, thk_s, wash_s;
  * their own (busl/busr) instead of the mix, at the same points and with the same gains, the pumps and the gate; the bus goes through the filter and the
  * phaser, into the echo for the delay, and back into the mix before the echoes and the reverb. Two held together share the bus: both act on every
  * track either one targets. The drums go as one (any drum in the targets takes all four), after their crush and mixer. */
+#if !EN_RUST_FACTORY
 const char *const EN_PT_NAME[EN_NPT] = {"ALL", "DRUMS", "SYNTHS", "PAD", "BASS", "ACID", "PLUCK", "ACID+PLK", "PAD+PLK", "BASS+ACID"};
+#endif
 static const uint8_t PT_MASK[EN_NPT] = {0xFF, 0x0F, 0xF0, 0x40, 0x10, 0x20, 0x80, 0xA0, 0xC0, 0x30};
 static uint32_t bus_m;                          /* the tracks in the bus this chunk (a bit a track, EN_TR_*): 0, no bus */
 static float tfx_m, tdx_m, tpx_m;               /* the three faded in and out (0..1) */
@@ -5147,14 +5617,22 @@ static float lp_amt_e, hp_amt_e;                 /* the filters' amounts: the ke
 static float cr_lv = 2048.0f, cr_wet;
 static int cr_hold = 1;
 static const float RPT_BEATS[9] = {2.0f, 1.0f, 2.0f / 3.0f, 0.5f, 0.25f, 0.125f, 1.0f / 3.0f, 1.0f / 6.0f, 0.0625f};   /* (the 7th and 8th: triplets; the last, 1/64, only the roll reaches) */
+#if !EN_RUST_FACTORY
 const char *const EN_FX_NAME[EN_NFX] = {
     [FX_RPT2] = "Rpt 1/2", "Rpt 1/4", "Rpt 1/6", "Rpt 1/8", "Rpt 1/16", "Rpt 1/32", "Reverse", "Tape stop",
     "Mute kick", "Mute hats", "Mute snare", "Mute perc", "Low-pass", "High-pass",
     "Gate 1/16", "Gate 1/8", "Gate pattern", "Echo throw", "Fill", "Phaser", "Flanger", "Tape", "Roll", "Pump", "Riser", "Vinyl", "Scatter", "Brake", "Spin back", "Half time", "Sweep", "Scratch", "Freeze", "Rev swell", "Ring mod", "Rpt 1/8T", "Rpt 1/16T",
     "Flex Beat", "Filter", "Delay", "Phaser", "Mute drums", "", "", "", "", "", "", "", "", "", "", "Talk", "Wah", "Hat roll", "Hat trip", "Snr roll", "Flam", "Dbl kick"};
+#endif
 
+ #if EN_RUST_EFFECTS
+static void rust_fx_engage(int kind,int argument);
+#endif
 static void rpt_engage(int r)                   /* the slice that just ended, looped from its start */
 {
+#if EN_RUST_EFFECTS
+    rust_fx_engage(0,r);
+#else
     float len = RPT_BEATS[r] * 4.0f * step_len;
     while (len > (float)(RB_N - 8) * 2.0f && r < 5)   /* too long for the ring: the next shorter, in time */
         len = RPT_BEATS[++r] * 4.0f * step_len;
@@ -5171,6 +5649,7 @@ static void rpt_engage(int r)                   /* the slice that just ended, lo
     rp_gain = 1.0f;
     rp_pos = 0.0f;
     rp_rate = rp_pit != 0.0f ? fm_exp2f(rp_pit * fm_minf(rp_t * 0.25f, 1.0f) * (1.0f / 12.0f)) : 1.0f;   /* at the pitch the climb has reached */
+#endif
 }
 
 static void rpt_refresh(int st)                 /* on a sixteenth: a repeat with Refresh on takes the newest slice again each beat (or bar); the pitch's climb goes on */
@@ -5267,6 +5746,9 @@ static void scat_pick(void)
 }
 static void scat_engage(void)
 {
+#if EN_RUST_EFFECTS
+    rust_fx_engage(1,0);
+#else
     static const float SZ[3] = {0.5f, 1.0f, 2.0f};
     const float sl = fm_maxf(step_len * SZ[(int)fm_clampf((float)fxs_v[EN_FXS_SC_SIZE], 0.0f, 2.0f)], 64.0f), avail = (float)(RB_N - 8) * 2.0f;
     int n = (int)fm_clampf((float)fxs_v[EN_FXS_SC_LEN], 2.0f, 8.0f);
@@ -5279,6 +5761,7 @@ static void scat_engage(void)
     bm_start = rb_w - (uint32_t)((float)n * sl * 0.5f + 0.5f), bm_sm = bm_start % RB_N;
     bm_tgt = 1.0f;
     scat_pick();
+#endif
 }
 
 /* FLEX BEAT (after the MPC's): one-bar patterns that rework the last stretch of the music (the ring: up to eight sixteenths) on the grid.
@@ -5332,6 +5815,9 @@ static int flx_n;
 static float flx_slice, flx_off, flx_sub, flx_p;
 static void flx_load(void)                      /* the step's slice */
 {
+#if EN_RUST_EFFECTS
+    rust_fx_engage(8,FLEX[flx_pat][flx_pos&15]);
+#else
     const uint8_t b = FLEX[flx_pat][flx_pos & 15];
     const int e = b & 15, div = b >> 6 & 3;
     flx_mute = (b >> 5) & 1u;
@@ -5342,9 +5828,13 @@ static void flx_load(void)                      /* the step's slice */
         flx_sub = fm_maxf(flx_slice / (float)(1 << div), 32.0f);
     }
     flx_p = 0.0f;
+#endif
 }
 static void flx_engage(void)
 {
+#if EN_RUST_EFFECTS
+    rust_fx_engage(7,FLEX[flx_pat][0]);
+#else
     if (flx_active && bmode == BM_FLX) {        /* already playing: the next pattern, from its start */
         flx_pos = 0;
         flx_load();
@@ -5360,6 +5850,7 @@ static void flx_engage(void)
     flx_active = 1;
     en_flx_state = 2;
     flx_load();
+#endif
 }
 static void flx_tick(int st)                    /* on every sixteenth */
 {
@@ -5654,6 +6145,9 @@ static float vr_time(float v, float base)       /* base * 2 ^ (v * 0.06) seconds
 }
 static void var_engage(int wh)
 {
+#if EN_RUST_EFFECTS
+    rust_fx_engage(2,wh);
+#else
     bmode = BM_VAR;
     bm_start = rb_w - 2u, bm_sm = bm_start % RB_N;
     bm_off = 0.0f;
@@ -5661,9 +6155,13 @@ static void var_engage(int wh)
     vr_rate = 1.0f;
     vr_which = wh;
     vr_lp[0] = vr_lp[1] = 0.0f;
+#endif
 }
 static void var_params(int wh)
 {
+#if EN_RUST_EFFECTS
+    rust_fx_engage(3,wh);
+#else
     static const float HS[3] = {0.667f, 0.5f, 0.25f};
     if (wh == FX_HALF) {
         vr_tgt = HS[(int)fm_clampf((float)fxs_v[EN_FXS_HF_SPEED], 0.0f, 2.0f)];
@@ -5674,6 +6172,7 @@ static void var_params(int wh)
         vr_c = vr_time((float)fxs_v[EN_FXS_BR_TIME], 0.03f);
         vr_dull = (float)fxs_v[EN_FXS_BR_DULL] * 0.009f;
     }
+#endif
 }
 
 /* the scratch: the ring's last stretch (a sixteenth up to half a note) read back and forth, the read point following a sine
@@ -5681,6 +6180,9 @@ static void var_params(int wh)
 static float scr_t, scr_w, scr_per;
 static void scr_engage(void)
 {
+#if EN_RUST_EFFECTS
+    rust_fx_engage(4,0);
+#else
     static const float WIN[4] = {1.0f, 2.0f, 4.0f, 8.0f}, PER[4] = {4.0f, 2.0f, 1.0f, 0.5f};
     const float avail = (float)(RB_N - 8) * 2.0f;
     scr_w = fm_minf(fm_maxf(step_len * WIN[(int)fm_clampf((float)fxs_v[EN_FXS_SR_REACH], 0.0f, 3.0f)], 64.0f), avail);
@@ -5690,6 +6192,7 @@ static void scr_engage(void)
     bmode = BM_SCR;
     bm_start = rb_w - (uint32_t)(scr_w * 0.5f + 0.5f), bm_sm = bm_start % RB_N;
     bm_tgt = 1.0f;
+#endif
 }
 /* the freeze: a stretch of the past (0.1 .. 0.85 s) held, and grains (20 .. 200 ms, one to four) drawn from it at random
  * places, each in a parabolic window, overlapping: a shimmering texture of the moment you froze. */
@@ -5703,6 +6206,9 @@ static void gn_respawn(int i)
 }
 static void grn_engage(void)
 {
+#if EN_RUST_EFFECTS
+    rust_fx_engage(5,0);
+#else
     const float frames = fm_minf((0.1f + 0.0075f * (float)fxs_v[EN_FXS_FZ_SPREAD]) * 22050.0f, (float)(RB_N - 8));
     int i;
     gn_region = frames * 2.0f;
@@ -5716,6 +6222,7 @@ static void grn_engage(void)
         gn_respawn(i);
         gn_pos[i] = gn_len * (float)i / (float)gn_n;    /* staggered */
     }
+#endif
 }
 /* the reverse swell: the last stretch (a half beat, a beat or two) played backwards once, rising in level, ending where it
  * began, from the sixteenth; under the live mix by its Mix. One swell for each press. */
@@ -5723,6 +6230,9 @@ static float rv_pos, rv_len;
 static uint8_t rv_held;
 static void rvs_engage(void)
 {
+#if EN_RUST_EFFECTS
+    rust_fx_engage(6,0);
+#else
     static const float LEN[3] = {2.0f, 4.0f, 8.0f};    /* sixteenths */
     const float avail = (float)(RB_N - 8) * 2.0f;
     rv_len = fm_minf(step_len * LEN[(int)fm_clampf((float)fxs_v[EN_FXS_RV_LEN], 0.0f, 2.0f)], avail);
@@ -5730,10 +6240,18 @@ static void rvs_engage(void)
     bmode = BM_RVS;
     bm_start = rb_w - (uint32_t)(rv_len * 0.5f + 0.5f), bm_sm = bm_start % RB_N;
     bm_tgt = 0.3f + 0.007f * (float)fxs_v[EN_FXS_RV_MIX];
+#endif
 }
 
+#if EN_RUST_EFFECTS
+#include "rust_fx_engage.inc"
+#include "rust_fx_control.inc"
+#endif
 static void fx_control(uint32_t n)              /* once a chunk: what the held effects ask for */
 {
+#if EN_RUST_EFFECTS
+    rust_fx_control(n);
+#else
     const uint64_t m = fx_req;
     uint32_t solo = trk_solo,
              mute = trk_mute | (uint32_t)(m >> FX_MUTE_KICK & 1u) << EN_TR_KICK | (uint32_t)(m >> FX_MUTE_HATS & 1u) << EN_TR_HATS |
@@ -6086,8 +6604,8 @@ static void fx_control(uint32_t n)              /* once a chunk: what the held e
         rpt_arm = 0;
         bm_tgt = 0.0f;                          /* back to the live mix (the ring fades out) */
     }
+#endif
 }
-
 /* ----------------------------------------------------- the master bus: a compressor and a limiter --- */
 /* After the performance effects, before the master gain. The compressor: a stereo-linked peak detector in dB, a soft knee (6 dB), the
  * ratio, the threshold, a fast attack (4 ms) and a release that follows the programme (it is slower the deeper the reduction), the
@@ -6104,18 +6622,44 @@ static uint32_t lk_i, lk_n, lk_si;
 static float cp_thr = 0.0f, cp_slope, cp_make = 1.0f, cp_ka = 0.05f, cp_kr = 0.0005f, lk_ceil = 1.0f;
 volatile float en_comp_gr, en_lim_gr, en_out_peak;
 static float gr_hold, pk_hold;
+#if EN_RUST_EFFECTS
+static void fx_master_state_read(fm1_fx_master_t *s)
+{
+    *s=(fm1_fx_master_t){lk_cur,lk_sum,lk_rs,cp_env,cp_g,lk_subm,lk_chk,lk_i,lk_n,lk_si,
+        cp_thr,cp_slope,cp_make,cp_ka,cp_kr,lk_ceil,gr_hold,pk_hold};
+}
+static void fx_master_state_write(const fm1_fx_master_t *s)
+{
+    lk_cur=s->cur;lk_sum=s->sum;lk_rs=s->release;cp_env=s->envelope;cp_g=s->gain;lk_subm=s->sub_min;
+    lk_chk=s->check;lk_i=s->index;lk_n=s->count;lk_si=s->sub_index;
+    cp_thr=s->threshold;cp_slope=s->slope;cp_make=s->makeup;cp_ka=s->attack;cp_kr=s->decay;lk_ceil=s->ceiling;
+    gr_hold=s->reduction_hold;pk_hold=s->peak_hold;
+}
+#endif
 
 static void reverb_set(void)                    /* once a chunk, before the tank's job: the type, damping, predelay */
 {
+#if EN_RUST_EFFECTS
+    fm1_fx_rv_settings_t s;
+    _Static_assert(PRE_D==1322,"Rust predelay setting bound");
+    fm1_rust_fx_reverb_set(&s,par[P_RV_TYPE],par[P_RV_DAMP],par[P_RV_PRE],par[P_RV_X]);
+    rv_type=s.kind;rv_damp=s.damping;rv_pre=s.pre;rv_shim=s.shimmer;rv_gate_hold=s.hold;
+#else
     rv_type = par[P_RV_TYPE] < 0 ? 0 : par[P_RV_TYPE] > 2 ? 2 : par[P_RV_TYPE];
     rv_damp = 0.85f - 0.0085f * (float)par[P_RV_DAMP];
     rv_pre = 256 + (PRE_D - 256) * par[P_RV_PRE] / 100;                    /* 6 .. 30 ms (never under a chunk: the line is written as it is read) */
     rv_shim = 0.05f + 0.30f * (float)par[P_RV_X] * 0.01f;                  /* the shimmer's feedback */
     rv_gate_hold = (0.08f + 0.32f * (float)par[P_RV_X] * 0.01f) * EN_SR;   /* the gate's hold: 80 .. 400 ms */
+#endif
 }
 
 static void master_dyn_set(void)                /* once a chunk: the settings, from the parameters */
 {
+#if EN_RUST_EFFECTS
+    fm1_fx_master_t state;fx_master_state_read(&state);
+    fm1_rust_fx_master_set(&state,par[P_MC_RATIO],par[P_MC_THR],par[P_MC_MAKE],par[P_ML_CEIL]);
+    fx_master_state_write(&state);
+#else
     static const float RATIO[7] = {1.0f, 1.5f, 2.0f, 3.0f, 4.0f, 6.0f, 10.0f};
     const int r = par[P_MC_RATIO] < 0 ? 0 : par[P_MC_RATIO] > 6 ? 6 : par[P_MC_RATIO];
     cp_slope = r ? 1.0f - 1.0f / RATIO[r] : 0.0f;
@@ -6124,10 +6668,15 @@ static void master_dyn_set(void)                /* once a chunk: the settings, f
     cp_ka = 1.0f - fm_expf(-1.0f / (0.004f * EN_SR));
     cp_kr = 1.0f - fm_expf(-1.0f / ((0.06f + 0.04f * cp_env) * EN_SR));     /* the release: ~60 ms, up to 400 ms at 9 dB of reduction (set once a chunk) */
     lk_ceil = fm_db2lin(-12.0f + 0.12f * (float)par[P_ML_CEIL]);   /* -12 .. 0 dB */
+#endif
 }
 
 static void master_dyn_reset(void)              /* a new engine: nothing delayed, no reduction */
 {
+#if EN_RUST_EFFECTS
+    fm1_fx_master_t state;fx_master_state_read(&state);
+    fm1_rust_fx_master_reset(&state,lk_l,lk_r,lk_gm,lk_sub);fx_master_state_write(&state);
+#else
     uint32_t k;
     for (k = 0; k < LK; k++)
         lk_l[k] = lk_r[k] = 0.0f, lk_gm[k] = 1.0f;
@@ -6137,6 +6686,7 @@ static void master_dyn_reset(void)              /* a new engine: nothing delayed
     lk_sum = (float)LK;
     lk_i = lk_n = lk_si = 0;
     cp_env = gr_hold = pk_hold = 0.0f;
+#endif
 }
 
 
@@ -6144,6 +6694,11 @@ static void master_dyn_reset(void)              /* a new engine: nothing delayed
  * ramped across them; the limiter's window minimum is kept, not rescanned. */
 static void master_dyn_block(float *pl, float *pr, uint32_t n)
 {
+#if EN_RUST_EFFECTS
+    fm1_fx_master_t state;fx_master_state_read(&state);
+    fm1_rust_fx_master_block(&state,lk_l,lk_r,lk_gm,lk_sub,pl,pr,n);fx_master_state_write(&state);
+    if(n)en_comp_gr=cp_env;
+#else
     static const float INV[5] = {0.0f, 1.0f, 0.5f, 0.33333334f, 0.25f};
     uint32_t j = 0;
     while (j < n) {
@@ -6227,11 +6782,19 @@ static void master_dyn_block(float *pl, float *pr, uint32_t n)
         cp_g = g1;
         j += m;
     }
+#endif
 }
 
+#if EN_RUST_EFFECTS
+#include "rust_tone.inc"
+#include "rust_sampler.inc"
+#endif
 static inline void fx_master(float *pl, float *pr)   /* one sample of the master, before the gain */
 {
     float l = *pl, r = *pr;
+#if EN_RUST_EFFECTS
+    fx_sampler(&l,&r);
+#else
     if (bmode == BM_LIVE || bmode == BM_STOP || bmode == BM_VAR || (bmode == BM_RPT && rp_ref && rp_ok))   /* (a refreshing repeat: the ring goes on recording under the loop) */
         rb_write(l, r);
     if (bmode != BM_LIVE) {
@@ -6353,6 +6916,10 @@ static inline void fx_master(float *pl, float *pr)   /* one sample of the master
             brate = -1;
         }
     }
+#endif
+#if EN_RUST_EFFECTS
+    fx_tone(&l,&r);
+#else
     if (lp_amt_e > 0.0f) {
         l = svf_lp(l, lp_c, &lp_s[0]);
         r = svf_lp(r, lp_c, &lp_s[2]);
@@ -6514,6 +7081,7 @@ static inline void fx_master(float *pl, float *pr)   /* one sample of the master
         l += (crush_l - l) * cr_wet;
         r += (crush_r - r) * cr_wet;
     }
+#endif
     *pl = l;
     *pr = r;
 }
@@ -6631,6 +7199,10 @@ static void drain(void)
         case C_CMCAP: cm_capture(a & 15, b & 128 ? -1 : b & 127); cm_publish(); break;
         case C_CMSTEP: cm_step_set(a & 15, b & 15, b >> 4 & 3); break;
         case C_BSSTEP:                          /* a bass step (the page), or a piece's (bit 4 of a: a rest of a piece's that set none); 0x20: capture */
+#if EN_RUST_MELODIC
+            {fm1_bass_t state;melodic_bass_get(&state);uint32_t publish=fm1_rust_bass_edit(&state,(uint32_t)a,(uint32_t)b);melodic_bass_put(&state);if(publish)bs_publish();}
+            break;
+#else
             if (a & 0x20) {
                 if (!bs_set)
                     bs_capture();
@@ -6643,6 +7215,7 @@ static void drain(void)
                 bs_set = 0;
             bs_publish();
             break;
+#endif
         case C_PROG: pg_lo = (uint32_t)a | ((uint32_t)b & 0xFFFFu) << 8; break;
         case C_DTAP:
             if ((unsigned)a < (unsigned)EN_NDRUM)
@@ -6754,6 +7327,11 @@ static void pad_publish(uint32_t w, uint32_t n)   /* the job's pad (after the ch
 static void pad_chorus(uint32_t n)
 {
     const float a = en_shed_level >= 2 ? 0.0f : (float)par[P_PL_CHO] * 0.01f * 0.55f;   /* (no chorus when the load is far too high: it runs on the pad's core, and the first level answers the first core's time) */
+#if EN_RUST_EFFECTS
+    fm1_fx_chorus_t state={ch_i,{ch_ph[0],ch_ph[1],ch_ph[2]}};
+    fm1_rust_fx_chorus(&state,&ch_buf[0][0],pad_ol,pad_or,n,a);
+    ch_i=state.index;ch_ph[0]=state.phases[0];ch_ph[1]=state.phases[1];ch_ph[2]=state.phases[2];
+#else
     const float rate[3] = {0.47f / EN_SR, 0.61f / EN_SR, 0.79f / EN_SR};   /* Hz, the sweeps are slow and unequal */
     uint32_t j;
     int k;
@@ -6793,6 +7371,7 @@ static void pad_chorus(uint32_t n)
         pad_ol[j] = dl + wl * a * 0.45f;
         pad_or[j] = dr + wr * a * 0.45f;
     }
+#endif
 }
 
 static void render_pad(uint32_t n)
@@ -7502,6 +8081,12 @@ static float nz_hl, nz_hr;                       /* the pair held across two sam
 static uint32_t nz_ph;
 static void render_noise(uint32_t n)            /* into its own buffer: the pump ducks it on its own */
 {
+#if EN_RUST_EFFECTS
+    fm1_fx_vinyl_t s;const fm1_fx_vinyl_config_t c={vin_m*vn_g,nz_lp_k,vn_hiss,vn_pop,vn_amp,trk_g[TR_PAD],trk_g1[TR_PAD],tg_inv,en_playing,(uint32_t)shed3};
+    _Static_assert(sizeof(nz_t)==sizeof(fm1_fx_vinyl_gen_t),"Rust vinyl generator layout");
+    memcpy(s.generators,nz,sizeof nz);s.held[0]=nz_hl;s.held[1]=nz_hr;s.phase=nz_ph;
+    fm1_rust_fx_vinyl(&s,&c,nzl,nzr,n);memcpy(nz,s.generators,sizeof nz);nz_hl=s.held[0];nz_hr=s.held[1];nz_ph=s.phase;
+#else
     uint32_t j;
     const float g = vin_m * vn_g, k = nz_lp_k;   /* the vinyl key fades it in; its settings are en_fxs's */
     if (g <= 0.0f || !en_playing || shed3) {     /* (shed level 3: the vinyl's noise is off) */
@@ -7526,6 +8111,7 @@ static void render_noise(uint32_t n)            /* into its own buffer: the pump
     nz[1].lp = fm_flush(nz[1].lp);
     nz[0].br = fm_flush(nz[0].br);
     nz[1].br = fm_flush(nz[1].br);
+#endif
 }
 
 /* a hat: the metal and noise, high-passed (Chamberlin SVF, its corner the lane's tune); little echo */
@@ -7756,10 +8342,15 @@ _Static_assert(BLK <= RV_MAX && RV_MAX <= 256, "a chunk is at most the predelay 
 static float mx_sv[4][BLK] EN_POOL;
 static void mx_gains(int t, float *gl, float *gr, float *sg)
 {
+#if EN_RUST_EFFECTS
+    float values[3];fm1_rust_fx_mixer_gains(par[P_PAN+t],par[P_SEND+t],values);
+    *gl=values[0];*gr=values[1];*sg=values[2];
+#else
     const float p = (float)par[P_PAN + t] * 0.01f;
     *gl = fm_minf(1.0f, 2.0f * (1.0f - p));
     *gr = fm_minf(1.0f, 2.0f * p);
     *sg = (float)par[P_SEND + t] * 0.02f;
+#endif
 }
 static int mx_off(int t) { return par[P_PAN + t] != 50 || par[P_SEND + t] != 50; }
 static void mx_begin(int t, uint32_t n)
@@ -7781,12 +8372,17 @@ static void mx_end(int t, uint32_t n)
     if (!mx_off(t))
         return;
     mx_gains(t, &gl, &gr, &sg);
+#if EN_RUST_EFFECTS
+    fm1_rust_fx_mixer_end(mixl,mx_sv[0],n,gl);fm1_rust_fx_mixer_end(mixr,mx_sv[1],n,gr);
+    fm1_rust_fx_mixer_end(rsend,mx_sv[2],n,sg);fm1_rust_fx_mixer_end(esend,mx_sv[3],n,sg);
+#else
     for (j = 0; j < n; j++) {
         mixl[j] = mx_sv[0][j] + (mixl[j] - mx_sv[0][j]) * gl;
         mixr[j] = mx_sv[1][j] + (mixr[j] - mx_sv[1][j]) * gr;
         rsend[j] = mx_sv[2][j] + (rsend[j] - mx_sv[2][j]) * sg;
         esend[j] = mx_sv[3][j] + (esend[j] - mx_sv[3][j]) * sg;
     }
+#endif
 }
 
 /* the first core's time by stage, for the telemetry (the firmware sets the clock; the host leaves it off): ticks summed since last read */
@@ -7900,6 +8496,10 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
     }
     pad_midi_flush();
     DT(6);
+#if EN_RUST_EFFECTS
+    {fm1_fx_duck_t s={de,gg};const fm1_fx_duck_config_t c={depth,duck_dec,nz_pump,trk_g1[TR_KICK],step_len,step_t,gate,(uint32_t)odd,bus_m};
+     float *p[10]={mixl,mixr,rsend,esend,busl,busr,dk,gg_v,nzl,nzr};fm1_rust_fx_duck(&s,&c,p,n);de=s.envelope;gg=s.gate;}
+#else
     for (j = 0; j < n; j++) {                   /* the sidechain: the kick pushes the rest down, briefly */
         float gt = 1.0f;
         if (gate == 1)                          /* the gate: the first half of each sixteenth */
@@ -7927,6 +8527,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
             busl[j] *= dk[j] * gg_v[j];
             busr[j] *= dk[j] * gg_v[j];
         }
+#endif
     gate_g = gg;
     DT(7);
     PT(4);                                      /* the merge, the sidechain */
@@ -7943,6 +8544,9 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
             br[j] = mixr[j];
         }
         render_drums(n);
+#if EN_RUST_EFFECTS
+        {fm1_fx_crush_t s={hl,hr,hc};fm1_rust_fx_crush(&s,mixl,mixr,bl,br,n,c);hl=s.left;hr=s.right;hc=s.count;}
+#else
         for (j = 0; j < n; j++) {
             float dl = mixl[j] - bl[j], dr = mixr[j] - br[j];
             if (++hc >= hold) {
@@ -7953,6 +8557,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
             mixl[j] = bl[j] + dl + (hl - dl) * c;
             mixr[j] = br[j] + dr + (hr - dr) * c;
         }
+#endif
     } else {
         if (bus_m & 0x0Fu)                      /* (the drums to the bus: the mix before them, to take out what they add) */
             for (j = 0; j < n; j++) {
@@ -8010,6 +8615,14 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
     duck_env = fm_flush(de);
     DT(9);
     if (bus_m) {                                /* the punch-ins' bus: the filter, the phaser, then back into the mix */
+#if EN_RUST_EFFECTS
+        fm1_fx_bus_t s;fm1_fx_bus_config_t c;
+        memcpy(s.filter,tf_s,sizeof tf_s);memcpy(s.feedback,tp_fb,sizeof tp_fb);memcpy(s.stages,tp_z,sizeof tp_z);
+        memcpy(c.filter,tf_c,sizeof tf_c);memcpy(c.phase,tp_a,sizeof tp_a);
+        c.filter_mix=tfx_m;c.phase_mix=tpx_m;c.wet=(float)fxs_v[EN_FXS_TP_MIX]*0.005f;c.kind=tf_type;
+        fm1_rust_fx_bus(&s,&c,busl,busr,mixl,mixr,n);
+        memcpy(tf_s,s.filter,sizeof tf_s);memcpy(tp_fb,s.feedback,sizeof tp_fb);memcpy(tp_z,s.stages,sizeof tp_z);
+#else
         const float pk1 = (float)fxs_v[EN_FXS_TP_MIX] * 0.005f;   /* the phaser's wet share, 0 .. 0.5 */
         for (j = 0; j < n; j++) {
             float x[2];
@@ -8037,6 +8650,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
         }
         for (j = 0; j < 4; j++)
             tf_s[j] = fm_flush(tf_s[j]);
+#endif
     }
     {
     const float thr = throw_amt * 0.5f, tdg = tdx_m * (float)fxs_v[EN_FXS_TD_SEND] * 0.006f;   /* (the bus is cleared each chunk, so 0 when unused) */
@@ -8083,6 +8697,9 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
     DT(11);
     master_dyn_block(mixl, mixr, n);            /* the compressor and the limiter */
     DT(12);
+#if EN_RUST_EFFECTS
+    fm1_rust_fx_output(mixl,mixr,n,out,usb_cur,gain,usb_gain,(uint32_t)shed3);
+#else
     for (j = 0; j < n; j++) {                   /* the master gain and the soft clip */
         if (shed3) {                            /* the cheap clip (a rational tanh) */
             out[2 * j] = (int32_t)(soft_sat(mixl[j] * gain) * 8300000.0f);
@@ -8098,6 +8715,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
             usb_cur[2 * j] = (int16_t)(fm_tanhf(mixl[j] * usb_gain) * 32421.0f);
             usb_cur[2 * j + 1] = (int16_t)(fm_tanhf(mixr[j] * usb_gain) * 32421.0f);
         }
+#endif
     DT(13);
     PT(8);                                      /* the master: effects, dynamics, the soft clip */
     if (rv_c2) {                                /* the other core's DX voices (they run behind the master): done before anything touches their state */
@@ -8250,11 +8868,18 @@ static void control(uint32_t n)                 /* once a chunk: the slow things
         float bt = sec == SEC_BREAK ? 1.0f : sec == SEC_BUILD ? -0.6f : 0.0f;
         brk += (bt - brk) * fm_minf((float)n / ((sec == SEC_BUILD ? 4.0f : 2.0f) * EN_SR), 1.0f);
     }
+#if EN_RUST_EFFECTS
+    {float s[3]={pl_decay,pl_dd2,rev_in_gain};fm1_rust_fx_decay(s,pl_decay_t,en_frozen);pl_decay=s[0];pl_dd2=s[1];rev_in_gain=s[2];}
+#else
     pl_decay += ((en_frozen ? 0.9995f : pl_decay_t) - pl_decay) * 0.002f;
     pl_dd2 = fm_clampf(pl_decay + 0.15f, 0.25f, 0.5f);
     rev_in_gain += ((en_frozen ? 0.0f : 1.0f) - rev_in_gain) * 0.01f;
+#endif
     if (!en_jam_on && en_playing && !en_frozen) {
         const int hr = hr_bars();
+#if EN_RUST_MELODIC
+        change_pending=(uint8_t)fm1_rust_mel_harmonic_samples(change_pending,(uint32_t)hr,&drift_left,n);
+#else
         if (!change_pending || hr) {
             drift_left -= (float)n;
             if (drift_left <= 0.0f) {
@@ -8264,6 +8889,7 @@ static void control(uint32_t n)                 /* once a chunk: the slow things
                     change_pending = 1;
             }
         }
+#endif
     }
     en_drift_bars = drift_total > 0.0f && step_len > 1.0f ? fm_minf(drift_left / (step_len * 16.0f), 99.0f) : 99.0f;
     en_drift = drift_total > 0.0f ? 1.0f - fm_clampf(drift_left / drift_total, 0.0f, 1.0f) : 0.0f;

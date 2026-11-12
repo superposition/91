@@ -6,7 +6,7 @@ pub const PARAMETER_COUNT: usize = 176;
 #[repr(transparent)]
 pub struct ParamId(u8);
 impl ParamId {
-    pub fn new(index: usize) -> Result<Self, ValueError> {
+    pub const fn new(index: usize) -> Result<Self, ValueError> {
         if index < PARAMETER_COUNT {
             Ok(Self(index as u8))
         } else {

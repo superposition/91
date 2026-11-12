@@ -2,9 +2,9 @@ name: Rust migration checks
 
 on:
   push:
-    paths: ['Cargo.toml', 'Cargo.lock', 'rust/**', 'firmware/**', 'host/**', 'web/**', 'tests/host/emu*', 'tests/host/browser_doubles.mjs', 'tests/host/gparams.c', 'tests/reference/**', 'tests/rust_*', 'tests/web*', 'assets/fonts/**', 'tools/gen_font.py', 'tools/make_params.py', 'tools/make_pages_site.py', 'tools/web*.py', 'tools/release.sh', '.github/workflows/rust.yml']
+    paths: ['Cargo.toml', 'Cargo.lock', 'rust/**', 'firmware/**', 'host/**', 'web/**', 'tests/host/emu*', 'tests/host/browser_doubles.mjs', 'tests/host/gparams.c', 'tests/reference/**', 'tests/rust_*', 'tests/web*', 'assets/fonts/**', 'tools/gen_font.py', 'tools/effects_abi.py', 'tools/import_factory_tables.py', 'tools/factory_footprint.mjs', 'tools/make_params.py', 'tools/make_pages_site.py', 'tools/web*.py', 'tools/release.sh', '.github/workflows/rust.yml']
   pull_request:
-    paths: ['Cargo.toml', 'Cargo.lock', 'rust/**', 'firmware/**', 'host/**', 'web/**', 'tests/host/emu*', 'tests/host/browser_doubles.mjs', 'tests/host/gparams.c', 'tests/reference/**', 'tests/rust_*', 'tests/web*', 'assets/fonts/**', 'tools/gen_font.py', 'tools/make_params.py', 'tools/make_pages_site.py', 'tools/web*.py', 'tools/release.sh', '.github/workflows/rust.yml']
+    paths: ['Cargo.toml', 'Cargo.lock', 'rust/**', 'firmware/**', 'host/**', 'web/**', 'tests/host/emu*', 'tests/host/browser_doubles.mjs', 'tests/host/gparams.c', 'tests/reference/**', 'tests/rust_*', 'tests/web*', 'assets/fonts/**', 'tools/gen_font.py', 'tools/effects_abi.py', 'tools/import_factory_tables.py', 'tools/factory_footprint.mjs', 'tools/make_params.py', 'tools/make_pages_site.py', 'tools/web*.py', 'tools/release.sh', '.github/workflows/rust.yml']
   workflow_dispatch:
 
 permissions:
@@ -85,8 +85,14 @@ jobs:
         run: sh tests/rust_emulator_parity.sh
       - name: Browser bindings and lifecycle
         run: node tests/host/emu_browser_test.mjs build/emu/amb.wasm
-      - name: Native clock, sequencer, mutation and scheduled-event trace parity
-        run: sh tests/rust_sequencer_parity.sh
+      - name: Native clock, melodic/drum scheduling, mutation and event trace parity
+        run: sh tests/rust_melodic_parity.sh
+      - name: Compact factory tables and packed musical codecs
+        run: sh tests/rust_factory_tables.sh
+      - name: Native effects, master, output and state parity
+        run: sh tests/rust_effects_parity.sh
+      - name: Effects worker placement and ordered completion
+        run: sh tests/rust_effects_workers.sh
       - name: Songbook snapshot and staging handoffs
         run: sh tests/rust_handoff.sh
       - uses: actions/upload-artifact@v4
@@ -103,3 +109,14 @@ jobs:
           path: |
             build/transport-parity/*.json
             build/transport-parity/source-verification.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: factory-effects-parity
+          path: |
+            build/factory/*.json
+            build/factory/r01-verification.log
+            build/effects-parity/*.json
+            build/effects-parity/results.jsonl
+            build/effects-parity/source-verification.log
+            build/effects-workers/results.txt

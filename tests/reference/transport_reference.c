@@ -59,6 +59,41 @@ int main(int argc,char **argv)
             }printf("%s%u",mode==1?"":",",h);
         }puts("]");return 0;
     }
+    if(scenario==11){
+        unsigned test,step,round,value;printf("[");
+        for(test=0;test<64;test++){
+            static const int major[12]={0,2,4,5,7,9,11,0,0,0,0,0};uint32_t h=2166136261u;
+            nsteps=7;chord_nt=3;deg=(int)(test%7);for(step=0;step<12;step++)steps[step]=major[step];chord_pcs[0]=0;chord_pcs[1]=4;chord_pcs[2]=7;chord_pcs[3]=0;
+            par[P_ROOT]=(int16_t)(test%12);par[P_OCT]=(int16_t)((int)(test%7)-3);par[P_AC_OCT]=(int16_t)((int)(test%5)-2);
+            par[P_AC_LEN]=(int16_t)(1+test%16);par[P_AC_DENS]=(int16_t)(test*17%101);par[P_AC_RANGE]=(int16_t)(1+test%3);par[P_AC_SLIDE]=(int16_t)(test*31%101);
+            par[P_AC_MUT]=(int16_t)(test*29%101);par[P_AC_CHG]=(int16_t)(test%4);par[P_AC_LOCK]=(int16_t)(test%7==0);evolve=(float)(test%10)*0.1f;
+            ac_gate=ac_accent=ac_slide=0;for(step=0;step<16;step++)ac_off[step]=ac_oct[step]=0;rng=(test+1u)*2654435761u;ac_regrow();
+            for(round=0;round<9;round++){
+                if(round)ac_mutate();
+                h=word(word(word(h,ac_gate),ac_accent),ac_slide);for(step=0;step<16;step++)h=word(word(h,(uint8_t)ac_off[step]),(uint8_t)ac_oct[step]);h=word(h,rng);
+                for(value=0;value<45;value++)for(step=0;step<16;step++)h=word(h,(uint32_t)en_acid_preview((int)step,(int)value));
+            }printf("%s%u",test?",":"",h);
+        }puts("]");return 0;
+    }
+    if(scenario==12){
+        unsigned genre,mode,comp,jam,k;printf("[");
+        for(genre=0;genre<19;genre++){
+            uint32_t h=2166136261u;const uint8_t section[]={SECT[genre].kick,SECT[genre].hat,SECT[genre].build,SECT[genre].pad,SECT[genre].kret,SECT[genre].snare,SECT[genre].bass,SECT[genre].ft,SECT[genre].fl};
+            for(k=0;k<9;k++)h=word(h,section[k]);h=word(h,FILL_OK[genre]);
+            for(mode=0;mode<=16;mode++){
+#if EN_RUST_MELODIC
+                fm1_bass_config_t config={0};config.mode=(int32_t)mode;fm1_rust_bass_recipe(&config,genre);
+                h=word(word(h,config.root_mask),config.riff_mask);for(k=0;k<4;k++)h=word(h,(uint8_t)config.intervals[k]);
+#else
+                const bl_fig_t *figure=mode==6?&BL_RIFF[genre]:&BL_FIG[(mode>6?mode-7:0)%EN_NBLFIG];
+                h=word(word(h,BL_ROOT[genre]),figure->mask);for(k=0;k<4;k++)h=word(h,(uint8_t)figure->iv[k]);
+#endif
+            }
+            chord_genre=(int)genre;
+            for(jam=0;jam<2;jam++)for(comp=0;comp<=8;comp++){en_jam_on=(uint8_t)jam;par[P_PAD_COMP]=(int16_t)comp;h=word(h,comp_mask());}
+            printf("%s%u",genre?",":"",h);
+        }puts("]");return 0;
+    }
     if(scenario<16 && (scenario&2u))en_jam_set(JAM_ON,1);
     else {
         unsigned l,s;en_genre(scenario>=16?(int)(scenario-16)%19:7);en_set(P_SWING,100);en_set(P_HUMAN,100);
@@ -74,8 +109,37 @@ int main(int argc,char **argv)
         en_set(P_DD_CHANGE,2);en_set(P_DD_MUTATE,2);en_set(P_DD_EVERY,1);en_set(P_GHOST,100);en_set(P_ACCENT,75);en_set(P_KIT_KICK,4);
         for(l=0;l<EN_NLANE;l++){en_set(P_COND+(int)l,(int)((scenario+l)%8));en_set(P_PROB+(int)l,75);en_set(P_DENS+(int)l,20+(int)l*15);en_set(P_LSRC+(int)l,1+(int)l);en_set(P_LLEN+(int)l,l&1?16:5+(int)l);}
     }
+    if(scenario>=35){
+        unsigned test=scenario-35;en_set(P_AC_LEN,1+(int)test%16);en_set(P_AC_RESP,5+(int)(test*7)%40);en_set(P_AC_EVERY,(int)test%8);en_set(P_AC_CHANCE,(int)test%2);
+        en_set(P_AC_MUT,100);en_set(P_AC_CHG,(int)test%4);en_set(P_AC_DENS,65);en_set(P_AC_RANGE,1+(int)test%3);en_set(P_AC_SLIDE,80);en_set(P_AC_LOCK,0);
+        en_set(P_CM_LVL,80);en_set(P_CM_DENS,90);en_set(P_CM_MOTIF,100);en_set(P_CM_VU,60);en_set(P_CM_LOOP,(int)test%4);en_set(P_CM_RATE,(int)test%4);en_set(P_CM_STYLE,(int)test%6);en_set(P_CM_LEAP,80);en_set(P_CM_LOCK,0);
+        en_set(P_BL_MODE,1+(int)test%16);en_set(P_BL_MOVE,100);en_set(P_BL_LEN,100);en_pedal((int)test&1);
+    }
     en_set(P_TEMPO,70);en_play(1);
-    for(i=0;i<5000;i++) {
+    for(i=0;i<(scenario>=35?10000u:5000u);i++) {
+        if(scenario>=35){
+            unsigned test=scenario-35;
+            if(i==200){en_acid_capture(3,30+(int)test*3,1,1);en_pluck_capture(2,48+(int)test);}
+            if(i==350){en_acid_step(1,(int)test%12,(int)test%4,1,1,1);en_pluck_step(1,(int)test%12,3);}
+            if(i==600){en_set(P_AC_MAN,1);en_set(P_CM_MAN,1);en_set(P_DR_MAN,1);}
+            if(i==850){en_set(P_AC_MAN,0);en_set(P_CM_MAN,0);en_set(P_DR_MAN,0);}
+            if(i==1100){en_set(P_AC_LOCK,1);en_set(P_CM_LOCK,1);en_set(P_CM_LOOP,2);}
+            if(i==1300){en_set(P_AC_LOCK,0);en_set(P_CM_LOCK,0);en_set(P_CM_LOOP,3);}
+            if(i==1600){en_set(P_AC_RESP,5+(int)(test*11)%40);en_set(P_AC_EVERY,(int)(test+3)%8);en_set(P_AC_CHANCE,(int)(test+1)%2);en_set(P_AC_LEN,1+(int)(test+7)%16);}
+            if(i==2600){static const uint8_t empty[16]={0};en_bass_steps_set(empty);}
+            if(i==2700){en_set(P_BL_MODE,EN_BL_STEPS);en_bass_capture();}
+            if(i==3000){en_bass_step(5,1|3<<3|1<<6);en_bass_step(9,4|5<<3|2<<6);}
+            if(i==3400){en_set(P_CM_MOTIF,35);en_set(P_CM_STYLE,(int)(test+3)%6);en_set(P_CM_VU,100);en_set(P_AC_MUT,35);}
+            if(i==4000){en_pedal((int)(test+1)&1);en_set(P_BL_MODE,5);}
+            if(i==4100)en_fx(1ull<<FX_SCATTER);
+            if(i==4200)en_fx(1ull<<FX_RVSWELL);
+            if(i==4300)en_fx(1ull<<FX_RPT8);
+            if(i==4400)en_fx(1ull<<FX_BRAKE);
+            if(i==4500)en_fx(0);
+            /* Let a complete phrase record and develop after the stop/start,
+             * external-clock and DejaVu exercises above. */
+            if(i==5000){en_set(P_CM_VU,0);en_set(P_CM_MOTIF,100);en_set(P_CM_LOCK,0);en_set(P_CM_DENS,100);en_set(P_CM_RATE,3);}
+        }
         if(scenario>=16) {
             if(i%400==0){en_set(P_CHAIN,1+(int)(i/400)%9);en_set(P_SLICE,9);en_set(P_TIME,(int)(i/400)%3);}
             if(i==300)en_section(EN_CMD_BREAK);
@@ -140,15 +204,24 @@ int main(int argc,char **argv)
                 const uint32_t delayed[]={(uint32_t)drum[tempo].wait,(uint32_t)drum[tempo].wait2,bits(drum[tempo].pend),bits(drum[tempo].pend2),drum[tempo].rn,(uint32_t)drum[tempo].rgap,bits(drum[tempo].rmul)};
                 trace_words(delayed,7);
             }
+            {const uint32_t melodic[]={0x4c,rng,ac_gate,ac_accent,ac_slide,(uint32_t)ac_pos,ac_loop,ac_loop0,ac_bar0,ac_ans_bar,ac_ans_loop,ac_resync_bar,ac_resync_loop,
+                (uint32_t)cm_i,cm_k,cm_sync,mo_play,(uint32_t)(int32_t)mo_last,mo_valid,mo_rec,mo_on,mo_inv,mo_alt,mo_restate,mo_first,mo_idx0,mo_prev,bs_set,bl_beat,(uint32_t)(int32_t)en_bs_pos,
+                (uint32_t)ac_pend.n,ac_pend.slid_ok,ac_pend.acc,ac_pend.hat,ac_pend.slide,ac_pend.beat,bits(ac_pend.dec),(uint32_t)bl_pn,bl_pfl,(uint32_t)cm_pnote,bits(cm_pvel),
+                (uint32_t)hr_left,bits(drift_left),bits(drift_total),change_pending};
+            trace_words(melodic,sizeof melodic/4);trace_words(ac_off,4);trace_words(ac_oct,4);trace_words(cm_f,8);trace_words(cm_g,8);trace_words(cm_ix,8);trace_words(cm_vl,8);trace_words(mo_k,4);trace_words(bs,4);trace_words(bs_hist,4);trace_words(cm_mn,2);trace_words(cm_moff,8);}
         }
         for(tempo=0;tempo<11;tempo++)state_hash=word(state_hash,state[tempo]);
     }
-    printf("{\"scenario\":%u,\"frames\":%u,\"chunks\":%u,\"state_hash\":%u,\"pcm_hash\":%u,\"midi_hash\":%u,\"midi_messages\":%u,\"midi_clocks\":%u}\n",
-        scenario,render_frame,en_prof[9],state_hash,pcm_hash,midi_hash,midi_count,clock_count);
+    printf("{\"scenario\":%u,\"render_calls\":%u,\"frames\":%u,\"chunks\":%u,\"state_hash\":%u,\"pcm_hash\":%u,\"midi_hash\":%u,\"midi_messages\":%u,\"midi_clocks\":%u}\n",
+        scenario,i,render_frame,en_prof[9],state_hash,pcm_hash,midi_hash,midi_count,clock_count);
 #if EN_RUST_SCHEDULER
     assert(fm1_rust_jam_stat(18)>0 && fm1_rust_jam_stat(20)>0);
     if(scenario<16 && (scenario&2u))assert(fm1_rust_jam_stat(21)>0);
     if(scenario>=16)assert(fm1_rust_jam_stat(19)>0);
+#endif
+#if EN_RUST_MELODIC
+    assert(fm1_rust_jam_stat(26)>0 && fm1_rust_jam_stat(27)>0);
+    if(scenario>=16)assert(fm1_rust_jam_stat(22)>0 && fm1_rust_jam_stat(23)>0 && fm1_rust_jam_stat(24)>0 && fm1_rust_jam_stat(25)>0);
 #endif
     if(trace && fclose(trace)){perror("transport trace close");return 2;}
     return 0;
