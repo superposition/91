@@ -9,6 +9,11 @@ mod jam;
 pub use jam::JamSettings;
 mod command;
 pub use command::{CommandKind, DecodedCommand};
+mod musical;
+pub use musical::{
+    AcidLine, AcidStep, ChordKinds, GenreId, LaneId, PatternId, PieceId, PluckLine, PluckStep,
+    Progression, StepId,
+};
 
 pub const SAMPLE_RATE: u32 = 44_100;
 pub const RENDER_FRAMES: usize = 256;

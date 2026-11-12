@@ -3,6 +3,8 @@
 #![no_std]
 #![forbid(unsafe_code)]
 
+#[path = "factory_logic.rs"]
+pub mod factory;
 pub mod planner;
 pub mod sequencer;
 pub mod transport;
