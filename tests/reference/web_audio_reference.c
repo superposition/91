@@ -1,5 +1,8 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 /* Include the actual selected/frozen app; no copied audio arithmetic oracle. */
+#ifndef __wasm__
+#include <stdio.h>
+#endif
 #ifndef WEB_AUDIO_SOURCE
 #define WEB_AUDIO_SOURCE "../../web/emu/amb_web.c"
 #endif
