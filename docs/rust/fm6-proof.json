@@ -1,0 +1,1172 @@
+{
+  "ticket": "https://github.com/superposition/91/issues/12",
+  "date": "2026-11-12",
+  "base_commit": "b6e82a90c7a9ea346764d27f43c6ddeb4a12c076",
+  "status": "FM6 emulator-capable software acceptance complete; physical link/memory/timing/output qualification remains open",
+  "reference": {
+    "source_files_verified": 440,
+    "source_log_sha256": "02103818921d558fa092601f4329ba6740cf2ad792676fb0331e24f2fadfbd85",
+    "frozen_wasm": {
+      "bytes": 1937404,
+      "sha256": "a3d08947713bda76b64f76ed39b55aa26bdd182a65bf88fbd1efe0cbc12f8036"
+    },
+    "table_fixture_sha256": "780b6d98a5eea4f10cd14e6f9752276cffed3e03878754d26f6870b560a54592",
+    "component_fixture_sha256": "41470f8d4b2d1aca829e7fdc4086431b0a3efcf6a7136eb6cf031af8fe07fea0"
+  },
+  "checks": {
+    "rust": "1.94.1",
+    "node": "22.14.0",
+    "fmt": "pass",
+    "workspace_tests": 68,
+    "clippy_warnings_denied": "pass",
+    "no_std_release_check": "pass",
+    "wasm_no_default_features_build": "pass",
+    "generated_tables": "pass",
+    "frozen_and_fresh_component_reproduction": "pass",
+    "native_fm_full_state_pcm": "pass",
+    "native_full_instrument": "pass",
+    "legacy_worker_matrix": "pass",
+    "fm_worker_matrix": "pass",
+    "final_wasm_full_suite": "pass",
+    "independent_frozen_wasm": "pass",
+    "fm_only_c_fallback": "pass"
+  },
+  "representation": {
+    "voices": 6,
+    "voice_bytes": 388,
+    "slot_bytes": 408,
+    "slots_bytes": 2448,
+    "amplitude_envelope_bytes": 20,
+    "pitch_envelope_bytes": 24,
+    "lfo_bytes": 20,
+    "lfo_count": 2,
+    "canonical_patch_bytes": 155,
+    "c_patch_bytes": 156,
+    "programs": 30,
+    "dy_programs": 30,
+    "user_slots": 16,
+    "factory_packed_voices": 8,
+    "rom_voices": 24,
+    "ram_lookups_bytes": 11780,
+    "float_scratch_bytes": 768,
+    "integer_scratch_bytes": 768,
+    "queue_bytes": 256,
+    "fifo_frames": 512,
+    "fifo_delay_frames": 256,
+    "user_bytes": 2048,
+    "staging_or_bass_union_bytes": 2048,
+    "immutable_source_primitive_bytes": 21281,
+    "new_audio_payload_bytes": 0,
+    "new_voice_state_bytes": 0,
+    "new_diagnostic_bytes": 32,
+    "job_source_packets_32bit_bytes": 132,
+    "ams_packet_bytes": 24,
+    "output_packet_bytes": 20,
+    "wasm_exports": 24,
+    "wasm_memory_bytes": 33554432,
+    "allocator": false,
+    "core_unsafe": false
+  },
+  "components": {
+    "operators": 3456,
+    "loops": 48,
+    "envelopes": 900,
+    "pitch": 300,
+    "lfo": 1600
+  },
+  "native_fm": [
+    {
+      "scenario": 0,
+      "blocks": 12288,
+      "frames": 786432,
+      "events": 1536,
+      "hash": "a6ba8257",
+      "peak": 9.55273438
+    },
+    {
+      "scenario": 1,
+      "blocks": 12288,
+      "frames": 786432,
+      "events": 1536,
+      "hash": "3e154825",
+      "peak": 9.55273438
+    },
+    {
+      "scenario": 2,
+      "blocks": 7680,
+      "frames": 491520,
+      "events": 180,
+      "hash": "8f417d9e",
+      "peak": 9.76585102
+    },
+    {
+      "scenario": 3,
+      "blocks": 400,
+      "frames": 25600,
+      "events": 148,
+      "hash": "97f346d0",
+      "peak": 7.94873047
+    },
+    {
+      "scenario": 4,
+      "blocks": 640,
+      "frames": 40960,
+      "events": 16,
+      "hash": "f2006716",
+      "peak": 5.92578125
+    },
+    {
+      "scenario": 5,
+      "blocks": 900,
+      "frames": 57600,
+      "events": 25,
+      "hash": "8408c710",
+      "peak": 9.80556679
+    },
+    {
+      "scenario": 6,
+      "blocks": 180,
+      "frames": 18651,
+      "events": 14,
+      "hash": "67f270ca",
+      "peak": 0.0701175183
+    },
+    {
+      "scenario": 7,
+      "blocks": 180,
+      "frames": 18651,
+      "events": 28,
+      "hash": "1d1fc9b1",
+      "peak": 0.102620438
+    }
+  ],
+  "full_native": [
+    {
+      "mode": 0,
+      "frames": 168972,
+      "trace_hash": "b388f362",
+      "peak": 0.870960534
+    },
+    {
+      "mode": 1,
+      "frames": 564151,
+      "trace_hash": "e067f6e5",
+      "peak": 0.363251209
+    },
+    {
+      "mode": 2,
+      "frames": 564151,
+      "trace_hash": "ad9864c5",
+      "peak": 0.382166147
+    },
+    {
+      "mode": 3,
+      "frames": 564151,
+      "trace_hash": "e2a9a5ff",
+      "peak": 0.360722542
+    },
+    {
+      "mode": 4,
+      "frames": 564151,
+      "trace_hash": "82f5bb91",
+      "peak": 0.382166028
+    },
+    {
+      "mode": 5,
+      "frames": 564151,
+      "trace_hash": "d47d3288",
+      "peak": 0.382166624
+    },
+    {
+      "mode": 6,
+      "frames": 564151,
+      "trace_hash": "4fa9b0a2",
+      "peak": 0.382165551
+    },
+    {
+      "mode": 7,
+      "frames": 564151,
+      "trace_hash": "7898f640",
+      "peak": 0.38216579
+    },
+    {
+      "mode": 8,
+      "frames": 564151,
+      "trace_hash": "88620595",
+      "peak": 0.355569363
+    },
+    {
+      "mode": 20,
+      "frames": 564151,
+      "trace_hash": "d5b59cf1",
+      "peak": 0.382166028
+    },
+    {
+      "mode": 30,
+      "frames": 397056,
+      "trace_hash": "03e7f876",
+      "peak": 0.0571992174
+    },
+    {
+      "mode": 31,
+      "frames": 397056,
+      "trace_hash": "2cd4e83a",
+      "peak": 0
+    },
+    {
+      "mode": 9,
+      "frames": 564151,
+      "trace_hash": "0112ed0c",
+      "peak": 0.382166862
+    },
+    {
+      "mode": 10,
+      "frames": 564151,
+      "trace_hash": "5f7866c6",
+      "peak": 0.38216579
+    },
+    {
+      "mode": 11,
+      "frames": 564151,
+      "trace_hash": "d2c235f9",
+      "peak": 0.382165909
+    },
+    {
+      "mode": 12,
+      "frames": 564151,
+      "trace_hash": "6aa7d5fa",
+      "peak": 0.382166266
+    },
+    {
+      "mode": 13,
+      "frames": 564151,
+      "trace_hash": "657a6c09",
+      "peak": 0.382166505
+    },
+    {
+      "mode": 14,
+      "frames": 564151,
+      "trace_hash": "90fc2013",
+      "peak": 0.382165909
+    },
+    {
+      "mode": 15,
+      "frames": 564151,
+      "trace_hash": "06092075",
+      "peak": 0.382166266
+    },
+    {
+      "mode": 16,
+      "frames": 564151,
+      "trace_hash": "7975a1dc",
+      "peak": 0.382166386
+    },
+    {
+      "mode": 17,
+      "frames": 564151,
+      "trace_hash": "72291c74",
+      "peak": 0.382166743
+    },
+    {
+      "mode": 18,
+      "frames": 564151,
+      "trace_hash": "00a8e92d",
+      "peak": 0.382165909
+    },
+    {
+      "mode": 19,
+      "frames": 564151,
+      "trace_hash": "08796b86",
+      "peak": 0.382165909
+    }
+  ],
+  "legacy_workers": {
+    "cases": 48,
+    "frames_per_implementation": 11138400,
+    "results": [
+      "predelay=0 type=0 balance=1 serial d93ef055",
+      "predelay=0 type=0 balance=1 deferred d93ef055",
+      "predelay=0 type=0 balance=1 thread d93ef055",
+      "predelay=0 type=0 balance=1 mixed d93ef055",
+      "predelay=0 type=0 balance=2 serial d93ef055",
+      "predelay=0 type=0 balance=2 deferred d93ef055",
+      "predelay=0 type=0 balance=2 thread d93ef055",
+      "predelay=0 type=0 balance=2 mixed d93ef055",
+      "predelay=0 type=1 balance=1 serial 6ac68abe",
+      "predelay=0 type=1 balance=1 deferred 6ac68abe",
+      "predelay=0 type=1 balance=1 thread 6ac68abe",
+      "predelay=0 type=1 balance=1 mixed 6ac68abe",
+      "predelay=0 type=1 balance=2 serial 6ac68abe",
+      "predelay=0 type=1 balance=2 deferred 6ac68abe",
+      "predelay=0 type=1 balance=2 thread 6ac68abe",
+      "predelay=0 type=1 balance=2 mixed 6ac68abe",
+      "predelay=0 type=2 balance=1 serial e15e477b",
+      "predelay=0 type=2 balance=1 deferred e15e477b",
+      "predelay=0 type=2 balance=1 thread e15e477b",
+      "predelay=0 type=2 balance=1 mixed e15e477b",
+      "predelay=0 type=2 balance=2 serial e15e477b",
+      "predelay=0 type=2 balance=2 deferred e15e477b",
+      "predelay=0 type=2 balance=2 thread e15e477b",
+      "predelay=0 type=2 balance=2 mixed e15e477b",
+      "predelay=100 type=0 balance=1 serial f82821e2",
+      "predelay=100 type=0 balance=1 deferred f82821e2",
+      "predelay=100 type=0 balance=1 thread f82821e2",
+      "predelay=100 type=0 balance=1 mixed f82821e2",
+      "predelay=100 type=0 balance=2 serial f82821e2",
+      "predelay=100 type=0 balance=2 deferred f82821e2",
+      "predelay=100 type=0 balance=2 thread f82821e2",
+      "predelay=100 type=0 balance=2 mixed f82821e2",
+      "predelay=100 type=1 balance=1 serial e296d9b4",
+      "predelay=100 type=1 balance=1 deferred e296d9b4",
+      "predelay=100 type=1 balance=1 thread e296d9b4",
+      "predelay=100 type=1 balance=1 mixed e296d9b4",
+      "predelay=100 type=1 balance=2 serial e296d9b4",
+      "predelay=100 type=1 balance=2 deferred e296d9b4",
+      "predelay=100 type=1 balance=2 thread e296d9b4",
+      "predelay=100 type=1 balance=2 mixed e296d9b4",
+      "predelay=100 type=2 balance=1 serial de110743",
+      "predelay=100 type=2 balance=1 deferred de110743",
+      "predelay=100 type=2 balance=1 thread de110743",
+      "predelay=100 type=2 balance=1 mixed de110743",
+      "predelay=100 type=2 balance=2 serial de110743",
+      "predelay=100 type=2 balance=2 deferred de110743",
+      "predelay=100 type=2 balance=2 thread de110743",
+      "predelay=100 type=2 balance=2 mixed de110743"
+    ]
+  },
+  "fm_workers": {
+    "cases": 32,
+    "frames_per_implementation": 7425600,
+    "results": [
+      "songbook=0 float=0 balance=1 serial f82821e2",
+      "songbook=0 float=0 balance=1 deferred f82821e2",
+      "songbook=0 float=0 balance=1 thread f82821e2",
+      "songbook=0 float=0 balance=1 mixed f82821e2",
+      "songbook=0 float=0 balance=2 serial f82821e2",
+      "songbook=0 float=0 balance=2 deferred f82821e2",
+      "songbook=0 float=0 balance=2 thread f82821e2",
+      "songbook=0 float=0 balance=2 mixed f82821e2",
+      "songbook=0 float=1 balance=1 serial f82821e2",
+      "songbook=0 float=1 balance=1 deferred f82821e2",
+      "songbook=0 float=1 balance=1 thread f82821e2",
+      "songbook=0 float=1 balance=1 mixed f82821e2",
+      "songbook=0 float=1 balance=2 serial f82821e2",
+      "songbook=0 float=1 balance=2 deferred f82821e2",
+      "songbook=0 float=1 balance=2 thread f82821e2",
+      "songbook=0 float=1 balance=2 mixed f82821e2",
+      "songbook=2 float=0 balance=1 serial 2ad545b4",
+      "songbook=2 float=0 balance=1 deferred 2ad545b4",
+      "songbook=2 float=0 balance=1 thread 2ad545b4",
+      "songbook=2 float=0 balance=1 mixed 2ad545b4",
+      "songbook=2 float=0 balance=2 serial 2ad545b4",
+      "songbook=2 float=0 balance=2 deferred 2ad545b4",
+      "songbook=2 float=0 balance=2 thread 2ad545b4",
+      "songbook=2 float=0 balance=2 mixed 2ad545b4",
+      "songbook=2 float=1 balance=1 serial 2ad545b4",
+      "songbook=2 float=1 balance=1 deferred 2ad545b4",
+      "songbook=2 float=1 balance=1 thread 2ad545b4",
+      "songbook=2 float=1 balance=1 mixed 2ad545b4",
+      "songbook=2 float=1 balance=2 serial 2ad545b4",
+      "songbook=2 float=1 balance=2 deferred 2ad545b4",
+      "songbook=2 float=1 balance=2 thread 2ad545b4",
+      "songbook=2 float=1 balance=2 mixed 2ad545b4"
+    ],
+    "scope": "serial/deferred/pthread/busy; two placements, integer/float MarkI, legacy and actual v2 keys/bass; no lost-live-thread model"
+  },
+  "wasm": {
+    "full_existing_compared_values": 40058180,
+    "fm_compared_values": 4752216,
+    "expanded_compared_values": 44810396,
+    "http_compared_values": 1048576,
+    "factory": {
+      "initial_pack": "factory",
+      "blocks": 55000,
+      "seconds": 159.63718820861678,
+      "compared_samples": 14080000,
+      "pcm_hash": "baeff971",
+      "peak": 0.3714040517807007,
+      "blits": 4679,
+      "memory_bytes": 33554432,
+      "rust": {
+        "validations": 0,
+        "plans": 8,
+        "rejections": 0,
+        "fallbacks": 0,
+        "bass_events": 1037,
+        "sessions": 1,
+        "commands": {
+          "accepted": 961,
+          "consumed": 961,
+          "dropped": 0,
+          "high_water": 213
+        },
+        "transport": {
+          "pulses": 6215,
+          "chunks": 28982,
+          "controls": 27668
+        },
+        "sequencer": {
+          "lanes": 6222,
+          "mutations": 0,
+          "waits": 463712,
+          "boundaries": 1037
+        },
+        "factory": {
+          "accesses": 13627,
+          "codecs": 0,
+          "rejections": 0,
+          "copied_bytes": 5292
+        }
+      }
+    },
+    "saved_v1": {
+      "initial_pack": "rust/fm1-engine/tests/packs/harris-citypop.jmp",
+      "blocks": 55000,
+      "seconds": 159.63718820861678,
+      "compared_samples": 14080000,
+      "pcm_hash": "28722449",
+      "peak": 0.4303741455078125,
+      "blits": 4673,
+      "memory_bytes": 33554432,
+      "rust": {
+        "validations": 1,
+        "plans": 10,
+        "rejections": 0,
+        "fallbacks": 0,
+        "bass_events": 1033,
+        "sessions": 1,
+        "commands": {
+          "accepted": 751,
+          "consumed": 751,
+          "dropped": 0,
+          "high_water": 213
+        },
+        "transport": {
+          "pulses": 6192,
+          "chunks": 34155,
+          "controls": 27682
+        },
+        "sequencer": {
+          "lanes": 6198,
+          "mutations": 0,
+          "waits": 546480,
+          "boundaries": 1033
+        },
+        "factory": {
+          "accesses": 13893,
+          "codecs": 0,
+          "rejections": 0,
+          "copied_bytes": 5292
+        }
+      }
+    },
+    "session": {
+      "scenario": "v2-hold-idea-save-restart",
+      "render_calls": 11663,
+      "compared_samples": 6570900,
+      "seconds": 74.5,
+      "peak": 0.22903597354888916,
+      "memory_bytes": 33554432,
+      "saved_session": [
+        74,
+        83,
+        77,
+        1,
+        1,
+        11,
+        1,
+        8,
+        2,
+        1,
+        83,
+        0,
+        7,
+        1,
+        190,
+        0,
+        3,
+        83,
+        0,
+        0
+      ],
+      "rust": {
+        "validations": 1,
+        "plans": 9,
+        "rejections": 0,
+        "fallbacks": 0,
+        "bass_events": 804,
+        "sessions": 2,
+        "commands": {
+          "accepted": 319,
+          "consumed": 319,
+          "dropped": 0,
+          "high_water": 208
+        },
+        "transport": {
+          "pulses": 4819,
+          "chunks": 12684,
+          "controls": 11829
+        },
+        "sequencer": {
+          "lanes": 4824,
+          "mutations": 0,
+          "waits": 202944,
+          "boundaries": 804
+        },
+        "factory": {
+          "accesses": 1340,
+          "codecs": 0,
+          "rejections": 0,
+          "copied_bytes": 5292
+        }
+      }
+    },
+    "handoff": {
+      "snapshot_bytes": 220,
+      "published": 134,
+      "copied": 134,
+      "detail_pages": 4,
+      "staging_claims": 0,
+      "staging_activations": 0,
+      "staging_rejections": 0,
+      "memory_bytes": 33554432
+    },
+    "sequencer": {
+      "scenario": "legacy-f4-piece-genre-transport",
+      "compared_samples": 2557800,
+      "render_calls": 4231,
+      "peak": 0.4515293836593628,
+      "sequencer": {
+        "lanes": 876,
+        "waits": 96752,
+        "boundaries": 21
+      },
+      "melodic": {
+        "acid": 153,
+        "mutations": 22,
+        "pluck": 153,
+        "bass": 153,
+        "bar": 4061,
+        "midi_transport": 48413
+      },
+      "voices": {
+        "drums": 6047,
+        "pluck": 6047,
+        "drone": 4957,
+        "acid": 6047
+      },
+      "factory": {
+        "accesses": 3406,
+        "codecs": 0,
+        "rejections": 0,
+        "copied_bytes": 10512
+      },
+      "memory_bytes": 33554432
+    },
+    "factory_lines": {
+      "scenario": "stored-frozen-acid-pluck-save",
+      "compared_samples": 970200,
+      "render_calls": 1613,
+      "saved_bytes": 3836,
+      "factory": {
+        "accesses": 1400,
+        "codecs": 6,
+        "rejections": 0,
+        "copied_bytes": 5450
+      },
+      "formats": {
+        "decodes": 1,
+        "encodes": 2,
+        "rejections": 0,
+        "copied_bytes": 1304
+      },
+      "memory_bytes": 33554432
+    },
+    "fm": {
+      "scenario": "loaded-user-FM6-algorithms-key-retrigger-stop-tails",
+      "cases": [
+        {
+          "algorithm": 0,
+          "compared_samples": 1188054,
+          "render_calls": 2596,
+          "peak": 0.47700321674346924,
+          "pcm_hash": "d393a85d",
+          "fm6": [
+            9284,
+            19,
+            0,
+            19,
+            1,
+            1,
+            594176,
+            2
+          ]
+        },
+        {
+          "algorithm": 3,
+          "compared_samples": 1188054,
+          "render_calls": 2596,
+          "peak": 0.4807950258255005,
+          "pcm_hash": "d9669c55",
+          "fm6": [
+            9284,
+            19,
+            0,
+            19,
+            1,
+            1,
+            594176,
+            2
+          ]
+        },
+        {
+          "algorithm": 5,
+          "compared_samples": 1188054,
+          "render_calls": 2596,
+          "peak": 0.5013117790222168,
+          "pcm_hash": "abebadf5",
+          "fm6": [
+            9284,
+            19,
+            0,
+            19,
+            1,
+            1,
+            594176,
+            2
+          ]
+        },
+        {
+          "algorithm": 31,
+          "compared_samples": 1188054,
+          "render_calls": 2596,
+          "peak": 0.48351776599884033,
+          "pcm_hash": "cafdb8b9",
+          "fm6": [
+            9284,
+            19,
+            0,
+            19,
+            1,
+            1,
+            594176,
+            2
+          ]
+        }
+      ]
+    },
+    "effects": {
+      "scenario": "panel-effects-banks-release-tails",
+      "compared_samples": 2769480,
+      "render_calls": 5160,
+      "peak": 0.4538612365722656,
+      "pcm_hash": "fd659ab9",
+      "effects": {
+        "master_samples": 1384960,
+        "echo_samples": 1384960,
+        "tank_samples": 1384960,
+        "colour_sample_calls": 4154880
+      },
+      "memory_bytes": 33554432
+    },
+    "frozen_fm": {
+      "scenario": "loaded-user-FM6-algorithms-key-retrigger-stop-tails",
+      "cases": [
+        {
+          "algorithm": 0,
+          "compared_samples": 1188054,
+          "render_calls": 2596,
+          "peak": 0.47700321674346924,
+          "pcm_hash": "d393a85d",
+          "fm6": [
+            9284,
+            19,
+            0,
+            19,
+            1,
+            1,
+            594176,
+            2
+          ]
+        },
+        {
+          "algorithm": 3,
+          "compared_samples": 1188054,
+          "render_calls": 2596,
+          "peak": 0.4807950258255005,
+          "pcm_hash": "d9669c55",
+          "fm6": [
+            9284,
+            19,
+            0,
+            19,
+            1,
+            1,
+            594176,
+            2
+          ]
+        },
+        {
+          "algorithm": 5,
+          "compared_samples": 1188054,
+          "render_calls": 2596,
+          "peak": 0.5013117790222168,
+          "pcm_hash": "abebadf5",
+          "fm6": [
+            9284,
+            19,
+            0,
+            19,
+            1,
+            1,
+            594176,
+            2
+          ]
+        },
+        {
+          "algorithm": 31,
+          "compared_samples": 1188054,
+          "render_calls": 2596,
+          "peak": 0.48351776599884033,
+          "pcm_hash": "cafdb8b9",
+          "fm6": [
+            9284,
+            19,
+            0,
+            19,
+            1,
+            1,
+            594176,
+            2
+          ]
+        }
+      ]
+    },
+    "frozen_effects": {
+      "scenario": "panel-effects-banks-release-tails",
+      "compared_samples": 2769480,
+      "render_calls": 5160,
+      "peak": 0.4538612365722656,
+      "pcm_hash": "fd659ab9",
+      "effects": {
+        "master_samples": 1384960,
+        "echo_samples": 1384960,
+        "tank_samples": 1384960,
+        "colour_sample_calls": 4154880
+      },
+      "memory_bytes": 33554432
+    },
+    "fm_c_fallback": {
+      "scenario": "loaded-user-FM6-algorithms-key-retrigger-stop-tails",
+      "cases": [
+        {
+          "algorithm": 0,
+          "compared_samples": 1188054,
+          "render_calls": 2596,
+          "peak": 0.47700321674346924,
+          "pcm_hash": "d393a85d",
+          "fm6": [
+            9284,
+            19,
+            0,
+            19,
+            1,
+            1,
+            594176,
+            2
+          ]
+        },
+        {
+          "algorithm": 3,
+          "compared_samples": 1188054,
+          "render_calls": 2596,
+          "peak": 0.4807950258255005,
+          "pcm_hash": "d9669c55",
+          "fm6": [
+            9284,
+            19,
+            0,
+            19,
+            1,
+            1,
+            594176,
+            2
+          ]
+        },
+        {
+          "algorithm": 5,
+          "compared_samples": 1188054,
+          "render_calls": 2596,
+          "peak": 0.5013117790222168,
+          "pcm_hash": "abebadf5",
+          "fm6": [
+            9284,
+            19,
+            0,
+            19,
+            1,
+            1,
+            594176,
+            2
+          ]
+        },
+        {
+          "algorithm": 31,
+          "compared_samples": 1188054,
+          "render_calls": 2596,
+          "peak": 0.48351776599884033,
+          "pcm_hash": "cafdb8b9",
+          "fm6": [
+            9284,
+            19,
+            0,
+            19,
+            1,
+            1,
+            594176,
+            2
+          ]
+        }
+      ]
+    }
+  },
+  "artifacts": {
+    "rust": {
+      "bytes": 2425930,
+      "sha256": "3560445a91273c3f6be18be9841d37256c61efcd66a577ace516f0b8a765a320"
+    },
+    "fresh_c0": {
+      "bytes": 1940655,
+      "sha256": "69eb1658a47a893f9f329be01b728f800ae687d07e5d1634ba81d8d0060e8465"
+    },
+    "fm_only_c_fallback": {
+      "bytes": 2453012,
+      "sha256": "944ce0bbf8878c67d988cc8d8dfc14472aa898487bca396ef39a527550d4c9a5"
+    }
+  },
+  "host_cost": {
+    "scope": "WSL host release, one CPU affinity; real256-frame job, queue/span/output adapters and periodic six/five-plus-one retrigger; no physical timing claim",
+    "cases": [
+      {
+        "mode": 0,
+        "costs": {
+          "reference": {
+            "frames": 1280000,
+            "hash": "86641882",
+            "median_nanoseconds": 75121246,
+            "nanoseconds_per_frame": 58.6884734375,
+            "initialization_nanoseconds": [
+              740092,
+              455891,
+              459132
+            ],
+            "trials": [
+              75121246,
+              77725058,
+              74355314
+            ]
+          },
+          "c0": {
+            "frames": 1280000,
+            "hash": "86641882",
+            "median_nanoseconds": 75177196,
+            "nanoseconds_per_frame": 58.732184375,
+            "initialization_nanoseconds": [
+              410786,
+              442580,
+              411776
+            ],
+            "trials": [
+              75177196,
+              75536777,
+              74213625
+            ]
+          },
+          "rust": {
+            "frames": 1280000,
+            "hash": "86641882",
+            "median_nanoseconds": 125296708,
+            "nanoseconds_per_frame": 97.888053125,
+            "initialization_nanoseconds": [
+              1205817,
+              1022423,
+              1264344
+            ],
+            "trials": [
+              124775920,
+              125296708,
+              126847417
+            ]
+          }
+        },
+        "rust_over_c": 1.6679263813062952
+      },
+      {
+        "mode": 1,
+        "costs": {
+          "reference": {
+            "frames": 1280000,
+            "hash": "d76df5c8",
+            "median_nanoseconds": 93303209,
+            "nanoseconds_per_frame": 72.89313203125,
+            "initialization_nanoseconds": [
+              484423,
+              688892,
+              395103
+            ],
+            "trials": [
+              93303209,
+              96156077,
+              90574912
+            ]
+          },
+          "c0": {
+            "frames": 1280000,
+            "hash": "d76df5c8",
+            "median_nanoseconds": 93306194,
+            "nanoseconds_per_frame": 72.8954640625,
+            "initialization_nanoseconds": [
+              450873,
+              437522,
+              515271
+            ],
+            "trials": [
+              92248628,
+              93306194,
+              93461018
+            ]
+          },
+          "rust": {
+            "frames": 1280000,
+            "hash": "d76df5c8",
+            "median_nanoseconds": 94982928,
+            "nanoseconds_per_frame": 74.2054125,
+            "initialization_nanoseconds": [
+              1138873,
+              1394425,
+              1187327
+            ],
+            "trials": [
+              94982928,
+              92532962,
+              96219604
+            ]
+          }
+        },
+        "rust_over_c": 1.0180027998822634
+      },
+      {
+        "mode": 2,
+        "costs": {
+          "reference": {
+            "frames": 1280000,
+            "hash": "ab6210fc",
+            "median_nanoseconds": 104534049,
+            "nanoseconds_per_frame": 81.66722578125,
+            "initialization_nanoseconds": [
+              416148,
+              695160,
+              564380
+            ],
+            "trials": [
+              106246296,
+              104534049,
+              103193814
+            ]
+          },
+          "c0": {
+            "frames": 1280000,
+            "hash": "ab6210fc",
+            "median_nanoseconds": 104636747,
+            "nanoseconds_per_frame": 81.74745859375,
+            "initialization_nanoseconds": [
+              466109,
+              423517,
+              438130
+            ],
+            "trials": [
+              103979527,
+              104636747,
+              104913665
+            ]
+          },
+          "rust": {
+            "frames": 1280000,
+            "hash": "ab6210fc",
+            "median_nanoseconds": 149397592,
+            "nanoseconds_per_frame": 116.71686875,
+            "initialization_nanoseconds": [
+              1190360,
+              1102067,
+              986769
+            ],
+            "trials": [
+              147929339,
+              149397592,
+              155332803
+            ]
+          }
+        },
+        "rust_over_c": 1.4291763633875887
+      },
+      {
+        "mode": 3,
+        "costs": {
+          "reference": {
+            "frames": 1280000,
+            "hash": "d76df5c8",
+            "median_nanoseconds": 100918849,
+            "nanoseconds_per_frame": 78.84285078125,
+            "initialization_nanoseconds": [
+              497309,
+              537382,
+              481635
+            ],
+            "trials": [
+              107662452,
+              100847595,
+              100918849
+            ]
+          },
+          "c0": {
+            "frames": 1280000,
+            "hash": "d76df5c8",
+            "median_nanoseconds": 99569508,
+            "nanoseconds_per_frame": 77.788678125,
+            "initialization_nanoseconds": [
+              448600,
+              521588,
+              411484
+            ],
+            "trials": [
+              100762762,
+              96539269,
+              99569508
+            ]
+          },
+          "rust": {
+            "frames": 1280000,
+            "hash": "d76df5c8",
+            "median_nanoseconds": 134269942,
+            "nanoseconds_per_frame": 104.8983921875,
+            "initialization_nanoseconds": [
+              1498981,
+              1117618,
+              1211066
+            ],
+            "trials": [
+              143633607,
+              133202994,
+              134269942
+            ]
+          }
+        },
+        "rust_over_c": 1.3304743695600412
+      },
+      {
+        "mode": 4,
+        "costs": {
+          "reference": {
+            "frames": 1280000,
+            "hash": "4f9f38bf",
+            "median_nanoseconds": 169938842,
+            "nanoseconds_per_frame": 132.7647203125,
+            "initialization_nanoseconds": [
+              519653,
+              455672,
+              731360
+            ],
+            "trials": [
+              169630526,
+              169938842,
+              170363286
+            ]
+          },
+          "c0": {
+            "frames": 1280000,
+            "hash": "4f9f38bf",
+            "median_nanoseconds": 169936615,
+            "nanoseconds_per_frame": 132.76298046875,
+            "initialization_nanoseconds": [
+              399102,
+              594611,
+              490179
+            ],
+            "trials": [
+              169936615,
+              166862510,
+              171002682
+            ]
+          },
+          "rust": {
+            "frames": 1280000,
+            "hash": "4f9f38bf",
+            "median_nanoseconds": 165617731,
+            "nanoseconds_per_frame": 129.38885234375,
+            "initialization_nanoseconds": [
+              1265131,
+              1131684,
+              997452
+            ],
+            "trials": [
+              165617731,
+              165698159,
+              165296881
+            ]
+          }
+        },
+        "rust_over_c": 0.9745725524009397
+      }
+    ]
+  },
+  "qualified_source_sha256": {
+    "firmware/src/dsp/amb.c": "0c8b20243647ec68bf032eff752b17075b11c45c60a9acea0afb4e6eaeb3c220",
+    "firmware/src/dsp/fm6.inc": "b5c7bcf04c073fd1295491bf9d9ee805dde18fab1a4c3cd1a95fdff8510f8e2a",
+    "firmware/src/dsp/jam_runtime.inc": "363598f3e6e3191f48f0d877822f07a93e89a073c22a4483c4deaf695a1832ec",
+    "firmware/src/dsp/rust_fm6.h": "6d014305e59b0bb048dcc9b1c2235a93688cc95019718d48331fdcdb4528eccb",
+    "rust/fm1-engine/src/fm6/envelopes.rs": "27614fa411edac524117753639da07e6d91cfd4b863663d8168df9c7acc73eeb",
+    "rust/fm1-engine/src/fm6/frames.rs": "4a8d927cc605a1f44640b638d399ca092a1d8a6afdc22ea48636c3572caa6538",
+    "rust/fm1-engine/src/fm6/lfo.rs": "d7f608013b9589a08b0eba5483691184586868c844d83cf65a9485b8e5bc30ab",
+    "rust/fm1-engine/src/fm6/mod.rs": "3ced8e933d53bcf3707e3cb8a5ec3bbd7ef4eb3c25023b615c0d344c37e444b7",
+    "rust/fm1-engine/src/fm6/operators.rs": "39ec86f65162d34604d076c408054d96a3b12c2726e0129d7a260974ba3de6ea",
+    "rust/fm1-engine/src/fm6/plan.rs": "cf4544319645fa0c3d5f7f25c33a2191f3d5da1c00fc0e74288fbce9e74d125c",
+    "rust/fm1-engine/src/fm6/pool.rs": "2a05f445f666ef49b69c35ab102bdb3c54ac519b4d3075141df8183d5304fa76",
+    "rust/fm1-engine/src/fm6/program.rs": "a787ff12cb22d7c791ce3b23d27e609eeabf017de0bd8611cfb3d38e55dbbd1e",
+    "rust/fm1-engine/src/fm6/scaling.rs": "fe05a45b669131a17e175b29d6e37d1000e5c88c1c635090a9cc54e9ffed3469",
+    "rust/fm1-engine/src/fm6/tables.rs": "3abe35b2d88a9aaebf7761b18a06836166be7e2829bb2b18d38c7dafbef5cca9",
+    "rust/fm1-engine/src/fm6/types.rs": "93778b334145797f987811c96ae4b4bc356bfec7ac2f12a5a991c8f326d210be",
+    "rust/fm1-engine/src/fm6/voice.rs": "8b2e28cba026ec97027fef1581962e221b45d0a720e02eb9237c71abeba70060",
+    "rust/fm1-jam-bridge/src/fm6.rs": "c018d6d16839dba3f74dafdfd61daa14da23c00b24820078c7f4dd67d1485f75",
+    "tests/host/emu_fm6_test.mjs": "ac9520294319e79f61468d35dfb0e9c723aa8c6885825cfe956c76725897792b",
+    "tests/reference/fm6.sha256": "f35d9a9a3b6bf049c30f44cea5774914b8084652d03e7deb0248eddb322858ff",
+    "tests/reference/fm6_benchmark.c": "8a7c4908826e825c5aec7c79686d32d14d388c5fc46b191fee3fb22145633afa",
+    "tests/reference/fm6_benchmark.py": "098b8490d9482cfcabe731f572e70709815b2c8a8b7b28283706f7ebeff6b740",
+    "tests/reference/fm6_components_reference.c": "12932dd67d7748759a082b77e7e365e26625f72a6b306bfc302262cc5b9ae405",
+    "tests/reference/fm6_runtime_reference.c": "685f75cfed3f180024dea7ec3fa1707f652a082826705ecf1e305a14a59a3c28",
+    "tests/reference/fm6_tables_reference.c": "a4581b099da366b17682a1681e05f143115a43a1dcaa1d866c621a3d7c8f2525",
+    "tests/rust_emulator_parity.sh": "36cf419b42559878bc3952cf2da2b88cb72aafa71fc17aad15104b33fe0ee4cf",
+    "tests/rust_fm6_benchmark.sh": "1a5a849139bb5d8a3ed82c30dd5ef361c5579727adf5cfbafb68ae65b9a43379",
+    "tests/rust_fm6_parity.sh": "47b2d8bf1b0bd33fc5f839f4aeb4317b8ec20647a749560cd80c21fb80f9612f",
+    "tests/rust_fm6_tables.sh": "29415bf338cf75cebc7ea9fa8e75e582d1fafa544c47e49208d4a95c606b21dd",
+    "tests/rust_fm6_workers.sh": "7c988e4b9779ccf0ce8d0514950f6a4586b462906d693e44eb0fdbea87bf34fd",
+    "tools/import_fm6_tables.py": "21bd92210ca723ceca9aaecefdb591175ec08928eb25f2e241ee4c7e625bd273",
+    "web/emu/build.sh": "e4527120b581d2433ae779411bff9992f8fbb1cbccb9ac25bed274289f28f82d",
+    "web/emu/build_clang.sh": "c68b858f561a095d9c71c70cb7f8099febdbea1ff048893b1311b8ea8f631144"
+  },
+  "remaining_acceptance": [
+    "PI32 target link/map and pool reserve",
+    "soft-double and library-symbol audit",
+    "interrupt/worker stack high-water and worst-case cycle/deadline measurements",
+    "physical worker exclusion and retirement",
+    "physical output/listening qualification"
+  ],
+  "preserved_compatibility_quirks": [
+    "strict unsigned age endpoint: UINT32_MAX bass candidate leaves default slot0 selection",
+    "reset/program changes retain their differing bass-LFO/age/cache/scratch behavior",
+    "inactive current program zeros keyboard queue but retains operator sum",
+    "default Songbook boot refuses pending legacy user commits while staging union serves bass; WASM loaded-user test uses saved legacy/off session and seed0"
+  ],
+  "component_vectors": 6304,
+  "native_fm_frames": 2225846,
+  "full_native_frames": 12246104
+}

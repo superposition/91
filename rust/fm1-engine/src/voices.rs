@@ -3,6 +3,7 @@
 use crate::effects::math::{flush, max, min, tanh};
 pub mod acid;
 pub mod drone;
+pub mod pad;
 
 pub fn blep_saw(t: f32, dt: f32) -> f32 {
     let mut y = 2.0 * t - 1.0;
