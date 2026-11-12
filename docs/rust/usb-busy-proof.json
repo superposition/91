@@ -1,0 +1,36 @@
+{
+  "ticket": 19,
+  "base": "bf70b1f35ead55a1145d7495d69c6a58132dbf07",
+  "intentional_frozen_difference": "F0 must preserve dx_pos while dx_state is ready; only an admitted new collection resets it",
+  "added_state_bytes": 0,
+  "hardware_accessed": false,
+  "physical_qualified": false,
+  "frozen_witness_and_actual_busy_retry": "passed",
+  "source_sha256": {
+    "firmware/src/usb.c": "8350d5419980524e8034ee2d194b824afc81023d046d2adc571bff8a129f08a1",
+    "tests/reference/usb_busy_dispatch_reference.py": "eb4cd77b0a3c72f4042557a6bbbe67e71d84749b86890d287bffa1a43992943f",
+    "tests/rust_usb_busy_dispatch.sh": "913f9c77854a5f66f562a4d78893ee0906c25024fab2cd4886713c5385e46065"
+  },
+  "evidence": [
+    {
+      "path": "build/usb-busy.log",
+      "sha256": "351c8ef558ee762a8a24ed120fa1b3a157bb39b4f695b99314949c5b49ea50c1",
+      "bytes": 205
+    },
+    {
+      "path": "build/usb-busy/source-verification.log",
+      "sha256": "02103818921d558fa092601f4329ba6740cf2ad792676fb0331e24f2fadfbd85",
+      "bytes": 12678
+    },
+    {
+      "path": "build/usb-busy/frozen/test.c",
+      "sha256": "fd760302450614cde70145ea0c5b691442296e912b4d15d199ccec44c6949f27",
+      "bytes": 24269
+    },
+    {
+      "path": "build/usb-busy/current/test.c",
+      "sha256": "c59aa72ceadcca730dd8f72d9cb3f4010c825a24c955c8ded2dde3e4d2354951",
+      "bytes": 24453
+    }
+  ]
+}
