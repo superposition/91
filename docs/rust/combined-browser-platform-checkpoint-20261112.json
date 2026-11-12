@@ -1,0 +1,526 @@
+{
+  "tested_source": "67220891977203126576acc47e90af4dcaab8469",
+  "windows_tests": 170,
+  "native": {
+    "cases": 97,
+    "historical_cases": 94,
+    "known_failures": 19,
+    "artifact_count": 538,
+    "audio_frames": 80748288,
+    "artifact_bytes": 753826710
+  },
+  "focused_platform": {
+    "trace": {
+      "bytes": 64474894,
+      "sha256": "a865396389bdc2ec682c3d6e32d726817d4120bbe1e88b5ac73820c9afdd507d"
+    },
+    "input_rounds": 1024,
+    "objects": 33,
+    "lengths": 7,
+    "capacities": 6,
+    "frame_snapshots": 512,
+    "native_c0_rust_and_wasm_c0_rust_exact": true
+  },
+  "wasm": [
+    {
+      "file": "audio-views.json",
+      "proof": {
+        "variable_render_sizes": [
+          0,
+          1,
+          3,
+          31,
+          127,
+          128,
+          129,
+          255,
+          256,
+          257,
+          1023,
+          1024,
+          1025,
+          2048,
+          4097
+        ],
+        "compared_values": 665856,
+        "audio_view_allocations": 0,
+        "memory_growth": "rejected",
+        "scope": "Audio copying/WASI views; frame and store message serialization remains browser binding work"
+      }
+    },
+    {
+      "file": "controls.json",
+      "proof": {
+        "scenario": "panel-encoder-acceleration-and-nested-frame-input",
+        "compared_samples": 619164,
+        "actual_encoder_witness": 1,
+        "malformed_rejections": 1,
+        "exports": 24,
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "dj.json",
+      "proof": {
+        "scenario": "all27-dj-keys-polyphony-release-and-stop",
+        "compared_samples": 2651292,
+        "render_calls": 6312,
+        "peak": 0.6429266929626465,
+        "pcm_hash": "34cf7253",
+        "dj": {
+          "accepted_notes": 36,
+          "voice_samples": 1522343
+        },
+        "memory_bytes": 33554432,
+        "public_exports": 24
+      }
+    },
+    {
+      "file": "effects.json",
+      "proof": {
+        "scenario": "panel-effects-banks-release-tails",
+        "compared_samples": 2769480,
+        "render_calls": 5160,
+        "peak": 0.4538612365722656,
+        "pcm_hash": "fd659ab9",
+        "effects": {
+          "master_samples": 1384960,
+          "echo_samples": 1384960,
+          "tank_samples": 1384960,
+          "colour_sample_calls": 4154880
+        },
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "factory-lines.json",
+      "proof": {
+        "scenario": "stored-frozen-acid-pluck-save",
+        "compared_samples": 970200,
+        "render_calls": 1613,
+        "saved_bytes": 3836,
+        "factory": {
+          "accesses": 1184,
+          "codecs": 6,
+          "rejections": 0,
+          "copied_bytes": 230
+        },
+        "formats": {
+          "decodes": 0,
+          "encodes": 0,
+          "rejections": 0,
+          "copied_bytes": 0
+        },
+        "persistence": {
+          "project_calls": 12,
+          "object_saves": 2,
+          "bytes": 6884
+        },
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "factory.json",
+      "proof": {
+        "initial_pack": "factory",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "baeff971",
+        "peak": 0.3714040517807007,
+        "blits": 4679,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 0,
+          "plans": 8,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1037,
+          "sessions": 1,
+          "commands": {
+            "accepted": 961,
+            "consumed": 961,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6215,
+            "chunks": 28982,
+            "controls": 27668
+          },
+          "sequencer": {
+            "lanes": 6222,
+            "mutations": 0,
+            "waits": 463712,
+            "boundaries": 1037
+          },
+          "factory": {
+            "accesses": 13390,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 72
+          }
+        }
+      }
+    },
+    {
+      "file": "fm6.json",
+      "proof": {
+        "scenario": "loaded-user-FM6-algorithms-key-retrigger-stop-tails",
+        "cases": [
+          {
+            "algorithm": 0,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.47700321674346924,
+            "pcm_hash": "d393a85d",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 3,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.4807950258255005,
+            "pcm_hash": "d9669c55",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 5,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.5013117790222168,
+            "pcm_hash": "abebadf5",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 31,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.48351776599884033,
+            "pcm_hash": "cafdb8b9",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "file": "handoff.json",
+      "proof": {
+        "snapshot_bytes": 220,
+        "published": 134,
+        "copied": 134,
+        "detail_pages": 4,
+        "staging_claims": 0,
+        "staging_activations": 0,
+        "staging_rejections": 0,
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "project.json",
+      "proof": {
+        "legacy_project": [
+          {
+            "scenario": "recipes",
+            "compared_samples": 904050,
+            "render_calls": 1494,
+            "pcm_hash": "d5eb8651",
+            "project_calls": 7,
+            "object_saves": 0
+          },
+          {
+            "scenario": "corrupt-record",
+            "compared_samples": 904050,
+            "render_calls": 1494,
+            "pcm_hash": "d5eb8651",
+            "project_calls": 7,
+            "object_saves": 0
+          },
+          {
+            "scenario": "saved-factory-reset",
+            "compared_samples": 1177470,
+            "render_calls": 1950,
+            "pcm_hash": "d23160e5",
+            "project_calls": 10,
+            "object_saves": 2
+          }
+        ],
+        "frozen_reference": null
+      }
+    },
+    {
+      "file": "runner.json",
+      "proof": {
+        "scenario": "kick-runner-steering-restart-pause-exit",
+        "compared_samples": 4368546,
+        "render_calls": 10512,
+        "peak": 0.20634067058563232,
+        "pcm_hash": "cdcd5715",
+        "application_calls": 135456,
+        "public_exports": 24,
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "saved-v1.json",
+      "proof": {
+        "initial_pack": "rust/fm1-engine/tests/packs/harris-citypop.jmp",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "28722449",
+        "peak": 0.4303741455078125,
+        "blits": 4673,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 1,
+          "plans": 10,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1033,
+          "sessions": 1,
+          "commands": {
+            "accepted": 751,
+            "consumed": 751,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6192,
+            "chunks": 34155,
+            "controls": 27682
+          },
+          "sequencer": {
+            "lanes": 6198,
+            "mutations": 0,
+            "waits": 546480,
+            "boundaries": 1033
+          },
+          "factory": {
+            "accesses": 13656,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 72
+          }
+        }
+      }
+    },
+    {
+      "file": "sequencer.json",
+      "proof": {
+        "scenario": "legacy-f4-piece-genre-transport",
+        "compared_samples": 3475080,
+        "render_calls": 5744,
+        "peak": 0.4515293836593628,
+        "sequencer": {
+          "lanes": 1320,
+          "waits": 134032,
+          "boundaries": 21
+        },
+        "melodic": {
+          "acid": 227,
+          "mutations": 27,
+          "pluck": 227,
+          "bass": 227,
+          "bar": 6017,
+          "midi_transport": 67070
+        },
+        "voices": {
+          "drums": 8377,
+          "pluck": 8377,
+          "drone": 7287,
+          "acid": 8377,
+          "pad": 8377,
+          "pad_bus": 8377,
+          "controls": 6880,
+          "configs": 40795
+        },
+        "factory": {
+          "accesses": 3950,
+          "codecs": 0,
+          "rejections": 0,
+          "copied_bytes": 72
+        },
+        "harmony": [
+          6986,
+          35,
+          2,
+          0
+        ],
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "session.json",
+      "proof": {
+        "scenario": "v2-hold-idea-save-restart",
+        "render_calls": 11663,
+        "compared_samples": 6570900,
+        "seconds": 74.5,
+        "peak": 0.22903597354888916,
+        "memory_bytes": 33554432,
+        "saved_session": [
+          74,
+          83,
+          77,
+          1,
+          1,
+          11,
+          1,
+          8,
+          2,
+          1,
+          83,
+          0,
+          7,
+          1,
+          190,
+          0,
+          3,
+          83,
+          0,
+          0
+        ],
+        "rust": {
+          "validations": 1,
+          "plans": 9,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 804,
+          "sessions": 2,
+          "commands": {
+            "accepted": 319,
+            "consumed": 319,
+            "dropped": 0,
+            "high_water": 208
+          },
+          "transport": {
+            "pulses": 4819,
+            "chunks": 12684,
+            "controls": 11829
+          },
+          "sequencer": {
+            "lanes": 4824,
+            "mutations": 0,
+            "waits": 202944,
+            "boundaries": 804
+          },
+          "factory": {
+            "accesses": 1103,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 72
+          }
+        }
+      }
+    },
+    {
+      "file": "worker.json",
+      "proof": {
+        "scenario": "serialized-generation-stage-ownership",
+        "compared_samples": 1278900,
+        "render_calls": 2361,
+        "peak": 0.47122979164123535,
+        "pcm_hash": "f99f9451",
+        "worker": [
+          2710,
+          2710,
+          5420,
+          2710,
+          2710,
+          0,
+          0,
+          0
+        ],
+        "memory_bytes": 33554432
+      }
+    }
+  ],
+  "artifacts": {
+    "build/round17-windows.log": {
+      "bytes": 29352,
+      "sha256": "9a2649d8c44948de8d38dd661828cda78cb1c73416d42f97e861d40e1b720373"
+    },
+    "build/round17-runtime.log": {
+      "bytes": 79542,
+      "sha256": "ca554f462c97bf729d05ec1478ca697fecba393cf8f5394845d01a3f48c4903e"
+    },
+    "build/web-platform-focused-rerun.log": {
+      "bytes": 470,
+      "sha256": "6179a7f369c91ccdd1002cdf3bac1f22ee3067fa56dbd57b1fe8fd3b41df52bb"
+    },
+    "build/emu-parity/rust.wasm": {
+      "bytes": 2385996,
+      "sha256": "18e8cbfdbfb9aea20c1aa44b8d76435f45b22745f0c891f3ea22d91ba797e42b"
+    },
+    "build/emu-parity/reference.wasm": {
+      "bytes": 1945215,
+      "sha256": "3a2c4f8ec46fd3b20efea9a2b8cdc6d99e9af5d487aeac2d0f2757147ec04145"
+    },
+    "build/simulator/results.json": {
+      "bytes": 85751,
+      "sha256": "96160e11317ba808656457924158dabc06aa6a54b99ad69ebaec55680c85ec0e"
+    },
+    "build/simulator/repeat-results.json": {
+      "bytes": 3532,
+      "sha256": "55eb0568e9ca51f75889c66a055403518fd5c885564f6ae228f69a96dda1b422"
+    }
+  },
+  "architecture": {
+    "shared_model": "Native and browser use host-platform Controls,StoreMeta,frame operations and Schedule; physical MCU excludes this host-only clock/model.",
+    "browser": "Rust platform metadata,31x3840-byte object bank,240x240 RGB565 frame and512-word render root; no duplicate native/browser runtime payload within a selected host.",
+    "callbacks": "Six immutable callbacks; no Rust state borrow crosses boot/service/render/frame/input/time observation; foreign callbacks may reenter leaf operations.",
+    "abi": "24 public WASM exports and fixed32MiB memory retained; C application thunks and clock_gettime observation remain.",
+    "raw_outputs": "Actual native/browser store reads initialize foreign raw output without constructing a Rust reference to uninitialized bytes; retained frame/store pointers derive from private allocation roots."
+  },
+  "validation": [
+    "Windows workspace+web,fmt,strict Clippy,no_std pi32v2 and release WASM checks pass.",
+    "Fresh full97 five-way native scenarios,3 repeat sweeps and129 damaged stores match.",
+    "Full instrument WASM exact PCM,HTTP fallback,controls,browser API lifecycle and cached views pass.",
+    "Strict-provenance Miri passes actual browser callback reentry/retained frame+store roots/uninitialized output,existing audio roots and native store ABI."
+  ],
+  "harness_correction": "Initial focused run mixed native fixture compiled before an evaluation-order repair with WASM compiled afterward; rebuilt all from stable source. The mismatch reporter now compares each emitted chunk and reports its first differing byte instead of allocating an enormous assertion diff.",
+  "limits": [
+    "Actual desktop/mobile AudioWorklet/load/persistence qualification remains separate from API doubles.",
+    "C application/controller/page glue remains under15/16.",
+    "This checkpoint retains frame/store serialization and BigInt timestamp work in the audio callback; a separate binding checkpoint removes it.",
+    "Legacy u32-millisecond/f64-deadline49.7-day wrap limit is preserved.",
+    "Live preview and physical known-working0.3.3 were not changed."
+  ]
+}
