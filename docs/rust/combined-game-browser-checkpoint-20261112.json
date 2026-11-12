@@ -1,0 +1,625 @@
+{
+  "source": "2039162dbf772b0614f763065aa57f13e3172007",
+  "target_compiler_source": "1feee6bcd1b1f98d6239b0bcb13e052facba3193",
+  "source_followup": "Explicit u32 output-mask literal widths repair target compiler inference; standard Rust had already inferred u32. Complete generated-C policy/pixel corpora validate this follow-up against C0.",
+  "windows": [
+    {
+      "command": "cargo +1.94.1 fmt --all --check",
+      "passed": 0
+    },
+    {
+      "command": "cargo +1.94.1 test --workspace --features fm1-jam-bridge/web --locked",
+      "passed": 144
+    },
+    {
+      "command": "cargo +1.94.1 clippy --workspace --all-targets --features fm1-jam-bridge/web --locked -- -D warnings",
+      "passed": 0
+    },
+    {
+      "command": "cargo +1.94.1 check --release -p fm1-jam-bridge --no-default-features --features pi32v2 --target i686-pc-windows-msvc --locked",
+      "passed": 0
+    },
+    {
+      "command": "cargo +1.94.1 check --release -p fm1-jam-bridge --no-default-features --features web --target wasm32-unknown-unknown --locked",
+      "passed": 0
+    }
+  ],
+  "native": {
+    "cases": 97,
+    "historical_cases": 94,
+    "known_failures": 19,
+    "artifact_count": 538,
+    "audio_frames": 80748288,
+    "artifact_bytes": 753826710,
+    "results": {
+      "bytes": 85751,
+      "sha256": "96160e11317ba808656457924158dabc06aa6a54b99ad69ebaec55680c85ec0e"
+    },
+    "repeat": {
+      "bytes": 3532,
+      "sha256": "55eb0568e9ca51f75889c66a055403518fd5c885564f6ae228f69a96dda1b422"
+    }
+  },
+  "wasm": [
+    {
+      "file": "build/emu-parity/dj.json",
+      "compared_values": 2651292,
+      "result": {
+        "scenario": "all27-dj-keys-polyphony-release-and-stop",
+        "compared_samples": 2651292,
+        "render_calls": 6312,
+        "peak": 0.6429266929626465,
+        "pcm_hash": "34cf7253",
+        "dj": {
+          "accepted_notes": 36,
+          "voice_samples": 1522343
+        },
+        "memory_bytes": 33554432,
+        "public_exports": 24
+      }
+    },
+    {
+      "file": "build/emu-parity/effects.json",
+      "compared_values": 2769480,
+      "result": {
+        "scenario": "panel-effects-banks-release-tails",
+        "compared_samples": 2769480,
+        "render_calls": 5160,
+        "peak": 0.4538612365722656,
+        "pcm_hash": "fd659ab9",
+        "effects": {
+          "master_samples": 1384960,
+          "echo_samples": 1384960,
+          "tank_samples": 1384960,
+          "colour_sample_calls": 4154880
+        },
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "build/emu-parity/factory-lines.json",
+      "compared_values": 970200,
+      "result": {
+        "scenario": "stored-frozen-acid-pluck-save",
+        "compared_samples": 970200,
+        "render_calls": 1613,
+        "saved_bytes": 3836,
+        "factory": {
+          "accesses": 1184,
+          "codecs": 6,
+          "rejections": 0,
+          "copied_bytes": 230
+        },
+        "formats": {
+          "decodes": 0,
+          "encodes": 0,
+          "rejections": 0,
+          "copied_bytes": 0
+        },
+        "persistence": {
+          "project_calls": 12,
+          "object_saves": 2,
+          "bytes": 6884
+        },
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "build/emu-parity/factory.json",
+      "compared_values": 14080000,
+      "result": {
+        "initial_pack": "factory",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "baeff971",
+        "peak": 0.3714040517807007,
+        "blits": 4679,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 0,
+          "plans": 8,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1037,
+          "sessions": 1,
+          "commands": {
+            "accepted": 961,
+            "consumed": 961,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6215,
+            "chunks": 28982,
+            "controls": 27668
+          },
+          "sequencer": {
+            "lanes": 6222,
+            "mutations": 0,
+            "waits": 463712,
+            "boundaries": 1037
+          },
+          "factory": {
+            "accesses": 13390,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 72
+          }
+        }
+      }
+    },
+    {
+      "file": "build/emu-parity/fm6.json",
+      "compared_values": 4752216,
+      "result": {
+        "scenario": "loaded-user-FM6-algorithms-key-retrigger-stop-tails",
+        "cases": [
+          {
+            "algorithm": 0,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.47700321674346924,
+            "pcm_hash": "d393a85d",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 3,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.4807950258255005,
+            "pcm_hash": "d9669c55",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 5,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.5013117790222168,
+            "pcm_hash": "abebadf5",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 31,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.48351776599884033,
+            "pcm_hash": "cafdb8b9",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "file": "build/emu-parity/handoff.json",
+      "compared_values": 0,
+      "result": {
+        "snapshot_bytes": 220,
+        "published": 134,
+        "copied": 134,
+        "detail_pages": 4,
+        "staging_claims": 0,
+        "staging_activations": 0,
+        "staging_rejections": 0,
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "build/emu-parity/project.json",
+      "compared_values": 2985570,
+      "result": {
+        "legacy_project": [
+          {
+            "scenario": "recipes",
+            "compared_samples": 904050,
+            "render_calls": 1494,
+            "pcm_hash": "d5eb8651",
+            "project_calls": 7,
+            "object_saves": 0
+          },
+          {
+            "scenario": "corrupt-record",
+            "compared_samples": 904050,
+            "render_calls": 1494,
+            "pcm_hash": "d5eb8651",
+            "project_calls": 7,
+            "object_saves": 0
+          },
+          {
+            "scenario": "saved-factory-reset",
+            "compared_samples": 1177470,
+            "render_calls": 1950,
+            "pcm_hash": "d23160e5",
+            "project_calls": 10,
+            "object_saves": 2
+          }
+        ],
+        "frozen_reference": null
+      }
+    },
+    {
+      "file": "build/emu-parity/runner.json",
+      "compared_values": 4368546,
+      "result": {
+        "scenario": "kick-runner-steering-restart-pause-exit",
+        "compared_samples": 4368546,
+        "render_calls": 10512,
+        "peak": 0.20634067058563232,
+        "pcm_hash": "cdcd5715",
+        "game_calls": 132885,
+        "public_exports": 24,
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "build/emu-parity/saved-v1.json",
+      "compared_values": 14080000,
+      "result": {
+        "initial_pack": "rust/fm1-engine/tests/packs/harris-citypop.jmp",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "28722449",
+        "peak": 0.4303741455078125,
+        "blits": 4673,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 1,
+          "plans": 10,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1033,
+          "sessions": 1,
+          "commands": {
+            "accepted": 751,
+            "consumed": 751,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6192,
+            "chunks": 34155,
+            "controls": 27682
+          },
+          "sequencer": {
+            "lanes": 6198,
+            "mutations": 0,
+            "waits": 546480,
+            "boundaries": 1033
+          },
+          "factory": {
+            "accesses": 13656,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 72
+          }
+        }
+      }
+    },
+    {
+      "file": "build/emu-parity/sequencer.json",
+      "compared_values": 3475080,
+      "result": {
+        "scenario": "legacy-f4-piece-genre-transport",
+        "compared_samples": 3475080,
+        "render_calls": 5744,
+        "peak": 0.4515293836593628,
+        "sequencer": {
+          "lanes": 1320,
+          "waits": 134032,
+          "boundaries": 21
+        },
+        "melodic": {
+          "acid": 227,
+          "mutations": 27,
+          "pluck": 227,
+          "bass": 227,
+          "bar": 6017,
+          "midi_transport": 67070
+        },
+        "voices": {
+          "drums": 8377,
+          "pluck": 8377,
+          "drone": 7287,
+          "acid": 8377,
+          "pad": 8377,
+          "pad_bus": 8377,
+          "controls": 6880,
+          "configs": 40795
+        },
+        "factory": {
+          "accesses": 3950,
+          "codecs": 0,
+          "rejections": 0,
+          "copied_bytes": 72
+        },
+        "harmony": [
+          6986,
+          35,
+          2,
+          0
+        ],
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "build/emu-parity/session.json",
+      "compared_values": 6570900,
+      "result": {
+        "scenario": "v2-hold-idea-save-restart",
+        "render_calls": 11663,
+        "compared_samples": 6570900,
+        "seconds": 74.5,
+        "peak": 0.22903597354888916,
+        "memory_bytes": 33554432,
+        "saved_session": [
+          74,
+          83,
+          77,
+          1,
+          1,
+          11,
+          1,
+          8,
+          2,
+          1,
+          83,
+          0,
+          7,
+          1,
+          190,
+          0,
+          3,
+          83,
+          0,
+          0
+        ],
+        "rust": {
+          "validations": 1,
+          "plans": 9,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 804,
+          "sessions": 2,
+          "commands": {
+            "accepted": 319,
+            "consumed": 319,
+            "dropped": 0,
+            "high_water": 208
+          },
+          "transport": {
+            "pulses": 4819,
+            "chunks": 12684,
+            "controls": 11829
+          },
+          "sequencer": {
+            "lanes": 4824,
+            "mutations": 0,
+            "waits": 202944,
+            "boundaries": 804
+          },
+          "factory": {
+            "accesses": 1103,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 72
+          }
+        }
+      }
+    },
+    {
+      "file": "build/emu-parity/worker.json",
+      "compared_values": 1278900,
+      "result": {
+        "scenario": "serialized-generation-stage-ownership",
+        "compared_samples": 1278900,
+        "render_calls": 2361,
+        "peak": 0.47122979164123535,
+        "pcm_hash": "f99f9451",
+        "worker": [
+          2710,
+          2710,
+          5420,
+          2710,
+          2710,
+          0,
+          0,
+          0
+        ],
+        "memory_bytes": 33554432
+      }
+    }
+  ],
+  "wasm_compared_values": 57982184,
+  "http_compared_values": 1048576,
+  "audio_views": {
+    "variable_render_sizes": [
+      0,
+      1,
+      3,
+      31,
+      127,
+      128,
+      129,
+      255,
+      256,
+      257,
+      1023,
+      1024,
+      1025,
+      2048,
+      4097
+    ],
+    "compared_values": 665856,
+    "audio_view_allocations": 0,
+    "memory_growth": "rejected",
+    "scope": "Audio copying/WASI views; frame and store message serialization remains browser binding work"
+  },
+  "generated_c": {
+    "compiler_patch": "9c6321c51f606dfc7b60151020023c8b01d311b7e8f11577bf2057f912ad9d26",
+    "six_vendor_lto_crates": true,
+    "natural_i386_no_packing": true,
+    "all_layout_asserts": true,
+    "factory": {
+      "blocks": 55000,
+      "pcm_hash": "baeff971",
+      "blits": 4679,
+      "midi_messages": 11531,
+      "clock_messages": 6215
+    },
+    "effects": [
+      {
+        "mode": 0,
+        "frames": 168972,
+        "trace_hash": "b388f362",
+        "peak": 0.870960534
+      },
+      {
+        "mode": 1,
+        "frames": 564151,
+        "trace_hash": "e067f6e5",
+        "peak": 0.363251209
+      },
+      {
+        "mode": 2,
+        "frames": 564151,
+        "trace_hash": "ad9864c5",
+        "peak": 0.382166147
+      },
+      {
+        "mode": 3,
+        "frames": 564151,
+        "trace_hash": "e2a9a5ff",
+        "peak": 0.360722542
+      },
+      {
+        "mode": 4,
+        "frames": 564151,
+        "trace_hash": "82f5bb91",
+        "peak": 0.382166028
+      },
+      {
+        "mode": 5,
+        "frames": 564151,
+        "trace_hash": "d47d3288",
+        "peak": 0.382166624
+      },
+      {
+        "mode": 6,
+        "frames": 564151,
+        "trace_hash": "4fa9b0a2",
+        "peak": 0.382165551
+      },
+      {
+        "mode": 7,
+        "frames": 564151,
+        "trace_hash": "7898f640",
+        "peak": 0.38216579
+      },
+      {
+        "mode": 8,
+        "frames": 564151,
+        "trace_hash": "88620595",
+        "peak": 0.355569363
+      },
+      {
+        "mode": 20,
+        "frames": 564151,
+        "trace_hash": "d5b59cf1",
+        "peak": 0.382166028
+      },
+      {
+        "mode": 30,
+        "frames": 397056,
+        "trace_hash": "03e7f876",
+        "peak": 0.0571992174
+      },
+      {
+        "mode": 31,
+        "frames": 397056,
+        "trace_hash": "2cd4e83a",
+        "peak": 0
+      }
+    ],
+    "effects_frames": 6040443,
+    "runner_policy": {
+      "bytes": 43026432,
+      "sha256": "7907db2ba4280e8624e6621ef508ffee75b63836ccf0461ce7e5a2845317fe42"
+    },
+    "runner_pixels": {
+      "bytes": 59015168,
+      "sha256": "aa8dbf8c3be2c5f4355385674d9d357f7c3eeb20ad95e1dcd406a71012cc1e44"
+    }
+  },
+  "miri": "Strict-provenance retained raw output views passed on combined game/browser code with nightly-2026-08-28",
+  "irq": "Actual header,65536 nested incoming-ICFG cases pass; HAL remains disabled and no new physical IRQ/latency claim",
+  "prior_hosted_ci": {
+    "source": "8f1c7092f8113bf179e7a84d01ef69f4c8640ea1",
+    "run": "https://github.com/superposition/91/actions/runs/43305418593",
+    "all_five_jobs": "success"
+  },
+  "files": {
+    "build/round13-windows.log": {
+      "bytes": 20529,
+      "sha256": "ba5c3deb2f20b7842c4ab84d7a77594770ace5cd790abb50de5756a1da612772"
+    },
+    "build/round13-native.log": {
+      "bytes": 73428,
+      "sha256": "d1977fb5574ce0a8da8ade9db162f3118b0233bb6d0e176064a24189c366c81e"
+    },
+    "build/round13-wasm.log": {
+      "bytes": 5488,
+      "sha256": "0728ce053e54e0d8ed6c694519ca1f9f71c0f0e16f512836cca52fdab0d1a826"
+    },
+    "build/round13-compiler-retry.log": {
+      "bytes": 451,
+      "sha256": "7e7a82dc802a6b87f6f89a55c87da68509e32dc578ac48743c56006e12647696"
+    },
+    "build/emu-parity/rust.wasm": {
+      "bytes": 2345178,
+      "sha256": "10ae6941c46a51a0ba25b4446175a9bfd97415c63d4389ceaeb38d18f7284298"
+    },
+    "build/emu-parity/reference.wasm": {
+      "bytes": 1942312,
+      "sha256": "0062e4998f4bf1ebc041db4e2a83cce0037a7a184f15ededa1d4a27394367a8f"
+    }
+  },
+  "physical": "No device image installed; working0.3.3 recovery waits for FM-1 USB MIDI enumeration. This checkpoint does not establish hardware runtime, DMA stop, stack or audio deadlines.",
+  "scope": "Game and browser audio ownership integration plus previously qualified graphics/harmony/project/DSP. Main UI/controller/viz, hardware layer/transport, tools/release/talk remain tracked."
+}
