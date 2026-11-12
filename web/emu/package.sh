@@ -4,6 +4,7 @@
 set -eu
 cd "$(dirname "$0")/../.."
 mkdir -p build/emu/fonts build/emu/img
+python3 tools/build_codecs.py
 cp web/emu/index.html web/emu/worklet.js web/site.css build/emu/
 mkdir -p build/emu/src
 cp web/emu/src/*.mjs build/emu/src/

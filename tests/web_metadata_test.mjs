@@ -4,9 +4,12 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { getCodecs, codecWords, codecIntegers, codecConcat } from '../web/codec-runtime.mjs';
 import { Target } from './host/browser_doubles.mjs';
 
-const moduleFrom = async (name) => import('data:text/javascript;base64,' + fs.readFileSync(name).toString('base64'));
+const scopedFunction = (...args) => new globalThis.Function('getCodecs', 'codecWords', 'codecIntegers', 'codecConcat', ...args).bind(null, getCodecs, codecWords, codecIntegers, codecConcat);
+const moduleFrom = async (name) => import('data:text/javascript;base64,' + Buffer.from(fs.readFileSync(name, 'utf8').replaceAll('./codec-runtime.mjs', pathToFileURL(path.resolve('web/codec-runtime.mjs')).href)).toString('base64'));
 const { DEVICE_DATA: data } = await moduleFrom('web/device-data.js');
 const { DEVICE_TEXT, deviceText, deviceCapabilities, deviceParseAbout, createDeviceClient, deviceAction,
   deviceMapValid, deviceParseParameters, deviceReadParameters, deviceParseVoice } = await moduleFrom('web/fm1device.js');
@@ -108,7 +111,7 @@ const map1 = { 'n:0:60': { t:'k7' }, 'c:0:21': { t:'e2', mode:'rel64' } }, map2 
 for (const maps of [map1,map2,{}]) assert(deviceMapValid({ perfmap:1,maps },176));
 for (const maps of [null, [], {'c:16:1':{t:'k1'}}, {'c:0:1':{t:'p176'}}, {'n:0:1':{t:'p1'}}, {'c:0:1':{t:'e7'}}, {'c:0:1':{t:'b14'}}, {'c:0:1':{t:'k27'}}, {'c:0:1':{t:'e1',mode:'wrong'}}]) assert(!deviceMapValid({perfmap:1,maps},176));
 const raw = fs.readFileSync('web/device-data.js','utf8').replace(/^export /gm,'') + fs.readFileSync('web/fm1backup.js','utf8').replace(/^export /gm,'').replace(/^import .*;\r?\n/gm,'');
-const backup = new Function(raw + '; return {mmEncode,mmDecode,bkEncode,bkDecode};')();
+const backup = scopedFunction(raw + '; return {mmEncode,mmDecode,bkEncode,bkDecode};')();
 const hash = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
 // Frozen against c1d2249 before metadata extraction, including MAP1/MAP2 headers.
 assert.equal(hash(backup.mmEncode(map1).bytes),'2939ee5d81469ef1b5acb760d45d6bae4204f8661de46d6c1b4245fb71932e3e');
@@ -123,16 +126,16 @@ const editor = fs.readFileSync('web/editor/index.html','utf8');
 const updateNames = /function syncPluckNames\(\) \{[\s\S]*?\n\}/.exec(editor)[0];
 const table = structuredClone(params.params), slots = new Array(data.parameters.userSlots).fill(null); slots[0] = new Uint8Array(155);
 const factory = table[params.enum.P_CM_SND].t.slice(34,42);
-new Function('P','D','slots','nameOf','USER_VOICE_BASE','NSLOTS','renderRows', updateNames + ';syncPluckNames();')(table,params,slots,()=> 'My voice',data.parameters.userVoiceBase,data.parameters.userSlots,()=>{});
+scopedFunction('P','D','slots','nameOf','USER_VOICE_BASE','NSLOTS','renderRows', updateNames + ';syncPluckNames();')(table,params,slots,()=> 'My voice',data.parameters.userVoiceBase,data.parameters.userSlots,()=>{});
 assert.deepEqual(table[params.enum.P_CM_SND].t.slice(34,42),factory,'factory entries34–41 survive slot name refresh');
 assert.equal(table[params.enum.P_CM_SND].t[data.parameters.userVoiceBase],'DX My voice');
 const play = editor.slice(editor.indexOf('$("vplay").addEventListener'),editor.indexOf('/* connecting */'));
 const changes=[], values=[]; values[params.enum.P_CM_LVL]=60;
-new Function('$','port','D','setParam','val','slot','USER_VOICE_BASE','renderRows','say',play)(()=>({addEventListener:(_name,fn)=>fn()}),{},params,(...args)=>changes.push(args),values,3,data.parameters.userVoiceBase,()=>{},()=>{});
+scopedFunction('$','port','D','setParam','val','slot','USER_VOICE_BASE','renderRows','say',play)(()=>({addEventListener:(_name,fn)=>fn()}),{},params,(...args)=>changes.push(args),values,3,data.parameters.userVoiceBase,()=>{},()=>{});
 assert.deepEqual(changes[0],[params.enum.P_CM_SND,data.parameters.userVoiceBase+3]);
 const parameterCode=editor.slice(editor.indexOf('function clearPendingEdits('),editor.indexOf('const PAGES = '));
 const sent=[];
-new Function('send','setTimeout','say',`
+scopedFunction('send','setTimeout','say',`
   const port={}, val=[], pend=new Map(); let flushTimer=null; const parametersReady=true, parameterCount=${data.parameters.count};
   ${parameterCode}
   setParam(${params.enum.P_CM_SND}, ${data.parameters.userVoiceBase+3}); flush();
@@ -140,7 +143,7 @@ new Function('send','setTimeout','say',`
 assert.deepEqual(sent[0],[240,125,80,80,1,params.enum.P_CM_SND>>7,params.enum.P_CM_SND&127,64,data.parameters.userVoiceBase+3,247], 'actual parameter packet selects user slot3');
 {
   const writes=[], cleared=[];
-  const state=new Function('send','setTimeout','clearTimeout','say',`
+  const state=scopedFunction('send','setTimeout','clearTimeout','say',`
     let port=null, parametersReady=false, parameterCount=${data.parameters.count}, flushTimer=null;
     const val=[], pend=new Map();
     ${parameterCode}
@@ -165,18 +168,18 @@ assert(!editor.includes('12 + 22'));
   let waiting=0,reads=0;
   const voiceSlots=new Array(data.parameters.userSlots).fill(null);
   const sendCode=editor.slice(editor.indexOf('async function sendVoice()'),editor.indexOf('let slotsTimer = '));
-  const api=new Function('device','port','slots','packVoice','checksum','send','waitFor','say','renderSlotsSoon',`
+  const api=scopedFunction('device','port','slots','packVoice','checksum','send','waitFor','say','renderSlotsSoon',`
     let sending=false,again=false,nloaded=0,slot=0,voice=Uint8Array.from([1]); const parametersReady=true;
     ${sendCode}
     return {sendVoice,edit(value){voice[0]=value;},get sending(){return sending;}};
   `)(env.client,session,voiceSlots,(voice)=>new Uint8Array(128).fill(voice[0]),()=>0,(bytes)=>writes.push(bytes),()=>acks[waiting++].promise,(text)=>reports.push(text),()=>{});
   const readWait=deferred(); let readClick;
   const readBinding=editor.slice(editor.indexOf('$("vread").addEventListener'),editor.indexOf('$("vplay").addEventListener'));
-  new Function('$','deviceAction','device','readSlots','say',readBinding)(()=>({addEventListener:(_event,fn)=>{readClick=fn;}}),deviceAction,env.client,async()=>{reads++;await readWait.promise;},(text)=>reports.push(text));
+  scopedFunction('$','deviceAction','device','readSlots','say',readBinding)(()=>({addEventListener:(_event,fn)=>{readClick=fn;}}),deviceAction,env.client,async()=>{reads++;await readWait.promise;},(text)=>reports.push(text));
   const first=api.sendVoice(); api.edit(2); await api.sendVoice();
   await readClick(); assert.equal(reads,0); assert(reports.at(-1).includes(data.product.name));
   const tabs=new Map(),tabBinding=editor.slice(editor.indexOf('for (const t of ["sound", "voice", "about"]) $("tab-'));
-  new Function('$','deviceAction','device','readSlots','say','tab','parametersReady','slots','nloaded',tabBinding.slice(0,tabBinding.indexOf('\n\nrenderPages')))((id)=>({addEventListener:(_event,fn)=>tabs.set(id,fn)}),deviceAction,env.client,async()=>{reads++;},(text)=>reports.push(text),()=>{},true,voiceSlots,0);
+  scopedFunction('$','deviceAction','device','readSlots','say','tab','parametersReady','slots','nloaded',tabBinding.slice(0,tabBinding.indexOf('\n\nrenderPages')))((id)=>({addEventListener:(_event,fn)=>tabs.set(id,fn)}),deviceAction,env.client,async()=>{reads++;},(text)=>reports.push(text),()=>{},true,voiceSlots,0);
   tabs.get('tab-voice')(); await new Promise(setImmediate); assert.equal(reads,0,'tab cannot start a second read');
   acks[0].resolve({n:1}); await new Promise(setImmediate); assert.equal(writes.length,2);
   acks[1].resolve({n:1}); await first;
@@ -189,7 +192,7 @@ assert(!editor.includes('12 + 22'));
 const readSlots = editor.slice(editor.indexOf('async function readSlots()'),editor.indexOf('function syncPluckNames()'));
 for(const timeout of [false,true]) {
   const messages=[];
-  const read=new Function('NSLOTS','slots','device','say','unpackVoice','syncPluckNames','renderSlots','renderVoice','setTimeout',`
+  const read=scopedFunction('NSLOTS','slots','device','say','unpackVoice','syncPluckNames','renderSlots','renderVoice','setTimeout',`
     let voiceWait=null, voiceRequested=-1, nloaded=16, voice=null; const slot=0;
     function send() { ${timeout ? '' : 'queueMicrotask(() => voiceWait({slot:0,loaded:0,data:null}));'} }
     ${readSlots}
@@ -205,14 +208,14 @@ const installer=fs.readFileSync('web/amb_installer.html','utf8');
 {
   const env=environment(), transfer=deferred(), reports=[]; let starts=0;
   const gate=installer.slice(installer.indexOf('async function run(img'),installer.indexOf('async function runFirmware('));
-  const run=new Function('device','say','runFirmware',`const writing=false; ${gate}; return run;`)(env.client,(message)=>reports.push(message),async()=>{starts++;return transfer.promise;});
+  const run=scopedFunction('device','say','runFirmware',`const writing=false; ${gate}; return run;`)(env.client,(message)=>reports.push(message),async()=>{starts++;return transfer.promise;});
   const first=run({},'FM-1_7000300',false);
   assert.equal(await run({},'FM-1_7000300',false),false);
   assert.equal(starts,1,'repeated install cannot bypass the lock during MIDI preflight');
   assert(reports[0].includes(data.product.name)); transfer.resolve(true); assert.equal(await first,true);
 }
 const translation=installer.slice(installer.indexOf('const TEXT = '),installer.indexOf('let lang = '));
-const text=new Function('DEVICE_TEXT',translation+';return TEXT;')(DEVICE_TEXT);
+const text=scopedFunction('DEVICE_TEXT',translation+';return TEXT;')(DEVICE_TEXT);
 assert.deepEqual(Object.keys(text.en).sort(),Object.keys(text.ja).sort(),'installer supported languages have the same keys');
 assert(!text.en.mmold.includes('0.16.18')); assert.equal(text.ja.mmold,DEVICE_TEXT.ja.mapSettings);
 for (const marker of installer.matchAll(/data-t="([^"]+)"/g)) assert(marker[1] in text.en,marker[1]);

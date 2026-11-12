@@ -13,6 +13,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "fm1-codecs-wasm"
+version = "0.1.0"
+dependencies = [
+ "fm1-formats",
+ "serde_json",
+]
+
+[[package]]
 name = "fm1-engine"
 version = "0.1.0"
 dependencies = [

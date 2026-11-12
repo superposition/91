@@ -2,6 +2,11 @@
 #pragma once
 #include <stdint.h>
 /* Fixed-copy codec ABI; caller storage stays in C. No pointer is retained. */
+uint32_t fm1_rust_formats_crc32(const uint8_t*,uint32_t);
+int32_t fm1_rust_formats_object_header(uint32_t,uint32_t,uint32_t,uint32_t,uint8_t*,uint32_t);
+int32_t fm1_rust_formats_global(const int16_t*,const uint8_t*,uint32_t,const uint8_t*,uint8_t*,uint32_t);
+int32_t fm1_rust_formats_settings(const uint8_t*,uint32_t,const uint8_t*,const uint8_t*,uint32_t,uint32_t,uint8_t*,uint32_t);
+int32_t fm1_rust_formats_voices(const uint8_t*,uint32_t,uint8_t*,uint32_t);
 int32_t fm1_rust_formats_voice(uint32_t,const uint8_t*,uint32_t,uint8_t*,uint32_t);
 int32_t fm1_rust_formats_record_pack(const int16_t*,uint16_t,const uint16_t*,const uint8_t*,const uint8_t*,const uint8_t*,uint8_t*,uint32_t);
 int32_t fm1_rust_formats_record_unpack(const uint8_t*,uint32_t,uint32_t,int16_t*,uint16_t*,uint16_t*,uint8_t*,uint8_t*,uint8_t*);

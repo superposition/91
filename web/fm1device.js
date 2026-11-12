@@ -1,3 +1,4 @@
+import { getCodecs, codecWords } from "./codec-runtime.mjs";
 // SPDX-License-Identifier: GPL-3.0-only
 // Browser-independent capability/state helpers used by all connected tools.
 export const DEVICE_TEXT = {
@@ -48,9 +49,7 @@ export function deviceCapabilities(about, jam = null) {
 }
 
 export function deviceParseAbout(bytes) {
-  if (bytes.length !== 10 || bytes[0] !== 240 || bytes[1] !== 125 || bytes[2] !== 80 || bytes[3] !== 69 || bytes[9] !== 247 || bytes.slice(4, 9).some((v) => v > 127)) return null;
-  const about = { ver: bytes[4], npar: bytes[5] * 128 + bytes[6], genres: bytes[7], voices: bytes[8] };
-  return deviceCapabilities(about).backup ? about : null;
+  try { const v = codecWords(getCodecs().call(35, [], [bytes])); if (v[0] !== 0x45) return null; const about = {ver: v[1], npar: v[2], genres: v[3], voices: v[4]}; return deviceCapabilities(about).backup ? about : null; } catch (_) { return null; }
 }
 
 export function createDeviceClient(data, { requestMidi, onMessage = () => {}, onDisconnect = () => {}, language = () => "en", isBusy = () => false, secureContext = globalThis.isSecureContext !== false } = {}) {
@@ -113,7 +112,7 @@ export function createDeviceClient(data, { requestMidi, onMessage = () => {}, on
   return { text, error, access, open, close, request,
     get busy() { return busy; },
     async run(action) { if (busy || isBusy()) throw error("busy"); busy = true; try { return await action(); } finally { busy = false; } },
-    about: (session, timeout) => request(session, [240,125,80,66,6,247], (bytes) => deviceParseAbout(bytes) || undefined, timeout),
+    about: (session, timeout) => request(session, Array.from(getCodecs().call(92, [3])), (bytes) => deviceParseAbout(bytes) || undefined, timeout),
   };
 }
 
@@ -133,15 +132,12 @@ export function deviceAction(client, action, report) {
 }
 
 export function deviceParseParameters(bytes, count) {
-  if (bytes.length < 8 || bytes[0] !== 240 || bytes[1] !== 125 || bytes[2] !== 80 || bytes[3] !== 81 || bytes.at(-1) !== 247) return null;
-  const first = bytes[4] * 128 + bytes[5], length = bytes[6];
-  if (!length || bytes.length !== 8 + length * 2 || bytes.slice(4, -1).some((value) => value > 127)) return null;
-  return Array.from({ length: Math.max(0, Math.min(length, count - first)) }, (_, index) => [first + index, bytes[7 + index * 2] * 128 + bytes[8 + index * 2] - 8192]);
+  try { const v = codecWords(getCodecs().call(26, [], [bytes])); if (!v[1]) return null; return Array.from({length: Math.max(0, Math.min(v[1], count - v[0]))}, (_, i) => [v[0] + i, v[2 + i] | 0]); } catch (_) { return null; }
 }
 
 export function deviceReadParameters(client, session, count, apply, timeout) {
   const seen = new Set();
-  return client.request(session, [240,125,80,80,2,247], (bytes) => {
+  return client.request(session, Array.from(getCodecs().call(92, [4])), (bytes) => {
     const entries = deviceParseParameters(bytes, count);
     if (!entries) return undefined;
     apply(entries);
@@ -151,10 +147,5 @@ export function deviceReadParameters(client, session, count, apply, timeout) {
 }
 
 export function deviceParseVoice(bytes, slots, requested = bytes[4]) {
-  if (bytes[0] !== 240 || bytes[1] !== 125 || bytes[2] !== 80 || bytes[3] !== 88 || bytes.at(-1) !== 247 || bytes[4] >= slots || bytes[5] > slots) return null;
-  if (bytes[4] !== requested) return null;
-  const filled = bytes[4] < bytes[5];
-  if (bytes.length !== (filled ? 136 : 7) || bytes.slice(4, -1).some((value) => value > 127)) return null;
-  if (filled && bytes.slice(6, -1).reduce((sum, value) => sum + value, 0) % 128) return null;
-  return { slot: bytes[4], loaded: bytes[5], data: filled ? Uint8Array.from(bytes.slice(6, 134)) : null };
+  try { const raw = getCodecs().call(28, [], [bytes]), v = codecWords(raw.slice(0, 8)); if (v[0] >= slots || v[1] > slots || v[0] !== requested) return null; return {slot: v[0], loaded: v[1], data: raw.length > 8 ? raw.slice(8) : null}; } catch (_) { return null; }
 }
