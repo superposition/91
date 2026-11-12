@@ -6838,6 +6838,9 @@ static void drain(void)
 static float mixl[BLK], mixr[BLK], rsend[BLK], esend[BLK];
 static float busl[BLK], busr[BLK];              /* the punch-ins' bus (0.15.19) */
 static float dsn_l[BLK], dsn_r[BLK];            /* the mix before the drums (their crush, and the drums into the bus) */
+#if EN_RUST_EFFECTS
+#include "rust_mixer.inc"
+#endif
 
 /* the pad's bus: a 12 dB low-pass, darker than it sounds on paper (Brian Eno darkened everything: the
  * Synthi's filter below half, then tape). No chorus: a modulated delay against pure tones beats (on
@@ -7977,9 +7980,14 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
 {
     uint32_t j, pt0_ = en_prof_clock ? en_prof_clock() : 0u, bal_t0 = pt0_, bal_a = 0u, bal_w = 0u, cs_[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
     DIAG_LOCALS
+#if EN_RUST_EFFECTS
+    const float rg=fm1_rust_mix_reverb_gain(rev_send,rev_in_gain,arcm,brk),eg=echo_send;
+    const float depth=fm1_rust_mix_duck_depth(KK->duck,pulse_vol,trk_g1[TR_KICK]);
+#else
     const float rg = rev_send * rev_in_gain * (1.0f - 0.25f * arcm) * (1.0f + 0.7f * fm_maxf(brk, 0.0f)), eg = echo_send;
-    float dk[BLK], de = duck_env, gg = gate_g;
     const float depth = fm_minf(0.55f * KK->duck, 0.85f) * fm_minf(pulse_vol * 1.5f, 1.0f) * trk_g1[TR_KICK];   /* a muted kick ducks nothing */
+#endif
+    float dk[BLK], de = duck_env, gg = gate_g;
     const int gate = fx_on >> FX_GATE16 & 1u ? 1 : fx_on >> FX_GATE8 & 1u ? 2 : 0;
     const int odd = (int)((sixteenth - 1u) & 1u);         /* the sixteenth playing now: the second of an eighth? */
     int rv_c2;
@@ -8021,12 +8029,17 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
     DT(2);
     render_fm(n);                               /* the DX voices' samples from a chunk ago (the other core's), into the fm_ buffers added below */
     mx_end(3, n);
-    if (bus_m >> TR_CM & 1u)                    /* the plain pluck to the punch-ins' bus: it is all the mix holds so far */
+    if (bus_m >> TR_CM & 1u) {                  /* the plain pluck to the punch-ins' bus: it is all the mix holds so far */
+#if EN_RUST_EFFECTS
+        float *p[6];rust_mix_pointers(p,0);fm1_rust_mix_route_plain(p,n);
+#else
         for (j = 0; j < n; j++) {
             busl[j] = mixl[j];
             busr[j] = mixr[j];
             mixl[j] = mixr[j] = 0.0f;
         }
+#endif
+    }
     DT(3);
     render_dj(n);
     DT(4);
@@ -8042,6 +8055,9 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
         const uint32_t rp = pad_ctr - PAD_D;
         mx_gains(0, &pl, &pr, &ps);
         mx_gains(3, &fl, &fr, &fs);
+#if EN_RUST_EFFECTS
+        {const fm1_mix_merge_t c={{pl,pr,ps},{fl,fr,fs},(bus_m>>TR_PAD)&1u,(bus_m>>TR_CM)&1u};rust_mix_pad_fm(rp,n,&c);}
+#else
         {   /* (each into the punch-ins' bus when targeted: chosen once a chunk, 0.15.20, not tested a sample) */
             float *const pal = bus_m >> TR_PAD & 1u ? busl : mixl, *const par_ = bus_m >> TR_PAD & 1u ? busr : mixr;
             float *const fal = bus_m >> TR_CM & 1u ? busl : mixl, *const far_ = bus_m >> TR_CM & 1u ? busr : mixr;
@@ -8056,6 +8072,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
             esend[j] += ds * 0.2f + fm_es[j] * fs;
         }
         }
+#endif
         pad_ctr += n;
     }
     pad_midi_flush();
@@ -8131,13 +8148,18 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
         render_drums(n);                        /* (the kick sets duck_env for the next chunk) */
     }
     mx_end(4, n);
-    if (bus_m & 0x0Fu)                          /* the drums to the punch-ins' bus: what they added (crushed, through the mixer), out of the mix */
+    if (bus_m & 0x0Fu) {                        /* the drums to the punch-ins' bus: what they added (crushed, through the mixer), out of the mix */
+#if EN_RUST_EFFECTS
+        float *p[6];rust_mix_pointers(p,0);fm1_rust_mix_route_drums(p,dsn_l,dsn_r,n);
+#else
         for (j = 0; j < n; j++) {
             busl[j] += mixl[j] - dsn_l[j];
             busr[j] += mixr[j] - dsn_r[j];
             mixl[j] = dsn_l[j];
             mixr[j] = dsn_r[j];
         }
+#endif
+    }
     DT(8);
     PT(5);                                      /* the drums */
     if (rv_c2 && rv_job.bass) {                 /* the drone and the acid are the other core's: wait for them (the reverb goes on behind) */
@@ -8164,6 +8186,10 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
         float bl, br, bs, al, ar, as;
         mx_gains(1, &bl, &br, &bs);
         mx_gains(2, &al, &ar, &as);
+#if EN_RUST_EFFECTS
+        {const fm1_mix_merge_t c={{bl,br,bs},{al,ar,as},(bus_m>>TR_DRONE)&1u,(bus_m>>TR_ACID)&1u};
+         float *p[6];const float *input[4]={bass_o,acid_o,dk,gg_v};rust_mix_pointers(p,0);fm1_rust_mix_bass_acid(&c,p,input,n);}
+#else
         for (j = 0; j < n; j++) {
             const float b = bass_o[j], a = acid_o[j], dg = dk[j] * gg_v[j];
             float *const tbl = bus_m >> TR_DRONE & 1u ? busl : mixl, *const tbr = bus_m >> TR_DRONE & 1u ? busr : mixr;   /* (the punch-ins' bus when targeted) */
@@ -8175,6 +8201,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
             rsend[j] += (b * 0.06f * bs + a * 0.15f * as) * gg_v[j];
             esend[j] += (b * 0.04f * bs + a * 0.35f * as) * gg_v[j];
         }
+#endif
     }
     duck_env = fm_flush(de);
     DT(9);
@@ -8216,6 +8243,9 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
             tf_s[j] = fm_flush(tf_s[j]);
 #endif
     }
+#if EN_RUST_EFFECTS
+    rust_mix_echoes(n,dk,rg,eg);
+#else
     {
     const float thr = throw_amt * 0.5f, tdg = tdx_m * (float)fxs_v[EN_FXS_TD_SEND] * 0.006f;   /* (the bus is cleared each chunk, so 0 when unused) */
     for (j = 0; j < n; j++) {                   /* the echoes; the reverb's input into its line; the dry part of the mix */
@@ -8227,6 +8257,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
         dk[j] *= 1.3f * 0.36f;                  /* what the tank's output is scaled by */
     }
     }
+#endif
     DT(10);
     PT(6);                                      /* the echoes, the reverb's input */
     bal_a = pt0_;
@@ -8252,12 +8283,17 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
     PT(7);                                      /* the wait for the reverb */
     bal_w += pt0_ - bal_a;
     DT0();
+#if EN_RUST_EFFECTS
+    {float *p[6];rust_mix_pointers(p,0);fm1_rust_mix_tank(p,rv_wl,rv_wr,dk,n);}
+    for(j=0;j<n;j++)fx_master(&mixl[j],&mixr[j]);
+#else
     for (j = 0; j < n; j++) {                   /* the tank's output in, the performance effects */
         float l = mixl[j] + dk[j] * rv_wl[j], r = mixr[j] + dk[j] * rv_wr[j];
         fx_master(&l, &r);
         mixl[j] = l;
         mixr[j] = r;
     }
+#endif
     DT(11);
     master_dyn_block(mixl, mixr, n);            /* the compressor and the limiter */
     DT(12);
