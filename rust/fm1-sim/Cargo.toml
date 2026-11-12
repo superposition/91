@@ -17,4 +17,5 @@ c-app = []
 rust-engine = ["c-app", "dep:fm1-jam-bridge"]
 
 [dependencies]
+fm1-app = { workspace = true, features = ["host-platform"] }
 fm1-jam-bridge = { path = "../fm1-jam-bridge", optional = true }

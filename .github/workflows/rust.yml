@@ -46,6 +46,7 @@ jobs:
       - run: rustup toolchain install nightly-2026-08-28 --profile minimal --component miri --component rust-src
       - run: sh tests/rust_web_audio_miri.sh
       - run: sh tests/rust_hal_miri.sh
+      - run: sh tests/rust_sim_store_miri.sh
   native_simulator:
     name: Native Rust simulator and scenario compatibility
     runs-on: ubuntu-24.04
