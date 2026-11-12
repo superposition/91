@@ -87,10 +87,11 @@ static struct {
     int32_t avg_ticks;                           /* the job's time, smoothed (CPU1 writes it) */
 } aw __attribute__((aligned(32)));
 static int aw_online;
+static volatile int32_t aw_published_avg; /* CPU0 cache, updated only after an acquired completion */
 
 static int fm1_core1_online(void) { return aw_online; }
 /* how much of a chunk (256 frames at 44.1 kHz = 139320 ticks of the 24 MHz timer) the job takes, in percent: the other core's load */
-static uint32_t fm1_core1_load(void) { return aw_online && aw.avg_ticks > 0 ? (uint32_t)aw.avg_ticks / 1393u : 0u; }
+static uint32_t fm1_core1_load(void) { int32_t avg=aw_published_avg; return aw_online && avg>0 ? (uint32_t)avg/1393u : 0u; }
 static uint32_t aw_t0;                      /* when the outstanding job was submitted */
 static void fm1_core1_fence(void) { __asm__ volatile("csync" ::: "memory"); }   /* publish memory between the cores */
 /* 1 while the outstanding job can still finish: no CPU1 fault, under the 10 ms the join allows */
@@ -102,7 +103,7 @@ static int fm1_core1_alive(void)
 static int fm1_core1_submit(fm1_core1_fn fn, void *context)
 {
     uint32_t request;
-    if (!aw_online || (request = aw_load(&aw.request)) != aw_load(&aw.complete))
+    if (!aw_online || fm1_core1_fault.count || (request = aw_load(&aw.request)) != aw_load(&aw.complete))
         return 0;
     request++;
     aw.fn = fn;
@@ -120,6 +121,7 @@ static void fm1_core1_retire(void)
     fm1_core1_stop();
     fm1_core1_bar_set();
     aw_online = 0;
+    aw_published_avg = 0;
     aw_store(&aw.complete, aw_load(&aw.request));
 }
 
@@ -135,6 +137,10 @@ static void fm1_core1_check(void)
 static int fm1_core1_join(void)
 {
     uint32_t start = fm1_ticks(), elapsed;
+    /* A recovered/held worker is lost even if it published complete just
+     * before the hold. Never report its interrupted output as a successful
+     * backend join, or let a held CPU1 accept another request. */
+    if(fm1_core1_fault.count) {fm1_core1_retire();return 0;}
     while (aw_load(&aw.complete) != aw_load(&aw.request)) {   /* (the 10 ms count from the hand-over, as fm1_core1_alive's: a wait that already gave up does not start a second 10 ms) */
         if (fm1_core1_fault.count || (uint32_t)(fm1_ticks() - aw_t0) >= AW_TIMEOUT_TICKS) {
             if (!fm1_core1_fault.count)
@@ -146,6 +152,7 @@ static int fm1_core1_join(void)
     elapsed = fm1_ticks() - start;
     if (elapsed > aw.max_wait_ticks)
         aw.max_wait_ticks = elapsed;
+    aw_published_avg = aw.avg_ticks;
     return 1;
 }
 
@@ -211,6 +218,7 @@ static int fm1_core1_boot(void)
     uint32_t start, div;
     fm1_core1_stop();
     aw_online = 0;
+    aw_published_avg = 0;
     aw_store(&aw.ready, 0);
     aw_store(&aw.request, 0);
     aw_store(&aw.complete, 0);
