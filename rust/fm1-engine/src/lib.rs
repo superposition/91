@@ -3,6 +3,7 @@
 #![no_std]
 #![forbid(unsafe_code)]
 
+pub mod effects;
 #[path = "factory_logic.rs"]
 pub mod factory;
 pub mod melodic;

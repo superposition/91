@@ -1,0 +1,141 @@
+{
+  "ticket": "R12 / #13",
+  "scope": "FX/master/control checkpoint; mapped C mixer arithmetic and physical acceptance remain open",
+  "date": "2026-11-12",
+  "base_commit": "757be8b47da0ce37e9cf407c3f2a4a4eb73bf361",
+  "toolchain": {
+    "rust": "1.94.1 (e408947bf 2026-03-25)",
+    "node": "22.14.0",
+    "c_float_contract": "-O2 -ffp-contract=off",
+    "core": "no_std / forbid unsafe / no allocation"
+  },
+  "baseline": {
+    "source_files_verified": 440,
+    "source_manifest_sha256": "6148afa57b782c81e5a794f0ded441763fe986f35bf275014f304f6da76d88af",
+    "wasm_sha256": "a3d08947713bda76b64f76ed39b55aa26bdd182a65bf88fbd1efe0cbc12f8036"
+  },
+  "native": {
+    "cases": 23,
+    "frames": 12246104,
+    "comparison": "frozen C == fresh C0 == full Rust flags; PCM, fixed USB, scalar state, periodic whole ring payloads, RNG",
+    "genres": 19,
+    "golden": "rust/fm1-engine/tests/effects-native-golden.json",
+    "impulse": {
+      "mode": 30,
+      "frames": 397056,
+      "trace_hash": "03e7f876",
+      "peak": 0.0571992174
+    },
+    "null": {
+      "mode": 31,
+      "frames": 397056,
+      "trace_hash": "2cd4e83a",
+      "peak": 0
+    },
+    "external_clock": {
+      "mode": 20,
+      "frames": 564151,
+      "trace_hash": "d5b59cf1",
+      "peak": 0.382166028
+    },
+    "new_rust_tests": 7,
+    "workspace_tests": 38
+  },
+  "workers": {
+    "cases": 24,
+    "frames_per_case": 232050,
+    "modes": [
+      "serial",
+      "deferred",
+      "pthread",
+      "busy/refused"
+    ],
+    "reverb_types": 3,
+    "work_placements": [
+      1,
+      2
+    ],
+    "comparison": "frozen C PCM bytes == Rust PCM bytes",
+    "result_lines": [
+      "type=0 balance=1 serial 6a09f0c5",
+      "type=0 balance=1 deferred 6a09f0c5",
+      "type=0 balance=1 thread 6a09f0c5",
+      "type=0 balance=1 mixed 6a09f0c5",
+      "type=0 balance=2 serial 6a09f0c5",
+      "type=0 balance=2 deferred 6a09f0c5",
+      "type=0 balance=2 thread 6a09f0c5",
+      "type=0 balance=2 mixed 6a09f0c5",
+      "type=1 balance=1 serial 4c73553e",
+      "type=1 balance=1 deferred 4c73553e",
+      "type=1 balance=1 thread 4c73553e",
+      "type=1 balance=1 mixed 4c73553e",
+      "type=1 balance=2 serial 4c73553e",
+      "type=1 balance=2 deferred 4c73553e",
+      "type=1 balance=2 thread 4c73553e",
+      "type=1 balance=2 mixed 4c73553e",
+      "type=2 balance=1 serial 068ae007",
+      "type=2 balance=1 deferred 068ae007",
+      "type=2 balance=1 thread 068ae007",
+      "type=2 balance=1 mixed 068ae007",
+      "type=2 balance=2 serial 068ae007",
+      "type=2 balance=2 deferred 068ae007",
+      "type=2 balance=2 thread 068ae007",
+      "type=2 balance=2 mixed 068ae007"
+    ],
+    "excluded": "synthetic abandoned-live-pthread retirement; no physical qualification"
+  },
+  "wasm": {
+    "c0_bytes": 1940077,
+    "rust_bytes": 2456251,
+    "c0_sha256": "37d274d32cc8b847a39bab947e54f45cc22131dd580d27e2e14e46b34b041050",
+    "rust_sha256": "75a517c0bb042e6688ac23d7e7c4ed98ac55005948cd8c4fd22bd041f45d96c6",
+    "size_comparison_scope": "all active migration flags, not isolated R12 size",
+    "exports": 24,
+    "initial_and_final_memory_bytes": 33554432,
+    "pcm_values_compared": 40058180,
+    "http_extra_pcm_values_compared": 1048576,
+    "panel_effects": {
+      "scenario": "panel-effects-banks-release-tails",
+      "compared_samples": 2769480,
+      "render_calls": 5160,
+      "peak": 0.4538612365722656,
+      "pcm_hash": "fd659ab9",
+      "effects": {
+        "master_samples": 1384960,
+        "echo_samples": 1384960,
+        "tank_samples": 1384960,
+        "colour_sample_calls": 4154880
+      },
+      "memory_bytes": 33554432
+    },
+    "frozen_R01_panel_audio": "same fd659ab9 / 2769480 values / peak0.4538612365722656; direct immutable WASM comparison",
+    "scenario_fingerprints": {
+      "factory": "baeff971",
+      "harris-citypop.jmp": "28722449"
+    },
+    "manual_browser_device_qa_claimed": false
+  },
+  "memory": {
+    "existing_delay_payload_bytes": 233004,
+    "new_mutable_rust_delay_payload_bytes": 0,
+    "new_diagnostic_atomics_bytes": 16,
+    "control_packet_bytes": {
+      "state": 708,
+      "config": 288
+    },
+    "engagement_state_bytes": 216,
+    "tank_borrow_i16_words": 33383,
+    "predelay_excluded_i16_words": 1579,
+    "packet_costs_documented": "docs/rust/EFFECTS.md",
+    "target_pool_stack_timing_qualified": false
+  },
+  "remaining": [
+    "C per-voice and pad/FM/bass/acid additive pan/send arithmetic",
+    "C differential drum routing and echo input/predelay/dry/tank-return arithmetic",
+    "C allocation, initialization and staged job lifetime/retirement orchestration",
+    "physical PI32 link/map and pool reserve",
+    "no-soft-double target symbol audit",
+    "interrupt stack/cycle/deadline qualification",
+    "physical worker exclusion/retirement and device output"
+  ]
+}
