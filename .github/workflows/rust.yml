@@ -133,6 +133,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -252,6 +254,10 @@ jobs:
         run: sh tests/rust_ui_busy.sh
       - name: Retained foreground requests and guarded updater transitions
         run: sh tests/rust_storage_dispatch.sh
+      - name: Complete frozen source for queued USB regression
+        run: python3 tools/frozen_source.py build/r01-source
+      - name: Retained SysEx extent under unrelated incoming starts
+        run: sh tests/rust_usb_busy_dispatch.sh build/r01-source
       - name: Songbook snapshot and staging handoffs
         run: sh tests/rust_handoff.sh
       - uses: actions/upload-artifact@v4
