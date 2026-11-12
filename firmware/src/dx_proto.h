@@ -3,12 +3,18 @@
  * bytes. Every frame is F0 7D 50 kind ... F7 with 7-bit data, and none is longer than PX_FRAME_MAX: the buffer the caller builds it in. */
 #pragma once
 #include <stdint.h>
+#if EN_RUST_FORMATS
+#include "dsp/rust_formats.h"
+#endif
 
 #define PX_FRAME_MAX 144u                        /* the longest: a voice, 4 + 2 + 128 + 1 + 1 = 136 */
 
 /* kind 51: parameters first .. first + n - 1 (n <= 24): their values + 8192, each as two 7-bit bytes */
 static inline uint32_t px_build_dump(uint8_t *f, uint32_t first, const int32_t *v, uint32_t n)
 {
+#if EN_RUST_FORMATS
+    return fm1_rust_formats_dump(f,PX_FRAME_MAX,first,v,n);
+#else
     uint32_t k, o = 0;
     f[o++] = 0xF0, f[o++] = 0x7D, f[o++] = 0x50, f[o++] = 0x51;
     f[o++] = (uint8_t)((first >> 7) & 0x7Fu), f[o++] = (uint8_t)(first & 0x7Fu), f[o++] = (uint8_t)n;
@@ -18,11 +24,15 @@ static inline uint32_t px_build_dump(uint8_t *f, uint32_t first, const int32_t *
     }
     f[o++] = 0xF7;
     return o;
+#endif
 }
 
 /* kind 58: voice `slot`, `loaded` voices held; when d128 is not 0 the voice's 128 bytes and a checksum follow */
 static inline uint32_t px_build_voice(uint8_t *f, uint32_t slot, uint32_t loaded, const uint8_t *d128)
 {
+#if EN_RUST_FORMATS
+    return fm1_rust_formats_editor_voice(f,PX_FRAME_MAX,slot,loaded,d128);
+#else
     uint32_t k, sum = 0, o = 0;
     f[o++] = 0xF0, f[o++] = 0x7D, f[o++] = 0x50, f[o++] = 0x58;
     f[o++] = (uint8_t)(slot & 0x7Fu), f[o++] = (uint8_t)(loaded & 0x7Fu);
@@ -35,4 +45,5 @@ static inline uint32_t px_build_voice(uint8_t *f, uint32_t slot, uint32_t loaded
     }
     f[o++] = 0xF7;
     return o;
+#endif
 }

@@ -10,6 +10,7 @@ use fm1_formats::jam::JamPack;
 use fm1_formats::session::JamSession;
 mod commands;
 mod factory;
+mod formats;
 mod handoff;
 mod sequencer;
 mod transport;
@@ -283,6 +284,7 @@ pub extern "C" fn fm1_rust_jam_stat(index: u32) -> u32 {
         13..=17 => handoff::stat(index),
         18..=23 => sequencer::stat(index),
         32..=35 => factory::stat(index),
+        36..=39 => formats::stat(index),
         _ => 0,
     }
 }

@@ -17,6 +17,9 @@
  * chk: the 7-bit data bytes after the kind (obj .. the last nibble), summed, then 128 minus the sum modulo 128. */
 #pragma once
 #include <stdint.h>
+#if EN_RUST_FORMATS
+#include "dsp/rust_formats.h"
+#endif
 
 #define BK_MAX 3840u                             /* an object (plat.h PLAT_STORE_MAX) */
 #define BK_FRAME 64u                             /* raw bytes in a frame the FM-1 sends */
@@ -25,15 +28,22 @@
 
 static inline uint32_t bk_sum(const uint8_t *p, uint32_t n)
 {
+#if EN_RUST_FORMATS
+    return fm1_rust_formats_sum7(p,n);
+#else
     uint32_t s = 0;
     while (n--)
         s += *p++;
     return (128u - (s & 0x7Fu)) & 0x7Fu;
+#endif
 }
 
 /* kind 43: a frame of object obj (n <= BK_FRAME raw bytes from d; n 0 with len 0: nothing stored) */
 static inline uint32_t bk_build_frame(uint8_t *f, uint32_t obj, uint32_t idx, uint32_t len, const uint8_t *d, uint32_t n)
 {
+#if EN_RUST_FORMATS
+    return fm1_rust_formats_backup_frame(f,BK_FRAME_MAX,obj,idx,len,d,n);
+#else
     uint32_t k, o = 0;
     f[o++] = 0xF0, f[o++] = 0x7D, f[o++] = 0x50, f[o++] = 0x43;
     f[o++] = (uint8_t)(obj & 0x7Fu);
@@ -46,24 +56,33 @@ static inline uint32_t bk_build_frame(uint8_t *f, uint32_t obj, uint32_t idx, ui
     o++;
     f[o++] = 0xF7;
     return o;
+#endif
 }
 
 /* kind 44: the answer to chunk idx (or, idx 0x7F, to the write) of object obj */
 static inline uint32_t bk_build_ack(uint8_t *f, uint32_t obj, uint32_t idx, uint32_t status)
 {
+#if EN_RUST_FORMATS
+    return fm1_rust_formats_control(f,8,0,obj,idx,status);
+#else
     f[0] = 0xF0, f[1] = 0x7D, f[2] = 0x50, f[3] = 0x44;
     f[4] = (uint8_t)(obj & 0x7Fu), f[5] = (uint8_t)(idx & 0x7Fu), f[6] = (uint8_t)(status & 0x7Fu), f[7] = 0xF7;
     return 8;
+#endif
 }
 
 /* kind 45: the answer to "about" */
 #define BK_ABOUT_LEN 10u
 static inline uint32_t bk_build_about(uint8_t *f, uint32_t npar, uint32_t genres, uint32_t voices)
 {
+#if EN_RUST_FORMATS
+    return fm1_rust_formats_control(f,BK_ABOUT_LEN,1,npar,genres,voices);
+#else
     f[0] = 0xF0, f[1] = 0x7D, f[2] = 0x50, f[3] = 0x45, f[4] = 3;
     f[5] = (uint8_t)((npar >> 7) & 0x7Fu), f[6] = (uint8_t)(npar & 0x7Fu);
     f[7] = (uint8_t)(genres & 0x7Fu), f[8] = (uint8_t)(voices & 0x7Fu), f[9] = 0xF7;
     return BK_ABOUT_LEN;
+#endif
 }
 
 /* a chunk to write: m is the message between F0 and F7 (7D 50 42 03 obj idx(2) len(2) n(2) [2n] chk) */
@@ -74,6 +93,12 @@ typedef struct {
 } bk_chunk_t;
 static inline int bk_parse_chunk(const uint8_t *m, uint32_t mlen, bk_chunk_t *c)   /* 0 ok, 1 a bad checksum, 2 malformed */
 {
+#if EN_RUST_FORMATS
+    uint16_t fields[4];
+    const int st=fm1_rust_formats_chunk(m,mlen,c->d,fields);
+    if(!st){c->obj=(uint8_t)fields[0];c->idx=fields[1];c->len=fields[2];c->n=fields[3];}
+    return st;
+#else
     uint32_t k, n;
     if (mlen < 12u || m[0] != 0x7Du || m[1] != 0x50u || m[2] != 0x42u || m[3] != 0x03u)
         return 2;
@@ -92,6 +117,7 @@ static inline int bk_parse_chunk(const uint8_t *m, uint32_t mlen, bk_chunk_t *c)
     c->len = (uint16_t)(m[7] << 7 | m[8]);
     c->n = (uint16_t)n;
     return 0;
+#endif
 }
 
 /* the object being received: which, how long, which chunks are in (a bit each) */

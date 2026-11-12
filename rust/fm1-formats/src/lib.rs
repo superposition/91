@@ -3,8 +3,31 @@
 #![no_std]
 #![forbid(unsafe_code)]
 
+pub mod containers;
 pub mod jam;
+pub mod package;
 pub mod session;
+pub mod storage;
+pub mod voice;
+pub mod wire;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum CodecError {
+    Length,
+    Magic,
+    Version,
+    Index,
+    Range,
+    Checksum,
+    Nibble,
+    Capacity,
+    State,
+}
+
+pub fn read_u32(bytes: &[u8], offset: usize) -> Option<u32> {
+    let end = offset.checked_add(4)?;
+    Some(u32::from_le_bytes(bytes.get(offset..end)?.try_into().ok()?))
+}
 
 pub fn crc32(bytes: &[u8]) -> u32 {
     let mut crc = !0u32;

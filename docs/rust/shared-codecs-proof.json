@@ -1,0 +1,373 @@
+{
+  "ticket": "https://github.com/superposition/91/issues/6",
+  "status": "verified shared-codec checkpoint; explicit follow-up acceptance remains",
+  "base_commit": "4d27486cc71faca1b1bcee681160ad4f1cffb592",
+  "verified_on": "2026-11-12",
+  "toolchain": {
+    "rust": "rustc 1.94.1 (e408947bf 2026-03-25)",
+    "cc": "cc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+    "clang": "clang version 22.1.8",
+    "node": "v22.14.0",
+    "floating_point_contraction": "off"
+  },
+  "reference": {
+    "manifest": "tests/reference/source.sha256",
+    "manifest_sha256": "6148afa57b782c81e5a794f0ded441763fe986f35bf275014f304f6da76d88af",
+    "immutable_files_verified": 440,
+    "fixtures": {
+      "c": {
+        "bytes": 549743,
+        "sha256": "5d13d0130530f0111a86b1792a06a5a3986c36857324bb0e1aeeebbed3af69d1"
+      },
+      "js": {
+        "bytes": 76119,
+        "sha256": "f6714dbe2a0290b04a58400770405a7cd6d5ca5212c552fb685af0ca0c3f6d0b"
+      },
+      "python": {
+        "bytes": 537111,
+        "sha256": "65fecf470931382c030a3303cb870b4f65877f0e64808eef5900d6ccb8255548"
+      }
+    },
+    "independent_c_js_python_reexports_equal_frozen": true,
+    "current_c0_export_equal_frozen": true,
+    "current_c_rust_api_export_equal_frozen": true,
+    "original_usb_classifier_extracted_without_algorithm_changes": true
+  },
+  "coverage": {
+    "dx7_complete_vectors": 256,
+    "dx7_fields_times256": 72448,
+    "packed_record_complete_encodes": 32,
+    "packed_record_mutations": 96256,
+    "legacy_hyp2_cases": 128,
+    "stored_object_schemas": 12,
+    "stored_object_byte_mutations": 3344896,
+    "stored_object_length_cases": 13102,
+    "usb_classifier_families": 4,
+    "usb_classifier_length_header_cases": 7996,
+    "piece_files": 5,
+    "sets": 3,
+    "backups": 4,
+    "pack7_vectors": 72,
+    "ota_packets": 11,
+    "package_primitive_vectors": 256,
+    "chip_key_blobs": 65536,
+    "jlfs_entries": 32,
+    "compensation_cases": 64,
+    "bounded_corruption_cases": 20000,
+    "metadata_unknown_flags_and_reserved_bytes_preserved": true,
+    "guard_bytes_and_transactional_encodes_checked": true,
+    "abi_unaligned_and_overlapping_copy_checked": true
+  },
+  "architecture": {
+    "crate": "fm1-formats",
+    "no_std": true,
+    "allocator": false,
+    "core_unsafe_code": "forbidden",
+    "serialization": "explicit integer byte encoding and borrowed validated views; no Rust struct serialization",
+    "bridge": "fixed bounded copies, C-owned buffers, no retained pointers",
+    "diagnostic_indices": {
+      "36": "decode calls",
+      "37": "encode calls",
+      "38": "format rejections",
+      "39": "copied bytes"
+    },
+    "added_mutable_bytes": 16,
+    "flag": "EN_RUST_FORMATS",
+    "independent_of_factory_flag": true,
+    "hardware_default": "C0",
+    "dx7_runtime_bytes": 155,
+    "dx7_c_output_including_nul": 156,
+    "piece_record_bytes": 376,
+    "pattern_payload_bytes": 72,
+    "bank_with_progressions_bytes": 3836,
+    "store_max_bytes": 3840
+  },
+  "checks": {
+    "workspace_release_tests": 49,
+    "new_core_differential_tests": 11,
+    "new_bridge_boundary_tests": 2,
+    "workspace_clippy_warnings_denied": true,
+    "no_std_bridge_wasm_check": true,
+    "native_existing_dxproto_test": "pass",
+    "native_bridge": {
+      "formats_native": "pass",
+      "decodes": 3495402,
+      "encodes": 40035,
+      "rejections": 65492,
+      "copied_bytes": 63468621
+    },
+    "wasm_scenarios": {
+      "factory": {
+        "initial_pack": "factory",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "baeff971",
+        "peak": 0.3714040517807007,
+        "blits": 4679,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 0,
+          "plans": 8,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1037,
+          "sessions": 1,
+          "commands": {
+            "accepted": 961,
+            "consumed": 961,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6215,
+            "chunks": 28982,
+            "controls": 27668
+          },
+          "sequencer": {
+            "lanes": 6222,
+            "mutations": 0,
+            "waits": 463712,
+            "boundaries": 1037
+          },
+          "factory": {
+            "accesses": 13627,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 5292
+          }
+        }
+      },
+      "saved_v1": {
+        "initial_pack": "rust/fm1-engine/tests/packs/harris-citypop.jmp",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "28722449",
+        "peak": 0.4303741455078125,
+        "blits": 4673,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 1,
+          "plans": 10,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1033,
+          "sessions": 1,
+          "commands": {
+            "accepted": 751,
+            "consumed": 751,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6192,
+            "chunks": 34155,
+            "controls": 27682
+          },
+          "sequencer": {
+            "lanes": 6198,
+            "mutations": 0,
+            "waits": 546480,
+            "boundaries": 1033
+          },
+          "factory": {
+            "accesses": 13893,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 5292
+          }
+        }
+      },
+      "session_v2": {
+        "scenario": "v2-hold-idea-save-restart",
+        "render_calls": 11663,
+        "compared_samples": 6570900,
+        "seconds": 74.5,
+        "peak": 0.22903597354888916,
+        "memory_bytes": 33554432,
+        "saved_session": [
+          74,
+          83,
+          77,
+          1,
+          1,
+          11,
+          1,
+          8,
+          2,
+          1,
+          83,
+          0,
+          7,
+          1,
+          190,
+          0,
+          3,
+          83,
+          0,
+          0
+        ],
+        "rust": {
+          "validations": 1,
+          "plans": 9,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 804,
+          "sessions": 2,
+          "commands": {
+            "accepted": 319,
+            "consumed": 319,
+            "dropped": 0,
+            "high_water": 208
+          },
+          "transport": {
+            "pulses": 4819,
+            "chunks": 12684,
+            "controls": 11829
+          },
+          "sequencer": {
+            "lanes": 4824,
+            "mutations": 0,
+            "waits": 202944,
+            "boundaries": 804
+          },
+          "factory": {
+            "accesses": 1340,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 5292
+          }
+        }
+      },
+      "legacy": {
+        "scenario": "legacy-f4-piece-genre-transport",
+        "compared_samples": 2557800,
+        "render_calls": 4231,
+        "peak": 0.4515293836593628,
+        "sequencer": {
+          "lanes": 876,
+          "waits": 96752,
+          "boundaries": 21
+        },
+        "factory": {
+          "accesses": 3158,
+          "codecs": 0,
+          "rejections": 0,
+          "copied_bytes": 10512
+        },
+        "memory_bytes": 33554432
+      },
+      "stored_voice_lines_save": {
+        "scenario": "stored-frozen-acid-pluck-save",
+        "compared_samples": 970200,
+        "render_calls": 1613,
+        "saved_bytes": 3836,
+        "factory": {
+          "accesses": 1378,
+          "codecs": 6,
+          "rejections": 0,
+          "copied_bytes": 5450
+        },
+        "formats": {
+          "decodes": 4,
+          "encodes": 2,
+          "rejections": 0,
+          "copied_bytes": 1772
+        },
+        "memory_bytes": 33554432
+      }
+    },
+    "total_channel_sample_values_compared": 38258900,
+    "snapshot": {
+      "snapshot_bytes": 220,
+      "published": 134,
+      "copied": 134,
+      "detail_pages": 4,
+      "staging_claims": 0,
+      "staging_activations": 0,
+      "staging_rejections": 0,
+      "memory_bytes": 33554432
+    },
+    "http_fallback": {
+      "result": "pass",
+      "compared_samples": 1048576,
+      "frame_messages": 255,
+      "peak": 0.19218111038208008
+    },
+    "smoke": {
+      "result": "pass",
+      "peak": 0.231,
+      "blits": 239
+    },
+    "wasm_exports": 24,
+    "linear_memory_bytes": 33554432,
+    "memory_growth": false
+  },
+  "footprint": {
+    "formats_disabled": {
+      "path": "build/formats/disabled.wasm",
+      "bytes": 2534254,
+      "sha256": "56f8a1d2631e0f34ad8769a79f08ba8feb58bf5532229d443e30bc32e3bf2e1d",
+      "code_bytes": 590315,
+      "data_section_bytes": 152744,
+      "custom_section_bytes": 1790145
+    },
+    "formats_enabled": {
+      "path": "build/emu-parity/rust.wasm",
+      "bytes": 2531838,
+      "sha256": "2413d238357a28fe8d7c8326b8a04a61e28d57123d2950828531d21532428cd3",
+      "code_bytes": 595034,
+      "data_section_bytes": 153288,
+      "custom_section_bytes": 1782434
+    },
+    "delta": {
+      "file_bytes": -2416,
+      "code_bytes": 4719,
+      "data_section_bytes": 544,
+      "custom_section_bytes": -7711
+    },
+    "note": "same Rust engine, toggle only EN_RUST_FORMATS; hardware remains C0"
+  },
+  "reference_wasm_sha256": "d46ab456d3c1fdd423cb902f77cad4c12b8e75ca658b4dc5640f5e3599a0bf50",
+  "qualified_wasm_sha256": "2413d238357a28fe8d7c8326b8a04a61e28d57123d2950828531d21532428cd3",
+  "source_files_sha256": {
+    "firmware/src/app/project.c": "4065bf464f209e6a5f0c9bee1137999c484d65b6a984c6134423b13d2303cef1",
+    "firmware/src/app/ui.c": "069793c485d2f3f86992f2194e69cdf9e3a4ac7e0762828d569a245dead6fe8d",
+    "firmware/src/backup_proto.h": "8170eb2d2c75ef2f31dca6ff40859f67a31b9cdcee030a07dfc36636463c4216",
+    "firmware/src/dx_proto.h": "4d06cc2a8a1f8b3abd9803a7a87bb8c9a50bc6257c40e257d3461a8c3bd499e1",
+    "firmware/src/usb.c": "39fa5d9bbc6b244d39350fbfc1bb6b0484ecf67cd7c5b5c7a2448cb2c50f902f",
+    "firmware/src/dsp/amb.h": "400281a5fbceb71427a5d41a142f842ef4c2be2f594ce04de538cbf8444bb34b",
+    "firmware/src/dsp/fm6.inc": "d038aa4dbfdb2a6bbe80152ebe76b5d9669ac5fae117b40806eae10705abc5c1",
+    "firmware/src/dsp/rust_formats.h": "dd44db5d58b67c8653f38382fa2f0b4572b520e81c56e4f1e9f7f87336d9ea39",
+    "rust/fm1-formats/src/lib.rs": "0c54f2c628beb96b213460a7e592d48fd7f0800ab65e3a045fc730ca03c6ceab",
+    "rust/fm1-formats/src/containers.rs": "05d6640fb51a2bf513810fdccdc529f902425ee982103ca8d153e8a556aa86c2",
+    "rust/fm1-formats/src/package.rs": "81311734e3eac8cffd1eb30d33937591c72b6312f12857345454336c2a00bf3f",
+    "rust/fm1-formats/src/storage.rs": "673cb7bfe118583508affa905aad187c5e7ebecbdda0de6688f7b09e9004b82c",
+    "rust/fm1-formats/src/voice.rs": "6c3e1e3c6c37fe2c50c31c87233fbbcacf11bff856e4a6fde0b68cc930a1072d",
+    "rust/fm1-formats/src/wire.rs": "f4c5f7b0c744de169a59c8bef7b2cf27f2618fcb9d4529abe32fab8605a7c534",
+    "rust/fm1-jam-bridge/src/lib.rs": "ee404707c7e43915c8379cb7ca125d0a88e3bf9c7abe0a13db7283f9188e7d7e",
+    "rust/fm1-jam-bridge/src/formats.rs": "38dcaedb957ea0358415c2f5759437b9d13e37c6cb3cc41cc5ad0e7b81317fa3",
+    "web/emu/build.sh": "ba4889eb11a14a6df7d2143a7c5b953030afe9e3d9d8d6b890f7f0181889f3c5",
+    "web/emu/build_clang.sh": "2bf7eea5527ed4d6685713bc40d78a587748c377429e996c921d96bf51ab2fd2",
+    "tests/host/emu_factory_test.mjs": "a1c9db95eb7241691e8f98549653ce189084c0d50010b0ff57d17f2c3e6564cc",
+    "tests/reference/formats_reference.c": "9f46dbe548c034d01a753fc22738787abe535fd3cc7ba7ce7b1c5d46ac327113",
+    "tests/reference/formats_reference.mjs": "540f546e483ceb925502538eaf64e59c58fcd1b04e6edc8cb267cbbdceb933db",
+    "tests/reference/formats_reference.py": "487ddc672a33ec910287aebfa2ba9544de922d55e58b1d27ecc3ea3ad11f0e62",
+    "tests/reference/formats_usb_reference.py": "36d21d47708a1cdecbae6899a6272e608cd528b9f6d160db332d4d8805fdacf4",
+    "tests/rust_shared_formats.sh": "e80526ce1890f0881b8eb978de3f84cc0a4db789d4b858f84880a91518ec4ca5",
+    "tools/factory_footprint.mjs": "2a53f25ecd503e10e446f0fb7400f54a3de6aab9e841c02dfd7bfb6de8f1f73d"
+  },
+  "remaining_acceptance": [
+    "Typed Rust new-save constructors for PMGL/SET1/VOX1/extras/bass/MIDI-map objects; current C/JS constructors retained, Rust views/validators/lossless copies implemented",
+    "Browser distribution/adoption of shared Rust codecs; original JS helpers still used and covered by frozen differential fixtures",
+    "C OTA binding to qualified Rust primitives; DX checksum/service dispatch, Jam transfer operation policy and per-command telemetry schemas remain C",
+    "Physical MIDI/device, MCU linker-map/ROM/RAM/timing, Emscripten and combined parallel-slice qualification"
+  ],
+  "limitations": [
+    "No physical device writes or flashing",
+    "No browser interaction claim for this branch",
+    "Recovery stub/loader and hardware IRQ/publication behavior unchanged",
+    "Evidence applies to this base plus recorded source hashes before parallel DSP integration"
+  ]
+}
