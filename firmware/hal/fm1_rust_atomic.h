@@ -7,6 +7,10 @@
 #if EN_RUST_MCU_ATOMICS
 static volatile uint8_t fm1_rust_atomic_lock __attribute__((aligned(32)));
 static uint32_t fm1_rust_atomic_recoveries;
+static inline __attribute__((noreturn)) void fm1_mcu_park(void)
+{
+    for(;;) __asm__ volatile("nop" ::: "memory");
+}
 static inline uint32_t fm1_rust_atomic_try(void)
 {
     uint32_t acquired;
@@ -34,7 +38,7 @@ static void fm1_rust_atomic_stopped_owner(void)
     /* A stuck CPU0 owner cannot be recovered by CPU1. Park without acquiring
      * anything: CPU0's bounded join holds CPU1, or the watchdog resets CPU0.
      * Same-core reentry is also fail-stop rather than breaking exclusion. */
-    for(;;) __asm__ volatile("nop" ::: "memory");
+    fm1_mcu_park();
 }
 void fm1_mcu_fence(void) { __asm__ volatile("csync" ::: "memory"); }
 uint32_t fm1_mcu_atomic(uint32_t op,uint32_t *word,uint32_t expected,uint32_t value)

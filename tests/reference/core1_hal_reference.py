@@ -38,6 +38,7 @@ static uint32_t aw_load(volatile uint32_t*p){return *p;}
 static void aw_store(volatile uint32_t*p,uint32_t v){*p=v;}
 static int fm1_core1_online(void){return aw_online;}
 static uint32_t fm1_cnum(void){return 0;}
+static void fm1_mcu_park(void){for(;;);}
 static void fm1_core1_stop(void){if(expect_held){assert(fm1_rust_atomic_lock==1);expect_held=0;}stops++;}
 static void fm1_core1_bar_set(void){assert(stops);barred=1;}
 '''+functions+'\n'+recovery+r'''

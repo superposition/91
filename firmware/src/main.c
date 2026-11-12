@@ -194,6 +194,6 @@ __attribute__((noreturn)) void fm1_mcu_panic(void)
         fm1_core1_stop();
         bootguard.pending=1;
     }
-    for(;;) __asm__ volatile("nop" ::: "memory");
+    fm1_mcu_park();
 }
 #endif
