@@ -4,11 +4,11 @@ Execution is tracked in [epic #1](https://github.com/superposition/91/issues/1).
 
 ## Compatibility and ownership
 
-The browser build now runs Rust command publication/consumption, Songbook validation, session encoding/validation, phrase planning and bass decisions inside the existing instrument. Command dispatch, synthesis, application state, transport and UI remain C. The physical firmware still uses its original C path. The current working-tree Songbook/DX7 changes are part of the baseline. Do not reset them to the Git HEAD baseline.
+The browser build now runs Rust command publication/consumption, Songbook validation, session encoding/validation, phrase planning, bass decisions, sample-clock cadence, Songbook display snapshots and staging arbitration inside the existing instrument. Musical event dispatch, synthesis, application state and UI drawing remain C. The physical firmware still uses its original C path. The current working-tree Songbook/DX7 changes are part of the baseline. Do not reset them to the Git HEAD baseline.
 
 The device uses 256-frame render calls and 512-frame DMA halves at 44.1 kHz, allowing approximately 11,609 microseconds per half. Ordinary RAM is limited to 98,304 bytes, and the 344,064-byte pool must retain 4,096 bytes of reserve.
 
-The target Rust design assigns one owner to each mutable subsystem. The command ring now has Rust producer/consumer endpoints; the render/application owners and coherent UI snapshot have not migrated yet:
+The target Rust design assigns one owner to each mutable subsystem. The command ring has Rust producer/consumer endpoints and the Songbook UI consumes a copied view. Full render/application state and broader UI snapshots remain to migrate:
 
 ```mermaid
 flowchart LR
@@ -50,8 +50,8 @@ The workspace currently contains:
 | --- | --- |
 | `fm1-types` | Stable parameter IDs and metadata, Songbook settings, step/scale masks, packed modifiers and command words |
 | `fm1-formats` | CRC-32, validated borrowed Jam Pack v1/v2 views, sound-parameter validation and the 20-byte session codec |
-| `fm1-engine` | v1/v2 phrase planning, deterministic random state and bass-event derivation |
-| `fm1-rt` | Fixed 1,024-word SPSC command ring with unique Rust producer/consumer endpoints |
+| `fm1-engine` | v1/v2 phrase planning, deterministic random state, bass events and sample-clock/render cadence |
+| `fm1-rt` | Fixed SPSC command ring, bounded copied snapshots and staging lease arbitration |
 | `fm1-cli` | Layout reporting, parameter export, pack inspection/validation and phrase-plan inspection |
 | `fm1-jam-bridge` | Audited transitional C ABI used by the browser instrument; diagnostics count execution, rejection and C fallback |
 | `fm1-probe` | Compiler/ABI probes for the experimental hardware route; this package is not production firmware |
@@ -68,6 +68,9 @@ The synthesis engine, full application, hardware layer, remaining browser logic 
 | Two phrase buffers | 776 bytes |
 | Jam settings | 10 bytes |
 | Stored Songbook session | 20 bytes |
+| Sample-clock state replacing four C scalars | 16 bytes |
+| Songbook display view / gated cell | 220 / 224 bytes |
+| Staging lease state, excluding the retained C buffer | 4 bytes |
 
 The planner preserves candidate scoring/tie order, random-number consumption, cadence decisions and delayed following-section behavior. Fixed arrays and borrowed pack bytes keep allocation and expanded graph storage out of the musical core. Rust's native struct layout is never used as a stored or wire format.
 
@@ -100,12 +103,13 @@ flowchart LR
   ABI --> Bass[Rust bass decisions]
   Plan --> Phrase[C-owned 388-byte phrase]
   Bass --> Event[4-byte bass event]
-  Phrase --> DSP[C transport and synthesis]
+  Phrase --> Timing[Rust clock and render cadence]
+  Timing --> DSP[C musical dispatch and synthesis]
   Event --> DSP
   DSP --> WASM[WASM / AudioWorklet]
 ```
 
-`EN_RUST_JAM=1` is the browser default and also enables `EN_RUST_COMMANDS=1`. `EN_RUST_JAM=0` builds the C reference. The normal hardware build does not enable these bridges. No caller reference or pointer survives a Rust call. A previous/output phrase may alias; the bridge first copies its initialized header and active beats, avoiding uninitialized C tails. The bridge uses stack copies, so its device stack cost still requires hardware qualification.
+`EN_RUST_JAM=1` is the browser default and also enables `EN_RUST_COMMANDS=1`, `EN_RUST_TRANSPORT=1` and `EN_RUST_HANDOFF=1`. `EN_RUST_JAM=0` builds the C reference. The normal hardware build does not enable these bridges. No caller reference or pointer survives a Rust call. A previous/output phrase may alias; the bridge first copies its initialized header and active beats, avoiding uninitialized C tails. The bridge uses stack copies, so its device stack cost still requires hardware qualification.
 
 The current Rust unsafe inventory is confined to three packages. `fm1-jam-bridge` checks nullable/bounded pointers, copies initialized inputs, supports the documented phrase alias, and requires disjoint output/settings/pack/seed storage without concurrent mutation. Its command calls require one serialized producer, one render consumer and exclusive boot-time reset. Its relaxed counters are telemetry, not synchronization. `fm1-rt` uses acquire/release publication and slot reuse; safe Rust obtains non-clonable producer/consumer handles from one exclusive `split`. `fm1-probe` owns the experimental callback, `UnsafeCell`, section-placement and volatile-MMIO boundaries; its mutable cell requires exclusive boot-time access before audio/interrupt use. The musical/format/type libraries forbid unsafe code. Hardware and multicore ownership still need their own reviewed boundaries as those tickets are implemented.
 
@@ -115,7 +119,11 @@ The ring stores exactly 1,024 `CommandWord(u32)` values and two wrapping `u32` i
 
 Full queues reject the newest word without changing any queued word. Unsigned wrapping distance preserves full/empty behavior across `u32::MAX`, and the power-of-two capacity preserves physical slot order through that wrap. The frozen C corpus covers four starting positions, preset-like bursts, accepted/rejected publications and ordered drains: each case accepts and consumes 69,520 words and deliberately drops 25,856. An independent `VecDeque` model checks the same boundary cases. A real two-thread test transfers 500,000 patterned words without tearing, loss or reordering. All 39 command kinds preserve every signed payload, including a valid all-zero command word.
 
-In three full instrument scenarios the Rust queue accepts/consumes 961, 751 and 319 commands, drops none, and peaks at 213, 213 and 208 slots. The C command dispatcher and render-block drain points stay in place, so audio/framebuffer/lifecycle comparisons still match the frozen baseline. Telemetry reports accepted/consumed/dropped/high-water counts. The browser executes input/application/render on one worker (or the HTTP fallback's main thread); a physical backend must first supply/qualify 32-bit atomics or an appropriate interrupt-exclusion implementation. Coherent UI snapshots and transfer-buffer leases remain open parts of R08.
+In three full instrument scenarios the Rust queue accepts/consumes 961, 751 and 319 commands, drops none, and peaks at 213, 213 and 208 slots. The C command dispatcher and render-block drain points stay in place, so audio/framebuffer/lifecycle comparisons still match the frozen baseline. Telemetry reports accepted/consumed/dropped/high-water counts. The browser executes input/application/render on one worker (or the HTTP fallback's main thread); a physical backend must first supply/qualify 32-bit atomics or an appropriate interrupt-exclusion implementation. Broader application snapshots and physical staging/exclusion qualification remain open parts of R08.
+
+The [Songbook handoff checkpoint](rust/songbook-handoff.md) adds one 220-byte view per UI frame and lease arbitration over the existing 3,840-byte staging buffer. Its destination gate protects the Rust copy; the serialized emulator caller must still exclude changes to the C source. The lease preserves receive, activation and readback lifetimes without allocating a second payload. These unsafe ABI contracts are separate from the safe portable APIs.
+
+The [clock checkpoint](rust/TRANSPORT.md) replaces four C scalars with a 16-byte Rust state for 24-PPQN subdivision, sample phase, external-clock expiry, chunk limits and control cadence. C dispatch remains between scoped Rust calls in its original order, including tempo changes during a musical tick. Swing, lane/ratchet/polymeter decisions and synthesis still run in C. Focused proof files record each checkpoint's independent frozen-reference comparisons.
 
 `tests/rust_emulator_parity.sh` builds both variants from one checkout. Two 159.64-second playback runs compare **28,160,000 stereo Float32 values bit-for-bit**, sampled full framebuffers and LEDs, and frozen R01 PCM fingerprints. A third 74.5-second scenario restores a saved v2 pack, holds a phrase for 60 seconds without additional planning, requests New Idea, stops, saves and boots a fresh instance from the saved bytes. Its irregular render requests span **1 to 1,024 frames**, adding **6,570,900 matching audio values**.
 
