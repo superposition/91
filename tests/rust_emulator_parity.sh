@@ -19,4 +19,6 @@ node tests/host/emu_rust_test.mjs "$out/reference.wasm" "$out/rust.wasm" rust/fm
 cat "$out/saved-v1.json"
 node tests/host/emu_session_test.mjs "$out/reference.wasm" "$out/rust.wasm" > "$out/session.json"
 cat "$out/session.json"
+node tests/host/emu_handoff_test.mjs "$out/rust.wasm" > "$out/handoff.json"
+cat "$out/handoff.json"
 sha256sum "$out/reference.wasm" "$out/rust.wasm" > "$out/sha256.txt"

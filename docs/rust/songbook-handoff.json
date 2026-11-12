@@ -1,0 +1,34 @@
+{
+  "ticket": 9,
+  "base_commit": "9495d80595dcc52123ce5bf57de5e1f5917f6d5a",
+  "qualification": "serialized emulator source capture; no physical backend qualification",
+  "rust_toolchain": "1.94.1",
+  "snapshot_bytes": 220,
+  "snapshot_cell_bytes": 224,
+  "staging_lease_bytes": 4,
+  "added_static_bytes_including_ui_cache_and_five_counters": 468,
+  "existing_staging_payload_bytes": 3840,
+  "extra_staging_payload_copies": 0,
+  "concurrent_snapshot_publications": 100000,
+  "concurrent_staging_claims": 100000,
+  "common_protocol_response_hash": "eff97ff8",
+  "independent_reference": "R01 C after verification of all 440 frozen source hashes",
+  "full_instrument_compared_float32_values": 34730900,
+  "http_compared_float32_values": 1048576,
+  "wasm_ui_check": { "publications": 134, "copies": 134, "detail_pages": 4, "staging_rejections": 0 },
+  "wasm_memory_bytes": 33554432,
+  "wasm_exports": 24,
+  "wasm_artifact": {
+    "bytes": 2523928,
+    "sha256": "e21c67592061ce1945a795839f19548818bafe3afe8ac233a441ebc55de6c710"
+  },
+  "reference_wasm_sha256": "4dc40393b4d2071fad8d773e0bc3a83b6c5b02fb90abccb41e9239a1b0d02a04",
+  "unchanged_pcm_fingerprints": { "factory": "baeff971", "saved_v1": "28722449" },
+  "remaining": [
+    "full application/UI snapshot conversion",
+    "Rust ownership of the external C staging allocation and retained upload pointer",
+    "physical producer routing and atomic-or-critical-section backend",
+    "physical source exclusion time, stack and memory qualification",
+    "interactive browser layout/audio-device/MIDI QA"
+  ]
+}

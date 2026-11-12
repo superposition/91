@@ -138,6 +138,38 @@ int en_jam_option(int field)
 {
     int off=jp_option_offset(field);return jp_dx() && off>=0?jp_data[JP2_HEAD+off]:0;
 }
+#if EN_RUST_HANDOFF
+extern int32_t fm1_rust_snapshot_copy(const uint8_t *,uint8_t *,uint32_t);
+static void jp_snapshot_text(char *dst,const char *src,unsigned capacity)
+{
+    unsigned i=0;while(i+1<capacity && src[i]){dst[i]=src[i];i++;}dst[i]=0;
+}
+int en_jam_snapshot(en_jam_snapshot_t *out)
+{
+    en_jam_snapshot_t s;unsigned i;
+    /* Source exclusion is provided by the emulator's single execution context,
+     * not by volatile or by the destination's synchronization gate. */
+    for(i=0;i<sizeof s;i++)((uint8_t *)&s)[i]=0;
+    s.settings=jp_want;s.on=en_jam_on;s.bar=en_jam_bar;s.beat=en_jam_beat;
+    s.section=en_jam_section;s.pending=en_jam_pending;s.length=en_jam_length;
+    s.busy=(uint8_t)en_jam_busy();s.load=en_jam_load;s.source=(uint8_t)en_jam_source();
+    s.playing=en_playing;s.version=jp_data[4];s.revision=en_jam_revision;
+    for(i=0;i<10;i++)s.options[i]=(uint8_t)en_jam_option(JAM_SWELL+(int)i);
+    jp_snapshot_text(s.title,(const char *)jp_data+16,sizeof s.title);
+    jp_snapshot_text(s.form,en_jam_form(1),sizeof s.form);
+    jp_snapshot_text(s.pending_title,en_jam_pending_title(),sizeof s.pending_title);
+    if(en_jam_on){en_jam_name(0,s.chord);en_jam_name(1,s.next);}
+    for(i=0;i<2;i++) {
+        char *name=i?s.bass_name:s.keys_name;
+        unsigned value=s.options[(i?JAM_BASS_PROGRAM:JAM_KEYS_PROGRAM)-JAM_SWELL],k;
+        if(s.version==2 && value<jp_data[JP2_HEAD+4]) {
+            for(k=0;k<10;k++)name[k]=(char)jp_data[JP2_VOICE+value*128+118+k];
+            name[10]=0;
+        } else {name[0]='-';name[1]=0;}
+    }
+    return fm1_rust_snapshot_copy((const uint8_t *)&s,(uint8_t *)out,sizeof s);
+}
+#endif
 static void jp_editable(void)
 {
     unsigned i;if(jp_data!=jp_active){for(i=0;i<jp_len;i++)jp_active[i]=jp_data[i];jp_data=jp_active;}

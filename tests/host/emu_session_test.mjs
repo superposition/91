@@ -78,9 +78,10 @@ assert.deepEqual(saved.subarray(18),Uint8Array.from([0,0]),'legacy save clears r
 assert.equal(rust.ex.web_rust_stat(2),0,'no rejected Rust planning/encoding');
 assert.equal(rust.ex.web_rust_stat(3),0,'no C fallback');
 assert.equal(rust.memory.buffer.byteLength,memoryBytes);
-const counters=Array.from({length:10},(_,index)=>rust.ex.web_rust_stat(index));
+const counters=Array.from({length:13},(_,index)=>rust.ex.web_rust_stat(index));
 assert(counters[6]>176 && counters[7]>176,'Rust command handoff executes');
 assert.equal(counters[8],0,'panel/lifecycle flow drops no commands');
+assert(counters[10]>0 && counters[11]>0 && counters[12]>0,'Rust transport runs with irregular render sizes');
 // A fresh instance gives power-on RAM semantics while retaining saved objects.
 reference=await boot(process.argv[2],{26:pack,30:saved});
 rust=await boot(process.argv[3],{26:pack,30:saved});
@@ -93,4 +94,5 @@ console.log(JSON.stringify({scenario:'v2-hold-idea-save-restart',render_calls:ca
   compared_samples:samples,seconds:samples/2/44100,peak,memory_bytes:memoryBytes,
   saved_session:Array.from(saved),rust:{validations:counters[0],plans:counters[1],
     rejections:counters[2],fallbacks:counters[3],bass_events:counters[4],sessions:counters[5],
-    commands:{accepted:counters[6],consumed:counters[7],dropped:counters[8],high_water:counters[9]}}}));
+    commands:{accepted:counters[6],consumed:counters[7],dropped:counters[8],high_water:counters[9]},
+    transport:{pulses:counters[10],chunks:counters[11],controls:counters[12]}}}));

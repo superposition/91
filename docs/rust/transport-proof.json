@@ -1,0 +1,262 @@
+{
+  "ticket": "https://github.com/superposition/91/issues/10",
+  "status": "first integrated transport slice; full R09 remains open",
+  "date": "2026-11-12",
+  "reference": {
+    "baseline_archive_sha256": "3d20587f825b8a26cd1f9ab6a715e65e78838fce0c19b5c27ce0427c15fa6263",
+    "verified_source_files": 440,
+    "source_verification_log_sha256": "02103818921d558fa092601f4329ba6740cf2ad792676fb0331e24f2fadfbd85",
+    "adapter_sha256": "0f69a8fa2df6aaba36aef238a975b2044546d6be9452b65489af6875bcba13c8",
+    "frozen_tempo_corpus_sha256": "c53bd4c2f588aee7011593c2cd4755d5a0f9082ad5c49de3984c2a55b5032a1e"
+  },
+  "representation": {
+    "state_bytes": 16,
+    "state_alignment": 4,
+    "existing_step_length_cache_bytes": 4,
+    "additional_diagnostic_counter_bytes": 12,
+    "wasm_memory_bytes": 33554432
+  },
+  "toolchains": {
+    "rust": "1.94.1",
+    "node": "22.14.0",
+    "wasm_clang": "22.1.8 (Zig wrapper)",
+    "native_cc": "Ubuntu GCC 11.4.0",
+    "native_os": "WSL Ubuntu-22.04",
+    "portable_checks_os": "Windows"
+  },
+  "native": {
+    "comparison": "cmp of complete binary traces plus JSON summaries against frozen R01 C",
+    "render_calls": 40000,
+    "frames": 10973692,
+    "compared_pcm_values": 21947384,
+    "midi_messages": 20590,
+    "midi_clocks": 8991,
+    "cases": [
+      {
+        "scenario": 0,
+        "frames": 1266688,
+        "chunks": 6515,
+        "state_hash": 407062861,
+        "pcm_hash": 2448701170,
+        "midi_hash": 2654548873,
+        "midi_messages": 2469,
+        "midi_clocks": 1088,
+        "trace_bytes": 10442884,
+        "trace_sha256": "4d78bb3a1cc846a124ef2a5182962c7538f4b0f9968c7ea589736e714f7041fa"
+      },
+      {
+        "scenario": 1,
+        "frames": 1476735,
+        "chunks": 9143,
+        "state_hash": 2113110545,
+        "pcm_hash": 2960343957,
+        "midi_hash": 832204238,
+        "midi_messages": 2772,
+        "midi_clocks": 1266,
+        "trace_bytes": 12129320,
+        "trace_sha256": "88f36ce1dedfad94ab528e7e456e655f06630c14238fdefb074a3e061a68546a"
+      },
+      {
+        "scenario": 2,
+        "frames": 1266688,
+        "chunks": 5152,
+        "state_hash": 4043373231,
+        "pcm_hash": 3059693099,
+        "midi_hash": 1261085367,
+        "midi_messages": 2505,
+        "midi_clocks": 1087,
+        "trace_bytes": 10443604,
+        "trace_sha256": "542cf2ca13821b4067664292c18ee4f854b5f64597e2ed2c38a873f4cfc01f2a"
+      },
+      {
+        "scenario": 3,
+        "frames": 1476735,
+        "chunks": 7901,
+        "state_hash": 2461564526,
+        "pcm_hash": 3958659416,
+        "midi_hash": 987739012,
+        "midi_messages": 2810,
+        "midi_clocks": 1265,
+        "trace_bytes": 12130080,
+        "trace_sha256": "de2596025bfcedb8e9e98c3c6ed0d9c555432e9ca32ffb7e7ee20a7efabead15"
+      },
+      {
+        "scenario": 4,
+        "frames": 1266688,
+        "chunks": 6409,
+        "state_hash": 2240426126,
+        "pcm_hash": 2550798743,
+        "midi_hash": 35917709,
+        "midi_messages": 2335,
+        "midi_clocks": 991,
+        "trace_bytes": 10440204,
+        "trace_sha256": "fcd173cfcae825b75eb903e9e19a9793292af829ecbb6cfdab5cb2492b0f850a"
+      },
+      {
+        "scenario": 5,
+        "frames": 1476735,
+        "chunks": 9044,
+        "state_hash": 253862547,
+        "pcm_hash": 2950683530,
+        "midi_hash": 1904494959,
+        "midi_messages": 2618,
+        "midi_clocks": 1152,
+        "trace_bytes": 12126240,
+        "trace_sha256": "4c7a103fcccf05c07fad810f0f5cc44383be8af16ff815a0a2f3298164932112"
+      },
+      {
+        "scenario": 6,
+        "frames": 1266688,
+        "chunks": 5137,
+        "state_hash": 4206143290,
+        "pcm_hash": 2173966892,
+        "midi_hash": 1591609176,
+        "midi_messages": 2393,
+        "midi_clocks": 991,
+        "trace_bytes": 10441364,
+        "trace_sha256": "47db4cc4015cfe029eee123886872f3bb846a330f225d088967949f90619ede3"
+      },
+      {
+        "scenario": 7,
+        "frames": 1476735,
+        "chunks": 7885,
+        "state_hash": 1746909044,
+        "pcm_hash": 1504370851,
+        "midi_hash": 2694035790,
+        "midi_messages": 2688,
+        "midi_clocks": 1151,
+        "trace_bytes": 12127640,
+        "trace_sha256": "9af8d77bc253227f532637632d290715925ac9a6ec7c8ee0f852311e051ee52a"
+      }
+    ]
+  },
+  "wasm": {
+    "reference_sha256": "b38f4db479f022307e3b355617108c21c2ae540776f215faaf2f0d8e6dd316b3",
+    "rust_sha256": "24135deb829716fbcd1645bd2253b48bed0ecb39989b607fc4ad0be295a5944a",
+    "rust_bytes": 2516257,
+    "compared_float32_values": 34730900,
+    "http_fallback_compared_float32_values": 1048576,
+    "scenarios": [
+      {
+        "initial_pack": "factory",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "baeff971",
+        "peak": 0.3714040517807007,
+        "blits": 4679,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 0,
+          "plans": 8,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1037,
+          "sessions": 1,
+          "commands": {
+            "accepted": 961,
+            "consumed": 961,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6215,
+            "chunks": 28982,
+            "controls": 27668
+          }
+        }
+      },
+      {
+        "initial_pack": "rust/fm1-engine/tests/packs/harris-citypop.jmp",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "28722449",
+        "peak": 0.4303741455078125,
+        "blits": 4673,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 1,
+          "plans": 10,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1033,
+          "sessions": 1,
+          "commands": {
+            "accepted": 751,
+            "consumed": 751,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6192,
+            "chunks": 34155,
+            "controls": 27682
+          }
+        }
+      },
+      {
+        "scenario": "v2-hold-idea-save-restart",
+        "render_calls": 11663,
+        "compared_samples": 6570900,
+        "seconds": 74.5,
+        "peak": 0.22903597354888916,
+        "memory_bytes": 33554432,
+        "saved_session": [
+          74,
+          83,
+          77,
+          1,
+          1,
+          11,
+          1,
+          8,
+          2,
+          1,
+          83,
+          0,
+          7,
+          1,
+          190,
+          0,
+          3,
+          83,
+          0,
+          0
+        ],
+        "rust": {
+          "validations": 1,
+          "plans": 9,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 804,
+          "sessions": 2,
+          "commands": {
+            "accepted": 319,
+            "consumed": 319,
+            "dropped": 0,
+            "high_water": 208
+          },
+          "transport": {
+            "pulses": 4819,
+            "chunks": 12684,
+            "controls": 11829
+          }
+        }
+      }
+    ]
+  },
+  "checks": {
+    "windows_fmt": "pass",
+    "windows_workspace_tests": "21 pass",
+    "windows_clippy_warnings_denied": "pass",
+    "linux_native_trace_cmp": "8 pass",
+    "linux_wasm_complete_scenarios": "3 pass",
+    "http_fallback": "pass"
+  },
+  "remaining": [
+    "C musical tick/dispatch, swing/humanization, step/lane conditions, ratchets, polymeter, fills and mutations",
+    "C section state, start/stop voice cleanup and incoming MIDI clock routing",
+    "Physical memory/deadline/backend qualification; no device flashed"
+  ]
+}

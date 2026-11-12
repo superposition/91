@@ -16,6 +16,8 @@ static HIGH_WATER: AtomicU32 = AtomicU32::new(0);
 pub unsafe extern "C" fn fm1_rust_commands_reset() {
     // SAFETY: the C boot owner excludes render/input calls during initialization.
     unsafe { QUEUE.reset_exclusive() };
+    // SAFETY: the same boot exclusion covers staging and snapshot users.
+    unsafe { super::handoff::reset_exclusive() };
     for counter in [&ACCEPTED, &CONSUMED, &DROPPED, &HIGH_WATER] {
         counter.store(0, Ordering::Relaxed);
     }

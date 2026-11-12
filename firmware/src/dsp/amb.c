@@ -1804,7 +1804,13 @@ static drum_t drum[EN_NDRUM];
 #define DR_FADE (1.0f - 1.0f / (0.0008f * EN_SR))   /* the old hit's fade: ~0.8 ms, gone in ~4 */
 static float pulse_vol, swing, drive_k = 1.0f, lane_g[EN_NDRUM], lane_tune[EN_NDRUM], lane_dec[EN_NDRUM];
 static float kick_age = 1e9f;                  /* samples since the last kick (the pump can follow it) */
-static float step_len, pulse_left;               /* a sixteenth, in samples; to the next MIDI clock pulse */
+static float step_len;                           /* a sixteenth, in samples */
+#if EN_RUST_TRANSPORT
+#include "rust_transport.h"
+static fm1_transport_t transport;
+#else
+static float pulse_left;                        /* to the next MIDI clock pulse */
+#endif
 static uint32_t noise = 22222u;
 static const uint8_t DRUM_GM[EN_NDRUM] = {36, 38, 39, 42, 46, 37};   /* kick, snare, clap, hats, side stick */
 /* the hats' metal: four square waves at the 808's inharmonic ratios (Hz / EN_SR); the style's pitch */
@@ -4420,12 +4426,18 @@ tape_part:
 }
 
 /* ------------------------------------------------------------ parameters --- */
+#if !EN_RUST_TRANSPORT
 static int pulse;
 static uint32_t ext_age;
+#endif
 
 static void tempo_set(void)
 {
+#if EN_RUST_TRANSPORT
+    step_len = fm1_rust_transport_step_length((uint32_t)par[P_TEMPO]);
+#else
     step_len = EN_SR * 60.0f / ((float)par[P_TEMPO] * 4.0f);
+#endif
     duck_dec = fm_expf(-4.0f / (step_len * 3.0f));   /* the duck: back up in about three sixteenths */
 }
 
@@ -4862,20 +4874,33 @@ void en_init(void)
 /* ------------------------------------------------------------ transport --- */
 static void clock_pulse(void)
 {
+#if EN_RUST_TRANSPORT
+    if (fm1_rust_transport_tick(&transport))
+        tick();
+    if (!en_ext)
+        midi(0xF8, 0, 0);
+    fm1_rust_transport_pulse(&transport);
+#else
     if (pulse == 0)
         tick();
     if (!en_ext)
         midi(0xF8, 0, 0);
     if (++pulse >= 6)
         pulse = 0;
+#endif
 }
 
 static void play_start(int from_top)
 {
     int i;
+#if EN_RUST_TRANSPORT
+    fm1_rust_transport_start(&transport, (uint32_t)from_top);
+#endif
     if (from_top) {
         jp_pos=0;
+#if !EN_RUST_TRANSPORT
         pulse = 0;
+#endif
         sixteenth = 0;
         bars = 0;
         ac_pos = 0;
@@ -4886,7 +4911,9 @@ static void play_start(int from_top)
             en_lane_src[i] = lane_src[i] = (uint8_t)(par[P_LSRC + i] ? par[P_LSRC + i] - 1 : pat_now);
         pad_lfo.ph = drone_lfo.ph = 0.0f;
     }
+#if !EN_RUST_TRANSPORT
     pulse_left = 0.0f;
+#endif
     en_playing = 1;
     pad_gate = 1.0f;
     for (i = 0; i < EN_NPAD; i++)               /* from silence: the breaths start over, overlapping */
@@ -6432,7 +6459,11 @@ static void drain(void)
             break;
         case C_CLOCK:
             en_ext = 1;
+#if EN_RUST_TRANSPORT
+            fm1_rust_transport_receive(&transport);
+#else
             ext_age = 0;
+#endif
             if (a == EN_CLK_TICK) {
                 if (en_playing)
                     clock_pulse();
@@ -8168,7 +8199,9 @@ static void control(uint32_t n)                 /* once a chunk: the slow things
     }
 }
 
+#if !EN_RUST_TRANSPORT
 static uint32_t ctl_acc;                        /* frames since control() last ran */
+#endif
 void en_render(int32_t *out, uint32_t n, uint32_t gain_q12)
 {
     float gain;
@@ -8184,12 +8217,27 @@ void en_render(int32_t *out, uint32_t n, uint32_t gain_q12)
     trim_k += (trim_to - trim_k) * 0.15f;       /* the piece's level (en_trim), over about 40 ms */
     gain *= trim_k;
     usb_gain *= trim_k;
+#if EN_RUST_TRANSPORT
+    if (fm1_rust_transport_expired(&transport, en_ext))
+#else
     if (en_ext && ++ext_age > 100u)
+#endif
         en_ext = 0;
     while (n) {
         uint32_t k = n > BLK ? BLK : n;
         int timed = en_playing && !en_ext;
+#if EN_RUST_TRANSPORT
+        uint32_t control_frames;
+#endif
         if (timed) {
+#if EN_RUST_TRANSPORT
+            if (fm1_rust_transport_due(&transport)) {
+                RT(34, clock_pulse());
+                /* tick() may change tempo: schedule only after its dispatch. */
+                fm1_rust_transport_schedule(&transport, step_len);
+            }
+            k = fm1_rust_transport_clock_limit(&transport, k, step_len, jp_dx());
+#else
             if (pulse_left <= 0.0f) {
                 RT(34, clock_pulse());
                 pulse_left += step_len * (1.0f / 6.0f);
@@ -8203,6 +8251,7 @@ void en_render(int32_t *out, uint32_t n, uint32_t gain_q12)
                 if(jp_dx() && pulse)boundary+=(float)(6-pulse)*step_len*(1.0f/6.0f);
                 if((float)k>boundary)k=(uint32_t)boundary+1u;
             }
+#endif
         }
         if (k > n)
             k = n;
@@ -8214,9 +8263,18 @@ void en_render(int32_t *out, uint32_t n, uint32_t gain_q12)
                                                  * so a 256-frame render is now at most three chunks for the hits. The clock pulse still cuts where it
                                                  * falls: the grid and the MIDI clock out keep their timing; only hits that swing or humanize (6-60 ms
                                                  * off the grid by design) may come the little later. */
+#if EN_RUST_TRANSPORT
+            k = fm1_rust_transport_wait_limit(k, w, EN_MIN_CHUNK);
+#else
             if (w > 0 && (uint32_t)w < k)
                 k = (uint32_t)w >= EN_MIN_CHUNK ? (uint32_t)w : k < EN_MIN_CHUNK ? k : EN_MIN_CHUNK;
+#endif
         }
+#if EN_RUST_TRANSPORT
+        control_frames = fm1_rust_transport_advance(&transport, k, (uint32_t)timed);
+        if (control_frames) {
+            RT(33, control(control_frames));
+#else
         if (timed)
             pulse_left -= (float)k;
         ctl_acc += k;
@@ -8225,6 +8283,7 @@ void en_render(int32_t *out, uint32_t n, uint32_t gain_q12)
                                                  * things it steps take the frames since it last ran, so nothing drifts */
             RT(33, control(ctl_acc));
             ctl_acc = 0;
+#endif
         } else {
             int t;
             tg_inv = 1.0f / (float)k;           /* the tracks' gains hold at their targets through the skipped chunk; the ramp goes on at the next control */

@@ -23,6 +23,7 @@
  * Float only, no libm: fastmath.h. */
 #pragma once
 #include <stdint.h>
+#include <stddef.h>
 
 #define EN_SR 44100.0f
 #define EN_NDRUM 6                     /* the drum lanes: kick, snare, clap, closed hat, open hat, perc */
@@ -469,3 +470,24 @@ int en_jam_upload_from(const uint8_t *p,unsigned n,int source);
 int en_jam_option(int field);
 
 const char *en_jam_pending_title(void);
+
+/* A copied view, never pointers into a changing pack. The emulator captures it
+ * at its serialized UI boundary. Hardware must supply audio exclusion before
+ * enabling EN_RUST_HANDOFF; the default physical build retains its C path. */
+typedef struct {
+    jp_settings_t settings;
+    uint8_t on, bar, beat, section, pending, length, busy;
+    int8_t load;
+    uint8_t source, playing, version, options[10], reserved;
+    uint32_t revision;
+    char title[32], chord[32], next[32], form[32], pending_title[32];
+    char keys_name[11], bass_name[11];
+    uint8_t reserved_tail[2];
+} en_jam_snapshot_t;
+_Static_assert(sizeof(en_jam_snapshot_t)==220, "Songbook snapshot ABI");
+_Static_assert(offsetof(en_jam_snapshot_t,revision)==32 && offsetof(en_jam_snapshot_t,title)==36 &&
+               offsetof(en_jam_snapshot_t,keys_name)==196 && offsetof(en_jam_snapshot_t,reserved_tail)==218,
+               "Songbook snapshot field offsets");
+#if EN_RUST_HANDOFF
+int en_jam_snapshot(en_jam_snapshot_t *out);
+#endif
