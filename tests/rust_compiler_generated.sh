@@ -47,5 +47,12 @@ for profile in policy draw;do
     cmp "$out/c0-runner-$profile.bin" "$out/generated-runner-$profile.bin"
     sha256sum "$out/generated-runner-$profile.bin" > "$out/runner-$profile.sha256"
 done
+python3 tools/ui_abi.py --check
+"$zig" cc "${native[@]}" "${common[@]}" tests/reference/ui_state_reference.c -lm -o "$out/c0-ui-state"
+"$zig" cc "${native[@]}" "${common[@]}" -DEN_RUST_APP=1 tests/reference/ui_state_reference.c "$abi" "${objects[@]}" "$out/core.o" -lm -o "$out/generated-ui-state"
+"$out/c0-ui-state" > "$out/c0-ui-state.bin"
+"$out/generated-ui-state" > "$out/generated-ui-state.bin"
+cmp "$out/c0-ui-state.bin" "$out/generated-ui-state.bin"
+sha256sum "$out/generated-ui-state.bin" > "$out/ui-state.sha256"
 sha256sum "$core/libcore.rlib.c" "$bridge"/*.rlib.c "$out/generated.pcm" > "$out/identities.sha256"
-echo 'Generated-C natural32-bit factory,12 effects traces and full Runner policy/pixels match current C0.'
+echo 'Generated-C natural32-bit factory,12 effects traces, full Runner policy/pixels and UI layout/defaults match current C0.'
