@@ -13,7 +13,7 @@ Tracked in [web epic #28](https://github.com/superposition/91/issues/28), alongs
 | Backup/telemetry genre labels still showed HYPNO/LOFI while compiled metadata reports CITYPOP/SUNSET. | Align display labels with current `build/params.json`; preserve numeric IDs and saved bytes. |
 | README hero, tour and feature collages depicted the earlier fork. | Replace their references with five fresh, deterministic WASM framebuffer captures. |
 
-The current build uses Rust planning, bass decisions, pack/session codecs and command queue, with C command dispatch, transport, synthesis, effects and screen UI. These details remain documented here and in the migration notes; they are not product copy. Public pages explain choosing a song, key/tempo, Hold/New Idea and shaping keys/bass/swells. Hardware is optional for `/emu/`; the installer and connected editor retain their device-specific roles.
+The current build uses Rust planning, bass decisions, pack/session codecs, command queue, sample-clock cadence, Songbook view copies and staging arbitration. C still dispatches musical events and draws/synthesizes the instrument. These details remain in development documentation; public pages explain choosing a song, key/tempo, Hold/New Idea and shaping keys/bass/swells. Hardware is optional for `/emu/`; the installer and connected editor retain their device-specific roles.
 
 The public CPU/migration badges were intentionally removed after review. Their two non-interactive DOM IDs are recorded as retired in `tests/web-required-ids.json`; all actual controls remain covered by the original ID contract. Developer telemetry remains available through `window.ambLast` without being displayed to players.
 
@@ -49,7 +49,7 @@ This boots the actual WASM with seed 91 and master 2800, advances the instrument
 
 - [#29 — W01: inherited surface audit and product boundary](https://github.com/superposition/91/issues/29)
 - [#30 — W02: shared spectrum and broken theme correction](https://github.com/superposition/91/issues/30)
-- [#31 — W03: product navigation and current Songbook/Rust copy](https://github.com/superposition/91/issues/31)
+- [#31 — W03: product navigation and Songbook playing controls](https://github.com/superposition/91/issues/31)
 - [#32 — W04: browser presentation/integration modules](https://github.com/superposition/91/issues/32)
 - [#33 — W05: README and current imagery](https://github.com/superposition/91/issues/33)
 - [#34 — W06: metadata and capability copy](https://github.com/superposition/91/issues/34)
@@ -68,6 +68,6 @@ node tests/host/emu_http_test.mjs build/emu/amb.wasm
 node tests/web_backup_test.js
 ```
 
-This first pass fixes current branding, theme, product hierarchy and imagery. Full separation of the remaining inline browser logic, complete localization/capability metadata, retirement of unused builders and real desktop/mobile browser visual/audio/MIDI QA remain ticketed. Computer Use did not complete the prior browser verification because the browser host was unavailable and native URL verification stopped access. Source/Node/WASM checks and inspected framebuffer images do not establish browser-layout or audio-device QA. No public deployment is implied by a local build or draft PR.
+Branding, theme, player copy and imagery now match the Songbook. The [browser bindings](WEB_EMULATOR_MODULES.md) are separated into nine modules with startup cancellation and resource cleanup. Complete localization/capability metadata, retirement of unused builders and real desktop/mobile browser visual/audio/MIDI QA remain ticketed. Computer Use did not complete the prior browser verification because the browser host was unavailable and native URL verification stopped access. Source/Node/WASM checks and inspected framebuffer images do not establish browser-layout or audio-device QA. No public deployment is implied by a local build or draft PR.
 
 The existing manual renderer contains duplicate anchor IDs. The built-site check compares their exact fingerprint against `docs/manual.html`, rejects any new duplicates, and rejects duplicates outright in the refactored pages. Correcting the manual content renderer remains part of W07; this exception does not permit missing route/assets or new defects.
