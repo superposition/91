@@ -71,5 +71,29 @@ for profile in ui_controls usb_trs;do
     "$out/generated-$profile" > "$out/generated-$profile.bin"
     cmp "$out/c0-$profile.bin" "$out/generated-$profile.bin"
 done
+python3 tests/reference/ui_frame_extract.py . build/gen/ui_button_current.inc button_current
+cp tests/reference/ui_button_frozen.inc build/gen/ui_button_frozen.inc
+python3 tests/reference/ui_frame_extract.py . build/gen/ui_classify_current.inc classify
+cp tests/reference/ui_classify_frozen.inc build/gen/ui_classify_frozen.inc
+for profile in buttons classify;do
+    if [ "$profile" = buttons ];then source='-DUI_BUTTON_SOURCE="ui_button_current.inc"';else source='-DUI_CLASSIFY_SOURCE="ui_classify_current.inc"';fi
+    "$zig" cc "${native[@]}" "${common[@]}" "$source" tests/reference/ui_${profile}_reference.c -lm -o "$out/c0-ui-$profile"
+    "$zig" cc "${native[@]}" "${common[@]}" "$source" -DEN_RUST_APP=1 tests/reference/ui_${profile}_reference.c "$abi" "${objects[@]}" "$out/core.o" -lm -o "$out/generated-ui-$profile"
+    "$out/c0-ui-$profile" > "$out/c0-ui-$profile.bin"
+    "$out/generated-ui-$profile" > "$out/generated-ui-$profile.bin"
+    cmp "$out/c0-ui-$profile.bin" "$out/generated-ui-$profile.bin"
+done
+python3 tools/usb_reference.py . "$out/usb-source"
+python3 tests/reference/usb_queue_reference.py . "$out/queue-source"
+for profile in control transport queues;do
+    source=(-I"$out/usb-source" -DFELUCCA_CDC=1 -DFELUCCA_UAC=1 -DUSB_DX=1 -DFELUCCA_OTA=1)
+    fixture="tests/reference/usb_${profile}_reference.c"
+    if [ "$profile" = queues ];then source=(-I"$out/queue-source" -Ifirmware/hal);fixture=tests/reference/usb_queue_reference.c;fi
+    "$zig" cc "${native[@]}" "${common[@]}" "${source[@]}" "$fixture" -lm -o "$out/c0-usb-$profile"
+    "$zig" cc "${native[@]}" "${common[@]}" "${source[@]}" -DEN_RUST_USB=1 "$fixture" "$abi" "${objects[@]}" "$out/core.o" -lm -o "$out/generated-usb-$profile"
+    "$out/c0-usb-$profile" > "$out/c0-usb-$profile.bin"
+    "$out/generated-usb-$profile" > "$out/generated-usb-$profile.bin"
+    cmp "$out/c0-usb-$profile.bin" "$out/generated-usb-$profile.bin"
+done
 sha256sum "$core/libcore.rlib.c" "$bridge"/*.rlib.c "$out/generated.pcm" > "$out/identities.sha256"
-echo 'Generated-C natural32-bit factory,12 effects traces, Runner, UI layout/frame/encoders and TRS MIDI match current C0.'
+echo 'Generated-C natural32 factory,12 effects,Runner,UI layout/frame/encoders/buttons/classification,TRS and USB control/transport/queues match C0.'

@@ -6,3 +6,6 @@ export MIRIFLAGS=-Zmiri-strict-provenance
 cargo +nightly-2026-08-28 miri test --locked -p fm1-jam-bridge --features hal-test retained_dma_root_pointer_remains_valid_between_call_scoped_updates
 cargo +nightly-2026-08-28 miri test --locked -p fm1-jam-bridge --features hal-test foreign_uninitialized_load_is_initialized_only_after_verified_success
 cargo +nightly-2026-08-28 miri test --locked -p fm1-jam-bridge --features hal-test retained_uart_root_survives_scoped_parser_calls_without_dma_references
+for test in retained_ep0_root_and_uninitialized_destination_need_no_mutable_dma_reference retained_foreign_roots_keep_busy_payload_length_and_packet_bounds retained_raw_queue_roots_and_uninitialized_delivery_are_scoped;do
+    cargo +nightly-2026-08-28 miri test --locked -p fm1-jam-bridge --features hal-test "$test"
+done

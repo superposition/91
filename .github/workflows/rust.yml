@@ -27,6 +27,8 @@ jobs:
         run: python3 tools/frozen_source.py build/r01-source
       - name: Authoring, fake-device transactions, CLI and six complete songs
         run: bash tests/rust_authoring.sh build/r01-source
+      - name: Rescue and debugger policy over virtual USB endpoints
+        run: bash tests/rust_rescue.sh build/r01-source
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -46,6 +48,7 @@ jobs:
       - run: rustup toolchain install nightly-2026-08-28 --profile minimal --component miri --component rust-src
       - run: sh tests/rust_web_audio_miri.sh
       - run: sh tests/rust_hal_miri.sh
+      - run: sh tests/rust_ui_miri.sh
   native_simulator:
     name: Native Rust simulator and scenario compatibility
     runs-on: ubuntu-24.04
@@ -242,6 +245,10 @@ jobs:
         run: sh tests/rust_ui_frame.sh
       - name: Encoder acceleration and bounded input
         run: sh tests/rust_ui_controls.sh
+      - name: Button actions, reentrant callbacks and checked page helpers
+        run: |
+          sh tests/rust_ui_buttons.sh
+          sh tests/rust_ui_classify.sh
       - name: TRS MIDI parser and retained UART DMA
         run: sh tests/rust_usb_trs.sh
       - name: HAL registers, startup, IRQ and DMA fault contracts
@@ -258,6 +265,12 @@ jobs:
         run: python3 tools/frozen_source.py build/r01-source
       - name: Retained SysEx extent under unrelated incoming starts
         run: sh tests/rust_usb_busy_dispatch.sh build/r01-source
+      - name: USB descriptors, collectors and interrupt-safe MIDI queues
+        run: |
+          sh tests/rust_usb_control.sh build/r01-source
+          sh tests/rust_usb_transport.sh build/r01-source
+          sh tests/rust_usb_transport.sh build/r01-source edge
+          sh tests/rust_usb_queues.sh build/r01-source
       - name: Songbook snapshot and staging handoffs
         run: sh tests/rust_handoff.sh
       - uses: actions/upload-artifact@v4
