@@ -5,7 +5,7 @@ import re, sys
 
 text=(Path(sys.argv[1])/'firmware/src/app/ui.c').read_text(encoding='utf-8')
 mode=sys.argv[3]
-name='void ui_frame(' if mode=='frozen' else 'static uint32_t ui_frame_port('
+name={'frozen':'void ui_frame(', 'port':'static uint32_t ui_frame_port(', 'accel':'static int32_t accel('}[mode]
 match=re.search(re.escape(name)+r'[^;{]*\{',text)
 if not match:raise ValueError('missing '+name)
 start=match.start();end=match.end();depth=1

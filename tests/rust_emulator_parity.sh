@@ -16,6 +16,8 @@ if [ "${EN_RUST_APP:-1}" = 1 ];then
     node tests/host/emu_app_test.mjs "$out/rust.wasm"
     node tests/host/emu_runner_test.mjs "$out/reference.wasm" "$out/rust.wasm" > "$out/runner.json"
     cat "$out/runner.json"
+    node tests/host/emu_controls_test.mjs "$out/reference.wasm" "$out/rust.wasm" > "$out/controls.json"
+    cat "$out/controls.json"
 fi
 node tests/host/emu_http_test.mjs "$out/rust.wasm"
 node tests/host/emu_rust_test.mjs "$out/reference.wasm" "$out/rust.wasm" > "$out/factory.json"

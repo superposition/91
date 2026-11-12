@@ -1,0 +1,49 @@
+{
+  "scope": "encoder acceleration policy and actual UI consumers",
+  "toolchain": "Rust1.94.1; GCC11; Clang22 WASM",
+  "reference": {
+    "cases": 296352,
+    "bytes": 13928544,
+    "sha256": "2f922a13b0d4d7b9f2b14500ecb54215b168559ffa330a7694b75fdbbba23ebb",
+    "native": [
+      "R01",
+      "currentC0",
+      "actualRustCconsumer"
+    ],
+    "wasm": [
+      "R01",
+      "currentC0",
+      "actualRustCconsumer"
+    ],
+    "guards": 6,
+    "R01_manifest_files_verified": 440
+  },
+  "instrument": {
+    "compared_samples": 619164,
+    "actual_encoder_witness": 1,
+    "expected_malformed_rejections": 1,
+    "valid_retry": "passed",
+    "exports": 24,
+    "memory_bytes": 33554432,
+    "bytes": 2350290,
+    "sha256": "bdd53c343f6b1664017e7d7a737e4f212b9274b81636e216cf896e728792d5c7"
+  },
+  "native_scenarios": {
+    "cases": 8,
+    "names": [
+      "fxknobs",
+      "groups",
+      "runner",
+      "seqtricks",
+      "settings",
+      "shift",
+      "theme",
+      "zoom"
+    ],
+    "artifacts": 39,
+    "status": "exact five-way; original failed assertions preserved"
+  },
+  "static_RAM_delta": 0,
+  "physical_target_gate": "root integration; no hardware action",
+  "remaining_input_policy": "button/key/encoder routing and page/visualizer helpers remain under15; producer accumulation under17"
+}

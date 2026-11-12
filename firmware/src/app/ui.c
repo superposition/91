@@ -1733,6 +1733,10 @@ static void knob_set(int k, int v)
 static uint8_t accel_off;              /* the host simulator's "spin": exact steps */
 static int32_t accel(int role, int32_t s, int range)
 {
+#if EN_RUST_APP
+    int32_t value=0;
+    return fm1_rust_ui_accel(&ui,(uint32_t)role,s,range,plat_ms(),accel_off,&value)<0?0:value;
+#else
     uint32_t now = plat_ms(), dt = now - ui.enc_t[role], a = (uint32_t)(s < 0 ? -s : s), m;
     ui.enc_t[role] = now;
     if (!a)
@@ -1746,6 +1750,7 @@ static int32_t accel(int role, int32_t s, int range)
     if (range < 100 && m > 3u)
         m = 3u;
     return s * (int32_t)m;
+#endif
 }
 
 static void turn(int role, int k, int32_t e)

@@ -19,6 +19,35 @@ pub unsafe extern "C" fn fm1_rust_ui_initialize(
     0
 }
 
+/// # Safety
+/// UI is initialized and exclusively foreground-owned; output is one disjoint
+/// writable i32. No callback occurs and no reference survives this call.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_ui_accel(
+    state: *mut State,
+    role: u32,
+    step: i32,
+    range: i32,
+    now: u32,
+    disabled: u32,
+    output: *mut i32,
+) -> i32 {
+    if state.is_null() || output.is_null() {
+        return crate::app::reject();
+    }
+    // SAFETY: caller owns the initialized UI; pure arithmetic invokes no C.
+    let result = unsafe {
+        fm1_app::controls::accelerate(&mut *state, role as usize, step, range, now, disabled != 0)
+    };
+    let Ok(result) = result else {
+        return crate::app::reject();
+    };
+    // SAFETY: one exclusive disjoint output; the UI borrow already ended.
+    unsafe { output.write(result) };
+    crate::app::game_call();
+    0
+}
+
 type FrameCallback = unsafe extern "C" fn(u32, u32, u32) -> u32;
 struct ForegroundPort {
     ui: *mut State,

@@ -3,6 +3,7 @@
 #![no_std]
 #![forbid(unsafe_code)]
 pub mod controller;
+pub mod controls;
 pub mod graphics;
 pub mod runner;
 pub mod runner_draw;
