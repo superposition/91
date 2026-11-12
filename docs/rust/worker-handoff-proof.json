@@ -1,0 +1,1777 @@
+{
+  "ticket": "https://github.com/superposition/91/issues/14",
+  "date": "2026-11-12",
+  "base_commit": "6a12561a9928e11fa355dab65b252f7e6099387a",
+  "status": "combined final software qualification passed; physical integrated stop/atomic/link/timing qualification remains required",
+  "checks": {
+    "rust": "1.94.1",
+    "workspace_tests": 99,
+    "workspace_log_sha256": "7a7ae53816fc7310e899065af730b4fbeb6de43936c8cbc786050344db5c866d",
+    "runtime_job_tests": 6,
+    "fmt": "pass",
+    "clippy_warnings_denied": "pass",
+    "no_std_release": "pass",
+    "wasm_no_default_features_build": "pass",
+    "source_files_verified": 440,
+    "source_log_sha256": "02103818921d558fa092601f4329ba6740cf2ad792676fb0331e24f2fadfbd85",
+    "opaque_pi32v2_runtime_tests": 14,
+    "opaque_pi32v2_log_sha256": "8830c5ffb211c8daa93861a6d0b36517798e7c5fd533c1f58b633b6bd0ddf6de",
+    "final_checks_log_sha256": "32f9a13f9b9f08566614a81793fa884a52f8e4cd62af8973c2d2b6d7bab2638e"
+  },
+  "representation": {
+    "job_bytes": 32,
+    "mailbox_bytes": 96,
+    "mailbox_alignment": 32,
+    "private_meter_bytes": 32,
+    "diagnostic_bytes": 32,
+    "named_static_delta_bytes": 164,
+    "new_audio_buffer_bytes": 0,
+    "heap": false,
+    "generation_bits": 29,
+    "wrap_policy": "retire async permanently before reuse; serial playback continues",
+    "stage_poll_limit": 65536,
+    "callback_order": [
+      "bass/acid if assigned",
+      "tank",
+      "pad",
+      "FM6"
+    ]
+  },
+  "native": {
+    "valid_cases": 24,
+    "fault_cases": 12,
+    "frames_per_case": 232050,
+    "frames_total": 8353800,
+    "trace_contents": [
+      "PCM24",
+      "fixed USB16",
+      "MIDI packet and callback order",
+      "public meters"
+    ],
+    "results": [
+      {
+        "songbook": 0,
+        "placement": 1,
+        "mode": 0,
+        "frames": 232050,
+        "trace_hash": "d283d8a3",
+        "midi_events": 425,
+        "peak": 0.361495614,
+        "submits": 0,
+        "joins": 0,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 0,
+        "placement": 1,
+        "mode": 1,
+        "frames": 232050,
+        "trace_hash": "d283d8a3",
+        "midi_events": 425,
+        "peak": 0.361495614,
+        "submits": 1468,
+        "joins": 1468,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 0,
+        "placement": 1,
+        "mode": 10,
+        "frames": 232050,
+        "trace_hash": "d283d8a3",
+        "midi_events": 425,
+        "peak": 0.361495614,
+        "submits": 1468,
+        "joins": 1469,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 0,
+        "placement": 1,
+        "mode": 11,
+        "frames": 232050,
+        "trace_hash": "d283d8a3",
+        "midi_events": 425,
+        "peak": 0.361495614,
+        "submits": 1468,
+        "joins": 1468,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 0,
+        "placement": 1,
+        "mode": 2,
+        "frames": 232050,
+        "trace_hash": "d283d8a3",
+        "midi_events": 425,
+        "peak": 0.361495614,
+        "submits": 1468,
+        "joins": 1468,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 0,
+        "placement": 1,
+        "mode": 3,
+        "frames": 232050,
+        "trace_hash": "d283d8a3",
+        "midi_events": 425,
+        "peak": 0.361495614,
+        "submits": 1468,
+        "joins": 968,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 0,
+        "placement": 2,
+        "mode": 0,
+        "frames": 232050,
+        "trace_hash": "d283d8a3",
+        "midi_events": 425,
+        "peak": 0.361495614,
+        "submits": 0,
+        "joins": 0,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 0,
+        "placement": 2,
+        "mode": 1,
+        "frames": 232050,
+        "trace_hash": "d283d8a3",
+        "midi_events": 425,
+        "peak": 0.361495614,
+        "submits": 1468,
+        "joins": 1468,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 0,
+        "placement": 2,
+        "mode": 10,
+        "frames": 232050,
+        "trace_hash": "d283d8a3",
+        "midi_events": 425,
+        "peak": 0.361495614,
+        "submits": 1468,
+        "joins": 1470,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 0,
+        "placement": 2,
+        "mode": 11,
+        "frames": 232050,
+        "trace_hash": "d283d8a3",
+        "midi_events": 425,
+        "peak": 0.361495614,
+        "submits": 1468,
+        "joins": 1510,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 0,
+        "placement": 2,
+        "mode": 2,
+        "frames": 232050,
+        "trace_hash": "d283d8a3",
+        "midi_events": 425,
+        "peak": 0.361495614,
+        "submits": 1468,
+        "joins": 1468,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 0,
+        "placement": 2,
+        "mode": 3,
+        "frames": 232050,
+        "trace_hash": "d283d8a3",
+        "midi_events": 425,
+        "peak": 0.361495614,
+        "submits": 1468,
+        "joins": 968,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 1,
+        "placement": 1,
+        "mode": 0,
+        "frames": 232050,
+        "trace_hash": "f34d36a3",
+        "midi_events": 527,
+        "peak": 0.143972039,
+        "submits": 0,
+        "joins": 0,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 1,
+        "placement": 1,
+        "mode": 1,
+        "frames": 232050,
+        "trace_hash": "f34d36a3",
+        "midi_events": 527,
+        "peak": 0.143972039,
+        "submits": 1250,
+        "joins": 1250,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 1,
+        "placement": 1,
+        "mode": 10,
+        "frames": 232050,
+        "trace_hash": "f34d36a3",
+        "midi_events": 527,
+        "peak": 0.143972039,
+        "submits": 1250,
+        "joins": 1252,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 1,
+        "placement": 1,
+        "mode": 11,
+        "frames": 232050,
+        "trace_hash": "f34d36a3",
+        "midi_events": 527,
+        "peak": 0.143972039,
+        "submits": 1250,
+        "joins": 1250,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 1,
+        "placement": 1,
+        "mode": 2,
+        "frames": 232050,
+        "trace_hash": "f34d36a3",
+        "midi_events": 527,
+        "peak": 0.143972039,
+        "submits": 1250,
+        "joins": 1250,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 1,
+        "placement": 1,
+        "mode": 3,
+        "frames": 232050,
+        "trace_hash": "f34d36a3",
+        "midi_events": 527,
+        "peak": 0.143972039,
+        "submits": 1250,
+        "joins": 817,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 1,
+        "placement": 2,
+        "mode": 0,
+        "frames": 232050,
+        "trace_hash": "f34d36a3",
+        "midi_events": 527,
+        "peak": 0.143972039,
+        "submits": 0,
+        "joins": 0,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 1,
+        "placement": 2,
+        "mode": 1,
+        "frames": 232050,
+        "trace_hash": "f34d36a3",
+        "midi_events": 527,
+        "peak": 0.143972039,
+        "submits": 1250,
+        "joins": 1250,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 1,
+        "placement": 2,
+        "mode": 10,
+        "frames": 232050,
+        "trace_hash": "f34d36a3",
+        "midi_events": 527,
+        "peak": 0.143972039,
+        "submits": 1250,
+        "joins": 1251,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 1,
+        "placement": 2,
+        "mode": 11,
+        "frames": 232050,
+        "trace_hash": "f34d36a3",
+        "midi_events": 527,
+        "peak": 0.143972039,
+        "submits": 1250,
+        "joins": 1250,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 1,
+        "placement": 2,
+        "mode": 2,
+        "frames": 232050,
+        "trace_hash": "f34d36a3",
+        "midi_events": 527,
+        "peak": 0.143972039,
+        "submits": 1250,
+        "joins": 1250,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 1,
+        "placement": 2,
+        "mode": 3,
+        "frames": 232050,
+        "trace_hash": "f34d36a3",
+        "midi_events": 527,
+        "peak": 0.143972039,
+        "submits": 1250,
+        "joins": 816,
+        "unknown_renders": 0,
+        "retired": 0
+      },
+      {
+        "songbook": 0,
+        "placement": 2,
+        "mode": 4,
+        "frames": 232050,
+        "trace_hash": "458f22da",
+        "midi_events": 430,
+        "peak": 0.368709922,
+        "submits": 40,
+        "joins": 40,
+        "unknown_renders": 0,
+        "retired": 1
+      },
+      {
+        "songbook": 0,
+        "placement": 2,
+        "mode": 5,
+        "frames": 232050,
+        "trace_hash": "c7ac4a84",
+        "midi_events": 430,
+        "peak": 0.368694544,
+        "submits": 40,
+        "joins": 40,
+        "unknown_renders": 0,
+        "retired": 1
+      },
+      {
+        "songbook": 0,
+        "placement": 2,
+        "mode": 6,
+        "frames": 232050,
+        "trace_hash": "d5058d57",
+        "midi_events": 430,
+        "peak": 0.387028337,
+        "submits": 40,
+        "joins": 40,
+        "unknown_renders": 0,
+        "retired": 1
+      },
+      {
+        "songbook": 0,
+        "placement": 2,
+        "mode": 7,
+        "frames": 232050,
+        "trace_hash": "1105a3a5",
+        "midi_events": 575,
+        "peak": 0.378759265,
+        "submits": 1557,
+        "joins": 1560,
+        "unknown_renders": 3,
+        "retired": 0
+      },
+      {
+        "songbook": 0,
+        "placement": 2,
+        "mode": 8,
+        "frames": 232050,
+        "trace_hash": "b75b85e3",
+        "midi_events": 575,
+        "peak": 0.357626677,
+        "submits": 40,
+        "joins": 43,
+        "unknown_renders": 3,
+        "retired": 1
+      },
+      {
+        "songbook": 0,
+        "placement": 2,
+        "mode": 9,
+        "frames": 232050,
+        "trace_hash": "1105a3a5",
+        "midi_events": 575,
+        "peak": 0.378759265,
+        "submits": 1557,
+        "joins": 1560,
+        "unknown_renders": 3,
+        "retired": 0
+      },
+      {
+        "songbook": 1,
+        "placement": 2,
+        "mode": 4,
+        "frames": 232050,
+        "trace_hash": "a669007d",
+        "midi_events": 532,
+        "peak": 0.149899125,
+        "submits": 40,
+        "joins": 40,
+        "unknown_renders": 0,
+        "retired": 1
+      },
+      {
+        "songbook": 1,
+        "placement": 2,
+        "mode": 5,
+        "frames": 232050,
+        "trace_hash": "5706112c",
+        "midi_events": 532,
+        "peak": 0.149899125,
+        "submits": 40,
+        "joins": 40,
+        "unknown_renders": 0,
+        "retired": 1
+      },
+      {
+        "songbook": 1,
+        "placement": 2,
+        "mode": 6,
+        "frames": 232050,
+        "trace_hash": "f4d0d37e",
+        "midi_events": 532,
+        "peak": 0.149899125,
+        "submits": 40,
+        "joins": 40,
+        "unknown_renders": 0,
+        "retired": 1
+      },
+      {
+        "songbook": 1,
+        "placement": 2,
+        "mode": 7,
+        "frames": 232050,
+        "trace_hash": "d3573284",
+        "midi_events": 701,
+        "peak": 0.141025543,
+        "submits": 1265,
+        "joins": 1270,
+        "unknown_renders": 3,
+        "retired": 0
+      },
+      {
+        "songbook": 1,
+        "placement": 2,
+        "mode": 8,
+        "frames": 232050,
+        "trace_hash": "e6a22f36",
+        "midi_events": 701,
+        "peak": 0.141025543,
+        "submits": 40,
+        "joins": 43,
+        "unknown_renders": 3,
+        "retired": 1
+      },
+      {
+        "songbook": 1,
+        "placement": 2,
+        "mode": 9,
+        "frames": 232050,
+        "trace_hash": "d3573284",
+        "midi_events": 701,
+        "peak": 0.141025543,
+        "submits": 1265,
+        "joins": 1268,
+        "unknown_renders": 3,
+        "retired": 0
+      }
+    ],
+    "results_sha256": "32bb129eef08dfcfbfff0ba03ebefc805308a20deb788ef7a39cee3d4ca3399c",
+    "frozen_source_manifest": {
+      "path": "tests/reference/source.sha256",
+      "bytes": 39958,
+      "sha256": "6148afa57b782c81e5a794f0ded441763fe986f35bf275014f304f6da76d88af"
+    },
+    "frozen_source_verification": {
+      "path": "build/worker-handoff/source-verification.log",
+      "bytes": 12678,
+      "sha256": "02103818921d558fa092601f4329ba6740cf2ad792676fb0331e24f2fadfbd85"
+    },
+    "mode_names": {
+      "0": "serial",
+      "1": "deferred",
+      "2": "pthread",
+      "3": "busy/refusal",
+      "4": "stopped before bass publication",
+      "5": "stopped before tank publication",
+      "6": "stopped before pad publication",
+      "7": "unknown then completed",
+      "8": "unknown then stopped",
+      "9": "false backend completion then real completion",
+      "10": "missing tank publication",
+      "11": "stale callback replay"
+    }
+  },
+  "wasm_serialized": {
+    "scenario": "serialized-generation-stage-ownership",
+    "compared_samples": 1278900,
+    "render_calls": 2361,
+    "peak": 0.47122979164123535,
+    "pcm_hash": "f99f9451",
+    "worker": [
+      2710,
+      2710,
+      5420,
+      2710,
+      2710,
+      0,
+      0,
+      0
+    ],
+    "memory_bytes": 33554432
+  },
+  "wasm_frozen_effects": {
+    "scenario": "panel-effects-banks-release-tails",
+    "compared_samples": 2769480,
+    "render_calls": 5160,
+    "peak": 0.4538612365722656,
+    "pcm_hash": "fd659ab9",
+    "effects": {
+      "master_samples": 1384960,
+      "echo_samples": 1384960,
+      "tank_samples": 1384960,
+      "colour_sample_calls": 4154880
+    },
+    "memory_bytes": 33554432
+  },
+  "source_sha256": {
+    "firmware/src/dsp/amb.c": "ca7dd5da727fa4e26690ce6a8d57ad152b83bfb7028e52e666fd649e651f8810",
+    "firmware/src/dsp/amb.h": "808799f4894ba4791fc509842329dda0dd941ead72376d9e177aad7c743c5453",
+    "firmware/src/dsp/fm6.inc": "c51708b3d22260d51543d7be93586117e400a54ffc18e21f8367d50fd9c93b6f",
+    "firmware/src/dsp/fm6_core.inc": "11ce1db9e1263c8891cac47a38ba0d51d489048b4ca0829215acdee6895f9537",
+    "firmware/src/dsp/rust_pad.inc": "9d020a474af318b36ac62f14a17a7331b785d4c1c03c69d31047f42c0a872dca",
+    "firmware/src/dsp/rust_worker.h": "71ec435de8586c3b6f3f5cce70266afd49938c63c0e7afb98f279d1f1327b478",
+    "firmware/src/dsp/rust_worker.inc": "8fbbc9e70d99eaf1be5eb8bc26156716aa955dacd3793556a53e55603697deeb",
+    "rust/fm1-rt/src/job.rs": "e0d90a63606f639ea0590f2c7a35aa9c9a1ce12e1ec4eb73381afb9433a9ac28",
+    "rust/fm1-jam-bridge/src/worker.rs": "a91a0833cb030ec8ea2f3488f8603e8882793a5fc5bfb7a58f9c06ccc3a0a117",
+    "tests/host/worker_handoff_test.c": "260043417fff64c92687e2d3a73163d6764d63c945602c3d2998c46b4eff0ad7",
+    "tests/rust_worker_handoff.sh": "b310159ffaf3268b59b8256ec83e1bf69f1b26103a991c7bb70158567b658829",
+    "tests/host/emu_worker_test.mjs": "0df50d99b0f0923b1259dde049373ef2db130bd1d468db413d9ff9b444a6380f",
+    "rust/fm1-rt/src/lib.rs": "aae4886925a0edfcf21cf187be72dbeeef515bc2585495f970b0b7b6c2f9f300",
+    "rust/fm1-rt/src/atomic.rs": "6c97858b52802d1984fce4f3ccda822bfa7d2e230156345b4b5faed5865be819",
+    "rust/fm1-jam-bridge/src/lib.rs": "9e77af1196f94581acdd934aec8f1f887717f6854ef71287caf4e1610b4ed17f",
+    "web/emu/build_clang.sh": "9be25ac59f5e94c4ce084238100028fd38beaee91c1b142e862e8d85f539a70a",
+    "tests/rust_emulator_parity.sh": "ddc0b9386abae5eb5977561115ef77d20623da40494b85347dce6e3138953248",
+    "tests/rust_effects_parity.sh": "ba34e1b5bee6ae657a9e0b55d63efb3bf2e555d7ac7caed15968806e72cb6680",
+    "tests/rust_effects_workers.sh": "fa4e38e848f087803238172d5dd17beb7cc8b83bcc709449a23e6a42f58c9fd5",
+    "tests/rust_fm6_workers.sh": "2c2c05980fcab6a0007ab706db59863aca4133cac651759d908f66f2159b8fc6",
+    "tests/rust_transport_parity.sh": "2d801e1b3c7fbde55da60b9b5a01284e392542c6b247b8523fa3570bf81939f0",
+    "tests/rust_handoff.sh": "4dd178cc0a2b3422c0d8dd54a0f0691c72c62dfddf9fdcd45652872a6fc93541"
+  },
+  "remaining": [
+    "Integrate root-owned latest platform HAL/panic changes and qualify actual confirmed-stop semantics, including stopped atomic-lock-owner recovery and telemetry",
+    "Qualify MCU cache/IRQ/publication ordering and nested DSP buffer lifetime under actual hardware stop",
+    "Physical link/map/pool/stack/cycle/deadline and audio output qualification",
+    "Manual desktop/mobile/audio/MIDI qualification is separate from Node API/lifecycle mocks; historical C0 synchronization is not the new Rust proof"
+  ],
+  "implementation_checkpoint": "3877cfc1b7adf06c99df3ab828f33a0c64db392c",
+  "canonical_parent": "4e8fd1a1e08e580cb7fc92467f9413abba9b0096",
+  "regressions": {
+    "effects": {
+      "cases": 12,
+      "frames": 6040443,
+      "results": [
+        {
+          "mode": 0,
+          "frames": 168972,
+          "trace_hash": "b388f362",
+          "peak": 0.870960534
+        },
+        {
+          "mode": 1,
+          "frames": 564151,
+          "trace_hash": "e067f6e5",
+          "peak": 0.363251209
+        },
+        {
+          "mode": 2,
+          "frames": 564151,
+          "trace_hash": "ad9864c5",
+          "peak": 0.382166147
+        },
+        {
+          "mode": 3,
+          "frames": 564151,
+          "trace_hash": "e2a9a5ff",
+          "peak": 0.360722542
+        },
+        {
+          "mode": 4,
+          "frames": 564151,
+          "trace_hash": "82f5bb91",
+          "peak": 0.382166028
+        },
+        {
+          "mode": 5,
+          "frames": 564151,
+          "trace_hash": "d47d3288",
+          "peak": 0.382166624
+        },
+        {
+          "mode": 6,
+          "frames": 564151,
+          "trace_hash": "4fa9b0a2",
+          "peak": 0.382165551
+        },
+        {
+          "mode": 7,
+          "frames": 564151,
+          "trace_hash": "7898f640",
+          "peak": 0.38216579
+        },
+        {
+          "mode": 8,
+          "frames": 564151,
+          "trace_hash": "88620595",
+          "peak": 0.355569363
+        },
+        {
+          "mode": 20,
+          "frames": 564151,
+          "trace_hash": "d5b59cf1",
+          "peak": 0.382166028
+        },
+        {
+          "mode": 30,
+          "frames": 397056,
+          "trace_hash": "03e7f876",
+          "peak": 0.0571992174
+        },
+        {
+          "mode": 31,
+          "frames": 397056,
+          "trace_hash": "2cd4e83a",
+          "peak": 0
+        }
+      ],
+      "results_sha256": "2edb3cb36811d54333b9fb3620250540edecf8eaab1881b575c98081bff7c7ca"
+    },
+    "effects_extra_genres": {
+      "cases": 11,
+      "frames": 6205661,
+      "results": [
+        {
+          "mode": 9,
+          "frames": 564151,
+          "trace_hash": "0112ed0c",
+          "peak": 0.382166862
+        },
+        {
+          "mode": 10,
+          "frames": 564151,
+          "trace_hash": "5f7866c6",
+          "peak": 0.38216579
+        },
+        {
+          "mode": 11,
+          "frames": 564151,
+          "trace_hash": "d2c235f9",
+          "peak": 0.382165909
+        },
+        {
+          "mode": 12,
+          "frames": 564151,
+          "trace_hash": "6aa7d5fa",
+          "peak": 0.382166266
+        },
+        {
+          "mode": 13,
+          "frames": 564151,
+          "trace_hash": "657a6c09",
+          "peak": 0.382166505
+        },
+        {
+          "mode": 14,
+          "frames": 564151,
+          "trace_hash": "90fc2013",
+          "peak": 0.382165909
+        },
+        {
+          "mode": 15,
+          "frames": 564151,
+          "trace_hash": "06092075",
+          "peak": 0.382166266
+        },
+        {
+          "mode": 16,
+          "frames": 564151,
+          "trace_hash": "7975a1dc",
+          "peak": 0.382166386
+        },
+        {
+          "mode": 17,
+          "frames": 564151,
+          "trace_hash": "72291c74",
+          "peak": 0.382166743
+        },
+        {
+          "mode": 18,
+          "frames": 564151,
+          "trace_hash": "00a8e92d",
+          "peak": 0.382165909
+        },
+        {
+          "mode": 19,
+          "frames": 564151,
+          "trace_hash": "08796b86",
+          "peak": 0.382165909
+        }
+      ],
+      "results_sha256": "437ac00901e8dd95f90b88d1fcaabf7a72921114e96391537f1970616d59f183"
+    },
+    "effects_workers": {
+      "cases": 48,
+      "frames_per_case": 232050,
+      "frames": 11138400,
+      "result_lines": [
+        "predelay=0 type=0 balance=1 serial d93ef055",
+        "predelay=0 type=0 balance=1 deferred d93ef055",
+        "predelay=0 type=0 balance=1 thread d93ef055",
+        "predelay=0 type=0 balance=1 mixed d93ef055",
+        "predelay=0 type=0 balance=2 serial d93ef055",
+        "predelay=0 type=0 balance=2 deferred d93ef055",
+        "predelay=0 type=0 balance=2 thread d93ef055",
+        "predelay=0 type=0 balance=2 mixed d93ef055",
+        "predelay=0 type=1 balance=1 serial 6ac68abe",
+        "predelay=0 type=1 balance=1 deferred 6ac68abe",
+        "predelay=0 type=1 balance=1 thread 6ac68abe",
+        "predelay=0 type=1 balance=1 mixed 6ac68abe",
+        "predelay=0 type=1 balance=2 serial 6ac68abe",
+        "predelay=0 type=1 balance=2 deferred 6ac68abe",
+        "predelay=0 type=1 balance=2 thread 6ac68abe",
+        "predelay=0 type=1 balance=2 mixed 6ac68abe",
+        "predelay=0 type=2 balance=1 serial e15e477b",
+        "predelay=0 type=2 balance=1 deferred e15e477b",
+        "predelay=0 type=2 balance=1 thread e15e477b",
+        "predelay=0 type=2 balance=1 mixed e15e477b",
+        "predelay=0 type=2 balance=2 serial e15e477b",
+        "predelay=0 type=2 balance=2 deferred e15e477b",
+        "predelay=0 type=2 balance=2 thread e15e477b",
+        "predelay=0 type=2 balance=2 mixed e15e477b",
+        "predelay=100 type=0 balance=1 serial f82821e2",
+        "predelay=100 type=0 balance=1 deferred f82821e2",
+        "predelay=100 type=0 balance=1 thread f82821e2",
+        "predelay=100 type=0 balance=1 mixed f82821e2",
+        "predelay=100 type=0 balance=2 serial f82821e2",
+        "predelay=100 type=0 balance=2 deferred f82821e2",
+        "predelay=100 type=0 balance=2 thread f82821e2",
+        "predelay=100 type=0 balance=2 mixed f82821e2",
+        "predelay=100 type=1 balance=1 serial e296d9b4",
+        "predelay=100 type=1 balance=1 deferred e296d9b4",
+        "predelay=100 type=1 balance=1 thread e296d9b4",
+        "predelay=100 type=1 balance=1 mixed e296d9b4",
+        "predelay=100 type=1 balance=2 serial e296d9b4",
+        "predelay=100 type=1 balance=2 deferred e296d9b4",
+        "predelay=100 type=1 balance=2 thread e296d9b4",
+        "predelay=100 type=1 balance=2 mixed e296d9b4",
+        "predelay=100 type=2 balance=1 serial de110743",
+        "predelay=100 type=2 balance=1 deferred de110743",
+        "predelay=100 type=2 balance=1 thread de110743",
+        "predelay=100 type=2 balance=1 mixed de110743",
+        "predelay=100 type=2 balance=2 serial de110743",
+        "predelay=100 type=2 balance=2 deferred de110743",
+        "predelay=100 type=2 balance=2 thread de110743",
+        "predelay=100 type=2 balance=2 mixed de110743"
+      ],
+      "results_sha256": "40b06159409101c848db2151548bd2358e5781bdce466e9d39ef95404b34044e"
+    },
+    "fm6_workers": {
+      "cases": 32,
+      "frames_per_case": 232050,
+      "frames": 7425600,
+      "result_lines": [
+        "songbook=0 float=0 balance=1 serial f82821e2",
+        "songbook=0 float=0 balance=1 deferred f82821e2",
+        "songbook=0 float=0 balance=1 thread f82821e2",
+        "songbook=0 float=0 balance=1 mixed f82821e2",
+        "songbook=0 float=0 balance=2 serial f82821e2",
+        "songbook=0 float=0 balance=2 deferred f82821e2",
+        "songbook=0 float=0 balance=2 thread f82821e2",
+        "songbook=0 float=0 balance=2 mixed f82821e2",
+        "songbook=0 float=1 balance=1 serial f82821e2",
+        "songbook=0 float=1 balance=1 deferred f82821e2",
+        "songbook=0 float=1 balance=1 thread f82821e2",
+        "songbook=0 float=1 balance=1 mixed f82821e2",
+        "songbook=0 float=1 balance=2 serial f82821e2",
+        "songbook=0 float=1 balance=2 deferred f82821e2",
+        "songbook=0 float=1 balance=2 thread f82821e2",
+        "songbook=0 float=1 balance=2 mixed f82821e2",
+        "songbook=2 float=0 balance=1 serial 2ad545b4",
+        "songbook=2 float=0 balance=1 deferred 2ad545b4",
+        "songbook=2 float=0 balance=1 thread 2ad545b4",
+        "songbook=2 float=0 balance=1 mixed 2ad545b4",
+        "songbook=2 float=0 balance=2 serial 2ad545b4",
+        "songbook=2 float=0 balance=2 deferred 2ad545b4",
+        "songbook=2 float=0 balance=2 thread 2ad545b4",
+        "songbook=2 float=0 balance=2 mixed 2ad545b4",
+        "songbook=2 float=1 balance=1 serial 2ad545b4",
+        "songbook=2 float=1 balance=1 deferred 2ad545b4",
+        "songbook=2 float=1 balance=1 thread 2ad545b4",
+        "songbook=2 float=1 balance=1 mixed 2ad545b4",
+        "songbook=2 float=1 balance=2 serial 2ad545b4",
+        "songbook=2 float=1 balance=2 deferred 2ad545b4",
+        "songbook=2 float=1 balance=2 thread 2ad545b4",
+        "songbook=2 float=1 balance=2 mixed 2ad545b4"
+      ],
+      "results_sha256": "48beb03199252ea37a58e699b15c73ecd4a94faed9126784a33ac16581f76153"
+    },
+    "melodic": {
+      "cases": 43,
+      "frames": 80844411,
+      "midi_messages": 209246,
+      "coverage": {
+        "recorded": true,
+        "motif": true,
+        "inverted": true,
+        "alternate": true,
+        "restated": true,
+        "bar_answer": true,
+        "loop_answer": true,
+        "bass_steps": true,
+        "max_midi_gates": 8
+      },
+      "results": [
+        {
+          "scenario": 0,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6515,
+          "state_hash": 407062861,
+          "pcm_hash": 2448701170,
+          "midi_hash": 2654548873,
+          "midi_messages": 2469,
+          "midi_clocks": 1088
+        },
+        {
+          "scenario": 1,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 9143,
+          "state_hash": 2113110545,
+          "pcm_hash": 2960343957,
+          "midi_hash": 832204238,
+          "midi_messages": 2772,
+          "midi_clocks": 1266
+        },
+        {
+          "scenario": 2,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 5152,
+          "state_hash": 4043373231,
+          "pcm_hash": 3059693099,
+          "midi_hash": 1261085367,
+          "midi_messages": 2505,
+          "midi_clocks": 1087
+        },
+        {
+          "scenario": 3,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 7901,
+          "state_hash": 2461564526,
+          "pcm_hash": 3958659416,
+          "midi_hash": 987739012,
+          "midi_messages": 2810,
+          "midi_clocks": 1265
+        },
+        {
+          "scenario": 4,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6409,
+          "state_hash": 2240426126,
+          "pcm_hash": 2550798743,
+          "midi_hash": 35917709,
+          "midi_messages": 2335,
+          "midi_clocks": 991
+        },
+        {
+          "scenario": 5,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 9044,
+          "state_hash": 253862547,
+          "pcm_hash": 2950683530,
+          "midi_hash": 1904494959,
+          "midi_messages": 2618,
+          "midi_clocks": 1152
+        },
+        {
+          "scenario": 6,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 5137,
+          "state_hash": 4206143290,
+          "pcm_hash": 2173966892,
+          "midi_hash": 1591609176,
+          "midi_messages": 2393,
+          "midi_clocks": 991
+        },
+        {
+          "scenario": 7,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 7885,
+          "state_hash": 1746909044,
+          "pcm_hash": 1504370851,
+          "midi_hash": 2694035790,
+          "midi_messages": 2688,
+          "midi_clocks": 1151
+        },
+        {
+          "scenario": 16,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6483,
+          "state_hash": 3370481741,
+          "pcm_hash": 2862678158,
+          "midi_hash": 2267199969,
+          "midi_messages": 2643,
+          "midi_clocks": 1088
+        },
+        {
+          "scenario": 17,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 9108,
+          "state_hash": 2942207892,
+          "pcm_hash": 2468832463,
+          "midi_hash": 1424850901,
+          "midi_messages": 2773,
+          "midi_clocks": 1266
+        },
+        {
+          "scenario": 18,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6526,
+          "state_hash": 3928996211,
+          "pcm_hash": 1470031464,
+          "midi_hash": 1434512632,
+          "midi_messages": 2836,
+          "midi_clocks": 1088
+        },
+        {
+          "scenario": 19,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 9217,
+          "state_hash": 3270211178,
+          "pcm_hash": 1969025696,
+          "midi_hash": 201531236,
+          "midi_messages": 3362,
+          "midi_clocks": 1266
+        },
+        {
+          "scenario": 20,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6544,
+          "state_hash": 2212925492,
+          "pcm_hash": 1103003015,
+          "midi_hash": 3438682694,
+          "midi_messages": 3054,
+          "midi_clocks": 991
+        },
+        {
+          "scenario": 21,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 9084,
+          "state_hash": 1017174804,
+          "pcm_hash": 592900165,
+          "midi_hash": 1860060288,
+          "midi_messages": 3107,
+          "midi_clocks": 1152
+        },
+        {
+          "scenario": 22,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6372,
+          "state_hash": 4067041096,
+          "pcm_hash": 1387484512,
+          "midi_hash": 3379526171,
+          "midi_messages": 2485,
+          "midi_clocks": 991
+        },
+        {
+          "scenario": 23,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 8991,
+          "state_hash": 1755159293,
+          "pcm_hash": 1858541289,
+          "midi_hash": 2806837371,
+          "midi_messages": 2646,
+          "midi_clocks": 1152
+        },
+        {
+          "scenario": 24,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6466,
+          "state_hash": 2881066873,
+          "pcm_hash": 3813885036,
+          "midi_hash": 3649241854,
+          "midi_messages": 2585,
+          "midi_clocks": 1088
+        },
+        {
+          "scenario": 25,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 9046,
+          "state_hash": 3168542579,
+          "pcm_hash": 3769234848,
+          "midi_hash": 4256333059,
+          "midi_messages": 2521,
+          "midi_clocks": 1266
+        },
+        {
+          "scenario": 26,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6526,
+          "state_hash": 3928996211,
+          "pcm_hash": 1470031464,
+          "midi_hash": 1434512632,
+          "midi_messages": 2836,
+          "midi_clocks": 1088
+        },
+        {
+          "scenario": 27,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 9171,
+          "state_hash": 3547141831,
+          "pcm_hash": 2779205517,
+          "midi_hash": 4272242908,
+          "midi_messages": 3165,
+          "midi_clocks": 1266
+        },
+        {
+          "scenario": 28,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6544,
+          "state_hash": 2212925492,
+          "pcm_hash": 1103003015,
+          "midi_hash": 3438682694,
+          "midi_messages": 3054,
+          "midi_clocks": 991
+        },
+        {
+          "scenario": 29,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 9060,
+          "state_hash": 1083334434,
+          "pcm_hash": 4052556435,
+          "midi_hash": 855882744,
+          "midi_messages": 2947,
+          "midi_clocks": 1152
+        },
+        {
+          "scenario": 30,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6372,
+          "state_hash": 4067041096,
+          "pcm_hash": 1387484512,
+          "midi_hash": 3379526171,
+          "midi_messages": 2485,
+          "midi_clocks": 991
+        },
+        {
+          "scenario": 31,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 9000,
+          "state_hash": 2561160470,
+          "pcm_hash": 437749231,
+          "midi_hash": 1827503601,
+          "midi_messages": 2574,
+          "midi_clocks": 1152
+        },
+        {
+          "scenario": 32,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6412,
+          "state_hash": 867018264,
+          "pcm_hash": 2962160585,
+          "midi_hash": 3144669503,
+          "midi_messages": 2442,
+          "midi_clocks": 1088
+        },
+        {
+          "scenario": 33,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 9085,
+          "state_hash": 2689329973,
+          "pcm_hash": 2184268356,
+          "midi_hash": 721631921,
+          "midi_messages": 2789,
+          "midi_clocks": 1266
+        },
+        {
+          "scenario": 34,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6505,
+          "state_hash": 4245505447,
+          "pcm_hash": 3692789977,
+          "midi_hash": 3908794103,
+          "midi_messages": 2719,
+          "midi_clocks": 1088
+        },
+        {
+          "scenario": 35,
+          "render_calls": 10000,
+          "frames": 2955777,
+          "chunks": 19840,
+          "state_hash": 1096443631,
+          "pcm_hash": 2858266009,
+          "midi_hash": 4278390192,
+          "midi_messages": 9554,
+          "midi_clocks": 3815
+        },
+        {
+          "scenario": 36,
+          "render_calls": 10000,
+          "frames": 2533376,
+          "chunks": 14851,
+          "state_hash": 3350348997,
+          "pcm_hash": 3786836909,
+          "midi_hash": 3387042150,
+          "midi_messages": 8982,
+          "midi_clocks": 3174
+        },
+        {
+          "scenario": 37,
+          "render_calls": 10000,
+          "frames": 2955777,
+          "chunks": 19713,
+          "state_hash": 2591437068,
+          "pcm_hash": 1518525393,
+          "midi_hash": 3127490461,
+          "midi_messages": 9821,
+          "midi_clocks": 3701
+        },
+        {
+          "scenario": 38,
+          "render_calls": 10000,
+          "frames": 2533376,
+          "chunks": 14495,
+          "state_hash": 3058298913,
+          "pcm_hash": 3778811118,
+          "midi_hash": 1049661885,
+          "midi_messages": 8289,
+          "midi_clocks": 3174
+        },
+        {
+          "scenario": 39,
+          "render_calls": 10000,
+          "frames": 2955777,
+          "chunks": 19541,
+          "state_hash": 3430335482,
+          "pcm_hash": 2011042541,
+          "midi_hash": 2225460137,
+          "midi_messages": 8399,
+          "midi_clocks": 3701
+        },
+        {
+          "scenario": 40,
+          "render_calls": 10000,
+          "frames": 2533376,
+          "chunks": 14401,
+          "state_hash": 1586989321,
+          "pcm_hash": 1240183976,
+          "midi_hash": 2258600212,
+          "midi_messages": 7524,
+          "midi_clocks": 3271
+        },
+        {
+          "scenario": 41,
+          "render_calls": 10000,
+          "frames": 2955777,
+          "chunks": 19487,
+          "state_hash": 2492237391,
+          "pcm_hash": 3026123898,
+          "midi_hash": 2684746733,
+          "midi_messages": 8407,
+          "midi_clocks": 3815
+        },
+        {
+          "scenario": 42,
+          "render_calls": 10000,
+          "frames": 2533376,
+          "chunks": 14356,
+          "state_hash": 1528092745,
+          "pcm_hash": 1965226735,
+          "midi_hash": 3554988794,
+          "midi_messages": 7811,
+          "midi_clocks": 3271
+        },
+        {
+          "scenario": 43,
+          "render_calls": 10000,
+          "frames": 2955777,
+          "chunks": 19767,
+          "state_hash": 2561564973,
+          "pcm_hash": 1415116016,
+          "midi_hash": 435785685,
+          "midi_messages": 9182,
+          "midi_clocks": 3815
+        },
+        {
+          "scenario": 44,
+          "render_calls": 10000,
+          "frames": 2533376,
+          "chunks": 14707,
+          "state_hash": 3095853717,
+          "pcm_hash": 4070267340,
+          "midi_hash": 166773802,
+          "midi_messages": 8139,
+          "midi_clocks": 3174
+        },
+        {
+          "scenario": 45,
+          "render_calls": 10000,
+          "frames": 2955777,
+          "chunks": 19718,
+          "state_hash": 3323610750,
+          "pcm_hash": 2068412147,
+          "midi_hash": 4043648099,
+          "midi_messages": 9798,
+          "midi_clocks": 3701
+        },
+        {
+          "scenario": 46,
+          "render_calls": 10000,
+          "frames": 2533376,
+          "chunks": 14455,
+          "state_hash": 2276793160,
+          "pcm_hash": 3112502694,
+          "midi_hash": 3404751900,
+          "midi_messages": 8038,
+          "midi_clocks": 3174
+        },
+        {
+          "scenario": 47,
+          "render_calls": 10000,
+          "frames": 2955777,
+          "chunks": 19569,
+          "state_hash": 4174931283,
+          "pcm_hash": 771283655,
+          "midi_hash": 4061296699,
+          "midi_messages": 8631,
+          "midi_clocks": 3701
+        },
+        {
+          "scenario": 48,
+          "render_calls": 10000,
+          "frames": 2533376,
+          "chunks": 14345,
+          "state_hash": 1764444200,
+          "pcm_hash": 2280773005,
+          "midi_hash": 1899508673,
+          "midi_messages": 6959,
+          "midi_clocks": 3271
+        },
+        {
+          "scenario": 49,
+          "render_calls": 10000,
+          "frames": 2955777,
+          "chunks": 19458,
+          "state_hash": 1898346797,
+          "pcm_hash": 4074174212,
+          "midi_hash": 1788830577,
+          "midi_messages": 8287,
+          "midi_clocks": 3815
+        },
+        {
+          "scenario": 50,
+          "render_calls": 10000,
+          "frames": 2533376,
+          "chunks": 14389,
+          "state_hash": 3465355993,
+          "pcm_hash": 3981259998,
+          "midi_hash": 1821830192,
+          "midi_messages": 7812,
+          "midi_clocks": 3271
+        }
+      ]
+    },
+    "usb_handoff": {
+      "result": "jam USB response hash: eff97ff8\njam USB: checksums, incomplete/duplicate chunks, timeout, busy interlock, audition, save/readback and reboot OK",
+      "log_sha256": "001dc81510ad5e0cebc9dff0797041f02da39288d624ae82c9b617524dfd7709"
+    },
+    "worker_flag": "EN_RUST_WORKER=1 in all full-render regressions above; direct standalone operator/configuration oracles retain narrower kernel scope"
+  },
+  "wasm_fresh_c0": {
+    "factory": {
+      "initial_pack": "factory",
+      "blocks": 55000,
+      "seconds": 159.63718820861678,
+      "compared_samples": 14080000,
+      "pcm_hash": "baeff971",
+      "peak": 0.3714040517807007,
+      "blits": 4679,
+      "memory_bytes": 33554432,
+      "rust": {
+        "validations": 0,
+        "plans": 8,
+        "rejections": 0,
+        "fallbacks": 0,
+        "bass_events": 1037,
+        "sessions": 1,
+        "commands": {
+          "accepted": 961,
+          "consumed": 961,
+          "dropped": 0,
+          "high_water": 213
+        },
+        "transport": {
+          "pulses": 6215,
+          "chunks": 28982,
+          "controls": 27668
+        },
+        "sequencer": {
+          "lanes": 6222,
+          "mutations": 0,
+          "waits": 463712,
+          "boundaries": 1037
+        },
+        "factory": {
+          "accesses": 13627,
+          "codecs": 0,
+          "rejections": 0,
+          "copied_bytes": 5292
+        }
+      }
+    },
+    "saved-v1": {
+      "initial_pack": "rust/fm1-engine/tests/packs/harris-citypop.jmp",
+      "blocks": 55000,
+      "seconds": 159.63718820861678,
+      "compared_samples": 14080000,
+      "pcm_hash": "28722449",
+      "peak": 0.4303741455078125,
+      "blits": 4673,
+      "memory_bytes": 33554432,
+      "rust": {
+        "validations": 1,
+        "plans": 10,
+        "rejections": 0,
+        "fallbacks": 0,
+        "bass_events": 1033,
+        "sessions": 1,
+        "commands": {
+          "accepted": 751,
+          "consumed": 751,
+          "dropped": 0,
+          "high_water": 213
+        },
+        "transport": {
+          "pulses": 6192,
+          "chunks": 34155,
+          "controls": 27682
+        },
+        "sequencer": {
+          "lanes": 6198,
+          "mutations": 0,
+          "waits": 546480,
+          "boundaries": 1033
+        },
+        "factory": {
+          "accesses": 13893,
+          "codecs": 0,
+          "rejections": 0,
+          "copied_bytes": 5292
+        }
+      }
+    },
+    "session": {
+      "scenario": "v2-hold-idea-save-restart",
+      "render_calls": 11663,
+      "compared_samples": 6570900,
+      "seconds": 74.5,
+      "peak": 0.22903597354888916,
+      "memory_bytes": 33554432,
+      "saved_session": [
+        74,
+        83,
+        77,
+        1,
+        1,
+        11,
+        1,
+        8,
+        2,
+        1,
+        83,
+        0,
+        7,
+        1,
+        190,
+        0,
+        3,
+        83,
+        0,
+        0
+      ],
+      "rust": {
+        "validations": 1,
+        "plans": 9,
+        "rejections": 0,
+        "fallbacks": 0,
+        "bass_events": 804,
+        "sessions": 2,
+        "commands": {
+          "accepted": 319,
+          "consumed": 319,
+          "dropped": 0,
+          "high_water": 208
+        },
+        "transport": {
+          "pulses": 4819,
+          "chunks": 12684,
+          "controls": 11829
+        },
+        "sequencer": {
+          "lanes": 4824,
+          "mutations": 0,
+          "waits": 202944,
+          "boundaries": 804
+        },
+        "factory": {
+          "accesses": 1340,
+          "codecs": 0,
+          "rejections": 0,
+          "copied_bytes": 5292
+        }
+      }
+    },
+    "sequencer": {
+      "scenario": "legacy-f4-piece-genre-transport",
+      "compared_samples": 2557800,
+      "render_calls": 4231,
+      "peak": 0.4515293836593628,
+      "sequencer": {
+        "lanes": 876,
+        "waits": 96752,
+        "boundaries": 21
+      },
+      "melodic": {
+        "acid": 153,
+        "mutations": 22,
+        "pluck": 153,
+        "bass": 153,
+        "bar": 4061,
+        "midi_transport": 48413
+      },
+      "voices": {
+        "drums": 6047,
+        "pluck": 6047,
+        "drone": 4957,
+        "acid": 6047,
+        "pad": 6047,
+        "pad_bus": 6047,
+        "controls": 5043,
+        "configs": 29145
+      },
+      "factory": {
+        "accesses": 3406,
+        "codecs": 0,
+        "rejections": 0,
+        "copied_bytes": 10512
+      },
+      "memory_bytes": 33554432
+    },
+    "factory-lines": {
+      "scenario": "stored-frozen-acid-pluck-save",
+      "compared_samples": 970200,
+      "render_calls": 1613,
+      "saved_bytes": 3836,
+      "factory": {
+        "accesses": 1400,
+        "codecs": 6,
+        "rejections": 0,
+        "copied_bytes": 5450
+      },
+      "formats": {
+        "decodes": 1,
+        "encodes": 6,
+        "rejections": 0,
+        "copied_bytes": 1352
+      },
+      "memory_bytes": 33554432
+    },
+    "effects": {
+      "scenario": "panel-effects-banks-release-tails",
+      "compared_samples": 2769480,
+      "render_calls": 5160,
+      "peak": 0.4538612365722656,
+      "pcm_hash": "fd659ab9",
+      "effects": {
+        "master_samples": 1384960,
+        "echo_samples": 1384960,
+        "tank_samples": 1384960,
+        "colour_sample_calls": 4154880
+      },
+      "memory_bytes": 33554432
+    },
+    "fm6": {
+      "scenario": "loaded-user-FM6-algorithms-key-retrigger-stop-tails",
+      "cases": [
+        {
+          "algorithm": 0,
+          "compared_samples": 1188054,
+          "render_calls": 2596,
+          "peak": 0.47700321674346924,
+          "pcm_hash": "d393a85d",
+          "fm6": [
+            9284,
+            19,
+            0,
+            19,
+            1,
+            1,
+            594176,
+            2
+          ]
+        },
+        {
+          "algorithm": 3,
+          "compared_samples": 1188054,
+          "render_calls": 2596,
+          "peak": 0.4807950258255005,
+          "pcm_hash": "d9669c55",
+          "fm6": [
+            9284,
+            19,
+            0,
+            19,
+            1,
+            1,
+            594176,
+            2
+          ]
+        },
+        {
+          "algorithm": 5,
+          "compared_samples": 1188054,
+          "render_calls": 2596,
+          "peak": 0.5013117790222168,
+          "pcm_hash": "abebadf5",
+          "fm6": [
+            9284,
+            19,
+            0,
+            19,
+            1,
+            1,
+            594176,
+            2
+          ]
+        },
+        {
+          "algorithm": 31,
+          "compared_samples": 1188054,
+          "render_calls": 2596,
+          "peak": 0.48351776599884033,
+          "pcm_hash": "cafdb8b9",
+          "fm6": [
+            9284,
+            19,
+            0,
+            19,
+            1,
+            1,
+            594176,
+            2
+          ]
+        }
+      ]
+    },
+    "worker": {
+      "scenario": "serialized-generation-stage-ownership",
+      "compared_samples": 1278900,
+      "render_calls": 2361,
+      "peak": 0.47122979164123535,
+      "pcm_hash": "f99f9451",
+      "worker": [
+        2710,
+        2710,
+        5420,
+        2710,
+        2710,
+        0,
+        0,
+        0
+      ],
+      "memory_bytes": 33554432
+    }
+  },
+  "wasm_fresh_c0_compared_values": 47059496,
+  "wasm_http_extra_values": 1048576,
+  "wasm_frozen_worker": {
+    "scenario": "serialized-generation-stage-ownership",
+    "compared_samples": 1278900,
+    "render_calls": 2361,
+    "peak": 0.47122979164123535,
+    "pcm_hash": "f99f9451",
+    "worker": [
+      2710,
+      2710,
+      5420,
+      2710,
+      2710,
+      0,
+      0,
+      0
+    ],
+    "memory_bytes": 33554432
+  },
+  "wasm_frozen_fm6": {
+    "scenario": "loaded-user-FM6-algorithms-key-retrigger-stop-tails",
+    "cases": [
+      {
+        "algorithm": 0,
+        "compared_samples": 1188054,
+        "render_calls": 2596,
+        "peak": 0.47700321674346924,
+        "pcm_hash": "d393a85d",
+        "fm6": [
+          9284,
+          19,
+          0,
+          19,
+          1,
+          1,
+          594176,
+          2
+        ]
+      },
+      {
+        "algorithm": 3,
+        "compared_samples": 1188054,
+        "render_calls": 2596,
+        "peak": 0.4807950258255005,
+        "pcm_hash": "d9669c55",
+        "fm6": [
+          9284,
+          19,
+          0,
+          19,
+          1,
+          1,
+          594176,
+          2
+        ]
+      },
+      {
+        "algorithm": 5,
+        "compared_samples": 1188054,
+        "render_calls": 2596,
+        "peak": 0.5013117790222168,
+        "pcm_hash": "abebadf5",
+        "fm6": [
+          9284,
+          19,
+          0,
+          19,
+          1,
+          1,
+          594176,
+          2
+        ]
+      },
+      {
+        "algorithm": 31,
+        "compared_samples": 1188054,
+        "render_calls": 2596,
+        "peak": 0.48351776599884033,
+        "pcm_hash": "cafdb8b9",
+        "fm6": [
+          9284,
+          19,
+          0,
+          19,
+          1,
+          1,
+          594176,
+          2
+        ]
+      }
+    ]
+  },
+  "final_wasm": {
+    "path": "build/emu-parity/rust.wasm",
+    "bytes": 2397205,
+    "sha256": "2445a51f7aabddc3bdff79dcb320720967dbb95248b7192d957b7f9dbdac0c68"
+  },
+  "fresh_c0_wasm": {
+    "path": "build/emu-parity/reference.wasm",
+    "bytes": 1941366,
+    "sha256": "313dfc2bef39a945decf6b790862614f759187c8d21d5a550c2e084d07597ec2"
+  },
+  "frozen_c_wasm": {
+    "path": "../baseline-2026-11-11/source/build/emu/amb.wasm",
+    "bytes": 1937404,
+    "sha256": "a3d08947713bda76b64f76ed39b55aa26bdd182a65bf88fbd1efe0cbc12f8036"
+  },
+  "wasm_contract": {
+    "exports": 24,
+    "memory_bytes": 33554432,
+    "browser_api_and_lifecycle_mock": "pass",
+    "interactive_desktop_mobile_audio_midi_qa": "not run",
+    "threaded_wasm": "not used; real worker qualification is native pthread"
+  }
+}

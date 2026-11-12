@@ -612,7 +612,7 @@ static void fm_block(void)                       /* the next 64 samples of all t
 {
 #if EN_RUST_FM6
     const fm1_fm6_tables_t t=RUST_FM_TABLES;const fm1_fm6_scratch_t b=RUST_FM_SCRATCH;
-    const fm1_fm6_config_t c={(uint32_t)jp_dx(),fm_cur,fm_engine,(uint32_t)fm6_float_path,fm_tune,fm_bend};
+    const fm1_fm6_config_t c={(uint32_t)jp_dx(),fm_cur,fm_engine,(uint32_t)FM6_FLOAT_MODE,fm_tune,fm_bend};
     fm1_fm6_ams_t cache={fm_ams_amd,{fm_ams_pt[0],fm_ams_pt[1],fm_ams_pt[2],fm_ams_pt[3]},fm_ams_ok};
     fm1_rust_fm6_block((fm1_fm6_slot_t *)fmx,(fm1_fm6_lfo_t *)&fm_lfo,(fm1_fm6_lfo_t *)&fm_bass_lfo,fm_ed,fm_bass_ed,&c,&cache,&t,&b,fm_blk);
     fm_ams_amd=cache.amd;fm_ams_ok=cache.valid;fm_ams_pt[0]=cache.points[0];fm_ams_pt[1]=cache.points[1];fm_ams_pt[2]=cache.points[2];fm_ams_pt[3]=cache.points[3];
@@ -674,7 +674,7 @@ static inline float fm_next(void)                /* one sample, clipped as the D
 }
 
 /* tests: MARK I on the float buses (1) or the integer ones (0): the output must be the same bits */
-void en_fm_float_path(int v) { fm6_float_path = v; }
+void en_fm_float_path(int v){fm6_float_path=v;} /* worker uses its job snapshot */
 
 /* the DX7's other format: the 155-byte single-voice record -> the 128-byte packed one (the inverse of fm6_unpack) */
 static void fm6_pack(const uint8_t *v, uint8_t *b)

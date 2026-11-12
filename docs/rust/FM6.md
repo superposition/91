@@ -146,7 +146,7 @@ sh tests/rust_fm6_benchmark.sh ../baseline-2026-11-11/source
 ```
 
 `fm6-proof.json` records checks, fingerprints, sizes and host costs. The nine FM
-tests bring this base to 68 workspace tests. Independent components cover
+tests bring this base to 78 workspace tests. Independent components cover
 3,456 per-operator bus/add/feedback/path/partial-block cases, 48 two/three-op
 feedback loops, 900 amplitude envelopes, 300 pitch envelopes and 1,600 LFO
 wave/rate/delay-wrap cases: 6,304 vectors. All initialized lookup values also
@@ -163,7 +163,7 @@ work placements, serial/deferred/pthread/busy submissions and irregular chunks.
 Synthetic abandoned-live-thread tests remain excluded. This qualifies the host
 completion model, not a physical worker exclusion/retirement guarantee.
 
-Full WASM regression retains the original 40,058,180 compared Float32 values,
+Full WASM regression retains the original 41,028,380 compared Float32 values,
 framebuffers, saves/restarts and 1,048,576-value HTTP fallback. Four additional
 loaded-user algorithm tests compare 4,752,216 values against fresh C0 and R01.
 They use a saved legacy/off session and seed 0: default Songbook boot refuses
