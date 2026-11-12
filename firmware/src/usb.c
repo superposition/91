@@ -670,7 +670,10 @@ static void sysex_byte(uint8_t b)
 #if USB_DX
     if (b == 0xF0u) {
         dx_on = !dx_state;
-        dx_pos = 0;
+        /* A retained ready message owns both payload and length until the main
+         * dispatch releases it, including transient Busy retries. */
+        if (dx_on)
+            dx_pos = 0;
         px_on = 1;
         px_pos = 0;
     } else if (b == 0xF7u) {
