@@ -8,6 +8,8 @@ use core::cell::UnsafeCell;
 use core::sync::atomic::{AtomicU32, Ordering};
 use fm1_types::{CommandWord, COMMAND_CAPACITY};
 
+pub mod handoff;
+
 /// Single-producer/single-consumer ring, with the legacy 4 KiB payload.
 /// Obtain unique endpoints with [`Self::split`]. No allocation or blocking.
 pub struct CommandQueue {

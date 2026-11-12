@@ -9,6 +9,7 @@ use fm1_engine::planner::{bass_event, plan_into, Phrase, Seed, Settings};
 use fm1_formats::jam::JamPack;
 use fm1_formats::session::JamSession;
 mod commands;
+mod handoff;
 mod transport;
 
 static VALIDATIONS: AtomicU32 = AtomicU32::new(0);
@@ -276,7 +277,9 @@ pub extern "C" fn fm1_rust_jam_stat(index: u32) -> u32 {
         4 => BASS_EVENTS.load(Ordering::Relaxed),
         5 => SESSIONS.load(Ordering::Relaxed),
         6..=9 => commands::stat(index),
-        _ => transport::stat(index),
+        10..=12 => transport::stat(index),
+        13..=17 => handoff::stat(index),
+        _ => 0,
     }
 }
 

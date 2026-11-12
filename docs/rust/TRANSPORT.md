@@ -8,7 +8,7 @@ This is the first integrated slice of [R09 / issue #10](https://github.com/super
 
 | Field | Meaning |
 | --- | --- |
-| `pulse_left: f32` | Samples remaining to the next outgoing/received subdivision |
+| `pulse_left: f32` | Samples remaining to the next internal clock pulse |
 | `pulse: u32` | Position 0..5 within a musical sixteenth |
 | `external_age: u32` | Render calls since the last external-clock message |
 | `control_acc: u32` | Frames accumulated since the slow controls last ran |
