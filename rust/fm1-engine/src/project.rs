@@ -147,6 +147,11 @@ impl Patterns {
         modifiers: [[0; 16]; 6],
     };
 }
+/// The platform must admit a complete multi-object operation before invoking
+/// Project load/boot/switch methods. Once admitted, its hooks cannot return
+/// transient Busy between reads: the worker stays on the serial placement until
+/// release. Denial happens before any project borrow/mutation. Ordinary missing
+/// or corrupt records retain their legacy fallback behavior.
 pub trait Objects {
     fn load(&mut self, object: u32, output: &mut [u8]) -> i32;
     fn save(&mut self, object: u32, input: &[u8]) -> i32;

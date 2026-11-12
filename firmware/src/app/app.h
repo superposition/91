@@ -48,6 +48,7 @@ void project_apply(void);                /* every value to the engine (boot, a p
 const char *piece_name(int i);           /* "01" .. "10" */
 void project_piece(int i);               /* the playing piece kept as it is, piece i taken up as it was left */
 void project_set_genre(int g);           /* another bank: the pieces as they were left in it (or their recipes), the same number playing */
+int project_try_genre(int g);            /* 0 = switched/no change; PLAT_STORE_BUSY = unchanged, retry full UI action */
 void project_piece_save(void);           /* the playing piece, as it is, into the bank */
 void project_piece_factory(void);        /* the playing piece back to its recipe, and out of the bank */
 #define PX_NFX 7

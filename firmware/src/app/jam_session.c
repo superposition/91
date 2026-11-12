@@ -16,7 +16,7 @@ int jam_session_valid(const uint8_t *p,unsigned n)
         p[11]<2 && p[12]<8 && p[13]<=4 && jp_u16(p+14)>=70 && jp_u16(p+14)<=190;
 #endif
 }
-int jam_session_save_slot(int slot)
+static int jam_session_save_slot_body(int slot)
 {
     jp_settings_t s; uint8_t b[JS_LEN]={ 'J','S','M',1 }; unsigned i;
 #if EN_RUST_STORAGE
@@ -40,6 +40,11 @@ int jam_session_save_slot(int slot)
     b[16]=(uint8_t)en_jam_source();b[17]='S';
     return plat_store_save(OBJ_JSESSION,b,JS_LEN);
 }
+int jam_session_save_slot(int slot)
+{
+    int rc=plat_store_begin();if(rc)return rc;
+    rc=jam_session_save_slot_body(slot);plat_store_end();return rc;
+}
 /* Boot-time scratch only; use the existing project image buffer, before audio starts. */
 static void jam_session_apply(const uint8_t *b)
 {
@@ -58,7 +63,7 @@ static void jam_session_apply(const uint8_t *b)
     proj.par[P_TEMPO]=(int16_t)jp_u16(b+14); en_set(P_TEMPO,proj.par[P_TEMPO]);
     en_jam_set(JAM_ON,b[4]);
 }
-void jam_session_load(void)
+static void jam_session_load_body(void)
 {
     uint8_t b[JS_LEN]={'J','S','M',1,1,0,0,16,0,3,60,0,0,0,100,0};
     uint8_t saved[JS_LEN];
@@ -87,6 +92,11 @@ void jam_session_load(void)
 #endif
     jam_boot_on=b[4];
     jam_session_apply(b);
+}
+void jam_session_load(void)
+{
+    if(plat_store_begin())return;
+    jam_session_load_body();plat_store_end();
 }
 
 int jam_session_save(void) {return jam_session_save_slot(-1);}

@@ -370,7 +370,7 @@ static void old_bank_load(int n)
  * and make the image from it (flash is left as it is until the next save). */
 static void px_load(int g);
 static void bs_load(int g);
-static void image_load(int g)
+static void image_load_body(int g)
 {
 #if EN_RUST_STORAGE
     (void)project_rust_do(0,(uint32_t)g); return;
@@ -417,8 +417,13 @@ static void image_load(int g)
     image_header(g);
     bs_load(g);
 }
+static void image_load(int g)
+{
+    if(plat_store_begin())return;
+    image_load_body(g);plat_store_end();
+}
 /* genre g's saved pieces' bass steps out of their object (none: all rests, the line's own) */
-static void bs_load(int g)
+static void bs_load_body(int g)
 {
 #if EN_RUST_STORAGE
     (void)project_rust_do(12,(uint32_t)g); return;
@@ -436,8 +441,13 @@ static void bs_load(int g)
             memcpy(proj.slot[i].bs, b + at, BS_LEN);
     }
 }
+static void bs_load(int g)
+{
+    if(plat_store_begin())return;
+    bs_load_body(g);plat_store_end();
+}
 /* the marked pieces' steps into the object (written only if they changed it) */
-static int bs_save(void)
+static int bs_save_body(void)
 {
 #if EN_RUST_STORAGE
     return project_rust_do(13,0);
@@ -471,10 +481,15 @@ static int bs_save(void)
     bs_dirty = 0;
     return diff ? plat_store_save(OBJ_BSTEP, b, BS_SIZE) : 0;
 }
+static int bs_save(void)
+{
+    int rc=plat_store_begin();if(rc)return rc;
+    rc=bs_save_body();plat_store_end();return rc;
+}
 
 /* genre g's extras out of the object (an older or shorter one: as far as it goes; none: every slot the piece's type, FILTERS and SCREAM the
  * defaults), and this time's edits forgotten */
-static void px_load(int g)
+static void px_load_body(int g)
 {
 #if EN_RUST_STORAGE
     (void)project_rust_do(10,(uint32_t)g); return;
@@ -497,8 +512,13 @@ static void px_load(int g)
         }
     }
 }
+static void px_load(int g)
+{
+    if(plat_store_begin())return;
+    px_load_body(g);plat_store_end();
+}
 /* the playing genre's extras into the object, the other genres' as they were (a KND1 object made PCX1 first, its types kept) */
-static int px_save(void)
+static int px_save_body(void)
 {
 #if EN_RUST_STORAGE
     return project_rust_do(11,0);
@@ -531,6 +551,11 @@ static int px_save(void)
     memcpy(b + PX_HDR + (uint32_t)proj.genre * NPIECES * PX_LEN, px, sizeof px);
     return plat_store_save(OBJ_KINDS, b, PX_SIZE);
 }
+static int px_save(void)
+{
+    int rc=plat_store_begin();if(rc)return rc;
+    rc=px_save_body();plat_store_end();return rc;
+}
 
 /* the playing piece's FILTERS and SCREAM (PX_FXS): as left this time in the genre, else as saved with it, else the defaults */
 void project_fx_get(uint8_t *v)
@@ -552,7 +577,7 @@ void project_fx_get(uint8_t *v)
             v[k] = (uint8_t)EN_FXS_DEF[PX_FXS[k]];
 }
 
-static void glob_load(void)                  /* the player's three: their object, else the old bank's header, else the defaults */
+static void glob_load_body(void)                  /* the player's three: their object, else the old bank's header, else the defaults */
 {
 #if EN_RUST_STORAGE
     (void)project_rust_do(7,0); return;
@@ -571,11 +596,16 @@ static void glob_load(void)                  /* the player's three: their object
     }
     glob.magic = GLOB_MAGIC;
 }
+static void glob_load(void)
+{
+    if(plat_store_begin())return;
+    glob_load_body();plat_store_end();
+}
 
 /* power-on: each piece as saved, or its recipe; a piece at random. One never saved is nudged: the
  * levels and the sound a few points either way, the tempo a little (the key, the mode and the switches
  * stay). A saved one starts as it was saved. Seed 0 (the tests'): the first piece, exact. */
-void project_start(uint32_t seed)
+static void project_start_body(uint32_t seed)
 {
 #if EN_RUST_STORAGE
     if(project_rust_do(1,seed)) keep();
@@ -624,6 +654,11 @@ void project_start(uint32_t seed)
     if (seed)
         en_seed(seed ^ seed >> 16);
     en_genre(proj.genre);
+}
+void project_start(uint32_t seed)
+{
+    if(plat_store_begin())return;
+    project_start_body(seed);plat_store_end();
 }
 
 int project_place(void) { return glob.rsv & 0xFF; }
@@ -693,7 +728,7 @@ void project_piece(int i)
 /* the genres: each is its own object in flash (the pieces saved in it, the rest its recipes). A switch brings up the other bank with the
  * same piece number; the changes not saved last while you stay in a genre. (0.15.20: the original genre is like the others: its unsaved
  * changes no longer wait for it while you are in another, which freed 5.5 KB of the tight RAM.) */
-void project_set_genre(int g)
+static void project_set_genre_body(int g)
 {
 #if EN_RUST_STORAGE
     if(((g%EN_NGENRE)+EN_NGENRE)%EN_NGENRE==proj.genre) return;
@@ -711,6 +746,15 @@ void project_set_genre(int g)
     proj.edited = 0;
     take(proj.piece);
 }
+int project_try_genre(int g)
+{
+    int rc;
+    g=((g%EN_NGENRE)+EN_NGENRE)%EN_NGENRE;
+    if(g==proj.genre)return 0;
+    rc=plat_store_begin();if(rc)return rc;
+    project_set_genre_body(g);plat_store_end();return 0;
+}
+void project_set_genre(int g) {(void)project_try_genre(g);}
 
 void project_piece_save(void)
 {
@@ -772,7 +816,7 @@ int project_saved(int i) { return (unsigned)i < NPIECES && (saved >> i & 1u); }
 int project_pending(void) { return pending || pending_glob || pending_px || bs_dirty; }
 int project_pending_globals(void) { return pending_glob; }
 
-int project_flush(void)
+static int project_flush_body(void)
 {
 #if EN_RUST_STORAGE
     return project_rust_do(6,0);
@@ -795,10 +839,15 @@ int project_flush(void)
         return -1;
     return project_flush_globals();
 }
+int project_flush(void)
+{
+    int rc=plat_store_begin();if(rc)return rc;
+    rc=project_flush_body();plat_store_end();return rc;
+}
 
 /* the player's three alone, into flash as they are (a piece saved but not yet written stays waiting):
  * the music plays from power-on, so these are written without waiting for it to stop */
-int project_flush_globals(void)
+static int project_flush_globals_body(void)
 {
 #if EN_RUST_STORAGE
     return project_rust_do(9,0);
@@ -816,4 +865,9 @@ int project_flush_globals(void)
 #endif
     pending_glob = 0;
     return 0;
+}
+int project_flush_globals(void)
+{
+    int rc=plat_store_begin();if(rc)return rc;
+    rc=project_flush_globals_body();plat_store_end();return rc;
 }
