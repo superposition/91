@@ -13,7 +13,7 @@ mkdir -p "$out" build/gen
 native=(-target x86-linux-musl -msse2 -mfpmath=sse -ffp-contract=off -fexcess-precision=standard -O2 -std=gnu11 -w -ffunction-sections -fdata-sections)
 "$zig" cc "${native[@]}" -c "$core/libcore.rlib.c" -o "$out/core.o"
 objects=()
-for package in types formats engine rt app jam_bridge;do
+for package in hal types formats engine rt app jam_bridge;do
     "$zig" cc "${native[@]}" -c "$bridge/libfm1_$package.rlib.c" -o "$out/$package.o"
     objects+=("$out/$package.o")
 done

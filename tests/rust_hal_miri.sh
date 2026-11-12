@@ -1,0 +1,7 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-only
+set -eu
+cd "$(dirname "$0")/.."
+export MIRIFLAGS=-Zmiri-strict-provenance
+cargo +nightly-2026-08-28 miri test --locked -p fm1-jam-bridge --features hal-test retained_dma_root_pointer_remains_valid_between_call_scoped_updates
+cargo +nightly-2026-08-28 miri test --locked -p fm1-jam-bridge --features hal-test foreign_uninitialized_load_is_initialized_only_after_verified_success

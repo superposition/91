@@ -39,12 +39,13 @@ jobs:
             build/authoring-preview/
 
   browser_pointer_model:
-    name: Retained browser pointers under Miri
+    name: Retained browser and device pointers under Miri
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - run: rustup toolchain install nightly-2026-08-28 --profile minimal --component miri --component rust-src
       - run: sh tests/rust_web_audio_miri.sh
+      - run: sh tests/rust_hal_miri.sh
   native_simulator:
     name: Native Rust simulator and scenario compatibility
     runs-on: ubuntu-24.04
@@ -228,6 +229,16 @@ jobs:
         run: sh tests/rust_runner_policy.sh
       - name: Shared UI layout and in-place state initialization
         run: sh tests/rust_ui_state.sh
+      - name: HAL registers, startup, IRQ and DMA fault contracts
+        run: sh tests/rust_hal_parity.sh
+      - name: HAL audio output and retained DMA source
+        run: sh tests/rust_hal_audio_parity.sh
+      - name: Whole-worker flash admission and saved data preservation
+        run: sh tests/rust_hal_store_admission.sh
+      - name: UI pending reads, writes and selection retries
+        run: sh tests/rust_ui_busy.sh
+      - name: Retained foreground requests and guarded updater transitions
+        run: sh tests/rust_storage_dispatch.sh
       - name: Songbook snapshot and staging handoffs
         run: sh tests/rust_handoff.sh
       - uses: actions/upload-artifact@v4
