@@ -266,7 +266,11 @@ static void jp_tick(int st)
             }
             /* One short overlap from the previous voicing, rather than a
              * fifth sustained keyboard note blurring the next harmony. */
+#if EN_RUST_FM6
+            (void)fm1_rust_fm6_pool((fm1_fm6_slot_t *)fmx,3,old_age);
+#else
             for(i=0;i<FM_NV;i++)if(fmx[i].used && !fmx[i].part && fmx[i].age<=old_age)fmx[i].fade=0.9999f;
+#endif
         } else stab_fire(0.55f+0.004f*(float)jp_now.energy);
         jp_pad_gate=(uint32_t)(step_len*0.04f*(float)(g?g:80));
     }
