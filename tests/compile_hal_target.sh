@@ -14,6 +14,6 @@ cc="$JIELI_TOOLCHAIN/pi32v2/bin/clang"
 "$cc" "${flags[@]}" -DEN_RUST_APP=1 -c firmware/src/main.c -o "$out/main-app.o" > "$out/main-app.log" 2>&1
 "$cc" "${flags[@]}" -DEN_RUST_APP=1 -O2 -c firmware/src/dsp/amb.c -o "$out/engine-app.o" > "$out/engine-app.log" 2>&1
 "$cc" "${flags[@]}" -c tests/reference/ui_target_layout.c -o "$out/ui-layout.o"
-"$JIELI_TOOLCHAIN/common/bin/objcopy" -O binary --only-section=.fm1_ui_layout "$out/ui-layout.o" "$out/ui-layout.bin"
+"$JIELI_TOOLCHAIN/common/bin/objcopy" -O binary -j .fm1_ui_layout "$out/ui-layout.o" "$out/ui-layout.bin"
 "$JIELI_TOOLCHAIN/common/bin/objdump" -t "$out/main.o" > "$out/main-symbols.txt"
 echo 'HAL1 platform/engine compile with APP0/APP1 and emit the target UI layout; image link and hardware are unqualified.'
