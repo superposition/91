@@ -374,9 +374,9 @@
     "scope": "serial/deferred/pthread/busy; two placements, integer/float MarkI, legacy and actual v2 keys/bass; no lost-live-thread model"
   },
   "wasm": {
-    "full_existing_compared_values": 40058180,
+    "full_existing_compared_values": 41028380,
     "fm_compared_values": 4752216,
-    "expanded_compared_values": 44810396,
+    "expanded_compared_values": 45780596,
     "http_compared_values": 1048576,
     "factory": {
       "initial_pack": "factory",
