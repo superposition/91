@@ -97,7 +97,7 @@ pub fn candidates(names: &[Value], port: Option<&str>, only: bool) -> Vec<Value>
         names.iter().filter(|n| allowed(n)).cloned().collect()
     }
 }
-fn repr(s: &str) -> String {
+pub(crate) fn repr(s: &str) -> String {
     let q = if s.contains('\'') && !s.contains('"') {
         '"'
     } else {
@@ -233,7 +233,13 @@ impl<A: Adapter> Updater<'_, A> {
             }
             let link = match self.call("open", json!([name, out])) {
                 Ok(link) => link,
-                Err(e) if e.kind == "KeyboardInterrupt" || e.kind == "SystemExit" => return Err(e),
+                Err(e)
+                    if e.kind == "KeyboardInterrupt"
+                        || e.kind == "SystemExit"
+                        || e.kind == "BaseException" =>
+                {
+                    return Err(e)
+                }
                 Err(_) => continue,
             };
             let id = self.handshake(&link, 2)?;

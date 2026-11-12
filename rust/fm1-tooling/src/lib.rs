@@ -2,7 +2,9 @@
 //! Offline installer and diagnostic policy. Actual ports and clocks are supplied
 //! by an explicit synchronous adapter; this crate never opens a device.
 #![forbid(unsafe_code)]
+pub mod debugger;
 pub mod installer;
+pub mod rescue;
 pub mod summary;
 pub mod telemetry;
 use serde_json::{json, Value};
@@ -87,6 +89,10 @@ pub fn request(v: &Value, io: &mut impl Adapter) -> Result<Value> {
     let method = text(&v["method"])?;
     if let Some(method) = method.strip_prefix("install.") {
         installer::request(method, v, io)
+    } else if let Some(method) = method.strip_prefix("rescue.") {
+        rescue::request(method, v, io)
+    } else if let Some(method) = method.strip_prefix("debug.") {
+        debugger::request(method, v, io)
     } else {
         telemetry::request(method, v)
     }
@@ -156,6 +162,17 @@ pub fn stream() -> Result<()> {
 }
 pub fn cli(args: &[String]) -> Result<()> {
     match args.first().map(String::as_str) {
+        Some("rescue-plan") if args.len()==3=>{
+            let image=rescue::stock(&read_file(&args[1],1_100_000)?,&args[1])?;
+            let now=read_file(&args[2],rescue::FLASH_SIZE)?;
+            let changed=rescue::plan(&image,&now)?;
+            println!("{}",json!({"changed_sectors":changed,"write_order":changed.iter().rev().copied().collect::<Vec<_>>(),"protected_head_bytes":rescue::WRITE_MIN,"preserved_upper_bytes":rescue::FLASH_SIZE-rescue::APP_END,"writes_performed":0}));
+        }
+        Some("debug-plan") if args.len()==3||args.len()==4=>{
+            let a=cli_integer(&args[2])?;
+            let b=if let Some(value)=args.get(3){cli_integer(value)?}else if args[1]=="peek"{1}else if args[1]=="clock"{0}else{return Err(Error::value("poke needs address and value"))};
+            println!("{}",debugger::plan(&args[1],a,b)?);
+        }
         Some("package-info") if args.len() == 2 || (args.len() == 3 && args[2]=="--force") => {
             let b = read_file(&args[1],1_100_000)?;
             let (product, image) =
@@ -180,11 +197,32 @@ pub fn cli(args: &[String]) -> Result<()> {
         }
         _ => {
             return Err(Error::value(
-                "usage: fm1-rs tools package-info PACKAGE [--force] | decode KIND RAW-SYSEX-DATA | summary TELEMETRY.csv",
+                "usage: fm1-rs tools package-info PACKAGE [--force] | decode KIND RAW-SYSEX-DATA | summary TELEMETRY.csv | rescue-plan V15-PACKAGE SNAPSHOT | debug-plan peek|poke|clock A [B]",
             ))
         }
     }
     Ok(())
+}
+fn cli_integer(text: &str) -> Result<i64> {
+    let text = text.trim();
+    let (negative, text) = if let Some(s) = text.strip_prefix('-') {
+        (true, s)
+    } else {
+        (false, text.strip_prefix('+').unwrap_or(text))
+    };
+    let (radix, text) = if let Some(t) = text.strip_prefix("0x").or_else(|| text.strip_prefix("0X"))
+    {
+        (16, t)
+    } else if let Some(t) = text.strip_prefix("0o").or_else(|| text.strip_prefix("0O")) {
+        (8, t)
+    } else if let Some(t) = text.strip_prefix("0b").or_else(|| text.strip_prefix("0B")) {
+        (2, t)
+    } else {
+        (10, text)
+    };
+    let n =
+        i64::from_str_radix(text, radix).map_err(|_| Error::value("expected bounded integer"))?;
+    Ok(if negative { -n } else { n })
 }
 fn read_file(path: &str, max: usize) -> Result<Vec<u8>> {
     let mut bytes = Vec::new();

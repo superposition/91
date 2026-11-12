@@ -1,0 +1,268 @@
+{
+  "schema": 1,
+  "ticket": 22,
+  "checkpoint": "rescue-and-debugger-policy",
+  "status": "qualified host slice; whole R21 remains open",
+  "base": "211acd7aff950d53c1da733b186592e4c1fd0ceb",
+  "source_fingerprint": "38fc113598f81c1859e5263258214bb6750a43f659956865ecf2c7e7b570a541",
+  "sources": {
+    "Cargo.lock": {
+      "bytes": 7015,
+      "sha256": "35074dbffbed366579b00fe99e859294853d463f3755b86e69b3d7893e5659c6"
+    },
+    "Cargo.toml": {
+      "bytes": 679,
+      "sha256": "e1b0bd0471ff7e7fba904743b87a689affede01a317d6ada96b2ed2433c38bb3"
+    },
+    "rust/fm1-cli/Cargo.toml": {
+      "bytes": 444,
+      "sha256": "bd02753c37dc73b455cf6c54ec87aa47c70118f9a16854f69e230f1781b64a36"
+    },
+    "rust/fm1-cli/src/main.rs": {
+      "bytes": 5181,
+      "sha256": "60ea19a37ca1c39a240596cfaac6d7a50a5a36b8f638f813f41127cb4889bcdf"
+    },
+    "rust/fm1-tooling/Cargo.toml": {
+      "bytes": 293,
+      "sha256": "f4c05d07b18d50255c7111b1957d934557a4bcefb7af72ef1497925a0af70f9e"
+    },
+    "rust/fm1-tooling/src/debugger.rs": {
+      "bytes": 5855,
+      "sha256": "1e8c4d64cab2da2298967aade5ba98668da82ae1641f140e0a4276ce54da80bc"
+    },
+    "rust/fm1-tooling/src/installer.rs": {
+      "bytes": 17553,
+      "sha256": "9c4ab105f4a958ab124d30c788e81fc37cd18ac3acdf7186a537cf63e7b22cae"
+    },
+    "rust/fm1-tooling/src/lib.rs": {
+      "bytes": 8569,
+      "sha256": "abf9f5bcbc9eeb5325c83c51c87b9575c234b60bb0ccf0caffb375af657f388a"
+    },
+    "rust/fm1-tooling/src/rescue.rs": {
+      "bytes": 25267,
+      "sha256": "44127d978a32ad8ca6b7e2f14f4abddced3c6e6b048d43cd2b97edd275a56801"
+    },
+    "rust/fm1-tooling/src/summary.rs": {
+      "bytes": 16717,
+      "sha256": "bdab66c28361694dac87ccb0c5471ed1e5962a42020062556bbe517f30e86592"
+    },
+    "rust/fm1-tooling/src/telemetry.rs": {
+      "bytes": 7737,
+      "sha256": "f6e579bf199f4bb5a37da0119630fb37cb088965fa5484e2b3be5a1ca8e12362"
+    },
+    "rust/fm1-tooling/src/telemetry_fields.rs": {
+      "bytes": 1600,
+      "sha256": "1f492167aa7ccebe71643d09fd3bbe736640f87980012f9cc0874fe9e2203dff"
+    },
+    "rust/fm1-tooling/tests/contracts.rs": {
+      "bytes": 3047,
+      "sha256": "fe754730e08fd447c812861221d986ef5b04e3292f5cca4fe66b888963cebb7d"
+    },
+    "rust/fm1-tooling/tests/recovery.rs": {
+      "bytes": 2370,
+      "sha256": "6dc80cf0b6537b890b2574b01ebf252400fee76b17391b6bfbaf5e11cbf396d9"
+    },
+    "tests/rescue_bulk.py": {
+      "bytes": 9251,
+      "sha256": "00c94a4cc67049ded758b68a07b50c2a035d0c4d32f012976b80d224df5da3e7"
+    },
+    "tests/rescue_capture.py": {
+      "bytes": 8994,
+      "sha256": "a4c525e0d58ca4a83924bce0b97b1b3ab4d1f5d0013b93380dd81acc39ec9540"
+    },
+    "tests/rescue_differential.py": {
+      "bytes": 11513,
+      "sha256": "2fad71e09f775fec660d51cf48f5280fad18e6830891602704df75db13914ed4"
+    },
+    "tests/rust_rescue.sh": {
+      "bytes": 975,
+      "sha256": "d2ff0cc2603bc4b4ae9db36a25fb6248d207666dac5ab531a08b0333269b22fe"
+    },
+    "tools/fm1_debug.py": {
+      "bytes": 3387,
+      "sha256": "e2f69f063f8ab21d7378a7cadb8140bc043b917009706b4db5d2cbc6795c1196"
+    },
+    "tools/fm1_rescue.py": {
+      "bytes": 14238,
+      "sha256": "03a8e793d2d9fe8516cfa4b22df49efec43f68e39044d33547eca1fb3b95432f"
+    },
+    "tools/rust_tooling.py": {
+      "bytes": 4282,
+      "sha256": "569183c6a84809ba386398ad450492e5fad35faf23c52910ab5b180edbacabbb"
+    }
+  },
+  "artifacts": {
+    "build/rescue/linux-final.log": {
+      "bytes": 3185,
+      "sha256": "a83aa8de2c69f1d1f5405c547da9addfe9924420c69f33ce3850624c6b28f9ea"
+    },
+    "build/rescue/windows-final.log": {
+      "bytes": 3059,
+      "sha256": "64753ea60c7a0fd960f6d36e2f6af270cafedf5691403d04d06ddd5a10d72b35"
+    },
+    "build/rescue/workspace-final.log": {
+      "bytes": 21204,
+      "sha256": "23c39b540f619d8be668e652b34351dcf5a0d7bccac0818596199ff50c188087"
+    },
+    "build/rescue/clippy-final.log": {
+      "bytes": 270,
+      "sha256": "33c4daa2bcb11b12cc086ac4d56e85f3e2a4afc6c480c23286599f1f418bbedb"
+    },
+    "build/rescue/fmt-final.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "build/rescue/codec-features.txt": {
+      "bytes": 1056,
+      "sha256": "35eedf95a8a8173641ee30f4cd40edf2d724f2f5d538e453c2d5f2bdf5d0edc3"
+    },
+    "build/rescue/mcu-bridge-features.txt": {
+      "bytes": 1253,
+      "sha256": "1bc4e84e9b90212ec3075beb0c64527d3d55abab21f8e6ebae047e04dd8095b9"
+    },
+    "build/rescue/linux/release/fm1-rs": {
+      "bytes": 1525144,
+      "sha256": "88442903bbc13140845b1368444c295bed681056ce655a6b53aedfbd7244fad3"
+    },
+    "build/rescue/windows/release/fm1-rs.exe": {
+      "bytes": 1222656,
+      "sha256": "12437e209b422a414009d5df9b8e1d7e87128768948f639427bde6569c65b423"
+    }
+  },
+  "reference_manifest": {
+    "file": "tests/reference/source.sha256",
+    "bytes": 39958,
+    "sha256": "6148afa57b782c81e5a794f0ded441763fe986f35bf275014f304f6da76d88af",
+    "verified_files": 440
+  },
+  "platforms": {
+    "linux": {
+      "identity": "Ubuntu-22.04 WSL, Python3.10.12, Rust1.94.1, x86_64-unknown-linux-gnu",
+      "reports": [
+        {
+          "cases": 274,
+          "case_names_sha256": "402c87a52035b3cd360031676c0eac9e6f71be617d6065554c44f2467639d1f1",
+          "traces_sha256": "bbc6c8c9a1a1058464fcb12da0953f9308e55ff52ad0aad0bc8824195997a7b4",
+          "actual_stock_pin": true,
+          "hardware_access": false
+        },
+        {
+          "cases": 332,
+          "trace_sha256": "804efda7fb2303f854af416689e5155e0020930d772acc887c07280066b6bbc5",
+          "invalid_fragment_refusals": 2,
+          "protected_head_and_upper_preserved": true,
+          "physical_usb_opened": false
+        },
+        {
+          "cases": 20,
+          "trace_sha256": "8d9a6665788743a2c419ea2d1649651559ce2de1885c091d999459fd9ca425c3",
+          "physical_usb_opened": false
+        },
+        {
+          "cases": 2739,
+          "case_names_sha256": "3452595ea8c19c3ceeb8b33ea07b55fad43ddc70bf3fd9461e1de7b7e545112c",
+          "transactions": 64,
+          "transaction_trace_sha256": "8c6905a2eb9f68703dd111bc086ccde67d014610f909d28992fbaaa2193f0029",
+          "ports_opened": 0,
+          "real_sleeps": 0
+        }
+      ]
+    },
+    "windows": {
+      "identity": "Windows native Python3.8.3, Rust1.94.1, x86_64-pc-windows-msvc",
+      "reports": [
+        {
+          "cases": 274,
+          "case_names_sha256": "402c87a52035b3cd360031676c0eac9e6f71be617d6065554c44f2467639d1f1",
+          "traces_sha256": "f1cdfb1d846694d92ff946c82637638a595219281793e5665fe9ae08fffbbdcb",
+          "actual_stock_pin": true,
+          "hardware_access": false
+        },
+        {
+          "cases": 332,
+          "trace_sha256": "01d0aa4d55c9f989375d232d8b8bb3f0f931d0718576c2f5aa563380e0c7141b",
+          "invalid_fragment_refusals": 2,
+          "protected_head_and_upper_preserved": true,
+          "physical_usb_opened": false
+        },
+        {
+          "cases": 20,
+          "trace_sha256": "881f6ac538c8694baadd8f601275cd622937b5aba8b1ecfb9797daee81dda8a8",
+          "physical_usb_opened": false
+        },
+        {
+          "cases": 2739,
+          "case_names_sha256": "3452595ea8c19c3ceeb8b33ea07b55fad43ddc70bf3fd9461e1de7b7e545112c",
+          "transactions": 64,
+          "transaction_trace_sha256": "8c6905a2eb9f68703dd111bc086ccde67d014610f909d28992fbaaa2193f0029",
+          "ports_opened": 0,
+          "real_sleeps": 0
+        }
+      ]
+    }
+  },
+  "new_cases": 626,
+  "prior_regression_cases": 2739,
+  "combined_cases": 3365,
+  "invalid_fragment_refusals": 2,
+  "workspace_tests": 156,
+  "checks": [
+    "formatting",
+    "strict workspace all-target Clippy",
+    "all440 immutable R01 file hashes",
+    "all256 aligned sectors plus unaligned/negative/end/max boundaries",
+    "eight interrupted program boundaries followed by repair",
+    "full BOT-backed 1MiB backup/restore/verify and full main capture/retry path",
+    "backup data before first erase, descending changed-sector order, three Fail retries, full final comparison",
+    "stock pin and byte image against cached actual V15, unpinned RAM-loader refusals, SHA256 vs hashlib",
+    "BOT exact packets/tag wrap/status/command echo/CRC/short fragments; malformed status errors",
+    "driver/config/claim/reset/capture faults, scoped keepalive, cancellation without retry",
+    "debugger discovery/drain/poll/timeout/close/request/format and malformed report prefix",
+    "earlier installer/telemetry cases, threaded fake installer suite and logger selftest",
+    "selected WASM and MCU bridge graphs exclude tooling/SHA2"
+  ],
+  "digest_dependency": {
+    "name": "sha2",
+    "version": "0.10.9",
+    "features": [
+      "force-soft"
+    ],
+    "new_lock_entries": 10,
+    "scope": "host only; cached official API inspected"
+  },
+  "actual_stock": {
+    "file": "C:\\Users\\ericm\\fm1\\refs\\fm1_open\\sdk\\firmware\\FM-1_015.fwsc",
+    "bytes": 699956,
+    "sha256": "db1642b2b6fa5c2cccb11ffd13878068bb28601678d3644049f99dc40e7edb8a"
+  },
+  "adapter_scope": [
+    "Existing Python argparse, OS descriptor/config/claim/detach/libusb bindings, mido contexts, file/network/terminal/clock/thread/Event I/O remain adapters",
+    "Rust serializes command I/O under one per-Bot Python lock; keepalive uses an independent Rust stack while foreground waits",
+    "All device observations are copied JSON/byte data; Rust retains no OS handle or Python reference"
+  ],
+  "intentional_bounds": [
+    "Empty/oversized flash fragments fail after one read; empty legacy loop is bounded by its fake to record non-progress fingerprint",
+    "Common frame/byte bounds retained; CDB<=16,args<=14,block<=512,full flash read<=1MiB,tries<=1000; raw protocol helpers remain compatibility methods"
+  ],
+  "inherited_profile": [
+    "Truncated/invalid debugger words retain R05 CodecError(-1/-5); raw R01 Python IndexError differs. Frozen report code plus retained shared byte profile proves printed-prefix/error equivalence. Sixteen cases are explicitly labelled."
+  ],
+  "physical": {
+    "usb_opened": false,
+    "midi_opened": false,
+    "reads": false,
+    "writes": false,
+    "resets": false,
+    "flashes": false,
+    "loader_downloaded": false,
+    "vendor_loader_executed": false
+  },
+  "limits": [
+    "Platform trace hashes include native file separators; exact current/reference equality is asserted within each platform",
+    "Actual OS/libusb/ROM compatibility, loader execution/timing and physical install delivery remain separate; Windows virtual proof does not make the macOS adapter a Windows recovery route",
+    "Actual V15 file positive pin runs when FM1_STOCK_PACKAGE or the known local SDK file exists; CI without it reports false and has two fewer cases, without weakening core/frozen/byte assertions",
+    "No firmware, app/controller/simulator ABI, compiler/emitter/build graph, public copy, server, hardware or remote issue state was edited",
+    "No full PCM/WASM replay rerun for this host-only boundary; selected dependency graphs are checked",
+    "Bootstrap shell, build/package/LZ4/SDK/acquisition and asset/site/manual generators remain ticket22 work"
+  ]
+}

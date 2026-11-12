@@ -28,26 +28,22 @@ FM-1-transporter, docs/PROTOCOL.md), which were verified on hardware:
 """
 import argparse
 import rust_codecs as _codecs
-import hashlib
+import rust_tooling as _tools
+import threading
 import os
 import struct
 import sys
 import time
 import urllib.request
 
-VID, PID = 0x4C4A, 0x8057
-STOCK_SHA256 = "db1642b2b6fa5c2cccb11ffd13878068bb28601678d3644049f99dc40e7edb8a"
-LOADER_URL = ("https://raw.githubusercontent.com/kagaimiq/jl-uboot-tool/"
-              "c32b28e7a04f873f526ba929cb1bae9f05442fe9/data/loaderblobs/usb/wl82loader.bin")
-LOADER_SHA256 = "d41da6126760c9d66660bcc0cac8d27d221806c5e369a8036921efe68dca5376"
-LOADER_ADDR, LOADER_ARG = 0x1C02000, 0x0001
-
-FLASH_IDS = (0x856014, 0xB36014)   # the FM-1's flash: Puya P25Q80, UCUN UC25HQ80 (as felucca-bsp f690fa6)
-FLASH_SIZE = 0x100000
-APP_END = 0x93000          # the .fwsc flash entry is raw flash [0, APP_END)
-WRITE_MIN = 0x4000         # flash header, SPL, isd_config: never written
-SECTOR = 0x1000
-IO = 512
+_CONFIG = _tools.call('rescue.config')
+VID, PID = _CONFIG['vid'], _CONFIG['pid']
+STOCK_SHA256, LOADER_SHA256 = _CONFIG['stock_sha256'], _CONFIG['loader_sha256']
+LOADER_URL = _CONFIG['loader_url']
+LOADER_ADDR, LOADER_ARG = _CONFIG['loader_addr'], _CONFIG['loader_arg']
+FLASH_IDS = tuple(_CONFIG['flash_ids'])
+FLASH_SIZE, APP_END = _CONFIG['flash_size'], _CONFIG['app_end']
+WRITE_MIN, SECTOR, IO = (_CONFIG[k] for k in ('write_min', 'sector', 'io'))
 
 # ROM UBOOT1.00
 CMD_WRITE_MEMORY, CMD_READ_MEMORY, CMD_JUMP = 0xFB06, 0xFD07, 0xFB08
@@ -86,6 +82,7 @@ class Bot:
 
     def __init__(self, dev, usb):
         self.dev, self.usb, self.tag = dev, usb, 1
+        self._rust_lock = threading.RLock()
         cfg = dev.get_active_configuration() if self._configured() else None
         if cfg is None:
             dev.set_configuration()
@@ -109,40 +106,16 @@ class Bot:
             return False
 
     def reset_recovery(self):
-        """Bulk-only mass storage reset, then clear both halts (what a host does after a stall)."""
-        try:
-            self.dev.ctrl_transfer(0x21, 0xFF, 0, self.intf, None, timeout=2000)
-        except self.usb.core.USBError:
-            pass
-        for ep in (self.ep_in, self.ep_out):
-            try:
-                self.dev.clear_halt(ep)
-            except self.usb.core.USBError:
-                pass
+        _call('reset', adapter=_Adapter(bot=self), bulk=True)
 
     def xfer(self, cdb, data_out=None, n_in=0, timeout=5000):
-        tag = self.tag
-        self.tag = (self.tag + 1) & 0xFFFFFFFF
-        length = len(data_out) if data_out is not None else n_in
-        flags = 0x80 if n_in else 0x00
-        cbw = struct.pack("<4sIIBBB", b"USBC", tag, length, flags, 0, len(cdb)) + bytes(cdb).ljust(16, b"\0")
-        self.ep_out.write(cbw, timeout)
-        got = b""
-        if data_out is not None and len(data_out):
-            self.ep_out.write(bytes(data_out), timeout)
-        elif n_in:
-            got = bytes(self.ep_in.read(n_in, timeout))
-        csw = bytes(self.ep_in.read(13, timeout))
-        sig, ctag, _, status = struct.unpack("<4sIIB", csw)
-        if sig != b"USBS" or ctag != tag:
-            raise Fail(f"bad status block ({csw.hex()})")
-        if status != 0:
-            raise Fail(f"command failed (status {status})")
-        return got
+        return bytes(_call('bot', [list(cdb), None if data_out is None else list(data_out), n_in, timeout],
+                           _Adapter(bot=self), bulk=True))
 
 
-def cdb_for(cmd, args=b""):
-    return (struct.pack(">H", cmd) + bytes(args)).ljust(16, b"\xFF")
+
+def cdb_for(cmd, args=b''):
+    return bytes(_call('cdb', [cmd, list(args)]))
 
 
 # ----------------------------------------------------------------- device ---
@@ -150,131 +123,164 @@ class Uboot:
     def __init__(self, bot):
         self.bot = bot
 
-    def inquiry(self):
-        r = self.bot.xfer(bytes([0x12, 0, 0, 0, 36, 0]), n_in=36)
-        return r[8:16].decode(errors="replace").strip(), r[16:32].decode(errors="replace").strip()
+    def _request(self, method, args=()):
+        return _call(method, args, _Adapter(bot=self.bot), bulk=True)
 
-    def cmd(self, cmd, args=b""):
-        r = self.bot.xfer(cdb_for(cmd, args), n_in=16)
-        if struct.unpack(">H", r[0:2])[0] != cmd:
-            raise Fail(f"command {cmd:04X} answered as {r[0:2].hex()}")
-        return r[2:]
+    def inquiry(self):
+        return tuple(self._request('inquiry'))
+
+    def cmd(self, cmd, args=b''):
+        return bytes(self._request('cmd', [cmd, list(args)]))
 
     def write_block(self, cmd, addr, data):
-        args = struct.pack(">IH", addr, len(data)) + b"\0" + struct.pack("<H", crc16(data))
-        self.bot.xfer(cdb_for(cmd, args), data_out=data)
+        self._request('write_block', [cmd, addr, list(data)])
 
     def start_loader(self, blob):
-        for off in range(0, len(blob), IO):                  # shipped already ciphered: send raw
-            self.write_block(CMD_WRITE_MEMORY, LOADER_ADDR + off, blob[off:off + IO])
-        self.cmd(CMD_JUMP, struct.pack(">IH", LOADER_ADDR, LOADER_ARG))
+        self._request('start_loader', [list(blob)])
 
     def chip(self):
-        p = self.cmd(CMD_READ_KEY, struct.pack(">I", 0x00AC6900))
-        k = bytearray([p[5], p[4]])
-        crc_cipher(k)
-        key = k[0] | k[1] << 8
-        p = self.cmd(CMD_GET_ONLINE_DEVICE)
-        return key, p[0], struct.unpack_from("<I", p, 2)[0]
+        return tuple(self._request('chip'))
 
     def read(self, addr, n):
-        out = bytearray()
-        while len(out) < n:
-            k = min(IO, n - len(out))
-            out += self.bot.xfer(cdb_for(CMD_READ_FLASH, struct.pack(">IH", addr + len(out), k)), n_in=k)
-        return bytes(out)
+        return bytes(self._request('read', [addr, n]))
 
     def write_sector(self, addr, data):
-        if addr < WRITE_MIN or addr >= APP_END or addr % SECTOR or len(data) != SECTOR:
-            raise Fail(f"refusing to write {addr:#x}")
-        self.cmd(CMD_ERASE_SECTOR, struct.pack(">I", addr))
-        for off in range(0, SECTOR, IO):
-            self.write_block(CMD_WRITE_FLASH, addr + off, data[off:off + IO])
-        if self.read(addr, SECTOR) != data:
-            raise Fail(f"sector {addr:#07x} did not verify")
+        self._request('write_sector', [addr, list(data)])
 
     def run_app(self):
-        try:
-            self.cmd(CMD_RUN_APP, struct.pack(">I", 1))
-        except Exception:
-            pass                                             # it may reset before it answers
+        self._request('run_app')
 
 
 # ------------------------------------------------------------------- flow ---
-def rescue(dev, image, loader, write, backup_dir, say=print, confirm=None):
-    """Everything in one session: the FM-1 leaves UBOOT (and crashes again) as soon as it is let go."""
-    vendor, product = dev.inquiry()
-    say(f"  device: {vendor} {product}")
-    if vendor != "WL82":
-        raise Fail(f"not a WL82 UBOOT ({vendor!r})")
-    dev.start_loader(loader)
-    key, typ, fid = dev.chip()
-    say(f"  chip key {key:04X}, flash type {typ}, id {fid:06X}")
-    if (key, typ) != (0x980F, 3) or fid not in FLASH_IDS:
-        raise Fail("this is not the FM-1's chip and flash (expected key 980F, type 3, id 856014 or B36014); nothing written")
-    say("  reading the whole flash ...")
-    t0 = time.time()
-    now = dev.read(0, FLASH_SIZE)
-    path = os.path.join(backup_dir, time.strftime("fm1-backup-%Y%m%d-%H%M%S.bin"))
-    with open(path, "wb") as f:
-        f.write(now)
-    say(f"  backup saved: {path} ({time.time() - t0:.1f} s)")
-    diff = [a for a in range(0, APP_END, SECTOR) if image[a:a + SECTOR] != now[a:a + SECTOR]]
-    low = [a for a in diff if a < WRITE_MIN]
-    if low:
-        raise Fail("the protected head of the flash differs from V15 (sectors "
-                   + " ".join(f"{a:#06x}" for a in low) + "): not writing; send this output and the backup")
-    say(f"  {len(diff)} of {APP_END // SECTOR} firmware sectors differ from V15")
-    if not write and confirm is not None:
-        write = keep_alive(dev, confirm)
-    if not write:
-        say("  check passed. Nothing written: run again with --write to put V15 back.")
-        return False
-    # high to low: X0X's start-up code (low in the app area: its watchdog and its crash counter,
-    # which bring it back to update mode) is the last thing replaced if the write is cut short
-    for i, a in enumerate(reversed(diff)):
-        for attempt in range(3):
+def _call(method, args=(), adapter=None, isolated=False, **values):
+    try:
+        call = _tools.isolated if isolated else _tools.call
+        return call('rescue.' + method, args, adapter, **values)
+    except _tools.ToolError as error:
+        kinds = {'Fail': Fail, 'ValueError': ValueError, 'StructError': struct.error,
+                 'IndexError': IndexError, 'SystemExit': SystemExit}
+        raise kinds.get(error.kind, RuntimeError)(str(error)) from error
+
+
+class _Adapter:
+    def __init__(self, dev=None, bot=None, say=print, confirm=None, stop=None, usb=None):
+        self.dev, self.bot, self.usb = dev, bot, usb
+        self.say, self.confirm, self.stop = say, confirm, stop
+        if bot is not None and not hasattr(bot, '_rust_lock'):
+            bot._rust_lock = threading.RLock()
+
+    def __call__(self, action):
+        kind, a = action['kind'], action['args']
+        if kind == 'say':
+            self.say(*a) if action['end'] is None else self.say(*a, end=action['end'])
+            return None
+        if kind == 'clock':
+            return time.time()
+        if kind == 'timestamp':
+            return time.strftime('%Y%m%d-%H%M%S')
+        if kind == 'backup':
+            with open(a[0], 'wb') as stream:
+                stream.write(bytes(a[1]))
+            return None
+        if kind == 'confirm_keep_alive':
+            return bool(keep_alive(self.dev, self.confirm))
+        if kind == 'stop_wait':
+            return self.stop.wait(a[0])
+        if kind == 'sleep':
+            time.sleep(a[0])
+            return None
+        if kind == 'usb_backend':
+            self.backend = backend(self.usb)
+            return None
+        if kind == 'usb_find':
+            self.candidate = self.usb.core.find(idVendor=a[0], idProduct=a[1], backend=self.backend)
+            return self.candidate is not None
+        if kind == 'usb_detach':
             try:
-                dev.write_sector(a, image[a:a + SECTOR])
-                break
-            except Fail as e:
-                if attempt == 2:
-                    raise Fail(f"{e}; the FM-1 is still in update mode: run the script again")
-        say(f"\r  writing {i + 1}/{len(diff)}", end="")
-    say("")
-    say("  final read ...")
-    expect = image + now[APP_END:]
-    final = dev.read(0, FLASH_SIZE)
-    if final != expect:
-        bad = [a for a in range(0, FLASH_SIZE, SECTOR) if final[a:a + SECTOR] != expect[a:a + SECTOR]]
-        raise Fail("final read differs in sectors " + " ".join(f"{a:#07x}" for a in bad)
-                   + "; run the script again with --write")
-    say("  flash now holds V15. Restarting the FM-1 ...")
-    dev.run_app()
-    return True
+                if self.candidate.is_kernel_driver_active(0):
+                    self.candidate.detach_kernel_driver(0)
+            except (NotImplementedError, self.usb.core.USBError) as error:
+                if getattr(error, 'errno', None) not in (None, 2):
+                    print(f"  (could not detach macOS's driver: {error})")
+            return None
+        if kind == 'usb_open':
+            self.bot = Bot(self.candidate, self.usb)
+            self.dev = Uboot(self.bot)
+            return None
+        if kind == 'bulk_reset':
+            self.bot.dev.ctrl_transfer(0x21, 0xFF, 0, self.bot.intf, None, timeout=2000)
+            return None
+        if kind == 'bulk_clear_in':
+            self.bot.dev.clear_halt(self.bot.ep_in)
+            return None
+        if kind == 'bulk_clear_out':
+            self.bot.dev.clear_halt(self.bot.ep_out)
+            return None
+        if kind == 'usb_dispose':
+            self.usb.util.dispose_resources(self.bot.dev)
+            return None
+        if kind == 'bulk_begin':
+            self.bot._rust_lock.acquire()
+            return None
+        if kind == 'bulk_end':
+            self.bot._rust_lock.release()
+            return None
+        if kind == 'tag':
+            return self.bot.tag
+        if kind == 'tag_set':
+            self.bot.tag = a[0]
+            return None
+        if kind == 'bulk_write':
+            self.bot.ep_out.write(bytes(a[0]), a[1])
+            return None
+        if kind == 'bulk_read':
+            return list(self.bot.ep_in.read(*a))
+        method = kind.removeprefix('dev_') if hasattr(str, 'removeprefix') else kind[4:]
+        if method in ('inquiry', 'chip'):
+            return list(getattr(self.dev, method)())
+        if method in ('start_loader',):
+            getattr(self.dev, method)(bytes(a[0]))
+            return None
+        if method == 'cmd':
+            return list(self.dev.cmd(a[0], bytes(a[1])))
+        if method == 'read':
+            return list(self.dev.read(*a))
+        if method == 'write_sector':
+            self.dev.write_sector(a[0], bytes(a[1]))
+            return None
+        if method == 'run_app':
+            self.dev.run_app()
+            return None
+        raise RuntimeError('unknown rescue I/O action: ' + kind)
+
+
+def rescue(dev, image, loader, write, backup_dir, say=print, confirm=None):
+    bulk = isinstance(dev, Uboot)
+    adapter = _Adapter(dev, dev.bot if bulk else None, say=say, confirm=confirm)
+    return _call('restore', [list(image), list(loader), bool(write), str(backup_dir), confirm is not None],
+                 adapter, bulk=bulk)
 
 
 def keep_alive(dev, confirm):
-    """Ask while the loader is kept busy (it resets the chip after ~3 s without a command)."""
-    import threading
     stop, lost = threading.Event(), []
-
+    bulk = isinstance(dev, Uboot)
+    adapter = _Adapter(dev, dev.bot if bulk else None, stop=stop)
     def run():
-        while not stop.wait(1.0):
-            try:
-                dev.cmd(CMD_GET_ONLINE_DEVICE)
-            except Exception as e:
-                lost.append(e)
-                return
-    t = threading.Thread(target=run, daemon=True)
-    t.start()
+        try:
+            value = _call('keep_alive', adapter=adapter, isolated=True, bulk=bulk)
+            if value['lost'] is not None:
+                lost.append(value['lost'])
+        except Exception as error:
+            lost.append(str(error))
+    thread = threading.Thread(target=run, daemon=True)
+    thread.start()
     try:
         answer = confirm()
     finally:
         stop.set()
-        t.join()
+        thread.join()
     if lost:
-        raise Fail(f"the FM-1 dropped out while waiting ({lost[0]}); run it again")
+        raise Fail(f'the FM-1 dropped out while waiting ({lost[0]}); run it again')
     return answer
 
 
@@ -285,8 +291,7 @@ def get_loader(path):
         print("downloading JieLi's flash loader (wl82loader.bin) ...")
         with urllib.request.urlopen(LOADER_URL, timeout=30) as r:
             blob = r.read()
-    if hashlib.sha256(blob).hexdigest() != LOADER_SHA256:
-        raise Fail("wl82loader.bin: unexpected contents")
+    _call('loader', [list(blob)])
     return blob
 
 
@@ -300,7 +305,7 @@ def backend(usb):
     except ImportError:
         pass
     import usb.backend.libusb1 as lb
-    for path in (None, "/opt/homebrew/lib/libusb-1.0.dylib", "/usr/local/lib/libusb-1.0.dylib"):
+    for path in _CONFIG['backend_paths']:
         b = lb.get_backend() if path is None else (lb.get_backend(find_library=lambda _: path)
                                                    if os.path.exists(path) else None)
         if b is not None:
@@ -309,33 +314,9 @@ def backend(usb):
 
 
 def open_device(usb, timeout):
-    """Wait for 4C4A:8057 and take it from macOS's mass storage driver."""
-    print("waiting for the FM-1 in update mode (switch it on, or wait for it to cycle) ...")
-    be = backend(usb)
-    t0 = time.time()
-    while time.time() - t0 < timeout:
-        dev = usb.core.find(idVendor=VID, idProduct=PID, backend=be)
-        if dev is not None:
-            print(f"found it after {time.time() - t0:.1f} s")
-            try:
-                try:
-                    if dev.is_kernel_driver_active(0):
-                        dev.detach_kernel_driver(0)
-                except (NotImplementedError, usb.core.USBError) as e:
-                    if getattr(e, "errno", None) not in (None, 2):
-                        print(f"  (could not detach macOS's driver: {e})")
-                bot = Bot(dev, usb)
-                try:
-                    Uboot(bot).inquiry()
-                except Exception:
-                    bot.reset_recovery()
-                return bot
-            except Exception as e:
-                print(f"  could not open it ({e}); waiting for the next cycle")
-                time.sleep(1.0)
-                continue
-        time.sleep(0.02)
-    raise Fail("the FM-1 did not appear in update mode")
+    adapter = _Adapter(usb=usb)
+    _call('open', [timeout], adapter, bulk=True)
+    return adapter.bot
 
 
 def ask():
@@ -357,37 +338,19 @@ def main():
     args = ap.parse_args()
     try:
         raw = open(args.package, "rb").read()
-        if hashlib.sha256(raw).hexdigest() != STOCK_SHA256:
-            raise Fail(f"{args.package} is not M-VAVE's FM-1 V15 package (sha256 mismatch)")
-        image = package_flash_image(raw)
-        if len(image) != APP_END:
-            raise Fail("unexpected flash entry size")
+        image = bytes(_call('stock', [list(raw), args.package]))
         loader = get_loader(args.loader)
-        if os.geteuid() != 0:
-            raise Fail("run it with sudo: macOS has to give the device up")
+        _call('uid', [os.geteuid()])
         try:
             import usb.core
             import usb.util
         except ImportError:
             raise Fail("pyusb is missing: ~/fm1-rescue/bin/pip install pyusb libusb-package")
         backup_dir = os.path.dirname(os.path.abspath(args.package))
-        for attempt in range(1, args.tries + 1):
-            bot = open_device(usb, args.wait)
-            try:
-                rescue(Uboot(bot), image, loader, args.write, backup_dir,
-                       say=lambda *a, **k: print(*a, **k, flush=True),
-                       confirm=ask if args.ask else None)
-                return 0
-            except (Fail, usb.core.USBError) as e:
-                print(f"\n  attempt {attempt}: {e}")
-                if isinstance(e, Fail) and "not writing" in str(e) or "not the FM-1" in str(e):
-                    return 1
-            finally:
-                try:
-                    usb.util.dispose_resources(bot.dev)
-                except Exception:
-                    pass
-        raise Fail("gave up; send this whole output")
+        adapter = _Adapter(usb=usb, say=lambda *a, **k: print(*a, **k, flush=True),
+                           confirm=ask if args.ask else None)
+        return _call('recover', [list(image), list(loader), args.write, backup_dir,
+                                 args.ask, args.tries, args.wait], adapter, bulk=True)
     except Fail as e:
         print(f"fm1_rescue: {e}")
         return 1

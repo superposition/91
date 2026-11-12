@@ -10,6 +10,8 @@ a few register and RAM ranges). Needs mido with python-rtmidi.
 """
 import sys
 import rust_codecs as _codecs
+import rust_tooling as _tools
+import contextlib
 import time
 
 import mido
@@ -26,48 +28,74 @@ def r35(b, i):
     return _codecs.scalar(102, [], [b[i:i + 5]])
 
 
+def _tool(method, args=(), adapter=None):
+    try:
+        return _tools.call('debug.' + method, args, adapter)
+    except _tools.ToolError as error:
+        kinds = {'SystemExit': SystemExit, 'ValueError': ValueError,
+                 'ZeroDivisionError': ZeroDivisionError}
+        raise kinds.get(error.kind, RuntimeError)(str(error)) from error
+
+
+class _Adapter:
+    def __call__(self, action):
+        kind, a = action['kind'], action['args']
+        if kind == 'debug_outputs':
+            return list(mido.get_output_names())
+        if kind == 'debug_open':
+            self.stack = contextlib.ExitStack()
+            try:
+                self.inp = self.stack.enter_context(mido.open_input(a[0]))
+                self.out = self.stack.enter_context(mido.open_output(a[0]))
+            except BaseException:
+                self.stack.close()
+                raise
+            return None
+        if kind == 'debug_poll':
+            message = self.inp.poll()
+            return None if message is None else dict(type=message.type,
+                data=list(message.data) if message.type == 'sysex' else [])
+        if kind == 'debug_send':
+            self.out.send(mido.Message('sysex', data=a[0]))
+            return None
+        if kind == 'debug_clock':
+            return time.time()
+        if kind == 'debug_sleep':
+            time.sleep(a[0])
+            return None
+        if kind == 'debug_close':
+            self.stack.close()
+            return None
+        raise RuntimeError('unknown debugger I/O action: ' + kind)
+
+
 def ask(cmd, args, timeout=3.0):
-    name = next((n for n in mido.get_output_names() if "FM-1" in n or "X0X" in n), None)
-    if not name:
-        sys.exit("fm1_debug: no FM-1 MIDI port")
-    with mido.open_input(name) as i, mido.open_output(name) as o:
-        while i.poll():
-            pass
-        o.send(mido.Message("sysex", data=HDR + [cmd] + args))
-        end = time.time() + timeout
-        while time.time() < end:
-            m = i.poll()
-            if m is None:
-                time.sleep(0.002)
-                continue
-            if m.type == "sysex" and list(m.data[:4]) == HDR + [cmd]:
-                return list(m.data[4:])
-    sys.exit("fm1_debug: no reply (not a debug build, or an address outside the allowed ranges)")
+    return _tool('ask', [cmd, list(args), timeout], _Adapter())
 
 
 def main():
     a = sys.argv[1:]
     if not a:
         sys.exit(__doc__)
-    if a[0] == "peek":
-        addr, n = int(a[1], 0), int(a[2], 0) if len(a) > 2 else 1
-        b = ask(PEEK, w35(addr) + w35(n))
-        for k in range(n):
-            print(f"{addr + 4 * k:08X}: {r35(b, 5 + 5 * k):08X}")
-    elif a[0] == "poke":
-        addr, v = int(a[1], 0), int(a[2], 0)
-        b = ask(POKE, w35(addr) + w35(v))
-        print(f"{addr:08X}: {r35(b, 5):08X} -> {r35(b, 10):08X}")
-    elif a[0] == "clock":
-        it = int(a[1], 0) if len(a) > 1 else 2000000
-        b = ask(CLOCK, w35(it), timeout=10)
-        ticks, c0, c1 = r35(b, 0), r35(b, 5), r35(b, 10)
-        us = ticks / 24.0
-        print(f"{it} iterations: {ticks} ticks = {us:.1f} us = {it / us:.2f} iterations per us;"
-              f" C0_TL_CKCNT {c0:08X} -> {c1:08X} ({(c1 - c0) & 0xFFFFFFFF} counted"
-              + (f", {((c1 - c0) & 0xFFFFFFFF) / us:.1f} MHz)" if c1 != c0 else ", not counting)"))
+    if a[0] == 'peek':
+        x, y = int(a[1], 0), int(a[2], 0) if len(a) > 2 else 1
+    elif a[0] == 'poke':
+        x, y = int(a[1], 0), int(a[2], 0)
+    elif a[0] == 'clock':
+        x, y = int(a[1], 0) if len(a) > 1 else 2000000, 0
     else:
         sys.exit(__doc__)
+    plan = _tool('plan', [a[0], x, y])
+    reply = ask(plan['cmd'], plan['args'], timeout=plan['timeout'])
+    rendered = _tool('report', [plan, reply])
+    print(rendered['text'], end='')
+    error = rendered['error']
+    if error:
+        if error['kind'] == 'CodecError':
+            raise _codecs.CodecError(int(error['code']))
+        kind = {'ZeroDivisionError': ZeroDivisionError, 'ValueError': ValueError}.get(error['kind'], RuntimeError)
+        raise kind(error['message'])
+
 
 
 if __name__ == "__main__":

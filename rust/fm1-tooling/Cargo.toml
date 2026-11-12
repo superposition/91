@@ -8,3 +8,4 @@ license.workspace = true
 [dependencies]
 fm1-formats.workspace = true
 serde_json.workspace = true
+sha2 = { version = "=0.10.9", default-features = false, features = ["force-soft"] }
