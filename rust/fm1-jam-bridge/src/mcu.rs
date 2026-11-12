@@ -23,3 +23,16 @@ pub extern "C" fn panic_impl(_info: *const core::ffi::c_void) -> ! {
 pub extern "C" fn _Unwind_Resume() {
     panic_stop()
 }
+
+/// # Safety
+/// The caller supplies valid object-representation byte ranges of `length`
+/// bytes, allowing overlap and padding, with no concurrent conflicting access.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_memory_move(
+    destination: *mut u8,
+    source: *const u8,
+    length: usize,
+) {
+    // SAFETY: this C runtime entry forwards the caller's exact range contract.
+    unsafe { fm1_rt::memory::move_bytes(destination, source, length) };
+}

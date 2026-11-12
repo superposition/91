@@ -176,6 +176,14 @@ static void ota_commit(const uint8_t *parm)
 #include "app/main_fm1.c"
 
 #if EN_RUST_MCU_ATOMICS
+#include <stddef.h>
+extern void fm1_rust_memory_move(uint8_t *,const uint8_t *,size_t);
+/* Preserve C's void* signature; the byte movement implementation is Rust. */
+void *memmove(void *destination,const void *source,size_t length)
+{
+    fm1_rust_memory_move(destination,source,length);
+    return destination;
+}
 /* The Rust panic and mrustc core abort entries converge here. CPU1 parks until
  * CPU0's bounded join holds it and drops partial output. A CPU0 panic silences
  * DMA, holds CPU1 and marks this boot failed before the watchdog restarts. */

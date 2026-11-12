@@ -60,3 +60,12 @@ return, matching their C declarations despite mrustc's char representation of
 Rust `!`. Rust 1.94.1 release Clippy checks this path on a 32-bit non-WASM
 target; mrustc plus the vendor compiler accepts all five crates with the new
 entries. Actual panic/silence and stopped-worker tests remain physical gates.
+
+The integrated link also requires `memmove` for overlapping pad-key state
+shifts. Its implementation is a small Rust runtime primitive using
+`MaybeUninit<u8>` so padding can move without becoming an initialized typed
+value. Volatile byte operations prevent recursive lowering to the runtime
+symbol being implemented. A C adapter preserves the standard void-pointer
+signature and immediately forwards to that Rust primitive. All overlapping
+ranges in a32-byte buffer match standard Rust byte movement, including
+zero-length/null input and a partially uninitialized object representation.

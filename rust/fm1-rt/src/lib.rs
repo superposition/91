@@ -11,6 +11,7 @@ use fm1_types::{CommandWord, COMMAND_CAPACITY};
 pub mod atomic;
 pub mod handoff;
 pub mod job;
+pub mod memory;
 
 /// Single-producer/single-consumer ring, with the legacy 4 KiB payload.
 /// Obtain unique endpoints with [`Self::split`]. No allocation or blocking.
