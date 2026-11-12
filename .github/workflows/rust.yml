@@ -93,6 +93,8 @@ jobs:
         run: sh tests/rust_tonal_parity.sh
       - name: Compact factory tables and packed musical codecs
         run: sh tests/rust_factory_tables.sh
+      - name: Shared native, browser and package codec compatibility
+        run: sh tests/rust_shared_formats.sh
       - name: Native effects, master, output and state parity
         run: sh tests/rust_effects_parity.sh
       - name: Effects worker placement and ordered completion
