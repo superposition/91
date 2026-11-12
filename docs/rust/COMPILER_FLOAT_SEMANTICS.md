@@ -62,3 +62,20 @@ The native commands require Linux with static i386 execution, pinned Zig 0.17.1 
 The additional patch SHA-256 is `f4f469d7184d6cdb134b6f8e751fa1534f5a5556f90c4658defd02aefa9a50cd`. The resulting combined diff is `9c6321c51f606dfc7b60151020023c8b01d311b7e8f11577bf2057f912ad9d26`. Parent review adopted that exact combined diff in `mrustc-pi32v2.patch` and its verification manifest. A fresh checkout needs only the combined patch; the separate addition records the repair against the earlier compiler. The verifier continues to reject any unrecorded compiler diff. The old root compiler binary, diff and manifest were archived before applying the addition; rebuilding the compiler/core/application outputs is a separate gate from the clone evidence above.
 
 Vendor compilation, exported-static/map checks, physical atomics, stack/RAM/cycle qualification and device testing remain separate gates. The diagnostic MCU atomic helper is serial-only and panic traps remain active. These results establish compiler-semantic defects and their repair; they do not establish a cause for the separate device USB failure.
+
+## Adopted compiler rebuild
+
+[compiler-adoption-proof.json](compiler-adoption-proof.json) records the fresh
+root compiler/core and six-crate vendor-LTO rebuild. The 49 floating records,
+28 comparisons, immutable/exported-static section checks, natural-i386 factory
+and all 12 focused effects traces pass again with graphics, storage and harmonic
+paths selected. The factory remains `baeff971`; effects cover 6,040,443 frames.
+
+The private MCU link uses the repaired compiler, current DSP, storage, harmony
+and queue guard, with application graphics and the new hardware layer disabled.
+Its image is 574,704 bytes, ordinary RAM is 97,988/98,304 and the pool is
+339,404/344,064. The image body has 2,544 bytes of linker headroom. Strict register
+access, soft-double, allocator, TLS and unwind-table checks pass; the abort-only
+compatibility handlers remain explicitly recorded. Installer fake-device and
+actual-package simulated-NOR checks pass, with the pinned recovery stub intact.
+This image was never flashed and supplies no runtime deadline or stack evidence.

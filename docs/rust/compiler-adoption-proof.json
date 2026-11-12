@@ -1,0 +1,257 @@
+{
+  "source": "393846865cdd8172c6976419ff7dd1aba8ee0beb",
+  "rust_objects_source": "27583020d710a1849585a5f51cb89f1fdd4b4624",
+  "compiler": {
+    "base": "5205980b25d4d15494abdb45103e59e8dc309970",
+    "sha256": "9c6321c51f606dfc7b60151020023c8b01d311b7e8f11577bf2057f912ad9d26",
+    "files": [
+      "src/expand/codegen.cpp",
+      "src/hir/from_ast.cpp",
+      "src/hir_conv/constant_evaluation.cpp",
+      "src/mir/from_hir.cpp",
+      "src/mir/mir.cpp",
+      "src/mir/optimise.cpp",
+      "src/trans/codegen_c.cpp"
+    ],
+    "scope": [
+      "readonly owned immutable statics, excluding UnsafeCell and foreign storage",
+      "export_name registration and legacy no_mangle static lowering",
+      "actual linker labels on owned static definitions",
+      "binary32 literal and arithmetic rounding in MIR and constant evaluation",
+      "structural floating constant identity preserves signed zero and NaN payloads",
+      "truncating floating remainder in evaluation and generated C"
+    ],
+    "regression": "static-export section/symbol gate; 49 floating bit-pattern cases; 28 comparison predicates; generated-C factory and effects PCM parity"
+  },
+  "rebuild": "Fresh core from pinned archive; six application crates emitted/vendor LTO compiled after immutable palette static fix",
+  "float_bit_cases": 49,
+  "float_comparison_predicates": 28,
+  "export_static_gate": "Natural i386 values/cell mutation and vendor readonly/data symbol sections",
+  "generated_factory": {
+    "blocks": 55000,
+    "pcm_hash": "baeff971",
+    "blits": 4679,
+    "midi_messages": 11531,
+    "clock_messages": 6215
+  },
+  "generated_effects": [
+    {
+      "mode": 0,
+      "frames": 168972,
+      "trace_hash": "b388f362",
+      "peak": 0.870960534
+    },
+    {
+      "mode": 1,
+      "frames": 564151,
+      "trace_hash": "e067f6e5",
+      "peak": 0.363251209
+    },
+    {
+      "mode": 2,
+      "frames": 564151,
+      "trace_hash": "ad9864c5",
+      "peak": 0.382166147
+    },
+    {
+      "mode": 3,
+      "frames": 564151,
+      "trace_hash": "e2a9a5ff",
+      "peak": 0.360722542
+    },
+    {
+      "mode": 4,
+      "frames": 564151,
+      "trace_hash": "82f5bb91",
+      "peak": 0.382166028
+    },
+    {
+      "mode": 5,
+      "frames": 564151,
+      "trace_hash": "d47d3288",
+      "peak": 0.382166624
+    },
+    {
+      "mode": 6,
+      "frames": 564151,
+      "trace_hash": "4fa9b0a2",
+      "peak": 0.382165551
+    },
+    {
+      "mode": 7,
+      "frames": 564151,
+      "trace_hash": "7898f640",
+      "peak": 0.38216579
+    },
+    {
+      "mode": 8,
+      "frames": 564151,
+      "trace_hash": "88620595",
+      "peak": 0.355569363
+    },
+    {
+      "mode": 20,
+      "frames": 564151,
+      "trace_hash": "d5b59cf1",
+      "peak": 0.382166028
+    },
+    {
+      "mode": 30,
+      "frames": 397056,
+      "trace_hash": "03e7f876",
+      "peak": 0.0571992174
+    },
+    {
+      "mode": 31,
+      "frames": 397056,
+      "trace_hash": "2cd4e83a",
+      "peak": 0
+    }
+  ],
+  "generated_effect_frames": 6040443,
+  "package": {
+    "identity": "FM-1_7000306",
+    "checks": [
+      "installer fake-device suite",
+      "actual-package OTA simulated-NOR suite",
+      "locked v3 recovery stub unchanged",
+      "app prefix matches recovery stub",
+      "build memory/size/no-soft-double gates"
+    ],
+    "files": {
+      "build/naiwan91-0.3.6.fwsc": {
+        "bytes": 611251,
+        "sha256": "0dccd56bbd8b330684261d9142c35cf88252d0343b8fc644ca298559511b5d43"
+      },
+      "build/amb.bin": {
+        "bytes": 574704,
+        "sha256": "ba28bf22b7cddc58e323d94dfafeb763b94634135ab6ca62d300f58a69f849e7"
+      },
+      "build/amb.elf": {
+        "bytes": 664692,
+        "sha256": "fa5988cf949f72b6a8eb0f6fc8cc2ba1414d5d811e4a7e37b271b7ffc96477a8"
+      },
+      "build/loader/ota.bin": {
+        "bytes": 8095,
+        "sha256": "fb264969d35b09657af9277527710c80af8dcc164de4946fa298da61420f2e85"
+      },
+      "build/stub/stub.bin": {
+        "bytes": 2268,
+        "sha256": "4e33bfbb5ebdadc6245a8ba36aff087231e42e66507df8a1e0dea0e620d098ef"
+      },
+      "build/host-proof/installer.log": {
+        "bytes": 2082,
+        "sha256": "31ce56df34f24e450f5fffed054f8f2be1eb50eb7bc6c60389928057451fa251"
+      },
+      "build/host-proof/ota.log": {
+        "bytes": 1155,
+        "sha256": "adb70f19c776996c82cfe9cc6ead1a077fcb3edcd4c4c908f5d02dafa0e65d5c"
+      }
+    }
+  },
+  "inspection": {
+    "forbidden_symbols": [],
+    "unwind_tables": false,
+    "tls": false,
+    "compatibility_handlers": {
+      "abort": " 203617e:    bf ea 13 7b       \tcall -68058 <fm1_mcu_panic : 20257a8 >\n 2036182:    71 99             \tcall -14 <_Unwind_Resume : 2036176 >\n 2036184:    f7 9f             \tgoto -2 <abort+0x6 : 2036184 >",
+      "_Unwind_Resume": " 2036176:    bf ea 17 7b       \tcall -68050 <fm1_mcu_panic : 20257a8 >\n 203617a:    71 9d             \tcall -6 <_Unwind_Resume : 2036176 >\n 203617c:    f7 9f             \tgoto -2 <_Unwind_Resume+0x6 : 203617c >",
+      "panic_impl": " 2039f4e:    bf ea 2b 5c       \tcall -83882 <fm1_mcu_panic : 20257a8 >\n 2039f52:    bf ea 10 e1       \tcall -15840 <_Unwind_Resume : 2036176 >\n 2039f56:    f7 9f             \tgoto -2 <panic_impl+0x8 : 2039f56 >"
+    },
+    "files": {
+      "final-symbols.txt": {
+        "bytes": 142066,
+        "sha256": "488e6172623e463c356d8d15c7bb833f9c6434bfd80201c4264460b8b0db2040"
+      },
+      "final-sections.txt": {
+        "bytes": 812,
+        "sha256": "d179255155b24afb58d1653061e21861270c4cc1f046b6fd972ba10aa4ab2ac4"
+      },
+      "build.log": {
+        "bytes": 9832,
+        "sha256": "0f15fc7323a9d7c2d45405bb26dbfc711f09e56c7001373d165532053291e7b0"
+      },
+      "qualified-package.json": {
+        "bytes": 1273,
+        "sha256": "0a3a2d78c186dd4bbb3ded04174dbff447d0aac553a8b79fc23f863d23578056"
+      },
+      "source-manifest.json": {
+        "bytes": 132704,
+        "sha256": "6ba222a7e5084303c4663a29d7044320d3df5d7d6397b7093e539ca77d5e938b"
+      }
+    },
+    "physical": "Never flashed; no runtime, DMA, stack, IRQ latency or audio deadline qualification"
+  },
+  "resources": {
+    "image": 574704,
+    "body": 570896,
+    "body_limit": 573440,
+    "ram": 97988,
+    "ram_limit": 98304,
+    "pool": 339404,
+    "pool_limit": 344064
+  },
+  "enabled": [
+    "EN_CDC",
+    "EN_CORE2",
+    "EN_DIAG",
+    "EN_RUST_JAM",
+    "EN_RUST_COMMANDS",
+    "EN_RUST_HANDOFF",
+    "EN_RUST_TRANSPORT",
+    "EN_RUST_SCHEDULER",
+    "EN_RUST_MELODIC",
+    "EN_RUST_EFFECTS",
+    "EN_RUST_FACTORY",
+    "EN_RUST_VOICES",
+    "EN_RUST_FM6",
+    "EN_RUST_FORMATS",
+    "EN_RUST_WORKER",
+    "EN_RUST_MCU_ATOMICS",
+    "EN_RUST_STORAGE",
+    "EN_RUST_HARMONY"
+  ],
+  "disabled": [
+    "EN_RUST_APP",
+    "EN_RUST_HAL"
+  ],
+  "files": {
+    "mrustc/bin/mrustc": {
+      "bytes": 10878704,
+      "sha256": "7e140c410c901d694375bf55be31ed3053a941d6c7ada43eec41f9b1a16b52ba"
+    },
+    "output-core-float-adopted/core.sha256": {
+      "bytes": 457,
+      "sha256": "3092e5e0248533d6fa94b3fdea4d7b7cdb45387078fe211413f05bee3b03cd4f"
+    },
+    "output-core-float-adopted/libcore.rlib.c": {
+      "bytes": 27878669,
+      "sha256": "b302367596993be4bbe65108ad22a3fd966a072d3e7cc6ef45b23889ebd0a3ee"
+    },
+    "output-core-float-adopted/libcore.lto.o": {
+      "bytes": 4459668,
+      "sha256": "ba2d8dc0f6cd97a4f2c032072b5bbe00714b7d24f870d23444933a2380ebded8"
+    },
+    "output-graphics-static-float-adopted/bridge.sha256": {
+      "bytes": 3045,
+      "sha256": "d94397b151450e2c0679c0c0cf2992280766f9ed57cc4f2d07cf4bb966854aa1"
+    },
+    "build/round9-compiler-retry.log": {
+      "bytes": 1038,
+      "sha256": "8fa09835f9c3c8bb4649a310d1123b024007252f79a95b62f61644c709702619"
+    },
+    "build/compiler-float-regression/identities.sha256": {
+      "bytes": 1351,
+      "sha256": "2cc360988df41a960c1b9c89307e785da7a6702db4c649bf12c11eb01ccdbe84"
+    },
+    "build/compiler-static-regression/identities.sha256": {
+      "bytes": 611,
+      "sha256": "64fc442eb8c1229b5cf7e7b67cdce299c92faa985dbbfb1c9787dc9052b7b443"
+    },
+    "build/compiler-generated-regression/identities.sha256": {
+      "bytes": 1279,
+      "sha256": "5ee7c249e91485dcf980966b3898c6b08793200dd12b2fa73523678755594ea6"
+    }
+  },
+  "physical": "Never flashed. No target runtime/latency/stack/DMA/deadline qualification. Recovery of working0.3.3 still waits for USB enumeration; no causal link to0.3.4 USB failure established."
+}
