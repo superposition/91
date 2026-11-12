@@ -491,3 +491,10 @@ _Static_assert(offsetof(en_jam_snapshot_t,revision)==32 && offsetof(en_jam_snaps
 #if EN_RUST_HANDOFF
 int en_jam_snapshot(en_jam_snapshot_t *out);
 #endif
+
+#if EN_RUST_FACTORY
+#include "rust_factory.h"
+#define PARAMS (fm1_rust_factory_parameters())
+#define EN_MODE_POOL (fm1_rust_factory_modes())
+#include "rust_factory_names.inc"
+#endif

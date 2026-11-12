@@ -36,16 +36,25 @@ static int jp_dx(void) {return en_jam_on && jp_v2(jp_data);}
 volatile uint8_t en_jam_on,en_jam_bar,en_jam_beat,en_jam_section,en_jam_pending,en_jam_length=16;
 volatile uint32_t en_jam_revision;
 
+#if !EN_RUST_FACTORY
 const char *const EN_NOTE_NAME[12] = {"C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"};
+#endif
+#if !EN_RUST_FACTORY
 const char *const EN_MODE_NAME[EN_NMODES] = {"Ionian", "Dorian", "Phrygian", "Lydian", "Mixolyd.", "Aeolian",
                                              "Pent maj", "Pent min"};
+#endif
 #define B(a, b, c, d, e, f, g) (1u << (a) | 1u << (b) | 1u << (c) | 1u << (d) | 1u << (e) | 1u << (f) | 1u << (g))
+#if !EN_RUST_FACTORY
 const uint16_t EN_MODE_POOL[EN_NMODES] = {
     B(0, 2, 4, 5, 7, 9, 11), B(0, 2, 3, 5, 7, 9, 10), B(0, 1, 3, 5, 7, 8, 10), B(0, 2, 4, 6, 7, 9, 11),
     B(0, 2, 4, 5, 7, 9, 10), B(0, 2, 3, 5, 7, 8, 10), B(0, 2, 4, 7, 9, 9, 9),  B(0, 3, 5, 7, 10, 10, 10)};
+#endif
 #undef B
+#if !EN_RUST_FACTORY
 const char *const EN_LANE_NAME[EN_NLANE] = {"Kick", "Snare", "Clap", "Hat", "Open hat", "Perc"};
+#endif
 
+#if !EN_RUST_FACTORY
 static const en_param_t PARAMS[P_NPARAMS] = {
     [P_PAD] = {"Pad", 0, 100, 45},          [P_ACID] = {"Acid", 0, 100, 55},       [P_BASS] = {"Bass", 0, 100, 65},
     [P_PULSE] = {"Drums", 0, 100, 75},      [P_NOISE] = {"Vinyl", 0, 100, 20},
@@ -118,6 +127,7 @@ static const en_param_t PARAMS[P_NPARAMS] = {
     [P_AC_LOCK] = {"Frozen", 0, 1, 0},
     [P_BL_MODE] = {"Mode", 0, EN_BL_STEPS, 0},       [P_BL_LEN] = {"Length", 0, 100, 50},  [P_BL_MOVE] = {"Move", 0, 100, 30},  [P_BL_GLIDE] = {"Glide", 0, 100, 0},
 };
+#endif
 const en_param_t *en_param_info(int i) { return (i >= 0 && i < P_NPARAMS) ? &PARAMS[i] : &PARAMS[0]; }
 int en_par_global(int p) { return p == P_TUNE || p == P_MIDI || p == P_THEME; }
 int en_par_sticky(int p) { return en_par_global(p); }   /* (0.16.28: the drum drift is the piece's, no longer the player's) */
@@ -128,7 +138,9 @@ volatile uint16_t en_pats[EN_NPAT][EN_NLANE];
 volatile uint8_t en_mod[EN_NLANE][16];          /* a piece's step tricks, a byte a lane step: ratchet (bits 0-2), push (3-5), level (6-7); 0: none (the UI edits) */
 
 #define EN_NBLFIG 9                             /* the bass line's figures by name (modes 7 ..; the table BL_FIG is with the bass line) */
+#if !EN_RUST_FACTORY
 static const char *const BL_FIG_NAME[EN_NBLFIG] = {"Octaves", "Two-step", "One-drop", "Log drum", "Skippy", "Funk", "Big beat", "Dub", "Gallop"};
+#endif
 
 /* the library columns' piece macros (base recipes only; GEN_OVR in the NAIWAN block expands its own kits) */
 #define LV(l) P_LANE_LVL(l)
@@ -255,7 +267,13 @@ static void x_pats(int g, int i, uint16_t pats[EN_NPAT][EN_NLANE])
  * root / mode rows; GEN_OVR is its own P_* answer on top of the donor's recipe; GEN_PLUCK its five pluck
  * sounds. Adding a genre means one row in each of these tables, nothing else. */
 static const uint8_t GEN_DONOR[EN_NGENRE] = {10, 11, 6, 7, 10, 11, 15, 13, 15, 14, 6, 14, 10, 13, 15, 12, 12, 7, 17};
-static int gx(int g) { return GEN_DONOR[(unsigned)g < EN_NGENRE ? g : 0]; }   /* a genre's donor column */
+static int gx(int g) {
+#if EN_RUST_FACTORY
+    return fm1_rust_factory_donor((unsigned)g < EN_NGENRE ? g : 0);
+#else
+ return GEN_DONOR[(unsigned)g < EN_NGENRE ? g : 0];
+#endif
+}   /* a genre's donor column */
 static const int16_t GO_CITYPOP[] = {P_CH_LOOP,2,P_SWING,22,P_BASS,78,P_BL_MODE,6,P_BL_LEN,32,P_BL_MOVE,18,P_PAD,52,P_PADTONE,6,P_ACID,30,P_AC_DENS,35,P_AC_LEN,16,P_PL_CHO,55,P_ECHO,28,P_REVERB,40,P_SIZE,62,P_RV_TYPE,0,P_MC_RATIO,3,P_MC_THR,46,P_MC_MAKE,32,P_KIT_KICK,4,P_KIT_SNARE,4,P_KIT_HAT,4,P_KIT_PERC,4, -1};
 static const int16_t GO_SUNSET[] = {P_SWING,24,P_BASS,80,P_ACID,35,P_AC_DENS,45,P_GHOST,60,P_HUMAN,25,P_PL_CHO,50,P_ECHO,30,P_REVERB,34,P_SIZE,58,P_KIT_KICK,4,P_KIT_SNARE,4,P_KIT_HAT,4,P_KIT_PERC,4, -1};
 static const int16_t GO_AOR[] = {P_SWING,16,P_DRIVE,30,P_BASS,72,P_ACID,30,P_AC_DENS,40,P_PAD,48,P_REVERB,42,P_SIZE,66,P_RV_TYPE,0,P_KIT_KICK,4,P_KIT_SNARE,4,P_KIT_HAT,4,P_KIT_PERC,4, -1};
@@ -318,6 +336,7 @@ static const uint8_t GEN_PLUCK[EN_NGENRE][5] = {
     {13, 12, 22, 15, 26},
     {18, 26, 12, 25, 30},
 };
+#if !EN_RUST_FACTORY
 static const char *const GEN_PIECE_NAME[EN_NGENRE][EN_NPIECES] = {
     {"C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10"},   /* CITYPOP */
     {"S01", "S02", "S03", "S04", "S05", "S06", "S07", "S08", "S09", "S10"},   /* SUNSET */
@@ -339,7 +358,10 @@ static const char *const GEN_PIECE_NAME[EN_NGENRE][EN_NPIECES] = {
     {"D01", "D02", "D03", "D04", "D05", "D06", "D07", "D08", "D09", "D10"},   /* SEASIDE */
     {"Z01", "Z02", "Z03", "Z04", "Z05", "Z06", "Z07", "Z08", "Z09", "Z10"},   /* SANDS */
 };
+#endif
+#if !EN_RUST_FACTORY
 static const char *const GENRE_NAME[EN_NGENRE] = {"CITYPOP", "SUNSET", "AOR", "SHIBUYA", "BOOGIE", "YACHT", "TAPE", "NEON", "KAYO", "LOUNGE", "SURF", "BALEAR", "TROPIC", "SUMMER", "MARINA", "CALYPSO", "ISLAND", "SEASIDE", "SANDS"};
+#endif
 
 /* Each genre's palette of sounds, five of the pad, drone, acid and pluck (the pluck's from the plain sounds and the DX voices) and three of each drum's kit: a piece takes one of each by its number, with a
  * different stride for each (1, 2, 3, 4 of five; 1, 2 of three), so the pieces of a genre differ in sound as well as in key and tempo, and no two
@@ -406,6 +428,13 @@ static void naiwan_prog(int which);
 static int8_t naiwan_pending = -1;      /* which loop the next chord change applies */   /* NAIWAN 91: a piece's hand-set progression (defined below) */
 void en_piece_g(int g, int i, int16_t *par, uint16_t *pool)
 {
+#if EN_RUST_FACTORY
+    g = (unsigned)g < EN_NGENRE ? g : 0;
+    i = (unsigned)i < EN_NPIECES ? i : 0;
+    fm1_rust_factory_piece(g,i,par,P_NPARAMS,pool);
+    if(g==0) naiwan_pending=(int8_t)i;
+#else
+
     int p;
     const int16_t *c;
     i = (unsigned)i < EN_NPIECES ? i : 0;
@@ -512,21 +541,35 @@ void en_piece_g(int g, int i, int16_t *par, uint16_t *pool)
         par[P_BASSOCT] = -1;
     }
     *pool = EN_MODE_POOL[par[P_MODE]];
+
+#endif
 }
 const char *en_genre_name(int g) { return GENRE_NAME[(unsigned)g < EN_NGENRE ? g : 0]; }
 int en_genre_donor(int g) { return gx(g); }
 const char *en_piece_name_g(int g, int i)
 {
+#if EN_RUST_FACTORY
+    return (const char*)fm1_rust_factory_name(25,((unsigned)g<EN_NGENRE?g:0)*10+((unsigned)i<EN_NPIECES?i:0));
+#else
+
     i = (unsigned)i < EN_NPIECES ? i : 0;
     return GEN_PIECE_NAME[(unsigned)g < EN_NGENRE ? g : 0][i];
+
+#endif
 }
 const char *en_piece_name(int i) { return en_piece_name_g(0, i); }
 
 void en_piece(int i, int16_t *par, uint16_t *pool) { en_piece_g(0, i, par, pool); }
 void en_piece_pats_g(int g, int i, uint16_t pats[EN_NPAT][EN_NLANE])
 {
+#if EN_RUST_FACTORY
+    fm1_rust_factory_bank((unsigned)g<EN_NGENRE?g:0,(unsigned)i<EN_NPIECES?i:0,0,(uint8_t*)pats,72);
+#else
+
     i = (unsigned)i < EN_NPIECES ? i : 0;
     x_pats(gx(g) - 4, i, pats);             /* the library column */
+
+#endif
 }
 void en_piece_pats(int i, uint16_t pats[EN_NPAT][EN_NLANE]) { en_piece_pats_g(0, i, pats); }
 /* A genre's factory step tricks (en_mod; the same for each of its pieces): the feel a genre has that a grid of hits cannot say. Byte: ratchet | push << 3 | level << 6.
@@ -534,6 +577,10 @@ void en_piece_pats(int i, uint16_t pats[EN_NPAT][EN_NLANE]) { en_piece_pats_g(0,
  * on the hat's last beat. The other genres are as the pattern says. A trick on a step with no hit does nothing. */
 void en_piece_mods_g(int g, int i, uint8_t mod[EN_NLANE][16])
 {
+#if EN_RUST_FACTORY
+    fm1_rust_factory_bank((unsigned)g<EN_NGENRE?g:0,(unsigned)i<EN_NPIECES?i:0,1,&mod[0][0],96);
+#else
+
     int s, l;
     g = gx(g);                                  /* the donor's feel */
     for (l = 0; l < EN_NLANE; l++)
@@ -586,34 +633,60 @@ void en_piece_mods_g(int g, int i, uint8_t mod[EN_NLANE][16])
         mod[3][ROLL[a][0]] = (uint8_t)(mod[3][ROLL[a][0]] & ~7u) | ROLL[a][1];
         mod[3][ROLL[b][0]] = (uint8_t)(mod[3][ROLL[b][0]] & ~7u) | ROLL[b][1];
     }
+
+#endif
 }
 
+#if !EN_RUST_FACTORY
 static const char *const ETIME_NAME[6] = {"1/8", "3/16", "1/4", "1/4.", "1/2", "1 bar"};
+#endif
 static const float ETIME_BEATS[6] = {0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 4.0f};
 /* the LFOs' rates (0.15.13: 1/8, 1/8T, 1/16, 1/16T appended for the dubstep wobble; the stored values never renumbered) */
 #define NLFO_RATE 12
+#if !EN_RUST_FACTORY
 static const char *const LFO_RATE_NAME[NLFO_RATE] = {"1/4", "1/2", "1 bar", "2 bars", "4 bars", "8 bars", "16 bars", "32 bars", "1/8", "1/8T", "1/16", "1/16T"};
+#endif
 static const float LFO_RATE_BEATS[NLFO_RATE] = {1.0f, 2.0f, 4.0f, 8.0f, 16.0f, 32.0f, 64.0f, 128.0f, 0.5f, 1.0f / 3.0f, 0.25f, 1.0f / 6.0f};
+#if !EN_RUST_FACTORY
 static const char *const LFO_SHAPE_NAME[6] = {"Sine", "Triangle", "Saw", "Square", "S&H", "Drift"};
-static const char *const PAD_DEST_NAME[8] = {"Filter", "Level", "Pan", "Pitch", "Acid cut", "Acid reso", "Echo time", "Punch cut"};   /* (4-7: 0.16.4, the LFO on other voices and effects) */
+#endif
+#if !EN_RUST_FACTORY
+static const char *const PAD_DEST_NAME[8] = {"Filter", "Level", "Pan", "Pitch", "Acid cut", "Acid reso", "Echo time", "Punch cut"};
+#endif   /* (4-7: 0.16.4, the LFO on other voices and effects) */
+#if !EN_RUST_FACTORY
 static const char *const DRONE_DEST_NAME[8] = {"Cutoff", "Pitch", "Level", "Drive", "Reso", "Acid cut", "Acid reso", "Echo time"};
-static const char *const NOISE_NAME[8] = {"Mint", "Clean", "Light", "Used", "Worn", "Scratched", "Dusty", "Trashed"};   /* the vinyl's wear */
+#endif
+#if !EN_RUST_FACTORY
+static const char *const NOISE_NAME[8] = {"Mint", "Clean", "Light", "Used", "Worn", "Scratched", "Dusty", "Trashed"};
+#endif   /* the vinyl's wear */
+#if !EN_RUST_FACTORY
 static const char *const TRIG_NAME[6] = {"Chord", "1 bar", "2 bars", "4 bars", "8 bars", "Off"};
+#endif
+#if !EN_RUST_FACTORY
 static const char *const THEME_NAME[EN_NTHEME] = {"Beach", "Synth", "Acid", "Ice", "Ember", "Phosphor"};
+#endif
 /* the voice bank: what each voice can play (the sounds themselves: PAD_SOUND, DRONE_SOUND, ACID_SOUND, and
  * the kits: the old styles' drums) */
+#if !EN_RUST_FACTORY
 const char *const EN_PAD_SOUND[EN_NSOUND] = {"Rhodes", "Voices", "Strings", "Glass", "Organ", "Warm", "Stabs", "Dark",
                                              "Dub", "Trance", "Poly", "Hollow", "Pings", "Hits", "Rave", "Sine",
                                              "Ooh", "Wurli", "Mallet", "Brass", "Fat", "Pluck", "Chapel", "Air"};
+#endif
+#if !EN_RUST_FACTORY
 const char *const EN_DRONE_SOUND[EN_NSOUND] = {"Saws", "Warm", "Grit", "Dirty", "Reese", "Pulse", "FM", "Organ",
                                                "Rumble", "Sub", "Square", "Hoover", "Fifths", "Metal", "Sync", "Bright",
                                                "Wub", "Bite", "Tine", "Clang", "Gnarl", "Wide", "Power", "Air"};
+#endif
+#if !EN_RUST_FACTORY
 const char *const EN_ACID_SOUND[EN_NACID] = {"Saw", "Square", "Driven", "Sync", "Pluck", "PWM", "Chip", "Sub",
                                               "Trance", "Bleep", "Fifth", "Bell", "Organ", "Laser", "Fold", "Soft",
                                               "Marimba", "E.Piano", "Kalimba", "Brass", "Gong", "Clav", "Vibes", "Digital",
                                               "Super", "CZ", "Mini", "Hyper", "CZ Pulse", "CZ Bell", "Lead"};
+#endif
+#if !EN_RUST_FACTORY
 const char *const EN_KIT_NAME[EN_NKIT] = {"Hypno", "House", "Techno", "Acid", "Break", "Minimal", "Hard", "808", "Dusty", "Heavy",
                                                    "909", "Electro", "DnB", "Trap"};
+#endif
 
 /* the envelopes' times, from their knobs (0..100), in seconds */
 static float pe_atk_s(int v) { return 0.05f * fm_exp2f((float)v * 0.0764f); }        /* 0.05 .. 10 s */
@@ -866,7 +939,9 @@ int en_scale(uint32_t pool, int *steps)
     return m;
 }
 
+#if !EN_RUST_FACTORY
 const char *const EN_CHORD_NAME[EN_NCHORD] = {"Auto", "Triads", "7ths", "9ths", "Sus", "Dub", "Fourths", "11ths"};
+#endif
 
 int en_chord_kind(uint32_t pool, int root, int deg, int kind, int *pcs)
 {
@@ -1167,7 +1242,9 @@ void en_test_reseed(uint32_t s)                 /* the host tests: a block's ran
  * each drum lane's channel and note (kick, snare, clap, closed hat, open hat, perc). Channels count from 0. */
 #define MAP_OFF 0xFFu
 typedef struct { uint8_t ch[4]; int8_t tr[4]; uint8_t dch[EN_NDRUM], dn[EN_NDRUM]; } midimap_t;
+#if !EN_RUST_FACTORY
 const char *const EN_MAP_NAME[EN_NMAP] = {"GM", "M:Samples", "MPC Sample", "SP-404"};
+#endif
 static const midimap_t MAPS[EN_NMAP] = {
     {{0, 1, 2, 3}, {0, 0, 0, 0}, {9, 9, 9, 9, 9, 9}, {36, 38, 39, 42, 46, 37}},
     /* Model:Samples (manual OS 1.13, 7.5): its six tracks on channels 1-6, the drums one a track at note 36 (the sample's own pitch: 12-60 is -24..+24);
@@ -2195,6 +2272,12 @@ static uint8_t naiwan_arc, naiwan_left, naiwan_rotate;   /* the arc playing, cho
 
 static void naiwan_prog(int which)
 {
+#if EN_RUST_FACTORY
+    uint8_t b[9];
+    if(!fm1_rust_factory_arc(which,b,sizeof b)) return;
+    en_prog(b); en_prog_kinds(b+6); naiwan_left=8;
+#else
+
     uint8_t b[6] = {0}, kb[3] = {0};
     int s;
     for (s = 0; s < 8; s++) {
@@ -2208,6 +2291,8 @@ static void naiwan_prog(int which)
     en_prog(b);
     en_prog_kinds(kb);                                 /* each slot's own chord type: the turnarounds rely on it */
     naiwan_left = 8;                                 /* eight chords an arc */
+
+#endif
 }
 static void chord_change(void);
 static void prog_take(uint32_t lo, uint32_t hi) /* the progression from the page or the piece (en_prog) */
@@ -2441,6 +2526,12 @@ static void chord_to(int i)                     /* the chord moves to degree i *
 /* ----------------------------------------------------------- the acid line --- */
 int en_acid_pack(uint8_t *b)
 {
+#if EN_RUST_FACTORY
+    uint16_t words[16]; int s;
+    for(s=0;s<16;s++) words[s]=(en_acid_off[s]&15u)|(en_acid_oct[s]&3u)<<4|(en_acid_gate>>s&1u)<<6|(en_acid_acc>>s&1u)<<7|(en_acid_slide>>s&1u)<<8;
+    return fm1_rust_factory_line(0,0,(const uint8_t*)words,sizeof words,b,18);
+#else
+
     uint32_t acc = 0, bits = 0, o = 0;
     int s;
     for (s = 0; s < EN_NSTEP; s++) {
@@ -2455,9 +2546,17 @@ int en_acid_pack(uint8_t *b)
         }
     }
     return (int)o;
+
+#endif
 }
 void en_acid_unpack(const uint8_t *b)
 {
+#if EN_RUST_FACTORY
+    uint16_t words[16]; int s;
+    if(fm1_rust_factory_line(0,1,b,18,(uint8_t*)words,sizeof words)!=32) return;
+    for(s=0;s<16;s++) post(C_ACSTEP,s,words[s]);
+#else
+
     uint32_t acc = 0, bits = 0, i = 0;
     int s;
     for (s = 0; s < EN_NSTEP; s++) {
@@ -2471,6 +2570,8 @@ void en_acid_unpack(const uint8_t *b)
         bits -= 9;
         post(C_ACSTEP, s, (int)((v & 15u) | (v >> 4 & 3u) << 4 | (v >> 6 & 1u) << 6 | (v >> 7 & 1u) << 7 | (v >> 8 & 1u) << 8));
     }
+
+#endif
 }
 void en_acid_step(int s, int off, int oct, int gate, int accent, int slide)
 {
@@ -2484,6 +2585,13 @@ volatile uint8_t en_cm_rung[16], en_cm_lvl[16], en_cm_pos;
 void en_pluck_step(int s, int rung, int level) { post(C_CMSTEP, s & 15, (rung & 15) | (level & 3) << 4); }
 int en_pluck_pack(uint8_t *b)
 {
+#if EN_RUST_FACTORY
+    uint16_t words[16]; int s,any=0;
+    for(s=0;s<16;s++){words[s]=(en_cm_rung[s]&15u)|(en_cm_lvl[s]&3u)<<4;any|=words[s]!=0;}
+    if(fm1_rust_factory_line(1,0,(const uint8_t*)words,sizeof words,b,12)!=12) return 0;
+    return any;
+#else
+
     uint32_t acc = 0, bits = 0, i = 0;
     int s, any = 0;
     for (s = 0; s < 16; s++) {
@@ -2498,9 +2606,17 @@ int en_pluck_pack(uint8_t *b)
         }
     }
     return any;
+
+#endif
 }
 void en_pluck_unpack(const uint8_t *b)
 {
+#if EN_RUST_FACTORY
+    uint16_t words[16]; int s;
+    if(fm1_rust_factory_line(1,1,b,12,(uint8_t*)words,sizeof words)!=32) return;
+    for(s=0;s<16;s++) post(C_CMSTEP,s,words[s]);
+#else
+
     uint32_t acc = 0, bits = 0, i = 0;
     int s;
     for (s = 0; s < 16; s++) {
@@ -2514,6 +2630,8 @@ void en_pluck_unpack(const uint8_t *b)
         bits -= 6;
         post(C_CMSTEP, s, (int)v);
     }
+
+#endif
 }
 static void ac_roll_w(int st, int what)         /* a step made anew: what 0 all of it, 1 the note, 2 the rhythm (whether it sounds), 3 the accent and the slide */
 {
@@ -3259,14 +3377,24 @@ static const cm_snd_t CM_SOUND[CM_NPLAIN] = {
     {1.0f, 0.0f, 0.0f, 0, 1.15f},    /* Bleep: a plain sine */
     {7.01f, 0.1f, 1.0f, 0, 0.9f},    /* Glass */
 };
+#if EN_RUST_FACTORY
+const char *EN_CM_SOUND[EN_NCMSND];
+#else
 const char *EN_CM_SOUND[EN_NCMSND] = {"Pluck", "Marimba", "E.Piano", "Kalimba", "Bell", "Vibes", "Gong", "Clav", "Digital", "Brass", "Bleep", "Glass",
     "DX Tine EP", "DX Glass Bell", "DX Round Bass", "DX Brass Sect", "DX Soft Pad", "DX Wood Bars", "DX Drawbars", "DX Nylon Pick", "DX Brass 2", "DX Solid Bass", "DX Bells", "DX Marimba", "DX Clavinet", "DX Strings", "DX Glass Pad", "DX Sync Lead", "DX Harp", "DX Kalimba", "DX Flute", "DX Steel Drum", "DX Saw Bass", "DX Tubular", "DX Steel Gtr", "DX Clean Gtr", "DX Muted Gtr", "DX Drive Gtr", "DX Slap Bass", "DX Synth Brass", "DX Sax", "DX Mute Trumpet",
     "(empty)", "(empty)", "(empty)", "(empty)", "(empty)", "(empty)", "(empty)", "(empty)",
     "(empty)", "(empty)", "(empty)", "(empty)", "(empty)", "(empty)", "(empty)", "(empty)"};
+#endif
+#if !EN_RUST_FACTORY
 static const char *const FM_DX_NAME[EN_NFMFACT] = {   /* (the same thirty, to put back when the DY set is switched off: en_fm_set_dy) */
     "DX Tine EP", "DX Glass Bell", "DX Round Bass", "DX Brass Sect", "DX Soft Pad", "DX Wood Bars", "DX Drawbars", "DX Nylon Pick", "DX Brass 2", "DX Solid Bass", "DX Bells", "DX Marimba", "DX Clavinet", "DX Strings", "DX Glass Pad", "DX Sync Lead", "DX Harp", "DX Kalimba", "DX Flute", "DX Steel Drum", "DX Saw Bass", "DX Tubular", "DX Steel Gtr", "DX Clean Gtr", "DX Muted Gtr", "DX Drive Gtr", "DX Slap Bass", "DX Synth Brass", "DX Sax", "DX Mute Trumpet"};
+#endif
+#if !EN_RUST_FACTORY
 const char *const EN_CM_STYLE[EN_NCMSTYLE] = {"Up", "Down", "Up-down", "Random", "Skip", "Thirds"};
-const char *const EN_CM_RATE[4] = {"1/4", "3/16", "1/8", "1/16"};   /* slowest to fastest */
+#endif
+#if !EN_RUST_FACTORY
+const char *const EN_CM_RATE[4] = {"1/4", "3/16", "1/8", "1/16"};
+#endif   /* slowest to fastest */
 static int32_t fm_bend;                          /* a keyboard's bend on the DX pluck, as a Q24 log (fm6's pitch; hb_tick sets it) */
 #include "fm6.inc"
 /* a keyboard's pitch bend and mod wheel (0.15.26: an MPK mini's) on the voice its keys play: the pluck (plain: its phase; DX: fm_bend), the drone, the acid.
@@ -5159,6 +5287,12 @@ static void master_dyn_reset(void);
 void en_init(void)
 {
     int i, l;
+#if EN_RUST_FACTORY
+    /* Static C initializers ran once: retain DY/user labels on later engine resets. */
+    if(!EN_CM_SOUND[0])
+        for(i=0;i<EN_NCMSND;i++) EN_CM_SOUND[i]=(const char*)fm1_rust_factory_name(19,(uint32_t)i);
+#endif
+
     en_jam_on=0; jp_upload=0; jp_data=JP_SONG_0; jp_len=sizeof JP_SONG_0;
     en_jam_load=-1;jp_song=0;jp_patch_dirty=0;jp_swell_phase=1.0f;jp_plan_wait=0;
     for(i=0;i<2;i++)jp_phrase[i].bars=0;
@@ -5204,9 +5338,15 @@ void en_init(void)
         pad[i].fh = 0.15f;
         pad[i].fr = 0.35f;
     }
+#if EN_RUST_FACTORY
+    { uint16_t boot[6][6];
+      fm1_rust_factory_bank(0,0,2,(uint8_t*)boot,sizeof boot);
+      for(i=0;i<EN_NPAT;i++)for(l=0;l<EN_NLANE;l++)en_pats[i][l]=boot[i][l]; }
+#else
     for (i = 0; i < EN_NPAT; i++)               /* the factory patterns (the app loads the player's after) */
         for (l = 0; l < EN_NLANE; l++)
             en_pats[i][l] = EN_PIECE_PATS[0][i][l];
+#endif
     arcm = 0.0f;
     pad_gain = 0.0f;
     for (i = 0; i < P_NPARAMS; i++)
@@ -5409,7 +5549,9 @@ static float lpk_s, hpk_s, crk_s, thk_s, wash_s;
  * their own (busl/busr) instead of the mix, at the same points and with the same gains, the pumps and the gate; the bus goes through the filter and the
  * phaser, into the echo for the delay, and back into the mix before the echoes and the reverb. Two held together share the bus: both act on every
  * track either one targets. The drums go as one (any drum in the targets takes all four), after their crush and mixer. */
+#if !EN_RUST_FACTORY
 const char *const EN_PT_NAME[EN_NPT] = {"ALL", "DRUMS", "SYNTHS", "PAD", "BASS", "ACID", "PLUCK", "ACID+PLK", "PAD+PLK", "BASS+ACID"};
+#endif
 static const uint8_t PT_MASK[EN_NPT] = {0xFF, 0x0F, 0xF0, 0x40, 0x10, 0x20, 0x80, 0xA0, 0xC0, 0x30};
 static uint32_t bus_m;                          /* the tracks in the bus this chunk (a bit a track, EN_TR_*): 0, no bus */
 static float tfx_m, tdx_m, tpx_m;               /* the three faded in and out (0..1) */
@@ -5419,11 +5561,13 @@ static float lp_amt_e, hp_amt_e;                 /* the filters' amounts: the ke
 static float cr_lv = 2048.0f, cr_wet;
 static int cr_hold = 1;
 static const float RPT_BEATS[9] = {2.0f, 1.0f, 2.0f / 3.0f, 0.5f, 0.25f, 0.125f, 1.0f / 3.0f, 1.0f / 6.0f, 0.0625f};   /* (the 7th and 8th: triplets; the last, 1/64, only the roll reaches) */
+#if !EN_RUST_FACTORY
 const char *const EN_FX_NAME[EN_NFX] = {
     [FX_RPT2] = "Rpt 1/2", "Rpt 1/4", "Rpt 1/6", "Rpt 1/8", "Rpt 1/16", "Rpt 1/32", "Reverse", "Tape stop",
     "Mute kick", "Mute hats", "Mute snare", "Mute perc", "Low-pass", "High-pass",
     "Gate 1/16", "Gate 1/8", "Gate pattern", "Echo throw", "Fill", "Phaser", "Flanger", "Tape", "Roll", "Pump", "Riser", "Vinyl", "Scatter", "Brake", "Spin back", "Half time", "Sweep", "Scratch", "Freeze", "Rev swell", "Ring mod", "Rpt 1/8T", "Rpt 1/16T",
     "Flex Beat", "Filter", "Delay", "Phaser", "Mute drums", "", "", "", "", "", "", "", "", "", "", "Talk", "Wah", "Hat roll", "Hat trip", "Snr roll", "Flam", "Dbl kick"};
+#endif
 
 static void rpt_engage(int r)                   /* the slice that just ended, looped from its start */
 {
