@@ -3,6 +3,59 @@
 use core::sync::atomic::{AtomicU32, Ordering};
 use fm1_engine::voices::{self, Drum, DrumsConfig, Mix, Pluck, PluckConfig};
 static COUNTERS: [AtomicU32; 8] = [const { AtomicU32::new(0) }; 8];
+const _: [(); 96] = [(); core::mem::size_of::<voices::drone::State>()];
+const _: [(); 12] = [(); core::mem::size_of::<voices::drone::Line>()];
+const _: [(); 124] = [(); core::mem::size_of::<voices::drone::Config>()];
+const _: [(); 108] = [(); core::mem::size_of::<voices::acid::State>()];
+const _: [(); 88] = [(); core::mem::size_of::<voices::acid::Config>()];
+
+/// # Safety
+/// Initialized state/config/line/control and1025-value sine table are aligned
+/// and pairwise disjoint from the n-f32 output. Voice owner exclusively holds
+/// all writable regions until return; no callback or pointer is retained.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_voice_drone(
+    s: *mut voices::drone::State,
+    c: *const voices::drone::Config,
+    line: *mut voices::drone::Line,
+    control: *mut u32,
+    table: *const f32,
+    out: *mut f32,
+    n: u32,
+) -> f32 {
+    let level = voices::drone::process(
+        unsafe { &mut *s },
+        unsafe { &*c },
+        unsafe { &mut *line },
+        unsafe { &mut *control },
+        unsafe { &*table.cast::<[f32; 1025]>() },
+        unsafe { core::slice::from_raw_parts_mut(out, n as usize) },
+    );
+    COUNTERS[3].fetch_add(1, Ordering::Relaxed);
+    level
+}
+/// # Safety
+/// The module's disjoint scoped voice/control/output contract applies. Table
+/// provides1025 initialized f32 values and state has firmware-valid bounds.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_voice_acid(
+    s: *mut voices::acid::State,
+    c: *const voices::acid::Config,
+    control: *mut u32,
+    table: *const f32,
+    out: *mut f32,
+    n: u32,
+) -> f32 {
+    let level = voices::acid::process(
+        unsafe { &mut *s },
+        unsafe { &*c },
+        unsafe { &mut *control },
+        unsafe { &*table.cast::<[f32; 1025]>() },
+        unsafe { core::slice::from_raw_parts_mut(out, n as usize) },
+    );
+    COUNTERS[4].fetch_add(1, Ordering::Relaxed);
+    level
+}
 pub fn stat(index: u32) -> u32 {
     COUNTERS
         .get(index.wrapping_sub(40) as usize)

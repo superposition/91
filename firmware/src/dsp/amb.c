@@ -1824,6 +1824,9 @@ static inline float blep_saw(float t, float dt)
  * when the chord changes); what moves is the filter: CUTOFF and RESO, its envelope (retriggered on
  * each chord or every 1 .. 8 bars), its LFO (to the cutoff, the pitch, the level or the drive), a slow
  * random drift, the arc, and the sections (it closes in a breakdown, opens through the build). */
+#if EN_RUST_VOICES
+static fm1_voice_drone_t bass;
+#else
 static struct {
     float ph[3], sph, mph, note, target, amp;   /* mph: Metal's modulator, Sync's slave */
     float s[4], c1[4], c2[4];                   /* the filters' states, their coefficients */
@@ -1833,8 +1836,17 @@ static struct {
     uint8_t play;                               /* played from the keys */
     float vd;                                   /* a key's velocity, as a gain less 1 (0: as the algorithm plays it; 0.15.23) */
 } bass;
+#endif
+#if EN_RUST_VOICES
+static fm1_voice_line_t bl_line;
+#define bl_env bl_line.env
+#define bl_gate bl_line.gate
+#define bl_up bl_line.up
+static uint8_t bl_kick,bl_beat;
+#else
 static float bl_env, bl_gate;                   /* the bass line's envelope, 0..1, and the samples its note still holds */
 static uint8_t bl_up, bl_kick, bl_beat;         /* attacking; the kick hit this step; the notes since the bar (the riff's place) */
+#endif
 static float bass_vol, reso_k = 1.0f;
 static const float GLIDE_K = 1.0f / (0.6f * EN_SR);
 static float brk;                               /* the sections, smoothed: +1 breakdown, -0.5 build, 0 groove */
@@ -1848,6 +1860,9 @@ static float duck_env, duck_dec = 0.9997f;      /* the kick's sidechain: 1 just 
  * low-passes in a row, the first resonant, driven between them; an envelope sweeps the cutoff (ENV MOD,
  * DECAY), an accent sweeps it further and plays louder (ACCENT); a slide glides the pitch without a
  * new attack. */
+#if EN_RUST_VOICES
+static fm1_voice_acid_t acid;
+#else
 static struct {
     float ph, inc, inc_t, amp, amp_t, env, edec, acc, s[4], c1[4], c2[4];
     int32_t gate_left;                          /* samples until the note's gate closes; -1 held (a slide) */
@@ -1855,6 +1870,7 @@ static struct {
     uint8_t play;                               /* played from the keys: the line steps on, silent */
     float ps, p3, p4, p5, lph;                  /* more phases (sync, sub, the trance saws, the supersaw's...), the PWM's LFO */
 } acid;
+#endif
 static int8_t ac_off[EN_NSTEP], ac_oct[EN_NSTEP];   /* each step: scale steps above the chord's degree, octave */
 static uint16_t ac_gate, ac_accent, ac_slide;       /* bit s: step s plays; is accented; slides into the next */
 static int ac_pos;
@@ -7564,6 +7580,9 @@ static void render_pad(uint32_t n)
 /* (0.14.4 tried this in RAM, .ram_hot: on the device the bass costs about 200 us a chunk whatever the chunk's length, the most of any stage, which
  * looks like its code fetched cold from the flash each chunk. It makes 43 calls out to helpers the compiler keeps in the flash, and a pi32v2 call
  * cannot reach the flash from RAM (R_PI32V2_LONG_JUMP_23M2 truncated), so it needs those helpers inlined or in RAM with it first.) */
+#if EN_RUST_VOICES
+#include "rust_tonal.inc"
+#endif
 static void render_bass(uint32_t n)
 {
     if(jp_dx()) {
@@ -7571,6 +7590,10 @@ static void render_bass(uint32_t n)
         for(k=0;k<n;k++){float x=fm_bass_fifo[(rv_job.fm_w-FM_D+k)&(FM_R-1)]*g;bass_o[k]=x;peak=fm_maxf(peak,fm_fabsf(x));}
         en_bass_level=peak;return;
     }
+#if EN_RUST_VOICES
+    const fm1_voice_drone_config_t config=voice_drone_config();
+    en_bass_level=fm1_rust_voice_drone(&bass,&config,&bl_line,&dr_ctl,SINT,bass_o,n);
+#else
     const int ft_bass = fxs_v[EN_FXS_FT_BASS];
     uint32_t j;
     const drone_snd_t *DS = &DRONE_SOUND[(unsigned)par[P_DR_INST] < EN_NSOUND ? par[P_DR_INST] : 0];
@@ -7719,6 +7742,7 @@ static void render_bass(uint32_t n)
     bass.mph = mp;
     bass.amp = amp;
     en_bass_level = bl_on ? amp * bl_env : amp;
+#endif
 }
 
 static void render_dj(uint32_t n)               /* the snips, into the mix and its sends, before the sidechain */
@@ -7834,6 +7858,10 @@ static void render_cm(uint32_t n)
 
 static void render_acid(uint32_t n)
 {
+#if EN_RUST_VOICES
+    const fm1_voice_acid_config_t config=voice_acid_config();
+    en_acid_level=fm1_rust_voice_acid(&acid,&config,&ac_ctl,SINT,acid_o,n);
+#else
     const int ft_acid = fxs_v[EN_FXS_FT_ACID];
     uint32_t j;
     const acid_snd_t *AS = &ACID_SOUND[(unsigned)par[P_AC_WAVE] < EN_NACID ? par[P_AC_WAVE] : 0];
@@ -8046,6 +8074,7 @@ static void render_acid(uint32_t n)
     acid.inc = inc;
     acid.amp = amp;
     en_acid_level = lvl * (0.6f + 0.4f * acid.env);
+#endif
 }
 
 /* the noise: one sample of a colour from a generator */

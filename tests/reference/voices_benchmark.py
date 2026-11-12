@@ -11,7 +11,7 @@ import subprocess
 import sys
 
 out = Path(sys.argv[1])
-cases = [*range(7), 97, 100, 113, 135]
+cases = [int(value) for value in sys.argv[2:]] or [*range(7), 97, 100, 113, 135]
 results = []
 for case in cases:
     pair = {}
