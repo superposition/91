@@ -72,6 +72,7 @@ for profile in ui_controls usb_trs;do
     cmp "$out/c0-$profile.bin" "$out/generated-$profile.bin"
 done
 python3 tests/reference/ui_frame_extract.py . build/gen/ui_button_current.inc button_current
+python3 tests/reference/ui_frame_extract.py . build/gen/ui_button_port.inc button_port
 cp tests/reference/ui_button_frozen.inc build/gen/ui_button_frozen.inc
 python3 tests/reference/ui_frame_extract.py . build/gen/ui_classify_current.inc classify
 cp tests/reference/ui_classify_frozen.inc build/gen/ui_classify_frozen.inc
