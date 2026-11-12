@@ -2,6 +2,9 @@
 /* The instrument (amb.h). One compilation unit, -O2. */
 #include "amb.h"
 #include "fastmath.h"
+#if EN_RUST_WORKER
+#include "rust_worker.h"
+#endif
 #if EN_RUST_FM6
 #include "rust_fm6.h"
 #endif
@@ -1196,6 +1199,13 @@ volatile float en_arc;
 volatile uint8_t en_pulse_rest;
 volatile uint8_t en_pad_note[EN_NPAD];
 volatile float en_pad_amp[EN_NPAD];
+#if EN_RUST_WORKER
+/* No worker writes public UI fields: a quarantined worker can outlive the
+ * silence-only render return. Publish these copies only after confirmed join. */
+static struct{float pad,bass,acid;uint8_t note[EN_NPAD];float amp[EN_NPAD];} worker_meters;
+static void worker_meters_capture(void){unsigned i;worker_meters.pad=en_pad_level;worker_meters.bass=en_bass_level;worker_meters.acid=en_acid_level;for(i=0;i<EN_NPAD;i++){worker_meters.note[i]=en_pad_note[i];worker_meters.amp[i]=en_pad_amp[i];}}
+static void worker_meters_publish(void){unsigned i;en_pad_level=worker_meters.pad;en_bass_level=worker_meters.bass;en_acid_level=worker_meters.acid;for(i=0;i<EN_NPAD;i++){en_pad_note[i]=worker_meters.note[i];en_pad_amp[i]=worker_meters.amp[i];}}
+#endif
 
 static int16_t par[P_NPARAMS];
 int en_par_now(int p) { return (unsigned)p < (unsigned)P_NPARAMS ? par[p] : 0; }
@@ -1242,6 +1252,9 @@ static int irand(int n) { return n > 0 ? (int)((rnd() >> 8) % (uint32_t)n) : 0; 
 #ifdef EN_HOST
 void en_test_reseed(uint32_t s)                 /* the host tests: a block's random walk its own, not what the blocks before it used up */
 {
+#if EN_RUST_WORKER
+    {const uint32_t phase=fm1_rust_worker_phase();if(phase!=FM1_WORKER_IDLE&&phase!=FM1_WORKER_RETIRED)return;}
+#endif
     rng = s ? s : 0x9E3779B9u;
     prng = 0x2545F491u ^ s;
 }
@@ -2221,7 +2234,7 @@ static const struct { uint8_t tonic, cad_every, cad_to, back, hr, dom; ch_edge_t
 /* synthwave in a major mode (0.16.7, the audit's 2b): I-vi-IV-V, the decade's own loop, in place of its minor i-VI-III-VII edges */
 static const ch_edge_t SYN_MAJ[8] = {{0, 5, 8}, {5, 3, 8}, {3, 4, 8}, {4, 0, 8}, {0, 3, 4}, {4, 5, 3}, {0, 0, 0}, {0, 0, 0}};
 static volatile uint8_t chord_genre;
-void en_genre(int g) { chord_genre = (uint8_t)gx(g); }   /* the donor column drives every genre-indexed table */
+void en_genre(int g) { chord_genre=(uint8_t)gx(g); } /* worker uses its immutable job snapshot */
 static int hr_bars_v(int v)                     /* the genre's bars a chord, by Drift: a quarter below 20, half below 45, double above 80, four times above 95 */
 {
     int b = CHT[chord_genre].hr;
@@ -4722,8 +4735,18 @@ static inline void reverb_tank(float x, float *ol, float *or_)
  * on the other core (en_core2_attach) while this one renders the voices, the drums and the echoes. Same job, same
  * result, whichever core runs it. The line's slots a job reads and the slots being written are apart (PRE_LP). */
 #define RV_MAX 256
+#if EN_RUST_WORKER
+typedef fm1_worker_job_t rv_job_t;
+#else
 typedef struct { int n, r0; int fm_on; uint32_t fm_w, pad_w; int bass; } rv_job_t;   /* bass: the job renders the drone and the acid too; pad_w: where the pad's ring is written */
+#endif
 static rv_job_t rv_job;
+#if EN_RUST_WORKER
+#define PAD_JOB_GENRE (rv_job.genre)
+static int fm_job_float_mode(void){return rv_job.float_path;}
+#else
+#define PAD_JOB_GENRE (chord_genre)
+#endif
 /* The pad reaches the mix a chunk late (PAD_D frames), as the DX voices do: the job writes this ring and the first core reads it a chunk on, so it
  * never waits for the pad. (Until 0.14.4 it waited at its third stage, 1.2 ms into the chunk, a time the other core could not meet with the chorus
  * to do; the balancer then ran the chorus on the first core, 250-330 us a chunk in most genres, while the other core sat at 30 %.) */
@@ -4747,6 +4770,10 @@ static int (*c2_alive)(void);
 uint32_t en_c2_jobs, en_c2_lost;
 void en_core2_attach(int (*submit)(void (*)(void *), void *), int (*join)(void), void (*fence)(void), int (*alive)(void))
 {
+#if EN_RUST_WORKER
+    const uint32_t phase=fm1_rust_worker_phase();
+    if(phase!=FM1_WORKER_IDLE&&phase!=FM1_WORKER_RETIRED)return;
+#endif
     c2_submit = submit;
     c2_join = join;
     c2_fence = fence;
@@ -4768,7 +4795,12 @@ static void bal_apply(int l)
 void en_balance_force(int v) { bal_force = (int8_t)v; }
 static float bass_o[RV_MAX] EN_POOL, acid_o[RV_MAX] EN_POOL, gg_v[RV_MAX] EN_POOL;   /* the drone's and the acid's samples for the chunk, and the gate's gain per sample */
 static float bass_duck;                          /* the sidechain's envelope as the chunk began (what the drone's filter follows: the kick moves it later in the chunk) */
+#if EN_RUST_WORKER
+static uint32_t worker_generation;
+static int worker_unknown;
+#else
 static volatile uint32_t stage_done, stage2_done, stage3_done;   /* the job's first stage (the pad) is done: its outputs may be read; the second (the drone, the acid); the third (the reverb's tank) */
+#endif
 static void render_pad(uint32_t n);
 static void pad_publish(uint32_t w, uint32_t n);
 static void render_bass(uint32_t n);
@@ -4795,7 +4827,7 @@ static void fm_job(const rv_job_t *c)           /* the DX voices' samples for th
         return;
     }
     const fm1_fm6_tables_t t=RUST_FM_TABLES;const fm1_fm6_scratch_t b=RUST_FM_SCRATCH;
-    const fm1_fm6_config_t config={(uint32_t)jp_dx(),fm_cur,fm_engine,(uint32_t)fm6_float_path,fm_tune,fm_bend};
+    const fm1_fm6_config_t config={(uint32_t)jp_dx(),fm_cur,fm_engine,(uint32_t)FM6_FLOAT_MODE,fm_tune,fm_bend};
     fm1_fm6_ams_t cache={fm_ams_amd,{fm_ams_pt[0],fm_ams_pt[1],fm_ams_pt[2],fm_ams_pt[3]},fm_ams_ok};
     const fm1_fm6_render_t r={(fm1_fm6_slot_t *)fmx,(fm1_fm6_lfo_t *)&fm_lfo,(fm1_fm6_lfo_t *)&fm_bass_lfo,fm_ed,fm_bass_ed,&config,&cache,&t,&b,fm_blk,&fm_pos,&fm_bass_sample};
     /* Only exact write spans are borrowed; the foreground reads 256 frames
@@ -4817,9 +4849,24 @@ static void fm_job(const rv_job_t *c)           /* the DX voices' samples for th
     }
 #endif
 }
+static int worker_publish_stage(uint32_t stage)
+{
+#if EN_WORKER_TEST
+    extern int en_worker_test_stage(uint32_t);
+    const int action=en_worker_test_stage(stage);
+    if(!action)return 0;
+    if(action==2)return 1; /* missing publication: completion must still join */
+#endif
+#if EN_RUST_WORKER
+    if(worker_generation)(void)fm1_rust_worker_publish(worker_generation,stage);
+#else
+    if(stage==1)stage2_done=1;else if(stage==2)stage3_done=1;else stage_done=1;
+#endif
+    return 1;
+}
 /* what the other core does in a chunk: the pad's voices (the stage the first core waits for, before it mixes), then the reverb's tank (the first core needs its
  * output at the end of the chunk), then the DX voices (needed a chunk on, so nothing waits for them) */
-static void chunk_job(void *p)
+static void chunk_job_body(const rv_job_t *p)
 {
     /* in the order the first core needs them (0.14.5): the drone and the acid first if they are this core's (wanted after the drums, about 1.5 ms into
      * the chunk), then the tank (wanted before the master, about 3 ms in), then the pad and the DX voices, which are both for the next chunk. With the
@@ -4829,19 +4876,30 @@ static void chunk_job(void *p)
         render_acid((uint32_t)((const rv_job_t *)p)->n);
         if (c2_fence)
             c2_fence();
-        stage2_done = 1;
+        if(!worker_publish_stage(1))return;
     }
-    reverb_job(p);
+    reverb_job((void *)p);
     if (c2_fence)
         c2_fence();
-    stage3_done = 1;                            /* the tank's output may be read: the first core goes on to its master while the pad and the DX voices render */
+    if(!worker_publish_stage(2))return;         /* the tank is available while pad/FM continue */
     render_pad((uint32_t)((const rv_job_t *)p)->n);
     pad_publish(((const rv_job_t *)p)->pad_w, (uint32_t)((const rv_job_t *)p)->n);   /* into the ring: the first core takes it a chunk on */
     if (c2_fence)
         c2_fence();
-    stage_done = 1;
+    if(!worker_publish_stage(4))return;
     fm_job((const rv_job_t *)p);
 }
+static void chunk_job(void *p)
+{
+#if EN_RUST_WORKER
+    (void)fm1_rust_worker_execute((uint32_t)(uintptr_t)p,chunk_job_body);
+#else
+    chunk_job_body((const rv_job_t *)p);
+#endif
+}
+#if EN_RUST_WORKER
+#include "rust_worker.inc"
+#endif
 
 static void plate_init(void)
 {
@@ -5411,6 +5469,9 @@ static void quiet(void)
 static void master_dyn_reset(void);
 void en_init(void)
 {
+#if EN_RUST_WORKER
+    {const uint32_t phase=fm1_rust_worker_phase();if(phase!=FM1_WORKER_IDLE&&phase!=FM1_WORKER_RETIRED)return;}
+#endif
     int i, l;
 #if EN_RUST_FACTORY
     /* Static C initializers ran once: retain DY/user labels on later engine resets. */
@@ -7459,6 +7520,11 @@ static void pad_chorus(uint32_t n)
 #endif
 }
 
+#if EN_RUST_WORKER
+#define en_pad_level worker_meters.pad
+#define en_pad_note worker_meters.note
+#define en_pad_amp worker_meters.amp
+#endif
 static void render_pad(uint32_t n)
 {
 #if EN_RUST_VOICES
@@ -7473,7 +7539,7 @@ static void render_pad(uint32_t n)
     uint32_t j0;
     for (j0 = 0; j0 < n; j0++)
         padl[j0] = padr[j0] = 0.0f;
-    const float g = pad_vol * 0.5f * pad_lvl * (1.0f + 0.01f * (float)SECT[chord_genre].pad * fm_maxf(brk, 0.0f)) * PAD_SOUND[pad_snd()].g *   /* the pad rises in a breakdown */
+    const float g = pad_vol * 0.5f * pad_lvl * (1.0f + 0.01f * (float)SECT[PAD_JOB_GENRE].pad * fm_maxf(brk, 0.0f)) * PAD_SOUND[pad_snd()].g *   /* the pad rises in a breakdown */
                     (1.0f + 0.35f * (float)par[P_LK_SNARE] * 0.01f * pad_lk);                    /* and swells with the links */
     uint32_t nb = (n + 31u) >> 5;
     pad_gain += (pad_gate - pad_gain) * fm_minf((float)n / ((pad_gate > 0.0f ? 2.0f : 5.0f) * EN_SR), 1.0f);
@@ -7645,6 +7711,12 @@ static void render_pad(uint32_t n)
 #if EN_RUST_VOICES
 #include "rust_tonal.inc"
 #endif
+#if EN_RUST_WORKER
+#undef en_pad_level
+#undef en_pad_note
+#undef en_pad_amp
+#define en_bass_level worker_meters.bass
+#endif
 static void render_bass(uint32_t n)
 {
     if(jp_dx()) {
@@ -7814,6 +7886,9 @@ static void render_bass(uint32_t n)
 #endif
 }
 
+#if EN_RUST_WORKER
+#undef en_bass_level
+#endif
 static void render_dj(uint32_t n)               /* the snips, into the mix and its sends, before the sidechain */
 {
     static const float ES[3][2] = {{0.0f, 0.0f}, {0.25f, 0.35f}, {0.6f, 0.9f}};          /* the reverb's and the echo's share */
@@ -7939,6 +8014,9 @@ static void render_cm(uint32_t n)
 #endif
 }
 
+#if EN_RUST_WORKER
+#define en_acid_level worker_meters.acid
+#endif
 static void render_acid(uint32_t n)
 {
 #if EN_RUST_VOICES
@@ -8161,6 +8239,9 @@ static void render_acid(uint32_t n)
 }
 
 /* the noise: one sample of a colour from a generator */
+#if EN_RUST_WORKER
+#undef en_acid_level
+#endif
 static inline float nz_white(nz_t *z)
 {
     z->rng = z->rng * 1664525u + 1013904223u;
@@ -8578,7 +8659,14 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
         rv_job.pad_w = pad_ctr & (PAD_R - 1);
         pad_lk = lk_snare;
         rv_job.bass = en_bass_c1;
+#if EN_RUST_WORKER
+        rv_job.genre=chord_genre;rv_job.float_path=fm6_float_path;
+#endif
         bass_duck = duck_env;
+#if EN_RUST_WORKER
+        rv_c2=worker_dispatch();
+        if(rv_c2<0)return;
+#else
         stage_done = 0;
         stage2_done = 0;
         stage3_done = 0;
@@ -8587,6 +8675,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
             en_c2_jobs++;
         else
             chunk_job(&rv_job);
+#endif
     }
     PT(0);                                      /* the clear, the job's start */
     DT0();
@@ -8649,7 +8738,9 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
 #endif
         pad_ctr += n;
     }
+#if !EN_RUST_WORKER
     pad_midi_flush();
+#endif
     DT(6);
 #if EN_RUST_EFFECTS
     {fm1_fx_duck_t s={de,gg};const fm1_fx_duck_config_t c={depth,duck_dec,nz_pump,trk_g1[TR_KICK],step_len,step_t,gate,(uint32_t)odd,bus_m};
@@ -8737,6 +8828,11 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
     DT(8);
     PT(5);                                      /* the drums */
     if (rv_c2 && rv_job.bass) {                 /* the drone and the acid are the other core's: wait for them (the reverb goes on behind) */
+#if EN_RUST_WORKER
+        const int status=worker_wait_stage(FM1_WORKER_BASS);
+        if(status<0)return;
+        if(!status){rv_c2=0;en_c2_lost++;worker_drop_outputs(FM1_WORKER_BASS,n);}
+#else
         while (!stage2_done)
             if (c2_alive && !c2_alive()) {
                 if (c2_join())                  /* it finished just as the time ran out: not lost */
@@ -8752,6 +8848,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
                     fm_fifo[j] = 0.0f;
                 break;
             }
+#endif
         if (c2_fence)
             c2_fence();
     }
@@ -8836,6 +8933,11 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
     PT(6);                                      /* the echoes, the reverb's input */
     bal_a = pt0_;
     if (rv_c2) {                                /* the tank's output is the other core's: wait for that only (its DX voices go on behind, joined after the master) */
+#if EN_RUST_WORKER
+        const int status=worker_wait_stage(FM1_WORKER_TANK);
+        if(status<0)return;
+        if(!status){rv_c2=0;en_c2_lost++;worker_drop_outputs(FM1_WORKER_TANK,n);}
+#else
         while (!stage3_done)
             if (c2_alive && !c2_alive()) {
                 if (c2_join())                  /* it finished just as the time ran out: not lost */
@@ -8851,6 +8953,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
                     fm_fifo[j] = 0.0f;
                 break;
             }
+#endif
         if (c2_fence)
             c2_fence();
     }
@@ -8894,6 +8997,11 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
     PT(8);                                      /* the master: effects, dynamics, the soft clip */
     if (rv_c2) {                                /* the other core's DX voices (they run behind the master): done before anything touches their state */
         bal_a = pt0_;
+#if EN_RUST_WORKER
+        const int status=worker_join_status();
+        if(status<0)return;
+        if(!status){en_c2_lost++;worker_drop_outputs(FM1_WORKER_PAD,n);}
+#else
         if (!c2_join()) {                       /* lost: its voices were its own */
             en_c2_lost++;
             pad_ring_clear(rv_job.pad_w, n);
@@ -8902,6 +9010,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
                 fm_fifo[j] = 0.0f;
             plate_init();
         }
+#endif
         if (en_prof_clock) {
             const uint32_t t1_ = en_prof_clock();
             en_prof[7] += t1_ - pt0_;
@@ -8910,6 +9019,13 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
         }
         bal_w += pt0_ - bal_a;
     }
+#if EN_RUST_WORKER
+    if(worker_generation&&fm1_rust_worker_phase()!=FM1_WORKER_RETIRED){
+        if(!fm1_rust_worker_reclaim(worker_generation)){worker_unknown=1;(void)fm1_rust_worker_quarantine(worker_generation);return;}
+    }
+    if(!worker_generation||fm1_rust_worker_phase()!=FM1_WORKER_RETIRED)worker_meters_publish();
+    pad_midi_flush(); /* every producer is joined; same serialized callback order */
+#endif
     en_prof[9]++;
     if (en_prof_clock && n < (uint32_t)BLK) {   /* the short chunks' stages apart: against the full chunks' they give each stage's fixed cost a chunk (tools/fm1sum.py) */
         uint32_t k;
@@ -9120,6 +9236,9 @@ void en_render(int32_t *out, uint32_t n, uint32_t gain_q12)
     float gain;
     int32_t *const out0 = out;
     const uint32_t n0 = n;
+#if EN_RUST_WORKER
+    if(!worker_poll_quarantine()){worker_silence(out,en_usb_out,n);return;}
+#endif
     RT(32, drain());
     if(jp_plan_wait) {
         if(n>=jp_plan_wait){jp_plan_wait=0;jp_prepare(0);}
@@ -9205,6 +9324,9 @@ void en_render(int32_t *out, uint32_t n, uint32_t gain_q12)
         }
         usb_cur = en_usb_out ? en_usb_out + (out - out0) : 0;
         render_chunk(out, k, gain);
+#if EN_RUST_WORKER
+        if(worker_unknown){worker_silence(out,en_usb_out?en_usb_out+(out-out0):0,n);return;}
+#endif
         RT(35, drums_wait_step((int32_t)k));
         out += 2 * k;
         n -= k;

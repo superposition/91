@@ -146,7 +146,7 @@ sh tests/rust_fm6_benchmark.sh ../baseline-2026-11-11/source
 ```
 
 `fm6-proof.json` records checks, fingerprints, sizes and host costs. The nine FM
-tests bring this base to 68 workspace tests. Independent components cover
+tests bring this base to 78 workspace tests. Independent components cover
 3,456 per-operator bus/add/feedback/path/partial-block cases, 48 two/three-op
 feedback loops, 900 amplitude envelopes, 300 pitch envelopes and 1,600 LFO
 wave/rate/delay-wrap cases: 6,304 vectors. All initialized lookup values also

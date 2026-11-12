@@ -289,6 +289,12 @@ enum { FM6_P_ADD = 4, FM6_P_FB = 0x40, FM6_P_RUN = 0x80 };   /* plan: bits 0-1 o
 /* ------------------------------------------------------ the operators --- */
 static float fm6_bus[2][FM6_N] EN_POOL, fm6_sum[FM6_N] EN_POOL;
 static int fm6_float_path;                       /* tests: 1 runs MARK I on the float buses (the integer ones must give the same bits) */
+#if EN_RUST_WORKER
+static int fm_job_float_mode(void);
+#define FM6_FLOAT_MODE (fm_job_float_mode())
+#else
+#define FM6_FLOAT_MODE (fm6_float_path)
+#endif
 
 /* MARK I: a sine from the log-sine and exponent tables (mkiSin); env: attenuation, 1024 an octave.
  * As in Dexed the sum is 16 bits, the sign its top bit (a gain ramp that overshoots wraps it) */
@@ -593,7 +599,7 @@ static void fm6_run(fm6_voice_t *s, uint32_t n)
     uint32_t k, eng = s->eng;
 #if !MELODEE_DUAL_CORE
     float (*bus)[CTL] = fm6_bus, *sum = fm6_sum;
-    if (eng == FM6_MARK1 && !fm6_float_path) {   /* the default engine: integer buses */
+    if (eng == FM6_MARK1 && !FM6_FLOAT_MODE) {   /* the default engine: integer buses */
         fm6_run_mki(s, n, sum);
         return;
     }
