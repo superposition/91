@@ -21,7 +21,7 @@ node tests/host/emu_session_test.mjs "$out/reference.wasm" "$out/rust.wasm" > "$
 cat "$out/session.json"
 node tests/host/emu_handoff_test.mjs "$out/rust.wasm" > "$out/handoff.json"
 cat "$out/handoff.json"
-node tests/host/emu_sequencer_test.mjs "$out/reference.wasm" "$out/rust.wasm" > "$out/sequencer.json"
+node tests/host/emu_sequencer_test.mjs "$out/reference.wasm" "$out/rust.wasm" --harmony > "$out/sequencer.json"
 cat "$out/sequencer.json"
 node tests/host/emu_factory_test.mjs "$out/reference.wasm" "$out/rust.wasm" > "$out/factory-lines.json"
 cat "$out/factory-lines.json"

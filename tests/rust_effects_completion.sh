@@ -11,7 +11,7 @@ if [ "$baseline" != "$repo" ];then (cd "$baseline";sha256sum -c "$repo/tests/ref
 cargo build --release --locked -p fm1-jam-bridge --target-dir "$out/rust-build"
 cc -O2 -ffp-contract=off -std=gnu99 -DEN_HOST -I"$baseline/firmware/src/dsp" tests/reference/effects_completion_reference.c -lpthread -lm -o "$out/reference"
 cc -O2 -ffp-contract=off -std=gnu99 -DEN_HOST -Ifirmware/src/dsp tests/reference/effects_completion_reference.c -lpthread -lm -o "$out/c0"
-cc -O2 -ffp-contract=off -std=gnu99 -DEN_HOST -DEN_RUST_JAM=1 -DEN_RUST_COMMANDS=1 -DEN_RUST_TRANSPORT=1 -DEN_RUST_HANDOFF=1 -DEN_RUST_SCHEDULER=1 -DEN_RUST_MELODIC=1 -DEN_RUST_EFFECTS=1 -DEN_RUST_FACTORY=1 -DEN_RUST_VOICES=1 -DEN_RUST_FM6=1 -DEN_RUST_FORMATS=1 -DEN_RUST_WORKER=1 -Ifirmware/src/dsp tests/reference/effects_completion_reference.c "$out/rust-build/release/libfm1_jam_bridge.a" -lpthread -ldl -lm -o "$out/rust"
+cc -O2 -ffp-contract=off -std=gnu99 -DEN_HOST -DEN_RUST_JAM=1 -DEN_RUST_COMMANDS=1 -DEN_RUST_TRANSPORT=1 -DEN_RUST_HANDOFF=1 -DEN_RUST_SCHEDULER=1 -DEN_RUST_MELODIC=1 -DEN_RUST_EFFECTS=1 -DEN_RUST_FACTORY=1 -DEN_RUST_VOICES=1 -DEN_RUST_FM6=1 -DEN_RUST_FORMATS=1 -DEN_RUST_WORKER=1 -DEN_RUST_HARMONY=1 -Ifirmware/src/dsp tests/reference/effects_completion_reference.c "$out/rust-build/release/libfm1_jam_bridge.a" -lpthread -ldl -lm -o "$out/rust"
 : > "$out/results.jsonl"
 for mode in 0 1 2 3 4;do
     for impl in reference c0 rust;do "$out/$impl" "$mode" "$out/$impl.trace" > "$out/$impl-$mode.json";done

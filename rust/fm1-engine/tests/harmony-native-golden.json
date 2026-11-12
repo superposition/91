@@ -1,0 +1,44 @@
+{
+  "0": {
+    "mode": 0,
+    "rows": 987136,
+    "midi_messages": 0,
+    "trace_hash": "bc58f4a5"
+  },
+  "1": {
+    "mode": 1,
+    "rows": 12000,
+    "midi_messages": 0,
+    "trace_hash": "540092ad"
+  },
+  "2": {
+    "mode": 2,
+    "rows": 116736,
+    "midi_messages": 0,
+    "trace_hash": "971a6fad"
+  },
+  "3": {
+    "mode": 3,
+    "rows": 68096,
+    "midi_messages": 136942,
+    "trace_hash": "8d2293d7",
+    "alterations": [
+      65769,
+      1222,
+      1105
+    ],
+    "diminished_moves": 0
+  },
+  "4": {
+    "mode": 4,
+    "rows": 4096,
+    "midi_messages": 0,
+    "trace_hash": "5ce001e6"
+  },
+  "5": {
+    "mode": 5,
+    "rows": 6656,
+    "midi_messages": 13566,
+    "trace_hash": "c22fae20"
+  }
+}

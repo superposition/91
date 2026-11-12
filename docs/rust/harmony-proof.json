@@ -1,0 +1,2167 @@
+{
+  "ticket": "https://github.com/superposition/91/issues/8",
+  "date": "2026-11-12",
+  "base_commit": "ea502f51085ae3020e57f0c0c9dc53413250b545",
+  "status": "Remaining legacy harmony policy implemented and qualified through actual hosted consumers; physical transaction/backend/resource gates remain root-owned",
+  "checks": {
+    "rust": "1.94.1",
+    "workspace_release_tests": 105,
+    "opaque_pi32v2_runtime_tests": 14,
+    "fmt": "pass",
+    "clippy_warnings_denied": "pass",
+    "no_std_release": "pass",
+    "generated_abi": "pass",
+    "shell_syntax": "pass",
+    "frozen_source_files": 440,
+    "fresh_c0_and_rust_wasm_rebuild": "byte-identical after final source review",
+    "retained_final_checks": "pass"
+  },
+  "representation": {
+    "scalar_packets": {
+      "State": 208,
+      "Config": 48,
+      "Targets": 32,
+      "Mood": 20,
+      "Bing": 32
+    },
+    "alignment": 4,
+    "state_padding_explicitly_zeroed": 3,
+    "additional_persistent_harmonic_state_bytes": 0,
+    "diagnostic_bytes": 16,
+    "diagnostic_indices": [
+      76,
+      77,
+      78,
+      79
+    ],
+    "heap": false,
+    "new_audio_or_delay_bytes": 0,
+    "expanded_graph_bytes": 0,
+    "immutable_source_numeric_bytes": 818,
+    "corresponding_c_numeric_bytes": 854,
+    "graph_rows": 19,
+    "graph_bytes": 570,
+    "edges_per_row": 8,
+    "maximum_rich_walk_edge_tests": 56,
+    "maximum_other_scale_weights": 12,
+    "register_permutations": 24,
+    "nearest_per_search": 96,
+    "collision_pair_tests_per_search": 144,
+    "pad_pedal_max_searches": 2,
+    "existing_phrase_plan_payloads": "unchanged; separate8-note Songbook planner and64-beat plan limits retained",
+    "packet_lifetime": "stack-local copied numeric state; no pointer retained and no callback during a Rust borrow",
+    "engine_contexts": [
+      "CPU0 foreground",
+      "render/drain including ISR on MCU",
+      "UI preview/capture"
+    ],
+    "qualified_execution": "host serialized engine plus retained native worker placements",
+    "unqualified_mcu_publication": "naiwan_bing -> en_note_v -> post crosses render consumer to command producer; root #9 owns whole-push IRQ transaction guard; per-atomic exclusion is insufficient"
+  },
+  "native": {
+    "harmony": {
+      "cases": 6,
+      "rows": 1194720,
+      "frames": 0,
+      "results": [
+        {
+          "mode": 0,
+          "rows": 987136,
+          "midi_messages": 0,
+          "trace_hash": "bc58f4a5",
+          "alterations": [
+            0,
+            0,
+            0
+          ],
+          "diminished_moves": 0
+        },
+        {
+          "mode": 1,
+          "rows": 12000,
+          "midi_messages": 0,
+          "trace_hash": "540092ad",
+          "alterations": [
+            0,
+            0,
+            0
+          ],
+          "diminished_moves": 0
+        },
+        {
+          "mode": 2,
+          "rows": 116736,
+          "midi_messages": 0,
+          "trace_hash": "971a6fad",
+          "alterations": [
+            0,
+            0,
+            0
+          ],
+          "diminished_moves": 0
+        },
+        {
+          "mode": 3,
+          "rows": 68096,
+          "midi_messages": 136942,
+          "trace_hash": "8d2293d7",
+          "alterations": [
+            65769,
+            1222,
+            1105
+          ],
+          "diminished_moves": 0
+        },
+        {
+          "mode": 4,
+          "rows": 4096,
+          "midi_messages": 0,
+          "trace_hash": "5ce001e6",
+          "alterations": [
+            0,
+            0,
+            0
+          ],
+          "diminished_moves": 0
+        },
+        {
+          "mode": 5,
+          "rows": 6656,
+          "midi_messages": 13566,
+          "trace_hash": "c22fae20",
+          "alterations": [
+            2221,
+            37,
+            46
+          ],
+          "diminished_moves": 124
+        }
+      ]
+    },
+    "harmony_builds": [
+      "immutable frozen R01 C",
+      "fresh C0",
+      "combined Rust flags",
+      "EN_RUST_HARMONY-only with other ports C0"
+    ],
+    "effects": {
+      "cases": 12,
+      "rows": 0,
+      "frames": 6040443,
+      "results": [
+        {
+          "mode": 0,
+          "frames": 168972,
+          "trace_hash": "b388f362",
+          "peak": 0.870960534
+        },
+        {
+          "mode": 1,
+          "frames": 564151,
+          "trace_hash": "e067f6e5",
+          "peak": 0.363251209
+        },
+        {
+          "mode": 2,
+          "frames": 564151,
+          "trace_hash": "ad9864c5",
+          "peak": 0.382166147
+        },
+        {
+          "mode": 3,
+          "frames": 564151,
+          "trace_hash": "e2a9a5ff",
+          "peak": 0.360722542
+        },
+        {
+          "mode": 4,
+          "frames": 564151,
+          "trace_hash": "82f5bb91",
+          "peak": 0.382166028
+        },
+        {
+          "mode": 5,
+          "frames": 564151,
+          "trace_hash": "d47d3288",
+          "peak": 0.382166624
+        },
+        {
+          "mode": 6,
+          "frames": 564151,
+          "trace_hash": "4fa9b0a2",
+          "peak": 0.382165551
+        },
+        {
+          "mode": 7,
+          "frames": 564151,
+          "trace_hash": "7898f640",
+          "peak": 0.38216579
+        },
+        {
+          "mode": 8,
+          "frames": 564151,
+          "trace_hash": "88620595",
+          "peak": 0.355569363
+        },
+        {
+          "mode": 20,
+          "frames": 564151,
+          "trace_hash": "d5b59cf1",
+          "peak": 0.382166028
+        },
+        {
+          "mode": 30,
+          "frames": 397056,
+          "trace_hash": "03e7f876",
+          "peak": 0.0571992174
+        },
+        {
+          "mode": 31,
+          "frames": 397056,
+          "trace_hash": "2cd4e83a",
+          "peak": 0
+        }
+      ]
+    },
+    "extra_genres": {
+      "cases": 11,
+      "rows": 0,
+      "frames": 6205661,
+      "results": [
+        {
+          "mode": 9,
+          "frames": 564151,
+          "trace_hash": "0112ed0c",
+          "peak": 0.382166862
+        },
+        {
+          "mode": 10,
+          "frames": 564151,
+          "trace_hash": "5f7866c6",
+          "peak": 0.38216579
+        },
+        {
+          "mode": 11,
+          "frames": 564151,
+          "trace_hash": "d2c235f9",
+          "peak": 0.382165909
+        },
+        {
+          "mode": 12,
+          "frames": 564151,
+          "trace_hash": "6aa7d5fa",
+          "peak": 0.382166266
+        },
+        {
+          "mode": 13,
+          "frames": 564151,
+          "trace_hash": "657a6c09",
+          "peak": 0.382166505
+        },
+        {
+          "mode": 14,
+          "frames": 564151,
+          "trace_hash": "90fc2013",
+          "peak": 0.382165909
+        },
+        {
+          "mode": 15,
+          "frames": 564151,
+          "trace_hash": "06092075",
+          "peak": 0.382166266
+        },
+        {
+          "mode": 16,
+          "frames": 564151,
+          "trace_hash": "7975a1dc",
+          "peak": 0.382166386
+        },
+        {
+          "mode": 17,
+          "frames": 564151,
+          "trace_hash": "72291c74",
+          "peak": 0.382166743
+        },
+        {
+          "mode": 18,
+          "frames": 564151,
+          "trace_hash": "00a8e92d",
+          "peak": 0.382165909
+        },
+        {
+          "mode": 19,
+          "frames": 564151,
+          "trace_hash": "08796b86",
+          "peak": 0.382165909
+        }
+      ]
+    },
+    "effect_controls": {
+      "cases": 5,
+      "rows": 45308,
+      "frames": 135151,
+      "results": [
+        {
+          "mode": 0,
+          "rows": 1276,
+          "frames": 0,
+          "trace_hash": "27723a28"
+        },
+        {
+          "mode": 1,
+          "rows": 42363,
+          "frames": 0,
+          "trace_hash": "98fe6947"
+        },
+        {
+          "mode": 2,
+          "rows": 1100,
+          "frames": 94452,
+          "trace_hash": "62c27989"
+        },
+        {
+          "mode": 3,
+          "rows": 64,
+          "frames": 0,
+          "trace_hash": "fd353cc2"
+        },
+        {
+          "mode": 4,
+          "rows": 505,
+          "frames": 40699,
+          "trace_hash": "1ea84c3a"
+        }
+      ]
+    },
+    "worker_lifetimes": {
+      "cases": 36,
+      "rows": 0,
+      "frames": 8353800,
+      "results": [
+        {
+          "mode": 0,
+          "frames": 232050,
+          "trace_hash": "d283d8a3",
+          "midi_events": 425,
+          "peak": 0.361495614,
+          "submits": 0,
+          "joins": 0,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 1,
+          "frames": 232050,
+          "trace_hash": "d283d8a3",
+          "midi_events": 425,
+          "peak": 0.361495614,
+          "submits": 1468,
+          "joins": 1468,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 2,
+          "frames": 232050,
+          "trace_hash": "d283d8a3",
+          "midi_events": 425,
+          "peak": 0.361495614,
+          "submits": 1468,
+          "joins": 1469,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 3,
+          "frames": 232050,
+          "trace_hash": "d283d8a3",
+          "midi_events": 425,
+          "peak": 0.361495614,
+          "submits": 1468,
+          "joins": 968,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 10,
+          "frames": 232050,
+          "trace_hash": "d283d8a3",
+          "midi_events": 425,
+          "peak": 0.361495614,
+          "submits": 1468,
+          "joins": 1472,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 11,
+          "frames": 232050,
+          "trace_hash": "d283d8a3",
+          "midi_events": 425,
+          "peak": 0.361495614,
+          "submits": 1468,
+          "joins": 1468,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 0,
+          "frames": 232050,
+          "trace_hash": "d283d8a3",
+          "midi_events": 425,
+          "peak": 0.361495614,
+          "submits": 0,
+          "joins": 0,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 1,
+          "frames": 232050,
+          "trace_hash": "d283d8a3",
+          "midi_events": 425,
+          "peak": 0.361495614,
+          "submits": 1468,
+          "joins": 1468,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 2,
+          "frames": 232050,
+          "trace_hash": "d283d8a3",
+          "midi_events": 425,
+          "peak": 0.361495614,
+          "submits": 1468,
+          "joins": 1468,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 3,
+          "frames": 232050,
+          "trace_hash": "d283d8a3",
+          "midi_events": 425,
+          "peak": 0.361495614,
+          "submits": 1468,
+          "joins": 968,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 10,
+          "frames": 232050,
+          "trace_hash": "d283d8a3",
+          "midi_events": 425,
+          "peak": 0.361495614,
+          "submits": 1468,
+          "joins": 1469,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 11,
+          "frames": 232050,
+          "trace_hash": "d283d8a3",
+          "midi_events": 425,
+          "peak": 0.361495614,
+          "submits": 1468,
+          "joins": 1468,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 4,
+          "frames": 232050,
+          "trace_hash": "458f22da",
+          "midi_events": 430,
+          "peak": 0.368709922,
+          "submits": 40,
+          "joins": 40,
+          "unknown_renders": 0,
+          "retired": 1
+        },
+        {
+          "mode": 5,
+          "frames": 232050,
+          "trace_hash": "c7ac4a84",
+          "midi_events": 430,
+          "peak": 0.368694544,
+          "submits": 40,
+          "joins": 40,
+          "unknown_renders": 0,
+          "retired": 1
+        },
+        {
+          "mode": 6,
+          "frames": 232050,
+          "trace_hash": "d5058d57",
+          "midi_events": 430,
+          "peak": 0.387028337,
+          "submits": 40,
+          "joins": 40,
+          "unknown_renders": 0,
+          "retired": 1
+        },
+        {
+          "mode": 7,
+          "frames": 232050,
+          "trace_hash": "1105a3a5",
+          "midi_events": 575,
+          "peak": 0.378759265,
+          "submits": 1557,
+          "joins": 1561,
+          "unknown_renders": 3,
+          "retired": 0
+        },
+        {
+          "mode": 8,
+          "frames": 232050,
+          "trace_hash": "b75b85e3",
+          "midi_events": 575,
+          "peak": 0.357626677,
+          "submits": 40,
+          "joins": 43,
+          "unknown_renders": 3,
+          "retired": 1
+        },
+        {
+          "mode": 9,
+          "frames": 232050,
+          "trace_hash": "1105a3a5",
+          "midi_events": 575,
+          "peak": 0.378759265,
+          "submits": 1557,
+          "joins": 1561,
+          "unknown_renders": 3,
+          "retired": 0
+        },
+        {
+          "mode": 0,
+          "frames": 232050,
+          "trace_hash": "f34d36a3",
+          "midi_events": 527,
+          "peak": 0.143972039,
+          "submits": 0,
+          "joins": 0,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 1,
+          "frames": 232050,
+          "trace_hash": "f34d36a3",
+          "midi_events": 527,
+          "peak": 0.143972039,
+          "submits": 1250,
+          "joins": 1250,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 2,
+          "frames": 232050,
+          "trace_hash": "f34d36a3",
+          "midi_events": 527,
+          "peak": 0.143972039,
+          "submits": 1250,
+          "joins": 1250,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 3,
+          "frames": 232050,
+          "trace_hash": "f34d36a3",
+          "midi_events": 527,
+          "peak": 0.143972039,
+          "submits": 1250,
+          "joins": 816,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 10,
+          "frames": 232050,
+          "trace_hash": "f34d36a3",
+          "midi_events": 527,
+          "peak": 0.143972039,
+          "submits": 1250,
+          "joins": 1251,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 11,
+          "frames": 232050,
+          "trace_hash": "f34d36a3",
+          "midi_events": 527,
+          "peak": 0.143972039,
+          "submits": 1250,
+          "joins": 1250,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 0,
+          "frames": 232050,
+          "trace_hash": "f34d36a3",
+          "midi_events": 527,
+          "peak": 0.143972039,
+          "submits": 0,
+          "joins": 0,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 1,
+          "frames": 232050,
+          "trace_hash": "f34d36a3",
+          "midi_events": 527,
+          "peak": 0.143972039,
+          "submits": 1250,
+          "joins": 1250,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 2,
+          "frames": 232050,
+          "trace_hash": "f34d36a3",
+          "midi_events": 527,
+          "peak": 0.143972039,
+          "submits": 1250,
+          "joins": 1250,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 3,
+          "frames": 232050,
+          "trace_hash": "f34d36a3",
+          "midi_events": 527,
+          "peak": 0.143972039,
+          "submits": 1250,
+          "joins": 817,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 10,
+          "frames": 232050,
+          "trace_hash": "f34d36a3",
+          "midi_events": 527,
+          "peak": 0.143972039,
+          "submits": 1250,
+          "joins": 1252,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 11,
+          "frames": 232050,
+          "trace_hash": "f34d36a3",
+          "midi_events": 527,
+          "peak": 0.143972039,
+          "submits": 1250,
+          "joins": 1250,
+          "unknown_renders": 0,
+          "retired": 0
+        },
+        {
+          "mode": 4,
+          "frames": 232050,
+          "trace_hash": "a669007d",
+          "midi_events": 532,
+          "peak": 0.149899125,
+          "submits": 40,
+          "joins": 40,
+          "unknown_renders": 0,
+          "retired": 1
+        },
+        {
+          "mode": 5,
+          "frames": 232050,
+          "trace_hash": "5706112c",
+          "midi_events": 532,
+          "peak": 0.149899125,
+          "submits": 40,
+          "joins": 40,
+          "unknown_renders": 0,
+          "retired": 1
+        },
+        {
+          "mode": 6,
+          "frames": 232050,
+          "trace_hash": "f4d0d37e",
+          "midi_events": 532,
+          "peak": 0.149899125,
+          "submits": 40,
+          "joins": 40,
+          "unknown_renders": 0,
+          "retired": 1
+        },
+        {
+          "mode": 7,
+          "frames": 232050,
+          "trace_hash": "d3573284",
+          "midi_events": 701,
+          "peak": 0.141025543,
+          "submits": 1265,
+          "joins": 1268,
+          "unknown_renders": 3,
+          "retired": 0
+        },
+        {
+          "mode": 8,
+          "frames": 232050,
+          "trace_hash": "e6a22f36",
+          "midi_events": 701,
+          "peak": 0.141025543,
+          "submits": 40,
+          "joins": 43,
+          "unknown_renders": 3,
+          "retired": 1
+        },
+        {
+          "mode": 9,
+          "frames": 232050,
+          "trace_hash": "d3573284",
+          "midi_events": 701,
+          "peak": 0.141025543,
+          "submits": 1265,
+          "joins": 1268,
+          "unknown_renders": 3,
+          "retired": 0
+        }
+      ]
+    },
+    "fx_worker_placements": {
+      "cases": 48,
+      "results": [
+        "predelay=0 type=0 balance=1 serial d93ef055",
+        "predelay=0 type=0 balance=1 deferred d93ef055",
+        "predelay=0 type=0 balance=1 thread d93ef055",
+        "predelay=0 type=0 balance=1 mixed d93ef055",
+        "predelay=0 type=0 balance=2 serial d93ef055",
+        "predelay=0 type=0 balance=2 deferred d93ef055",
+        "predelay=0 type=0 balance=2 thread d93ef055",
+        "predelay=0 type=0 balance=2 mixed d93ef055",
+        "predelay=0 type=1 balance=1 serial 6ac68abe",
+        "predelay=0 type=1 balance=1 deferred 6ac68abe",
+        "predelay=0 type=1 balance=1 thread 6ac68abe",
+        "predelay=0 type=1 balance=1 mixed 6ac68abe",
+        "predelay=0 type=1 balance=2 serial 6ac68abe",
+        "predelay=0 type=1 balance=2 deferred 6ac68abe",
+        "predelay=0 type=1 balance=2 thread 6ac68abe",
+        "predelay=0 type=1 balance=2 mixed 6ac68abe",
+        "predelay=0 type=2 balance=1 serial e15e477b",
+        "predelay=0 type=2 balance=1 deferred e15e477b",
+        "predelay=0 type=2 balance=1 thread e15e477b",
+        "predelay=0 type=2 balance=1 mixed e15e477b",
+        "predelay=0 type=2 balance=2 serial e15e477b",
+        "predelay=0 type=2 balance=2 deferred e15e477b",
+        "predelay=0 type=2 balance=2 thread e15e477b",
+        "predelay=0 type=2 balance=2 mixed e15e477b",
+        "predelay=100 type=0 balance=1 serial f82821e2",
+        "predelay=100 type=0 balance=1 deferred f82821e2",
+        "predelay=100 type=0 balance=1 thread f82821e2",
+        "predelay=100 type=0 balance=1 mixed f82821e2",
+        "predelay=100 type=0 balance=2 serial f82821e2",
+        "predelay=100 type=0 balance=2 deferred f82821e2",
+        "predelay=100 type=0 balance=2 thread f82821e2",
+        "predelay=100 type=0 balance=2 mixed f82821e2",
+        "predelay=100 type=1 balance=1 serial e296d9b4",
+        "predelay=100 type=1 balance=1 deferred e296d9b4",
+        "predelay=100 type=1 balance=1 thread e296d9b4",
+        "predelay=100 type=1 balance=1 mixed e296d9b4",
+        "predelay=100 type=1 balance=2 serial e296d9b4",
+        "predelay=100 type=1 balance=2 deferred e296d9b4",
+        "predelay=100 type=1 balance=2 thread e296d9b4",
+        "predelay=100 type=1 balance=2 mixed e296d9b4",
+        "predelay=100 type=2 balance=1 serial de110743",
+        "predelay=100 type=2 balance=1 deferred de110743",
+        "predelay=100 type=2 balance=1 thread de110743",
+        "predelay=100 type=2 balance=1 mixed de110743",
+        "predelay=100 type=2 balance=2 serial de110743",
+        "predelay=100 type=2 balance=2 deferred de110743",
+        "predelay=100 type=2 balance=2 thread de110743",
+        "predelay=100 type=2 balance=2 mixed de110743"
+      ]
+    },
+    "fm_worker_placements": {
+      "cases": 32,
+      "results": [
+        "songbook=0 float=0 balance=1 serial f82821e2",
+        "songbook=0 float=0 balance=1 deferred f82821e2",
+        "songbook=0 float=0 balance=1 thread f82821e2",
+        "songbook=0 float=0 balance=1 mixed f82821e2",
+        "songbook=0 float=0 balance=2 serial f82821e2",
+        "songbook=0 float=0 balance=2 deferred f82821e2",
+        "songbook=0 float=0 balance=2 thread f82821e2",
+        "songbook=0 float=0 balance=2 mixed f82821e2",
+        "songbook=0 float=1 balance=1 serial f82821e2",
+        "songbook=0 float=1 balance=1 deferred f82821e2",
+        "songbook=0 float=1 balance=1 thread f82821e2",
+        "songbook=0 float=1 balance=1 mixed f82821e2",
+        "songbook=0 float=1 balance=2 serial f82821e2",
+        "songbook=0 float=1 balance=2 deferred f82821e2",
+        "songbook=0 float=1 balance=2 thread f82821e2",
+        "songbook=0 float=1 balance=2 mixed f82821e2",
+        "songbook=2 float=0 balance=1 serial 2ad545b4",
+        "songbook=2 float=0 balance=1 deferred 2ad545b4",
+        "songbook=2 float=0 balance=1 thread 2ad545b4",
+        "songbook=2 float=0 balance=1 mixed 2ad545b4",
+        "songbook=2 float=0 balance=2 serial 2ad545b4",
+        "songbook=2 float=0 balance=2 deferred 2ad545b4",
+        "songbook=2 float=0 balance=2 thread 2ad545b4",
+        "songbook=2 float=0 balance=2 mixed 2ad545b4",
+        "songbook=2 float=1 balance=1 serial 2ad545b4",
+        "songbook=2 float=1 balance=1 deferred 2ad545b4",
+        "songbook=2 float=1 balance=1 thread 2ad545b4",
+        "songbook=2 float=1 balance=1 mixed 2ad545b4",
+        "songbook=2 float=1 balance=2 serial 2ad545b4",
+        "songbook=2 float=1 balance=2 deferred 2ad545b4",
+        "songbook=2 float=1 balance=2 thread 2ad545b4",
+        "songbook=2 float=1 balance=2 mixed 2ad545b4"
+      ]
+    },
+    "melodic": {
+      "cases": 43,
+      "frames": 80844411,
+      "render_calls": 295000,
+      "results": [
+        {
+          "scenario": 0,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6515,
+          "state_hash": 407062861,
+          "pcm_hash": 2448701170,
+          "midi_hash": 2654548873,
+          "midi_messages": 2469,
+          "midi_clocks": 1088
+        },
+        {
+          "scenario": 1,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 9143,
+          "state_hash": 2113110545,
+          "pcm_hash": 2960343957,
+          "midi_hash": 832204238,
+          "midi_messages": 2772,
+          "midi_clocks": 1266
+        },
+        {
+          "scenario": 2,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 5152,
+          "state_hash": 4043373231,
+          "pcm_hash": 3059693099,
+          "midi_hash": 1261085367,
+          "midi_messages": 2505,
+          "midi_clocks": 1087
+        },
+        {
+          "scenario": 3,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 7901,
+          "state_hash": 2461564526,
+          "pcm_hash": 3958659416,
+          "midi_hash": 987739012,
+          "midi_messages": 2810,
+          "midi_clocks": 1265
+        },
+        {
+          "scenario": 4,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6409,
+          "state_hash": 2240426126,
+          "pcm_hash": 2550798743,
+          "midi_hash": 35917709,
+          "midi_messages": 2335,
+          "midi_clocks": 991
+        },
+        {
+          "scenario": 5,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 9044,
+          "state_hash": 253862547,
+          "pcm_hash": 2950683530,
+          "midi_hash": 1904494959,
+          "midi_messages": 2618,
+          "midi_clocks": 1152
+        },
+        {
+          "scenario": 6,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 5137,
+          "state_hash": 4206143290,
+          "pcm_hash": 2173966892,
+          "midi_hash": 1591609176,
+          "midi_messages": 2393,
+          "midi_clocks": 991
+        },
+        {
+          "scenario": 7,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 7885,
+          "state_hash": 1746909044,
+          "pcm_hash": 1504370851,
+          "midi_hash": 2694035790,
+          "midi_messages": 2688,
+          "midi_clocks": 1151
+        },
+        {
+          "scenario": 16,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6483,
+          "state_hash": 3370481741,
+          "pcm_hash": 2862678158,
+          "midi_hash": 2267199969,
+          "midi_messages": 2643,
+          "midi_clocks": 1088
+        },
+        {
+          "scenario": 17,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 9108,
+          "state_hash": 2942207892,
+          "pcm_hash": 2468832463,
+          "midi_hash": 1424850901,
+          "midi_messages": 2773,
+          "midi_clocks": 1266
+        },
+        {
+          "scenario": 18,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6526,
+          "state_hash": 3928996211,
+          "pcm_hash": 1470031464,
+          "midi_hash": 1434512632,
+          "midi_messages": 2836,
+          "midi_clocks": 1088
+        },
+        {
+          "scenario": 19,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 9217,
+          "state_hash": 3270211178,
+          "pcm_hash": 1969025696,
+          "midi_hash": 201531236,
+          "midi_messages": 3362,
+          "midi_clocks": 1266
+        },
+        {
+          "scenario": 20,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6544,
+          "state_hash": 2212925492,
+          "pcm_hash": 1103003015,
+          "midi_hash": 3438682694,
+          "midi_messages": 3054,
+          "midi_clocks": 991
+        },
+        {
+          "scenario": 21,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 9084,
+          "state_hash": 1017174804,
+          "pcm_hash": 592900165,
+          "midi_hash": 1860060288,
+          "midi_messages": 3107,
+          "midi_clocks": 1152
+        },
+        {
+          "scenario": 22,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6372,
+          "state_hash": 4067041096,
+          "pcm_hash": 1387484512,
+          "midi_hash": 3379526171,
+          "midi_messages": 2485,
+          "midi_clocks": 991
+        },
+        {
+          "scenario": 23,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 8991,
+          "state_hash": 1755159293,
+          "pcm_hash": 1858541289,
+          "midi_hash": 2806837371,
+          "midi_messages": 2646,
+          "midi_clocks": 1152
+        },
+        {
+          "scenario": 24,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6466,
+          "state_hash": 2881066873,
+          "pcm_hash": 3813885036,
+          "midi_hash": 3649241854,
+          "midi_messages": 2585,
+          "midi_clocks": 1088
+        },
+        {
+          "scenario": 25,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 9046,
+          "state_hash": 3168542579,
+          "pcm_hash": 3769234848,
+          "midi_hash": 4256333059,
+          "midi_messages": 2521,
+          "midi_clocks": 1266
+        },
+        {
+          "scenario": 26,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6526,
+          "state_hash": 3928996211,
+          "pcm_hash": 1470031464,
+          "midi_hash": 1434512632,
+          "midi_messages": 2836,
+          "midi_clocks": 1088
+        },
+        {
+          "scenario": 27,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 9171,
+          "state_hash": 3547141831,
+          "pcm_hash": 2779205517,
+          "midi_hash": 4272242908,
+          "midi_messages": 3165,
+          "midi_clocks": 1266
+        },
+        {
+          "scenario": 28,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6544,
+          "state_hash": 2212925492,
+          "pcm_hash": 1103003015,
+          "midi_hash": 3438682694,
+          "midi_messages": 3054,
+          "midi_clocks": 991
+        },
+        {
+          "scenario": 29,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 9060,
+          "state_hash": 1083334434,
+          "pcm_hash": 4052556435,
+          "midi_hash": 855882744,
+          "midi_messages": 2947,
+          "midi_clocks": 1152
+        },
+        {
+          "scenario": 30,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6372,
+          "state_hash": 4067041096,
+          "pcm_hash": 1387484512,
+          "midi_hash": 3379526171,
+          "midi_messages": 2485,
+          "midi_clocks": 991
+        },
+        {
+          "scenario": 31,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 9000,
+          "state_hash": 2561160470,
+          "pcm_hash": 437749231,
+          "midi_hash": 1827503601,
+          "midi_messages": 2574,
+          "midi_clocks": 1152
+        },
+        {
+          "scenario": 32,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6412,
+          "state_hash": 867018264,
+          "pcm_hash": 2962160585,
+          "midi_hash": 3144669503,
+          "midi_messages": 2442,
+          "midi_clocks": 1088
+        },
+        {
+          "scenario": 33,
+          "render_calls": 5000,
+          "frames": 1476735,
+          "chunks": 9085,
+          "state_hash": 2689329973,
+          "pcm_hash": 2184268356,
+          "midi_hash": 721631921,
+          "midi_messages": 2789,
+          "midi_clocks": 1266
+        },
+        {
+          "scenario": 34,
+          "render_calls": 5000,
+          "frames": 1266688,
+          "chunks": 6505,
+          "state_hash": 4245505447,
+          "pcm_hash": 3692789977,
+          "midi_hash": 3908794103,
+          "midi_messages": 2719,
+          "midi_clocks": 1088
+        },
+        {
+          "scenario": 35,
+          "render_calls": 10000,
+          "frames": 2955777,
+          "chunks": 19840,
+          "state_hash": 1096443631,
+          "pcm_hash": 2858266009,
+          "midi_hash": 4278390192,
+          "midi_messages": 9554,
+          "midi_clocks": 3815
+        },
+        {
+          "scenario": 36,
+          "render_calls": 10000,
+          "frames": 2533376,
+          "chunks": 14851,
+          "state_hash": 3350348997,
+          "pcm_hash": 3786836909,
+          "midi_hash": 3387042150,
+          "midi_messages": 8982,
+          "midi_clocks": 3174
+        },
+        {
+          "scenario": 37,
+          "render_calls": 10000,
+          "frames": 2955777,
+          "chunks": 19713,
+          "state_hash": 2591437068,
+          "pcm_hash": 1518525393,
+          "midi_hash": 3127490461,
+          "midi_messages": 9821,
+          "midi_clocks": 3701
+        },
+        {
+          "scenario": 38,
+          "render_calls": 10000,
+          "frames": 2533376,
+          "chunks": 14495,
+          "state_hash": 3058298913,
+          "pcm_hash": 3778811118,
+          "midi_hash": 1049661885,
+          "midi_messages": 8289,
+          "midi_clocks": 3174
+        },
+        {
+          "scenario": 39,
+          "render_calls": 10000,
+          "frames": 2955777,
+          "chunks": 19541,
+          "state_hash": 3430335482,
+          "pcm_hash": 2011042541,
+          "midi_hash": 2225460137,
+          "midi_messages": 8399,
+          "midi_clocks": 3701
+        },
+        {
+          "scenario": 40,
+          "render_calls": 10000,
+          "frames": 2533376,
+          "chunks": 14401,
+          "state_hash": 1586989321,
+          "pcm_hash": 1240183976,
+          "midi_hash": 2258600212,
+          "midi_messages": 7524,
+          "midi_clocks": 3271
+        },
+        {
+          "scenario": 41,
+          "render_calls": 10000,
+          "frames": 2955777,
+          "chunks": 19487,
+          "state_hash": 2492237391,
+          "pcm_hash": 3026123898,
+          "midi_hash": 2684746733,
+          "midi_messages": 8407,
+          "midi_clocks": 3815
+        },
+        {
+          "scenario": 42,
+          "render_calls": 10000,
+          "frames": 2533376,
+          "chunks": 14356,
+          "state_hash": 1528092745,
+          "pcm_hash": 1965226735,
+          "midi_hash": 3554988794,
+          "midi_messages": 7811,
+          "midi_clocks": 3271
+        },
+        {
+          "scenario": 43,
+          "render_calls": 10000,
+          "frames": 2955777,
+          "chunks": 19767,
+          "state_hash": 2561564973,
+          "pcm_hash": 1415116016,
+          "midi_hash": 435785685,
+          "midi_messages": 9182,
+          "midi_clocks": 3815
+        },
+        {
+          "scenario": 44,
+          "render_calls": 10000,
+          "frames": 2533376,
+          "chunks": 14707,
+          "state_hash": 3095853717,
+          "pcm_hash": 4070267340,
+          "midi_hash": 166773802,
+          "midi_messages": 8139,
+          "midi_clocks": 3174
+        },
+        {
+          "scenario": 45,
+          "render_calls": 10000,
+          "frames": 2955777,
+          "chunks": 19718,
+          "state_hash": 3323610750,
+          "pcm_hash": 2068412147,
+          "midi_hash": 4043648099,
+          "midi_messages": 9798,
+          "midi_clocks": 3701
+        },
+        {
+          "scenario": 46,
+          "render_calls": 10000,
+          "frames": 2533376,
+          "chunks": 14455,
+          "state_hash": 2276793160,
+          "pcm_hash": 3112502694,
+          "midi_hash": 3404751900,
+          "midi_messages": 8038,
+          "midi_clocks": 3174
+        },
+        {
+          "scenario": 47,
+          "render_calls": 10000,
+          "frames": 2955777,
+          "chunks": 19569,
+          "state_hash": 4174931283,
+          "pcm_hash": 771283655,
+          "midi_hash": 4061296699,
+          "midi_messages": 8631,
+          "midi_clocks": 3701
+        },
+        {
+          "scenario": 48,
+          "render_calls": 10000,
+          "frames": 2533376,
+          "chunks": 14345,
+          "state_hash": 1764444200,
+          "pcm_hash": 2280773005,
+          "midi_hash": 1899508673,
+          "midi_messages": 6959,
+          "midi_clocks": 3271
+        },
+        {
+          "scenario": 49,
+          "render_calls": 10000,
+          "frames": 2955777,
+          "chunks": 19458,
+          "state_hash": 1898346797,
+          "pcm_hash": 4074174212,
+          "midi_hash": 1788830577,
+          "midi_messages": 8287,
+          "midi_clocks": 3815
+        },
+        {
+          "scenario": 50,
+          "render_calls": 10000,
+          "frames": 2533376,
+          "chunks": 14389,
+          "state_hash": 3465355993,
+          "pcm_hash": 3981259998,
+          "midi_hash": 1821830192,
+          "midi_messages": 7812,
+          "midi_clocks": 3271
+        }
+      ]
+    },
+    "usb_handoff": {
+      "response_hash": "eff97ff8",
+      "frozen_source_verified": 440,
+      "cases": "activation, checksum, incomplete/duplicate chunks, timeout, busy, audition, save/readback/reboot"
+    },
+    "host_cost": {
+      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+      "method": "3 sequential process wall-time samples per executable/mode; includes startup, real callbacks and trace hashing, with no trace-file IO; other workstation activity uncontrolled; not an MCU deadline measurement",
+      "cases": {
+        "1": {
+          "rows": 12000,
+          "trace_hash": "540092ad",
+          "seconds": {
+            "reference": [
+              0.01690714400001525,
+              0.021341095000025234,
+              0.018825621999894793
+            ],
+            "c0": [
+              0.017948177000107535,
+              0.019637615000192454,
+              0.019633911000255466
+            ],
+            "harmony-only": [
+              0.016088438000224414,
+              0.019731344999854628,
+              0.018015517999629083
+            ],
+            "rust": [
+              0.018894093000199064,
+              0.022222169000087888,
+              0.019565998999951262
+            ]
+          },
+          "median_seconds": {
+            "reference": 0.018825621999894793,
+            "c0": 0.019633911000255466,
+            "harmony-only": 0.018015517999629083,
+            "rust": 0.019565998999951262
+          }
+        },
+        "3": {
+          "rows": 68096,
+          "trace_hash": "8d2293d7",
+          "seconds": {
+            "reference": [
+              0.08048200200028077,
+              0.08411216400008925,
+              0.07910903099991629
+            ],
+            "c0": [
+              0.09282572300026004,
+              0.08446686099978251,
+              0.08386405600003854
+            ],
+            "harmony-only": [
+              0.10849673699976847,
+              0.1037173409999923,
+              0.10045230900004753
+            ],
+            "rust": [
+              0.10555099099974541,
+              0.10602539000001343,
+              0.10283329499998217
+            ]
+          },
+          "median_seconds": {
+            "reference": 0.08048200200028077,
+            "c0": 0.08446686099978251,
+            "harmony-only": 0.1037173409999923,
+            "rust": 0.10555099099974541
+          }
+        }
+      }
+    }
+  },
+  "wasm": {
+    "final_rust": {
+      "path": "build/emu-parity/rust.wasm",
+      "bytes": 2404436,
+      "sha256": "1d3a890ba057d7d29a641aa3470422084f1c42d1742d1f4d36821ee785546055"
+    },
+    "fresh_c0": {
+      "path": "build/emu-parity/reference.wasm",
+      "bytes": 1941589,
+      "sha256": "338c87ef6f31fe39cf5cc814f1ae83244672440b1a6ed822148843fc7c1b4097"
+    },
+    "frozen_c": {
+      "path": "../baseline-2026-11-11/source/build/emu/amb.wasm",
+      "bytes": 1937404,
+      "sha256": "a3d08947713bda76b64f76ed39b55aa26bdd182a65bf88fbd1efe0cbc12f8036"
+    },
+    "exports": 24,
+    "memory_bytes": 33554432,
+    "compared_float_values": 47976776,
+    "extra_http_values": 1048576,
+    "fresh_c0_comparisons": {
+      "factory": {
+        "initial_pack": "factory",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "baeff971",
+        "peak": 0.3714040517807007,
+        "blits": 4679,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 0,
+          "plans": 8,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1037,
+          "sessions": 1,
+          "commands": {
+            "accepted": 961,
+            "consumed": 961,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6215,
+            "chunks": 28982,
+            "controls": 27668
+          },
+          "sequencer": {
+            "lanes": 6222,
+            "mutations": 0,
+            "waits": 463712,
+            "boundaries": 1037
+          },
+          "factory": {
+            "accesses": 13627,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 5292
+          }
+        }
+      },
+      "saved-v1": {
+        "initial_pack": "rust/fm1-engine/tests/packs/harris-citypop.jmp",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "28722449",
+        "peak": 0.4303741455078125,
+        "blits": 4673,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 1,
+          "plans": 10,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1033,
+          "sessions": 1,
+          "commands": {
+            "accepted": 751,
+            "consumed": 751,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6192,
+            "chunks": 34155,
+            "controls": 27682
+          },
+          "sequencer": {
+            "lanes": 6198,
+            "mutations": 0,
+            "waits": 546480,
+            "boundaries": 1033
+          },
+          "factory": {
+            "accesses": 13893,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 5292
+          }
+        }
+      },
+      "session": {
+        "scenario": "v2-hold-idea-save-restart",
+        "render_calls": 11663,
+        "compared_samples": 6570900,
+        "seconds": 74.5,
+        "peak": 0.22903597354888916,
+        "memory_bytes": 33554432,
+        "saved_session": [
+          74,
+          83,
+          77,
+          1,
+          1,
+          11,
+          1,
+          8,
+          2,
+          1,
+          83,
+          0,
+          7,
+          1,
+          190,
+          0,
+          3,
+          83,
+          0,
+          0
+        ],
+        "rust": {
+          "validations": 1,
+          "plans": 9,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 804,
+          "sessions": 2,
+          "commands": {
+            "accepted": 319,
+            "consumed": 319,
+            "dropped": 0,
+            "high_water": 208
+          },
+          "transport": {
+            "pulses": 4819,
+            "chunks": 12684,
+            "controls": 11829
+          },
+          "sequencer": {
+            "lanes": 4824,
+            "mutations": 0,
+            "waits": 202944,
+            "boundaries": 804
+          },
+          "factory": {
+            "accesses": 1340,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 5292
+          }
+        }
+      },
+      "handoff": {
+        "snapshot_bytes": 220,
+        "published": 134,
+        "copied": 134,
+        "detail_pages": 4,
+        "staging_claims": 0,
+        "staging_activations": 0,
+        "staging_rejections": 0,
+        "memory_bytes": 33554432
+      },
+      "sequencer": {
+        "scenario": "legacy-f4-piece-genre-transport",
+        "compared_samples": 3475080,
+        "render_calls": 5744,
+        "peak": 0.4515293836593628,
+        "sequencer": {
+          "lanes": 1320,
+          "waits": 134032,
+          "boundaries": 21
+        },
+        "melodic": {
+          "acid": 227,
+          "mutations": 27,
+          "pluck": 227,
+          "bass": 227,
+          "bar": 6017,
+          "midi_transport": 67070
+        },
+        "voices": {
+          "drums": 8377,
+          "pluck": 8377,
+          "drone": 7287,
+          "acid": 8377,
+          "pad": 8377,
+          "pad_bus": 8377,
+          "controls": 6880,
+          "configs": 40795
+        },
+        "factory": {
+          "accesses": 4217,
+          "codecs": 0,
+          "rejections": 0,
+          "copied_bytes": 10512
+        },
+        "harmony": [
+          6986,
+          35,
+          2,
+          0
+        ],
+        "memory_bytes": 33554432
+      },
+      "factory-lines": {
+        "scenario": "stored-frozen-acid-pluck-save",
+        "compared_samples": 970200,
+        "render_calls": 1613,
+        "saved_bytes": 3836,
+        "factory": {
+          "accesses": 1400,
+          "codecs": 6,
+          "rejections": 0,
+          "copied_bytes": 5450
+        },
+        "formats": {
+          "decodes": 1,
+          "encodes": 6,
+          "rejections": 0,
+          "copied_bytes": 1352
+        },
+        "memory_bytes": 33554432
+      },
+      "fm6": {
+        "scenario": "loaded-user-FM6-algorithms-key-retrigger-stop-tails",
+        "cases": [
+          {
+            "algorithm": 0,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.47700321674346924,
+            "pcm_hash": "d393a85d",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 3,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.4807950258255005,
+            "pcm_hash": "d9669c55",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 5,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.5013117790222168,
+            "pcm_hash": "abebadf5",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 31,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.48351776599884033,
+            "pcm_hash": "cafdb8b9",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          }
+        ]
+      },
+      "worker": {
+        "scenario": "serialized-generation-stage-ownership",
+        "compared_samples": 1278900,
+        "render_calls": 2361,
+        "peak": 0.47122979164123535,
+        "pcm_hash": "f99f9451",
+        "worker": [
+          2710,
+          2710,
+          5420,
+          2710,
+          2710,
+          0,
+          0,
+          0
+        ],
+        "memory_bytes": 33554432
+      },
+      "effects": {
+        "scenario": "panel-effects-banks-release-tails",
+        "compared_samples": 2769480,
+        "render_calls": 5160,
+        "peak": 0.4538612365722656,
+        "pcm_hash": "fd659ab9",
+        "effects": {
+          "master_samples": 1384960,
+          "echo_samples": 1384960,
+          "tank_samples": 1384960,
+          "colour_sample_calls": 4154880
+        },
+        "memory_bytes": 33554432
+      }
+    },
+    "frozen_comparisons": {
+      "sequencer": {
+        "scenario": "legacy-f4-piece-genre-transport",
+        "compared_samples": 3475080,
+        "render_calls": 5744,
+        "peak": 0.4515293836593628,
+        "sequencer": {
+          "lanes": 1320,
+          "waits": 134032,
+          "boundaries": 21
+        },
+        "melodic": {
+          "acid": 227,
+          "mutations": 27,
+          "pluck": 227,
+          "bass": 227,
+          "bar": 6017,
+          "midi_transport": 67070
+        },
+        "voices": {
+          "drums": 8377,
+          "pluck": 8377,
+          "drone": 7287,
+          "acid": 8377,
+          "pad": 8377,
+          "pad_bus": 8377,
+          "controls": 6880,
+          "configs": 40795
+        },
+        "factory": {
+          "accesses": 4217,
+          "codecs": 0,
+          "rejections": 0,
+          "copied_bytes": 10512
+        },
+        "harmony": [
+          6986,
+          35,
+          2,
+          0
+        ],
+        "memory_bytes": 33554432
+      },
+      "effects": {
+        "scenario": "panel-effects-banks-release-tails",
+        "compared_samples": 2769480,
+        "render_calls": 5160,
+        "peak": 0.4538612365722656,
+        "pcm_hash": "fd659ab9",
+        "effects": {
+          "master_samples": 1384960,
+          "echo_samples": 1384960,
+          "tank_samples": 1384960,
+          "colour_sample_calls": 4154880
+        },
+        "memory_bytes": 33554432
+      },
+      "worker": {
+        "scenario": "serialized-generation-stage-ownership",
+        "compared_samples": 1278900,
+        "render_calls": 2361,
+        "peak": 0.47122979164123535,
+        "pcm_hash": "f99f9451",
+        "worker": [
+          2710,
+          2710,
+          5420,
+          2710,
+          2710,
+          0,
+          0,
+          0
+        ],
+        "memory_bytes": 33554432
+      },
+      "fm6": {
+        "scenario": "loaded-user-FM6-algorithms-key-retrigger-stop-tails",
+        "cases": [
+          {
+            "algorithm": 0,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.47700321674346924,
+            "pcm_hash": "d393a85d",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 3,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.4807950258255005,
+            "pcm_hash": "d9669c55",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 5,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.5013117790222168,
+            "pcm_hash": "abebadf5",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 31,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.48351776599884033,
+            "pcm_hash": "cafdb8b9",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          }
+        ]
+      }
+    },
+    "browser_lifecycle_mocks": {
+      "browser_api_contract": "pass",
+      "secure_http_boot_and_pcm": true,
+      "startup_cancel_timeout_retry": true,
+      "input_midi_stream_storage_lifecycle": true,
+      "interactive_browser_qa": "not run"
+    },
+    "rust_size_delta_vs_preceding_fx_bundle_bytes": -1661,
+    "custom_debug_note": "A final comment/source-column cleanup changed custom debug bytes only (standard sections matched); full final WASM scenarios reran, then byte-identical rebuild passed."
+  },
+  "remaining_boundaries": [
+    "C parameter/genre setters and application command-byte assembly/post/dispatch; manual-pad next-walk sentinel invalidation",
+    "C recipe-loaded pending notification and UI chord-name/text/progress publication (#15)",
+    "C voice/MIDI callbacks execute after returned Rust packet borrows end",
+    "Root-owned MCU foreground/render command producer transaction and physical serialization (#9)",
+    "Physical integrated compiler/link/static placement/stack/deadline/backend/output/resource qualification; no device access in this task"
+  ],
+  "qualification_notes": [
+    "Initial control driver tried unsupported control(n) sizes; driver was corrected to the actual1..383 contract, with no production behavior change.",
+    "An overlapping default transport invocation was interrupted with Text file busy; excluded from results. The retained expanded43-scenario run completed after recompilation and passed.",
+    "An initial test command used a nonexistent pi32v2-test feature; corrected command uses pi32v2 and its14opaque-ABI tests pass.",
+    "No physical crash cause or new interactive desktop/mobile/audio/MIDI hardware QA is claimed."
+  ],
+  "source_files": [
+    {
+      "path": "docs/rust/HARMONY.md",
+      "bytes": 15435,
+      "sha256": "59a1f4f116d8bd58b4fc3d2b3ee7b2c2c677f55e9124eac67f1716d1d948a363"
+    },
+    {
+      "path": "firmware/src/dsp/amb.c",
+      "bytes": 502123,
+      "sha256": "cabad44c3fd780109a397e0bb56b704bc40fc2bb55bc0c2d90c933b2590c40f0"
+    },
+    {
+      "path": "firmware/src/dsp/rust_harmony.h",
+      "bytes": 1309,
+      "sha256": "fc8b554140003dbde07cee37973d38d1c9babe7d2e2ef651376b06bd779483e8"
+    },
+    {
+      "path": "firmware/src/dsp/rust_harmony.inc",
+      "bytes": 1427,
+      "sha256": "6ad5b4acc6ea1fd9edda2018cb3c203071e6538edbe161fcee51fbc064a39c82"
+    },
+    {
+      "path": "firmware/src/dsp/rust_harmony_abi.h",
+      "bytes": 7102,
+      "sha256": "4d6efdf8aea785f84a694fb17beb5d1115a6431972b4b884d51627a16d4ece69"
+    },
+    {
+      "path": "firmware/src/dsp/rust_harmony_state.inc",
+      "bytes": 3123,
+      "sha256": "07aff92d9a1e253d60530be02af041855b445054e555952654fb055ec9477954"
+    },
+    {
+      "path": "rust/fm1-engine/src/harmony.rs",
+      "bytes": 272,
+      "sha256": "89241d1bc1405c44db508fa172a7fdf8900390aa3d3d149a77f90edf90c459be"
+    },
+    {
+      "path": "rust/fm1-engine/src/harmony/abi.rs",
+      "bytes": 5940,
+      "sha256": "4259050401be844d1c8455330f67af5581351320f133406fb36b46b54cea7fa0"
+    },
+    {
+      "path": "rust/fm1-engine/src/harmony/basic.rs",
+      "bytes": 5065,
+      "sha256": "376206c36146410da4d73be75a36da6a3681588c82bb8850afae7deee752fa44"
+    },
+    {
+      "path": "rust/fm1-engine/src/harmony/legacy.rs",
+      "bytes": 18106,
+      "sha256": "c7f2ffce7bf9e69f8382340bf29a8f540240cca8a5c716d0b946996bb232ffda"
+    },
+    {
+      "path": "rust/fm1-engine/src/harmony/tables.rs",
+      "bytes": 7337,
+      "sha256": "943c62628e2d8f8d1d9f9a4aedc42c262174874e0b1aaac826f1e4db9693455b"
+    },
+    {
+      "path": "rust/fm1-engine/src/lib.rs",
+      "bytes": 364,
+      "sha256": "bfec279be6f357291cf9d45d6b4e3c1bb6f0cd078a2206876bab8901c1ce6354"
+    },
+    {
+      "path": "rust/fm1-engine/tests/harmony-native-golden.json",
+      "bytes": 709,
+      "sha256": "b82bc07dba58470c8c1d621ff42e280885cd984ae307026ade3709432e1192f2"
+    },
+    {
+      "path": "rust/fm1-engine/tests/harmony.rs",
+      "bytes": 4538,
+      "sha256": "5f57c96beb77b7146d67aed10b366a7fb7d8a7ca35e5a6539d87f5737f483f8c"
+    },
+    {
+      "path": "rust/fm1-jam-bridge/src/harmony.rs",
+      "bytes": 12613,
+      "sha256": "92cd57cd980f162d2738d31607558fdfa69a9b31ed32be6f7fadeb40984efde7"
+    },
+    {
+      "path": "rust/fm1-jam-bridge/src/lib.rs",
+      "bytes": 14591,
+      "sha256": "98be4eb80094b11876eaba48146989b61355aa9a3f0194022d5b3b39584a77b6"
+    },
+    {
+      "path": "tests/host/emu_sequencer_test.mjs",
+      "bytes": 5277,
+      "sha256": "29927487f3cb321efcac35161bc5fbc33af24ed66ae1669c1f683aa985fdad21"
+    },
+    {
+      "path": "tests/reference/harmony_reference.c",
+      "bytes": 7220,
+      "sha256": "eda431add01db8d9332a86e47982f51d6c00d171893a1938750efb6f58662258"
+    },
+    {
+      "path": "tests/reference/harmony_state.inc",
+      "bytes": 2199,
+      "sha256": "f4cb3a613236cbc2e3da002b032aa415120b2c22d9d076cbe801c07539ef03d1"
+    },
+    {
+      "path": "tests/rust_effects_completion.sh",
+      "bytes": 1923,
+      "sha256": "912d16c41b563cb5d9326bee8e8747fdcca9580effb4b0cdf809421e81e8480a"
+    },
+    {
+      "path": "tests/rust_effects_parity.sh",
+      "bytes": 2509,
+      "sha256": "dec53925a21a3333216485bb6da72174732290bbb5930140e38fdfbe08af1f2f"
+    },
+    {
+      "path": "tests/rust_effects_workers.sh",
+      "bytes": 2368,
+      "sha256": "f56957495211d4b82465b52980fc9620e35b1f8d3672caaf75bfac64e74350f3"
+    },
+    {
+      "path": "tests/rust_emulator_parity.sh",
+      "bytes": 1759,
+      "sha256": "919da87ba316e82ad874feb0fad1ff31446ff988ab53d3075e365b0871dfdb34"
+    },
+    {
+      "path": "tests/rust_fm6_workers.sh",
+      "bytes": 2126,
+      "sha256": "83cd202ebe2da44917af150cb96b91cb43860ade7929e1fec72f684fa46842ee"
+    },
+    {
+      "path": "tests/rust_handoff.sh",
+      "bytes": 1753,
+      "sha256": "7883915e200d723470d2ae9869b307eab284cb355802a4cf1066c1978b90e666"
+    },
+    {
+      "path": "tests/rust_harmony_parity.sh",
+      "bytes": 2386,
+      "sha256": "69db4850ff5ba75a734d4062dd26d1f9be816980986212d6e6720df5f734526c"
+    },
+    {
+      "path": "tests/rust_transport_parity.sh",
+      "bytes": 1920,
+      "sha256": "a2263a76856ab785fcd2abbecf7fce525a6ca50ba6ba6518cbcdbde3e298c733"
+    },
+    {
+      "path": "tests/rust_worker_handoff.sh",
+      "bytes": 2051,
+      "sha256": "a1d808dbd724058a4e831a348a64173026ed3a2367aa9c6573a92c5f97eca17c"
+    },
+    {
+      "path": "tools/harmony_abi.py",
+      "bytes": 4575,
+      "sha256": "89b874a783ca880f1137336f75a21a566000bc024443e19563d0b6214388de3c"
+    },
+    {
+      "path": "web/emu/build.sh",
+      "bytes": 1914,
+      "sha256": "d4b07d424a233c8d69d06db41312f38efef90c7905f3eef69f43dc3b555bcda6"
+    },
+    {
+      "path": "web/emu/build_clang.sh",
+      "bytes": 1914,
+      "sha256": "6aab27f0baf4e08aeeb3de49fd7e28db35acfde7a05536cd28c4eb8d832b038e"
+    }
+  ],
+  "retained_logs": [
+    {
+      "path": "build/harmony-qualified/workspace.log",
+      "bytes": 31044,
+      "sha256": "057a367307a72be0441ed4f21ebcad6b8bc66a339bc38de88562445de6f662ab"
+    },
+    {
+      "path": "build/harmony-qualified/atomic.log",
+      "bytes": 1841,
+      "sha256": "1300d101892863c906a8b4ab2678b1d7ce6575188d04f3001ddcd8afee2cb277"
+    },
+    {
+      "path": "build/harmony-qualified/fmt.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/harmony-qualified/clippy.log",
+      "bytes": 486,
+      "sha256": "6e0062c71b206f1bc7b4211b4a82a7751052dac7869bf1c135d6f2c878fd9367"
+    },
+    {
+      "path": "build/harmony-qualified/nostd.log",
+      "bytes": 476,
+      "sha256": "5c59dd14eb1841c06a15dc94ec547266b572b64e9d68f4826f73ce3fd4030ee0"
+    },
+    {
+      "path": "build/harmony-qualified/harmony.log",
+      "bytes": 854,
+      "sha256": "b47bed12b5c81474ae451502b1e8ab3e5817609596716635b2a817903bda7c78"
+    },
+    {
+      "path": "build/harmony-qualified/wasm.log",
+      "bytes": 4450,
+      "sha256": "edb15e1be449da1ebd5fb4794af0da288d20b32512ebe7769d4e44ea37127be9"
+    },
+    {
+      "path": "build/harmony-qualified/effects.log",
+      "bytes": 1182,
+      "sha256": "6931c79308d64f5050c31ae0e52d0540098bab6607c0c31edb1b0846aa4e24ce"
+    },
+    {
+      "path": "build/harmony-qualified/fx-extra.log",
+      "bytes": 1128,
+      "sha256": "a54ce697b58f0299f7848da802d55fcdf35f3a23ffb756c48fc50235708bd4f7"
+    },
+    {
+      "path": "build/harmony-qualified/melodic-full.log",
+      "bytes": 7888,
+      "sha256": "0264104933a381502525219987b352c572987fa807f9b0278186614a3883f10d"
+    },
+    {
+      "path": "build/harmony-qualified/fx-workers.log",
+      "bytes": 926,
+      "sha256": "dfd1c633c6d45acc1263426e6e62c163ae8ea8b3f275af339de1ac2d196b42d4"
+    },
+    {
+      "path": "build/harmony-qualified/fm-workers.log",
+      "bytes": 881,
+      "sha256": "fb5794d1376d400669632d81867e23bf29158ead5ffb01df36f3347a66d90e4a"
+    },
+    {
+      "path": "build/harmony-qualified/handoff.log",
+      "bytes": 5669,
+      "sha256": "11fa8e242d2a5dde7a2dcb62ee9b4a8fb2aadeb2d23b2a29b775e42c7446b394"
+    },
+    {
+      "path": "build/harmony-qualified/fx-completion.log",
+      "bytes": 658,
+      "sha256": "2baa6543f7a351056c6d3b236c5e0abad17726cdbb78e88c51982c534cb2b19c"
+    },
+    {
+      "path": "build/harmony-qualified/usb.log",
+      "bytes": 776,
+      "sha256": "957391a9fe77d447ac8d2ff3ff29c0746dfea370a9abd4edac0a499afc73f81d"
+    },
+    {
+      "path": "build/harmony-qualified/repro.log",
+      "bytes": 250,
+      "sha256": "49ff56dc736c886db04256cdcc0983081d949eae0dc9c4d72ed5600116a3361e"
+    },
+    {
+      "path": "build/harmony-qualified/browser.log",
+      "bytes": 178,
+      "sha256": "2accea0954831ab397d9c66cab3c867466d498fc57f925ef50a4c0fe0da6802e"
+    },
+    {
+      "path": "build/harmony-qualified/host-cost.json",
+      "bytes": 1905,
+      "sha256": "d43f9d853e563a5954aa668eb9d0992588376042fb95cec3f0c817ce649648b6"
+    },
+    {
+      "path": "build/harmony-qualified/frozen-sequencer.json",
+      "bytes": 516,
+      "sha256": "4289c1157a95841bdfdedae299a7500195f2a808d85933f4e9c11d05bcf1a308"
+    },
+    {
+      "path": "build/harmony-qualified/frozen-effects.json",
+      "bytes": 281,
+      "sha256": "892067b349a57ef48fff195c7e6a3cc15f012f8c335d09c561e78c31637f3f01"
+    },
+    {
+      "path": "build/harmony-qualified/frozen-worker.json",
+      "bytes": 215,
+      "sha256": "521537ccef34782b25f70d8a5d822baa7c914ca1c95eb91a2f096d0060804a4b"
+    },
+    {
+      "path": "build/harmony-qualified/frozen-fm6.json",
+      "bytes": 660,
+      "sha256": "99d29f443b3972082205ffb3bea61ad149d447d67ef9eeb91b0072e85fb843f2"
+    }
+  ]
+}

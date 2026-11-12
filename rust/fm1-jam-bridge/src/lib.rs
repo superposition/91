@@ -15,6 +15,7 @@ mod factory;
 mod fm6;
 mod formats;
 mod handoff;
+mod harmony;
 #[cfg(all(feature = "pi32v2", not(feature = "std"), not(target_arch = "wasm32")))]
 mod mcu;
 mod melodic;
@@ -308,6 +309,7 @@ pub extern "C" fn fm1_rust_jam_stat(index: u32) -> u32 {
         56..=63 => worker::stat(index),
         64..=71 => persistence::stat(index),
         72..=73 => dj::stat(index),
+        76..=79 => harmony::stat(index),
         _ => 0,
     }
 }
