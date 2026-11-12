@@ -907,6 +907,22 @@ static void ep1_rx(void)
     sie_wr(S_RXCSR2, csr >> 8);
 }
 
+#if EN_RUST_USB
+#if FELUCCA_OTA
+static uint32_t ota_now_ms(void);
+static void ota_idle(void);
+#define USB_TX_FEATURE 1u
+#define USB_TX_SYSEX_ROOTS sx_out_q,(void *)&so_w,(void *)&so_r,(void *)&sx_busy
+#define USB_TX_CALLBACKS ota_now_ms,ota_idle
+#else
+#define USB_TX_FEATURE 0u
+#define USB_TX_SYSEX_ROOTS 0,0,0,0
+#define USB_TX_CALLBACKS 0,0
+#endif
+#define USB_TX_CONTEXT {USB_TX_FEATURE,{midi_out_q,(void *)&mo_w,(void *)&mo_r, \
+    USB_TX_SYSEX_ROOTS,ep1tx,&usb.config},usb_transport_publish,USB_TX_CALLBACKS}
+#endif
+
 #if FELUCCA_OTA
 /* ---- SysEx frames for the main loop (ota.c / editor.c hooks; felucca.c and the
  * update loader supply ota_now_ms / ota_idle) ---- */
@@ -915,6 +931,10 @@ static void ota_idle(void);
 
 static int ota_wire_send(const uint8_t *p, uint32_t n)   /* F0..F7 -> USB-MIDI SysEx packets */
 {
+#if EN_RUST_USB
+    const fm1_usb_tx_t context=USB_TX_CONTEXT;
+    return fm1_rust_usb_tx_send(&context,p,n,1);
+#else
     uint32_t i = 0, t0 = ota_now_ms();
     sx_busy = 1;
     while (i < n) {
@@ -936,10 +956,15 @@ static int ota_wire_send(const uint8_t *p, uint32_t n)   /* F0..F7 -> USB-MIDI S
     }
     sx_busy = 0;
     return 0;
+#endif
 }
 /* one SysEx F0..F7 to the host if there is room for it all at once, else nothing (the main loop never waits for the host here) */
 static int usb_sysex_try(const uint8_t *p, uint32_t n)
 {
+#if EN_RUST_USB
+    const fm1_usb_tx_t context=USB_TX_CONTEXT;
+    return fm1_rust_usb_tx_send(&context,p,n,0);
+#else
     uint32_t i = 0;
     if (!*(volatile uint8_t *)&usb.config || so_w - so_r + (n + 2u) / 3u > SXQ)
         return -1;
@@ -955,6 +980,7 @@ static int usb_sysex_try(const uint8_t *p, uint32_t n)
     }
     sx_busy = 0;
     return 0;
+#endif
 }
 static int ota_frame_get(const uint8_t **p, uint32_t *n)
 {
@@ -988,6 +1014,12 @@ static void ep1_tx(void)
         return;                                         /* previous packet still pending */
     if (csr & 0x80u)
         sie_wr(S_TXCSR1, csr & ~0x80u);
+#if EN_RUST_USB
+    const fm1_usb_tx_t context=USB_TX_CONTEXT;
+    const int32_t bytes=fm1_rust_usb_tx_fill(&context);
+    if(bytes<0)return;
+    n=(uint32_t)bytes;
+#else
 #if FELUCCA_OTA
     while (so_r != so_w && n < 64u) {                   /* SysEx first, never split by notes */
         uint32_t pkt = sx_out_q[so_r % SXQ];
@@ -1013,6 +1045,7 @@ static void ep1_tx(void)
         RING_PUBLISH();
         mo_r++;
     }
+#endif
     if (!n)
         return;
     fm1_usb_ep_send(1, ep1tx, n);

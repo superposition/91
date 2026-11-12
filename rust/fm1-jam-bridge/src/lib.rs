@@ -40,6 +40,7 @@ mod usb_control;
 mod usb_midi;
 mod usb_queues;
 mod usb_transport;
+mod usb_tx;
 #[rustfmt::skip]
 mod ui_layout;
 mod voice_config;

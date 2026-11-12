@@ -54,7 +54,13 @@ static void fm1_usb_ep0_send(void *p,uint32_t n){
     assert(!retained&&n<=64);event(13,identity(p),n);emit(p,n);
     retained=p;retained_length=n;memcpy(expected,p,n);
 }
-static void fm1_usb_ep_send(uint32_t ep,void *p,uint32_t n){event(14,ep,n);(void)p;}
+static void fm1_usb_ep_send(uint32_t ep,void *p,uint32_t n){event(14,ep,n);
+#ifdef USB_TX_TEST_SEND
+    USB_TX_TEST_SEND(ep,p,n);
+#else
+    (void)p;
+#endif
+}
 static void fm1_usb_rx_sync(void){event(15,0,0);}
 static void fm1_usb_ep_enable(uint32_t eps){event(16,eps,0);}
 static uint32_t fm1_usb_sof_take(void){return 0;}

@@ -27,6 +27,14 @@ int32_t fm1_rust_usb_sysex(const fm1_usb_transport_t *,const void *input,uint32_
 int32_t fm1_rust_usb_device_receive(const fm1_usb_transport_t *,const void *input,uint32_t count);
 int32_t fm1_rust_usb_midi_push(uint32_t *data,volatile uint32_t *write,volatile uint32_t *read,uint32_t value,uint32_t enabled,void (*publish)(void));
 int32_t fm1_rust_usb_midi_pop(uint32_t *data,volatile uint32_t *write,volatile uint32_t *read,uint32_t *output,void (*publish)(void));
+/*52B PI32 caller-stack descriptor; no persistent state or payload. */
+typedef struct {
+    uint32_t flags;void *slots[9];void (*publish)(void);
+    uint32_t (*now)(void);void (*idle)(void);
+} fm1_usb_tx_t;
+_Static_assert(sizeof(fm1_usb_tx_t)==13u*sizeof(void *) && offsetof(fm1_usb_tx_t,publish)==10u*sizeof(void *),"TX context ABI");
+int32_t fm1_rust_usb_tx_fill(const fm1_usb_tx_t *);
+int32_t fm1_rust_usb_tx_send(const fm1_usb_tx_t *,const void *,uint32_t count,uint32_t blocking);
 uint32_t fm1_rust_usb_descriptor_length(uint32_t flags,uint32_t pid,uint32_t request);
 int32_t fm1_rust_usb_descriptor_copy(uint32_t flags,uint32_t pid,uint32_t request,uint32_t offset,void *output,uint32_t capacity);
 uint32_t fm1_rust_usb_ep0_start(uint32_t length,uint32_t wanted);

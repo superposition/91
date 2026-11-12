@@ -1,0 +1,134 @@
+{
+  "ticket": 19,
+  "base": "e76134b0f21b410f6b7c8db0688b1b2609a89dff",
+  "rust": "1.94.1",
+  "flag": "EN_RUST_USB=1",
+  "scope": "ordinary parity for actual TX traversal/arbitration/SysEx encoding/wait; reset and unavailable-SIE admission correction next",
+  "hardware_accessed": false,
+  "physical_qualified": false,
+  "added_global_state_bytes": 0,
+  "added_global_payload_bytes": 0,
+  "scoped_context_bytes_pi32v2": 52,
+  "scoped_context_bytes_native64": 104,
+  "capacities": {
+    "midi_events": 64,
+    "sysex_events": 64,
+    "endpoint_bytes": 64,
+    "try_source_bytes": 192,
+    "blocking_source_bytes": 640
+  },
+  "variants": [
+    {
+      "variant": "0-0",
+      "ota": 0,
+      "loader": 0,
+      "cases": 11681,
+      "bytes": 1650708,
+      "sha256": "6f92af4a55effbae819c169bd7bc138284615cea6f6627b85d1cf7a0986d9591"
+    },
+    {
+      "variant": "0-1",
+      "ota": 0,
+      "loader": 1,
+      "cases": 11681,
+      "bytes": 1650708,
+      "sha256": "6f92af4a55effbae819c169bd7bc138284615cea6f6627b85d1cf7a0986d9591"
+    },
+    {
+      "variant": "1-0",
+      "ota": 1,
+      "loader": 0,
+      "cases": 165521,
+      "bytes": 23109124,
+      "sha256": "f3af81e7e4f8dd5233bf4387ce5c1c13c30e3950fdb897795a37f863625971eb"
+    },
+    {
+      "variant": "1-1",
+      "ota": 1,
+      "loader": 1,
+      "cases": 165521,
+      "bytes": 23109124,
+      "sha256": "f3af81e7e4f8dd5233bf4387ce5c1c13c30e3950fdb897795a37f863625971eb"
+    }
+  ],
+  "checks": {
+    "linux_workspace_passed": 169,
+    "miri_strict_provenance_reentrant_consumer_raw_roots": true,
+    "safe_packet_source_bounds": true,
+    "clippy_warnings_denied": true,
+    "fmt": true,
+    "no_std_wasm": true,
+    "vendor_c_usb1_hal0_main_engine_compile_only": true,
+    "vendor_c_usb1_hal1_main_engine_compile_only": true
+  },
+  "artifacts": [
+    {
+      "path": "build/usb-tx/final.log",
+      "bytes": 1456,
+      "sha256": "89459f4316c5e9c5e22fcc152cb80fd01d32321af3ca04e28a5380e55288dbf7"
+    },
+    {
+      "path": "build/usb-tx/workspace.log",
+      "bytes": 24082,
+      "sha256": "b2966115026cf93f73c9918027908962a367692b1fd1bf2b309ae46d16a557ee"
+    },
+    {
+      "path": "build/usb-tx/nostd.log",
+      "bytes": 342,
+      "sha256": "fbdba1dd682614e7aef8583494a9693d6862bda4b96eec1ea5e9d028ead426c4"
+    },
+    {
+      "path": "build/usb-tx/miri.log",
+      "bytes": 1123,
+      "sha256": "f39b3a17b612372a0392b7e0a2d25bc556abb7b0f34b402fe10290ce2aff36b4"
+    },
+    {
+      "path": "build/usb-tx/source-verification.log",
+      "bytes": 12678,
+      "sha256": "02103818921d558fa092601f4329ba6740cf2ad792676fb0331e24f2fadfbd85"
+    },
+    {
+      "path": "build/usb-tx/compile-target-0.sh",
+      "bytes": 1177,
+      "sha256": "a28fbebc9fcf1667597f361e62062719e4c0fbb69d280e3d2d0d0ee84b37aa26"
+    },
+    {
+      "path": "build/usb-tx/compile-target-1.sh",
+      "bytes": 1177,
+      "sha256": "a28fbebc9fcf1667597f361e62062719e4c0fbb69d280e3d2d0d0ee84b37aa26"
+    },
+    {
+      "path": "build/usb-tx/target-0/main.o",
+      "bytes": 522620,
+      "sha256": "9807c5aba67d7b7e9ff25a6eb9f088a24c4d02d7f43933f0ffa4b498fb522319"
+    },
+    {
+      "path": "build/usb-tx/target-0/engine.o",
+      "bytes": 417252,
+      "sha256": "e8a852d865f4bd288f6727c5fbfe85c9de9cd2d162dc74318530137661d34de3"
+    },
+    {
+      "path": "build/usb-tx/target-1/main.o",
+      "bytes": 480444,
+      "sha256": "caf6d2d94dea52893d065eb8ea1492bd52bd427263e7bf1eaac78911ba97f547"
+    },
+    {
+      "path": "build/usb-tx/target-1/engine.o",
+      "bytes": 418076,
+      "sha256": "fe190e19a53985a0c750ec53de7280b2f12c57d89e7330aa6e438b7127daeb68"
+    }
+  ],
+  "source_sha256": {
+    "firmware/src/usb.c": "16e4d7f82fce0a3f1ecfa21903453ef93836c60b3b8681d5989b11d95fdc421d",
+    "firmware/src/dsp/rust_usb.h": "00e7d1c66e285dc93d6ea3d0ecd264046498cad4be7c1f272299480f23afbe82",
+    "rust/fm1-hal/src/lib.rs": "1fde4c3d22f2989c68ee84cf439f89dbdcd98cdc06cc3ed9846194dd07456c97",
+    "rust/fm1-hal/src/usb_tx.rs": "2234de7c2a3d0793a48e379ebc0297a043a343c2db4f52891e8eb69182c6ce73",
+    "rust/fm1-hal/tests/usb_tx.rs": "0cfc84ae09036907d911e7e35ee1c402d83566237a65864f528ad68a69d0fe25",
+    "rust/fm1-jam-bridge/src/lib.rs": "f29d03f707ab3fa541c2695f26627da4ce84f676db85c01745499b24fd8a00dc",
+    "rust/fm1-jam-bridge/src/usb_tx.rs": "2ce896107148738d5f24f8a70d83fb67ea1fed333e8f35e81d4fe0c17583d88e",
+    "tests/reference/usb_control_reference.c": "74196417029252ed7bed8ff682ec42d7c8ae348f80beb6ce29c7d43a13226d8f",
+    "tests/reference/usb_tx_reference.c": "d5dea6448ff812a761405073d3feaec4b79925260d5b0c1714fd79153110bc1c",
+    "tests/rust_usb_tx.sh": "d383336adfc7d5b4f8a69dcfe06808c882548205961025c5ef14cd3acd59908f"
+  },
+  "remaining": "explicit reset/config epoch and unknown completion correction; SIE/device lifecycle/host/CDC/UAC/physical stress/deadlines"
+}
