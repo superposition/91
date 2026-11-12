@@ -65,8 +65,11 @@ static void ju_song_service(uint8_t *buf,int legacy_busy)
     if(plat_ms()-since<150u || ju_busy() || legacy_busy)return;
     if(song<3)data=en_jam_builtin(song,&len);
     else {
-        int got;if(!ju_owner_set(1))return;
+        int got;if(plat_store_begin())return;
+        if(!ju_owner_set(1)){plat_store_end();return;}
         got=plat_store_load(OBJ_JAM0+song-3,buf,JP_MAX);
+        plat_store_end();
+        if(got==PLAT_STORE_BUSY){ju_owner_set(0);return;} /* keep en_jam_load queued */
         if(got<=0){ju_owner_set(0);en_jam_load=-1;return;}len=(unsigned)got;data=buf;
     }
     if(en_jam_upload_from(data,len,song)){if(song>=3)ju_owner_set(2);en_jam_load=-1;}
@@ -101,9 +104,15 @@ static unsigned ju_request(const uint8_t *m,unsigned n,uint8_t *buf,int legacy_b
         slot=a[0];index=a[1];off=index*64;
         if(!index) {
             if(ju_busy()) {st=JU_BUSY;break;}
-            if(!ju_owner_set(3)) {st=JU_BUSY;break;}
+            if(slot && plat_store_begin())return 0;
+            if(!ju_owner_set(3)) {if(slot)plat_store_end();st=JU_BUSY;break;}
             if(!slot) {data=en_jam_data(&len);for(i=0;i<len;i++)buf[i]=data[i];}
-            else {int got=plat_store_load(OBJ_JAM0+slot-1,buf,JP_MAX);len=got>0?(unsigned)got:0;}
+            else {
+                int got=plat_store_load(OBJ_JAM0+slot-1,buf,JP_MAX);
+                plat_store_end();
+                if(got==PLAT_STORE_BUSY){ju_owner_set(0);return 0;} /* retry the retained request */
+                len=got>0?(unsigned)got:0;
+            }
             ju.len=(uint16_t)len;ju.token=(uint8_t)token;
         } else if(ju_owner()!=3 || ju.token!=token) {st=JU_BAD;break;}
         len=ju.len;
@@ -171,16 +180,26 @@ static unsigned ju_request(const uint8_t *m,unsigned n,uint8_t *buf,int legacy_b
         if(!en_jam_on) en_jam_set(JAM_ON,1);
         break;
     case 7: {
-        unsigned len;const uint8_t *data;uint32_t crc;int got;
+        unsigned len;const uint8_t *data;uint32_t crc;int got,admission;
         if(alen!=1 || a[0]<1 || a[0]>4) {st=JU_BAD;break;}
         if(en_playing) {st=JU_STOP;break;}
         if(ju_busy() || plat_store_locked()) {st=JU_BUSY;break;}
-        if(!ju_owner_set(3)) {st=JU_BUSY;break;}
+        admission=plat_store_begin();
+        if(admission==PLAT_STORE_BUSY)return 0;
+        if(admission){st=JU_STORE;break;}
+        if(!ju_owner_set(3)) {plat_store_end();st=JU_BUSY;break;}
         data=en_jam_data(&len);crc=jp_crc(data,len);
-        if(plat_store_save(OBJ_JAM0+a[0]-1,data,len)) {ju_owner_set(0);st=JU_STORE;break;}
+        got=plat_store_save(OBJ_JAM0+a[0]-1,data,len);
+        if(got==PLAT_STORE_BUSY){ju_owner_set(0);plat_store_end();return 0;}
+        if(got) {ju_owner_set(0);plat_store_end();st=JU_STORE;break;}
         got=plat_store_load(OBJ_JAM0+a[0]-1,buf,JP_MAX);
-        if(got!=(int)len || jp_crc(buf,len)!=crc || jam_session_save_slot(a[0])) {ju_owner_set(0);st=JU_STORE;break;}
+        if(got==PLAT_STORE_BUSY){ju_owner_set(0);plat_store_end();return 0;}
+        if(got!=(int)len || jp_crc(buf,len)!=crc) {ju_owner_set(0);plat_store_end();st=JU_STORE;break;}
+        got=jam_session_save_slot(a[0]);
+        if(got==PLAT_STORE_BUSY){ju_owner_set(0);plat_store_end();return 0;}
+        if(got) {ju_owner_set(0);plat_store_end();st=JU_STORE;break;}
         ju_owner_set(0);
+        plat_store_end();
         for(i=0;i<4;i++)raw[i]=(uint8_t)(crc>>(i*8));
         count=4;break;
     }

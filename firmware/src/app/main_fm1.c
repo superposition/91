@@ -297,8 +297,13 @@ static void fm1_fault(const fm1_crash_t *c)
     fm1_reboot();
 }
 
+static int app_flush_ready(void);
 static void enter_uboot(const char *why)
 {
+    if(!safe_mode) {
+        if(usb.uboot_req!=2) {usb.uboot_req=2;en_play(0);en_panic();}
+        if(!app_flush_ready())return;
+    }
     fm1_audio_stop();
     lcd_fill(0, 0, 240, 240, C_BLACK);
     draw_text_box(0, 110, 240, &FONT_S, why, C_WHITE, 1);
@@ -489,6 +494,47 @@ static uint32_t bk_rd_obj = 0xFFFFFFFFu, bk_rd_i, bk_rd_len;   /* an object bein
 static uint32_t bk_wait_obj = 0xFFFFFFFFu;       /* an object being written (the music fading out): which */
 static int bk_obj_ok(uint32_t obj) { return obj < OBJ_NOBJ && obj != OBJ_PANEL; }
 static void bk_ack_put(uint32_t obj, uint32_t idx, uint32_t status) { bk_ack_n = (uint8_t)bk_build_ack(bk_ack, obj, idx, status); }
+/* An impossible object length marks a read deferred by worker admission.
+ * Reuse the existing snapshot state; never send Busy as an empty backup. */
+#define BK_READ_PENDING 0xFFFFFFFFu
+static uint8_t bk_restore_deferred; /* leases bk_buf while the queued restore waits for a flush */
+static int app_flush_ready(void)
+{
+    /* A completed restore deliberately replaces the old RAM image. */
+    if(bk_restored && ui_restore_state()==2 && plat_store_locked())return 1;
+    ui_flush();
+    return !ui_flush_pending();
+}
+static int bk_read_try(void)
+{
+    int n;
+    if(plat_store_begin())return 0;
+    n=plat_store_load(bk_rd_obj,bk_buf,BK_MAX);
+    plat_store_end();
+    if(n==PLAT_STORE_BUSY)return 0;
+    bk_sess.mask=0;
+    bk_rd_len=n>0?(uint32_t)n:0u;
+    bk_rd_i=0;bk_touched=fm1_ms;
+    return 1;
+}
+static void bk_read_start(uint32_t obj)
+{
+    bk_rd_obj=obj;bk_rd_i=0;bk_rd_len=BK_READ_PENDING;bk_touched=fm1_ms;
+    (void)bk_read_try();
+}
+static int bk_restore_ready(uint32_t event)
+{
+    const uint32_t obj=event>>14&0x1fu,len=event&0x3fffu;
+    if(event>>28!=5u || ju_busy() || !bk_obj_ok(obj) || !bk_complete(&bk_sess,obj,len) ||
+       ui_restore_state()==1 || !ui_restore_valid(obj,bk_buf,len))return 1;
+    /* Subsequent objects deliberately replace old RAM during a restore session. */
+    if(bk_restored && ui_restore_state()==2 && plat_store_locked())return 1;
+    if(ui_flush_pending()) {
+        ui_flush();
+        if(ui_flush_pending()){bk_restore_deferred=1;return 0;}
+    }
+    return 1;
+}
 
 /* THE PLAYER'S DX7 VOICES. usb.c collects a DX7 SysEx (a 32-voice bulk dump: the first EN_NUSER voices replace the loaded ones; a single voice, appended; or
  * ours, F0 7D 50 56 slot 128-bytes checksum F7: one slot, or 7F alone to clear), here it is checked and handed to the engine, and the UI keeps them. */
@@ -506,15 +552,16 @@ static void dx_service(void)
     if(ju_ack_n) return; /* backpressure: do not overwrite an unsent response */
     kind = dx_kind;
     if(kind==6) {
-        ju_ack_n=ju_request(dx_buf,dx_pos,bk_buf,bk_sess.mask || bk_rd_obj!=0xffffffffu || bk_wait_obj!=0xffffffffu || ui_restore_state()==1,ju_ack);
-        dx_state=0; return;
+        ju_ack_n=ju_request(dx_buf,dx_pos,bk_buf,bk_restore_deferred || bk_sess.mask || bk_rd_obj!=0xffffffffu || bk_wait_obj!=0xffffffffu || ui_restore_state()==1,ju_ack);
+        if(ju_ack_n)dx_state=0; /* zero retains a transiently denied request */
+        return;
     }
     if (kind == 5) {                                 /* a chunk of a restore: taken into bk_buf, answered */
         bk_chunk_t c;
         uint8_t f[8];
         int st = bk_parse_chunk(dx_buf, dx_pos, &c);
         const uint32_t obj = dx_pos > 4u ? dx_buf[4] & 0x7Fu : 0u;
-        if (st == 0 && (!bk_obj_ok(c.obj) || ju_busy() || bk_rd_obj!=0xffffffffu || ui_restore_state() == 1 || bk_accept(&bk_sess, bk_buf, &c) != 0))
+        if (st == 0 && (!bk_obj_ok(c.obj) || ju_busy() || bk_restore_deferred || bk_rd_obj!=0xffffffffu || ui_restore_state() == 1 || bk_accept(&bk_sess, bk_buf, &c) != 0))
             st = 2;
         bk_touched=fm1_ms;
         dx_state = 0;
@@ -584,13 +631,17 @@ static void px_service(void)
     static uint32_t dump_i = 0xFFFFFFFFu, vox_req = 0xFFFFFFFFu;
     static uint8_t about_req;                        /* the pieces page asked what this firmware is */
     uint8_t f[PX_FRAME_MAX];                         /* the longest frame (a voice) fits: dx_proto.h, checked by tests/host/dxproto_test.c */
-    ju_song_service(bk_buf,bk_sess.mask || bk_rd_obj!=0xffffffffu || bk_wait_obj!=0xffffffffu || ui_restore_state()==1);
+    int bk_read_attempted=0;
+    if(px_r==px_w)bk_restore_deferred=0;
+    ju_song_service(bk_buf,bk_restore_deferred || bk_sess.mask || bk_rd_obj!=0xffffffffu || bk_wait_obj!=0xffffffffu || ui_restore_state()==1);
     ju_poll();
     if(fm1_ms-bk_touched>30000u && ui_restore_state()!=1) {bk_sess.mask=0;bk_rd_obj=0xffffffffu;}
     if(ju_ack_n && usb_sysex_try(ju_ack,ju_ack_n)==0) ju_ack_n=0;
     while (px_r != px_w) {
         const uint32_t e = px_q[px_r % PX_N];
         RING_PUBLISH();
+        if(!bk_restore_ready(e))break; /* keep this head occupied; never roll back a published consumer */
+        bk_restore_deferred=0;
         px_r++;
         if (e >> 28 == 1u)
             ui_param_set((int)(e >> 14 & 0x3FFFu), (int)(e & 0x3FFFu) - 8192);
@@ -601,12 +652,8 @@ static void px_service(void)
         else if (e >> 28 == 4u) {                        /* backup: send an object (a restore under way is dropped) */
             const uint32_t obj = e & 0x7Fu;
             if (!ju_busy() && bk_obj_ok(obj) && bk_rd_obj == 0xFFFFFFFFu && ui_restore_state() != 1) {
-                const int n = plat_store_load(obj, bk_buf, BK_MAX);
-                bk_sess.mask = 0;
-                bk_rd_len = n > 0 ? (uint32_t)n : 0u;
-                bk_rd_i = 0;
-                bk_rd_obj = obj;
-                bk_touched=fm1_ms;
+                bk_read_start(obj);
+                bk_read_attempted=1;
             }
         } else if (e >> 28 == 5u) {                      /* restore: the object is complete: check it, write it */
             const uint32_t obj = e >> 14 & 0x1Fu, len = e & 0x3FFFu;
@@ -636,7 +683,9 @@ static void px_service(void)
     }
     if (bk_ack_n && usb_sysex_try(bk_ack, bk_ack_n) == 0)
         bk_ack_n = 0;
-    if (bk_rd_obj != 0xFFFFFFFFu) {                      /* an object going out, a frame a turn of the loop as the queue has room */
+    if(bk_rd_obj!=0xFFFFFFFFu && bk_rd_len==BK_READ_PENDING && !bk_read_attempted)
+        (void)bk_read_try();
+    if (bk_rd_obj != 0xFFFFFFFFu && bk_rd_len!=BK_READ_PENDING) { /* a frame as the queue has room */
         const uint32_t n = bk_rd_len - bk_rd_i > BK_FRAME ? BK_FRAME : bk_rd_len - bk_rd_i;
         if (usb_sysex_try(f, bk_build_frame(f, bk_rd_obj, bk_rd_i / BK_FRAME, bk_rd_len, bk_buf + bk_rd_i, n)) == 0) {
             bk_touched=fm1_ms;
@@ -1005,13 +1054,13 @@ static void fm1_main(void)
         px_service();
         main_where = 0;
         if (usb.ota_req) {
-            usb.ota_req = 0;
-            en_play(0);
-            en_panic();
-            ui_flush();                             /* a store or autosave in flight: written, its fade undone */
-            if (flash_ok)
-                ota_session();                      /* returns only if nothing was committed */
-            ui_init();
+            if(usb.ota_req==1) {usb.ota_req=2;en_play(0);en_panic();}
+            if(app_flush_ready()) {                  /* a pending save must finish before reinit/detach */
+                usb.ota_req=0;
+                if (flash_ok)
+                    ota_session();                  /* returns only if nothing was committed */
+                ui_init();
+            }
         }
         if (usb.uboot_req)
             enter_uboot("UBOOT (USB)");
