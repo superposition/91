@@ -40,5 +40,6 @@ wasmflags="--target=wasm32 -O2 -ffp-contract=off -std=gnu99 -nostdlib -ffreestan
 clang $wasmflags -o "$out/c0.wasm" tests/reference/app_graphics_reference.c web/emu/shim/libc.c
 clang $wasmflags -DEN_RUST_APP=1 -o "$out/rust.wasm" tests/reference/app_graphics_reference.c web/emu/shim/libc.c "$out/wasm/wasm32-unknown-unknown/release/libfm1_jam_bridge.a"
 clang $wasmflags "-DAPP_GFX_SOURCE=\"$repo/tests/reference/app_gfx_frozen.inc\"" "-DAPP_ALPHA_SOURCE=\"$repo/tests/reference/app_alpha_frozen.inc\"" -o "$out/frozen.wasm" tests/reference/app_graphics_reference.c web/emu/shim/libc.c
-node tests/host/project_wasm_test.mjs "$out/frozen.bin" "$out/frozen.wasm" "$out/c0.wasm" "$out/rust.wasm"
+node tests/host/project_wasm_test.mjs "$out/frozen.bin" "$out/frozen.wasm" "$out/c0.wasm" "$out/rust.wasm" > "$out/wasm-results.jsonl"
+cat "$out/wasm-results.jsonl"
 sha256sum "$out/c0.bin" "$out/rust.bin"

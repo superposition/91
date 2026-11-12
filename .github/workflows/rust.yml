@@ -11,6 +11,13 @@ permissions:
   contents: read
 
 jobs:
+  browser_pointer_model:
+    name: Retained browser pointers under Miri
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install nightly-2026-08-28 --profile minimal --component miri --component rust-src
+      - run: sh tests/rust_web_audio_miri.sh
   native_simulator:
     name: Native Rust simulator and scenario compatibility
     runs-on: ubuntu-24.04
@@ -80,12 +87,12 @@ jobs:
       - name: Pinned Rust and WASM target
         run: rustup toolchain install 1.94.1 --profile minimal --component rustfmt,clippy --target wasm32-unknown-unknown
       - run: cargo +1.94.1 fmt --all --check
-      - run: cargo +1.94.1 test --workspace --locked
-      - run: cargo +1.94.1 clippy --workspace --all-targets --locked -- -D warnings
+      - run: cargo +1.94.1 test --workspace --features fm1-jam-bridge/web --locked
+      - run: cargo +1.94.1 clippy --workspace --all-targets --features fm1-jam-bridge/web --locked -- -D warnings
       - run: cargo +1.94.1 check -p fm1-types -p fm1-formats -p fm1-engine -p fm1-rt --target wasm32-unknown-unknown --locked
       - run: cargo +1.94.1 test -p fm1-rt --features pi32v2 --locked
       - run: cargo +1.94.1 check -p fm1-jam-bridge --no-default-features --features pi32v2 --target wasm32-unknown-unknown --locked
-      - run: cargo +1.94.1 build --release --locked -p fm1-jam-bridge --no-default-features --target wasm32-unknown-unknown
+      - run: cargo +1.94.1 build --release --locked -p fm1-jam-bridge --no-default-features --features web --target wasm32-unknown-unknown
 
   emulator:
     runs-on: ubuntu-24.04
@@ -126,6 +133,10 @@ jobs:
         run: sh tests/rust_emulator_parity.sh
       - name: Browser bindings and lifecycle
         run: node tests/host/emu_browser_test.mjs build/emu/amb.wasm
+      - name: Cached audio views, irregular quanta and fixed memory
+        run: node tests/host/emu_audio_views_test.mjs build/emu-parity/reference.wasm build/emu-parity/rust.wasm
+      - name: Browser audio ring, output and background compatibility
+        run: sh tests/rust_web_audio.sh
       - name: Native clock, melodic/drum scheduling, mutation and event trace parity
         run: sh tests/rust_melodic_parity.sh
       - name: Isolated analog voice state and PCM parity
@@ -182,6 +193,8 @@ jobs:
         run: sh tests/rust_harmony_parity.sh
       - name: Exact graphics and retained display DMA source
         run: sh tests/rust_app_graphics.sh
+      - name: KickRunner gameplay, drawing and retained display source
+        run: sh tests/rust_runner_policy.sh
       - name: Songbook snapshot and staging handoffs
         run: sh tests/rust_handoff.sh
       - uses: actions/upload-artifact@v4
@@ -243,4 +256,6 @@ jobs:
             build/harmony-parity/*.json
             build/harmony-parity/results.jsonl
             build/harmony-parity/source-verification.log
-            build/app-graphics/*.json
+            build/app-graphics/*.jsonl
+            build/web-audio/*.jsonl
+            build/runner-policy/*.jsonl

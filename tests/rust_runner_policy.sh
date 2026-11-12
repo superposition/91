@@ -32,7 +32,7 @@ wasmflags="--target=wasm32 -O2 -ffp-contract=off -std=gnu99 -nostdlib -ffreestan
 clang $wasmflags -o "$out/c0.wasm" tests/reference/runner_policy_reference.c web/emu/shim/libc.c
 clang $wasmflags -DEN_RUST_APP=1 -o "$out/rust.wasm" tests/reference/runner_policy_reference.c web/emu/shim/libc.c "$out/wasm/wasm32-unknown-unknown/release/libfm1_jam_bridge.a"
 clang $wasmflags "-DAPP_RUNNER_SOURCE=\"$repo/tests/reference/runner_frozen.inc\"" -o "$out/frozen.wasm" tests/reference/runner_policy_reference.c web/emu/shim/libc.c
-node tests/host/project_wasm_test.mjs "$out/frozen.bin" "$out/frozen.wasm" "$out/c0.wasm" "$out/rust.wasm"
+node tests/host/project_wasm_test.mjs "$out/frozen.bin" "$out/frozen.wasm" "$out/c0.wasm" "$out/rust.wasm" > "$out/wasm-results.jsonl"
 sha256sum "$out/rust.bin"
 drawflags="$flags -DRUNNER_DRAW_TEST=1"
 cc $drawflags -o "$out/draw-c0" tests/reference/runner_policy_reference.c -lm
@@ -48,7 +48,8 @@ cmp "$out/draw-c0.bin" "$out/draw-rust.bin"
 clang $wasmflags -DRUNNER_DRAW_TEST=1 -o "$out/draw-c0.wasm" tests/reference/runner_policy_reference.c web/emu/shim/libc.c
 clang $wasmflags -DRUNNER_DRAW_TEST=1 -DEN_RUST_APP=1 -o "$out/draw-rust.wasm" tests/reference/runner_policy_reference.c web/emu/shim/libc.c "$out/wasm/wasm32-unknown-unknown/release/libfm1_jam_bridge.a"
 clang $wasmflags -DRUNNER_DRAW_TEST=1 "$frozenrunner" "$frozenwidgets" -o "$out/draw-frozen.wasm" tests/reference/runner_policy_reference.c web/emu/shim/libc.c
-node tests/host/project_wasm_test.mjs "$out/draw-frozen.bin" "$out/draw-frozen.wasm" "$out/draw-c0.wasm" "$out/draw-rust.wasm"
+node tests/host/project_wasm_test.mjs "$out/draw-frozen.bin" "$out/draw-frozen.wasm" "$out/draw-c0.wasm" "$out/draw-rust.wasm" >> "$out/wasm-results.jsonl"
+cat "$out/wasm-results.jsonl"
 for profile in 0 1;do
     cc $flags -DEN_RUST_APP=$profile -o "$out/dma-$profile" tests/host/runner_dma_test.c "$out/native/release/libfm1_jam_bridge.a" -lm -ldl -lpthread
     "$out/dma-$profile"
