@@ -334,10 +334,10 @@ impl State {
         let (mut effects, mut mute) = (0u32, 0u32);
         if self.on != 0 && self.over == 0 {
             for track in &order[usize::from(self.layer)..] {
-                mute |= 1 << track;
+                mute |= 1u32 << track;
             }
             if self.beat < self.lp_until {
-                effects |= 1 << lowpass;
+                effects |= 1u32 << lowpass;
             }
         }
         Ok([effects, mute])
@@ -359,28 +359,28 @@ impl State {
         }
         let (mut buttons_out, mut keys) = (0u32, 0u32);
         if playing {
-            buttons_out |= 1 << buttons[0];
+            buttons_out |= 1u32 << buttons[0];
         }
         for (i, level) in glow.iter().take(11).enumerate() {
             if *level > 0.35 {
-                keys |= 1 << black[i];
+                keys |= 1u32 << black[i];
             }
         }
         if self.over == 0 {
-            keys |= 1 << white[usize::from(self.lane)];
+            keys |= 1u32 << white[usize::from(self.lane)];
         }
         for row in &self.row {
             let depth = row.beat - self.beat;
             if row.done == 0 && (0.0..2.0).contains(&depth) && (frame / 6) & 1 != 0 {
                 for (lane, key) in white.iter().enumerate() {
                     if row.wall >> lane & 1 != 0 {
-                        keys |= 1 << key;
+                        keys |= 1u32 << key;
                     }
                 }
             }
         }
         if self.layer >= 5 {
-            buttons_out |= 1 << buttons[1];
+            buttons_out |= 1u32 << buttons[1];
         }
         Ok([buttons_out, keys])
     }
