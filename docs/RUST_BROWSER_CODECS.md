@@ -39,7 +39,7 @@ The existing `fm1-rs` CLI supplies `codec OP` and a bounded `codec-stream` stdio
 
 This keeps command-line logging and MIDI transfers from launching a process for every frame. The allocating host transport is outside the allocator-free core. `fm1pkg_make.py`, `build.py`, `fm1_install.py`, `fm1log.py`, `jam_midi.py`, `fm1_rescue.py`, `fm1_debug.py` and the site package reader delegate their byte operations to this shared implementation. The independent slow CRC in the boot-stub packager remains an intentional cross-check, not the production encoder.
 
-SDK asset selection, boot-stub placement, flash ranges, loader/recovery policy, user confirmation, device discovery and transfer scheduling remain with their existing owners. In particular, USB mass-storage CBW/CSW/CDB transport and guarded development register-command services belong to #19. Music-source compilers remain under #3; their already-qualified Jam/session formats are outside this remaining-codec port. Project publication/flash transaction policy belongs to #7 and browser interaction policy to #23.
+SDK asset selection, boot-stub placement, flash ranges, loader/recovery policy, user confirmation, device discovery and transfer scheduling remain with their existing owners. In particular, USB mass-storage CBW/CSW/CDB transport and guarded development register-command services belong to #19. Music-source compilers remain under #21; their already-qualified Jam/session formats are outside this remaining-codec port. Project publication/flash transaction policy belongs to #7 and browser interaction policy to #23.
 
 ## Evidence
 

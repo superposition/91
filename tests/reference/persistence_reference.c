@@ -57,13 +57,14 @@ __attribute__((export_name("run")))
 #endif
 int persistence_run(void){
     static const uint32_t lengths[]={0,1,31,255,256,257,600,3836,3840};
-    uint32_t id=0,o,l,k,c,p,v[4];
+    uint32_t id=0,o,l,k,c,p,v[8];
     for(o=0;o<31;o++)for(l=0;l<9;l++)for(k=0;k<12;k++){
         uint32_t cuts=(k==7||k==10)?18:(k==9||k==11)?8:1;
         for(c=0;c<cuts;c++)for(p=0;p<((k==7||k==8||k==10)?4u:1u);p++)
             run_case(id++,o,lengths[l],k,c,(uint32_t[]){0,1,17,256}[p]);
     }
-    reset_faults();v[0]=st_save(0,a,3841);v[1]=operations;v[2]=id;v[3]=sizeof(st_hdr_t);emit(v,sizeof v);
+    reset_faults();v[0]=st_save(0,a,3841);v[1]=operations;v[2]=id;v[3]=sizeof(st_hdr_t);
+    v[4]=(uint32_t)st_save(0,0,0);v[5]=(uint32_t)st_load(0,0,0);v[6]=trace;v[7]=hash(2166136261u,nor+st_sector(0,0),8192);emit(v,sizeof v);
     return (int)id;
 }
 #ifndef __wasm__

@@ -436,6 +436,12 @@ static void naiwan_bing(int root, int up)
 }
 static void naiwan_prog(int which);
 static int8_t naiwan_pending = -1;      /* which loop the next chord change applies */   /* NAIWAN 91: a piece's hand-set progression (defined below) */
+void en_piece_recipe_loaded(int g,int i)
+{
+    g=(unsigned)g<EN_NGENRE?g:0;
+    i=(unsigned)i<EN_NPIECES?i:0;
+    if(g==0) naiwan_pending=(int8_t)i;
+}
 void en_piece_g(int g, int i, int16_t *par, uint16_t *pool)
 {
 #if EN_RUST_FACTORY

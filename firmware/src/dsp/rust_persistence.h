@@ -11,4 +11,5 @@ typedef struct {
  * caller's 3840-byte scratch and data are separate live RAM ranges. */
 int fm1_rust_store(uint32_t save, uint32_t object, void *data, uint32_t length,
                    uint8_t *scratch, const fm1_store_hooks *hooks);
+int fm1_rust_store_access(uint32_t available,uint32_t locked,uint32_t restore);
 #endif

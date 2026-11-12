@@ -12,6 +12,7 @@ cc $flags -DEN_RUST_STORAGE=1 -o "$out/rust" tests/reference/persistence_referen
 "$out/c0" > "$out/c0.bin"
 "$out/rust" > "$out/rust.bin"
 cmp "$out/c0.bin" "$out/rust.bin"
+grep '  build/persistence/c0.bin$' tests/reference/persistence.sha256 | sha256sum -c -
 if [ "$#" -gt 0 ]; then
     baseline=$(CDPATH= cd -- "$1" && pwd)
     (cd "$baseline" && sha256sum -c "$repo/tests/reference/source.sha256") > "$out/r01-verification.log"

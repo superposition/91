@@ -7,6 +7,18 @@ pub const PAYLOAD_OFFSET: u32 = 256;
 pub const MAX: usize = 3840;
 pub const MAGIC: u32 = 0x3058_3058;
 pub const HEADER_LEN: usize = 32;
+/// 1 means lock before attempting a restore. A failed restore remains locked.
+pub const fn access(available: bool, locked: bool, restore: bool) -> i32 {
+    if !available {
+        -9
+    } else if restore {
+        1
+    } else if locked {
+        -8
+    } else {
+        0
+    }
+}
 
 /// Hooks must complete synchronously, must not retain slices, and must not
 /// re-enter this store. Program receives RAM, at most one 256-byte page.

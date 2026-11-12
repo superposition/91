@@ -3,6 +3,13 @@
 use fm1_engine::persistence::{Counts, Nor, Store, MAX};
 use fm1_rt::atomic::{AtomicU32, Ordering};
 static COUNTS: [AtomicU32; 8] = [const { AtomicU32::new(0) }; 8];
+pub(crate) fn project_call() {
+    COUNTS[2].fetch_add(1, Ordering::Relaxed);
+}
+pub(crate) fn object_save(bytes: usize) {
+    COUNTS[3].fetch_add(1, Ordering::Relaxed);
+    COUNTS[7].fetch_add(bytes as u32, Ordering::Relaxed);
+}
 pub fn stat(index: u32) -> u32 {
     COUNTS
         .get(index.wrapping_sub(64) as usize)
@@ -12,8 +19,8 @@ fn record(c: Counts) {
     for (counter, value) in COUNTS.iter().zip([
         c.loads,
         c.saves,
-        c.selected_a,
-        c.selected_b,
+        0,
+        0,
         c.missing,
         c.programs,
         c.verify_failed,
@@ -21,6 +28,10 @@ fn record(c: Counts) {
     ]) {
         counter.fetch_add(value, Ordering::Relaxed);
     }
+}
+#[no_mangle]
+pub extern "C" fn fm1_rust_store_access(available: u32, locked: u32, restore: u32) -> i32 {
+    fm1_engine::persistence::access(available != 0, locked != 0, restore != 0)
 }
 #[repr(C)]
 pub struct Hooks {
@@ -57,7 +68,7 @@ pub unsafe extern "C" fn fm1_rust_store(
     scratch: *mut u8,
     hooks: *const Hooks,
 ) -> i32 {
-    if data.is_null()
+    if (data.is_null() && length != 0)
         || scratch.is_null()
         || hooks.is_null()
         || save > 1
@@ -71,15 +82,25 @@ pub unsafe extern "C" fn fm1_rust_store(
     });
     let result = if save == 1 {
         // SAFETY: checked bounded initialized input disjoint from scratch.
-        store.save(object, unsafe {
-            core::slice::from_raw_parts(data, length as usize)
-        })
+        store.save(
+            object,
+            if length == 0 {
+                &[]
+            } else {
+                unsafe { core::slice::from_raw_parts(data, length as usize) }
+            },
+        )
     } else {
         // No load can write more than MAX even if the caller offers more space.
         // SAFETY: caller guarantees this writable span and exclusive access.
-        store.load(object, unsafe {
-            core::slice::from_raw_parts_mut(data, (length as usize).min(MAX))
-        })
+        store.load(
+            object,
+            if length == 0 {
+                &mut []
+            } else {
+                unsafe { core::slice::from_raw_parts_mut(data, (length as usize).min(MAX)) }
+            },
+        )
     };
     record(store.counts);
     result

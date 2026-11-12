@@ -116,6 +116,9 @@ void plat_midi_out(uint32_t pkt)                    /* the ring has one writer a
 /* the engine's MIDI out (from the render): a USB-MIDI packet, cable 0, CIN = the status's high nibble */
 void en_midi_out(uint32_t st, uint32_t d1, uint32_t d2) { plat_midi_out(st >> 4 | st << 8 | d1 << 16 | d2 << 24); }
 
+#if EN_RUST_STORAGE
+#include "../dsp/rust_persistence.h"
+#endif
 int plat_store_load(uint32_t obj, void *dst, uint32_t max) { return flash_ok ? st_load(obj, dst, max) : -1; }
 static volatile uint32_t tel_stores, tel_store_us;       /* telemetry: flash writes so far, and how long the last one stopped the chip */
 static uint8_t store_lock;                               /* a backup was restored: what is in RAM is out of date, so nothing more is written until the restart */
@@ -191,10 +194,14 @@ int plat_usb_host_state(void) { return 0; }
 int plat_store_save(uint32_t obj, const void *src, uint32_t len)
 {
     uint32_t t0, r;
+#if EN_RUST_STORAGE
+    { int gate=fm1_rust_store_access((uint32_t)flash_ok,store_lock,0); if(gate) return gate; }
+#else
     if (!flash_ok)
         return -9;
     if (store_lock)
         return -8;
+#endif
     t0 = fm1_ticks();
     r = (uint32_t)st_save(obj, src, len);
     tel_store_us = (fm1_ticks() - t0) / FM1_TICKS_PER_US;
@@ -204,9 +211,13 @@ int plat_store_save(uint32_t obj, const void *src, uint32_t len)
 int plat_store_restore(uint32_t obj, const void *src, uint32_t len)
 {
     int r;
+#if EN_RUST_STORAGE
+    { int gate=fm1_rust_store_access((uint32_t)flash_ok,store_lock,1); if(gate<0) return gate; store_lock=(uint8_t)gate; }
+#else
     if (!flash_ok)
         return -9;
     store_lock = 1;
+#endif
     r = st_save(obj, src, len);
     tel_stores++;
     return r;

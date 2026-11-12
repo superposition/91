@@ -17,6 +17,7 @@ mod handoff;
 mod melodic;
 mod object_formats;
 mod persistence;
+mod project;
 mod sequencer;
 mod transport;
 mod voice_config;
