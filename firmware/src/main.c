@@ -174,3 +174,18 @@ static void ota_commit(const uint8_t *parm)
 #include "app/jam_session.c"
 #include "app/ui.c"
 #include "app/main_fm1.c"
+
+#if EN_RUST_MCU_ATOMICS
+/* The Rust panic and mrustc core abort entries converge here. CPU1 parks until
+ * CPU0's bounded join holds it and drops partial output. A CPU0 panic silences
+ * DMA, holds CPU1 and marks this boot failed before the watchdog restarts. */
+__attribute__((noreturn)) void fm1_mcu_panic(void)
+{
+    if(!fm1_cnum()) {
+        fm1_audio_stop();
+        fm1_core1_stop();
+        bootguard.pending=1;
+    }
+    for(;;) __asm__ volatile("nop" ::: "memory");
+}
+#endif

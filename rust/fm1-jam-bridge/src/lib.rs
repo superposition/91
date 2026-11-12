@@ -14,6 +14,8 @@ mod factory;
 mod fm6;
 mod formats;
 mod handoff;
+#[cfg(all(feature = "pi32v2", not(feature = "std"), not(target_arch = "wasm32")))]
+mod mcu;
 mod melodic;
 mod sequencer;
 mod transport;
@@ -32,7 +34,9 @@ static SESSIONS: AtomicU32 = AtomicU32::new(0);
 fn panic(_: &core::panic::PanicInfo<'_>) -> ! {
     #[cfg(target_arch = "wasm32")]
     core::arch::wasm32::unreachable();
-    #[cfg(not(target_arch = "wasm32"))]
+    #[cfg(all(not(target_arch = "wasm32"), feature = "pi32v2"))]
+    mcu::panic_stop();
+    #[cfg(all(not(target_arch = "wasm32"), not(feature = "pi32v2")))]
     loop {
         core::hint::spin_loop();
     }

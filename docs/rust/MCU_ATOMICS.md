@@ -50,3 +50,13 @@ it parks for CPU0's bounded join or the watchdog. This revised failure path
 still needs the physical stop/heartbeat proof and integrated worker tests.
 Per-sample diagnostic counters also need a
 measured hardware cost; they must not consume the render deadline unnoticed.
+
+The physical bridge now routes panic, abort and mrustc's explicit
+`panic_impl` / `_Unwind_Resume` entries through one HAL panic boundary. CPU1
+parks for CPU0's bounded join and confirmed hold. CPU0 stops audio DMA, holds
+CPU1 and marks the current boot failed before waiting for the watchdog. The
+standard C abort/resume entries use void signatures with bodies that never
+return, matching their C declarations despite mrustc's char representation of
+Rust `!`. Rust 1.94.1 release Clippy checks this path on a 32-bit non-WASM
+target; mrustc plus the vendor compiler accepts all five crates with the new
+entries. Actual panic/silence and stopped-worker tests remain physical gates.
