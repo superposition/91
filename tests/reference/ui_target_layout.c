@@ -2,6 +2,8 @@
 /* Vendor-object ABI evidence; compare this section with the generated-C
  * natural32 UI reference prefix. No code executes on the instrument. */
 #include <stddef.h>
+#include "../../firmware/src/dsp/amb.h"
+#include "../../firmware/src/app/plat.h"
 #include "../../firmware/src/dsp/rust_ui_state.h"
 _Static_assert(sizeof(fm1_ui_state)==1320,"PI32 UI carrier size");
 _Static_assert(__alignof__(fm1_ui_state)==4,"PI32 UI carrier alignment");
