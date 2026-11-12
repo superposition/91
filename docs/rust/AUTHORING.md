@@ -153,6 +153,13 @@ cargo +1.94.1 fmt --all -- --check
 cargo +1.94.1 clippy --workspace --all-targets -- -D warnings
 ```
 
+The comparison source can also be reconstructed from the preserved Git
+checkpoint with `python3 tools/frozen_source.py build/r01-source` (fetch the
+repository history first). This verifies all 440 captured hashes before writing
+files. It restores captured CRLF bytes in two files only when their pinned
+hashes match. The separate Python 3.10 CI job uses this source and runs the full
+authoring gate, including complete song renders, without opening device ports.
+
 The runner contains no workstation paths and opens no device ports. The initial
 proof used existing Windows mido 1.3.3 / NumPy 1.24.4 for independent Python
 oracles and WSL Linux for the C/native preview comparison. A subsequent complete
