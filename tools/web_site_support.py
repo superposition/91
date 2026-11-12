@@ -3,6 +3,10 @@
 # Package/module helpers derived from Leo Kuroshita (@kurogedelic), Hügelton Instruments.
 """Maintained static-site helpers and bounded generated-output replacement."""
 import atexit
+if __package__:
+    from . import rust_codecs
+else:
+    import rust_codecs
 import hashlib
 import json
 import os
@@ -24,12 +28,10 @@ def strip_module(source):
 
 
 def product_of(raw):
-    """Read the package marker identity using the fm1pkg.js wire algorithm."""
-    if len(raw) < BLOCKS * BLK:
-        raise ValueError("firmware package is shorter than its 20 identity blocks")
-    return "".join(chr((marker - i - 1) & 255)
-                   for i in range(BLOCKS) if (marker := raw[i * BLK + KEEP]) != 0x7D)
-
+    try:
+        return rust_codecs.call(14, [], [raw]).decode('latin-1')
+    except rust_codecs.CodecError as error:
+        raise ValueError('firmware package is shorter than its 20 identity blocks') from error
 
 def release_identity(version):
     """The release identity contract used by tools/build.py: FM-1_7XXYYZZ."""

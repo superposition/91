@@ -1,0 +1,93 @@
+{
+  "scope": "R05 completing host/package consumer checkpoint",
+  "software_codec_acceptance": "complete; combined latest-engine qualification follows",
+  "rust": "1.94.1",
+  "base": "f8cb906acc5a0671917c6b1cb4a4785f99fde3e1",
+  "browser_checkpoint": "c48aaaa41162d6b266b40a6c386dea2ef27b8a71",
+  "independent_vectors": {
+    "count": 2923,
+    "sha256": "141986f84ea2eb85aa3ef5aab67466545c9a4abd3258c6ef516718aabee8af8d",
+    "tool_fixture_sha256": "1e3de734ac3eca8584a82ae74790e28bf5407ca89e7de9f6f4688b1056d3dc94",
+    "r01_verified_files": 440
+  },
+  "wasm": {
+    "vectors": 2923,
+    "attempts": 10219,
+    "dxFieldMutations": 72448,
+    "keyBlobs": 65536,
+    "memoryBytes": 4194304,
+    "guards": true
+  },
+  "wasm_artifact": {
+    "abi": 1,
+    "rust": "1.94.1",
+    "bytes": 119837,
+    "sha256": "badbc70b6038a16d599e040f55a719e73b86bf03afcc65d7cb8f7af0733c7f3f",
+    "source": "db30a694791ddf9d5aefa7bcc6fdba611709107ba390c20cb1228ff20a48611b"
+  },
+  "python_consumers": {
+    "frozen_package_sha256": "e5424ccb8cef76c6eb4b9b256ce27d9e6c61c416d6847c6f5031dd5bd7533888",
+    "full_sdk_package": {
+      "app_sha256": "6b2ae6990de3cca6358906a2095266bc658a167080cba1421b0314fa25f4c4ac",
+      "bytes": 611251,
+      "flash_sha256": "9a40f4d267be68a1631f887cd2942da3381d97eb04e204409243d47a8daecb6f",
+      "loader_sha256": "fb264969d35b09657af9277527710c80af8dcc164de4946fa298da61420f2e85",
+      "package_sha256": "c4f6c00b4a5558101333893f7702d5ce7dd98c297b3391a3f847e7a1b962f61e",
+      "sdk": {
+        "cfg/eq_cfg_hw.bin": "41167491bffed4651750719c973d2758adeb9021a5670d02d6a53c85ed80ea7d",
+        "cfg_tool.bin": "276579954f076886a6a7694f65dc71c034a63a2c204b76749065c0ac7b010d1b",
+        "uboot.boot": "4e3b4c220dc96641cb5a723f41e68ce41d5261ae9434bb33fbd7f2c59976ded4"
+      },
+      "stub_version": 3
+    },
+    "host_transport": {
+      "concurrent_calls": 256,
+      "explicit_failure_retry": "pass",
+      "oversized_truncated_messages": "pass",
+      "required_executable": "pass"
+    },
+    "primitive_consumer_checks": 1377,
+    "rust_execution_required": true
+  },
+  "host_pipe": {
+    "concurrent_calls": 256,
+    "explicit_failure_retry": "pass",
+    "oversized_truncated_messages": "pass",
+    "required_executable": "pass"
+  },
+  "checks": {
+    "workspace_release_tests": 92,
+    "workspace_clippy": "pass",
+    "boot_stub": "265 checks,0failed",
+    "simulated_installer": "pass including logical-image/product-vs-browser",
+    "logger": "188-byte-frame selftest pass",
+    "jam_tools": "8tests pass,1optionalMIDIimportskip",
+    "jam_real_c_transport": "2tests pass",
+    "site": {
+      "routes": 9,
+      "local_links_and_assets": 141,
+      "parsed_scripts": 6,
+      "parsed_module_copies": 18,
+      "css_asset_dependencies": 42,
+      "hosted_subpath": true,
+      "manifest_verified": true,
+      "shared_theme": true,
+      "standalone_assets": true,
+      "current_captures": 5,
+      "preserved_control_ids": 152,
+      "retired_engineering_ids": 2,
+      "baseline_manual_duplicate_ids": {
+        "the-perform-screen": 2
+      }
+    }
+  },
+  "remaining_software_codec_consumers": [],
+  "separate_owners": {
+    "7": "project/storage publication and transaction state",
+    "19": "IRQ/HAL,physical USB/BOT transport,device qualification",
+    "23": "browser application policy",
+    "3": "already-qualified music source compilers"
+  },
+  "physical_writes": "none",
+  "interactive_browser_qa": "not run"
+}

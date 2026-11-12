@@ -407,6 +407,56 @@ pub fn run(operation: u32, input: &[u8], out: &mut [u8]) -> Result<usize, CodecE
             Ok(w.len())
         }
         66 => fm1_formats::voice_file::decode_compatible(r.data(0)?, out),
+        100 => {
+            let n = copy(r.data(0)?, out)?;
+            fm1_formats::tool_wire::crc_cipher(&mut out[..n]);
+            Ok(n)
+        }
+        101 => copy(
+            &fm1_formats::tool_wire::word35(
+                u64::from(r.arg(0)?) | (u64::from(r.arg(1)? & 7) << 32),
+            ),
+            out,
+        ),
+        102 => copy(
+            &fm1_formats::tool_wire::read_word35(r.data(0)?)?.to_le_bytes(),
+            out,
+        ),
+        103 => fm1_formats::tool_wire::telemetry_compatible(
+            r.data(0)?,
+            r.arg(0)? as u8,
+            r.arg(1)? as usize,
+            out,
+        ),
+        104 => match r.arg(0)? {
+            0 => fm1_formats::tool_wire::jam_begin(
+                u16::try_from(r.arg(1)?).map_err(|_| CodecError::Range)?,
+                r.arg(2)?,
+                out,
+            ),
+            1 => fm1_formats::tool_wire::jam_chunk(
+                u8::try_from(r.arg(1)?).map_err(|_| CodecError::Index)?,
+                r.data(0)?,
+                out,
+            ),
+            2 => fm1_formats::tool_wire::jam_control(
+                u8::try_from(r.arg(1)?).map_err(|_| CodecError::Index)?,
+                u16::try_from(r.arg(2)?).map_err(|_| CodecError::Range)?,
+                out,
+            ),
+            _ => Err(CodecError::Index),
+        },
+        105 => fm1_formats::tool_wire::rescue_flash_compatible(r.data(0)?, out),
+        106 => fm1_formats::tool_wire::telemetry_request(
+            u8::try_from(r.arg(0)?).map_err(|_| CodecError::Range)?,
+            out,
+        ),
+        99 => fm1_formats::package_write::UfwParts {
+            flash: r.data(0)?,
+            ota: r.data(1)?,
+            product: r.data(2)?,
+        }
+        .encode(out),
         97 => fm1_formats::jam::JamPack::parse_structural(r.data(0)?)
             .map_err(|_| CodecError::Range)?
             .encode_into(out),

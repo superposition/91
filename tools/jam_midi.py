@@ -3,28 +3,36 @@ import pathlib
 import secrets
 import struct
 import time
-import zlib
+import rust_codecs as _codecs
 
 ERRORS = {1:'malformed request or invalid pack',2:'checksum mismatch',3:'device busy',4:'stop playback before saving',5:'persistent save/readback failed',6:'unsupported pack version'}
 FIELDS={'on':0,'key':1,'bars':2,'form':3,'movement':4,'energy':5,'hold':6,'bass':7,'idea':8,'slot':9,'play':10,'song':11,'swell':12,'variation':13,'keys_program':14,'bass_program':15,'touch':16,'release':17,'bass_gate':18,'swell_voice':19,'bass_attack':20,'brightness':21}
 
-def checksum(a): return (-sum(a)) & 127
-def nibble(a): return [v for x in a for v in (x>>4,x&15)]
+def checksum(a): return _codecs.scalar(84, [], [a])
+def nibble(a): return list(_codecs.call(90, [], [a]))
 def frame(op,token,data=()):
-    a=[op,token,*data]
-    if any(not 0<=x<128 for x in a): raise ValueError('SysEx payload is not seven-bit clean')
-    return [0x7d,0x50,0x60,*a,checksum(a)]
+    data = list(data)
+    if any(not 0 <= value < 128 for value in [op, token, *data]):
+        raise ValueError('SysEx payload is not seven-bit clean')
+    return list(_codecs.call(85, [op, token], [data])[1:-1])
 
 def parse_reply(data,op,token):
-    a=list(data)
-    if len(a)<7 or a[:5]!=[0x7d,0x50,0x61,op,token]: return None
-    if checksum(a[3:-1])!=a[-1] or (len(a)-7)%2 or any(x>15 for x in a[6:-1]): raise ValueError('damaged device reply')
-    if a[5]: raise RuntimeError(ERRORS.get(a[5],f'device error {a[5]}'))
-    return bytes(a[i]<<4|a[i+1] for i in range(6,len(a)-1,2))
+    a = list(data)
+    if len(a) < 7 or a[:5] != [125,80,97,op,token]:
+        return None
+    try:
+        reply = _codecs.call(86, [], [[240,*a,247]])
+    except _codecs.CodecError as error:
+        raise ValueError('damaged device reply') from error
+    _, _, status = struct.unpack_from('<III', reply)
+    if status:
+        raise RuntimeError(ERRORS.get(status, f'device error {status}'))
+    return reply[12:]
 
 class Device:
     def __init__(self,port=None):
         import mido
+        _codecs.executable()  # no compiler startup while a device request is pending
         self.mido=mido;self.token=secrets.randbelow(127)+1
         ins=mido.get_input_names();outs=mido.get_output_names()
         def pick(names):
@@ -76,11 +84,11 @@ class Device:
             if len(b)==total:return bytes(b)
             index+=1
     def audition(self,b):
-        crc=zlib.crc32(b)
-        self.request(3,[len(b)>>7,len(b)&127,*[(crc>>s)&15 for s in range(28,-1,-4)]])
+        crc=_codecs.scalar(1, blobs=[b])
+        self.request(3,_codecs.call(104, [0,len(b),crc]))
         try:
             for i,off in enumerate(range(0,len(b),256)):
-                c=b[off:off+256];ack=self.request(4,[i,len(c)>>7,len(c)&127,*nibble(c)])
+                c=b[off:off+256];ack=self.request(4,_codecs.call(104,[1,i],[c]))
                 if ack!=bytes([i]):raise ValueError('wrong chunk acknowledgement')
             self.request(5);self.request(6)
         except Exception:
@@ -88,7 +96,7 @@ class Device:
             except Exception:pass
             raise
     def wait_active(self,b,timeout=75):
-        want=f'{zlib.crc32(b):08x}';until=time.monotonic()+timeout
+        want=f'{_codecs.scalar(1, blobs=[b]):08x}';until=time.monotonic()+timeout
         while time.monotonic()<until:
             s=self.status()
             if not s['pending'] and s['crc32']==want:return s
@@ -99,11 +107,11 @@ class Device:
         if before['playing']: raise RuntimeError(ERRORS[4])
         r=self.request(7,[slot],timeout=15)
         saved=self.read(slot)
-        if len(r)!=4 or zlib.crc32(saved)!=struct.unpack('<I',r)[0] or f'{zlib.crc32(saved):08x}'!=before['crc32']:
+        if len(r)!=4 or _codecs.scalar(1, blobs=[saved])!=struct.unpack('<I',r)[0] or f'{_codecs.scalar(1, blobs=[saved]):08x}'!=before['crc32']:
             raise RuntimeError('saved pack failed readback comparison')
         return dict(slot=slot,bytes=len(saved),crc32=before['crc32'])
     def control(self,field,value):
-        self.request(10,[FIELDS[field],value>>7,value&127]);time.sleep(.04);return self.status()
+        self.request(10,_codecs.call(104,[2,FIELDS[field],value]));time.sleep(.04);return self.status()
 
 def ports():
     import mido

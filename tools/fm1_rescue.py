@@ -27,6 +27,7 @@ FM-1-transporter, docs/PROTOCOL.md), which were verified on hardware:
   5. a final full read must equal the expected image; then the FM-1 restarts into V15.
 """
 import argparse
+import rust_codecs as _codecs
 import hashlib
 import os
 import struct
@@ -61,60 +62,25 @@ class Fail(Exception):
 
 # ------------------------------------------------------------------ maths ---
 def crc16(data, crc=0):
-    """CRC-16/XMODEM (poly 0x1021, no reflection)"""
-    for b in data:
-        crc ^= b << 8
-        for _ in range(8):
-            crc = ((crc << 1) ^ 0x1021) & 0xFFFF if crc & 0x8000 else (crc << 1) & 0xFFFF
-    return crc
-
+    return _codecs.scalar(70, [crc], [data])
 
 MAGIC = bytes([0xC3, 0xCF, 0xC0, 0xE8, 0xCE, 0xD2, 0xB0, 0xAE,
                0xC4, 0xE3, 0xA3, 0xAC, 0xD3, 0xF1, 0xC1, 0xD6])
 
 
 def crc_cipher(buf):
-    """JieLi's CrcDecode cipher, key 0xFFFFFFFF (in place)"""
-    crc = crc16(b"\xFF\xFF", 0xFFFF)
-    for i in range(len(buf)):
-        crc = crc16(MAGIC[i % 16:i % 16 + 1], crc)
-        buf[i] ^= crc & 0xFF
-
+    buf[:] = _codecs.call(100, [], [buf])
 
 def enc(buf, key=0xFFFF):
-    """JieLi ENC stream cipher (in place)"""
-    for i in range(len(buf)):
-        buf[i] ^= key & 0xFF
-        key = ((key << 1) ^ (0x1021 if key & 0x8000 else 0)) & 0xFFFF
+    buf[:] = _codecs.call(71, [key], [buf])
 
-
-# ---------------------------------------------------------------- package ---
 def package_flash_image(raw):
-    """The .fwsc's type-0 entry: raw flash [0, APP_END). Layout as tools/fm1pkg_make.py writes it:
-    the logical image is the .fwsc without the marker byte after each of its first 20 0x2F-byte
-    blocks; it starts with a 0x40-byte header and a list of 0x50-byte entries, each ENC'd."""
-    logical = bytearray()
-    for i in range(20):
-        logical += raw[i * 0x30:i * 0x30 + 0x2F]
-    logical += raw[20 * 0x30:]
-    hdr = bytearray(logical[0:0x40])
-    enc(hdr)
-    n = struct.unpack_from("<H", hdr, 8)[0]
-    if hdr[16:22] != b"AC791N" or not 0 < n < 16:
-        raise Fail("not an FM-1 package (header)")
-    for i in range(n):
-        e = bytearray(logical[0x40 + i * 0x50:0x40 + (i + 1) * 0x50])
-        enc(e)
-        typ, _, dcrc, _, off, size = struct.unpack_from("<HHHHII", e, 0)
-        if typ == 0:
-            data = bytes(logical[off:off + size])
-            if len(data) != size or crc16(data) != dcrc:
-                raise Fail("package flash entry: bad CRC")
-            return data
-    raise Fail("package has no flash entry")
+    try:
+        return _codecs.call(105, [], [raw])
+    except _codecs.CodecError as error:
+        message = 'package has no flash entry' if error.code == -4 else 'package flash entry: bad CRC' if error.code == -6 else 'not an FM-1 package (header)'
+        raise Fail(message) from error
 
-
-# -------------------------------------------------------------- transport ---
 class Bot:
     """USB mass storage bulk-only transport: one SCSI-style command per call."""
 

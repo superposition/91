@@ -21,7 +21,7 @@ All integrity checks in the format are CRC16 (poly 0x1021, init 0).
 import argparse
 import os
 import struct
-import zlib
+import rust_codecs as _codecs
 from pathlib import Path
 
 APP_SLOT = 0x8DFBC
@@ -42,62 +42,36 @@ UFW_CHIP = b"AC791N"
 SDK = None
 
 
-def _crc_table():
-    t = []
-    for i in range(256):
-        c = i << 8
-        for _ in range(8):
-            c = ((c << 1) ^ 0x1021) if c & 0x8000 else (c << 1)
-        t.append(c & 0xFFFF)
-    return t
-
-
-_T = _crc_table()
-
-
 def crc16(data, crc=0):
-    for b in data:
-        crc = ((crc << 8) & 0xFFFF) ^ _T[((crc >> 8) ^ b) & 0xFF]
-    return crc
+    return _codecs.scalar(70, [crc], [data])
 
 
 def enc(buf, off, size, key=0xFFFF):
-    """JieLi ENC stream cipher (in place)"""
-    for i in range(size):
-        buf[off + i] ^= key & 0xFF
-        key = ((key << 1) ^ (0x1021 if key & 0x8000 else 0)) & 0xFFFF
+    """JieLi ENC stream cipher (in place), shared with native/WASM readers."""
+    if off < 0 or size < 0 or off + size > len(buf):
+        raise ValueError("ENC byte range is outside the buffer")
+    buf[off:off + size] = _codecs.call(71, [key], [buf[off:off + size]])
 
 
 def sfc(buf, off, size, base, key):
-    """SFC cipher: ENC per 32-byte block, key mixed with the block address"""
-    for i in range(0, size, 32):
-        enc(buf, off + i, min(size - i, 32), key ^ ((off + i - base) >> 2))
+    if off < 0 or size < 0 or off + size > len(buf) or off < base:
+        raise ValueError("SFC byte range/address is outside the buffer")
+    buf[off:off + size] = _codecs.call(9, [off - base, 0, key], [buf[off:off + size]])
 
 
-def chipkey_decode(d):
-    """chip key from the 32-byte isd_config blob"""
-    thesum = sum(d[:16]) & 0xFF
-    thesum = 0xAA if thesum >= 0xE0 else 0x55 if thesum <= 0x10 else thesum
-    return sum(1 << i for i in range(16) if (d[16 + i] ^ d[15 - i]) < thesum)
+def chipkey_decode(data):
+    return _codecs.scalar(10, [], [data[:32]])
 
 
 def entry(dcrc, offset, size, flags, resvd, index, name, fill=0xFF):
-    if isinstance(name, bytes):                     # 16 raw bytes: name + the packer's trailing fields
-        nm = name
-    else:
-        nm = name.encode() + b"\0"
-        nm = nm + bytes([fill]) * (16 - len(nm))
-    body = struct.pack("<HIIBBH16s", dcrc, offset & 0xFFFFFFFF, size & 0xFFFFFFFF, flags, resvd, index, nm)
-    return struct.pack("<H", crc16(body)) + body
+    # Names are application strings; Rust owns the byte layout and checksum.
+    nm = name.ljust(16, b"\0")[:16] if isinstance(name, bytes) else (name.encode() + b"\0").ljust(16, bytes([fill]))[:16]
+    struct.pack("<HBBH", dcrc, flags, resvd, index)  # preserve Python range errors
+    return _codecs.call(18, [dcrc, offset, size, flags, resvd, index], [nm])
 
 
 def key_blob(key):
-    """32 bytes that chipkey_decode() turns into `key` (+ CRC16)"""
-    d = bytearray([0x10] * 16) + bytearray(16)        # sum 0 -> threshold 0x55
-    for i in range(16):
-        d[16 + i] = d[15 - i] ^ (0x00 if key >> i & 1 else 0xFF)
-    assert chipkey_decode(bytes(d)) == key
-    return bytes(d) + struct.pack("<H", crc16(d))
+    return _codecs.call(11, [key])
 
 
 def sdk_file(rel):
@@ -118,35 +92,11 @@ def stub_version(app):
 
 
 def marker(body):
-    """the 20-byte commit marker of a body (app.bin from STUB_LEN, padded to words)"""
-    m = struct.pack("<IIII", MARK_MAGIC, MARK_FORMAT, len(body), zlib.crc32(body))
-    return m + struct.pack("<I", zlib.crc32(m))
+    return _codecs.call(12, [], [body])
 
 
 def compensate(app, off, want):
-    """4 bytes for app[off:off + 4] (zero on entry) that make crc16(app) == want.
-
-    The CRC-16 (init 0, no final xor) is linear over GF(2): crc(a ^ b) = crc(a) ^ crc(b) for equal lengths. So
-    crc(app with bytes v at off) = crc(app) ^ E(v), E(v) = crc(v + zeros to the end): 16 equations in 32 unknown
-    bits, solved by elimination over the 32 basis vectors (the free bits stay 0)."""
-    tail = bytes(len(app) - off - 4)
-    need = crc16(app) ^ want
-    rows = []                                           # (E(bit k), 1 << k), reduced as they come
-    for k in range(32):
-        e, m = crc16((1 << k).to_bytes(4, "little") + tail), 1 << k
-        for pe, pm in rows:
-            if e ^ pe < e:                              # pe's top bit is set in e
-                e, m = e ^ pe, m ^ pm
-        if e:
-            rows.append((e, m))
-            rows.sort(reverse=True)
-    v = 0
-    for pe, pm in rows:
-        if need ^ pe < need:
-            need, v = need ^ pe, v ^ pm
-    if need:
-        raise SystemExit("fm1pkg_make: no compensation bytes give the fixed CRC-16")
-    return v.to_bytes(4, "little")
+    return _codecs.call(13, [off, want], [app])
 
 
 def crc16_slow(data):
@@ -226,43 +176,12 @@ def flash_image(app, key, marker_of=marker):
 
 
 def ufw(flash, ota, product):
-    files = [(0, "flash.bin", flash), (100, "ota.bin", ota)]
-    off, ents, data = 0x400, [], bytearray()
-    for i, (typ, name, d) in enumerate(files):
-        off = (off + 0xFF) & ~0xFF
-        e = bytearray(0x50)
-        struct.pack_into("<HHHHIII", e, 0, typ, i, crc16(d), 0, off, len(d), (len(d) + 31) & ~31)
-        e[0x40:0x40 + len(name)] = name.encode()
-        ents.append((e, off, d))
-        off += len(d)
-    total = off
-    hdr = bytearray(0x40)
-    struct.pack_into("<IH", hdr, 4, total, len(files))
-    struct.pack_into("<HHH", hdr, 10, 0x0004, 0x0200, 0)     # header fields as written by the SDK packer
-    hdr[16:16 + len(UFW_CHIP)] = UFW_CHIP
-    lst = bytearray()
-    for e, _, _ in ents:
-        x = bytearray(e)
-        enc(x, 0, 0x50)
-        lst += x
-    struct.pack_into("<H", hdr, 2, crc16(lst))
-    struct.pack_into("<H", hdr, 0, crc16(hdr[2:0x40]))
-    enc(hdr, 0, 0x40)
-    logical = bytearray(b"\xFF" * total)
-    logical[0:0x40] = hdr
-    logical[0x40:0x40 + len(lst)] = lst
-    for e, o, d in ents:
-        logical[o:o + len(d)] = d
-    # .fwsc: one marker byte after each of the first 20 0x2F-byte blocks (the identity)
-    if len(product) > 20 or any((ord(c) + i + 1) & 0xFF == 0x7D for i, c in enumerate(product)):
-        raise SystemExit(f"product {product!r}: at most 20 characters, none encoding to the unused marker")
-    raw = bytearray()
-    for i in range(20):
-        ch = product[i] if i < len(product) else None
-        m = (ord(ch) + i + 1) & 0xFF if ch else 0x7D
-        raw += logical[i * 0x2F:(i + 1) * 0x2F] + bytes([m])
-    raw += logical[20 * 0x2F:]
-    return bytes(raw)
+    try:
+        # Match the original byte-valued product marker semantics.
+        identity = bytes(ord(char) & 255 for char in product)
+        return _codecs.call(99, [], [flash, ota, identity])
+    except _codecs.CodecError as error:
+        raise SystemExit(f"fm1pkg_make: invalid or oversized package input: {error}") from error
 
 
 def main():

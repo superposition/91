@@ -18,7 +18,8 @@ This extends [R05 / #6](https://github.com/superposition/91/issues/6) and [the o
 | OTA/Jam/backup/editor/debug frames | `wire`, `device_wire::dispatch` | Browser updater/device tools and opt-in firmware C primitive bindings |
 | CRC32 | shared `crc32` | Browser file checksums and ZIP checksum; firmware Jam transfer checksum |
 | Jam packs and sessions | existing validated views/encoders | Existing instrument path; codec WASM exercises both families |
-| FWSC logical addressing/product, JLFS, CRC/ENC/SFC/key/marker/compensation | `package` | Browser firmware package reader; host packager binding is the next checkpoint |
+| FWSC logical addressing/product, UFW header/directory/package, JLFS, CRC/ENC/SFC/key/marker/compensation | `package`, `package_write` | Browser firmware reader; actual SDK packager, loader packer, site builder and recovery reader |
+| Recovery key cipher, legacy debug35-bit words, logger frames, Jam payload fields | `tool_wire` | Existing Python recovery/debug/logger/Jam tools through the same safe dispatcher |
 
 `EN_RUST_FORMATS` stays independent of the factory flag. C0 implementations remain selectable. No musical parameter, object ID, protocol magic, storage size, checksum scope, or recovery layout changes. Typed byte work does not move transfer ownership, erase scheduling, MIDI interrupt behavior, or browser connection policy.
 
@@ -32,16 +33,25 @@ ABI1 uses a 256-byte request header: 32 little-endian scalar words followed by s
 
 The build embeds the compiled module into the existing static scripts. It needs no extra network request, MIME configuration, secure origin or browser library. Music and MIDI connection flows remain unchanged. `tools/build_codecs.py` pins Rust1.94.1 and records both source and artifact hashes; the site builder rejects missing/stale codec inputs. The emulator packaging step builds this shared browser dependency; it does not link the sidecar into the audio module.
 
+## Host tools boundary
+
+The existing `fm1-rs` CLI supplies `codec OP` and a bounded `codec-stream` stdio mode. `tools/rust_codecs.py` compiles that host tool with pinned Rust1.94.1, then owns one serialized child pipe per Python process. The child has no network listener, device handle, application state or retained input borrow. Requests are bounded before allocation. Python closes it on exit; failures propagate and a subsequent explicit call may start a fresh child. Windows launches it without a console window. Native build caches are separated for Windows and WSL. No Python codec fallback masks missing Rust execution.
+
+This keeps command-line logging and MIDI transfers from launching a process for every frame. The allocating host transport is outside the allocator-free core. `fm1pkg_make.py`, `build.py`, `fm1_install.py`, `fm1log.py`, `jam_midi.py`, `fm1_rescue.py`, `fm1_debug.py` and the site package reader delegate their byte operations to this shared implementation. The independent slow CRC in the boot-stub packager remains an intentional cross-check, not the production encoder.
+
+SDK asset selection, boot-stub placement, flash ranges, loader/recovery policy, user confirmation, device discovery and transfer scheduling remain with their existing owners. In particular, USB mass-storage CBW/CSW/CDB transport and guarded development register-command services belong to #19. Music-source compilers remain under #3; their already-qualified Jam/session formats are outside this remaining-codec port. Project publication/flash transaction policy belongs to #7 and browser interaction policy to #23.
+
 ## Evidence
 
 * A frozen R01 C exporter uses the original struct definitions and byte writers for every retained object constructor. It also executes actual settings, voices, project, globals, extras and bass save consumers. All 440 immutable source hashes are verified before reproduction. Current C0 and the production C→Rust adapters produce identical bytes.
-* **2,546** independently sourced C/JavaScript/Python operation vectors execute in both the safe native dispatcher and actual codec WASM. They cover constructors, signed records, files, package primitives and wire families. Expanded fixtures remain test-only and never enter a production module.
+* **2,923** independently sourced C/JavaScript/Python operation vectors execute in both the safe native dispatcher and actual codec WASM. They cover constructors, signed records, files, package primitives and wire families. Expanded fixtures remain test-only and never enter a production module.
 * Native decoder tests vary malformed descriptors, truncation, output capacities and data bytes, checking guard tails. Dedicated constructor tests cover invalid indices, reserved/padding preservation, full voice slots and compatible unknown fields.
 * WASM additionally reproduces all **72,448** frozen C DX7 field mutations and all **65,536** Python key blobs. Memory size remains fixed and window guards remain intact.
 * Existing player-oriented piece, backup, DX-file, five updater discovery profiles and device API/busy/disconnect/import suites run through the compiled codec client. Source-extracted tests inject that actual client, with no JavaScript codec fallback.
+* The real Python SDK packager executes Rust for 1,377 frozen primitive checks and produces a byte-identical **611,251-byte** package using the actual recovery-stub app, loader and three hash-recorded SDK inputs. The independent frozen writer never calls the maintained Rust module. Existing boot-stub integrity tests report **265 checks, zero failures**. Simulated installer/Jam tools and logger self-tests exercise the same host binding without hardware. Host tests cover concurrent callers, oversized/truncated messages, explicit failure/retry and required-executable errors.
 * The full seven-scenario C0/Rust emulator suite passes, including saved HYP3/custom-DX playback/save and effect tails. HTTP audio fallback and browser API/resource-lifecycle doubles pass. The generated site preserves all **152** interactive control IDs; all routes, scripts, local assets and nested hosting paths pass source/build checks.
 
-The dedicated proof is [browser-codecs-proof.json](rust/browser-codecs-proof.json). Physical device/browser interaction is not claimed by this checkpoint. Root will qualify the combined latest engine base separately. SDK package assembly/recovery policy remains in its existing tooling; its duplicated Python byte primitives are the remaining software-consumer binding being addressed next, before #6 is considered complete.
+The final integrated result is [shared-codecs-completion.json](rust/shared-codecs-completion.json), including Windows Python 3.8, full native/WASM execution and the linked footprint. The original browser checkpoint is recorded in [browser-codecs-proof.json](rust/browser-codecs-proof.json); [package-codecs-proof.json](rust/package-codecs-proof.json) records the completing host binding and full-package comparison. Physical device/browser interaction is not claimed by source/Node tests. Root qualifies the combined latest engine base separately. No remaining duplicate browser/host byte-codec implementation is deferred under a generic platform label; the policy boundaries above are separately ticketed.
 
 ## Reproduce
 
@@ -56,3 +66,5 @@ python3 tests/web_site_test.py build/site-codec-check build/emu
 ```
 
 The first command compiles the sidecar and native copy bridge, checks fixture hashes and compares frozen/C0/Rust constructor bytes. The immutable-source argument is optional in routine CI; native/WASM goldens, consumer suites, current C0/Rust comparisons and bounds checks still execute.
+
+At the integrated `ad1b312` base, toggling only `EN_RUST_FORMATS` changes the engine WASM by +7,073 code bytes and +656 data-section bytes; file size changes by -870 bytes because custom metadata also changes. The separate codec module is 119,837 bytes with fixed 4 MiB memory. These are linked WASM measurements, not MCU ROM/RAM or timing estimates. Windows Python 3.8 passes the primitive/pipe, simulated installer, logger, all eight Jam-tool tests, pure build/recovery/site/debug helpers and help entry points. No device is accessed by those checks.

@@ -20,6 +20,8 @@ Exit codes: 0 done, 1 cancelled or other error, 2 bad arguments or package,
 loader / no restart), 6 wrong model, or another identity after the install.
 """
 import argparse
+import struct
+import rust_codecs as _codecs
 import queue
 import re
 import sys
@@ -54,48 +56,19 @@ class InstallError(Exception):
 # ------------------------------------------------------------ wire format ---
 
 def pack7(data):
-    out, acc, nb = [], 0, 0
-    for b in data:
-        acc |= b << nb
-        nb += 8
-        while nb >= 7:
-            out.append(acc & 0x7F)
-            acc >>= 7
-            nb -= 7
-    if nb:
-        out.append(acc & 0x7F)
-    return bytes(out)
+    return _codecs.call(72, [], [data])
 
-
-def unpack7(s):
-    out, acc, nb = [], 0, 0
-    for b in s:
-        acc |= (b & 0x7F) << nb
-        nb += 7
-        while nb >= 8:
-            out.append(acc & 0xFF)
-            acc >>= 8
-            nb -= 8
-    return bytes(out)
-
+def unpack7(data):
+    return _codecs.call(73, [1_100_000], [data])[4:]
 
 def response(addr, data, fl=0):
-    n = len(data)
-    body = bytearray([0x00, 0x59, 0x30, (n + 8) & 0xFF, ((n + 8) >> 8) & 0xFF, 0, fl])
-    body += addr.to_bytes(4, "little") + bytes([n & 0xFF, (n >> 8) & 0xFF, 0]) + bytes(data)
-    body.append(~sum(body[6:]) & 0xFF)
-    return b"\xF0" + pack7(body) + b"\xF7"
-
+    return _codecs.call(93, [addr, fl], [data])
 
 def parse_request(pkt):
-    """-> (flags, addr, len) or None"""
-    if len(pkt) < 2 or pkt[0] != 0xF0 or pkt[-1] != 0xF7:
+    try:
+        return struct.unpack('<III', _codecs.call(94, [0], [pkt]))
+    except _codecs.CodecError:
         return None
-    u = unpack7(pkt[1:-1])
-    if len(u) != 15 or u[:3] != b"\x00\x59\x30" or ~sum(u[6:14]) & 0xFF != u[14]:
-        return None
-    return u[6], int.from_bytes(u[7:11], "little"), int.from_bytes(u[11:14], "little")
-
 
 class Identity:
     def __init__(self, text, model, version):
@@ -109,30 +82,24 @@ class Identity:
 def parse_identity(pkt):
     if len(pkt) < 2 or pkt[0] != 0xF0 or pkt[-1] != 0xF7:
         return None
-    d = unpack7(pkt[1:-1])
-    if len(d) != 34 or d[:3] != b"\x00\x59\x11":
+    try:
+        text = _codecs.call(94, [1], [pkt]).rstrip(b'\0').decode('latin-1')
+    except _codecs.CodecError:
         return None
-    txt = d[6:33].rstrip(b"\0").decode("latin-1")
-    m = re.fullmatch(r"([^_]+)_(\d+)", txt)
-    return Identity(txt, m[1], int(m[2])) if m else None
-
-
-# --------------------------------------------------------------- package ---
+    m = re.fullmatch(r'([^_]+)_(\d+)', text)
+    return Identity(text, m[1], int(m[2])) if m else None
 
 def product_of(raw):
-    """the package identity ("FM-1_906"): one marker byte after each of the first 20 blocks"""
-    if len(raw) < BLOCKS * BLK:
-        raise InstallError("badpkg", "not an FM-1 package (too short)")
-    return "".join(chr((m - i - 1) & 0xFF) for i in range(BLOCKS) if (m := raw[i * BLK + KEEP]) != 0x7D)
-
+    try:
+        return _codecs.call(14, [], [raw]).decode('latin-1')
+    except _codecs.CodecError as error:
+        raise InstallError('badpkg', 'not an FM-1 package (too short or damaged)') from error
 
 def logical_image(raw):
-    """the image the device reads during an update: the package without the 20 marker bytes"""
-    out = bytearray()
-    for i in range(BLOCKS):
-        out += raw[i * BLK:i * BLK + KEEP]
-    return bytes(out + raw[BLOCKS * BLK:])
-
+    try:
+        return _codecs.call(15, [], [raw])
+    except _codecs.CodecError as error:
+        raise InstallError('badpkg', 'not an FM-1 package (too short or damaged)') from error
 
 def model_of(text):
     head = text.split("_")[0]
@@ -146,6 +113,7 @@ class MidoLink:
 
     def __init__(self, backend, in_name, out_name):
         import mido
+        _codecs.executable()  # build the host dependency before acquiring ports
         self.backend, self.name, self.mido = backend, in_name, mido
         self.q = queue.Queue()
         self.inp = mido.open_input(in_name, callback=self._rx)
@@ -238,7 +206,7 @@ def ask(link, query, secs):
 def handshake(link, tries=3):
     global HS_FULL
     if HS_FULL is None:
-        HS_FULL = b"\xF0" + pack7(bytes([0, 0x59, 0x11, 1, 0, 0, 1, 0xFE])) + b"\xF7"
+        HS_FULL = _codecs.call(95, [1])
     link.drain()
     for _ in range(tries):
         ident = ask(link, HS_QUERY, DELAY["hs"])

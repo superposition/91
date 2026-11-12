@@ -14,3 +14,4 @@ fm1-types.workspace = true
 fm1-formats.workspace = true
 fm1-engine.workspace = true
 serde_json.workspace = true
+fm1-codecs-wasm = { path = "../fm1-codecs-wasm" }
