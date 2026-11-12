@@ -91,11 +91,11 @@ export function createPanel(document = globalThis.document) {
     device.insertBefore(d, document.getElementById("start"));
     c.hit = d;
   }
-  // what each control does, on hover (the Buttons list below says the same)
-  const TIP = { FX: "The effects menu, on / off", ENV: "Pad (again: env, LFO, chords); with SEL: the voice on screen by hand", LFO: "Bass (again: env, LFO)", EDIT: "The next chord", GLO: "Global", SEL: "Shift (hold): keys 1-6 pick the pattern; PRESETS on the next bar; ALGORITHM the sound of the voice on screen; ENV the voice on screen by hand", HOME: "Tempo", SAVE: "Breakdown / build; hold: drop. On Global: store the piece (hold: factory)",
-    ARP: "Acid (again: env, line)", SEQ: "Drums (again: Links, Kit, Drum drift); hold: the sequencer; with SEL: links on / off", PLAY: "Play / stop", REC: "Freeze: the chord holds, the reverb rings on",
-    "OCT-": "An octave down: this page's voice, or the song; sequencer: the drum above", "OCT+": "An octave up: this page's voice, or the song; sequencer: the drum below", SELECT: "Tempo", ALGORITHM: "Mode", PRESETS: "Piece, 01 to 10",
-    MASTER: "Volume" };
+  // Songbook starts first; tips also identify the controls' generative-piece roles.
+  const TIP = { FX: "Open or close the effects menu", ENV: "Pad pages; hold SEL to play the voice on screen by hand", LFO: "Bass pages", EDIT: "On Songbook: request a new idea. On generative pieces: next chord", GLO: "Global settings", SEL: "Hold for alternate controls and combinations", HOME: "Return to the Songbook performance screen; on generative pieces: tempo and performance views", SAVE: "On Songbook pages: save session while stopped. On generative pieces: breakdown/build; on Global: store the piece",
+    ARP: "Acid pages", SEQ: "Drum pages; hold for the sequencer", PLAY: "Play or stop", REC: "On Songbook: hold the phrase. On generative pieces: freeze the chord",
+    "OCT-": "An octave down for the voice or song; in the sequencer: previous drum", "OCT+": "An octave up for the voice or song; in the sequencer: next drum", SELECT: "Choose a page, including Songbook, Arrangement, DX Keys, DX Bass and Swells", ALGORITHM: "On Songbook pages: energy. On generative pieces: mode; hold SEL to choose a voice sound", PRESETS: "On Songbook: choose a song; hold GLO to choose form. Other pages: choose a piece",
+    KNOB1: "On Songbook: key. On detail pages: first setting", KNOB2: "On Songbook: tempo. On detail pages: second setting", KNOB3: "On Songbook: section length. On detail pages: third setting", KNOB4: "On Songbook: movement. On detail pages: fourth setting", MASTER: "Volume" };
   for (const [n, c] of [...Object.entries(buttons), ...Object.entries(knobs)]) if (TIP[n]) c.g.setAttribute("aria-description", TIP[n]);
   for (const k of Object.values(knobs)) hit(k, "knob");
   for (const b of Object.values(buttons)) hit(b);
