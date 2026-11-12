@@ -6,6 +6,7 @@
 pub mod effects;
 #[path = "factory_logic.rs"]
 pub mod factory;
+pub mod fm6;
 pub mod melodic;
 pub mod planner;
 pub mod scheduling_tables;

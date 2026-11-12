@@ -2,6 +2,9 @@
 /* The instrument (amb.h). One compilation unit, -O2. */
 #include "amb.h"
 #include "fastmath.h"
+#if EN_RUST_FM6
+#include "rust_fm6.h"
+#endif
 #if EN_RUST_VOICES
 #include "rust_voices.h"
 #endif
@@ -1547,7 +1550,13 @@ void en_style_sounds(int16_t *p)                /* a stored style (1..4): its ki
         p[P_AC_WAVE] = ACIDS[st];
     p[P_STYLE] = 0;
 }
+#if EN_RUST_VOICES
+static fm1_voice_pad_runtime_t pad_runtime;
+#define stab_env pad_runtime.stab
+static float stab_k=0.99f;
+#else
 static float stab_env, stab_k = 0.99f;          /* the pad's stabs: the envelope, its fall each 32 samples */
+#endif
 
 /* ---------------------------------------------------------------- links --- */
 /* The drums patched into the voices (P_LINKS on, SEL + SEQ): each kick opens the drone's filter for a
@@ -1565,6 +1574,9 @@ static int links_on(void);
  * forms and dissolves rather than sitting there. The timbre: two saws a few
  * cents apart through two formant band-passes, a vowel that Bright moves from "oo" through "ah" to
  * "eh", with a little of the first formant's low-pass for body. */
+#if EN_RUST_VOICES
+typedef fm1_voice_pad_t pad_t;
+#else
 typedef struct {
     float ph[4], inc[4], sub;                   /* the two saws Detune apart, a second pair inside them (strings, supersaw), the sub's phase */
     float note, target;                         /* MIDI: the note of this breath, the next one's */
@@ -1581,8 +1593,14 @@ typedef struct {
     uint32_t pord;                              /* when it was played (the oldest is taken first) */
     float pamp;                                 /* a played note's envelope, 0..1 */
 } pad_t;
+#endif
 static pad_t pad[EN_NPAD];
+#if EN_RUST_VOICES
+static float pad_gate,pad_vol,bright,detune=0.00144f;
+#define pad_gain pad_runtime.gain
+#else
 static float pad_gate, pad_gain, pad_vol, bright, detune = 0.00144f;
+#endif
 static const float PAD_PAN[EN_NPAD] = {-0.55f, -0.18f, 0.18f, 0.55f};
 static const float BREATH[EN_NPAD] = {1.0f, 1.21f, 1.43f, 1.67f};    /* unequal cycles, as 2/1's 12..20 s loops */
 static const float START_T[EN_NPAD] = {0.0f, 0.9f, 0.82f, 0.95f};    /* the first breaths overlap */
@@ -1672,6 +1690,9 @@ static inline float svf_mm(float x, const float *c, float *s, int t)   /* the mu
 static void midi(uint32_t st, uint32_t d1, uint32_t d2);
 /* the pad's MIDI notes are queued, and sent by the first core once the pad's render is done (MIDI out is not for the other core to call) */
 static uint8_t pq_st[16], pq_d1[16], pq_d2[16], pq_n;
+#if EN_RUST_VOICES
+static fm1_voice_pad_breath_t voice_pad_breath_config(void);
+#endif
 static void pad_midi(uint32_t st, uint32_t d1, uint32_t d2)
 {
     if (pq_n < 16u) {
@@ -1690,6 +1711,9 @@ static void pad_midi_flush(void)
 }
 static void pad_breathe(pad_t *v, int i)        /* a new breath: its length, its strength, its note */
 {
+#if EN_RUST_VOICES
+    const fm1_voice_pad_breath_t c=voice_pad_breath_config();fm1_rust_voice_pad_breathe(v,&c,BREATH[i],&prng,pad_midi);
+#else
     float a = pe_atk_s(par[P_PE_ATK]), h = pe_hold_s(par[P_PE_HOLD]), r = pe_rel_s(par[P_PE_REL]),
           secs = a + h + r + pe_rest_s(par[P_PE_REST]);
     secs = fm_maxf(secs, 0.3f);
@@ -1706,6 +1730,7 @@ static void pad_breathe(pad_t *v, int i)        /* a new breath: its length, its
     v->midi_note = (uint8_t)v->target;
     if (en_playing && !par[P_PAD_MAN])
         pad_midi(0x90, v->midi_note, (uint32_t)(50.0f + 40.0f * v->peak));
+#endif
 }
 
 /* a new key (piece, root, scale): the voices still singing the old one fade out in about a second and
@@ -4762,6 +4787,22 @@ static void reverb_job(void *p)
 }
 static void fm_job(const rv_job_t *c)           /* the DX voices' samples for this chunk, into the ring (they are played a chunk later) */
 {
+#if EN_RUST_FM6
+    uint32_t at=c->fm_w&(FM_R-1),left=(uint32_t)c->n;
+    if(!c->fm_on){
+        (void)fm1_rust_fm6_pool((fm1_fm6_slot_t *)fmx,0,0);
+        while(left){uint32_t count=left<FM_R-at?left:FM_R-at;fm_zero(fm_fifo+at,count*sizeof(float));left-=count;at=0;}
+        return;
+    }
+    const fm1_fm6_tables_t t=RUST_FM_TABLES;const fm1_fm6_scratch_t b=RUST_FM_SCRATCH;
+    const fm1_fm6_config_t config={(uint32_t)jp_dx(),fm_cur,fm_engine,(uint32_t)fm6_float_path,fm_tune,fm_bend};
+    fm1_fm6_ams_t cache={fm_ams_amd,{fm_ams_pt[0],fm_ams_pt[1],fm_ams_pt[2],fm_ams_pt[3]},fm_ams_ok};
+    const fm1_fm6_render_t r={(fm1_fm6_slot_t *)fmx,(fm1_fm6_lfo_t *)&fm_lfo,(fm1_fm6_lfo_t *)&fm_bass_lfo,fm_ed,fm_bass_ed,&config,&cache,&t,&b,fm_blk,&fm_pos,&fm_bass_sample};
+    /* Only exact write spans are borrowed; the foreground reads 256 frames
+     * behind. The inactive legacy upload/bass union is never borrowed. */
+    while(left){uint32_t count=left<FM_R-at?left:FM_R-at;fm1_rust_fm6_render(&r,fm_fifo+at,config.jam?fm_bass_fifo+at:0,count);left-=count;at=0;}
+    fm_ams_amd=cache.amd;fm_ams_ok=cache.valid;fm_ams_pt[0]=cache.points[0];fm_ams_pt[1]=cache.points[1];fm_ams_pt[2]=cache.points[2];fm_ams_pt[3]=cache.points[3];
+#else
     int j;
     if (!c->fm_on) {                             /* not the pluck's sound: the voices let go, nothing sounds */
         for (j = 0; j < FM_NV; j++)
@@ -4774,6 +4815,7 @@ static void fm_job(const rv_job_t *c)           /* the DX voices' samples for th
         fm_fifo[(c->fm_w + (uint32_t)j) & (FM_R - 1)] = fm_next();
         if(jp_dx())fm_bass_fifo[(c->fm_w+(uint32_t)j)&(FM_R-1)]=fm_bass_sample;
     }
+#endif
 }
 /* what the other core does in a chunk: the pad's voices (the stage the first core waits for, before it mixes), then the reverb's tank (the first core needs its
  * output at the end of the chunk), then the DX voices (needed a chunk on, so nothing waits for them) */
@@ -7309,7 +7351,12 @@ static float dsn_l[BLK], dsn_r[BLK];            /* the mix before the drums (the
  * Synthi's filter below half, then tape). No chorus: a modulated delay against pure tones beats (on
  * the FM-1's speaker above all), and that read as pulsing. The width comes from the voices' places,
  * the echo's two heads and the plate. */
+#if EN_RUST_VOICES
+#define pad_ctl pad_runtime.controls
+static uint32_t dr_ctl,ac_ctl;
+#else
 static uint32_t pad_ctl[EN_NPAD], dr_ctl, ac_ctl;      /* the control steps' counts (every 32 samples), kept across chunks */
+#endif
 static float padl[BLK] EN_POOL, padr[BLK] EN_POOL;
 static float plp[4];
 static float pad_ol[BLK] EN_POOL, pad_or[BLK] EN_POOL;   /* the job's working buffers: the pad's contribution to the mix, through the chorus, then into pad_ring (its dry sum goes straight there from pad_bus) */
@@ -7322,8 +7369,15 @@ static float ch_ph[3] = {0.0f, 0.3333f, 0.6667f};
 static uint32_t ch_i;
 static float pad_lk;                             /* the snare link, as it was when the chunk began (the pad may be rendered on the other core) */
 
+#if EN_RUST_VOICES
+#include "rust_pad.inc"
+#endif
 static void pad_bus(uint32_t n)
 {
+#if EN_RUST_VOICES
+    const fm1_voice_pad_bus_t c=voice_pad_bus_config();
+    float *const outputs[4]={padl,padr,pad_ol,pad_or};fm1_rust_voice_pad_bus(plp,&c,outputs,pad_ring[2],n);
+#else
     const float fc = fm_clampf(700.0f * PAD_SOUND[pad_snd()].fc * fm_exp2f(bright * 0.03f + 0.6f * arcm + 1.5f * pad_filt +
                                                          3.0f * (float)par[P_LK_SNARE] * 0.01f * pad_lk), 200.0f, 12000.0f);
     const float c = 1.0f - fm_expf(-FM_TWO_PI * fc * (1.0f / EN_SR));
@@ -7342,6 +7396,7 @@ static void pad_bus(uint32_t n)
     }
     for (j = 0; j < 4; j++)
         plp[j] = fm_flush(plp[j]);
+#endif
 }
 
 static void pad_publish(uint32_t w, uint32_t n)   /* the job's pad (after the chorus) into the ring, for the first core a chunk on (the dry sum went in from pad_bus) */
@@ -7406,6 +7461,12 @@ static void pad_chorus(uint32_t n)
 
 static void render_pad(uint32_t n)
 {
+#if EN_RUST_VOICES
+    const fm1_voice_pad_config_t c=voice_pad_config();fm1_voice_pad_publication_t result;unsigned i;
+    fm1_rust_voice_pad(pad,&pad_runtime,&c,&prng,SINT,padl,padr,&result,n,pad_midi);
+    for(i=0;i<EN_NPAD;i++)if(result.mask>>i&1u){en_pad_note[i]=result.notes[i];en_pad_amp[i]=result.amplitudes[i];}
+    en_pad_level=result.level;pad_bus(n);pad_chorus(n);
+#else
     const int ft_pad = fxs_v[EN_FXS_FT_PAD];   /* the FILTERS page's type for the saw sounds */
     int i;
     float lvl = 0.0f;
@@ -7575,6 +7636,7 @@ static void render_pad(uint32_t n)
     stab_env = fm_flush(stab_env);
     pad_bus(n);
     pad_chorus(n);
+#endif
 }
 
 /* (0.14.4 tried this in RAM, .ram_hot: on the device the bass costs about 200 us a chunk whatever the chunk's length, the most of any stage, which
@@ -7586,9 +7648,16 @@ static void render_pad(uint32_t n)
 static void render_bass(uint32_t n)
 {
     if(jp_dx()) {
+#if EN_RUST_FM6
+        uint32_t done=0;float peak=0.0f,g=bass_vol*0.5f*FM_OUT*(float)jp_data[JP2_HEAD+9]*0.01f;
+        while(done<n){uint32_t at=(rv_job.fm_w-FM_D+done)&(FM_R-1),count=n-done;if(count>FM_R-at)count=FM_R-at;
+            peak=fm_maxf(peak,fm1_rust_fm6_bass_output(fm_bass_fifo+at,bass_o+done,g,count));done+=count;}
+        en_bass_level=peak;return;
+#else
         uint32_t k;float peak=0.0f,g=bass_vol*0.5f*FM_OUT*(float)jp_data[JP2_HEAD+9]*0.01f;
         for(k=0;k<n;k++){float x=fm_bass_fifo[(rv_job.fm_w-FM_D+k)&(FM_R-1)]*g;bass_o[k]=x;peak=fm_maxf(peak,fm_fabsf(x));}
         en_bass_level=peak;return;
+#endif
     }
 #if EN_RUST_VOICES
     const fm1_voice_drone_config_t config=voice_drone_config();
@@ -7782,7 +7851,11 @@ static void render_fm(uint32_t n)
 {
     const int on = jp_dx() || (par[P_CM_SND] >= CM_NPLAIN && cm_vol > 0.0f);
     const int cur = on && fm_cur >= 0 ? fm_cur : 0;   /* (the voice that is loaded: an empty user slot plays the first built-in one, at its own gain) */
+#if EN_RUST_FM6
+    const float g = jp_dx() ? pad_vol*0.5f*FM_OUT*(float)jp_data[JP2_HEAD+8]*0.01f : cm_vol * 0.5f * FM_OUT * fm1_rust_fm6_gain((uint32_t)cur,fm_dy_cur);
+#else
     const float g = jp_dx() ? pad_vol*0.5f*FM_OUT*(float)jp_data[JP2_HEAD+8]*0.01f : cm_vol * 0.5f * FM_OUT * (fm_dy_cur && cur < EN_NFMFACT ? FM_GAIN_DY[cur] : FM_GAIN[cur]);
+#endif
     uint32_t j;
     float lvl = 0.0f;
     if (!on) {
@@ -7791,6 +7864,15 @@ static void render_fm(uint32_t n)
         fm_ctr += n;
         return;
     }
+#if EN_RUST_FM6
+    j=0;
+    while(j<n){
+        const uint32_t at=(fm_ctr-FM_D+j)&(FM_R-1);uint32_t count=n-j;const int track=jp_dx()?TR_PAD:TR_CM;
+        if(count>FM_R-at)count=FM_R-at;
+        const fm1_fm6_output_t c={g,trk_g[track],trk_g1[track],tg_inv,j};float *const outputs[4]={fm_ol+j,fm_or+j,fm_rs+j,fm_es+j};
+        lvl=fm_maxf(lvl,fm1_rust_fm6_output(fm_fifo+at,outputs,&c,count));j+=count;
+    }
+#else
     for (j = 0; j < n; j++) {
         float x = fm_fifo[(fm_ctr - FM_D + j) & (FM_R - 1)];   /* (rendered a chunk ago, by the other core) */
         const float y = (x < -16.0f ? -16.0f : x > 16.0f ? 16.0f : x) * g * TG(jp_dx()?TR_PAD:TR_CM, j);
@@ -7800,6 +7882,7 @@ static void render_fm(uint32_t n)
         fm_es[j] = y * 0.5f;
         lvl = fm_maxf(lvl, y < 0.0f ? -y : y);
     }
+#endif
     en_cm_level = fm_minf(lvl * 4.0f, 1.0f);
     fm_ctr += n;
 }
@@ -8929,7 +9012,11 @@ static void control(uint32_t n)                 /* once a chunk: the slow things
     if(jp_dx() && jp_patch_dirty) {
         unsigned part;
         for(part=0;part<2;part++)if(jp_patch_dirty>>(part)&1u) {
+#if EN_RUST_FM6
+            int busy=(int)fm1_rust_fm6_pool((fm1_fm6_slot_t *)fmx,2,part);
+#else
             int k,busy=0;for(k=0;k<FM_NV;k++)if(fmx[k].used && fmx[k].part==part)busy=1;
+#endif
             if(!busy){fm_jam_program(jp_data,part);jp_patch_dirty&=(uint8_t)~(1u<<part);}
         }
     }
