@@ -100,7 +100,7 @@ pub struct KeyResult {
 }
 const _: [(); 44] = [(); core::mem::size_of::<setup::KeyConfig>()];
 const _: [(); 104] = [(); core::mem::size_of::<KeyResult>()];
-const _: [(); 20] = [(); core::mem::size_of::<setup::DrumConfig>()];
+const _: [(); 32] = [(); core::mem::size_of::<setup::DrumConfig>()];
 const _: [(); 36] = [(); core::mem::size_of::<setup::AcidConfig>()];
 /// # Safety
 /// Four pads, drone, acid,24held bytes,3counts, sequence, config and output are
