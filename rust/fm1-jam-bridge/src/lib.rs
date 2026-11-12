@@ -8,6 +8,7 @@ use fm1_engine::planner::{bass_event, plan_into, Phrase, Seed, Settings};
 use fm1_formats::jam::JamPack;
 use fm1_formats::session::JamSession;
 use fm1_rt::atomic::{AtomicU32, Ordering};
+mod app;
 mod commands;
 mod dj;
 mod effects;
@@ -308,6 +309,7 @@ pub extern "C" fn fm1_rust_jam_stat(index: u32) -> u32 {
         48..=55 => fm6::stat(index),
         56..=63 => worker::stat(index),
         64..=71 => persistence::stat(index),
+        80..=83 => app::stat(index),
         72..=73 => dj::stat(index),
         76..=79 => harmony::stat(index),
         _ => 0,

@@ -19,6 +19,59 @@ static uint16_t cv_px[CV_MAX] __attribute__((section(".pool")));
 static uint32_t cv_w, cv_h;
 static int32_t cv_oy;            /* y offset for graph drawing */
 static int32_t cv_y0, cv_y1;     /* X0X: the rows drawing may touch (cv_band) */
+static uint8_t cv_scan;          /* odd screen rows a quarter darker */
+#if EN_RUST_APP
+#include "dsp/rust_app.h"
+#ifndef LCD_READY
+#if (defined(EN_HOST) && EN_HOST) || (defined(EN_WEB) && EN_WEB) || defined(FM1_APP_TEST)
+#define LCD_READY() (lcd_sync(),1) /* only synchronous/non-DMA software backends */
+#else
+#error "Rust graphics requires confirmed LCD_READY; void lcd_sync is not a completion proof"
+#endif
+#endif
+#endif
+#if EN_RUST_APP || defined(LCD_READY)
+#define CV_RETAINED_LCD 1
+static uint8_t cv_dma_pending;
+static int cv_ready(void)
+{
+    if(LCD_READY()!=1) {cv_dma_pending=2;return 0;} /* retained/unknown: quarantine */
+    cv_dma_pending=0;return 1;
+}
+static int cv_mutable(void)
+{
+    return cv_dma_pending!=2 && (!cv_dma_pending || cv_ready());
+}
+#endif
+#if EN_RUST_APP
+static fm1_canvas_font cv_font_view(const felucca_font_t *f)
+{
+    fm1_canvas_font out={f->h,f->pad,f->first,f->last,f->adv,f->bw,f->off,f->data,0};
+    uint32_t i,n=(uint32_t)f->last-f->first+1u;
+    for(i=0;i<n;i++) {uint32_t end=f->off[i]+(uint32_t)f->h*((f->bw[i]+1u)/2u);if(end>out.length)out.length=end;}
+    return out;
+}
+static uint32_t cv_string_length(const char *s)
+{
+    uint32_t n=0;
+    if(s) while(n<=256u && s[n]) n++;
+    return n;
+}
+static int32_t cv_rust(uint32_t op,const int32_t args[6],const felucca_font_t *font,const char *text)
+{
+    fm1_canvas_state state={cv_w,cv_h,cv_oy,cv_y0,cv_y1,cv_scan};
+    fm1_canvas_font view={0};
+    int32_t result;
+    if(cv_dma_pending==2) return -1; /* only a fresh successful begin may reclaim */
+    if(font) view=cv_font_view(font);
+    /* The previous transfer can retain cv_px after lcd_blit returns. Never
+     * form a mutable Rust pixel slice until that hardware read has ended. */
+    if(op!=1u && (op!=5u || cv_scan) && cv_dma_pending && !cv_ready()) return -1;
+    result=fm1_rust_canvas(op,cv_px,CV_MAX,&state,args,font?&view:0,(const uint8_t*)text,cv_string_length(text));
+    cv_w=state.width;cv_h=state.height;cv_oy=state.origin;cv_y0=state.top;cv_y1=state.bottom;cv_scan=(uint8_t)state.scan;
+    return result;
+}
+#endif
 
 #define RGB(r, g, b) ((uint16_t)((((r) >> 3) << 11) | (((g) >> 2) << 5) | ((b) >> 3)))
 #define C_BLACK 0x0000u
@@ -49,6 +102,10 @@ static uint16_t pal[5];
 
 static void palette_set(uint32_t i)
 {
+#if EN_RUST_APP
+    fm1_rust_palette(i,pal);return;
+#endif
+
     uint32_t k;
     for (k = 0; k < 5u; k++)
         pal[k] = PALETTES[i % NPALETTES].c[k];
@@ -58,10 +115,18 @@ static inline uint16_t swap16(uint32_t c) { return (uint16_t)(((c >> 8) & 0xFFu)
 
 static void cv_begin(uint32_t w, uint32_t h, uint16_t bg)
 {
+#if EN_RUST_APP
+    { const int32_t a[6]={(int32_t)w,(int32_t)h,bg,0,0,0};if(!cv_ready())return;(void)cv_rust(0,a,0,0);return; }
+#endif
+
     uint32_t i, n;
     if (w * h > CV_MAX)
         h = CV_MAX / w;
+#if CV_RETAINED_LCD
+    if(!cv_ready()) return;
+#else
     lcd_sync();                     /* the last blit may still read cv_px */
+#endif
     cv_w = w;
     cv_h = h;
     cv_oy = cv_y0 = 0;
@@ -75,16 +140,27 @@ static void cv_begin(uint32_t w, uint32_t h, uint16_t bg)
  * canvas that holds several, sent in one transfer so the bands change on screen together) */
 static void cv_band(int32_t y0, int32_t h)
 {
+#if EN_RUST_APP
+    { const int32_t a[6]={y0,h,0,0,0,0};(void)cv_rust(1,a,0,0);return; }
+#endif
+
     cv_oy = cv_y0 = y0;
     cv_y1 = y0 + h;
 }
 
-static uint8_t cv_scan;          /* Scanlines (a setting): every other screen row a quarter darker, a CRT's */
+/* Scanlines are declared with the strip state above. */
 static void cv_scanlines(uint32_t y, uint32_t r0)
 {
+#if EN_RUST_APP
+    { const int32_t a[6]={(int32_t)y,(int32_t)r0,0,0,0,0};(void)cv_rust(5,a,0,0);return; }
+#endif
+
     uint32_t r;
     if (!cv_scan)
         return;
+#if CV_RETAINED_LCD
+    if(!cv_mutable()) return;
+#endif
     for (r = r0 + ((y + r0) & 1u ? 0u : 1u); r < cv_h; r += 2u) {   /* the odd screen rows */
         uint16_t *p = cv_px + r * cv_w, *e = p + cv_w;
         for (; p < e; p++) {
@@ -95,20 +171,46 @@ static void cv_scanlines(uint32_t y, uint32_t r0)
 }
 static void cv_blit(uint32_t x, uint32_t y)
 {
+#if CV_RETAINED_LCD
+    if(cv_dma_pending==2) return;
+#endif
     cv_scanlines(y, 0);
+#if CV_RETAINED_LCD
+    if(cv_dma_pending==2) return;
+#endif
     lcd_blit(x, y, cv_w, cv_h, cv_px);
+#if CV_RETAINED_LCD
+    cv_dma_pending=1;
+#endif
 }
 
 /* canvas rows r0 .. cv_h-1 only, to screen row y + r0 */
 static void cv_blit_from(uint32_t x, uint32_t y, uint32_t r0)
 {
+#if CV_RETAINED_LCD
+    if(cv_dma_pending==2) return;
+#endif
     cv_scanlines(y, r0);
-    if (r0 < cv_h)
+#if CV_RETAINED_LCD
+    if(cv_dma_pending==2) return;
+#endif
+    if (r0 < cv_h) {
         lcd_blit(x, y + r0, cv_w, cv_h - r0, cv_px + r0 * cv_w);
+#if CV_RETAINED_LCD
+        cv_dma_pending=1;
+#endif
+    }
 }
 
 static inline void cv_pset(int32_t x, int32_t y, uint16_t c)
 {
+#if EN_RUST_APP
+    { const int32_t a[6]={x,y,c,0,0,0};(void)cv_rust(2,a,0,0);return; }
+#endif
+
+#if CV_RETAINED_LCD
+    if(!cv_mutable()) return;
+#endif
     y += cv_oy;
     if ((uint32_t)x < cv_w && y >= cv_y0 && y < cv_y1)
         cv_px[(uint32_t)y * cv_w + (uint32_t)x] = swap16(c);
@@ -116,6 +218,13 @@ static inline void cv_pset(int32_t x, int32_t y, uint16_t c)
 
 static void cv_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t c)
 {
+#if EN_RUST_APP
+    { const int32_t a[6]={x,y,w,h,c,0};(void)cv_rust(3,a,0,0);return; }
+#endif
+
+#if CV_RETAINED_LCD
+    if(!cv_mutable()) return;
+#endif
     int32_t x1 = x + w, y1 = y + h + cv_oy, i;
     uint16_t sc = swap16(c);
     y += cv_oy;                             /* clipped once, then filled row by row */
@@ -134,6 +243,10 @@ static void cv_rect(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t c)
 
 static void cv_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint16_t c)
 {
+#if EN_RUST_APP
+    { const int32_t a[6]={x0,y0,x1,y1,c,0};(void)cv_rust(4,a,0,0);return; }
+#endif
+
     int32_t dx = x1 > x0 ? x1 - x0 : x0 - x1, sx = x0 < x1 ? 1 : -1;
     int32_t dy = y1 > y0 ? y0 - y1 : y1 - y0, sy = y0 < y1 ? 1 : -1;
     int32_t err = dx + dy, guard = 2000;
@@ -168,6 +281,13 @@ static uint32_t glyph(const felucca_font_t *f, uint32_t ch)
  * anti-aliased face on a coloured box gets no dark fringe); returns the end x */
 static int32_t cv_text(int32_t x, int32_t y, const felucca_font_t *f, const char *s, uint16_t c)
 {
+#if EN_RUST_APP
+    { const int32_t a[6]={x,y,c,0,0,0};return cv_rust(6,a,f,s); }
+#endif
+
+#if CV_RETAINED_LCD
+    if(!cv_mutable()) return -1;
+#endif
     uint32_t r = c >> 11, g = (c >> 5) & 63u, b = c & 31u;
     for (; *s; s++) {
         uint32_t gi = glyph(f, (uint8_t)*s), gx, gy, w, bpr;
@@ -199,6 +319,10 @@ static int32_t cv_text(int32_t x, int32_t y, const felucca_font_t *f, const char
 
 static int32_t text_w(const felucca_font_t *f, const char *s)
 {
+#if EN_RUST_APP
+    { const fm1_canvas_font view=cv_font_view(f);return fm1_rust_text_width(&view,(const uint8_t*)s,cv_string_length(s)); }
+#endif
+
     int32_t w = 0;
     for (; *s; s++)
         w += f->adv[glyph(f, (uint8_t)*s)];

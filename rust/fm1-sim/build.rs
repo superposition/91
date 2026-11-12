@@ -76,6 +76,7 @@ fn main() {
                 "WORKER",
                 "STORAGE",
                 "HARMONY",
+                "APP",
             ] {
                 c.arg(format!("-DEN_RUST_{flag}=1"));
             }

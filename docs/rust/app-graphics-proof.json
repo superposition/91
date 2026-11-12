@@ -1,0 +1,168 @@
+{
+  "ticket": "https://github.com/superposition/91/issues/15",
+  "checkpoint": "Production Rust strip graphics; controller, visualizers and game remain open",
+  "base": "fa070e65dcb5e7b6f651aed511bb240328d675bf",
+  "compiler": "Rust 1.94.1 (e408947bf 2026-03-25), clang wasm32; no FP contraction",
+  "flag": "EN_RUST_APP",
+  "frozen": {
+    "sourceManifest": "tests/reference/source.sha256",
+    "verifiedSourceFiles": 440,
+    "capturedGraphicsManifest": "tests/reference/app-graphics.sha256",
+    "generatedFontSha256": "45201e2caf40faad99ad7432b29d6725f51eb46db7c67b6f431fab364c7d7458"
+  },
+  "corpus": {
+    "cases": 78353,
+    "bytes": 51694092,
+    "sha256": "2ab1f5e8f5f52ef156df08c21f156328f1be1942f3abdc1c9c994376f97f8a8b",
+    "executions": [
+      "verified original R01 C native",
+      "captured hash-checked frozen C native",
+      "current C0 native",
+      "Rust production adapter native",
+      "captured hash-checked frozen C WASM",
+      "current C0 WASM",
+      "Rust production adapter WASM"
+    ],
+    "includes": [
+      "every active pixel and complete strip hash",
+      "all five fonts and all 256 byte glyph inputs",
+      "all 65,536 RGB565 alpha colors",
+      "4096 clipped geometry/band cases",
+      "scanlines, partial/full blits and zero/clamped canvas",
+      "text lengths 0..256",
+      "sync/blit/lease ordering"
+    ]
+  },
+  "safeCoreTests": 4,
+  "dmaDouble": {
+    "confirmedCompletion": true,
+    "failedBeginQuarantines": true,
+    "failedScanCannotBlit": true,
+    "noTypedPixelEntryWhileQuarantined": true,
+    "lateCompleteNeedsFreshBegin": true,
+    "extraPixelPayloadBytes": 0
+  },
+  "instrument": {
+    "publicExports": 24,
+    "memoryBytes": 33554432,
+    "allLoggedComparedPcmPositionsIncludingHttp": 53744934,
+    "instrumentPcmPositionsExcludingHttp": 52696358,
+    "httpFallbackPcmPositions": 1048576,
+    "realGraphicsCalls": 15940,
+    "realPixelWrites": 2926841,
+    "rejectedGraphicsCalls": 0,
+    "artifact": {
+      "path": "build/emu-parity/rust.wasm",
+      "bytes": 2363465,
+      "sha256": "654b39ce5bd38d61bffdec455e444890c97a51e8d4cbd76177f882ffb38b2a3d"
+    }
+  },
+  "nativeSimulator": {
+    "scenarios": 97,
+    "flavors": [
+      "reference",
+      "c0",
+      "frozen-runner",
+      "c0-runner",
+      "rust"
+    ],
+    "historicalScenarios": 94,
+    "matchingHistoricalFailureScenarios": 19,
+    "artifactCount": 538,
+    "pngCount": 238,
+    "repeatScenarios": [
+      "first",
+      "compat",
+      "restarts"
+    ],
+    "results": {
+      "path": "build/simulator/results.json",
+      "bytes": 85751,
+      "sha256": "96160e11317ba808656457924158dabc06aa6a54b99ad69ebaec55680c85ec0e"
+    },
+    "repeatResults": {
+      "path": "build/simulator/repeat-results.json",
+      "bytes": 3532,
+      "sha256": "55eb0568e9ca51f75889c66a055403518fd5c885564f6ae228f69a96dda1b422"
+    },
+    "cpuMode": "test reference now_ns0; production simulator virtual CPU0, measured costs remain summary only"
+  },
+  "footprint": {
+    "app_disabled": {
+      "path": "build/app-graphics/app-disabled.wasm",
+      "bytes": 2367642,
+      "sha256": "124354f2ec082cdc4eead2ed1f3b004b45438983fa89b666572cba068f2fc45e",
+      "code_bytes": 682304,
+      "data_section_bytes": 160628,
+      "custom_section_bytes": 1522936
+    },
+    "app_enabled": {
+      "path": "build/emu-parity/rust.wasm",
+      "bytes": 2363465,
+      "sha256": "654b39ce5bd38d61bffdec455e444890c97a51e8d4cbd76177f882ffb38b2a3d",
+      "code_bytes": 674082,
+      "data_section_bytes": 160852,
+      "custom_section_bytes": 1526725
+    },
+    "delta": {
+      "file_bytes": -4177,
+      "code_bytes": -8222,
+      "data_section_bytes": 224,
+      "custom_section_bytes": 3789
+    },
+    "note": "same Rust engine, toggle only EN_RUST_APP; WASM accounting is not an MCU RAM or flash estimate"
+  },
+  "memory": {
+    "reusedStripBytes": 69120,
+    "reusedVisualizerUnionBytes": 7200,
+    "addedCounterBytes": 16,
+    "addedLeaseStateBytes": 1,
+    "canvasStateBytes": 24,
+    "fontViewBytes32bit": 36,
+    "fontViewBytes64bit": 56,
+    "allocator": false
+  },
+  "remainingIssue15": [
+    "page/input/encoder/key/button/LED controller",
+    "UI theme/help/layout composition and bounded text consumer adoption",
+    "visualizer algorithms over existing union",
+    "Kick Runner state/actions/rendering",
+    "full application snapshots/action continuation and callback borrow proof"
+  ],
+  "notClaimed": [
+    "whole MCU emission/link/code size/stack/latency qualification",
+    "physical LCD completed/abort/quarantine latency proof",
+    "interactive browser or MIDI/device QA"
+  ],
+  "physicalDeviceWrites": false,
+  "liveServerChanges": false,
+  "sourceSha256Lf": {
+    "Cargo.lock": "0a51f3b32e56f7c4a0290de89a7d30108b595f45d215040542e336536eb56411",
+    "Cargo.toml": "1d8caaaba41615e238cc4befb3f3cdfb023d9ff92a7ec30d4459322894398f24",
+    "docs/RUST_APP.md": "2511d62dd7d494f6c9532a9a9d139c60c4106cfffcf66f47ae9e14b97d3072da",
+    "firmware/src/app/ui.c": "d3108f3d884ef96abf60f4d3201dcf0ea6c6cf593e9f3e4285489f6c0584d9ca",
+    "firmware/src/dsp/rust_app.h": "30d43e9bf982995889acf69e8aa0c32b2336f52fcb938f194b56c10df0510161",
+    "firmware/src/gfx.c": "cc728afbc460f5afc0ea88c3d2787ffc304961140bb333f3327d88dc16731561",
+    "rust/fm1-app/Cargo.toml": "457942233c071ab60a5d2aa648f86547926f20274424d7ecb2295959a5a32305",
+    "rust/fm1-app/src/graphics.rs": "8959820cd9e604d71bd88245e6b147f03c1c3aa3cf8702cc28c92c7e22e0dae0",
+    "rust/fm1-app/src/lib.rs": "6f7ce77b0e755fba63b499a3643cbf054d245af8b6d9a914c3dc59deacff1b8d",
+    "rust/fm1-app/src/text.rs": "8688fb843e4cc7e3ea392496cf9b64d6ba78da624a8fcb4f9a0ead4633ea6f71",
+    "rust/fm1-app/tests/graphics.rs": "5445533944c3ec55094f8f8901126e425390012a2cc77429581abe2d03aa4990",
+    "rust/fm1-jam-bridge/Cargo.toml": "833dc1b9d7815dd8c20cece6e58b7abfcdbbfaef0a8f295e7821bf0f6ecffafb",
+    "rust/fm1-jam-bridge/src/app.rs": "1a2fd3ce20ccb9345fcc4938e361461a8b0790701f2fc1e0fbf71ea22c851e05",
+    "rust/fm1-jam-bridge/src/lib.rs": "b8d4d9a4c4ffbd93da4675cf63163d7b0373b368b794c089755c937217b1589f",
+    "rust/fm1-sim/build.rs": "2dbccd9503b313668e05bb9bc084f031766f56061b6d3e5f0a9b6dca1b6c5593",
+    "tests/host/app_dma_test.c": "ea46f8232cf552f0ad9cc377519ff1b20f75247dd33459ebf1b6827fc124b007",
+    "tests/host/emu_app_test.mjs": "1264c98e140cc01fb0eeccff461c34e49c650d6480b4414a8097fad9fb68c878",
+    "tests/host/project_wasm_test.mjs": "20bf6ac174ba80d332616b2652fee09837742d338dd897beb5f6b5f8dc4813d3",
+    "tests/reference/app-graphics.sha256": "cd891b607a9e1cd7ea354f579fa0aa29860f7c41b44cb98600021534e36896f2",
+    "tests/reference/app_alpha_frozen.inc": "aae69058d8856b2f16b27bd8155a2658337ed84396d44be76edca604ae17cd40",
+    "tests/reference/app_extract_alpha.py": "262ce3ed5e8ddd1fa61b46ad33040ee4ee99ab9e76e116452000f2c4114914b6",
+    "tests/reference/app_gfx_frozen.inc": "c412798ceca5519b1114b35014b9111cd6cc8acf55ff277d89de50352badcd28",
+    "tests/reference/app_graphics_reference.c": "a82472f59e689dc6db0d0f12768912d4dd923b930613e0708e14e351e9467366",
+    "tests/rust_app_graphics.sh": "d0d058b325cc7ac3846a1ecd8cef06a1a5acfb5dbea4e18a3a41c711e4b469d0",
+    "tests/rust_emulator_parity.sh": "f521fd94eb7feffd2525180318b17e2cb47881eab435b4078479f4a29747c509",
+    "web/emu/build.sh": "8777a4938412bc14e89027eeb52ecdde280b7652d8fbe17d43fdfbf86e5a0d31",
+    "web/emu/build_clang.sh": "54bcad9715cfc19b48d9b93114ab58a4b6d9f2ec1fce87fbb7cb305653f0525f"
+  }
+}

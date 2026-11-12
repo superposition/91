@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["rust/fm1-types", "rust/fm1-formats", "rust/fm1-engine", "rust/fm1-rt", "rust/fm1-cli", "rust/toolchain/probe", "rust/fm1-jam-bridge", "rust/fm1-codecs-wasm", "rust/fm1-sim"]
+members = ["rust/fm1-types", "rust/fm1-formats", "rust/fm1-engine", "rust/fm1-rt", "rust/fm1-cli", "rust/toolchain/probe", "rust/fm1-jam-bridge", "rust/fm1-codecs-wasm", "rust/fm1-sim", "rust/fm1-app"]
 
 [workspace.package]
 version = "0.1.0"
@@ -10,6 +10,7 @@ license = "GPL-3.0-only"
 
 [workspace.dependencies]
 fm1-types = { path = "rust/fm1-types" }
+fm1-app = { path = "rust/fm1-app" }
 fm1-formats = { path = "rust/fm1-formats" }
 fm1-engine = { path = "rust/fm1-engine" }
 fm1-rt = { path = "rust/fm1-rt" }
