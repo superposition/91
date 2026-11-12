@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// AMB-1 in an AudioWorklet: amb.wasm is the whole FM-1 app (web/emu/amb_web.c). Each render
+// NAIWAN 91 in an AudioWorklet: amb.wasm is the whole FM-1 app (web/emu/amb_web.c). Each render
 // quantum asks it for 128 frames, which runs the device's clock forward; between quanta the page's
 // input goes in and, about 30 times a second, the screen, the lights and any saved objects go out.
 
@@ -98,6 +98,13 @@ export class Amb extends ProcessorBase {
         rejected: ex.web_rust_stat(17) },
       sequencer: { lanes: ex.web_rust_stat(18), mutations: ex.web_rust_stat(19),
         waits: ex.web_rust_stat(20), boundaries: ex.web_rust_stat(21) },
+      melodic: { acidSteps: ex.web_rust_stat(22), acidMutations: ex.web_rust_stat(23),
+        pluckSteps: ex.web_rust_stat(24), bassSteps: ex.web_rust_stat(25),
+        barDecisions: ex.web_rust_stat(26), midiTransport: ex.web_rust_stat(27) },
+      effects: { masterSamples: ex.web_rust_stat(28), echoSamples: ex.web_rust_stat(29),
+        tankSamples: ex.web_rust_stat(30), colourSampleCalls: ex.web_rust_stat(31) },
+      factory: { accesses: ex.web_rust_stat(32), codecs: ex.web_rust_stat(33),
+        rejections: ex.web_rust_stat(34), copiedBytes: ex.web_rust_stat(35) },
     };
     if (ex.web_bg) msg.bg = Array.from(new Float32Array(this.mem.buffer, ex.web_bg(), 12));   // for the stream view's background
     if (this.frames >= 44100) {                       // the share of real time spent running the device

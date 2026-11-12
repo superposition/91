@@ -60,6 +60,7 @@ for (const secure of [true, false]) {
   assert(peak > 0.001);
   assert(env.frames.some((frame) => frame.fb?.length === 240 * 240));
   assert(env.frames.some((frame) => frame.rust?.plans > 0));
+  assert(env.frames.some((frame) => frame.rust?.effects?.masterSamples > 0 && frame.rust?.factory?.accesses > 0), 'real processor frames expose integrated effects and factory execution');
   if (secure) securePCM = samples; else assert.deepEqual(samples, securePCM);
   await env.session.dispose(); await env.session.dispose(); await flush();
   assert.equal(env.contexts[0].closes, 1);
