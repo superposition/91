@@ -2,6 +2,8 @@
 #pragma once
 #include "rust_harmony_abi.h"
 #include <string.h>
+/* Packed progression result: bit16 requests the ordered C chord callback. */
+enum { FM1_HARM_CHORD_CHANGE = 1u << 16 };
 extern int32_t fm1_rust_harm_scale(uint32_t,int32_t *);
 extern int32_t fm1_rust_harm_chord(uint32_t,int32_t,int32_t,int32_t,int32_t *);
 extern int32_t fm1_rust_harm_voice(const int32_t *,const int32_t *,int32_t,int32_t *,int32_t,int32_t);

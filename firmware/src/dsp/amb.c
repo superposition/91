@@ -2632,7 +2632,7 @@ static void prog_take(uint32_t lo, uint32_t hi) /* the progression from the page
 {
 #if EN_RUST_HARMONY
     const uint32_t token=harmony_transition(13,lo,hi,0);
-    if(token&0x10000u)chord_change();
+    if(token&FM1_HARM_CHORD_CHANGE)chord_change();
     if(harmony_transition(14,token,0,0))drift_reset();
 #else
     const int was = pg_on, unit = (int)(hi >> 17 & 3u);
