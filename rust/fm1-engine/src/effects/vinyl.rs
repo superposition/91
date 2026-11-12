@@ -27,7 +27,8 @@ pub struct State {
 }
 #[repr(C)]
 pub struct Config {
-    pub gain: f32,
+    pub fade: f32,
+    pub level: f32,
     pub lowpass: f32,
     pub hiss: f32,
     pub pop: f32,
@@ -39,7 +40,7 @@ pub struct Config {
     pub shed: u32,
 }
 const _: [(); 124] = [(); core::mem::size_of::<State>()];
-const _: [(); 40] = [(); core::mem::size_of::<Config>()];
+const _: [(); 44] = [(); core::mem::size_of::<Config>()];
 fn sample(z: &mut Generator, c: &Config) -> f32 {
     z.rng = z.rng.wrapping_mul(1664525).wrapping_add(1013904223);
     let w = z.rng as i32 as f32 * (1.0 / 2147483648.0);
@@ -79,13 +80,14 @@ fn sample(z: &mut Generator, c: &Config) -> f32 {
 }
 pub fn process(s: &mut State, c: &Config, l: &mut [f32], r: &mut [f32]) {
     assert_eq!(l.len(), r.len());
-    if c.gain <= 0.0 || c.playing == 0 || c.shed != 0 {
+    let gain = c.fade * c.level;
+    if gain <= 0.0 || c.playing == 0 || c.shed != 0 {
         l.fill(0.0);
         r.fill(0.0);
         return;
     }
     for j in 0..l.len() {
-        let tg = (c.gain0 + (c.gain1 - c.gain0) * j as f32 * c.inverse) * c.gain;
+        let tg = (c.gain0 + (c.gain1 - c.gain0) * j as f32 * c.inverse) * gain;
         let old = s.phase;
         s.phase = s.phase.wrapping_add(1);
         if old & 1 == 0 {

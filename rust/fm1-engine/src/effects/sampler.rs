@@ -57,8 +57,8 @@ pub struct Config {
     pub bm_len: f32,
     pub sc_len: f32,
     pub sc_n: i32,
-    pub sc_chaos: f32,
-    pub sc_reverse: f32,
+    pub sc_chaos: i32,
+    pub sc_reverse: i32,
     pub scr_w: f32,
     pub scr_per: f32,
     pub scr_style: i32,
@@ -120,10 +120,10 @@ fn write(buffer: &mut [i16; WORDS], s: &mut State, l: f32, r: f32) {
 }
 fn scatter(s: &mut State, c: &Config, rng: &mut Rng) {
     let mut source = (s.sc_k % c.sc_n as u32) as i32;
-    if source != 0 && rng.fraction() < c.sc_chaos {
+    if source != 0 && rng.fraction() < c.sc_chaos as f32 * 0.01 {
         source = (rng.fraction() * c.sc_n as f32) as i32 % c.sc_n;
     }
-    s.sc_rev = i32::from(source != 0 && rng.fraction() < c.sc_reverse);
+    s.sc_rev = i32::from(source != 0 && rng.fraction() < c.sc_reverse as f32 * 0.01);
     s.sc_off = source as f32 * c.sc_len;
     s.sc_pos = 0.0;
     s.sc_k = s.sc_k.wrapping_add(1);
