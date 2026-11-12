@@ -1,6 +1,34 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! Fixed voice state and block-scoped sample kernels over caller-owned buffers.
 use crate::effects::math::{flush, max, min, tanh};
+pub mod acid;
+pub mod drone;
+
+pub fn blep_saw(t: f32, dt: f32) -> f32 {
+    let mut y = 2.0 * t - 1.0;
+    if t < dt {
+        let x = t / dt;
+        y -= x + x - x * x - 1.0;
+    } else if t > 1.0 - dt {
+        let x = (t - 1.0) / dt;
+        y -= x * x + x + x + 1.0;
+    }
+    y
+}
+pub fn svf_mm(x: f32, c: &[f32; 4], s: &mut [f32], kind: i32) -> f32 {
+    let v3 = x - s[1];
+    let v1 = c[0] * s[0] + c[1] * v3;
+    let v2 = s[1] + c[1] * s[0] + c[2] * v3;
+    s[0] = 2.0 * v1 - s[0];
+    s[1] = 2.0 * v2 - s[1];
+    match kind {
+        1 => x - c[3] * v1 - v2,
+        2 => c[3] * v1,
+        3 => x - c[3] * v1,
+        4 => 2.0 * v2 - x + c[3] * v1,
+        _ => v2,
+    }
+}
 
 pub fn sine(table: &[f32; 1025], phase: f32) -> f32 {
     let x = (phase - phase as i32 as f32) * 1024.0;
