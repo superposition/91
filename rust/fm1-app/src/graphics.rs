@@ -334,7 +334,7 @@ impl<'a> Canvas<'a> {
 pub const fn rgb(r: u8, g: u8, b: u8) -> u16 {
     (((r as u16) >> 3) << 11) | (((g as u16) >> 2) << 5) | ((b as u16) >> 3)
 }
-pub const PALETTES: [[u16; 5]; 5] = [
+pub static PALETTES: [[u16; 5]; 5] = [
     [
         rgb(34, 34, 40),
         rgb(74, 74, 82),
