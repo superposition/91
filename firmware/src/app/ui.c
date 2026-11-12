@@ -983,6 +983,7 @@ static void fxp_range(int k, int *lo, int *hi)
 enum {UI_IO_SET=1,UI_IO_VOICES=2,UI_IO_MAP=4,UI_IO_INIT=8};
 static uint8_t ui_io_pending;          /* transient reads/reinit; no payload buffer */
 #define UI_SWITCH_SETLIST 0x4000u
+#define UI_SWITCH_MIX 0x2000u
 static int16_t ui_genre_pending = -1;  /* absolute genre or captured set-list slot/entry */
 static void genre_step(int d);
 static void ui_io_retry(void);
@@ -2354,6 +2355,14 @@ static void sl_go_entry(int s,int e)             /* complete captured slot/genre
     if(admitted)plat_store_end();
 }
 static void sl_go(int s) {sl_go_entry(s,glob.sl[s%SL_N]);}
+static void sl_go_bar(int s,int from,int playing)
+{
+    sl_go(s);
+    if(playing) {
+        if(ui_genre_pending>=0)ui_genre_pending|=UI_SWITCH_MIX;
+        else mix_start(from);
+    }
+}
 
 /* into flash now. Writing it stops the chip a moment (it runs from the same flash), so while the music
  * plays it fades out (en_hush), holds still while the store is written, and fades back in where it was:
@@ -4158,9 +4167,7 @@ static void input(void)
     if (ui.sl_q && !ui.store_wait && (!en_playing || en_drum_pos == EN_NSTEP - 1)) {   /* the bar's last step: the set list's slot */
         const int s = ui.sl_q - 1, t0 = proj.par[P_TEMPO], pl = en_playing;
         ui.sl_q = 0;
-        sl_go(s);
-        if (pl)
-            mix_start(t0);
+        sl_go_bar(s,t0,pl);
     }
     if (ui.piece_q && (!en_playing || en_drum_pos == EN_NSTEP - 1)) {   /* the bar's last step: the piece */
         const int t = ui.piece_q - 1, t0 = proj.par[P_TEMPO], pl = en_playing;
@@ -7748,7 +7755,14 @@ static void ui_io_retry(void)
     {
         const uint16_t action=(uint16_t)ui_genre_pending;
         ui_genre_pending=-1;
-        if(action&UI_SWITCH_SETLIST)sl_go_entry((action>>8)&15u,action&255u);
+        if(action&UI_SWITCH_SETLIST) {
+            const int from=proj.par[P_TEMPO],playing=en_playing;
+            sl_go_entry((action>>8)&15u,action&255u);
+            if(action&UI_SWITCH_MIX) {
+                if(ui_genre_pending>=0)ui_genre_pending|=UI_SWITCH_MIX;
+                else if(playing)mix_start(from);
+            }
+        }
         else genre_step((int)action-proj.genre);
     }
 }

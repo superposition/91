@@ -1,0 +1,36 @@
+{
+  "scope": "complete deferred queued set-list tempo glide",
+  "request_storage": "one spare bit in existing signed16 action word;0addedmutablebytes",
+  "actual_consumers": [
+    "C0 complete UI",
+    "all-Rust complete UI"
+  ],
+  "checks": [
+    "repeated Busy retains captured slot/entry and current glide",
+    "admission starts requested4bar glide from current pre-switch tempo",
+    "stopped playback before admission changes piece without a new glide",
+    "1024 detach guard combinations include both action tags"
+  ],
+  "healthy_native": {
+    "scenarios": 8,
+    "names": [
+      "setlist",
+      "mixglide",
+      "genrestore",
+      "restore",
+      "store",
+      "groups",
+      "octave",
+      "seqtricks"
+    ],
+    "status": "exact five-way including preserved original assertion failures"
+  },
+  "healthy_wasm": {
+    "controls_compared_samples": 619164,
+    "runner_compared_samples": 4368546,
+    "http_compared_samples": 1048576,
+    "exports": 24,
+    "memory_bytes": 33554432
+  },
+  "hardware": "not accessed"
+}

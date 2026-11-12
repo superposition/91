@@ -22,6 +22,12 @@ slot **and its captured entry**, so later slot edits cannot change the deferred
 selection. One byte of read/reinit flags and one signed 16-bit action word are the
 only persistent retry state; no second storage payload is added.
 
+A queued set-list change also retains its tempo-glide request in a spare bit of
+that word. Repeated denial preserves the current glide; admission switches to
+the captured slot/entry and starts the new glide from the tempo currently heard.
+If playback has stopped while waiting, the piece changes without starting a
+glide. An admitted request keeps its original effect order.
+
 A restore retains state 1, its source pointer, object and length while Busy, then
 retries the same write. `ui_flush()` returns while that operation remains pending.
 `ui_flush_pending()` covers reads, selection retries, queued writes, dirty UI RAM,

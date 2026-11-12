@@ -84,6 +84,22 @@ int main(void){unsigned i;uint32_t state,saved,voices,cache,screen;
   assert((uint16_t)ui_genre_pending==(UI_SWITCH_SETLIST|3u<<8|(uint32_t)entry));
   glob.sl[3]=1;denied=0;ui_io_retry();assert(proj.genre==(int)g&&proj.piece==4&&ui.sl_pos==3&&ui_genre_pending<0);
  }
+ /* A queued slot keeps its requested tempo glide across repeated denial. */
+ en_jam_set(JAM_ON,0);en_play(1);drain();knob_set(P_TEMPO,200);ui.mx_bars=8;
+ {unsigned g=((unsigned)proj.genre+1)%EN_NGENRE;int entry=(int)(g*NPIECES+2),from=proj.par[P_TEMPO];
+  glob.sl_rsv[1]=1;glob.sl[4]=(uint8_t)entry;state=ui_hash();saved=saved_hash();i=(unsigned)proj.genre;
+  denied=1;sl_go_bar(4,from,1);assert(proj.genre==i&&ui_hash()==state&&saved_hash()==saved);
+  assert((uint16_t)ui_genre_pending==(UI_SWITCH_SETLIST|UI_SWITCH_MIX|4u<<8|(uint32_t)entry));
+  glob.sl[4]=1;ui_io_retry();assert(ui_hash()==state&&(ui_genre_pending&UI_SWITCH_MIX));
+  denied=0;ui_io_retry();assert(proj.genre==(int)g&&proj.piece==1&&ui.sl_pos==4&&ui_genre_pending<0);
+  assert(ui.mx_bars==4&&ui.mx_from==from&&ui.mx_to!=from&&proj.par[P_TEMPO]==from);
+ }
+ {unsigned g=((unsigned)proj.genre+1)%EN_NGENRE;int from=proj.par[P_TEMPO];
+  glob.sl[5]=(uint8_t)(g*NPIECES+3);denied=1;sl_go_bar(5,from,1);assert(ui_genre_pending&UI_SWITCH_MIX);
+  en_play(0);drain();denied=0;ui_io_retry();
+  assert(proj.genre==(int)g&&proj.piece==2&&ui_genre_pending<0&&proj.par[P_TEMPO]!=from);
+  mix_tick();assert(!ui.mx_bars&&!en_playing);
+ }
  assert(depth==0&&successes==ends);
  puts("UI denied init/reads/saves/restore/complete genre+setlist retries preserve state, bytes and balanced admission");
  return 0;
