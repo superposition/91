@@ -8,6 +8,9 @@ use std::{env, fs, process};
 fn run() -> Result<(), String> {
     let args: Vec<_> = env::args().skip(1).collect();
     match args.first().map(String::as_str) {
+        Some("author") => fm1_authoring::cli::run(&args[1..]).map_err(|e|e.to_string())?,
+        Some("author-api") => fm1_authoring::cli::api().map_err(|e|e.to_string())?,
+        Some("author-stream") => fm1_authoring::cli::stream().map_err(|e|e.to_string())?,
         Some("codec") => {
             let op=args.get(1).ok_or("usage: fm1-rs codec OP < ABI1-request")?.parse::<u32>().map_err(|e|e.to_string())?;
             codecs::once(op).map_err(|e|e.to_string())?;

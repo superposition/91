@@ -1,0 +1,620 @@
+{
+  "date": "2026-11-12",
+  "ticket": 21,
+  "scope": "R20 authoring, previews, host Jam transactions and acceptance policy",
+  "source_base": "7cadd57ef52943c1d4713a46a90fa3cb73418590",
+  "source_fingerprint": "8dd2b5c05b8b158ab7d87457c1b403781bfcaec88ba76d063a904322a9b3c2d3",
+  "frozen_source_files": 440,
+  "frozen_manifest_sha256": "6148afa57b782c81e5a794f0ded441763fe986f35bf275014f304f6da76d88af",
+  "rust": "1.94.1",
+  "linux_oracles": {
+    "python": "3.10",
+    "mido": "1.3.3",
+    "numpy": "1.24.4",
+    "Pillow": "12.3.0",
+    "packaging": "26.3",
+    "isolated_venv": true
+  },
+  "windows_oracles": {
+    "mido": "1.3.3",
+    "numpy": "1.24.4"
+  },
+  "binaries": [
+    {
+      "path": "build/authoring-linux-evidence/fm1-rs",
+      "bytes": 1112920,
+      "sha256": "1c4c40ccffe33c4f7d2263320564afb4ed1c810000aa61f47e30872c60fbae3f"
+    },
+    {
+      "path": "build/rust-authoring-windows/release/fm1-rs.exe",
+      "bytes": 839680,
+      "sha256": "daea8fc3c93da8ea54fea04846b06eb598bb8eac5a1df8998da948d32dc88fc3"
+    }
+  ],
+  "authoring": {
+    "cases": 903,
+    "accepted": 600,
+    "rejected": 303,
+    "hashes": {
+      "harris-citypop": "5af1401d7226c1483e0a90577087a64e6ced048367132f9bcfcf5d4a3a58550a",
+      "velvet-changes": "5ff54336047b67f2f7898f6aef38a1c080adfec78f098db59fbd9b88634e954f",
+      "afterhours": "19e42007b5e96208295a86d63919dfd2faa736ca3a31d9e60e3d81ffd430bc1e",
+      "neon-turnaround": "6f77429cd23fab5b8b55127c991b558cd1e4c3e9176d1c9623be69b96de908d2",
+      "midi-log-70": "45e46ffa061bddc4c75512ecb62c031536f1736eb9b1db988cdda31473e26b0c",
+      "midi-log-91": "a5bf3828155d118ae77d2842d139be6c35d0017cba3ce590cdd4eb79af13560d",
+      "midi-log-100": "c169042a04b80f34b6574b110fb9b725a2de418907be7d05f6cf88ce2ef76063",
+      "midi-log-127": "25fccaf99155bdcf981e34a6f8bad34402f099e7cebfdeffec83cac4c876c014",
+      "midi-log-190": "f58d7ef5e61010eee14f4a0d82d7013107ddfacced7b6a1ee0de2b2675565658"
+    }
+  },
+  "device": {
+    "cases": 167,
+    "accepted": 53,
+    "rejected": 114,
+    "hardware_io": false
+  },
+  "acceptance": {
+    "scenarios": [
+      {
+        "scenario": "normal",
+        "exit": 0,
+        "calls": 2621,
+        "frames": 76800,
+        "errors": [],
+        "wav_sha256": "c45c8ffe4e6bae579d2e1f6aa6dad28c106f0375956cb87fee3f6f0fb81352dc"
+      },
+      {
+        "scenario": "delayed",
+        "exit": 0,
+        "calls": 2623,
+        "frames": 76800,
+        "errors": [],
+        "wav_sha256": "c45c8ffe4e6bae579d2e1f6aa6dad28c106f0375956cb87fee3f6f0fb81352dc"
+      },
+      {
+        "scenario": "short",
+        "exit": 1,
+        "calls": 111,
+        "frames": 2560,
+        "errors": [
+          "AssertionError('not all songs activated')"
+        ],
+        "wav_sha256": "2d498d71f61ae127861b5e359f27245d8fc382bb5ffc6c8c3c1974b06f760122"
+      },
+      {
+        "scenario": "features",
+        "exit": 1,
+        "calls": 12,
+        "frames": 0,
+        "errors": [
+          "AssertionError()"
+        ],
+        "wav_sha256": "991cd2a53281fab26a26b23f2b3d7a020e277b83978ea36796679e0952ae7575"
+      },
+      {
+        "scenario": "timeout",
+        "exit": 1,
+        "calls": 68,
+        "frames": 0,
+        "errors": [
+          "TimeoutError('factory song activation')"
+        ],
+        "wav_sha256": "991cd2a53281fab26a26b23f2b3d7a020e277b83978ea36796679e0952ae7575"
+      },
+      {
+        "scenario": "telemetry",
+        "exit": 1,
+        "calls": 2621,
+        "frames": 76800,
+        "errors": [
+          "AssertionError('no hardware telemetry')"
+        ],
+        "wav_sha256": "c45c8ffe4e6bae579d2e1f6aa6dad28c106f0375956cb87fee3f6f0fb81352dc"
+      },
+      {
+        "scenario": "xruns",
+        "exit": 1,
+        "calls": 2621,
+        "frames": 76800,
+        "errors": [
+          "AssertionError('audio xruns increased')"
+        ],
+        "wav_sha256": "c45c8ffe4e6bae579d2e1f6aa6dad28c106f0375956cb87fee3f6f0fb81352dc"
+      },
+      {
+        "scenario": "late",
+        "exit": 1,
+        "calls": 2621,
+        "frames": 76800,
+        "errors": [
+          "AssertionError('late increased')"
+        ],
+        "wav_sha256": "c45c8ffe4e6bae579d2e1f6aa6dad28c106f0375956cb87fee3f6f0fb81352dc"
+      },
+      {
+        "scenario": "shed",
+        "exit": 1,
+        "calls": 2621,
+        "frames": 76800,
+        "errors": [
+          "AssertionError('load shedding')"
+        ],
+        "wav_sha256": "c45c8ffe4e6bae579d2e1f6aa6dad28c106f0375956cb87fee3f6f0fb81352dc"
+      },
+      {
+        "scenario": "flags",
+        "exit": 1,
+        "calls": 2621,
+        "frames": 76800,
+        "errors": [
+          "AssertionError('USB recording callback flags')"
+        ],
+        "wav_sha256": "c45c8ffe4e6bae579d2e1f6aa6dad28c106f0375956cb87fee3f6f0fb81352dc"
+      },
+      {
+        "scenario": "songs",
+        "exit": 1,
+        "calls": 2621,
+        "frames": 76800,
+        "errors": [
+          "AssertionError('not all songs activated')"
+        ],
+        "wav_sha256": "c45c8ffe4e6bae579d2e1f6aa6dad28c106f0375956cb87fee3f6f0fb81352dc"
+      },
+      {
+        "scenario": "key",
+        "exit": 1,
+        "calls": 2621,
+        "frames": 76800,
+        "errors": [
+          "AssertionError('home key changed')"
+        ],
+        "wav_sha256": "c45c8ffe4e6bae579d2e1f6aa6dad28c106f0375956cb87fee3f6f0fb81352dc"
+      },
+      {
+        "scenario": "stop",
+        "exit": 1,
+        "calls": 804,
+        "frames": 23168,
+        "errors": [
+          "InterruptedError('acceptance stopped by stop file')"
+        ],
+        "wav_sha256": "c9983ca4157d5e899862c4126f272f06c416378925a0e7f115a977998723ae8a"
+      },
+      {
+        "scenario": "control",
+        "exit": 1,
+        "calls": 2362,
+        "frames": 69376,
+        "errors": [
+          "RuntimeError('control failed')"
+        ],
+        "wav_sha256": "86f5c300a468e274f58e090f931277f5a46a43de35e6e96370ef65a5f989bc08"
+      },
+      {
+        "scenario": "cleanup",
+        "exit": 1,
+        "calls": 2620,
+        "frames": 76800,
+        "errors": [
+          "cleanup: RuntimeError('cleanup failed')"
+        ],
+        "wav_sha256": "c45c8ffe4e6bae579d2e1f6aa6dad28c106f0375956cb87fee3f6f0fb81352dc"
+      }
+    ],
+    "reduction_controls": [
+      {
+        "samples": 0,
+        "rms": 0.0,
+        "peak": 0
+      },
+      {
+        "samples": 2,
+        "rms": 23170.478900963615,
+        "peak": 32768
+      },
+      {
+        "samples": 14,
+        "rms": 23090.181430642766,
+        "peak": 32768
+      },
+      {
+        "samples": 16,
+        "rms": 23076.84435749394,
+        "peak": 32768
+      },
+      {
+        "samples": 126,
+        "rms": 22364.21107856628,
+        "peak": 32768
+      },
+      {
+        "samples": 128,
+        "rms": 22351.646773783807,
+        "peak": 32768
+      },
+      {
+        "samples": 130,
+        "rms": 22339.09694907115,
+        "peak": 32768
+      },
+      {
+        "samples": 254,
+        "rms": 21590.320944812283,
+        "peak": 32768
+      },
+      {
+        "samples": 256,
+        "rms": 21578.733639859405,
+        "peak": 32768
+      },
+      {
+        "samples": 258,
+        "rms": 21567.1624273261,
+        "peak": 32768
+      },
+      {
+        "samples": 1024,
+        "rms": 18566.64410980078,
+        "peak": 32768
+      },
+      {
+        "samples": 16777218,
+        "rms": 18918.614189029606,
+        "peak": 32768
+      }
+    ],
+    "hardware_io": false,
+    "callback_order": "exact",
+    "json_reports": "exact",
+    "wav_bytes": "exact"
+  },
+  "cli": {
+    "cases": [
+      {
+        "command": "factory-0",
+        "exit": 0
+      },
+      {
+        "command": "compile/decode/validate/header-0",
+        "exit": 0,
+        "sha256": "5af1401d7226c1483e0a90577087a64e6ced048367132f9bcfcf5d4a3a58550a"
+      },
+      {
+        "command": "factory-1",
+        "exit": 0
+      },
+      {
+        "command": "compile/decode/validate/header-1",
+        "exit": 0,
+        "sha256": "5ff54336047b67f2f7898f6aef38a1c080adfec78f098db59fbd9b88634e954f"
+      },
+      {
+        "command": "factory-2",
+        "exit": 0
+      },
+      {
+        "command": "compile/decode/validate/header-2",
+        "exit": 0,
+        "sha256": "19e42007b5e96208295a86d63919dfd2faa736ca3a31d9e60e3d81ffd430bc1e"
+      },
+      {
+        "command": "factory-3",
+        "exit": 0
+      },
+      {
+        "command": "compile/decode/validate/header-3",
+        "exit": 0,
+        "sha256": "6f77429cd23fab5b8b55127c991b558cd1e4c3e9176d1c9623be69b96de908d2"
+      },
+      {
+        "command": "invalid-{}",
+        "python_exit": 1,
+        "rust_exit": 2
+      },
+      {
+        "command": "invalid-{\"version\":3}",
+        "python_exit": 1,
+        "rust_exit": 2
+      },
+      {
+        "command": "invalid-{broken json",
+        "python_exit": 1,
+        "rust_exit": 2
+      }
+    ],
+    "python_cli": "compatible flags/JSON semantics/pack and header output/statuses",
+    "native_cli": "documented offline commands; errors use existing fm1-rs exit2",
+    "stream_recovery": "pass",
+    "hardware_io": false
+  },
+  "previews": {
+    "cases": [
+      {
+        "case": "velvet-changes-0",
+        "bars": 16,
+        "phrases": 4,
+        "bpm": 70,
+        "key": 11,
+        "minor": false,
+        "frames": 9770496,
+        "peak_pcm16": 5066,
+        "stuck_notes": 0,
+        "sha256": {
+          "preview.jmp": "5ff54336047b67f2f7898f6aef38a1c080adfec78f098db59fbd9b88634e954f",
+          "preview.amb": "33d3a3e8cbf4671afcb51be720b3418ac7c4b0bad05d6d11f9b5f24aebb1d776",
+          "preview.wav": "b48c92a15ab6de4a0f23ab78ec2ad595abf35747570d7fbd48cf9bda34d835a6",
+          "preview.mid": "f4ae7da0745193cc5a294825fb698e990de97059631dac94042b0f3e9513e6e9",
+          "preview.png": "7701ce4f1a4043f04dd34385bc23a2bc178bc21ee38b1e20c421803c61f471f1",
+          "midi_out.txt": "cff1715bd4f133a7bdc93b954b38ed9609ae4ab6073650be2a3be9b5628569bc"
+        }
+      },
+      {
+        "case": "velvet-changes-1",
+        "bars": 16,
+        "phrases": 4,
+        "bpm": 70,
+        "key": 11,
+        "minor": true,
+        "frames": 9770496,
+        "peak_pcm16": 4873,
+        "stuck_notes": 0,
+        "sha256": {
+          "preview.jmp": "5ff54336047b67f2f7898f6aef38a1c080adfec78f098db59fbd9b88634e954f",
+          "preview.amb": "8a6ecc096a4cc3f6ce6847b33f6f8935d006abf43a74447728e52144d0896264",
+          "preview.wav": "bf65d3d541c61fa328484ffb1d9a12e542f7d5463e8e6a557309d18afeaa6bf4",
+          "preview.mid": "21fa73e094e7be822a409a0b4b091f7695bb86238147b3a94a941f7b95e01d01",
+          "preview.png": "13db9e6c9c1ad8ba19834e5a48ae82a233150c191cf05ee1936e7cc93586eb91",
+          "midi_out.txt": "ee4f54b6750f09b7ecbafcd9bab240e6c83bb7dcb60ec54cb9548ade8d093a34"
+        }
+      },
+      {
+        "case": "afterhours-0",
+        "bars": 16,
+        "phrases": 4,
+        "bpm": 127,
+        "key": 4,
+        "minor": false,
+        "frames": 5427200,
+        "peak_pcm16": 5207,
+        "stuck_notes": 0,
+        "sha256": {
+          "preview.jmp": "19e42007b5e96208295a86d63919dfd2faa736ca3a31d9e60e3d81ffd430bc1e",
+          "preview.amb": "6140c96cac9de8ce7fc70826d34cbca7d133877fe09a96f28e161413b1eae224",
+          "preview.wav": "33a439de0a50a7fe6f13d934285a1e8fb1fd84378637403bf733fbee17db9b0d",
+          "preview.mid": "a2343e1ecb3a25b1817280b2562c6c5fde9d0d494be9f47cd7e919a72d8d6ffd",
+          "preview.png": "09df393554d0343281b41ccd6fc15fcab4c2fae3524e0f40c427351f47a09898",
+          "midi_out.txt": "ba1c8bcebb086ccfc0d4f1abe53cc457b86d0a34e386b9b2ad0ba1f490633a02"
+        }
+      },
+      {
+        "case": "afterhours-1",
+        "bars": 16,
+        "phrases": 4,
+        "bpm": 127,
+        "key": 4,
+        "minor": true,
+        "frames": 5427200,
+        "peak_pcm16": 5121,
+        "stuck_notes": 0,
+        "sha256": {
+          "preview.jmp": "19e42007b5e96208295a86d63919dfd2faa736ca3a31d9e60e3d81ffd430bc1e",
+          "preview.amb": "4213339d7d12cf5a28072e37523e62667def9038459cc12d090826f64ae90fb0",
+          "preview.wav": "e0d7ae2f6543adb7cb8f74c8f8a67346f507d0dbfb052577a385c54f817c3d80",
+          "preview.mid": "2ca41c2f1ce7d62dde27e1d623d39b89da87efdbbacbb927d41df5eabcd47bc1",
+          "preview.png": "15af6c4a49e0b58da04e6938051e05dc83f0c01ba85ca6d6db8a5720e1ce9e1f",
+          "midi_out.txt": "16b4ed97fbf4b5d96610abf8a1a3318481c7a8f954ffa9a78f20f60670f773e9"
+        }
+      },
+      {
+        "case": "neon-turnaround-0",
+        "bars": 16,
+        "phrases": 4,
+        "bpm": 190,
+        "key": 7,
+        "minor": false,
+        "frames": 3658752,
+        "peak_pcm16": 4873,
+        "stuck_notes": 0,
+        "sha256": {
+          "preview.jmp": "6f77429cd23fab5b8b55127c991b558cd1e4c3e9176d1c9623be69b96de908d2",
+          "preview.amb": "3c0f8a9459b9952dee58ecadac9df92f3455120cc7028b2ddb3582119467be4d",
+          "preview.wav": "33c0a785e94c5701209adc9faec91aae9da1d5dffb2f9ae9be3e9c19e97f8272",
+          "preview.mid": "0b71fa1cf723ed2a5275f697e79ceddfef5145cb77f052573ec64284e0564b1b",
+          "preview.png": "ddd6570f54e6d156b44aa4a4236b2a6f3294985e011402ef711b2074d5dd5ce6",
+          "midi_out.txt": "aa7e9987375f43d3009131b38918b94b9b65acab5bfb8e6e160183fbf8b6102f"
+        }
+      },
+      {
+        "case": "neon-turnaround-1",
+        "bars": 16,
+        "phrases": 4,
+        "bpm": 190,
+        "key": 7,
+        "minor": true,
+        "frames": 3658752,
+        "peak_pcm16": 5319,
+        "stuck_notes": 0,
+        "sha256": {
+          "preview.jmp": "6f77429cd23fab5b8b55127c991b558cd1e4c3e9176d1c9623be69b96de908d2",
+          "preview.amb": "0d0aedc0a693b3f19999c1b61df58d13b0945bd4cd53542c0b4d41851d6df124",
+          "preview.wav": "bae793eebe112fd3c047de50013a87c76f29b33f6016a1f0d123273868a88032",
+          "preview.mid": "07993e13507d06190adc9b44349cbead283e48d7ace1213b85dc6d50bfe28704",
+          "preview.png": "e5283c1dcc4085e0ef96319d6787cace3968e5dac3c32ccdff14c093531fd2fc",
+          "midi_out.txt": "0141b29fde8e961dc54da10203a36edc6800298c112c4934bfb964550f7e7af5"
+        }
+      }
+    ],
+    "frames": 37712896,
+    "source_files": 440,
+    "cpu_text_override": "test-only zero on frozen host; virtual Rust platform already returns zero",
+    "restart": "exact",
+    "hardware_io": false
+  },
+  "host_cost": {
+    "windows_linux_mini_preview": "exact audio/MIDI/framebuffer/log/pack; scenario preserves platform text newline",
+    "windows_validate_process_ms": [
+      10.710400000000009,
+      8.107000000000003,
+      7.805800000000001,
+      7.745800000000011,
+      7.524199999999995,
+      7.702699999999993,
+      7.967200000000007,
+      8.998199999999997,
+      7.535199999999992,
+      7.475000000000009
+    ],
+    "median_ms": 7.775800000000006,
+    "binary_sha256": "daea8fc3c93da8ea54fea04846b06eb598bb8eac5a1df8998da948d32dc88fc3",
+    "context": "local host process startup and pack validation; no physical timing claim"
+  },
+  "linux_native_copy": {
+    "native_root": "/home/superposition/fm1-authoring-ci/source",
+    "reference": "/home/superposition/fm1-authoring-ci/reference",
+    "review_code_matches_native_copy": true,
+    "partial_ntfs_attempt": "build/authoring-ntfs-attempt.log",
+    "binary": {
+      "bytes": 1112920,
+      "sha256": "1c4c40ccffe33c4f7d2263320564afb4ed1c810000aa61f47e30872c60fbae3f"
+    },
+    "parameter_limits_sha256": "b82eb7f558a4931d28a398c7cd493d5c242a05590cea6a54d9810d7268f5ba52"
+  },
+  "checks": {
+    "linux_full_gate": "pass",
+    "windows_differential": "pass",
+    "windows_device": "pass",
+    "windows_acceptance": "pass",
+    "windows_cli": "pass",
+    "workspace_tests": 136,
+    "fmt": "pass",
+    "clippy_deny_warnings": "pass",
+    "jam_tool_tests": 8,
+    "real_c_transport_tests": 2,
+    "windows_wsl_preview": "pass",
+    "hardware_io": false
+  },
+  "artifacts": [
+    {
+      "path": "build/authoring-linux-full.log",
+      "bytes": 1770,
+      "sha256": "0e132cf2ea946d67c427f6ba896d3981e492c72caf4fd1feeb94225cda60f4c9"
+    },
+    {
+      "path": "build/authoring-workspace-tests.log",
+      "bytes": 18497,
+      "sha256": "42173966cda96162f838388d7e40a69d6257fb0b894cede47ec9489d87dcf75c"
+    },
+    {
+      "path": "build/authoring-clippy.log",
+      "bytes": 72,
+      "sha256": "1c7756783337f4ff32d028d1dbc0d93fc609a50ffa203cdd3be9869975ac9d26"
+    },
+    {
+      "path": "build/authoring-transport-real-c.log",
+      "bytes": 100,
+      "sha256": "c3ee13005c2e203b4de26b4a89fcb082d7607c7e830a390d75d942dee0aa7829"
+    },
+    {
+      "path": "build/authoring-proof/authoring.json",
+      "bytes": 65098,
+      "sha256": "2ebf1b6f6235d7f3dfe967e095fef3fc9b5167a30d2a730fc767ab7250f91619"
+    },
+    {
+      "path": "build/authoring-device/device.json",
+      "bytes": 31201,
+      "sha256": "f7be4473964da297d77289dd98b6ed5bd524be2ffb671e46dddd525612f09868"
+    },
+    {
+      "path": "build/authoring-acceptance/acceptance.json",
+      "bytes": 5017,
+      "sha256": "62ad9431e43208f9af1f4ba0dd0241590e7c0660ad11697a47ae2b3f2aba718f"
+    },
+    {
+      "path": "build/authoring-cli/cli.json",
+      "bytes": 1427,
+      "sha256": "b900c16940a670530c01a7807f53109e3144eb65e41e9ef7293375e260c47414"
+    },
+    {
+      "path": "build/authoring-preview/preview-proof.json",
+      "bytes": 4930,
+      "sha256": "1c08ac328f3168039c4d9f7389a692178d53745c6d0ccdb11bbcbcdff865da2a"
+    },
+    {
+      "path": "build/authoring-windows-evidence/authoring.json",
+      "bytes": 68729,
+      "sha256": "a402a318fef1c5aa85403b073b6e76270f79f7d076c757b1eaa68353c1c7424c"
+    },
+    {
+      "path": "build/authoring-windows-evidence/device.json",
+      "bytes": 32211,
+      "sha256": "bf6d641a05c8c1e7b4bce86dfe1ee21c5f554f1aaf6f3513aa9aae7287505607"
+    },
+    {
+      "path": "build/authoring-windows-evidence/acceptance.json",
+      "bytes": 5233,
+      "sha256": "dc63558231fe322d688b9ce2fc065dc223ca33da3a991b5dae7a52b6e1be1844"
+    },
+    {
+      "path": "build/authoring-windows-evidence/cli.json",
+      "bytes": 1486,
+      "sha256": "e6927498c3439f6ff1ddbe142b6b2c22c10492b24fe20f7316f67f561f6b9d9b"
+    },
+    {
+      "path": "build/authoring-host-cost.json",
+      "bytes": 598,
+      "sha256": "f58dcc014f8df23b9c6a2b3929428470a3aa37415dc2340e1927092fa6571904"
+    },
+    {
+      "path": "build/authoring-linux-evidence/metadata.json",
+      "bytes": 456,
+      "sha256": "b0233d82366329236ae8203409e5858b3af3a744d155c7aac68a3875cc96a272"
+    },
+    {
+      "path": "build/authoring-wasm-feature-tree.log",
+      "bytes": 1065,
+      "sha256": "105f869d1f033f3426b0555987cfc72cb763b50a6bf03b387bd8dc28c2fabc55"
+    }
+  ],
+  "source_inputs": {
+    "Cargo.lock": "ddd4827f26a802b67d84200bc208da2a91ef12b957e02a69003eea3d24914e62",
+    "Cargo.toml": "e20f11284d348e99104e6e11e92ead7008380c0bcdd8f32a9fc764104c885822",
+    "rust/fm1-authoring/Cargo.toml": "70f5294bbaac57b8f64fa4ab93f56104aaabd6964d94b3386505a2a3e8b437af",
+    "rust/fm1-authoring/src/acceptance.rs": "fffba5afe05f206053f3da082b0a8b65f4498a6e48b18fbcc6c9c9a2fae26321",
+    "rust/fm1-authoring/src/cli.rs": "f15d1f0068d53e0b131cb547c7758bb2dae5bb4054043c1f917f8e88954cb722",
+    "rust/fm1-authoring/src/device.rs": "45d5ae4caf476bc3d6782b34021a75b3796efeccf4d9f83ba9415af9f14a73ef",
+    "rust/fm1-authoring/src/factory.rs": "bc16eea502602986446ddc1b130e9e8172a48c95a73caefc791ec4b8eacea7c3",
+    "rust/fm1-authoring/src/lib.rs": "b541460f69cfa281936f9c6af074ab8eb8cae90625d8271b82bea30a78a8ed2f",
+    "rust/fm1-authoring/src/midi.rs": "3fe794cc93d3873363df253a1bc51c33f7bf325baf510865b572ce26c7e5283a",
+    "rust/fm1-authoring/src/pack.rs": "7a3bdcc5506a63543c18323720581e8644aa18879a765683e7bfd81f52d18c8b",
+    "rust/fm1-authoring/src/preview.rs": "6df9e8d554dc6959efd83bebc92b0bafa18c4081ae3ab904e28bee91e5d04747",
+    "rust/fm1-authoring/tests/contracts.rs": "bafa03a37dcf12e11e6c244c21bf59403b692a51af5be1d4f4d57b32f6bf9e12",
+    "rust/fm1-cli/Cargo.toml": "e36d4ec89c088cd2321fc0c30a810d4409b211378bafa2e7b1a7c051e8e39151",
+    "rust/fm1-cli/src/main.rs": "e903a38b325df08a0c85bc0c1ed56efd8c97fc45434313a225e0410d84d8d7af",
+    "tests/authoring_acceptance.py": "3f6b68ca28bbe23963bdb5ffb7b9d1c47364fd8754e419b8fcc8b5a61a462fcc",
+    "tests/authoring_cli.py": "5d0ccef9618a113e4597afc2f026b57acb6afdeb0761e04da010546e260914f0",
+    "tests/authoring_device.py": "8ec3800e09449f65fc5155eeda7291cd1b8aa3d84da04cac261478ef12768f0d",
+    "tests/authoring_differential.py": "80feaf80e3903b8b1156431860333bfbf08b8a152061fa69d20e6d65f9bea55e",
+    "tests/authoring_preview.py": "05945ba3df5017d30af42452203b60dea253b09c44e3d5e3c4f748630d4eb37a",
+    "tests/rust_authoring.sh": "dac13eeed8956606d8c904355a15d04a2397142a37393bc12302a1430a727aa1",
+    "tools/fm1_jam.py": "5fe24c71cc7ee3a9641a73eed5b61fe259d85191900042af0953864be171fb7f",
+    "tools/jam_midi.py": "929e6ce58490d9335d526426756a1301978e5ce752c544a4e13055103c099e7e",
+    "tools/jam_preview.py": "82eba3891e90ec5912230b5df7a6a596ddd3fbe4a4afd4342e2749ccde69bd44",
+    "tools/rust_authoring.py": "030277173e8829bf11d024b5cff3c4fd89fa288aed8cfd160104262661b0351b",
+    "tools/songbook.py": "e0ad4abad163cb4eee2fd6886ca11976cea01764db7cde8a8b7875a5fc539473",
+    "tools/songbook_accept.py": "478d8f6a183007cd61daae2bd21bc7aff58625fdde9bf7ccfc58fc9c4118e817"
+  },
+  "ordered_maps": {
+    "feature": "serde_json/preserve_order",
+    "scope": "selected host authoring builds",
+    "standalone_codec_wasm_uses_ordered_maps": false,
+    "wasm_feature_tree_sha256": "105f869d1f033f3426b0555987cfc72cb763b50a6bf03b387bd8dc28c2fabc55"
+  },
+  "limits": [
+    "Physical MIDI delivery, audio recorder callbacks, MCU memory/cycles and device timing are not qualified here.",
+    "Native preview uses the simulator application ABI tracked under its own migration ticket.",
+    "Python retains argument parsing, generic I/O and legacy JSON/diff presentation; musical and transaction policy executes Rust.",
+    "Historical v2 authoring acceptance is retained; shared strict target validation remains separately available.",
+    "Linux and Windows evidence identities are separate; no global packages/toolchain or live/device worktrees changed."
+  ]
+}
