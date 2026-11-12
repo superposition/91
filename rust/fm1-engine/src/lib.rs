@@ -3,6 +3,7 @@
 #![no_std]
 #![forbid(unsafe_code)]
 
+pub mod effects;
 pub mod planner;
 pub mod sequencer;
 pub mod transport;

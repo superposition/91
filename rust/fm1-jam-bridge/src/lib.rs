@@ -9,6 +9,7 @@ use fm1_engine::planner::{bass_event, plan_into, Phrase, Seed, Settings};
 use fm1_formats::jam::JamPack;
 use fm1_formats::session::JamSession;
 mod commands;
+mod effects;
 mod handoff;
 mod sequencer;
 mod transport;
@@ -281,6 +282,7 @@ pub extern "C" fn fm1_rust_jam_stat(index: u32) -> u32 {
         10..=12 => transport::stat(index),
         13..=17 => handoff::stat(index),
         18..=23 => sequencer::stat(index),
+        28..=31 => effects::stat(index),
         _ => 0,
     }
 }
