@@ -1,0 +1,63 @@
+diff --git a/src/trans/codegen_c.cpp b/src/trans/codegen_c.cpp
+index b5ef33f..4255448 100644
+--- a/src/trans/codegen_c.cpp
++++ b/src/trans/codegen_c.cpp
+@@ -2457,11 +2457,12 @@ namespace {
+         }
+ 
+         // Returns `true` if the type is pointer-aligned (i.e. it could contain a pointer)
+-        bool emit_static_ty(const HIR::TypeRef& type, const ::HIR::Path& p, bool is_proto)
++        bool emit_static_ty(const HIR::TypeRef& type, const ::HIR::Path& p, bool is_proto, bool is_const = false)
+         {
+             size_t size = 0, align = 0;
+             Target_GetSizeAndAlignOf(sp, m_resolve, type, size, align);
+             bool rv = ( align * 8 >= Target_GetCurSpec().m_arch.m_pointer_bits );
++            if(is_const) m_of << "const ";
+             m_of << "union u_static_" << Trans_Mangle(p);
+             if(is_proto) {
+                 m_of << "{ "; emit_ctype( type, FMT_CB(ss, ss << "val";) ); m_of << "; ";
+@@ -2505,7 +2506,7 @@ namespace {
+                 }
+                 m_of << linkage_name << "[0];\n";
+ 
+-                emit_static_ty(type, p, /*is_proto=*/true);
++                emit_static_ty(type, p, /*is_proto=*/true, !item.m_is_mut && item.m_linkage.name.empty() && m_resolve.type_is_interior_mutable(sp, type) == HIR::Compare::Unequal);
+                 m_of << " = { .raw = { (uintptr_t)" << linkage_name << " } };";
+                 m_of << "\t// static " << p << " : " << type;
+                 m_of << "\n";
+@@ -2529,7 +2530,7 @@ namespace {
+             }
+ 
+             m_of << "extern ";
+-            emit_static_ty(type, p, /*is_proto=*/true);
++            emit_static_ty(type, p, /*is_proto=*/true, !item.m_is_mut && item.m_linkage.name.empty() && m_resolve.type_is_interior_mutable(sp, type) == HIR::Compare::Unequal);
+             if( linkage_name != "" && m_compiler == Compiler::Gcc)
+             {
+                 if (Target_GetCurSpec().m_os_name == "macos") // Not macOS only, but all Apple platforms.
+@@ -2596,7 +2597,7 @@ namespace {
+             if( item.m_params.is_generic() ) {
+                 m_of << "static ";
+             }
+-            emit_static_ty(type, p, /*is_proto=*/true);
++            emit_static_ty(type, p, /*is_proto=*/true, !item.m_is_mut && item.m_linkage.name.empty() && m_resolve.type_is_interior_mutable(sp, type) == HIR::Compare::Unequal);
+             m_of << ";";
+             m_of << "\t// static " << p << " : " << type;
+             m_of << "\n";
+@@ -2617,7 +2618,7 @@ namespace {
+                 if( item.m_params.is_generic() ) {
+                     m_of << "static ";
+                 }
+-                bool is_packed = emit_static_ty(type, p, /*is_proto=*/false);
++                bool is_packed = emit_static_ty(type, p, /*is_proto=*/false, !item.m_is_mut && item.m_linkage.name.empty() && m_resolve.type_is_interior_mutable(sp, type) == HIR::Compare::Unequal);
+                 m_of << " = ";
+ 
+                 m_of << "{ .raw = {";
+@@ -2690,7 +2691,7 @@ namespace {
+             }
+             //else {
+             //    m_of << "//";
+-            //    emit_static_ty(type, p, /*is_proto=*/false);
++            //    emit_static_ty(type, p, /*is_proto=*/false, !item.m_is_mut && item.m_linkage.name.empty() && m_resolve.type_is_interior_mutable(sp, type) == HIR::Compare::Unequal);
+             //    m_of << "\t// Zero init static " << p << " : " << type << " = " << encoded << "\n";
+             //}
+ 

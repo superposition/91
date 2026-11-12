@@ -1,0 +1,1022 @@
+[
+  {
+    "path": "build.sh",
+    "ticket": "R21",
+    "sha256": "492715d23d2fa2f963a73c9bf2dc766f1e418056a8add650c556bbd129b4e735"
+  },
+  {
+    "path": "docs/manual.html",
+    "ticket": "R24",
+    "sha256": "8a9adad0cb0d7824ca58d46b0a2620b773e827ee157a4d8b750636a44317e15e"
+  },
+  {
+    "path": "firmware/crt0.S",
+    "ticket": "exception:assembly-boundary",
+    "sha256": "dc5a965fc0c5f997d467500c6dbf2ff10911edc74dcd959151ec62a647ca2cee"
+  },
+  {
+    "path": "firmware/hal/fm1_adc.h",
+    "ticket": "R17",
+    "sha256": "1917870bd802de9134d33335efbcf886b296705dff06688925fd7325589c0c1a"
+  },
+  {
+    "path": "firmware/hal/fm1_audio.h",
+    "ticket": "R17",
+    "sha256": "22351440699748546e932098e3016c618d6137dd0ae34557e08a107641d4e62e"
+  },
+  {
+    "path": "firmware/hal/fm1_cc.h",
+    "ticket": "R17",
+    "sha256": "46c533a0926ba9298ae36705f857ed609a61b95511ba7f0d1800857b4760dd73"
+  },
+  {
+    "path": "firmware/hal/fm1_core1.h",
+    "ticket": "R17",
+    "sha256": "e9b792a4313db5024da42f6e5839fd7418ff866f33ea83d81113b7910a23c505"
+  },
+  {
+    "path": "firmware/hal/fm1_core1_stop.h",
+    "ticket": "R17",
+    "sha256": "0521017427d49e2812e8cce3b7f18f6f9ce1333e3d5ae5ca4bb92f2142b80e78"
+  },
+  {
+    "path": "firmware/hal/fm1_debug.h",
+    "ticket": "R17",
+    "sha256": "ce54e8792aaf49380dfce1b297eac78f663065b85aa248cf17f7d1c2af70db37"
+  },
+  {
+    "path": "firmware/hal/fm1_flash.h",
+    "ticket": "R17",
+    "sha256": "b1bc17cdc08cd89ed4ee59862b6751495812a61a503a5281e41458b6f204de3d"
+  },
+  {
+    "path": "firmware/hal/fm1_flash_id.h",
+    "ticket": "R17",
+    "sha256": "70a15dbfa2bb1b4b3d3d23fc3d826a63dcb150a5fc00c53ee87cd8dfa2b3086a"
+  },
+  {
+    "path": "firmware/hal/fm1_gpio.h",
+    "ticket": "R17",
+    "sha256": "5e3937e32a3b4b9b9ae622c5b42c8819ec8a16f2d76dbddec91654703c77a216"
+  },
+  {
+    "path": "firmware/hal/fm1_guard.h",
+    "ticket": "R17",
+    "sha256": "53bc413de272f73bde7b9e6a32a7afba8e3d85ff75add9009b9d77a41beba7fe"
+  },
+  {
+    "path": "firmware/hal/fm1_input.h",
+    "ticket": "R17",
+    "sha256": "e8e46319e694188fdf552923da48ded93dd30e1fe7420c4c05b4b93d85451127"
+  },
+  {
+    "path": "firmware/hal/fm1_irq.h",
+    "ticket": "R17",
+    "sha256": "5898a5302cf5f6203c2725c4d0227b42b4ce5018f719453435a110771f64d25c"
+  },
+  {
+    "path": "firmware/hal/fm1_isr.S",
+    "ticket": "exception:assembly-boundary",
+    "sha256": "97f607d4c4506e4409a2c5231632fe925246260cbbcfc9ec7fae3bb0aba95d0c"
+  },
+  {
+    "path": "firmware/hal/fm1_lcd_hw.h",
+    "ticket": "R17",
+    "sha256": "8abbd7053516ad1aa1d45eec8c2b324b302a638aeceb5ac028b074fe469ee247"
+  },
+  {
+    "path": "firmware/hal/fm1_perf.h",
+    "ticket": "R17",
+    "sha256": "e48cc30adc298de861080fa2815e6861d7081a0c04b81deed3e42eb0cc6dddcf"
+  },
+  {
+    "path": "firmware/hal/fm1_probe.h",
+    "ticket": "R17",
+    "sha256": "01f850625dc01a64de0bf0b9fa7a274b30a65ca3feefd9594d47465549a2d9b5"
+  },
+  {
+    "path": "firmware/hal/fm1_sys.h",
+    "ticket": "R17",
+    "sha256": "5b11101420f512817b5be5592bf108715e4f79a8a6edafe07593ab7ab6b2ff17"
+  },
+  {
+    "path": "firmware/hal/fm1_time.h",
+    "ticket": "R17",
+    "sha256": "c05780fcf54590245855ce97fa60fe5f0243257e0befaf1871479fdf1f7426cd"
+  },
+  {
+    "path": "firmware/hal/fm1_timer.h",
+    "ticket": "R17",
+    "sha256": "1ec236ce4a75a5b94b9c16999dcdf7d71e4e0c5e0d2f14dbfb87bbaf025e1004"
+  },
+  {
+    "path": "firmware/hal/fm1_uart.h",
+    "ticket": "R17",
+    "sha256": "3c3dfce8ced6964f695f7bd28db0b4e413d00da63915be9c4752bb60af394171"
+  },
+  {
+    "path": "firmware/hal/fm1_usb.h",
+    "ticket": "R17",
+    "sha256": "7f22a4a05249652c8ad37c917fa7ec57d26215e72295147614ea4c4f1527b020"
+  },
+  {
+    "path": "firmware/hal/fm1_vec.S",
+    "ticket": "exception:assembly-boundary",
+    "sha256": "16013adf3c0ef37752560392e94466f639e4ee3bc6dd6bf1660e22504f9152c1"
+  },
+  {
+    "path": "firmware/hal/fm1_xip.h",
+    "ticket": "R17",
+    "sha256": "dcba6ddb9cd2403e1d97c4db49d836110ef2805d2369db7ed323e3fbe26c56ed"
+  },
+  {
+    "path": "firmware/loader/crt0_ldr.S",
+    "ticket": "exception:assembly-boundary",
+    "sha256": "bd4149b97520d1dcc271f730c5a046b0dbf97909e48e968e0ba18304ffc37841"
+  },
+  {
+    "path": "firmware/loader/ldr_core.c",
+    "ticket": "R19",
+    "sha256": "be2bc8dafb26d3323e5f3701abff70b503bcfbf418ce1e253ec0d59eb8bfafc7"
+  },
+  {
+    "path": "firmware/loader/loader.c",
+    "ticket": "R19",
+    "sha256": "313d0b916510434dc7f662ca24ae96afcdd1c06662754acbfbc924a3cf5b2434"
+  },
+  {
+    "path": "firmware/src/app/app.h",
+    "ticket": "R07/R14",
+    "sha256": "0fe1ea81fe3641ce52790b0b14a38670ca6b3223d39f91f6434debfe60889fdb"
+  },
+  {
+    "path": "firmware/src/app/jam_session.c",
+    "ticket": "R06",
+    "sha256": "322b7f9dc0b7ead7255814b5a35d09bba054ad3b8af590fb9601b7a64a507688"
+  },
+  {
+    "path": "firmware/src/app/jam_usb.h",
+    "ticket": "R07/R14",
+    "sha256": "ec17310420f7676a3c73c79083f2c6b7678f8a1e9a8eed4bdb36b59e8e7c3f36"
+  },
+  {
+    "path": "firmware/src/app/main_fm1.c",
+    "ticket": "R17",
+    "sha256": "e2494625e4151d3109c6f61db2a20ad019d6f32a68df0323daaff72c2fc91f38"
+  },
+  {
+    "path": "firmware/src/app/panel.c",
+    "ticket": "R07/R14",
+    "sha256": "e5a9a6dffe1660eb96eae4bbaeacc05923c6d3e0861a3abdabc74786288c9866"
+  },
+  {
+    "path": "firmware/src/app/plat.h",
+    "ticket": "R07/R14",
+    "sha256": "133da438aa6115cc227454df40992de9f5f3b409573a3b95f9f7f46c0a043359"
+  },
+  {
+    "path": "firmware/src/app/plat_fm1.c",
+    "ticket": "R17",
+    "sha256": "0705bdeaceed5f106a8e8d1c80f7db2b547826cf0424e7d4dcff7253308fc878"
+  },
+  {
+    "path": "firmware/src/app/project.c",
+    "ticket": "R06",
+    "sha256": "fd9ecc32d05afb750499d4ad930676d45e555093f2e539aeb6f365b55431e2dc"
+  },
+  {
+    "path": "firmware/src/app/runner.c",
+    "ticket": "R07/R14",
+    "sha256": "6bfe54a3a82843cdcfe85830a949357ef8b8059ddbb633b5cc0b4075013c570f"
+  },
+  {
+    "path": "firmware/src/app/theory.h",
+    "ticket": "R07/R14",
+    "sha256": "04602659d2bea8e2c75253b38db3c0a83b56914e8cba3f0e00029aa3546442c7"
+  },
+  {
+    "path": "firmware/src/app/ui.c",
+    "ticket": "R07/R14",
+    "sha256": "334707eb4a2a644288f9e4031e7b75a3eeb7e6e94f0ea1284f1aac4bf3a29ab6"
+  },
+  {
+    "path": "firmware/src/app/viz.c",
+    "ticket": "R07/R14",
+    "sha256": "e14d4c004e252b633ba31aec01429e797ccc2080c368d75916419d10b51dd574"
+  },
+  {
+    "path": "firmware/src/backup_proto.h",
+    "ticket": "R17",
+    "sha256": "66de7b6cee916a3a719d1db7caed1920fa833416f6a3d0c88b95db26f22ca507"
+  },
+  {
+    "path": "firmware/src/dsp/amb.c",
+    "ticket": "R04/R08/R09/R10/R12/R13",
+    "sha256": "e0a1ef3433f12b8a34fea8bd6d8e994e3bcab0d53acfcf95e0cc8dba6c44ba42"
+  },
+  {
+    "path": "firmware/src/dsp/amb.h",
+    "ticket": "R04/R10",
+    "sha256": "516f8de26c4b3bde386660c4f53deb2cfb12b3628c3044d58665011dc4ff6e84"
+  },
+  {
+    "path": "firmware/src/dsp/fastmath.h",
+    "ticket": "R04/R10",
+    "sha256": "7826027bb05d8d835b4ee6d74f1160938c0d72131b1f571439f2c7bd7f869436"
+  },
+  {
+    "path": "firmware/src/dsp/fm6.inc",
+    "ticket": "R11",
+    "sha256": "a1427316561b527e417ac09ccb9f7377313204f2866a085c2fa61c36db0e9f86"
+  },
+  {
+    "path": "firmware/src/dsp/fm6_core.inc",
+    "ticket": "R11",
+    "sha256": "4cee1301e7acfca88fcc8f0f783326ecf86498caf78d2996a5bd097c6d9a0121"
+  },
+  {
+    "path": "firmware/src/dsp/fm6_dy.h",
+    "ticket": "R11",
+    "sha256": "483625174949055b34135c410f2f11e79d966d4676994f43251e387118d0ee4a"
+  },
+  {
+    "path": "firmware/src/dsp/fm6_patches.h",
+    "ticket": "R11",
+    "sha256": "5107431c0d5602db9eb78bc1d866d51cc63fd6d1f74b34b4cbb60a7a760df748"
+  },
+  {
+    "path": "firmware/src/dsp/fm6_rom.h",
+    "ticket": "R11",
+    "sha256": "43a0d518c7401eb0358ceba9a02ba8d44932a28dac3892985cf654b82b13250c"
+  },
+  {
+    "path": "firmware/src/dsp/fm6_tables.h",
+    "ticket": "R11",
+    "sha256": "32abf52bf69d7a64163deca26aeeac38b6a127160c5b2216904bc522615c20d5"
+  },
+  {
+    "path": "firmware/src/dsp/jam.h",
+    "ticket": "R05/R07/R09",
+    "sha256": "8ca6615df148aea049828cf79c8d147eedbcc4a41fbdfa885e7b2d38cedfcc69"
+  },
+  {
+    "path": "firmware/src/dsp/jam_factory.inc",
+    "ticket": "R05/R07/R09",
+    "sha256": "7681523a5cd970377dd1fc24fe4ca51429d34e056d49ed1b237832dd58157aa5"
+  },
+  {
+    "path": "firmware/src/dsp/jam_runtime.inc",
+    "ticket": "R05/R07/R09",
+    "sha256": "434d8d0e1074c55c66c65ce09a65338f5e6fb9169b8519bfce3df7bfe389775b"
+  },
+  {
+    "path": "firmware/src/dsp/pats.h",
+    "ticket": "R04/R10",
+    "sha256": "0c6ed73805f74bad461faade39ef91dd1bde0847d8b88e19ade08b2c23d87a91"
+  },
+  {
+    "path": "firmware/src/dsp/sint_tab.h",
+    "ticket": "R04/R10",
+    "sha256": "28be3646be2931f2176bdbc0d5f9e1fadb6401c1b148817cb959500af3d14157"
+  },
+  {
+    "path": "firmware/src/dsp/song_factory.inc",
+    "ticket": "R05/R07/R09",
+    "sha256": "b2bb8b25e228e51124ffaea443729685811179e40d61dbfca9c32025b05040a2"
+  },
+  {
+    "path": "firmware/src/dsp/song_plan.inc",
+    "ticket": "R05/R07/R09",
+    "sha256": "201e8ee01696240025f9038b05e4ded70f0ad103e69328f4bdfcce612b00a174"
+  },
+  {
+    "path": "firmware/src/dx_proto.h",
+    "ticket": "R17",
+    "sha256": "b45950abf8896bdf5832e3062b5c94cf1a4c1645ba839ceaa90206c8e6d61d02"
+  },
+  {
+    "path": "firmware/src/gfx.c",
+    "ticket": "R17",
+    "sha256": "c412798ceca5519b1114b35014b9111cd6cc8acf55ff277d89de50352badcd28"
+  },
+  {
+    "path": "firmware/src/lcd.c",
+    "ticket": "R17",
+    "sha256": "a820e6edf53139b16c070eeff2e84922103c3c3bc9f4a2415423fef144dec800"
+  },
+  {
+    "path": "firmware/src/libc.c",
+    "ticket": "R17",
+    "sha256": "344b09afe33da826feefeb1ea2a1a7c50732f91c133fee30174819645edc131a"
+  },
+  {
+    "path": "firmware/src/main.c",
+    "ticket": "R17",
+    "sha256": "a557b38e92e7986e7a64384fd3e113a5a73cda4a6f013bb3ba87f6481d9f3704"
+  },
+  {
+    "path": "firmware/src/midi_uart.c",
+    "ticket": "R18",
+    "sha256": "9d2e4226ff22c89ba520027dd7711f517d7ecce89704e5c9c1a86a8d9dda65fa"
+  },
+  {
+    "path": "firmware/src/ota.c",
+    "ticket": "R19",
+    "sha256": "eb9d6a8562dde864ef74a12ab1fcbdca9779fba1dc52425d4771d542664f0f71"
+  },
+  {
+    "path": "firmware/src/storage.c",
+    "ticket": "R06",
+    "sha256": "d14fda4270727b672943df3503b680bd5374d181a3100a8ed2989899901da23a"
+  },
+  {
+    "path": "firmware/src/usb.c",
+    "ticket": "R18",
+    "sha256": "e086a69f81e09a3c7b848cb4cd6746b5703a0d79afbdcc2d96b85b02440f16a5"
+  },
+  {
+    "path": "firmware/src/usb_host.c",
+    "ticket": "R18",
+    "sha256": "6e2899608ca447c9e6b2f2a8911dae33e363a9550099096031ae5e565eed1dc1"
+  },
+  {
+    "path": "firmware/src/usb_host_desc.h",
+    "ticket": "R18",
+    "sha256": "c19a422e2cfb9d5ccb4695a2fd772e844dd4dd88b41caad9b2a82287185aa755"
+  },
+  {
+    "path": "firmware/stub/crt0_stub.S",
+    "ticket": "exception:pinned-upstream-stub",
+    "sha256": "4e2f6e68d31c1032bd01a45ba05b755cdacfaee48aae3db5bd5eabdefb2dca41"
+  },
+  {
+    "path": "firmware/stub/stub.c",
+    "ticket": "exception:pinned-upstream-stub",
+    "sha256": "bceee45795f3c087485d19ae4d4848eaf9c72f1de2311aba0fd6479eb1c1ffeb"
+  },
+  {
+    "path": "firmware/stub/stub_core.h",
+    "ticket": "exception:pinned-upstream-stub",
+    "sha256": "90778d2c71f7dd4aa1b68ba2f76c6c90db9e8ab6bd60552a2b84a7bb0b3cc118"
+  },
+  {
+    "path": "host/amb_host.c",
+    "ticket": "R15",
+    "sha256": "a2648bcf3c3bdeb1698aafeea046b7be8247303eb2f936b0b5374dd0ce348afa"
+  },
+  {
+    "path": "host/build_host.sh",
+    "ticket": "R15",
+    "sha256": "2e12d9498485bbd4a01429401ee0ae702c1934b8d95e14554715c8dc47e3c35b"
+  },
+  {
+    "path": "tests/boot_fixtures.py",
+    "ticket": "R24",
+    "sha256": "e71a6227032276580a6f2722522088b2a39bde1f5cd46bef90d787cf4375496d"
+  },
+  {
+    "path": "tests/boot_stub_pkg_test.py",
+    "ticket": "R24",
+    "sha256": "e69acdb957bc601f9b8e194cd185e23755b35ecaf9dd2178f2161a89f4c85400"
+  },
+  {
+    "path": "tests/boot_stub_test.c",
+    "ticket": "R24",
+    "sha256": "276d412e563b7a4b15f48f6913e43b730223acd6f2e1a8e6752c536bb4bf08c9"
+  },
+  {
+    "path": "tests/host/amb_test.c",
+    "ticket": "R24",
+    "sha256": "fd4d63c98881c9ecc3e78b7699927d4f59e8c043fda5f05adfd54981c5a41474"
+  },
+  {
+    "path": "tests/host/app_test.mjs",
+    "ticket": "R24",
+    "sha256": "2222361c05ef2d6d617f95d9af2f9399a06dca5f80c65d7e844cf673948f07f4"
+  },
+  {
+    "path": "tests/host/core2_test.c",
+    "ticket": "R24",
+    "sha256": "7e331b323ce893a932fecadc9e93b2a6c75b0ab751fc73abd4178c213c7f08fc"
+  },
+  {
+    "path": "tests/host/dxproto_test.c",
+    "ticket": "R24",
+    "sha256": "bcfecc5c04c1648117323c4f2557ec448eee41ce2db6c19dfc6fbd5a06105007"
+  },
+  {
+    "path": "tests/host/dycal.c",
+    "ticket": "R24",
+    "sha256": "848c7387e9557ca089132f19f176d7af8634f3de74073fb3e971ee706516df18"
+  },
+  {
+    "path": "tests/host/emu_test.mjs",
+    "ticket": "R24",
+    "sha256": "85575ff011ba0803b48ed324871ddc15d352c2f3d5beb8c489160e01d858c81f"
+  },
+  {
+    "path": "tests/host/encoder_test.c",
+    "ticket": "R24",
+    "sha256": "cad3a5ceb0e502fce490a3f47452d33fc87baa564032974d184adc2c4be02e47"
+  },
+  {
+    "path": "tests/host/fastmath_test.c",
+    "ticket": "R24",
+    "sha256": "fc901adbdaab316f4621e947168fcdbc4730f22fdeb7392ae740fdd409afdf23"
+  },
+  {
+    "path": "tests/host/flash_id_test.c",
+    "ticket": "R24",
+    "sha256": "6ff4eb4f50a7865d6b82a736a8ffd0f6b7f5398c7db6deeac86bb8826c0fde6c"
+  },
+  {
+    "path": "tests/host/fmcal.c",
+    "ticket": "R24",
+    "sha256": "1a416fd22ea98cbf686f19c8fb7841a890dd8a1c943c60136b2128df7d32b9ee"
+  },
+  {
+    "path": "tests/host/fmdemo.c",
+    "ticket": "R24",
+    "sha256": "88d398a710411a907ad297722711ba306f47252c5e648e4fd471e098528600d3"
+  },
+  {
+    "path": "tests/host/fmlist.c",
+    "ticket": "R24",
+    "sha256": "4ea570969be6fb21155a8e5e8822413610a25e50ba37f12175ad31d91fae0339"
+  },
+  {
+    "path": "tests/host/gbreak.c",
+    "ticket": "R24",
+    "sha256": "9e3845724bf563618ef26abb4996ca668c780d29190ca559ecf0142d97468980"
+  },
+  {
+    "path": "tests/host/gcost.c",
+    "ticket": "R24",
+    "sha256": "d332e4b472f34e184ba5dd0f8bd48ba3a78f3767e496f6b216638a45b99dde52"
+  },
+  {
+    "path": "tests/host/gcreep.c",
+    "ticket": "R24",
+    "sha256": "a5ce464f9ea8668225768419b1b2f209415649bc376ca71b78260d621a6e0eae"
+  },
+  {
+    "path": "tests/host/gharm.c",
+    "ticket": "R24",
+    "sha256": "638678c96611b5c0a246c33364563a1f7a8ca5c58ad6a28a3377900406514062"
+  },
+  {
+    "path": "tests/host/glevel.c",
+    "ticket": "R24",
+    "sha256": "7564f37463ad3c7dc2a077800b39e5230d245310249e5eee4c3f2d6c01cf1590"
+  },
+  {
+    "path": "tests/host/gmidi.c",
+    "ticket": "R24",
+    "sha256": "18cdf4ae1a9c0b5b9068692e5476a20bc61d2caeab3edb28fa4d87eddf684ea6"
+  },
+  {
+    "path": "tests/host/gonset.c",
+    "ticket": "R24",
+    "sha256": "56b212fb00f23f605670c28a6e42fb75f329baf1c41218023e54e120f47e295d"
+  },
+  {
+    "path": "tests/host/gpad.c",
+    "ticket": "R24",
+    "sha256": "6fa77c33849676481a79568ee8d485b4aeed970ee8c4cf28e5907b065b0811e9"
+  },
+  {
+    "path": "tests/host/gparams.c",
+    "ticket": "R24",
+    "sha256": "01308a5a577278e5a5689e59870bfb712be00fb63b5246fb31428eaabc0bfdb2"
+  },
+  {
+    "path": "tests/host/gpeak.c",
+    "ticket": "R24",
+    "sha256": "49a3c776973096a9910fd4376034e47ef2a30a82bc4b5d224529743dfc6e8c5e"
+  },
+  {
+    "path": "tests/host/gpiece.c",
+    "ticket": "R24",
+    "sha256": "0d419430013d5b25732f6d6589889980e6758a0c0ff9ddfa4a9d81b69aa40413"
+  },
+  {
+    "path": "tests/host/gprof.c",
+    "ticket": "R24",
+    "sha256": "8404feb37c932bb358e28e9a307ceac131f3e920baacea283abd56aa1d5a7a89"
+  },
+  {
+    "path": "tests/host/grpt.c",
+    "ticket": "R24",
+    "sha256": "b9e5e903fabbfe188d7d977d34095c1238a266a56a886a420359b1f3a347905f"
+  },
+  {
+    "path": "tests/host/gsong.c",
+    "ticket": "R24",
+    "sha256": "581e2324b9f66df6d2397d4db815a6aa04d1a1e12e602aa706860ab6b1af3761"
+  },
+  {
+    "path": "tests/host/gspike.c",
+    "ticket": "R24",
+    "sha256": "c20cce3a1b5a695c5abfa82171b8f4030e16e5b555d668ac2654d475a9596f4e"
+  },
+  {
+    "path": "tests/host/gstress.c",
+    "ticket": "R24",
+    "sha256": "1d611af5f62f618df5d1837d3ca3c1e762965bc26e9579ae702c41893f9e05dc"
+  },
+  {
+    "path": "tests/host/gtwin.c",
+    "ticket": "R24",
+    "sha256": "cc58ae513549125a3a67affe9a061ede4b94f78bc3eda3960ef6900c4fbf9e50"
+  },
+  {
+    "path": "tests/host/gvoice.c",
+    "ticket": "R24",
+    "sha256": "42c505e56cf4bbdd23254f791a70da2f3df1dd0d9519bfff6fa0a421da966a07"
+  },
+  {
+    "path": "tests/host/gwalk.c",
+    "ticket": "R24",
+    "sha256": "bd3ce93ce82390b034c596cfc55e02ae7384deca5bf97303ce8b6958f237099a"
+  },
+  {
+    "path": "tests/host/jam_test.c",
+    "ticket": "R24",
+    "sha256": "30be787c877b82f31c6df046d4d566f9a99f1422aadd9f22ee8994b7dd307ee4"
+  },
+  {
+    "path": "tests/host/jam_transport_bridge.c",
+    "ticket": "R24",
+    "sha256": "31078bab4272573094deda0719583bfc3db47e94630e9503985179002085e096"
+  },
+  {
+    "path": "tests/host/jam_usb_test.c",
+    "ticket": "R24",
+    "sha256": "a2f4508d6c30c6b0a583369704e31b200f39f2e03ab207f8d5fd390fcbf9bac8"
+  },
+  {
+    "path": "tests/host/songbook_test.c",
+    "ticket": "R24",
+    "sha256": "b6c6893cd53b93a65f7f91bc7187640b6b8efcda558cbc282c556a493870b2b3"
+  },
+  {
+    "path": "tests/host/theory_test.c",
+    "ticket": "R24",
+    "sha256": "b4892c61180945bc04cc35c30ea40511458277159e5202ae3dac97decbeccd2b"
+  },
+  {
+    "path": "tests/host/trs_test.c",
+    "ticket": "R24",
+    "sha256": "9af5bf31a7162d4fb3b6add2a2b4fd3108603e70f49a51eb4c0b9847fff0df58"
+  },
+  {
+    "path": "tests/host/uac_test.c",
+    "ticket": "R24",
+    "sha256": "8b6d585e793a38ff6515c216830b021b94e5a47934552394f9617d2393aba078"
+  },
+  {
+    "path": "tests/host/usbhost_test.c",
+    "ticket": "R24",
+    "sha256": "52942874eaf88ebbcad0211ac292c93cdca0bc8e30862f6862e00a92cde018c6"
+  },
+  {
+    "path": "tests/host/wavstat.c",
+    "ticket": "R24",
+    "sha256": "15db74d79043cc2779c9fd0d4cb0224d22b799905b3a379e41cb5b06d1a752e5"
+  },
+  {
+    "path": "tests/install_test.py",
+    "ticket": "R24",
+    "sha256": "aac9cb61bc1d0b56a2317c4f740f9ce1d81fa99778c8d823faef34f3e24603fb"
+  },
+  {
+    "path": "tests/jam_tools_test.py",
+    "ticket": "R24",
+    "sha256": "c80bdfdca7bef471b5fe69edc7707a297287ffee0c8f9fb4d3624d6cae503227"
+  },
+  {
+    "path": "tests/jam_transport_test.py",
+    "ticket": "R24",
+    "sha256": "0c1aa73e0921b34fd97be7ab9af505325ff92b7dd7ff6a513b17cbc06aedf1dc"
+  },
+  {
+    "path": "tests/ldr_test.c",
+    "ticket": "R24",
+    "sha256": "1e0df15260b29d064e28ce8bb7a50fbb2c96c40cef4b9164bcba687ab9d30d46"
+  },
+  {
+    "path": "tests/loader_powercut_test.c",
+    "ticket": "R24",
+    "sha256": "059836a543c4003173aa9133c6d576b8cc6f71f312c2fe0f2bdf8fbb933aee9b"
+  },
+  {
+    "path": "tests/ota_test.c",
+    "ticket": "R24",
+    "sha256": "95c6f8f20d3863e9799b371e2942f2682740b12bf5e77fff4a81ffa24e2af65a"
+  },
+  {
+    "path": "tests/run_tests.sh",
+    "ticket": "R24",
+    "sha256": "c7fcc376e4fa9680e797f304e5e01a5faf91589c4a4872bef88bdeb88f55ff5b"
+  },
+  {
+    "path": "tests/storage_test.c",
+    "ticket": "R24",
+    "sha256": "c57316550139e2468583ff8567c3c3a235d66ab10d4ec673487a3e4d039d834b"
+  },
+  {
+    "path": "tests/web_backup_test.js",
+    "ticket": "R24",
+    "sha256": "e8171a75e95e6032510ec64ff308e9dda554935a3979f1d6c2dca4c6e46870cc"
+  },
+  {
+    "path": "tests/web_idle_test.mjs",
+    "ticket": "R24",
+    "sha256": "cee420aa108adf7d14deafacab35495595dba912aa4fe6f16a6dc2e4902c8f14"
+  },
+  {
+    "path": "tests/web_ota_test.mjs",
+    "ticket": "R24",
+    "sha256": "4a75a0bd4512ad0f34751cee31cbdea09658f779bde094a266be7348353120cb"
+  },
+  {
+    "path": "tests/web_piece_test.js",
+    "ticket": "R24",
+    "sha256": "0b2acb7f224da8725e7c01ee0afda3ce1c2e8d3aee5b1ca2fb9e9444d4d510e8"
+  },
+  {
+    "path": "tests/web_syx_test.js",
+    "ticket": "R24",
+    "sha256": "43cccc875f57de3e022e74db0bf292d9ae1a914480a68edc13ca1327adf95bde"
+  },
+  {
+    "path": "tests/web_voice_test.js",
+    "ticket": "R24",
+    "sha256": "5590605049b4bfb9412b87f329603758b575e7d1a75f63b8eaf0f59dec4b4123"
+  },
+  {
+    "path": "tools/build.py",
+    "ticket": "R21",
+    "sha256": "04b736397c745bcd9eaea3edf7b1d94dfd1381dedf7ea5bc089e57c049e74b43"
+  },
+  {
+    "path": "tools/fit_fastmath.py",
+    "ticket": "R21",
+    "sha256": "d1a328318c6cccc2d6b78a8626862cf2a04fb8f87c316d099c104630eb42a342"
+  },
+  {
+    "path": "tools/fm1_debug.py",
+    "ticket": "R21",
+    "sha256": "c039d525c6a1078132c5f3915564eff1cfc96563f220b21536ca09c9f4d9e819"
+  },
+  {
+    "path": "tools/fm1_install.py",
+    "ticket": "R21",
+    "sha256": "bd96ead58e9e6c03be46f73a391e05b90ceeca2697e0daea20e4319eac912a97"
+  },
+  {
+    "path": "tools/fm1_jam.py",
+    "ticket": "R20",
+    "sha256": "a448c5bcdf61caa54cd819ee810be10de23c841426479adf0e64c506b3f718b2"
+  },
+  {
+    "path": "tools/fm1_rescue.py",
+    "ticket": "R21",
+    "sha256": "a799868cc0197318c9a4da1d3c10596f0b94fb03b817eb517eb4d88b0185b461"
+  },
+  {
+    "path": "tools/fm1_rescue.sh",
+    "ticket": "R21",
+    "sha256": "950765275956540239617c5d862f5ecd2e648c34d9cb8fbecdc92db533e8afc6"
+  },
+  {
+    "path": "tools/fm1log.py",
+    "ticket": "R21",
+    "sha256": "4ad40d549f9e2764cc33ead343ea9714091b56b48dcc23fda915d75b29320884"
+  },
+  {
+    "path": "tools/fm1pkg_make.py",
+    "ticket": "R21",
+    "sha256": "52b7e818b910dac4de34e2d41ca1683d6c8522fd0d9fd5f09011ed40e3161acd"
+  },
+  {
+    "path": "tools/fm1sum.py",
+    "ticket": "R21",
+    "sha256": "5114e1e540a7fe6d6f60678019f541a56c971fe41a3a19a7ce86229e9008bac2"
+  },
+  {
+    "path": "tools/gen_fm6_dy.py",
+    "ticket": "R21",
+    "sha256": "3885bded84e19c62885a206937e5dc94578217f8668b91f07e2705fd0a13c648"
+  },
+  {
+    "path": "tools/gen_font.py",
+    "ticket": "R21",
+    "sha256": "6cab3dc4260cce942837807e1d69ccb462f49d09899591e626bc58b8872e92dc"
+  },
+  {
+    "path": "tools/gen_pats.py",
+    "ticket": "R21",
+    "sha256": "9312271d6959a8a1e0062b15c8d434b267d9c7f5dfe4db9a49baa0063d3707c8"
+  },
+  {
+    "path": "tools/gen_sint.c",
+    "ticket": "R21",
+    "sha256": "b86e7095406242438af7ed3124aa59d9f214cbc31226401b82b69945a2bfe887"
+  },
+  {
+    "path": "tools/get_toolchain.sh",
+    "ticket": "R21",
+    "sha256": "01c997cf377aa964eceaaaa05f6e75c0df92a863297ca7d3cc4a71472764f5f3"
+  },
+  {
+    "path": "tools/jam_midi.py",
+    "ticket": "R20",
+    "sha256": "a5ffa7189074cedf6d7805429a36d6ed99c707c07b46320b0ade41a11e8cabf3"
+  },
+  {
+    "path": "tools/jam_preview.py",
+    "ticket": "R20",
+    "sha256": "941610e910ff7f887fb1f72948ea2694e273c7ea6ff5774cd6f7a2c576112b29"
+  },
+  {
+    "path": "tools/library_add.py",
+    "ticket": "R21",
+    "sha256": "d4190d8f2f5feeec4fd30931d33a67ad37598c5ffb0a979d4aa7ae25bf16a46c"
+  },
+  {
+    "path": "tools/lz4blk.py",
+    "ticket": "R21",
+    "sha256": "bede501ca8774ba6942b35ad2c43823e9f48f13d0fb001ef9b73cdaf41460e16"
+  },
+  {
+    "path": "tools/make_dev_artifact.py",
+    "ticket": "R21",
+    "sha256": "8faf13261cb99f4f2447f16fcc5a67bbd702ded0468551a97492047dc9b1b085"
+  },
+  {
+    "path": "tools/make_logo.py",
+    "ticket": "R21",
+    "sha256": "0cc417f33460419a2751b2f94c1d010d2a09415e40b56ed0ffbc6aee8b058c57"
+  },
+  {
+    "path": "tools/make_manual_pdf.py",
+    "ticket": "R21",
+    "sha256": "5c550eb4e668c19e0a820d434aed697a6fd7b51e4fb26b4556770829fe4403b0"
+  },
+  {
+    "path": "tools/make_pages_site.py",
+    "ticket": "R21",
+    "sha256": "ac603468dd85fa23b7803e620a488e83bd9e0ed766220fc13ab34a6179ae22ad"
+  },
+  {
+    "path": "tools/make_params.py",
+    "ticket": "R21",
+    "sha256": "4ca294e29fff9fc635222d1e349dd7692644f3a99297feea59f8f89253619ed9"
+  },
+  {
+    "path": "tools/make_quick_manual.py",
+    "ticket": "R21",
+    "sha256": "8595e6ddfc0322bb6de028ab97a42b2c5cdf6bc9e10a98e29d9eca2ed61ed662"
+  },
+  {
+    "path": "tools/make_screenshots.py",
+    "ticket": "R21",
+    "sha256": "8b8489023aec2a159b36c5482d61eb2ae9932fc4b051ff4c797dc2bf1ceecf2c"
+  },
+  {
+    "path": "tools/manual_html.py",
+    "ticket": "R21",
+    "sha256": "8b9f97d27ed3fd2a3012734a3eb46f52473ec90c99aa085a0614505b7fe4368b"
+  },
+  {
+    "path": "tools/publish_pages.sh",
+    "ticket": "R21",
+    "sha256": "d3777646a556f130ec0a1c05be95e2f1db4bcf5bfb78a754e0fd26bbb2b89bd5"
+  },
+  {
+    "path": "tools/release.sh",
+    "ticket": "R21",
+    "sha256": "dab3574e1dac99ed41da8aeb7c7ca7c68c63095c35bb72493d91c541c63ea4b8"
+  },
+  {
+    "path": "tools/songbook.py",
+    "ticket": "R20",
+    "sha256": "5283384de8de6280f0faa2852b3197cebfccc1b26a95c682f69dfe234e9ed8c0"
+  },
+  {
+    "path": "tools/songbook_accept.py",
+    "ticket": "R20",
+    "sha256": "032524dc12431b8a0bc8e21cb45b45729bce5a0d6239ed8142ff6e7e2b9b0a47"
+  },
+  {
+    "path": "video/driver/capture.mjs",
+    "ticket": "R23",
+    "sha256": "ffb5dc46db8b141d5ac19408ce0268e75f3ff5a1c945469bef6ad2b7c0490518"
+  },
+  {
+    "path": "video/driver/emu.mjs",
+    "ticket": "R23",
+    "sha256": "b9c823f4e9e9f16bc3d90915802a43a9d0a990af2fd6bbd244ff025e2a012ad6"
+  },
+  {
+    "path": "video/driver/rms.mjs",
+    "ticket": "R23",
+    "sha256": "a5cb06dacea99c6796d177b5acc122f175b76cb5a756c3cd1d5d1465925c537f"
+  },
+  {
+    "path": "video/driver/scenes/lib.mjs",
+    "ticket": "R23",
+    "sha256": "0c9ecf5e8e395050903b93f1a60927763b45242f9e8ad37858721afb8c8e5540"
+  },
+  {
+    "path": "video/driver/scenes/tour.mjs",
+    "ticket": "R23",
+    "sha256": "c5fb2e05ff82d13a516eb8c8b096d6e56daf4bee61bf09f84e56a29a5e14cb68"
+  },
+  {
+    "path": "video/driver/scenes/update0150.mjs",
+    "ticket": "R23",
+    "sha256": "7636e2d4bf22aa3d6b671ad17ebf79b356cb882ecebdc7a1ec70e64340ad6b00"
+  },
+  {
+    "path": "video/driver/sheet.mjs",
+    "ticket": "R23",
+    "sha256": "0729613bd43ffe938092431bfea4f364549b05e959248a108474fc640a4a8064"
+  },
+  {
+    "path": "video/src/Cards.jsx",
+    "ticket": "R23",
+    "sha256": "49d3d89cdb4e01217480cc92339d013c5cd51e811ea14327c2574fddfa92987f"
+  },
+  {
+    "path": "video/src/EmuScene.jsx",
+    "ticket": "R23",
+    "sha256": "6be9512137769f010f2ba0e9cdebe32433de968bc3e65110407b203d8d6ade49"
+  },
+  {
+    "path": "video/src/Full.jsx",
+    "ticket": "R23",
+    "sha256": "78bdb7669688b67c800d4bb5f8a3f75fb0100cd0596c8f75c00f405c57ae0b8c"
+  },
+  {
+    "path": "video/src/Panel.jsx",
+    "ticket": "R23",
+    "sha256": "bd4b4929874343758c56dac535ab54b278c3559b93f6decf17bef28278216bb5"
+  },
+  {
+    "path": "video/src/Root.jsx",
+    "ticket": "R23",
+    "sha256": "6657dbc88d3582f6741fd0717100773eb96830d600a935228cc3af6b9fccd6ad"
+  },
+  {
+    "path": "video/src/index.jsx",
+    "ticket": "R23",
+    "sha256": "5e86f317bb96a30c876953b89dfe0e71def233ff30d1519df01ce2e222698b29"
+  },
+  {
+    "path": "web/amb_installer.html",
+    "ticket": "R22",
+    "sha256": "553fa2b23b5b60f7ff5cc625746a93b53a4439e528f6ba17d98c6b4627fc68fa"
+  },
+  {
+    "path": "web/app/amb_api.c",
+    "ticket": "R16",
+    "sha256": "66ee628d640d3f00a418d46e0675ade5b5a04257b5f172abf03a124693130154"
+  },
+  {
+    "path": "web/app/build.sh",
+    "ticket": "R16",
+    "sha256": "9b09feaad6ed1165ea952ef1dfa26532c6b6db60e551fc7e276c4bde2d547a8c"
+  },
+  {
+    "path": "web/app/index.html",
+    "ticket": "R16",
+    "sha256": "98b7183e697912e1397b44351391f7a999bccf88125e73e59276454e2127cc1e"
+  },
+  {
+    "path": "web/app/worklet.js",
+    "ticket": "R16",
+    "sha256": "e59b45305c52ec21ea35ef21110e0faee1b33a12d8643eb89c43e20b97aa5365"
+  },
+  {
+    "path": "web/editor/index.html",
+    "ticket": "R22",
+    "sha256": "2ccbf88e94a5f9834a66721716a72030723eb08d85ca5532031e97131e280242"
+  },
+  {
+    "path": "web/emu/amb_web.c",
+    "ticket": "R16",
+    "sha256": "8588d68f6842c2fc89c2c9f750daa504c905469d071f6f25f72a87ca4acf8f4f"
+  },
+  {
+    "path": "web/emu/build.sh",
+    "ticket": "R16",
+    "sha256": "00c885752ad49e4b836fc7a81eae1fb7fda536ef21faf0c77cf15292a6fa1b11"
+  },
+  {
+    "path": "web/emu/build_clang.sh",
+    "ticket": "R16",
+    "sha256": "e534fd62f358f3d9e115ec114ca83329e1f1cf010bcd8538c2a1b912524e8d24"
+  },
+  {
+    "path": "web/emu/index.html",
+    "ticket": "R16",
+    "sha256": "058e3ee161e3f5a5725f97406e76a183263984b928ebb44962ffe0f9373e44dc"
+  },
+  {
+    "path": "web/emu/shim/libc.c",
+    "ticket": "R16",
+    "sha256": "bde097f5efbf9b6e96f18780d0b8168a37aef70d9d2505f8d208178bd0588665"
+  },
+  {
+    "path": "web/emu/shim/math.h",
+    "ticket": "R16",
+    "sha256": "43428d47dce88ab1d030e8f4bcebc6255bf2dae9d397ddc3d68f87018e68d75b"
+  },
+  {
+    "path": "web/emu/shim/stdio.h",
+    "ticket": "R16",
+    "sha256": "62212ad2c02e8683cbff1259d85a717bd51986ba454f8c60f83ebe048e31d345"
+  },
+  {
+    "path": "web/emu/shim/stdlib.h",
+    "ticket": "R16",
+    "sha256": "f0ea5851cfa593aaa9f4b1a8c53ac9c3c75ccd3f289063470f3e9d26ba223ea4"
+  },
+  {
+    "path": "web/emu/shim/string.h",
+    "ticket": "R16",
+    "sha256": "70cd1ce051db212c7eb5b048aca2cbafbb6d4c355213a06dbef5b883154b661a"
+  },
+  {
+    "path": "web/emu/shim/time.h",
+    "ticket": "R16",
+    "sha256": "8ba95e13d8df7fede1b58712a501f5a572aee718cc6ac8208b8f99b7e2fdfffd"
+  },
+  {
+    "path": "web/emu/worklet.js",
+    "ticket": "R16",
+    "sha256": "54e4f066afc0d8c140344adb68c78ed3113c9fd35a5217dbbf6861058840a379"
+  },
+  {
+    "path": "web/fm1backup.js",
+    "ticket": "R22",
+    "sha256": "e5b2e8a1dd5e43873997d5c22a385b5242784e218ab7c3bc3e923b49b1e306c1"
+  },
+  {
+    "path": "web/fm1card.js",
+    "ticket": "R22",
+    "sha256": "9cfd40dc2af295653118c4fbec50e7f8fce0cca120f3a2b3d944f3b8b7df1da5"
+  },
+  {
+    "path": "web/fm1idle.js",
+    "ticket": "R22",
+    "sha256": "5230b8cafb63aae502a920396d36b0a473b9b2027ffe103e359b9f0d0ca71387"
+  },
+  {
+    "path": "web/fm1ota.js",
+    "ticket": "R22",
+    "sha256": "48b63775d71389f71caab3cc6a7e52db8f57d4e578add7a7db0136a93628cbdf"
+  },
+  {
+    "path": "web/fm1piece.js",
+    "ticket": "R22",
+    "sha256": "87968249579fa1afbec6698d6ffbf8c816dd5e83f9b85f1210f998f209e1dae4"
+  },
+  {
+    "path": "web/fm1pkg.js",
+    "ticket": "R22",
+    "sha256": "b9d2353eb7bd879296bf67efbebe2967f5697911eedcd92b38a8b891e13a124d"
+  },
+  {
+    "path": "web/fm1share.js",
+    "ticket": "R22",
+    "sha256": "611550c13646a80ab9cc4b3640402be01ce8e434a380ed0299f01d28d21a9408"
+  },
+  {
+    "path": "web/library/index.html",
+    "ticket": "R22",
+    "sha256": "379b570ef7dbaeb7605ec38d7b665f7a839c8663f29959cdf15f1e3eaefbb62d"
+  },
+  {
+    "path": "web/make_site.py",
+    "ticket": "R22",
+    "sha256": "4e835b5a988b0f601b5eba99ec704d96c3b7ab9a12222b2471a7f275cda4c050"
+  },
+  {
+    "path": "web/pieces/index.html",
+    "ticket": "R22",
+    "sha256": "578d1e923a903feb519be0439519592a30fa8ccab10008f99df309c5981293e2"
+  },
+  {
+    "path": "web/relay/local.mjs",
+    "ticket": "R22",
+    "sha256": "26c0bfe012b2385585bea8e37a8054bc31129224b897e621b1449a7a7532b972"
+  },
+  {
+    "path": "web/relay/worker.js",
+    "ticket": "R22",
+    "sha256": "cdb0b0224d7b466ac4ce2a29b51598a70bf91472763a04eb6ac1fa50d62bc69d"
+  }
+]

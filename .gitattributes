@@ -7,3 +7,5 @@
 *.pdf binary
 *.ttf binary
 *.otf binary
+# Unified patches contain whitespace-only context lines.
+rust/toolchain/*.patch -whitespace

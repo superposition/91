@@ -1,0 +1,860 @@
+{
+  "source_head": "5b78ae77897d8bc08981c0a620ab2cce192a2d20",
+  "archive_sha256": "3d20587f825b8a26cd1f9ab6a715e65e78838fce0c19b5c27ce0427c15fa6263",
+  "source_files": 440,
+  "tests": [
+    {
+      "name": "fastmath",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "ea60372ca9048dbec4f1945b4e783dcd2c4953bbaea8b9e81752d909e622d0cf"
+    },
+    {
+      "name": "jamtools",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "742141cc45e5bcf8e3a2094ac22700fa15d0a6f633387288099981152bcbf2a0"
+    },
+    {
+      "name": "jam",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "9e08f3755aad268ba860b1e3137de1d15235484b3aea2da0559fdcb157d8f07f"
+    },
+    {
+      "name": "songbook",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "98bac0f592507d2e4e21d961e07e9328d65dfce99bb4677cd2710f318211ff21"
+    },
+    {
+      "name": "jamusb",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "15adeb518d2aef9fc528fb45375473f01766cfdf1fb9803a80daea2aa94b3840"
+    },
+    {
+      "name": "jamtransport",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "790ecbd18406c50f94ff499311f6ff2ec4c4f496372b209538c038647f056405"
+    },
+    {
+      "name": "encoder",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "782ad031458770b476dd5aca5a2a51a6054c8cae14f4d66cc25b90c637e1b061"
+    },
+    {
+      "name": "uac",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "e08534704cd353e432aa38dad3b5b6b28f9baa53c3a3c605933d22ca1f925e21"
+    },
+    {
+      "name": "trs",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "c81aadf5cd2068444c158a2e18983fc550f460f857e9e1997a8c14bcea74f771"
+    },
+    {
+      "name": "flashid",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "273854cb4767682a4a5711d808ae2b650333afc39ff9dc31a5379f69f27d993e"
+    },
+    {
+      "name": "usbhost",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "b8478b643b24c587f7f25c64347919adc2ab7ae84f1299deac23125c40363f28"
+    },
+    {
+      "name": "amb",
+      "status": "FAIL",
+      "assertions": [
+        "FAIL tests/host/amb_test.c:1844: loop 4: 4 9 2 2 | 0 2 11 4 | 4 4 0 2"
+      ],
+      "log_sha256": "1655bb13d6a3c375c689d4b4cfaad8910f37f60e17ccd405571e9a3d60e59d54"
+    },
+    {
+      "name": "harmony",
+      "status": "FAIL",
+      "assertions": [],
+      "log_sha256": "f95f4db302d0bf7d540e65bbbef88fb163ebe91eafbf528251a929d2052fe96b"
+    },
+    {
+      "name": "form",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "c3d55e0e33f6bdf46e1163f20b284c0b264048b84ed12b663e0de98b746433f8"
+    },
+    {
+      "name": "twins",
+      "status": "FAIL",
+      "assertions": [],
+      "log_sha256": "c214ca04eab306a82ab899fa2e7401e55b5f0adf25372e1162454a8008b8311f"
+    },
+    {
+      "name": "core2",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "aa7aae874a07f0537d038b6c36e6a08054b48ed02f15915c82f5db7255f5debc"
+    },
+    {
+      "name": "jamcore2",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "63f3616a29ee0d7baf6f87fa4635f9fde1d81a6b8a26d1ff9a8ff9280aba19f0"
+    },
+    {
+      "name": "songcore2",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "1db8c67ff3ade4970d88abd63e851317d3e76d5d0eeb2ff85e6ddaff4d8f233d"
+    },
+    {
+      "name": "storage",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "fd35531261a2038b843ad86269c9c8ac946e63051d851ed66e8c259060ab29a1"
+    },
+    {
+      "name": "websyx",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "81ed5b1d33b5232f6f76323073fa848101a012f124dadfe31a6c8557f9bd7700"
+    },
+    {
+      "name": "webbackup",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "b74e83a1289e590ca4759d6b1d60cd6de252a84c231475c6a92bd8a834fb121c"
+    },
+    {
+      "name": "webota",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "cb9614421b7f4e3d090c0226181125ac5a587f92f66a359f469f7c15b784edd2"
+    },
+    {
+      "name": "webidle",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "21dd82c7bfe683447cec58aa6792e84b9e61e0c37c9f06e4489cfd780c4ed982"
+    },
+    {
+      "name": "dxproto",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "96df69884bba82d4b96746e14b5797b722faf59bc8623f290503c7e4a6469f84"
+    },
+    {
+      "name": "params",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "2a468b6234602f101fa04fbb56bb7a3fa23bd7ce0c6f7f1bb4a3a2701d517d1a"
+    },
+    {
+      "name": "webvoice",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "c59bf389df4c144eae3196cbe78c3a3eddc970aa1e8232e6a6693b2853081b74"
+    },
+    {
+      "name": "host-build",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "3f74a56f448a8517ecbdd5a2faacc76cfd47bb31fdeebdbd96eb8e95153485bb"
+    },
+    {
+      "name": "webpiece",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "faace014be2134fcc76a2f76085bb5d73012b14998fecc5078777a44ddafd7f8"
+    },
+    {
+      "name": "scenario-acsteps",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "3ef44491787a7cdb4bba728347b548fccb0bc447539e2cb76b0b8261bd43a58a"
+    },
+    {
+      "name": "scenario-answer",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "2a230c2fc0a36bb992c9449f40348fd8c2a5aad280eb1609e0ec54d28f4b99a5"
+    },
+    {
+      "name": "scenario-arrange",
+      "status": "FAIL",
+      "assertions": [
+        "FAIL expect chordroot == 6, got 2",
+        "FAIL expect chordroot == 9, got 11",
+        "FAIL expect chordroot == 2, got 4",
+        "FAIL expect chordroot == 7, got 9",
+        "FAIL expect chordroot == 1, got 2",
+        "FAIL expect chordroot == 5, got 2"
+      ],
+      "log_sha256": "bc4cfd88503c3e5709e0385080c8b74c9c372edbe6c9e64f2194f9f8d21be780"
+    },
+    {
+      "name": "scenario-autofx",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "c6bf64611a9f7b400ba0a9bd9b5b873e82d7a9e4203ff0a116fee3992ada4cb8"
+    },
+    {
+      "name": "scenario-bassline",
+      "status": "FAIL",
+      "assertions": [
+        "FAIL expect par152 == 6, got 3",
+        "FAIL expect par152 == 8, got 5",
+        "FAIL expect par153 == 42, got 56",
+        "FAIL expect par154 == 28, got 24",
+        "FAIL expect par155 == 10, got 18"
+      ],
+      "log_sha256": "018f8f25ceb439015a674c49ec5dab247c88fd75a43390fa246beb4de1cac320"
+    },
+    {
+      "name": "scenario-basssteps",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "ff9cd8aeac301f4ce250bdd5f70d198a94b30bd63ca408c695577196ec99c4c4"
+    },
+    {
+      "name": "scenario-battery",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "6dc3e94251493c8ca473ece40837d419e7ae51f2a36f01fc615f223408a08308"
+    },
+    {
+      "name": "scenario-beatfx",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "f6f08c0326f60ba793403bb37a64a148ea31c9fd2479e2f0d86355397195d2f9"
+    },
+    {
+      "name": "scenario-capture",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "bb2aac7c7cda4a02f5d957658ff9aefdb135c4cd8f955308ad3f554f379f9ba1"
+    },
+    {
+      "name": "scenario-chordkeys",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "d3413eb2245bd870fad6fc9d8f6333deb6cc9f05c33d8edd24f318e7746ea76c"
+    },
+    {
+      "name": "scenario-chords",
+      "status": "FAIL",
+      "assertions": [
+        "FAIL expect chordiv == 2193, got 2069",
+        "FAIL expect par92 == 2, got 3",
+        "FAIL expect par93 == 0, got 1",
+        "FAIL expect par92 == 5, got 6",
+        "FAIL expect chordiv == 0x40D, got 1065",
+        "FAIL expect par92 == 3, got 4",
+        "FAIL expect chordiv == 2069, got 2209",
+        "FAIL expect chordiv == 2117, got 2069",
+        "FAIL expect chordiv == 1061, got 1035",
+        "FAIL expect chordiv == 1061, got 1035",
+        "FAIL expect chordiv == 1061, got 2193"
+      ],
+      "log_sha256": "8dadb18d2047b856d39312769ea83b1573c9dc3c90da1dd15148294295810c2b"
+    },
+    {
+      "name": "scenario-circle",
+      "status": "FAIL",
+      "assertions": [
+        "FAIL expect prgbars0 == 4, got 2",
+        "FAIL expect prgbars3 == 4, got 2"
+      ],
+      "log_sha256": "01fd6d68e246edc082b77c8d4b47a9626ff6f5db35bf6c7cb2b00c14a22c8922"
+    },
+    {
+      "name": "scenario-dancer_sections",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "64a03330e261788901254ca484a001bf51ff509d12c1adccb51fed6eb6eced81"
+    },
+    {
+      "name": "scenario-dejavu",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "4d70e623d188f4c1e16fdbf5465fd5e3021792839d73a87c3026482c96fd5ac0"
+    },
+    {
+      "name": "scenario-dj",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "c68c8e73068c18b56f062cd0c4fd9b6592ef8a8477a94fbac085cebede234f43"
+    },
+    {
+      "name": "scenario-drumdrift",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "30098d05448d5cc5964fa8cdb0f27aa4bed885f21817de79625f528e2a4e9586"
+    },
+    {
+      "name": "scenario-dyvoices",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "6ec43780956f712c74d4c468b277e98fa6332987c028d25265925c33b925173b"
+    },
+    {
+      "name": "scenario-feel",
+      "status": "FAIL",
+      "assertions": [
+        "FAIL expect par160 == 2, got 4",
+        "FAIL expect par163 == 30, got 40"
+      ],
+      "log_sha256": "46865132ff2d5c2372bcc34c271f99f77340af72c4a8c9a2fdcd038f531f3b04"
+    },
+    {
+      "name": "scenario-filters",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "78aae1a774f98cde5749004e7d17f404b6951bdbd74b30594b365416e2ce8022"
+    },
+    {
+      "name": "scenario-first",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "0f21af36a9771ec241c54e7743564e63439735c70af6a3167c9ffd09a564d390"
+    },
+    {
+      "name": "scenario-flex",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "42d0dc77411bc4b71ddac303e034c9cca91b1c492f96587c341dd1167e7d0355"
+    },
+    {
+      "name": "scenario-fx",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "467e0072eeef1ca7fbc043de0d4e6f92d92ab2886ce06a9f8ff254b0cd9ead48"
+    },
+    {
+      "name": "scenario-fxclose",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "374aa5da617ac4279d6557f18de466b2e48bcfbae7e6c23d13ab16c36a4cdf28"
+    },
+    {
+      "name": "scenario-fxedit",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "b4328aebc81bb39f65d743aba1e622c564efb234fa8f7b3d7046520fcd4d90b0"
+    },
+    {
+      "name": "scenario-fxjump",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "671adae211c68196eb43c885f18d514d084de78f01c96326d13173b2397692f8"
+    },
+    {
+      "name": "scenario-fxknobs",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "8705741bc2f4864031fea18c4f0203c47bc9073e44d7eb294cd1396a99a56095"
+    },
+    {
+      "name": "scenario-fxperf",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "ac3708dafb63df28de8f2ae012fea30ef621357461e60fed43161f0e63294020"
+    },
+    {
+      "name": "scenario-fxscopes",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "030c5d3346652661f1e891b7fe7f50c50214d7421eb3bb3b8618f3d6423f1ee2"
+    },
+    {
+      "name": "scenario-genre",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "edbfd1925dd986346ffa3f575c689b1a0f48c6ac3d2867721967faf264047b7e"
+    },
+    {
+      "name": "scenario-genrestore",
+      "status": "FAIL",
+      "assertions": [
+        "FAIL expect par0 == 30, got 44",
+        "FAIL expect par0 == 30, got 44",
+        "FAIL expect par0 == 30, got 44"
+      ],
+      "log_sha256": "6a44e89d8d5c8fcdbc87a1019e2361429357499cbcd9ffc7c7d567be538b9ee0"
+    },
+    {
+      "name": "scenario-groups",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "fc837168535aee79f57d4b697431324c04cefbfc142520ead59ca456910da2b9"
+    },
+    {
+      "name": "scenario-help",
+      "status": "FAIL",
+      "assertions": [
+        "FAIL expect par0 == 52, got 66",
+        "FAIL expect par0 == 55, got 69",
+        "FAIL expect par0 == 52, got 66"
+      ],
+      "log_sha256": "c0f68832f0c37f4eb43aedbbd817c96f858b33ffcb556c00507231f3e24b2634"
+    },
+    {
+      "name": "scenario-hero",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "e2acfa052f3ecd008433ee6c9d58af9e230d952a3718b563650076de75b1389c"
+    },
+    {
+      "name": "scenario-imp",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "eb9b6557c27ada9d6b8e3d40e50f815113e2b66687649627f03111975db05461"
+    },
+    {
+      "name": "scenario-jam-helper",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "99c5f2885aa361180079c22f9f75bd21b940b2585ac3ce1fa2e1e1085b03181b"
+    },
+    {
+      "name": "scenario-jam",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "81cf2273a0b05ae8f935b9acb22c0b66d3e264bd8c0b3b5e654cb56e0c318e20"
+    },
+    {
+      "name": "scenario-kaleido",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "2dc87dc3ee104d935da2c77b4a6e584d09658e1999439a7140db672ac62d0874"
+    },
+    {
+      "name": "scenario-keydrop",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "13371a99f362262bbfc63ef4bfee5ddb8de64024024d3caaf7a0ab47189810a3"
+    },
+    {
+      "name": "scenario-keymap",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "500e53e6e5d0f527ccbccb24536c6ffa3165d58da036fdfeb1c2ed72bebb4a65"
+    },
+    {
+      "name": "scenario-links",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "88ceded80f76e04874ca50d264463cbc05cb602fc9621aab3427a33c3237fda1"
+    },
+    {
+      "name": "scenario-look",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "e2ae826e64f949bac7cfbbaa83f56ee3b65c753f5c02e37d0da0d6d44adf0bed"
+    },
+    {
+      "name": "scenario-midimap",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "658ab5925e68edfb2e622a6478afbd78e3b95db9065d1944ca71965a31d5c6a1"
+    },
+    {
+      "name": "scenario-mix",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "00940dc9b85b7bd62188095da4e856d6550cf408425c373425680460a286ea75"
+    },
+    {
+      "name": "scenario-mixglide",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "1953629a8970271864bcf85323e5b7e7b1c61cc494ffae1849037d7ce2fd9c5b"
+    },
+    {
+      "name": "scenario-mood",
+      "status": "FAIL",
+      "assertions": [
+        "FAIL expect moodacid == 35, got 18",
+        "FAIL expect moodacid == 41, got 24",
+        "FAIL expect moodacid == 65, got 48",
+        "FAIL expect moodacid == 5, got 0",
+        "FAIL expect moodacid == 35, got 18"
+      ],
+      "log_sha256": "66b5285986fdcf6415aeefc7f098708b21bab245141bf1ca965689c3989ebe8c"
+    },
+    {
+      "name": "scenario-motion",
+      "status": "FAIL",
+      "assertions": [
+        "FAIL expect par0 == 32, got 46",
+        "FAIL expect par0 == 52, got 66"
+      ],
+      "log_sha256": "56947168ee6a18c270693eff9182342f1ab3db0ad649692cfbad04ce96973a12"
+    },
+    {
+      "name": "scenario-mpk",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "3781f7073f941b2506d2ad6ab8684cad3e5e64473d8c98092f495001ac36d360"
+    },
+    {
+      "name": "scenario-mscc",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "e5918288782bdc4dcfd5fe748f7ac2e5e16aecc67e3868d6aeed25a02dfd2fd5"
+    },
+    {
+      "name": "scenario-n1",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "48a044aaeeb80cf4e3a1b6f060cbf9ef78d471b19776162aed1c68fa717f746d"
+    },
+    {
+      "name": "scenario-octave",
+      "status": "FAIL",
+      "assertions": [
+        "FAIL expect par23 == -2, got -3",
+        "FAIL expect par23 == -2, got -3"
+      ],
+      "log_sha256": "9d963a597b48120dd76d5ac5dfbf2f6e7119d43911c3590a871434ae2c19d589"
+    },
+    {
+      "name": "scenario-pads",
+      "status": "FAIL",
+      "assertions": [
+        "FAIL expect chordroot == 2, got 11",
+        "FAIL expect chordroot == 2, got 4"
+      ],
+      "log_sha256": "cc7b844d4bfd9fbcf69a991ac3d08107b360f7aa269d71d36ebe9858cc104742"
+    },
+    {
+      "name": "scenario-pedal",
+      "status": "FAIL",
+      "assertions": [
+        "FAIL expect padheld1 == 1, got 8",
+        "FAIL expect padheld3 == 8, got 1"
+      ],
+      "log_sha256": "586dc92da23fd9cf759ec6de2c0a7312a8f28fe5d3aa088e5ad09cf12c75f539"
+    },
+    {
+      "name": "scenario-perf",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "3f9135fec8aad2127160b998ec18d568a21c5cc4cf7b456b87904dcb498b703e"
+    },
+    {
+      "name": "scenario-phrase",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "2f34de320c22839b6d57c8b373a215d97c88b6b2d152517ece129db0d9b36026"
+    },
+    {
+      "name": "scenario-pieces",
+      "status": "FAIL",
+      "assertions": [
+        "FAIL expect par0 == 42, got 56",
+        "FAIL expect par2 == 78, got 86",
+        "FAIL expect par1 == 30, got 12",
+        "FAIL expect par72 == 2, got 1",
+        "FAIL expect par0 == 42, got 56",
+        "FAIL expect par0 == 42, got 56",
+        "FAIL expect par0 == 52, got 66"
+      ],
+      "log_sha256": "45f7edbfea59520050b09958b903f686c223418a79505e2df81c0152927117aa"
+    },
+    {
+      "name": "scenario-playmap",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "ece45d178f9829579e6a996ac1e0dff8a05c027ef0ceb723d9488735d1b40a09"
+    },
+    {
+      "name": "scenario-pluck",
+      "status": "FAIL",
+      "assertions": [
+        "FAIL expect par98 == 50, got 37",
+        "FAIL expect par98 == 51, got 38",
+        "FAIL expect par99 == 14, got 17",
+        "FAIL expect par99 == 15, got 18"
+      ],
+      "log_sha256": "f7d7a969245531c75b5cbb5e1cfa2ead81252da88613d3bee38d0062234042ea"
+    },
+    {
+      "name": "scenario-pluckmig",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "6d4889b18fe83fb52c7291583e51ed40de7cca696ac7c33a7cb2a45ef5cbffcd"
+    },
+    {
+      "name": "scenario-plucksteps",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "c8bb08dbeaead8ac37a97e714eef37b3aadf2ebdc13cd11a5c34278afc7cde08"
+    },
+    {
+      "name": "scenario-progression",
+      "status": "FAIL",
+      "assertions": [
+        "FAIL expect progpos == -1, got 0",
+        "FAIL expect progpos == 0, got 4",
+        "FAIL expect chordiv == 2085, got 2193"
+      ],
+      "log_sha256": "8dcbe02fe091949505407ad17c26fee9a7c98bbcd369ea668a5d47c2c8c8d7e9"
+    },
+    {
+      "name": "scenario-remote",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "d83472a777e56513ddbe99c64fd46e52b8fc76b1e8165286b156804d53b0070c"
+    },
+    {
+      "name": "scenario-restore",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "41538039b98a42a6c68f5b4ca97e608df0a261da6d35de9707ffb4aa24707f1f"
+    },
+    {
+      "name": "scenario-restore_old",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "471b73a86d58d0e4e0ba8b665182c0d7507a7fa9346b7d95a765ee5f1c065e48"
+    },
+    {
+      "name": "scenario-restore_save",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "250ac468ddee0dafb8d8f66ec4d2ba27d0334e85c069eb032bb78a52b7174527"
+    },
+    {
+      "name": "scenario-restore_shared",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "3c1c9f262f12ab332ed05cf46d6d4d48c163d3609bf77ec594c785bb9f0b472a"
+    },
+    {
+      "name": "scenario-resume",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "73e06ee0107e664c426ae946e00e110ad60dcf569037a66d29cfe53edf673925"
+    },
+    {
+      "name": "scenario-rptwav",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "f5ffef5a65a3a816c548ef71c8c1919f606bab92d590906a6af62efa7232f9d8"
+    },
+    {
+      "name": "scenario-runner",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "8843601680faefd11390c139f0491b3999d52360a782709212608cec0987c07c"
+    },
+    {
+      "name": "scenario-samplehelp",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "c6b65b533d63d9ec35fb28cfa0eccdd7177500fe6e0d22b522655aff52691ba7"
+    },
+    {
+      "name": "scenario-sampler",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "8694f82d860b4c4f4975593c816b08d0f1f9271efc91fd88b3f86236ae5ad961"
+    },
+    {
+      "name": "scenario-scale",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "0dfed66f21670ba3faab8abb33e526e1fa302cc4e503f3136846aa077e702406"
+    },
+    {
+      "name": "scenario-scene",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "aedd46b22fa5aa46f232438b64f00454d602be65a8bf41b2af4eff69ea80061b"
+    },
+    {
+      "name": "scenario-seamless",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "d4928838e041f1da3f2dab68c060bcd0da7aca6330903b0fb149533eb55a6317"
+    },
+    {
+      "name": "scenario-sections",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "715eefc2da9d799e5d2715cadd155ce82f56d177140507569b4cf88a175d73b5"
+    },
+    {
+      "name": "scenario-seq",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "48ea78039aa39737d2f9afd5969b87d42548eaf1e88a2ec8dc5cf89099fef1c0"
+    },
+    {
+      "name": "scenario-seqtricks",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "64234d312b77bebb8e6493966c687e51fb181766d2a4acbe29e0b0bde8b8a230"
+    },
+    {
+      "name": "scenario-setlist",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "057d4d5c631877914178976cb401b5940cc86d09645532c44351c37e6ee2e8b4"
+    },
+    {
+      "name": "scenario-setmap",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "c20277d12c173ae2b6fcfe733ab83590b671a0432edf134c221f6a4b892bc2e6"
+    },
+    {
+      "name": "scenario-setmem",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "eae798b6e6d223c44f7c393b014aad42c82feaa017fbe80267071daa70eef3e7"
+    },
+    {
+      "name": "scenario-setpage",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "3fb6a4f7ddc7c7bc594d52c1f9ef7e2741a9965377d38c23543ec62529eb95d0"
+    },
+    {
+      "name": "scenario-settings",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "0a81fbde2821cc1c1ca97f7d2d420c6041db90dab75ca6ef8ae4a97d7f1e3f1a"
+    },
+    {
+      "name": "scenario-shift",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "1007a90218a2a0101c635c915e426f937e401c3153fc1103a6c1d02957670b09"
+    },
+    {
+      "name": "scenario-songbook",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "d1c241a274f14ca74aa245ed03b0b8eca2630e48611d4cd38e828ff023aa10ad"
+    },
+    {
+      "name": "scenario-sounds",
+      "status": "FAIL",
+      "assertions": [
+        "FAIL expect par84 == 1, got 4",
+        "FAIL expect par84 == 0, got 1",
+        "FAIL expect par84 == 0, got 1"
+      ],
+      "log_sha256": "9a2e4096a45ac3ae8ef80b0bb5534e73edd93404a047f67adc2d0501bb371169"
+    },
+    {
+      "name": "scenario-stage",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "8bdd329fd8e5f13a6ef5a192137500e9d0da3813d2418b38e631bb5d136fdf9c"
+    },
+    {
+      "name": "scenario-start",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "0182e71afb84ecdc6a252bf28608ccfef64cd49982e4d210fe05a3f7c0f7f16f"
+    },
+    {
+      "name": "scenario-steps",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "a35b1ce6c1b158240afb6d45c9d958c6be692719c9e75ea83fff3943899aebf7"
+    },
+    {
+      "name": "scenario-store",
+      "status": "FAIL",
+      "assertions": [
+        "FAIL expect par0 == 42, got 56",
+        "FAIL expect par0 == 52, got 66",
+        "FAIL expect par0 == 52, got 66"
+      ],
+      "log_sha256": "e129a9e2101a422f41b8eccc76d3b0c4d1c58bcd0209a6da19ae7b206bad85d1"
+    },
+    {
+      "name": "scenario-theme",
+      "status": "FAIL",
+      "assertions": [
+        "FAIL expect par0 == 42, got 56"
+      ],
+      "log_sha256": "ec2e30e38b36e74bbbab861983daee519f5439f47c10ee2035e73689055488e7"
+    },
+    {
+      "name": "scenario-theory",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "b6eb6cc06d31631103606d97d32558a74882d9122d8948237e900932400c67b3"
+    },
+    {
+      "name": "scenario-theory_walk",
+      "status": "FAIL",
+      "assertions": [
+        "FAIL expect walknext >-1, got -1"
+      ],
+      "log_sha256": "566eedfa0260856685d582b9eedcda7abb7b0c0d487a24af0c57cbc00b2ef034"
+    },
+    {
+      "name": "scenario-usbhost",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "884d60dda87f3b04805b1765b9591da32332d1481bf2b257d8efd233533c12f3"
+    },
+    {
+      "name": "scenario-viz",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "2fcd3e8229d1e19a725fbb689fa00f1829c60c04e3f546eabc4409141e5c29dc"
+    },
+    {
+      "name": "scenario-zoom",
+      "status": "ok",
+      "assertions": [],
+      "log_sha256": "50993ea5b9b19046423b7e0d72f50eefdf7e82fe947a356f1c278f4e3091ed2d"
+    }
+  ],
+  "passed": 100,
+  "failed": 22,
+  "artifacts": [
+    {
+      "path": "amb.bin",
+      "bytes": 482440,
+      "sha256": "6b2ae6990de3cca6358906a2095266bc658a167080cba1421b0314fa25f4c4ac"
+    },
+    {
+      "path": "loader/ota.bin",
+      "bytes": 8095,
+      "sha256": "fb264969d35b09657af9277527710c80af8dcc164de4946fa298da61420f2e85"
+    },
+    {
+      "path": "naiwan91-0.3.0.fwsc",
+      "bytes": 611251,
+      "sha256": "c4f6c00b4a5558101333893f7702d5ce7dd98c297b3391a3f847e7a1b962f61e"
+    },
+    {
+      "path": "emu/amb.wasm",
+      "bytes": 1937404,
+      "sha256": "a3d08947713bda76b64f76ed39b55aa26bdd182a65bf88fbd1efe0cbc12f8036"
+    }
+  ],
+  "wasm_smoke": "peak 0.231 blits 239",
+  "memory": {
+    "data_bss": 97196,
+    "ram_limit": 98304,
+    "pool": 339404,
+    "pool_limit": 344064,
+    "pool_reserve": 4096
+  },
+  "baseline_code_modified": false
+}

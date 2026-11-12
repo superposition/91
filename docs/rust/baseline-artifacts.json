@@ -1,0 +1,1662 @@
+[
+  {
+    "path": "build/scenarios/acsteps/acsteps.png",
+    "bytes": 173118,
+    "sha256": "7e6275cc50f51c59008cd2e5d2e8f223f5f9601f9aa377c729777853ab9f7034"
+  },
+  {
+    "path": "build/scenarios/acsteps/midi_out.txt",
+    "bytes": 15902,
+    "sha256": "78f229335795eb479f7d9e74ff8b505977caa9050a90a622d9c27c5437a67378"
+  },
+  {
+    "path": "build/scenarios/answer/answer_mirror.png",
+    "bytes": 173118,
+    "sha256": "d4fc2c2b2cbd4e312526d6ebff88e60f4f0bec3b19195a4085c3c3e07232b728"
+  },
+  {
+    "path": "build/scenarios/answer/answer_page.png",
+    "bytes": 173118,
+    "sha256": "6aad3f0a3b479377399083deba10f1020e88ae207326811603b1c1e9c9474a8f"
+  },
+  {
+    "path": "build/scenarios/answer/answer_reverse.png",
+    "bytes": 173118,
+    "sha256": "4d47aa5211da5229af8bade9a9efcfc88aa38953414e646f42bbb89d61516ac6"
+  },
+  {
+    "path": "build/scenarios/answer/midi_out.txt",
+    "bytes": 9397,
+    "sha256": "326bea16dcb01fa5ab9fae378690ce005b4d4499847b3c3e375e7124fdf22fde"
+  },
+  {
+    "path": "build/scenarios/arrange/groove.png",
+    "bytes": 173118,
+    "sha256": "69f7479c4a6f12aaa266ffe646a5df436735d109b53d18a859dc44a18c8bb48c"
+  },
+  {
+    "path": "build/scenarios/arrange/midi_out.txt",
+    "bytes": 38144,
+    "sha256": "6cb5cc4a03ac831fcefade7046b844493461c152b466cec4c16c5fb67009a933"
+  },
+  {
+    "path": "build/scenarios/autofx/autofx_live.png",
+    "bytes": 173118,
+    "sha256": "36442ec2cfad96220c51bc2db9116a622c108cbf33c7750600ce50e1eeff09fd"
+  },
+  {
+    "path": "build/scenarios/autofx/autofx_page.png",
+    "bytes": 173118,
+    "sha256": "aab11169c65224fe71641a2ef9950b755267121ec65f4bbe8a2c422e19fc3956"
+  },
+  {
+    "path": "build/scenarios/autofx/midi_out.txt",
+    "bytes": 38258,
+    "sha256": "65ebcb6136d40c5a37967d028b1905e39e3886a90dd0553d7ab80cc9462fa6bd"
+  },
+  {
+    "path": "build/scenarios/bassline/bassline.png",
+    "bytes": 173118,
+    "sha256": "03032fd1b466a387fe0fd74224d7237eb46e862949ca66d65bd4e2c779bf56aa"
+  },
+  {
+    "path": "build/scenarios/bassline/midi_out.txt",
+    "bytes": 4150,
+    "sha256": "b92eb5fe7dca3373c4f6da019edffa132fdd6956d9aaf01b0c2f9ff00100cfe4"
+  },
+  {
+    "path": "build/scenarios/basssteps/basssteps.png",
+    "bytes": 173118,
+    "sha256": "d5b24a827e03d4e270ed385a1cb4dff31a6e4919a8bd26759aae0d264a48b30f"
+  },
+  {
+    "path": "build/scenarios/basssteps/midi_out.txt",
+    "bytes": 16006,
+    "sha256": "ba3c927c2c5c980e3c9e55f88b367d16269f84ebc9e9ff4c36b9d77af1fd8a8f"
+  },
+  {
+    "path": "build/scenarios/battery/battery_full.png",
+    "bytes": 173118,
+    "sha256": "1d970921c411ddec4d218afa70f4a13eaa312d1a3d279aeeb738b746c8e7862e"
+  },
+  {
+    "path": "build/scenarios/battery/battery_low.png",
+    "bytes": 173118,
+    "sha256": "d9452641fb69f471ccfa3aabf46227982b0715957547b2780b2fe89699e319b2"
+  },
+  {
+    "path": "build/scenarios/battery/battery_mid.png",
+    "bytes": 173118,
+    "sha256": "2062585948877a81bc2ee2dae0cb08ceff619cc6b003b6b65f4bdabde89c730c"
+  },
+  {
+    "path": "build/scenarios/battery/battery_none.png",
+    "bytes": 173118,
+    "sha256": "58cbc1c78632babea79aa33adb2944508882aa90c0c7a0c17325680b5f6289cf"
+  },
+  {
+    "path": "build/scenarios/battery/battery_usb.png",
+    "bytes": 173118,
+    "sha256": "501404700fc1e998e5304d19cbea657c781902723354417919ff86ec1e6b8ad8"
+  },
+  {
+    "path": "build/scenarios/battery/midi_out.txt",
+    "bytes": 4906,
+    "sha256": "3d91f96ccfae2fbdd1feb31ce5e64f620d4bc15f91cb844ebbe92da33dcbae98"
+  },
+  {
+    "path": "build/scenarios/beatfx/beatfx_bank.png",
+    "bytes": 173118,
+    "sha256": "b3b7536133497db623aa21c25c042482c6e0d7d844d55c135e0b29addc10316f"
+  },
+  {
+    "path": "build/scenarios/beatfx/midi_out.txt",
+    "bytes": 20128,
+    "sha256": "9f0c64bc4d7bead7eb7357b8fa9f486f836f77e74a288d600bc7a6e1d5886af8"
+  },
+  {
+    "path": "build/scenarios/capture/capture_acid.png",
+    "bytes": 173118,
+    "sha256": "8b92a27191d4b12e9862626d7a8f2d8d87f9084253d082a1d72979902978de48"
+  },
+  {
+    "path": "build/scenarios/capture/capture_pluck.png",
+    "bytes": 173118,
+    "sha256": "30f85d5d48c6f898640c0c0bafb735168878f6adae7efccd740c4883f8f305d2"
+  },
+  {
+    "path": "build/scenarios/capture/midi_out.txt",
+    "bytes": 13648,
+    "sha256": "8db7c903b3fc1e0b8e836b2e10d0f24216ccbad6f370feacfce76c24f40cf28c"
+  },
+  {
+    "path": "build/scenarios/chordkeys/jam_chord.png",
+    "bytes": 173118,
+    "sha256": "3fde7db3138d26e1bf8a13c2283a4d72c4fe7f9d2753b55d031963204eaefae9"
+  },
+  {
+    "path": "build/scenarios/chordkeys/jam_chord2.png",
+    "bytes": 173118,
+    "sha256": "b4f052aa5c7c09a8f2ed763549f97c3d01e758dda880265ab41ef6243e251145"
+  },
+  {
+    "path": "build/scenarios/chordkeys/midi_out.txt",
+    "bytes": 9730,
+    "sha256": "27020fa0178ce036824c52f0068dfea5267a5674bb879cd9148bb5d618ee572b"
+  },
+  {
+    "path": "build/scenarios/chords/chords_9ths.png",
+    "bytes": 173118,
+    "sha256": "0fc3e567bcc7767139a2bfb85469bd2d3d241e68087fdd8bd82fa71513a86038"
+  },
+  {
+    "path": "build/scenarios/chords/midi_out.txt",
+    "bytes": 6490,
+    "sha256": "156f5e88dd482ccedefd570e6ae1e5cec92934fff3b5ac9d383678e98ccac3ec"
+  },
+  {
+    "path": "build/scenarios/circle/circle_page.png",
+    "bytes": 173118,
+    "sha256": "0f9f764a7a1b96e38c0c05c8dbe3924755f6a453b7f1d748bf456fba4fe37e30"
+  },
+  {
+    "path": "build/scenarios/circle/circle_theory.png",
+    "bytes": 173118,
+    "sha256": "ea5d89490785c039b6d19437dde967e6163e374da428f9a38fa20544b623e051"
+  },
+  {
+    "path": "build/scenarios/circle/circle_whole.png",
+    "bytes": 173118,
+    "sha256": "a6ac70ae7889b3629c11bf4b5b8fc89268b771fbb74439090f77becb26cf2453"
+  },
+  {
+    "path": "build/scenarios/circle/midi_out.txt",
+    "bytes": 8301,
+    "sha256": "665ec2841493a014ff481e25e01efed988e3a877ebf0fcbf4391496559326866"
+  },
+  {
+    "path": "build/scenarios/dancer_sections/midi_out.txt",
+    "bytes": 15056,
+    "sha256": "9a13e0a2b0cbd03a82236241fb3dff0ac2a1fcca23d903e2943f3a3fb4396023"
+  },
+  {
+    "path": "build/scenarios/dancer_sections/s_jump.png",
+    "bytes": 173118,
+    "sha256": "bb84bc336f4cffd1b2d8c67aa091cfedb07137528dd5e0789140da9dd9abe2fd"
+  },
+  {
+    "path": "build/scenarios/dancer_sections/s_jump2.png",
+    "bytes": 173118,
+    "sha256": "b00234f4c8296f3b903bc80ee9088dfe5bf74110f3e072fb3c22d418a608f1b3"
+  },
+  {
+    "path": "build/scenarios/dancer_sections/s_jump3.png",
+    "bytes": 173118,
+    "sha256": "8b1e4cc998a4cb48cb7da8b14a0086b7780994ed84ad5df84ddbcea547592a9f"
+  },
+  {
+    "path": "build/scenarios/dancer_sections/s_shake.png",
+    "bytes": 173118,
+    "sha256": "f23253dd204fdc229ab601323f0f23bfa4d0d2a63b04bdc1be97a1de8dfc3d97"
+  },
+  {
+    "path": "build/scenarios/dancer_sections/s_shake2.png",
+    "bytes": 173118,
+    "sha256": "d3d3db335405b36337b5467ac278337862eae6535000db9de3ea5c35fecc678e"
+  },
+  {
+    "path": "build/scenarios/dancer_sections/s_sleep.png",
+    "bytes": 173118,
+    "sha256": "4b539c2bb80605b57baa984197648a6a486b35f7dcc1e8c4018faa2674892707"
+  },
+  {
+    "path": "build/scenarios/dancer_sections/s_sleep2.png",
+    "bytes": 173118,
+    "sha256": "bf7ed339d03d0610a44eafc864a3feb6255bdabe470a3f2337f810d9ce2397a4"
+  },
+  {
+    "path": "build/scenarios/dejavu/dejavu.png",
+    "bytes": 173118,
+    "sha256": "0900ac65dfeed599174e79535ab4dedae8e30fbddb9849b13e87572e89a7b7bc"
+  },
+  {
+    "path": "build/scenarios/dejavu/midi_out.txt",
+    "bytes": 5320,
+    "sha256": "02c16635e6b55da944d9e22bc9a8926ba65fac4af47f2c22276706ac0d2a7cf9"
+  },
+  {
+    "path": "build/scenarios/dj/midi_out.txt",
+    "bytes": 71356,
+    "sha256": "dfc6d19f6f57782dc45c2d0d0c4fa001959d12590e4a3f3b9b0ee1153ba30f7b"
+  },
+  {
+    "path": "build/scenarios/drumdrift/drumdrift.png",
+    "bytes": 173118,
+    "sha256": "ab3b22382454db5325d5b7e5c0183731707b555bc963cd68105112ef336cdab1"
+  },
+  {
+    "path": "build/scenarios/drumdrift/midi_out.txt",
+    "bytes": 37021,
+    "sha256": "910f720156c44ae3fa355526da796908a838eec42e878564abe54735d33a1750"
+  },
+  {
+    "path": "build/scenarios/dyvoices/dyvoices.png",
+    "bytes": 173118,
+    "sha256": "b018ea9bdcac2a5fb12ce4cf9f3d85dfc1f481b73cfd91956bdf749a8a358e47"
+  },
+  {
+    "path": "build/scenarios/dyvoices/dyvoices_pluck.png",
+    "bytes": 173118,
+    "sha256": "0bf530b8d64eb43e8f4d514203477a4609e0be509a4f2a4e9babff066ca3ec2d"
+  },
+  {
+    "path": "build/scenarios/dyvoices/midi_out.txt",
+    "bytes": 11449,
+    "sha256": "74711c69d86bac7c7f096d8b01691435c173ec43fbebe0bf4767fa4fe6dfeadc"
+  },
+  {
+    "path": "build/scenarios/feel/feel.png",
+    "bytes": 173118,
+    "sha256": "b9ffd792328218176a947051ea6130f8d441f6cdfd9bcd510b62e2881d772eed"
+  },
+  {
+    "path": "build/scenarios/feel/midi_out.txt",
+    "bytes": 5608,
+    "sha256": "5101a3448fe2f99684e527938bd7439fb22fd4f56b32ad69e7e8d51e47e8c969"
+  },
+  {
+    "path": "build/scenarios/filters/filters_page.png",
+    "bytes": 173118,
+    "sha256": "78a4209f614a75f544741d829366e2e7fe59149c96cf0aacd48ca150639bfbfe"
+  },
+  {
+    "path": "build/scenarios/filters/midi_out.txt",
+    "bytes": 16904,
+    "sha256": "3bbac5dbd2253e169c5425f93c7ebe4c18ab2f0c9cfc7b14d9af54d379ca938e"
+  },
+  {
+    "path": "build/scenarios/first/acid.png",
+    "bytes": 173118,
+    "sha256": "2eef3c6cdad9bcccf93050661772c9a3ee64a2f6afe372c738bac0e72c209c5e"
+  },
+  {
+    "path": "build/scenarios/first/acid_line.png",
+    "bytes": 173118,
+    "sha256": "c2182d6eded5f80c1e20b3f4af27f209bce2d8f67f3ac6938a0109e02404c840"
+  },
+  {
+    "path": "build/scenarios/first/chords.png",
+    "bytes": 173118,
+    "sha256": "8f51c9166057a5a0e8a25783f602733899f3034330616071c1e37764651776a9"
+  },
+  {
+    "path": "build/scenarios/first/drone.png",
+    "bytes": 173118,
+    "sha256": "27a747de78bf46355842b31458c3dd19d8e3c4d2237f4f22d58b04cc3fa7b028"
+  },
+  {
+    "path": "build/scenarios/first/drone_lfo.png",
+    "bytes": 173118,
+    "sha256": "86f72b943d625fb25bfaef39c9b12abe02e11dcabed7fe28c4bb750168042d1d"
+  },
+  {
+    "path": "build/scenarios/first/drums.png",
+    "bytes": 173118,
+    "sha256": "5b6ab5f2ccefa70f3a713e51780b949f8a9d6c9a6b5d2007416e44c05368d531"
+  },
+  {
+    "path": "build/scenarios/first/first.wav",
+    "bytes": 6386732,
+    "sha256": "4fee5b2e8d24c0c39e361014b03068665b1be44b26678ca0b1933458dfd7f8d5"
+  },
+  {
+    "path": "build/scenarios/first/flow.png",
+    "bytes": 173118,
+    "sha256": "9a0ff9d086f7a3e1b8c795fda9cae35cd5bd9e98aa3279cb591708a4b992338e"
+  },
+  {
+    "path": "build/scenarios/first/flow30.png",
+    "bytes": 173118,
+    "sha256": "ff2fd472e7c01812aef39858d797af7357ac2df2a223b335df1d346cbe0896df"
+  },
+  {
+    "path": "build/scenarios/first/global.png",
+    "bytes": 173118,
+    "sha256": "8c79856d5c0f2bc2990427d6e2c68d492907de0a5b1e21d412700a06b31c8dd6"
+  },
+  {
+    "path": "build/scenarios/first/master.png",
+    "bytes": 173118,
+    "sha256": "873d17d23f30b395ed9a7712356fa615e70199eef8f2057ec0b341d3885acbb6"
+  },
+  {
+    "path": "build/scenarios/first/midi_out.txt",
+    "bytes": 38524,
+    "sha256": "8bebc573cfd043703fc871fc275b05d3249b6060161c28f528bf0f4131f254cb"
+  },
+  {
+    "path": "build/scenarios/first/mixer.png",
+    "bytes": 173118,
+    "sha256": "2f6d003eeaf7d5d859fc1f676f0a879d151a0240f7b0bc1ebdcdfdc1c05491c7"
+  },
+  {
+    "path": "build/scenarios/first/noise.png",
+    "bytes": 173118,
+    "sha256": "ece425faa6dcbfc3fbd76b83e5b1672cf3648a22a0d63973f52b6d95852671fb"
+  },
+  {
+    "path": "build/scenarios/first/pad.png",
+    "bytes": 173118,
+    "sha256": "55078becb319f97cf263ae19be2ccc77c4a399c36728823b2281eaa5585f3f73"
+  },
+  {
+    "path": "build/scenarios/first/pad_env.png",
+    "bytes": 173118,
+    "sha256": "79bbb4406aec71a8c7de0bcfcc8e6b1f79b89e12a2b96fc56dfc6e1f0444cd3e"
+  },
+  {
+    "path": "build/scenarios/first/pad_lfo.png",
+    "bytes": 173118,
+    "sha256": "44194fab43fa850bb4afd201f8f087f51842de4afd32ddcee361eaa29f1dcc4d"
+  },
+  {
+    "path": "build/scenarios/first/reverb.png",
+    "bytes": 173118,
+    "sha256": "42e382568194dfb840895dd6439a592465451092271142e61acb0d7c507d2048"
+  },
+  {
+    "path": "build/scenarios/first/space.png",
+    "bytes": 173118,
+    "sha256": "9bf3d6b139eb9cb56963604da39de060f5c505d6d6bb1e34288a12d45e103401"
+  },
+  {
+    "path": "build/scenarios/flex/flex_bank.png",
+    "bytes": 173118,
+    "sha256": "f03f0e84a9751b217a809d030817f6c7413de5a24b4fc390d9c89b4ce1d3f629"
+  },
+  {
+    "path": "build/scenarios/flex/midi_out.txt",
+    "bytes": 20854,
+    "sha256": "d0151814d4ce2b6ed0d41a3e346b984712c40f54bc216afcacaf0d4699b04490"
+  },
+  {
+    "path": "build/scenarios/fx/fx.wav",
+    "bytes": 9088044,
+    "sha256": "611d55b12a32749d52ae05cbc454c2827fbe666717091b1f40559a48f9f15d4c"
+  },
+  {
+    "path": "build/scenarios/fx/fx_closed_locked.png",
+    "bytes": 173118,
+    "sha256": "3a3d07e48e88deb29883abc1ec92df577f19aa12f3d3252418c1ca28f9840018"
+  },
+  {
+    "path": "build/scenarios/fx/fx_held.png",
+    "bytes": 173118,
+    "sha256": "5b12fd7b999217d49984e13cd7386297ff8a16d54c723d2d779541c76749f48b"
+  },
+  {
+    "path": "build/scenarios/fx/fx_latched.png",
+    "bytes": 173118,
+    "sha256": "07bfb78baa80546b62297bdcce7ad146320d9bff91cb77307083bf0bac7f707c"
+  },
+  {
+    "path": "build/scenarios/fx/fx_locked.png",
+    "bytes": 173118,
+    "sha256": "2d04c4c10cee9861af27a196291af26dcd036a8d8aff55cf3eb1bdad86d7a7a6"
+  },
+  {
+    "path": "build/scenarios/fx/fx_menu.png",
+    "bytes": 173118,
+    "sha256": "62968b5799219333d808b16947d038e6f0ad98b2cffb433c87172b3a2d99f290"
+  },
+  {
+    "path": "build/scenarios/fx/midi_out.txt",
+    "bytes": 52166,
+    "sha256": "f532dad4c1769129d7aba87935c38e5d2dc4a8933127c7c33ac1ff8ca5427ded"
+  },
+  {
+    "path": "build/scenarios/fxclose/midi_out.txt",
+    "bytes": 3322,
+    "sha256": "599a44eae5d4a33f91d4cd8d8e00aa4fbe6ca0c0b157ac0829cc4525c11db19d"
+  },
+  {
+    "path": "build/scenarios/fxedit/fx_punch_filter.png",
+    "bytes": 173118,
+    "sha256": "cf45c5beb780e8dd509236d0e47f9b36dacaff7f4f4ebbccfcba6465faec7f12"
+  },
+  {
+    "path": "build/scenarios/fxedit/gate_page.png",
+    "bytes": 173118,
+    "sha256": "4fe68edd43c5a681e67de1c6710c10d05c33b017b8beb4dced5238506c34d811"
+  },
+  {
+    "path": "build/scenarios/fxedit/gate_tres.png",
+    "bytes": 173118,
+    "sha256": "fdabbd03527b4cdc8a17cd9d63816445bee0e990c6cb91c51ce8831f4e2220e8"
+  },
+  {
+    "path": "build/scenarios/fxedit/midi_out.txt",
+    "bytes": 13940,
+    "sha256": "50ccdb8ed89ae692396b6c47705dc489388df08b12a3753c3d5181e147fa4eec"
+  },
+  {
+    "path": "build/scenarios/fxjump/midi_out.txt",
+    "bytes": 5158,
+    "sha256": "c55fcdbc14c45aa56aff30f49c9158c1c610db86d7448827e2f687bce14a460a"
+  },
+  {
+    "path": "build/scenarios/fxknobs/fxknobs.wav",
+    "bytes": 5215276,
+    "sha256": "824ec903c0bf6820a1807ccf31e090675c363d973b74b8542dbb3504781bb761"
+  },
+  {
+    "path": "build/scenarios/fxknobs/fxknobs_closed.png",
+    "bytes": 173118,
+    "sha256": "c9a805f3994da8ec11121327c9929421762938ce9d33a12bd3ab9ac56eb99792"
+  },
+  {
+    "path": "build/scenarios/fxknobs/fxknobs_crush.png",
+    "bytes": 173118,
+    "sha256": "480cc0ffbaa9fc8e9d411360b5eaf51944cef23d64214533355ce94b790c6fd4"
+  },
+  {
+    "path": "build/scenarios/fxknobs/fxknobs_hp.png",
+    "bytes": 173118,
+    "sha256": "150c776214a84319c78306b710f79ca3f184ff5eb050c77eca0e3d3d76c33e61"
+  },
+  {
+    "path": "build/scenarios/fxknobs/fxknobs_lp.png",
+    "bytes": 173118,
+    "sha256": "1c6d7803fec2ee9f86e1c73c0a4d99e46a3d34ee2903100d37aefc8bb91fea46"
+  },
+  {
+    "path": "build/scenarios/fxknobs/fxknobs_menu.png",
+    "bytes": 173118,
+    "sha256": "defdc592fa62275dd14fa1b44df59d5f2f2205c408aa2cd84c53d2878df1bac8"
+  },
+  {
+    "path": "build/scenarios/fxknobs/fxknobs_wash.png",
+    "bytes": 173118,
+    "sha256": "2030fc865bd33df63f063ddfcd9a9f419ee864885b761654112451c252adfc68"
+  },
+  {
+    "path": "build/scenarios/fxknobs/midi_out.txt",
+    "bytes": 31760,
+    "sha256": "ffcdd1a7ebebe0ada40ec533697b1a3b4c599258cc265cdb5c0a75204f6663b9"
+  },
+  {
+    "path": "build/scenarios/fxperf/fxperf.wav",
+    "bytes": 3753004,
+    "sha256": "b4608e8ebeb6278db8263e7cca112fb2582d2126fd5964921fa98cd7a586d686"
+  },
+  {
+    "path": "build/scenarios/fxperf/fxperf_riser.png",
+    "bytes": 173118,
+    "sha256": "453af6b0a218b45a753c2236bcf952ea9c40d601a4b390eef8bde9e4f0857a2e"
+  },
+  {
+    "path": "build/scenarios/fxperf/midi_out.txt",
+    "bytes": 23495,
+    "sha256": "1c551ce02d11efc214d5c9b80b308e5cf9e775ef3ed638c7147d51e6d3b257a6"
+  },
+  {
+    "path": "build/scenarios/fxscopes/fxs_brake.png",
+    "bytes": 173118,
+    "sha256": "2a971202cd74c77c1fe7bd75d4ce1094b958ff2e334263a76e05a674a05917d6"
+  },
+  {
+    "path": "build/scenarios/fxscopes/fxs_flanger.png",
+    "bytes": 173118,
+    "sha256": "7f28a712765ccc3b92b92584b0c9b8bf37a794b431b614a6e622971c1bfc393b"
+  },
+  {
+    "path": "build/scenarios/fxscopes/fxs_half.png",
+    "bytes": 173118,
+    "sha256": "b9140c036443dc16617a9754f40be74e39d271adaa91ea3b0553ae1add0e049b"
+  },
+  {
+    "path": "build/scenarios/fxscopes/fxs_phaser.png",
+    "bytes": 173118,
+    "sha256": "b2a724d97a362468e1652ba485c9c0e75607b144af72406889dccbfb244c1615"
+  },
+  {
+    "path": "build/scenarios/fxscopes/fxs_pump.png",
+    "bytes": 173118,
+    "sha256": "a2c2a164d7e437d44b39ce5d6def3ac3b721e7c40925dbfbe42b8c21418ff284"
+  },
+  {
+    "path": "build/scenarios/fxscopes/fxs_riser.png",
+    "bytes": 173118,
+    "sha256": "b4ee85405f13b49adffc47bb5f3554149e8b0d13fc250fd2456266557636c382"
+  },
+  {
+    "path": "build/scenarios/fxscopes/fxs_roll.png",
+    "bytes": 173118,
+    "sha256": "5aadddca0f1f7808c7f779501de42c8ebf4494a84d926568be92230685555a07"
+  },
+  {
+    "path": "build/scenarios/fxscopes/fxs_rvswell.png",
+    "bytes": 173118,
+    "sha256": "c5d1421583034921db2b6d58fc10fb6b491ce21390572db20a304ef089dc5372"
+  },
+  {
+    "path": "build/scenarios/fxscopes/fxs_scatter.png",
+    "bytes": 173118,
+    "sha256": "6234af2b2daa6531e3613038e72c2fefc7ff6b721020d69670083d6a67d7a9bd"
+  },
+  {
+    "path": "build/scenarios/fxscopes/fxs_sweep.png",
+    "bytes": 173118,
+    "sha256": "599dc60532ae00c37af2664395428e246080ace184271f552fba4bce5260996b"
+  },
+  {
+    "path": "build/scenarios/fxscopes/fxs_talk.png",
+    "bytes": 173118,
+    "sha256": "c2a072cf3bd29f481d92710726ed7f7bc8e0fb55336930e70707b944b298ecb8"
+  },
+  {
+    "path": "build/scenarios/fxscopes/fxs_tape.png",
+    "bytes": 173118,
+    "sha256": "0709d0ff6609794dbe61871aa91afa624372cf07130a851778c45b5d69878b7e"
+  },
+  {
+    "path": "build/scenarios/fxscopes/fxs_vinyl.png",
+    "bytes": 173118,
+    "sha256": "55eb29a9f9fe757edad89fabc75be9c40fbf4074e60b12b4210fe3ad1c9439b9"
+  },
+  {
+    "path": "build/scenarios/fxscopes/fxs_wah.png",
+    "bytes": 173118,
+    "sha256": "d1f994cd818fe0a10b2e8e246578a41423aafbfc7bd3830e7f08aa9b0dadb751"
+  },
+  {
+    "path": "build/scenarios/fxscopes/midi_out.txt",
+    "bytes": 8380,
+    "sha256": "18975f97011a4e4f834ab20106a00818b2006d11c43e74a1792db4648e5b284e"
+  },
+  {
+    "path": "build/scenarios/genre/genre_dub.png",
+    "bytes": 173118,
+    "sha256": "23e8cfc0ab979e295947ad9c0a40d616f528dc1781f0b7b56aac904697442414"
+  },
+  {
+    "path": "build/scenarios/genre/genre_forest.png",
+    "bytes": 173118,
+    "sha256": "336cba4ed6c0101fb22696a6620fd33464f903d5fd4182123e75f9d3dc058180"
+  },
+  {
+    "path": "build/scenarios/genre/genre_house.png",
+    "bytes": 173118,
+    "sha256": "f573421fa5cdaa23d87b8d2c5e89ad81b2c4343c3da438306a6676c2da4dada1"
+  },
+  {
+    "path": "build/scenarios/genre/genre_indus.png",
+    "bytes": 173118,
+    "sha256": "016dc25431241878632e26e3dce01392a33573a06559d71c3c08926ce10d775a"
+  },
+  {
+    "path": "build/scenarios/genre/genre_lofi.png",
+    "bytes": 173118,
+    "sha256": "595a880f1a01307612c2f7f5f9d60ad10f7fbe13a1e50e8ea18dd9d7065a0f9a"
+  },
+  {
+    "path": "build/scenarios/genre/genre_psy.png",
+    "bytes": 173118,
+    "sha256": "3eabdad89d067d80e0dd54ecd997ee937dea393e7b5b15e20e26479406124787"
+  },
+  {
+    "path": "build/scenarios/genre/midi_out.txt",
+    "bytes": 46480,
+    "sha256": "95c73ee332398fcbe8b6d810b8c4761033f5159f9929a7e4e4d27f81d1b9e9de"
+  },
+  {
+    "path": "build/scenarios/genrestore/midi_out.txt",
+    "bytes": 9748,
+    "sha256": "d7a2a9c2327ca432d4c54c97a98b9d7c6bd618e99d82d8e348dd2adaf203b514"
+  },
+  {
+    "path": "build/scenarios/groups/midi_out.txt",
+    "bytes": 4186,
+    "sha256": "07ec6f4a389949a05f8a1ddcff771e97b2494ab60bb6fbed27800a00efa32abf"
+  },
+  {
+    "path": "build/scenarios/help/help_lfo.png",
+    "bytes": 173118,
+    "sha256": "bf666b7130edd9a99454c53a6b34b10065cac59627b5df14da5bb25e8507dd27"
+  },
+  {
+    "path": "build/scenarios/help/help_rec.png",
+    "bytes": 173118,
+    "sha256": "d3d19dd44270be3f37a3412c368b715b572e942029455d5c0cff3bfac7c03291"
+  },
+  {
+    "path": "build/scenarios/help/midi_out.txt",
+    "bytes": 6220,
+    "sha256": "0e00b887915fc092371a20d3f4a4360a708ba9f84105b03b0e1088a9acea02c8"
+  },
+  {
+    "path": "build/scenarios/hero/kaleido.png",
+    "bytes": 173118,
+    "sha256": "28d5efa16f2d6addced5b474653dfd0644531c2b4b6560e4d46f1a046b360328"
+  },
+  {
+    "path": "build/scenarios/hero/master_hard.png",
+    "bytes": 173118,
+    "sha256": "9a82707207ccb6d5952d62ea130209b0ab6382d2919f7cec4b7a6915d0f34485"
+  },
+  {
+    "path": "build/scenarios/hero/master_hard2.png",
+    "bytes": 173118,
+    "sha256": "82a9c5ebc7941dded31f8b7c6ff9118d6f66137003c4c12110de5004ea5b1b7a"
+  },
+  {
+    "path": "build/scenarios/hero/master_hard3.png",
+    "bytes": 173118,
+    "sha256": "dff0af6328b3d5d1a778ca9df6e29a5a9262571af64a8d9cd10a49416f1c64c7"
+  },
+  {
+    "path": "build/scenarios/hero/midi_out.txt",
+    "bytes": 12171,
+    "sha256": "031dd4c22bc5c4f78a0aaacd79272eb733339cdbfe6ac85815ea632c29ae626f"
+  },
+  {
+    "path": "build/scenarios/imp/imp_acid.png",
+    "bytes": 173118,
+    "sha256": "b321d0d6c80d48b6c408ec9b59e0851e7f1fa5824842db11d6a84d12cca0bef5"
+  },
+  {
+    "path": "build/scenarios/imp/imp_drone.png",
+    "bytes": 173118,
+    "sha256": "7ee760bc9c78161a26632ce18d436fbba05531ab13490562145810a7d6ded713"
+  },
+  {
+    "path": "build/scenarios/imp/imp_drums.png",
+    "bytes": 173118,
+    "sha256": "cb7c8a627d358a3c8553f4485dbb84f2cf65a850f3347abed4c4e6de650e7fee"
+  },
+  {
+    "path": "build/scenarios/imp/imp_fx.png",
+    "bytes": 173118,
+    "sha256": "4f09074d27ec911074578ed933a4614629d28817e7db32e4ee512d04b329768a"
+  },
+  {
+    "path": "build/scenarios/imp/imp_global.png",
+    "bytes": 173118,
+    "sha256": "6d1faa4f3339104400ff6872fafae2d062b3a0d81f436103070a4295b5f2b6e3"
+  },
+  {
+    "path": "build/scenarios/imp/imp_groove.png",
+    "bytes": 173118,
+    "sha256": "e313000e7c36b9d43eabe4a77fdcb0fc37206968d7c775fec822f4fbcc74e2bd"
+  },
+  {
+    "path": "build/scenarios/imp/imp_hint.png",
+    "bytes": 173118,
+    "sha256": "91511b02fec89112b950595136b85cdf33231ab6578e634a5ac523f91378c14d"
+  },
+  {
+    "path": "build/scenarios/imp/imp_mixer.png",
+    "bytes": 173118,
+    "sha256": "00a53b3958ce42d29aed4f2b872ef503215abba2324cc64a177875851effc81b"
+  },
+  {
+    "path": "build/scenarios/imp/imp_pad.png",
+    "bytes": 173118,
+    "sha256": "45c8588fb999409d793b021ca42d2a9c9a3e069c56dbcaf8b21e90be0291f51b"
+  },
+  {
+    "path": "build/scenarios/imp/imp_perform.png",
+    "bytes": 173118,
+    "sha256": "b14a384cc9b659f8974d98b212cfd60f7799dcb72c4502f732b2170cf71774e1"
+  },
+  {
+    "path": "build/scenarios/imp/imp_pluck.png",
+    "bytes": 173118,
+    "sha256": "2e5976df5abdcb85d607411b381722f58e32b84c489f156b66eb1e2c73b507cf"
+  },
+  {
+    "path": "build/scenarios/imp/imp_space.png",
+    "bytes": 173118,
+    "sha256": "17289f0a33526e60e901ad0346c79a30eef74fcc36c7f21da6706d44db157eb2"
+  },
+  {
+    "path": "build/scenarios/imp/imp_tempo.png",
+    "bytes": 173118,
+    "sha256": "6d30232d2abfac0ec66ccff1543a9377214b9812bf222731f4b38b437c575260"
+  },
+  {
+    "path": "build/scenarios/imp/midi_out.txt",
+    "bytes": 14546,
+    "sha256": "90bdde0006ee014a6a7067c64396b2b62707deba40cd2587f9ac544457e1b650"
+  },
+  {
+    "path": "build/scenarios/imp/theme_acid.png",
+    "bytes": 173118,
+    "sha256": "fa327b0a3533dfd69b28cae44011aa56f4d38a9f43f4d11c3d65f9c50f9a438c"
+  },
+  {
+    "path": "build/scenarios/imp/theme_ember.png",
+    "bytes": 173118,
+    "sha256": "ecdb0cf29afb1e778b944ecee4a72e15fc224baa1f1485c7c799e28a18c32b9b"
+  },
+  {
+    "path": "build/scenarios/imp/theme_ice.png",
+    "bytes": 173118,
+    "sha256": "d7b2b76aa773ed663ff6a837af7375cf66bb4cf2f5c857a8e77168cad55a618a"
+  },
+  {
+    "path": "build/scenarios/imp/theme_phosphor.png",
+    "bytes": 173118,
+    "sha256": "13e65c121369863af74c68878ef8490cb8c492cf61d60c4ca84c9cc766454e78"
+  },
+  {
+    "path": "build/scenarios/imp/theme_synth.png",
+    "bytes": 173118,
+    "sha256": "435dd445a9de2932ec3748ae099c0e681631f29336f5433883cbe0659d25d74e"
+  },
+  {
+    "path": "build/scenarios/jam/jam_held.png",
+    "bytes": 173118,
+    "sha256": "a584655ecd16753d60162c075e0d3ce0ba43f0f87463519beb6da5a12f6a01d1"
+  },
+  {
+    "path": "build/scenarios/jam/jam_pluck.png",
+    "bytes": 173118,
+    "sha256": "c80b5dbd612204ef5c4e7f5d1fc9f943370f91cc027a47467a6cfd304ef9f90e"
+  },
+  {
+    "path": "build/scenarios/jam/midi_out.txt",
+    "bytes": 10096,
+    "sha256": "b6b2f79f1e2ce1000a61f94eac00b4493f127fcc018f3e1f5d4a67f70ccb3388"
+  },
+  {
+    "path": "build/scenarios/jam-helper/jam_helper.png",
+    "bytes": 173118,
+    "sha256": "e5705c1718025f2a929655d406bd5cd5fe0f4a37adcae7b9a40ef3dc1622fa76"
+  },
+  {
+    "path": "build/scenarios/jam-helper/midi_out.txt",
+    "bytes": 28417,
+    "sha256": "770ad19d1f3e757aad55255a084674010fbfc614fde43586bae4a00addf3a951"
+  },
+  {
+    "path": "build/scenarios/kaleido/midi_out.txt",
+    "bytes": 11696,
+    "sha256": "e7630d18b9bb48b3e96b068692d284d9504c43e2d5527f1605dcd7f5d212933a"
+  },
+  {
+    "path": "build/scenarios/kaleido/viz_bars2.png",
+    "bytes": 173118,
+    "sha256": "129145ff6f3d63da4fd61c8aa7edbea3e75adf2fe7ae19bd81a1bf7f134c51a9"
+  },
+  {
+    "path": "build/scenarios/kaleido/viz_kaleido.png",
+    "bytes": 173118,
+    "sha256": "0270991daca77a70e22caeb9421c9451549bdd5e14f76de608abd9011f779933"
+  },
+  {
+    "path": "build/scenarios/keydrop/keydrop_on.png",
+    "bytes": 173118,
+    "sha256": "a42e03179d37f286f26808c89d1d1590813213ae33d067a8f895e07a0b6601d3"
+  },
+  {
+    "path": "build/scenarios/keydrop/midi_out.txt",
+    "bytes": 15703,
+    "sha256": "790ffa0621610d871cb53638b89cef4bb11f15510ae4b9d08f04b371d1be0067"
+  },
+  {
+    "path": "build/scenarios/keymap/keymap_perf_glo.png",
+    "bytes": 173118,
+    "sha256": "5543dc2f605e7c88cd69be1faef247be2ba6c5b3a7ec7415b465e9c40f34bd39"
+  },
+  {
+    "path": "build/scenarios/keymap/keymap_shift.png",
+    "bytes": 173118,
+    "sha256": "d0b59965b3736da7222d9dacdb58bc80a383ed36d628f1c9f560d8c531524dc2"
+  },
+  {
+    "path": "build/scenarios/keymap/keymap_shift_seq.png",
+    "bytes": 173118,
+    "sha256": "e5359288c4f08edd8c4ef9bcd46cca7868a296ad02d575a54481349c11eb8dfa"
+  },
+  {
+    "path": "build/scenarios/keymap/midi_out.txt",
+    "bytes": 5644,
+    "sha256": "d274262c2f31c4129fa7bbde3d1cbd664715819986d6e0ee277a35354ddfee22"
+  },
+  {
+    "path": "build/scenarios/links/links_off.png",
+    "bytes": 173118,
+    "sha256": "a62b57c7b87d7d12fee5d677b640a5d59009b722878320b0deb372d7bb18e852"
+  },
+  {
+    "path": "build/scenarios/links/links_on.png",
+    "bytes": 173118,
+    "sha256": "05707b0ec230d5b9fcef483ebdf39e047f010be3b96a6accd89b680dc1d3528a"
+  },
+  {
+    "path": "build/scenarios/links/midi_out.txt",
+    "bytes": 3160,
+    "sha256": "a44d0b4b32341f0b0f0f68935265d7150a2d821f55b2ad1d375f5b5a817237c9"
+  },
+  {
+    "path": "build/scenarios/look/global.png",
+    "bytes": 173118,
+    "sha256": "242989c336f411753620192e4befae15a7fea5ed7d6143f66915e199b677ff84"
+  },
+  {
+    "path": "build/scenarios/look/home_imp.png",
+    "bytes": 173118,
+    "sha256": "b6ed4465f8050885962c8961e6b004aba39feb5277407bac486ef28dea5a0558"
+  },
+  {
+    "path": "build/scenarios/look/home_synth.png",
+    "bytes": 173118,
+    "sha256": "31652bf32ef000e5a9fc8a41caade63f1677abb45b496687a4e51bdba08a86a3"
+  },
+  {
+    "path": "build/scenarios/look/home_synth_imp.png",
+    "bytes": 173118,
+    "sha256": "2329bb9035fb343471f1475b674a30180b404bbf2bc6af651dd2565d43e3e4e7"
+  },
+  {
+    "path": "build/scenarios/look/home_synth_scan.png",
+    "bytes": 173118,
+    "sha256": "eaa6032d2d90f2b870029da3397b6bbe80bcbce57780fe407ca661a57a998408"
+  },
+  {
+    "path": "build/scenarios/look/midi_out.txt",
+    "bytes": 2998,
+    "sha256": "35e398d2f36bb8a910281f133bc00faabc229a607acb4fe670cfcab8a320c574"
+  },
+  {
+    "path": "build/scenarios/look/pad_synth.png",
+    "bytes": 173118,
+    "sha256": "890b49c1a71f52f2e4aa427e3c50a473be04bf988bee0092c31099f1cea11dcb"
+  },
+  {
+    "path": "build/scenarios/look/settings_scan.png",
+    "bytes": 173118,
+    "sha256": "8946a0682671fd9702f3b236bd5d82248d84fb8d67ba4de45668f873105d0fa3"
+  },
+  {
+    "path": "build/scenarios/look/splash.png",
+    "bytes": 173118,
+    "sha256": "1b33c712278d6d222ed7c2830cfb4ecff0c196deec542acb5626f85e1a96033d"
+  },
+  {
+    "path": "build/scenarios/midimap/midi_out.txt",
+    "bytes": 6177,
+    "sha256": "a1f963e8dcfb7332071e67c1c3a8a829f1e0ac183a6546973233fba6dc4f4347"
+  },
+  {
+    "path": "build/scenarios/midimap/midimap.png",
+    "bytes": 173118,
+    "sha256": "a9f49f2288f2dcd78d019cdca8fe38322fe117b6f19b740f6d2739f1f8a677ad"
+  },
+  {
+    "path": "build/scenarios/mix/midi_out.txt",
+    "bytes": 4870,
+    "sha256": "f7a4daea198c65ae35cded2f713cbb30c6bd90c85059a0b876e2510c5ea275b9"
+  },
+  {
+    "path": "build/scenarios/mix/mix_kick.png",
+    "bytes": 173118,
+    "sha256": "4d17a07a4b68ad8fccae2adbd47987a3c897452d1e1b93e36384438b04f16283"
+  },
+  {
+    "path": "build/scenarios/mix/mix_solo.png",
+    "bytes": 173118,
+    "sha256": "04e025b160f0e8379177ba919d8a1feda33bd45eb55acaaa7b2c676ff89a2729"
+  },
+  {
+    "path": "build/scenarios/mixglide/midi_out.txt",
+    "bytes": 13991,
+    "sha256": "2fdece171275c27c921cd24213f0ff101bea30fccb71ba55a4df2d887444984c"
+  },
+  {
+    "path": "build/scenarios/mood/midi_out.txt",
+    "bytes": 10036,
+    "sha256": "6d486764632ab496ef11467c594637c38f2ea43ebab87de8dd82ebc803768059"
+  },
+  {
+    "path": "build/scenarios/mood/mood_chill.png",
+    "bytes": 173118,
+    "sha256": "6c789eee02e04536b2f0d28f6edd5f5e9a2ddfd5186b2fa5752dbcd86fe182f7"
+  },
+  {
+    "path": "build/scenarios/mood/mood_peak.png",
+    "bytes": 173118,
+    "sha256": "83f34df0b2d39d7b0a8f6295bc163fbfc3d534815a0493466febd6791d24bd10"
+  },
+  {
+    "path": "build/scenarios/motion/frozen.png",
+    "bytes": 173118,
+    "sha256": "71767417efb00e953243a08054e9746743437eecd26a4c5e63bfe61e183c7cf1"
+  },
+  {
+    "path": "build/scenarios/motion/midi_out.txt",
+    "bytes": 8686,
+    "sha256": "bb36e0503b573035fe789623dad7a60e68449b813f04883381a8b4338ae667ef"
+  },
+  {
+    "path": "build/scenarios/motion/stopped.png",
+    "bytes": 173118,
+    "sha256": "171b93cbb98c5cdcd97866d3af5b8b2bd4038cb92fe90c3356074a6e1a5f611a"
+  },
+  {
+    "path": "build/scenarios/mpk/midi_out.txt",
+    "bytes": 9910,
+    "sha256": "2894b3f6efc4228c9fd6a9a1e07e244aee275fb53dcd894521db7e00954e192c"
+  },
+  {
+    "path": "build/scenarios/mpk/midiin_mpk.png",
+    "bytes": 173118,
+    "sha256": "0bdb1a9c3b02d9fec37408cdf58552bfedf234b2401f6e89762ba0c0e7fe2284"
+  },
+  {
+    "path": "build/scenarios/mscc/midi_out.txt",
+    "bytes": 18773,
+    "sha256": "844d649f429196d9b5617721bc7406b86b98b45bbec447f012b5fbef5a772f33"
+  },
+  {
+    "path": "build/scenarios/mscc/midiin_ms.png",
+    "bytes": 173118,
+    "sha256": "9f187443057ee559596b3517f9643db3f88cc4563773a55fd9960d688825bb22"
+  },
+  {
+    "path": "build/scenarios/n1/midi_out.txt",
+    "bytes": 6742,
+    "sha256": "0dc046f38ce26ec557128aa748540ccba3d601212a570cfb19b2686f6995418b"
+  },
+  {
+    "path": "build/scenarios/octave/midi_out.txt",
+    "bytes": 6636,
+    "sha256": "25b26bb32ada8fe2e989cfcab2c0a81c1e499a034929ec43be510d43f1dcc712"
+  },
+  {
+    "path": "build/scenarios/octave/pad_up.png",
+    "bytes": 173118,
+    "sha256": "1ab6ef1d3056e3c620b4b49846cea7ccc023c391866c1303f35dc4fc2431f97f"
+  },
+  {
+    "path": "build/scenarios/octave/song_up.png",
+    "bytes": 173118,
+    "sha256": "d3736e8b94cb7095e11dad9173ee2ac715268fcbedbb4a5c9e58b85a68a42a04"
+  },
+  {
+    "path": "build/scenarios/pads/midi_in_page.png",
+    "bytes": 173118,
+    "sha256": "8f5f00a1eddb63845ae66330854f2ba8022f755ff5b8da6e50ee23694842cf87"
+  },
+  {
+    "path": "build/scenarios/pads/midi_out.txt",
+    "bytes": 11161,
+    "sha256": "65ed9f52c27bc802411deaf90e7772e18568b2110fdb45154649807f93385ef0"
+  },
+  {
+    "path": "build/scenarios/pedal/midi_out.txt",
+    "bytes": 8222,
+    "sha256": "b923c7b51a05e8e780b0a738872d2c7d7f28ae44795629c12c591e80bb358d49"
+  },
+  {
+    "path": "build/scenarios/pedal/pedal_after_reboot.png",
+    "bytes": 173118,
+    "sha256": "2bcee6fb2b630362883c8ea86c37ae2cba644d059e74cfe00cfbbac028783368"
+  },
+  {
+    "path": "build/scenarios/pedal/pedal_pad.png",
+    "bytes": 173118,
+    "sha256": "8c897e82a5db00b46a2550e238b78495419c37de41fd0756951cff444f3f0a45"
+  },
+  {
+    "path": "build/scenarios/pedal/pedal_page.png",
+    "bytes": 173118,
+    "sha256": "fa77836879d72de619922a0f0d44d8a392fe23da06ee9d9860cdf665a2ab2f48"
+  },
+  {
+    "path": "build/scenarios/perf/midi_out.txt",
+    "bytes": 11734,
+    "sha256": "51660a7d9acdc230884f72dcacecbe807dbb72fc9eaba957d491ad5ebefd8114"
+  },
+  {
+    "path": "build/scenarios/perf/perf_dj.png",
+    "bytes": 173118,
+    "sha256": "7a6173914d024b1da3ed970523e0f3486a31c52e37a8ddbd247e8e3c33393d98"
+  },
+  {
+    "path": "build/scenarios/perf/perf_queued.png",
+    "bytes": 173118,
+    "sha256": "8730cc4df329c778002ba9513d785fc78a702a4b25849e398db2c5c0bbd1b080"
+  },
+  {
+    "path": "build/scenarios/perf/perf_screen.png",
+    "bytes": 173118,
+    "sha256": "1abb91319c67e846a57382016150f72ca626f8772bd3bc27dd1fbc4de11aa0ef"
+  },
+  {
+    "path": "build/scenarios/phrase/midi_out.txt",
+    "bytes": 11182,
+    "sha256": "36205e690db8053097f44a24430d59c5216f8467cfb0bfdebbd79c25a0b14c10"
+  },
+  {
+    "path": "build/scenarios/phrase/phrase.png",
+    "bytes": 173118,
+    "sha256": "f716cd26dfd0c0151dd156277e0e1348f5455bebed68defdff5c93dc823a72aa"
+  },
+  {
+    "path": "build/scenarios/pieces/edited.png",
+    "bytes": 173118,
+    "sha256": "d2c1263eb3a99ed418b747cda695ffbb1e45fbb33951d4b9d592c525567c7dc1"
+  },
+  {
+    "path": "build/scenarios/pieces/midi_out.txt",
+    "bytes": 20953,
+    "sha256": "5c26ca7d6211ae4bf87521fa351f0e0bf8f69a82854628a49a301e818b82e1b2"
+  },
+  {
+    "path": "build/scenarios/pieces/piece02.png",
+    "bytes": 173118,
+    "sha256": "6d367d3b57989629c85a426835ef49e274c59e912c85c30e3fa52b6e80956420"
+  },
+  {
+    "path": "build/scenarios/playmap/midi_out.txt",
+    "bytes": 5639,
+    "sha256": "46b280b3e4a4f0841de325e1bef89281293cfb21b4c93b6d7caa3610b2002b95"
+  },
+  {
+    "path": "build/scenarios/pluck/midi_out.txt",
+    "bytes": 7642,
+    "sha256": "79bb6e34a7eb27d2d559b7d29842ddf4fa135dc47b308a8c5dc1f69157409f8f"
+  },
+  {
+    "path": "build/scenarios/pluck/pluck1.png",
+    "bytes": 173118,
+    "sha256": "c389a88c8650636fc7997c908b3f8ce3b7e168e943ba87cee49b0c7df0f10952"
+  },
+  {
+    "path": "build/scenarios/pluck/pluck2.png",
+    "bytes": 173118,
+    "sha256": "9020eb2bc233c7fdb50c9445afab1c82c37108f4dde76fd280b4e84b5c1e6e86"
+  },
+  {
+    "path": "build/scenarios/pluckmig/midi_out.txt",
+    "bytes": 5014,
+    "sha256": "146dc167821e7d6f35cacc68608a431411e5a5347db6d499febb3b834bd97e5c"
+  },
+  {
+    "path": "build/scenarios/plucksteps/midi_out.txt",
+    "bytes": 6292,
+    "sha256": "ba64306c87021bc8a9fb31193030058c167f33d5e94baaed04503f0651bb29f7"
+  },
+  {
+    "path": "build/scenarios/plucksteps/plucksteps.png",
+    "bytes": 173118,
+    "sha256": "8eaa8221ddeabce6e8ec59952275396fca8414102f86e609be13d0891b1added"
+  },
+  {
+    "path": "build/scenarios/plucksteps/plucksteps_free.png",
+    "bytes": 173118,
+    "sha256": "561938f567ecd86f2dcd1d89c38e7e5c42cf586ff2858cd6ef76b4f4be77edc0"
+  },
+  {
+    "path": "build/scenarios/plucksteps/plucksteps_play.png",
+    "bytes": 173118,
+    "sha256": "0700632266eddbce0feaa3db7d49d78521849635d6167d68fc8f767d6cfc9884"
+  },
+  {
+    "path": "build/scenarios/progression/midi_out.txt",
+    "bytes": 41545,
+    "sha256": "0ddc50908a3834045d3153c9fc881a71732a139af8d8401cc06fa1330cdb6e4c"
+  },
+  {
+    "path": "build/scenarios/progression/progression.png",
+    "bytes": 173118,
+    "sha256": "4f7410e658e770d1d3919fdc3a687208e33a6ecb584840ff04904f5d646bc562"
+  },
+  {
+    "path": "build/scenarios/progression/progression_heard.png",
+    "bytes": 173118,
+    "sha256": "0f9f764a7a1b96e38c0c05c8dbe3924755f6a453b7f1d748bf456fba4fe37e30"
+  },
+  {
+    "path": "build/scenarios/progression/progression_hold.png",
+    "bytes": 173118,
+    "sha256": "e87a5fc78c9d0d3d901b0aa4f2583d0772c63a27ce8be425866885084cca507a"
+  },
+  {
+    "path": "build/scenarios/progression/progression_play.png",
+    "bytes": 173118,
+    "sha256": "fae2d1e56c7295643e168bec2adbc3bab7eddcffd70267fc0644ab9603950d99"
+  },
+  {
+    "path": "build/scenarios/progression/progression_types.png",
+    "bytes": 173118,
+    "sha256": "ebc2437161f5aeb891e80f3ead01074cd0157b7e3df797d2b3b3a2fd92ae8109"
+  },
+  {
+    "path": "build/scenarios/progression/tempo_drift_bars.png",
+    "bytes": 173118,
+    "sha256": "432b867d9ff8c046c7b735b94e93a46280a42ac044344a728856f0c4357653ca"
+  },
+  {
+    "path": "build/scenarios/progression/theory_loop.png",
+    "bytes": 173118,
+    "sha256": "115a4c108db9fb190f8b3faadaa2329850d3dce03e67ce42f6b5f9d4662f4870"
+  },
+  {
+    "path": "build/scenarios/remote/midi_out.txt",
+    "bytes": 2718,
+    "sha256": "b010aecea5edd79d21ba52930236d3486aeaf0aa6ff19eda5a9856110be68ce5"
+  },
+  {
+    "path": "build/scenarios/remote/remote_link.png",
+    "bytes": 173118,
+    "sha256": "3b239ca96d65619e4395f74623a4a3a3c01d5b98c5a7757d52fc21bbbb57652d"
+  },
+  {
+    "path": "build/scenarios/remote/remote_wait.png",
+    "bytes": 173118,
+    "sha256": "8466e66706dbd037d7aae1415ba63e536d5c1b36ef7f3cac345d0a6421839977"
+  },
+  {
+    "path": "build/scenarios/restore/midi_out.txt",
+    "bytes": 4852,
+    "sha256": "9e1f41401834b909db9c5a877137049fd494f116530b24276d0215570ff175d5"
+  },
+  {
+    "path": "build/scenarios/restore_old/midi_out.txt",
+    "bytes": 20075,
+    "sha256": "e0c6f918b08e4b94d65f2fe2d7eb246bbcb1f1ab536b6b5a95f8df5459efec89"
+  },
+  {
+    "path": "build/scenarios/restore_save/midi_out.txt",
+    "bytes": 5284,
+    "sha256": "2694ebf1cfd1c63f362438ad3300d46172f3e1cba2e83356c5af4ab9103a328d"
+  },
+  {
+    "path": "build/scenarios/restore_shared/midi_out.txt",
+    "bytes": 6958,
+    "sha256": "2abbf4e4a2de8a9bf70a93a93db423106cf88ea0f090c4eaeb39d7b2a51f9383"
+  },
+  {
+    "path": "build/scenarios/resume/midi_out.txt",
+    "bytes": 25326,
+    "sha256": "8bb1802b3588a76d160a6b218917c98afe6c0eadfc15c861b6977db8c738dd54"
+  },
+  {
+    "path": "build/scenarios/rptwav/midi_out.txt",
+    "bytes": 11145,
+    "sha256": "5310ec34729529101404c201e3c91ffc7a4cdf258a1dbb4b22772e73e733a4eb"
+  },
+  {
+    "path": "build/scenarios/rptwav/roll.wav",
+    "bytes": 882732,
+    "sha256": "ae894f77e4843c52e7df614d2247aab3cc74c29837066db5d2656cf5f6f7b82a"
+  },
+  {
+    "path": "build/scenarios/rptwav/rpt8.wav",
+    "bytes": 618540,
+    "sha256": "05cfc85f6cb195835e5e1bebddd19a14a394e5c19a68648078ddf0e26d059e6b"
+  },
+  {
+    "path": "build/scenarios/runner/midi_out.txt",
+    "bytes": 43701,
+    "sha256": "89f8125f9d18e562583eccd76e3f51f5b55fd7c26a5e9c8df924a43f61a04835"
+  },
+  {
+    "path": "build/scenarios/runner/runner.png",
+    "bytes": 173118,
+    "sha256": "b3b082b5208eeebdf698f8d198b1d1dac6d021432322d6082a08cf3ed09caba1"
+  },
+  {
+    "path": "build/scenarios/runner/runner2.png",
+    "bytes": 173118,
+    "sha256": "79cef92c97fd6998583eeb82493c6a90f1546f2c48c3009f4d2f81f233afbff3"
+  },
+  {
+    "path": "build/scenarios/samplehelp/midi_out.txt",
+    "bytes": 5209,
+    "sha256": "7036c2d39d6f8039efd2298d5e6488860d2446d1bbc6db63b4070dd0d2ccc297"
+  },
+  {
+    "path": "build/scenarios/samplehelp/sample_page.png",
+    "bytes": 173118,
+    "sha256": "ba1e71d18782982091a0514f8954be68db389d549cc60b3ad2cd22207873c61e"
+  },
+  {
+    "path": "build/scenarios/samplehelp/sample_run.png",
+    "bytes": 173118,
+    "sha256": "ef61c9e20422eefdbd8217a2d5d79a4635ebbbf09dd01d0476f3fda4665cd3ad"
+  },
+  {
+    "path": "build/scenarios/sampler/midi_out.txt",
+    "bytes": 7660,
+    "sha256": "7a8f6c08a45746e7b69e31bdad44282eefb72ff8a50fe4b7a120d9fc372e3132"
+  },
+  {
+    "path": "build/scenarios/sampler/snips_held.png",
+    "bytes": 173118,
+    "sha256": "c3bf466e74f829d5d663e5d6358c6530c0a630279d68fafa7d29711830968978"
+  },
+  {
+    "path": "build/scenarios/sampler/snips_page.png",
+    "bytes": 173118,
+    "sha256": "8ab45acee4f1db8ab8b0376b8757a7209f99bd91d681d766443d2653a91db877"
+  },
+  {
+    "path": "build/scenarios/scale/b_aeolian.png",
+    "bytes": 173118,
+    "sha256": "3fdaf4beefe83df9cf6569ff1499efd9e74e30ed0324852a646402a8a7428ccf"
+  },
+  {
+    "path": "build/scenarios/scale/midi_out.txt",
+    "bytes": 1936,
+    "sha256": "f43e70d84c5cc56245ab2ab182939257baf4e05d990d9849504e47f08f99a3bc"
+  },
+  {
+    "path": "build/scenarios/scale/three.png",
+    "bytes": 173118,
+    "sha256": "41306eb3d1267b2431b0e988506950ad3dc68f3ba35ba8e136a85dc70d1e397e"
+  },
+  {
+    "path": "build/scenarios/scene/midi_out.txt",
+    "bytes": 11506,
+    "sha256": "7b81873c87bfe453cda436dbb5bfb63a16526d639ef6991c7055aa320cf38dcd"
+  },
+  {
+    "path": "build/scenarios/scene/scene_stored.png",
+    "bytes": 173118,
+    "sha256": "7f448e3517362083bf5fcc215d2170c9c78b4fc6571bd3d1629037744bf1d4b2"
+  },
+  {
+    "path": "build/scenarios/seamless/midi_out.txt",
+    "bytes": 3160,
+    "sha256": "fd199121060e76d11f9b4dfa69131dd2d7d73b045c59e53c5563ebde582a2ab6"
+  },
+  {
+    "path": "build/scenarios/sections/breakdown.png",
+    "bytes": 173118,
+    "sha256": "d368ae8b251a658e4fe0f3d337f3cfe6d8ea30ec6763a0fcbe07af24aa3449e1"
+  },
+  {
+    "path": "build/scenarios/sections/build.png",
+    "bytes": 173118,
+    "sha256": "54e277700bd17797d9f3b17db26e6d60cf51a5e9cd2c54d8cf9be82c7753cc95"
+  },
+  {
+    "path": "build/scenarios/sections/midi_out.txt",
+    "bytes": 77569,
+    "sha256": "8fd039bdbd5928cdceacca188d37e0fd5f7c3ac1289de24b96cbe9d3e54f9c37"
+  },
+  {
+    "path": "build/scenarios/sections/sections.wav",
+    "bytes": 16433196,
+    "sha256": "14d2a154c86b56081fc3e79c5f87d67ca9c1c28aaf68041a84930eb4f1e70e71"
+  },
+  {
+    "path": "build/scenarios/seq/midi_out.txt",
+    "bytes": 5734,
+    "sha256": "a176d8da13e952be705cb75ada03524aea4a7ac3ce83ee81a7a5617d478e6ede"
+  },
+  {
+    "path": "build/scenarios/seq/seq.png",
+    "bytes": 173118,
+    "sha256": "22f6888507a617775f98b844ff7a54f5e3b9ccdd7b180ea5bb118cbbc5562ac8"
+  },
+  {
+    "path": "build/scenarios/seq/seq_p3.png",
+    "bytes": 173118,
+    "sha256": "d165d33ae6b7e78e285d84fe9bcc383908c79870c9e350851339ad19918be273"
+  },
+  {
+    "path": "build/scenarios/seq/theme_ice.png",
+    "bytes": 173118,
+    "sha256": "94388ba4c83c509a638f27ada221ac4e9b49085796d0ec48d1f9d7ee59407658"
+  },
+  {
+    "path": "build/scenarios/seqtricks/midi_out.txt",
+    "bytes": 3376,
+    "sha256": "72a1cdc43d51b314b7e5bf462653e6c018eda0dc79efe37764d1769372ef8491"
+  },
+  {
+    "path": "build/scenarios/seqtricks/seq_tricks.png",
+    "bytes": 173118,
+    "sha256": "b78b4d2a17d91f7ac568551188ad537942f4d4a26958b60c7872cbf6f851f275"
+  },
+  {
+    "path": "build/scenarios/setlist/midi_out.txt",
+    "bytes": 57190,
+    "sha256": "161fb6fdbedf1dc0e9770d779c80caf7c2fd981caf4caf6ff20f833ca7f4135f"
+  },
+  {
+    "path": "build/scenarios/setlist/setlist.png",
+    "bytes": 173118,
+    "sha256": "f70556bb09b5b688a9f5227fd028df2c22818ff619388e3d311fecf7ff5fbb8f"
+  },
+  {
+    "path": "build/scenarios/setlist/setlist_empty.png",
+    "bytes": 173118,
+    "sha256": "fe1d05fa292056653518e91dd3bb70b575e425e4e3b7b0dd49d98433686a7668"
+  },
+  {
+    "path": "build/scenarios/setmap/midi_out.txt",
+    "bytes": 4505,
+    "sha256": "e6c432769c741f19da55667fb594cf91f0903330178fafb13be694578c8852c5"
+  },
+  {
+    "path": "build/scenarios/setmem/midi_out.txt",
+    "bytes": 15439,
+    "sha256": "8832b23f3e88750f1083f961729e4d54d7f4842ddba315460d5c3e49808a5198"
+  },
+  {
+    "path": "build/scenarios/setpage/intro_header.png",
+    "bytes": 173118,
+    "sha256": "4097f6a5f87b9ac439cd54707188f730374395ae8472d6acdf4ccb64482e52a8"
+  },
+  {
+    "path": "build/scenarios/setpage/intro_home.png",
+    "bytes": 173118,
+    "sha256": "6af06a192b7e565cb02acefe594a086ff4976363878572a8e82caa75f32bd3cb"
+  },
+  {
+    "path": "build/scenarios/setpage/intro_mix.png",
+    "bytes": 173118,
+    "sha256": "cb8d63bc29efb0e31106093f59b3fde9b0854bd61d75f44447745fb947a7331a"
+  },
+  {
+    "path": "build/scenarios/setpage/midi_out.txt",
+    "bytes": 9514,
+    "sha256": "06400b6563659cfd25475438e7ed01a98102ef96d5d6282a03b4a3f3dd10c361"
+  },
+  {
+    "path": "build/scenarios/setpage/set_page.png",
+    "bytes": 173118,
+    "sha256": "3e1435dc6a4febb565c99c745c3fe41b32a3eb347659282bb22f8fc7eb0c3eb8"
+  },
+  {
+    "path": "build/scenarios/setpage/set_page_on.png",
+    "bytes": 173118,
+    "sha256": "7c994ea2baa4a88e304bc6c6945685e38a8e45efd4f85267dff8f177caaa586c"
+  },
+  {
+    "path": "build/scenarios/settings/midi_out.txt",
+    "bytes": 6562,
+    "sha256": "e7cfe0f746985208a381457cbab26d6ebf191b06bfde8551c435e7c834d32fea"
+  },
+  {
+    "path": "build/scenarios/settings/settings.png",
+    "bytes": 173118,
+    "sha256": "c393fbd5ed6c18b29c40ff9e54c603201d719317d12639fb4c03ba5c2cb776df"
+  },
+  {
+    "path": "build/scenarios/shift/midi_out.txt",
+    "bytes": 9100,
+    "sha256": "138371ceef818c4f488d2bb7f8286cb81ea63ceb18f99a802f0137e0145bafa6"
+  },
+  {
+    "path": "build/scenarios/shift/shift_pattern.png",
+    "bytes": 173118,
+    "sha256": "f3d15ba02c57645b2021cd9701e72757024641096737ef8c033f8aec0fa55855"
+  },
+  {
+    "path": "build/scenarios/shift/shift_piece.png",
+    "bytes": 173118,
+    "sha256": "c129f5ac2a95a71e6eb8b6c10a7488140ea065c4a42ecaef90e819d8b6c87edc"
+  },
+  {
+    "path": "build/scenarios/songbook/afterhours.png",
+    "bytes": 173118,
+    "sha256": "7d5237054b8bdb204d7d9843140134a2e6b69d702dfdc66b31f66503ab498ae2"
+  },
+  {
+    "path": "build/scenarios/songbook/arrangement.png",
+    "bytes": 173118,
+    "sha256": "09b01bdd6edaa10e098ee6b36ca3b1018a725c74dc40b57c8f28c44ef919663b"
+  },
+  {
+    "path": "build/scenarios/songbook/dx-bass.png",
+    "bytes": 173118,
+    "sha256": "354097e46ce13ed8cd5ae80525bc4ae80bd75eb8bbe1b1f1e69f0d7370afa295"
+  },
+  {
+    "path": "build/scenarios/songbook/dx-keys.png",
+    "bytes": 173118,
+    "sha256": "49c23b6824b74332af411b759d8e62eadd311399fd3147ff53b2295156f4291f"
+  },
+  {
+    "path": "build/scenarios/songbook/midi_out.txt",
+    "bytes": 301,
+    "sha256": "75fbbdd6aa39c97a6046a7952beeabf9c97148b4671a611b16f2f739a12a3beb"
+  },
+  {
+    "path": "build/scenarios/songbook/swells.png",
+    "bytes": 173118,
+    "sha256": "2ebe6cde4f7db24d8938578d7d58b6deef720068c0a89164aa69fca594cd747a"
+  },
+  {
+    "path": "build/scenarios/sounds/kit.png",
+    "bytes": 173118,
+    "sha256": "be6b4ce2dccb7d70281eee5f93d130a9a7c267ca25f7c15599a0af5a1e5dde74"
+  },
+  {
+    "path": "build/scenarios/sounds/midi_out.txt",
+    "bytes": 10639,
+    "sha256": "5ff7d3d911bf71ddb06fc7d04c696410b0ef5da2c2621d16d771798cefb77945"
+  },
+  {
+    "path": "build/scenarios/sounds/playing_drone.png",
+    "bytes": 173118,
+    "sha256": "c3dce36f51901a91adc95cc52ee68003172b93c52f6bc4ecc4211aa0e3e2e1ea"
+  },
+  {
+    "path": "build/scenarios/sounds/sound_drone.png",
+    "bytes": 173118,
+    "sha256": "baad6e39dba48a3947dcf40ac58edd38a8958c0efa83263aa343179a4b2904b0"
+  },
+  {
+    "path": "build/scenarios/sounds/sound_pad.png",
+    "bytes": 173118,
+    "sha256": "3d975e1407427c9efa0dd3ab89c51704e79d5111bc6f1213de611678a42f153f"
+  },
+  {
+    "path": "build/scenarios/stage/midi_out.txt",
+    "bytes": 64383,
+    "sha256": "9da2ceab7be3da454d9f8c1d9afe123bb6e23b5c3ea7e22324ca8238d8f497a4"
+  },
+  {
+    "path": "build/scenarios/stage/saver.png",
+    "bytes": 173118,
+    "sha256": "0e8adf43864bd03df7ba4c0fbda17c82fd7d5dc5118866bb21de5a9842a58831"
+  },
+  {
+    "path": "build/scenarios/start/midi_out.txt",
+    "bytes": 758,
+    "sha256": "8d0fdc71f0292973c307e9cdd53409242761323f03ed1a4b6e09211057fb4c1d"
+  },
+  {
+    "path": "build/scenarios/start/start.png",
+    "bytes": 173118,
+    "sha256": "cb3df2a0255865e756e61db5f9f06c0deb94c87a6fbd849a47a58279c79a87a5"
+  },
+  {
+    "path": "build/scenarios/steps/midi_out.txt",
+    "bytes": 6490,
+    "sha256": "80c40faf1c866b6d6e89c512f3b289862dbf9d49d9f92dd5ad0110e26591cb97"
+  },
+  {
+    "path": "build/scenarios/steps/steps.png",
+    "bytes": 173118,
+    "sha256": "42cf264f9aa0c4c545807d7d8d258ab42809cff821804dfba834be189f4ccaa4"
+  },
+  {
+    "path": "build/scenarios/store/global_edited.png",
+    "bytes": 173118,
+    "sha256": "302aa9eaf9997ed1aba03e8a02f20475b380e47d30e0ca7959b3d01b565f1a06"
+  },
+  {
+    "path": "build/scenarios/store/global_hold.png",
+    "bytes": 173118,
+    "sha256": "47b547b56e32348a7444c736d1a398dbe3c40e041004946f8b3e190185d5e939"
+  },
+  {
+    "path": "build/scenarios/store/global_stored.png",
+    "bytes": 173118,
+    "sha256": "cf9cbe256d7bfd3a642ea8ea22f29e1256b732214c13453520381e6fa310ea52"
+  },
+  {
+    "path": "build/scenarios/store/midi_out.txt",
+    "bytes": 8908,
+    "sha256": "527c2dfa9a7cf2ba12366a46db0d00678d873bb3e65ad702e4a16c6932a40335"
+  },
+  {
+    "path": "build/scenarios/theme/midi_out.txt",
+    "bytes": 10807,
+    "sha256": "39c4ea1cf47980e00037d60de673044ed31f4007a6b32a2478d0bebdbcaaffd8"
+  },
+  {
+    "path": "build/scenarios/theory/midi_out.txt",
+    "bytes": 27846,
+    "sha256": "2c4b30e7d55306d9f789209ec4967146635e5d0420efa09407933ef73fbe49cc"
+  },
+  {
+    "path": "build/scenarios/theory/theory_a_minor_i.png",
+    "bytes": 173118,
+    "sha256": "0c84c44f3d64b0f1df1309ab69d8dbcfc05711345ec194fbd20dfe09087600fd"
+  },
+  {
+    "path": "build/scenarios/theory/theory_a_minor_iv.png",
+    "bytes": 173118,
+    "sha256": "54d432bec8747ca31a9670ca16a984ed97ee1031d1ff71f4dca31716ce233d28"
+  },
+  {
+    "path": "build/scenarios/theory/theory_a_minor_V.png",
+    "bytes": 173118,
+    "sha256": "7b6fab6500d77e8daa8f89523806bf5ac05e7a114ce9b099204be4eb94f1fbb3"
+  },
+  {
+    "path": "build/scenarios/theory/theory_e_major.png",
+    "bytes": 173118,
+    "sha256": "dab7a03a1b3cb2e1c8a656d29ba24496a0aee1cab89139e7e1a2627b43fd2672"
+  },
+  {
+    "path": "build/scenarios/theory/theory_e_minor.png",
+    "bytes": 173118,
+    "sha256": "0b556b59e25143744540385d8f6f190c71bf57d7464eca194ac2875615da9725"
+  },
+  {
+    "path": "build/scenarios/theory/theory_eb_minor.png",
+    "bytes": 173118,
+    "sha256": "9ba2171b188b8fb19e91666111e9b36e88895aedf28053570052017ba979cf9c"
+  },
+  {
+    "path": "build/scenarios/theory/theory_synth.png",
+    "bytes": 173118,
+    "sha256": "158a0c2d0975e31fa7b1f004941672ef03e93c35cffe39f0172c3de4ca8c3108"
+  },
+  {
+    "path": "build/scenarios/theory_walk/midi_out.txt",
+    "bytes": 26868,
+    "sha256": "45e5234a1bba526d738713e267f1e701fb4191ad023e985b4e3fe8b7dd6587d1"
+  },
+  {
+    "path": "build/scenarios/theory_walk/theory_walk_a.png",
+    "bytes": 173118,
+    "sha256": "4a3bffb7385ad098e86d2d938ac02046fb3a82ec114d5dabd9f91dedd2fb7ba3"
+  },
+  {
+    "path": "build/scenarios/theory_walk/theory_walk_b.png",
+    "bytes": 173118,
+    "sha256": "ad943c4f1396410f68b00907a1d2a1098e419d0f966e95c53f8f5505891337bd"
+  },
+  {
+    "path": "build/scenarios/theory_walk/theory_walk_c.png",
+    "bytes": 173118,
+    "sha256": "288c791616883f37b17c0357f2bc692d6ac2c70f11a59cab7d07fc522e6fcc55"
+  },
+  {
+    "path": "build/scenarios/theory_walk/theory_walk_d.png",
+    "bytes": 173118,
+    "sha256": "741188d8653ac57d906e3e7d16cc3582b3c7652dee28f577a898338af7830f74"
+  },
+  {
+    "path": "build/scenarios/usbhost/midi_out.txt",
+    "bytes": 8075,
+    "sha256": "e03376331ef9b909b0c58e077c8ff980c190d7f60fc4ea61745e786a5082f5c9"
+  },
+  {
+    "path": "build/scenarios/usbhost/usb_host_on.png",
+    "bytes": 173118,
+    "sha256": "63aea59d7d810d89d634e38e07520f2e5675c8c00325c4a39f062882a1f46ec6"
+  },
+  {
+    "path": "build/scenarios/viz/midi_out.txt",
+    "bytes": 23855,
+    "sha256": "b0751294a95dfdff308fd78271d04f20c48378b6a634d62a780e76622910ef24"
+  },
+  {
+    "path": "build/scenarios/viz/viz_auto.png",
+    "bytes": 173118,
+    "sha256": "931e1a96b4034e32d577f11c0b60b62ade47493a30984823e33c3aeb3ca7b25b"
+  },
+  {
+    "path": "build/scenarios/viz/viz_bars.png",
+    "bytes": 173118,
+    "sha256": "c53f647f80db2319e25267dec54007ab37ccad0e86463379519e36311cca4430"
+  },
+  {
+    "path": "build/scenarios/viz/viz_disco.png",
+    "bytes": 173118,
+    "sha256": "6429b5706a87e1df77a58fa7871f5046b2d7eac4d8aa48924a4b5373d0eed39e"
+  },
+  {
+    "path": "build/scenarios/viz/viz_flux.png",
+    "bytes": 173118,
+    "sha256": "754923b8138dd4adf3c2d52176daf951ef505c0df6b4acabb12a59a71e4b9ba1"
+  },
+  {
+    "path": "build/scenarios/viz/viz_kaleido.png",
+    "bytes": 173118,
+    "sha256": "99ebe17b9a6896337ebacff678352e4adffd0dbcd2ad9206b5f2fd1697277930"
+  },
+  {
+    "path": "build/scenarios/viz/viz_life.png",
+    "bytes": 173118,
+    "sha256": "2ee31b6135fc4c30c8099a6d813a1870fcf04e3078345c38062a63fde85f9e64"
+  },
+  {
+    "path": "build/scenarios/viz/viz_orbit.png",
+    "bytes": 173118,
+    "sha256": "600b4cffe5ccd59f0e2746a8e8318c12eb472c1bc8539a13cdce4b0ae5fc70f8"
+  },
+  {
+    "path": "build/scenarios/viz/viz_plasma.png",
+    "bytes": 173118,
+    "sha256": "e6efe1604b1e3180176cb7ff895281fad1802b1dd8604c27aeae0351314e5c19"
+  },
+  {
+    "path": "build/scenarios/viz/viz_theory.png",
+    "bytes": 173118,
+    "sha256": "a1295a60191afab30ad05463b73dbd4cc8fbbbf33508133742d857069a334606"
+  },
+  {
+    "path": "build/scenarios/viz/viz_trip.png",
+    "bytes": 173118,
+    "sha256": "7aa32763810ea009b1c07d32cd05c1d34107d7c1832e74a5ad69ae47043b8841"
+  },
+  {
+    "path": "build/scenarios/zoom/midi_out.txt",
+    "bytes": 15859,
+    "sha256": "77726bd2bd89612c2550e1c794dbb7095946527b4be023de88faa989ba680f3d"
+  },
+  {
+    "path": "build/scenarios/zoom/zoom_setting.png",
+    "bytes": 173118,
+    "sha256": "5ee6613b5c367851c635cc2403de2dd1483efe0397a3c58dea2f6ca7eb5b44c8"
+  },
+  {
+    "path": "build/scenarios/zoom/zoom_tempo.png",
+    "bytes": 173118,
+    "sha256": "7e1decee311a3569c1ef90797c7e0419ef01309b3293617b79fbb8bd47fd582c"
+  }
+]

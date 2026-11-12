@@ -63,6 +63,12 @@ class Amb extends AudioWorkletProcessor {
     const ex = this.ex;
     const blits = ex.web_blits();
     const msg = { type: "frame", buttons: ex.web_lit_buttons() >>> 0, keys: ex.web_lit_keys() >>> 0 };
+    if (ex.web_rust_stat) msg.rust = {
+      validations: ex.web_rust_stat(0), plans: ex.web_rust_stat(1),
+      rejections: ex.web_rust_stat(2), fallbacks: ex.web_rust_stat(3),
+      bassEvents: ex.web_rust_stat(4),
+      sessions: ex.web_rust_stat(5),
+    };
     if (ex.web_bg) msg.bg = Array.from(new Float32Array(this.mem.buffer, ex.web_bg(), 12));   // for the stream view's background
     if (this.frames >= 44100) {                       // the share of real time spent running the device
       msg.load = Math.round(100 * this.busy / (this.frames / 44.1));

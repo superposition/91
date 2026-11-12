@@ -1,0 +1,14 @@
+[package]
+name = "fm1-probe"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lib]
+path = "../probe.rs"
+
+[dependencies]
+fm1-types.workspace = true
+fm1-formats.workspace = true
+fm1-engine.workspace = true

@@ -12,6 +12,17 @@ static void web_audio(const int32_t *blk, uint32_t n);
 #include "../../host/amb_host.c"
 
 #undef __attribute__
+#define WEB_EXPORT(name) __attribute__((used, visibility("default"), export_name(#name)))
+
+/* Transitional counters: validation, planning, rejections, C fallbacks, bass events. */
+WEB_EXPORT(web_rust_stat) uint32_t web_rust_stat(uint32_t index)
+{
+#if EN_RUST_JAM
+    return fm1_rust_jam_stat(index);
+#else
+    (void)index; return 0;
+#endif
+}
 
 /* output ring, stereo float, filled by run_ms, drained by web_render */
 #define RING 4096u
@@ -28,11 +39,11 @@ static void web_audio(const int32_t *blk, uint32_t n)
 }
 
 static float out_l[1024], out_r[1024];
-__attribute__((used, visibility("default"))) float *web_out_l(void) { return out_l; }
-__attribute__((used, visibility("default"))) float *web_out_r(void) { return out_r; }
+WEB_EXPORT(web_out_l) float *web_out_l(void) { return out_l; }
+WEB_EXPORT(web_out_r) float *web_out_r(void) { return out_r; }
 
 /* n frames (<= 1024) into out_l / out_r: the device runs until they exist */
-__attribute__((used, visibility("default"))) void web_render(uint32_t n)
+WEB_EXPORT(web_render) void web_render(uint32_t n)
 {
     uint32_t k;
     if (n > 1024u)
@@ -46,38 +57,38 @@ __attribute__((used, visibility("default"))) void web_render(uint32_t n)
     }
 }
 
-__attribute__((used, visibility("default"))) void web_boot(void)
+WEB_EXPORT(web_boot) void web_boot(void)
 {
     ui_splash_ms = 3200u;                        /* the boot cards, as on the FM-1 */
     boot();
 }
-__attribute__((used, visibility("default"))) void web_seed(uint32_t s) { host_seed = s; }   /* before web_boot */
-__attribute__((used, visibility("default"))) void web_buttons(uint32_t m) { held_btn = m; }
-__attribute__((used, visibility("default"))) void web_keys(uint32_t m) { held_keys = m; }
-__attribute__((used, visibility("default"))) void web_enc(int role, int32_t n)
+WEB_EXPORT(web_seed) void web_seed(uint32_t s) { host_seed = s; }   /* before web_boot */
+WEB_EXPORT(web_buttons) void web_buttons(uint32_t m) { held_btn = m; }
+WEB_EXPORT(web_keys) void web_keys(uint32_t m) { held_keys = m; }
+WEB_EXPORT(web_enc) void web_enc(int role, int32_t n)
 {
     if (role >= 0 && role < NE)
         enc_acc[role] += n;
 }
-__attribute__((used, visibility("default"))) void web_master(uint32_t v) { master = v > 4096u ? 4096u : v; }
-__attribute__((used, visibility("default"))) uint32_t web_lit_buttons(void) { return lit_btn; }
-__attribute__((used, visibility("default"))) uint32_t web_lit_keys(void) { return lit_keys; }
-__attribute__((used, visibility("default"))) uint16_t *web_fb(void) { return fb; }
-__attribute__((used, visibility("default"))) uint32_t web_blits(void) { return blits; }
-__attribute__((used, visibility("default"))) uint32_t web_now(void) { return now_ms; }
-__attribute__((used, visibility("default"))) uint32_t web_cpu(void) { return cpu_pct; }
+WEB_EXPORT(web_master) void web_master(uint32_t v) { master = v > 4096u ? 4096u : v; }
+WEB_EXPORT(web_lit_buttons) uint32_t web_lit_buttons(void) { return lit_btn; }
+WEB_EXPORT(web_lit_keys) uint32_t web_lit_keys(void) { return lit_keys; }
+WEB_EXPORT(web_fb) uint16_t *web_fb(void) { return fb; }
+WEB_EXPORT(web_blits) uint32_t web_blits(void) { return blits; }
+WEB_EXPORT(web_now) uint32_t web_now(void) { return now_ms; }
+WEB_EXPORT(web_cpu) uint32_t web_cpu(void) { return cpu_pct; }
 
 /* saved objects: the page keeps them (localStorage) and gives them back before boot */
-__attribute__((used, visibility("default"))) uint8_t *web_store(uint32_t obj) { return obj < OBJ_NOBJ ? store[obj] : 0; }
-__attribute__((used, visibility("default"))) int web_store_len(uint32_t obj) { return obj < OBJ_NOBJ ? store_len[obj] : -1; }
-__attribute__((used, visibility("default"))) void web_store_set_len(uint32_t obj, int n)
+WEB_EXPORT(web_store) uint8_t *web_store(uint32_t obj) { return obj < OBJ_NOBJ ? store[obj] : 0; }
+WEB_EXPORT(web_store_len) int web_store_len(uint32_t obj) { return obj < OBJ_NOBJ ? store_len[obj] : -1; }
+WEB_EXPORT(web_store_set_len) void web_store_set_len(uint32_t obj, int n)
 {
     if (obj < OBJ_NOBJ)
         store_len[obj] = n < 0 ? -1 : n > (int)PLAT_STORE_MAX ? (int)PLAT_STORE_MAX : n;
 }
-__attribute__((used, visibility("default"))) uint32_t web_store_writes(void) { return store_writes; }
-__attribute__((used, visibility("default"))) uint32_t web_nobj(void) { return OBJ_NOBJ; }
-__attribute__((used, visibility("default"))) uint32_t web_store_max(void) { return PLAT_STORE_MAX; }
+WEB_EXPORT(web_store_writes) uint32_t web_store_writes(void) { return store_writes; }
+WEB_EXPORT(web_nobj) uint32_t web_nobj(void) { return OBJ_NOBJ; }
+WEB_EXPORT(web_store_max) uint32_t web_store_max(void) { return PLAT_STORE_MAX; }
 
 static float bg_out[12];                         /* for the stream view's background: what the screen shows */
 static void bg_rgb(int at, uint16_t c)
@@ -87,7 +98,7 @@ static void bg_rgb(int at, uint16_t c)
     bg_out[at + 2] = (float)(c & 31u) / 31.0f;
 }
 /* the stream view's background: the screen theme's primary, accent and ground */
-__attribute__((used, visibility("default"))) float *web_bg(void)
+WEB_EXPORT(web_bg) float *web_bg(void)
 {
     bg_rgb(0, th->pad);
     bg_rgb(3, th->acc);

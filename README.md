@@ -26,6 +26,10 @@ Three original Harris-informed Citypop songs provide 32/64-bar forms from 8/16-b
 
 [Local validation](docs/SONGBOOK_VALIDATION.md) records the ten-minute FM-1 test, saved-pack restart check and existing baseline test failures.
 
+## Rust migration in progress
+
+The local browser build runs Songbook planning, bass decisions and pack/session codecs in Rust, with the existing C synthesis and UI. [Architecture, layouts and reproduction commands](docs/RUST_MIGRATION.md) document the port and Friday talk evidence. The [migration epic and 25 tickets](https://github.com/superposition/91/issues/1) track the remaining work. This incremental emulator build is not a new physical-device release.
+
 ## What's in 0.1.0
 
 **Nineteen genres, one mechanism.** Every genre is a donor column of the engine's library plus its own ten

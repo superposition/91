@@ -1,0 +1,30 @@
+# Experimental R02 target; a successful compile is not hardware qualification.
+[target]
+family = ""
+os-name = "none"
+env-name = ""
+
+[backend.c]
+variant = "gnu"
+target = "pi32v2"
+emulate-i128 = true
+compiler-opts = ["-ffunction-sections", "-fdata-sections", "-ffp-contract=off"]
+
+[arch]
+name = "pi32v2"
+pointer-bits = 32
+is-big-endian = false
+has-atomic-u8 = false
+has-atomic-u16 = false
+has-atomic-u32 = false
+has-atomic-u64 = false
+has-atomic-ptr = false
+
+[arch.alignments]
+u16 = 2
+u32 = 4
+u64 = 4
+u128 = 16
+f32 = 4
+f64 = 4
+ptr = 4

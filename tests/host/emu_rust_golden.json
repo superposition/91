@@ -1,0 +1,5 @@
+{
+  "provenance": "R01 untouched source.zip SHA-256 3d20587f825b8a26cd1f9ab6a715e65e78838fce0c19b5c27ce0427c15fa6263, EN_VERSION=0.3.0, seed=91, master=2800, 55000 blocks of 128 stereo frames",
+  "factory": { "pcm_hash": "baeff971", "blits": 4679 },
+  "harris-citypop.jmp": { "pcm_hash": "28722449", "blits": 4673 }
+}

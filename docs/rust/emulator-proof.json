@@ -1,0 +1,123 @@
+{
+  "scope": "Rust Songbook planner, bass decisions, pack validation and saved-session codecs inside C application/DSP/UI",
+  "reference": "EN_RUST_JAM=0 rebuilt C instrument plus frozen R01 PCM fingerprints; session lifecycle also compared against original R01 WASM",
+  "cases": [
+    {
+      "initial_pack": "factory",
+      "blocks": 55000,
+      "seconds": 159.63718820861678,
+      "compared_samples": 14080000,
+      "pcm_hash": "baeff971",
+      "peak": 0.3714040517807007,
+      "blits": 4679,
+      "memory_bytes": 33554432,
+      "rust": {
+        "validations": 0,
+        "plans": 8,
+        "rejections": 0,
+        "fallbacks": 0,
+        "bass_events": 1037,
+        "sessions": 1
+      }
+    },
+    {
+      "initial_pack": "rust/fm1-engine/tests/packs/harris-citypop.jmp",
+      "blocks": 55000,
+      "seconds": 159.63718820861678,
+      "compared_samples": 14080000,
+      "pcm_hash": "28722449",
+      "peak": 0.4303741455078125,
+      "blits": 4673,
+      "memory_bytes": 33554432,
+      "rust": {
+        "validations": 1,
+        "plans": 10,
+        "rejections": 0,
+        "fallbacks": 0,
+        "bass_events": 1033,
+        "sessions": 1
+      }
+    },
+    {
+      "scenario": "v2-hold-idea-save-restart",
+      "render_calls": 11663,
+      "compared_samples": 6570900,
+      "seconds": 74.5,
+      "peak": 0.22903597354888916,
+      "memory_bytes": 33554432,
+      "saved_session": [
+        74,
+        83,
+        77,
+        1,
+        1,
+        11,
+        1,
+        8,
+        2,
+        1,
+        83,
+        0,
+        7,
+        1,
+        190,
+        0,
+        3,
+        83,
+        0,
+        0
+      ],
+      "rust": {
+        "validations": 1,
+        "plans": 9,
+        "rejections": 0,
+        "fallbacks": 0,
+        "bass_events": 804,
+        "sessions": 2
+      }
+    }
+  ],
+  "total_compared_values": 34730900,
+  "total_simulated_seconds": 393.77437641723355,
+  "artifacts": {
+    "build/emu-parity/reference.wasm": {
+      "bytes": 1937538,
+      "sha256": "9c498c5425ab1164079cd7079977636880722c7e16349601baaf52e8c92cf6e5"
+    },
+    "build/emu-parity/rust.wasm": {
+      "bytes": 2582356,
+      "sha256": "92eddb2188493e3d8ad22e42c824d9d7c9ef3099898da5427ac56944a2825760"
+    },
+    "build/emu-parity/factory.json": {
+      "bytes": 280,
+      "sha256": "c4a2cd94fc3a9994c64be089591ce22751023911de72a38194755ce7b7438759"
+    },
+    "build/emu-parity/saved-v1.json": {
+      "bytes": 320,
+      "sha256": "e430e38961e1205069a93523c8ff722b51504e46ed3dd7559180da2d2fdd4425"
+    },
+    "build/emu-parity/session.json": {
+      "bytes": 316,
+      "sha256": "0e8d7ba21762dc72b87e3f896d33c3966318e4b46abaf63ef9e324d35e94e8d7"
+    },
+    "build/fm1-connected-before-rust.json": {
+      "bytes": 3862,
+      "sha256": "9e1e5b632c6c289e893ee9c7de524114f133c1f937b41b209486ee8a930e1192"
+    }
+  },
+  "native_rust": "rustc 1.94.1 (e408947bf 2026-03-25)",
+  "native_node": "v22.14.0",
+  "hosted_ci": "configured, not yet run",
+  "browser_visual_qa": "not completed: URL verification stopped Computer Use; in-app browser host unavailable",
+  "device": {
+    "input": "HYP-1 FM-1 0",
+    "output": "HYP-1 FM-1 1",
+    "protocol": 3,
+    "parameters": 176,
+    "genres": 19,
+    "voices": 0,
+    "read_only_snapshot": "build/fm1-connected-before-rust.json",
+    "firmware_flashed": false,
+    "rust_runtime_proof": "pending"
+  }
+}

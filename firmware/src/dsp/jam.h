@@ -33,6 +33,11 @@ static inline uint32_t jp_crc(const uint8_t *p, unsigned n)
     while (n--) { c ^= *p++; for (i=0;i<8;i++) c = (c >> 1) ^ (0xedb88320u & (0u-(c&1u))); }
     return ~c;
 }
+#if EN_RUST_JAM
+extern int32_t fm1_rust_jam_validate(const uint8_t *, uint32_t);
+extern uint32_t fm1_rust_jam_stat(uint32_t);
+#define jp_valid jp_valid_c_reference
+#endif
 static inline int jp_valid(const uint8_t *p, unsigned n)
 {
     unsigned i,j;
@@ -77,9 +82,17 @@ static inline int jp_valid(const uint8_t *p, unsigned n)
     }
     return 1;
 }
+#if EN_RUST_JAM
+#undef jp_valid
+static inline int jp_valid(const uint8_t *p, unsigned n) {return fm1_rust_jam_validate(p,n);}
+#endif
+
 typedef struct { uint8_t note[4], node, passing; } jp_beat_t;
 typedef struct { uint8_t bars, role, motif, section; jp_beat_t beat[64]; } jp_phrase_t;
 typedef struct { uint8_t on, key, minor, bars, form, movement, energy, hold, bass, slot; } jp_settings_t;
+#if EN_RUST_JAM
+_Static_assert(sizeof(jp_phrase_t)==388 && sizeof(jp_settings_t)==10, "Rust Jam bridge ABI");
+#endif
 static inline uint32_t jp_rand(uint32_t *r) { *r=*r*1664525u+1013904223u; return *r; }
 static inline unsigned jp_choose(const uint8_t *p, unsigned node, uint32_t *seed, unsigned role)
 {
@@ -133,7 +146,25 @@ static inline void jp_plan_v1(const uint8_t *p, const jp_settings_t *s, unsigned
         }
     }
 }
+#if EN_RUST_JAM
+#define jp_plan jp_plan_c_reference
+#endif
 #include "song_plan.inc"
+#if EN_RUST_JAM
+#undef jp_plan
+extern int32_t fm1_rust_jam_plan(const uint8_t *,uint32_t,const jp_settings_t *,uint32_t,const jp_phrase_t *,jp_phrase_t *,uint32_t *);
+extern void fm1_rust_jam_fallback(void);
+static inline void jp_plan(const uint8_t *p,const jp_settings_t *s,unsigned section,
+                          const jp_phrase_t *prev,jp_phrase_t *out,uint32_t *seed)
+{
+    if(fm1_rust_jam_plan(p,jp_v2(p)?JP2_META:JP_MIN,s,section,prev,out,seed))return;
+    fm1_rust_jam_fallback(); /* visible in emulator diagnostics; parity checks require zero */
+    jp_plan_c_reference(p,s,section,prev,out,seed);
+}
+#endif
+#if EN_RUST_JAM
+#define jp_bass_note jp_bass_note_c_reference
+#endif
 static inline int jp_bass_note(const uint8_t *p, const jp_settings_t *s, const jp_phrase_t *ph,
                                const jp_phrase_t *next, unsigned bar, unsigned step, unsigned *velocity, unsigned *gate)
 {
@@ -154,3 +185,19 @@ static inline int jp_bass_note(const uint8_t *p, const jp_settings_t *s, const j
     while(n>(jp_v2(p)?52:55)) n-=12;
     return n;
 }
+#if EN_RUST_JAM
+#undef jp_bass_note
+typedef struct { int16_t note; uint8_t velocity, gate; } jp_rust_bass_t;
+_Static_assert(sizeof(jp_rust_bass_t)==4, "Rust bass bridge ABI");
+extern int32_t fm1_rust_jam_bass(const uint8_t *,uint32_t,const jp_settings_t *,const jp_phrase_t *,const jp_phrase_t *,uint32_t,uint32_t,jp_rust_bass_t *);
+static inline int jp_bass_note(const uint8_t *p,const jp_settings_t *s,const jp_phrase_t *ph,
+                               const jp_phrase_t *next,unsigned bar,unsigned step,unsigned *velocity,unsigned *gate)
+{
+    jp_rust_bass_t event;
+    if(fm1_rust_jam_bass(p,jp_v2(p)?JP2_META:JP_MIN,s,ph,next,bar,step,&event)) {
+        *velocity=event.velocity; *gate=event.gate; return event.note;
+    }
+    fm1_rust_jam_fallback();
+    return jp_bass_note_c_reference(p,s,ph,next,bar,step,velocity,gate);
+}
+#endif

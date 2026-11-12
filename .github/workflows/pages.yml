@@ -71,6 +71,8 @@ jobs:
         env:
           EN_VERSION: ${{ env.VERSION }}
         run: |
+          rustup toolchain install 1.94.1 --profile minimal --target wasm32-unknown-unknown
+          rustup override set 1.94.1
           export PATH="$HOME/shim:$PATH"
           sh web/emu/build_clang.sh
 

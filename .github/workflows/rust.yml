@@ -1,0 +1,70 @@
+name: Rust migration checks
+
+on:
+  push:
+    paths: ['Cargo.toml', 'Cargo.lock', 'rust/**', 'firmware/**', 'host/**', 'web/emu/**', 'tests/host/emu*', 'tests/reference/**', 'tests/rust_*', 'assets/fonts/**', 'tools/gen_font.py', '.github/workflows/rust.yml']
+  pull_request:
+    paths: ['Cargo.toml', 'Cargo.lock', 'rust/**', 'firmware/**', 'host/**', 'web/emu/**', 'tests/host/emu*', 'tests/reference/**', 'tests/rust_*', 'assets/fonts/**', 'tools/gen_font.py', '.github/workflows/rust.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portable:
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pinned Rust and WASM target
+        run: rustup toolchain install 1.94.1 --profile minimal --component rustfmt,clippy --target wasm32-unknown-unknown
+      - run: cargo +1.94.1 fmt --all --check
+      - run: cargo +1.94.1 test --workspace --locked
+      - run: cargo +1.94.1 clippy --workspace --all-targets --locked -- -D warnings
+      - run: cargo +1.94.1 check -p fm1-types -p fm1-formats -p fm1-engine --target wasm32-unknown-unknown --locked
+      - run: cargo +1.94.1 build --release --locked -p fm1-jam-bridge --no-default-features --target wasm32-unknown-unknown
+
+  emulator:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Pinned Rust and WASM target
+        run: |
+          rustup toolchain install 1.94.1 --profile minimal --target wasm32-unknown-unknown
+          rustup override set 1.94.1
+      - run: python3 -m pip install --quiet Pillow
+      - name: Pinned WASM clang
+        run: |
+          curl -fsSL https://ziglang.org/download/0.17.1/zig-x86_64-linux-0.17.1.tar.xz -o /tmp/zig.tar.xz
+          echo "3581863e3cbcfd0fce0efc682ce7e9e93da96668a977791d356a26d2a7e9b17a  /tmp/zig.tar.xz" | sha256sum -c -
+          tar -xf /tmp/zig.tar.xz -C "$HOME"
+          mv "$HOME/zig-x86_64-linux-0.17.1" "$HOME/zig"
+          mkdir -p "$HOME/shim"
+          cat > "$HOME/shim/clang" <<'EOS'
+          #!/usr/bin/env bash
+          args=()
+          for a in "$@"; do
+              case "$a" in
+                  --target=wasm32|-target=wasm32) ;;
+                  *) args+=("$a") ;;
+              esac
+          done
+          exec "$HOME/zig/zig" cc -target wasm32-freestanding "${args[@]}"
+          EOS
+          chmod +x "$HOME/shim/clang"
+          echo "$HOME/shim" >> "$GITHUB_PATH"
+      - name: Full-instrument C/Rust differential playback
+        run: sh tests/rust_emulator_parity.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: emulator-parity
+          path: build/emu-parity/

@@ -167,7 +167,8 @@ img.logo{{display:none}}
 
 <div class="bar">
   <span id="status">Off. Sound starts when you switch it on.</span>
-  <span class="cpu" id="cpu"></span>
+    <span class="cpu" id="cpu"></span>
+    <span class="cpu" id="migration" hidden title="Songbook pack/session codecs, phrase planning and bass decisions run in Rust; synthesis and UI are still C."></span>
   <button id="reset" type="button" title="Restart using the saved Jam session (stored packs and pieces kept)">New start</button>
   <button id="forget" type="button" title="Forget stored packs, session, pieces and settings">Forget stored</button>
 </div>
@@ -999,6 +1000,11 @@ async function switchOn() {
           midiLights(m.buttons, m.keys);
           window.ambLast = m;
           if (m.load !== undefined) cpu.textContent = `NAIWAN 91 uses ${m.load}% of this computer's time`;
+          if (m.rust && m.rust.plans) {
+            const migration = document.getElementById("migration");
+            migration.hidden = false;
+            migration.textContent = `Songbook planner + bass: Rust (${m.rust.plans} plans) · DSP/UI: C`;
+          }
           if (m.store) saveStore(m.store);
         }
       };
