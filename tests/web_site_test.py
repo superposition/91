@@ -78,6 +78,7 @@ for name in routes:
         assert result.returncode==0,f'JavaScript parse failed in {name}: {result.stderr.decode()}';scripts+=1
 css=(OUT/'site.css').read_bytes()
 assert css==(ROOT/'web/site.css').read_bytes()
+modules=0
 for location in [OUT/'emu',STANDALONE]:
     page=location/'index.html';parsed=Page(page.read_text(encoding='utf-8'))
     for link in parsed.links:
@@ -85,10 +86,21 @@ for location in [OUT/'emu',STANDALONE]:
             target=local_target(page,link,location)
             assert target and target.is_file(),f'standalone emulator asset missing: {link}'
     assert (location/'site.css').read_bytes()==css
+    assert 'src/app.mjs' in parsed.links,'missing emulator module entry point'
+    for source in sorted((ROOT/'web/emu/src').glob('*.mjs')):
+        bundled=location/'src'/source.name
+        assert bundled.read_bytes()==source.read_bytes(),f'stale or missing browser module: {bundled}'
+        code=bundled.read_text(encoding='utf-8')
+        result=subprocess.run(['node','--check',str(bundled)],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        assert result.returncode==0,f'module parse failed: {bundled}: {result.stderr.decode()}'
+        for match in re.finditer(r'''(?:from\s*|import\(|new URL\()(["'])(\.\.?/[^"']+)\1''',code):
+            target=local_target(bundled,match.group(2),location)
+            assert target and target.is_file(),f'missing module dependency: {bundled}: {match.group(2)}'
+        modules+=1
 readme=(ROOT/'README.md').read_text(encoding='utf-8')
 assert 'docs/img/readme-' not in readme,'obsolete README imagery returned'
 captures=json.loads((ROOT/'docs/img/naiwan91-captures.json').read_text(encoding='utf-8'))
 assert len(captures['captures'])==5
 for capture in captures['captures']:
     assert (OUT/'img'/capture['file']).read_bytes()==(ROOT/'docs/img'/capture['file']).read_bytes()
-print(json.dumps(dict(routes=len(routes),local_links_and_assets=links,parsed_scripts=scripts,shared_theme=True,standalone_assets=True,current_captures=5,preserved_control_ids=sum(map(len,required.values()))-sum(map(len,removed.values())),retired_engineering_ids=sum(map(len,removed.values())),baseline_manual_duplicate_ids=manual_duplicates)))
+print(json.dumps(dict(routes=len(routes),local_links_and_assets=links,parsed_scripts=scripts,parsed_module_copies=modules,shared_theme=True,standalone_assets=True,current_captures=5,preserved_control_ids=sum(map(len,required.values()))-sum(map(len,removed.values())),retired_engineering_ids=sum(map(len,removed.values())),baseline_manual_duplicate_ids=manual_duplicates)))

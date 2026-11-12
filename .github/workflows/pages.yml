@@ -89,6 +89,8 @@ jobs:
       - name: Validate web bundle before publication
         run: |
           python3 tests/web_site_test.py build/site build/emu
+          node tests/host/emu_browser_test.mjs build/emu/amb.wasm
+          node tests/host/emu_http_test.mjs build/emu/amb.wasm
           node tests/web_syx_test.js
           node tests/web_backup_test.js
           node tests/web_ota_test.mjs

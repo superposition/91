@@ -20,10 +20,17 @@ export class Amb extends ProcessorBase {
     this.lastFrame = 0;
     this.busy = 0;
     this.frames = 0;
-    this.port.onmessage = (e) => this.onMessage(e.data);
+    this.disposed = false;
+    this.port.onmessage = (e) => {
+      this.onMessage(e.data).catch((error) => {
+        if (!this.disposed) this.port.postMessage({ type: "error", message: error.message || String(error) });
+      });
+    };
   }
 
   async onMessage(m) {
+    if (m.type === "dispose") { this.dispose(); return; }
+    if (this.disposed) return;
     if (m.type === "load") {
       const now = () => BigInt(Math.round(this.audioTime() * 1e9));
       const wasi = {
@@ -37,6 +44,7 @@ export class Amb extends ProcessorBase {
       const stub = new Proxy(wasi, { get: (t, k) => (k in t ? t[k] : () => 0) });
       const env = new Proxy({}, { get: () => () => 0 });
       const { instance } = await WebAssembly.instantiate(m.wasm, { wasi_snapshot_preview1: stub, env });
+      if (this.disposed) return;
       this.ex = instance.exports;
       this.mem = this.ex.memory;
       if (this.ex._initialize) this.ex._initialize();
@@ -62,6 +70,14 @@ export class Amb extends ProcessorBase {
     } else if (m.type === "master") {
       this.ex.web_master(m.value | 0);
     }
+  }
+
+  dispose() {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.ex = this.mem = this.input = null;
+    this.port.onmessage = null;
+    this.port.close?.();
   }
 
   publish() {
@@ -100,6 +116,7 @@ export class Amb extends ProcessorBase {
   }
 
   process(inputs, outputs) {
+    if (this.disposed) return false;
     if (!this.ex) return true;
     const out = outputs[0];
     const n = out[0].length;
@@ -129,7 +146,12 @@ export function createHttpAudioNode(context) {
   node.onaudioprocess = (event) => processor.process([], [[
     event.outputBuffer.getChannelData(0), event.outputBuffer.getChannelData(1),
   ]]);
+  let disposed = false;
   node.dispose = () => {
+    if (disposed) return;
+    disposed = true;
+    node.onaudioprocess = null;
+    processor.dispose();
     node.disconnect(); channel.port1.close(); channel.port2.close();
   };
   return node;

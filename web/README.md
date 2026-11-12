@@ -4,15 +4,17 @@ The served site is built by `tools/make_pages_site.py`. The landing page is auth
 
 | Route | Source / responsibility |
 | --- | --- |
-| `/` | `web/index.html`: current product, screenshots and migration scope |
-| `/emu/` | `web/emu/index.html`: panel/input/browser storage; `worklet.js`: audio and WASM messages |
+| `/` | `web/index.html`: songs, playing controls and screenshots |
+| `/emu/` | `web/emu/index.html`: player interface; `web/emu/src/*.mjs`: browser bindings; `worklet.js`: audio and WASM messages |
 | `/install/` | `web/amb_installer.html`: optional USB update, backup, restore and diagnostics |
 | `/editor/` | `web/editor/index.html`: connected parameter/DX voice editor |
 | `/pieces/` | `web/pieces/index.html`: legacy piece/set library and connected transfers |
 | `/library/` | Compatibility redirect to `/pieces/#library` |
 | `/manual/` | Generated `docs/manual.html`, with the shared site theme and a current Songbook link |
 
-The emulator is useful without hardware and starts audio only on **Switch on**. It uses AudioWorklet on secure origins, with the same processor driven by a Web Audio callback for LAN HTTP previews. Preserve both paths. The Rust/C status labels must describe the actual build.
+The emulator is useful without hardware and starts audio only on **Switch on**. It uses AudioWorklet on secure origins, with the same processor driven by a Web Audio callback for LAN HTTP previews. Preserve both paths. Public copy describes playing the instrument; engineering telemetry stays available through `window.ambLast`.
+
+[Browser modules and lifecycle](../docs/WEB_EMULATOR_MODULES.md) describes mounting, audio startup/cancellation, input subscriptions, MIDI and stream cleanup, and targeted checks. `web/emu/package.sh` copies the same modules into standalone and full-site builds; no bundler or external JavaScript service is needed.
 
 `web/app` is an unshipped, older AMB-style API prototype. `web/make_site.py` retains imported helper functions used by the current builder; its old command-line layout is not the NAIWAN site build. Their retirement/quarantine is tracked in [web ticket #35](https://github.com/superposition/91/issues/35).
 
