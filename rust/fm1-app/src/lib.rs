@@ -4,3 +4,4 @@
 #![forbid(unsafe_code)]
 pub mod graphics;
 pub mod text;
+pub mod web_audio;

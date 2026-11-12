@@ -7,6 +7,9 @@
  *
  *   web/emu/build.sh   ->  build/emu/amb.wasm (+ the page) */
 #include <stdint.h>
+#ifndef EN_RUST_WEB
+#define EN_RUST_WEB 0
+#endif
 
 static void web_audio(const int32_t *blk, uint32_t n);
 #include "../../host/amb_host.c"
@@ -26,6 +29,16 @@ WEB_EXPORT(web_rust_stat) uint32_t web_rust_stat(uint32_t index)
 
 /* output ring, stereo float, filled by run_ms, drained by web_render */
 #define RING 4096u
+#if EN_RUST_WEB
+extern uint32_t fm1_rust_web_available(void);
+extern int32_t fm1_rust_web_push(const int32_t *,uint32_t);
+extern int32_t fm1_rust_web_drain(uint32_t);
+extern const float *fm1_rust_web_out_l(void),*fm1_rust_web_out_r(void);
+extern const float *fm1_rust_web_bg(uint32_t,uint32_t,uint32_t,uint32_t);
+static void web_audio(const int32_t *blk,uint32_t n) { (void)fm1_rust_web_push(blk,n); }
+#define out_l (fm1_rust_web_out_l())
+#define out_r (fm1_rust_web_out_r())
+#else
 static float ring[RING * 2];
 static uint32_t ring_w, ring_r;
 static void web_audio(const int32_t *blk, uint32_t n)
@@ -39,15 +52,21 @@ static void web_audio(const int32_t *blk, uint32_t n)
 }
 
 static float out_l[1024], out_r[1024];
-WEB_EXPORT(web_out_l) float *web_out_l(void) { return out_l; }
-WEB_EXPORT(web_out_r) float *web_out_r(void) { return out_r; }
+#endif
+WEB_EXPORT(web_out_l) const float *web_out_l(void) { return out_l; }
+WEB_EXPORT(web_out_r) const float *web_out_r(void) { return out_r; }
 
 /* n frames (<= 1024) into out_l / out_r: the device runs until they exist */
 WEB_EXPORT(web_render) void web_render(uint32_t n)
 {
-    uint32_t k;
     if (n > 1024u)
         n = 1024u;
+#if EN_RUST_WEB
+    while (fm1_rust_web_available() < n)
+        run_ms(1);
+    (void)fm1_rust_web_drain(n);
+#else
+    uint32_t k;
     while (ring_w - ring_r < n)
         run_ms(1);
     for (k = 0; k < n; k++) {
@@ -55,6 +74,7 @@ WEB_EXPORT(web_render) void web_render(uint32_t n)
         out_l[k] = ring[i];
         out_r[k] = ring[i + 1];
     }
+#endif
 }
 
 WEB_EXPORT(web_boot) void web_boot(void)
@@ -90,6 +110,7 @@ WEB_EXPORT(web_store_writes) uint32_t web_store_writes(void) { return store_writ
 WEB_EXPORT(web_nobj) uint32_t web_nobj(void) { return OBJ_NOBJ; }
 WEB_EXPORT(web_store_max) uint32_t web_store_max(void) { return PLAT_STORE_MAX; }
 
+#if !EN_RUST_WEB
 static float bg_out[12];                         /* for the stream view's background: what the screen shows */
 static void bg_rgb(int at, uint16_t c)
 {
@@ -97,12 +118,17 @@ static void bg_rgb(int at, uint16_t c)
     bg_out[at + 1] = (float)((c >> 5) & 63u) / 63.0f;
     bg_out[at + 2] = (float)(c & 31u) / 31.0f;
 }
+#endif
 /* the stream view's background: the screen theme's primary, accent and ground */
-WEB_EXPORT(web_bg) float *web_bg(void)
+WEB_EXPORT(web_bg) const float *web_bg(void)
 {
+#if EN_RUST_WEB
+    return fm1_rust_web_bg(th->pad,th->acc,th->bg,th->acid);
+#else
     bg_rgb(0, th->pad);
     bg_rgb(3, th->acc);
     bg_rgb(6, th->bg);
     bg_rgb(9, th->acid);
     return bg_out;
+#endif
 }
