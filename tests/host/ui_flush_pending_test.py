@@ -15,14 +15,14 @@ while depth:
 source='''#include <stdint.h>
 static struct {uint8_t store_wait,vox_dirty,set_dirty,set_lazy;}ui;
 static uint8_t ui_io_pending,rs_state;
-static int8_t ui_genre_pending;
+static int16_t ui_genre_pending;
 static int pending_project,pending_globals;
 static int project_pending(void){return pending_project;}
 static int project_pending_globals(void){return pending_globals;}
 '''+text[start:end]+'''
 int main(void){unsigned mask,state;
  for(state=0;state<4;state++)for(mask=0;mask<256;mask++){
-  ui_io_pending=(mask&1)?7:0;ui_genre_pending=(mask&2)?17:-1;
+  ui_io_pending=(mask&1)?7:0;ui_genre_pending=(mask&2)?0x4fbf:-1;
   ui.store_wait=(mask>>2)&1;ui.vox_dirty=(mask>>3)&1;
   ui.set_dirty=(mask>>4)&1;ui.set_lazy=(mask>>5)&1;
   pending_project=(mask>>6)&1;pending_globals=(mask>>7)&1;rs_state=(uint8_t)state;

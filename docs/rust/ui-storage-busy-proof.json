@@ -1,0 +1,12 @@
+{
+  "scope": "foreground UI storage Busy retries and detach guard",
+  "toolchain": "Rust 1.94.1; GCC 11 native",
+  "command": "sh tests/rust_ui_busy.sh",
+  "execution": {"actual_complete_ui_c0": "passed", "actual_complete_ui_all_rust": "passed", "actual_query_combinations": 1024},
+  "checks": ["denied init preserves semantic UI, remote, restore, pixels and saved state", "settings/voices/map Busy loads preserve state", "input and default writeback wait for reads", "admission and backend denial retain dirty RAM and saved bytes", "restore and forced flush retain same source until retry", "genre denial precedes all musical actions", "set-list captures slot and entry before retry", "all successful admissions are balanced"],
+  "persistent_retry_bytes": 3,
+  "added_storage_payloads": 0,
+  "hardware_validation": "not performed",
+  "healthy_native_wasm_regression": "separate qualification follows this checkpoint",
+  "controller_migration": "in progress"
+}

@@ -975,9 +975,12 @@ static void fxp_range(int k, int *lo, int *hi)
     *hi = kind == KN_PRESET ? NGXP - 1 : kind == KN_LEN ? 16 : kind == KN_TGT || kind == KN_PTGT ? NTGT - 1 :
           kind == KN_NAME ? FXP_CTL(k).n - 1 : kind == KN_RANGE ? FXP_CTL(k).n : 100;
 }
-static uint8_t ui_io_pending;          /* transient settings/voice/map reads; no payload buffer */
-static int8_t ui_genre_pending = -1;   /* absolute requested genre, replayed only after admission */
+enum {UI_IO_SET=1,UI_IO_VOICES=2,UI_IO_MAP=4,UI_IO_INIT=8};
+static uint8_t ui_io_pending;          /* transient reads/reinit; no payload buffer */
+#define UI_SWITCH_SETLIST 0x4000u
+static int16_t ui_genre_pending = -1;  /* absolute genre or captured set-list slot/entry */
 static void genre_step(int d);
+static void ui_io_retry(void);
 static void fxp_set(int k, int v)
 {
     int lo, hi;
@@ -2287,7 +2290,8 @@ static void genre_step(int d)
         return;
     }
     const int g = (proj.genre + d + EN_NGENRE) % EN_NGENRE;
-    project_set_genre(g);
+    if(project_try_genre(g)==PLAT_STORE_BUSY) {ui_genre_pending=(int16_t)g;return;}
+    ui_genre_pending=-1;
     en_genre(g);
     ui.key_on = 0;
     project_apply();
@@ -2302,12 +2306,19 @@ static void genre_step(int d)
         say(en_genre_name(g), u);
     }
 }
-static void sl_go(int s)                        /* the set list's slot s now: its genre, then its piece (said as SET 3/8 and its title) */
+static void sl_go_entry(int s,int e)             /* complete captured slot/genre/piece action */
 {
-    const int e = glob.sl[s % SL_N], g = (e - 1) / NPIECES, p = (e - 1) % NPIECES;
-    int i, n = 0, k = 0;
+    const int g = (e - 1) / NPIECES, p = (e - 1) % NPIECES;
+    int i, n = 0, k = 0, admitted=0;
     if (!e)
         return;
+    if(g!=proj.genre && !ui.store_wait) {
+        if(plat_store_begin()==PLAT_STORE_BUSY) {
+            ui_genre_pending=(int16_t)(UI_SWITCH_SETLIST|((uint32_t)(s%SL_N)<<8)|(uint32_t)e);return;
+        }
+        admitted=1;
+    }
+    ui_genre_pending=-1;
     ui.sl_pos = (uint8_t)(s % SL_N);
     if (g != proj.genre)
         genre_step(g - proj.genre);
@@ -2330,7 +2341,9 @@ static void sl_go(int s)                        /* the set list's slot s now: it
         piece_title(v, sizeof v);
         say(u, v);
     }
+    if(admitted)plat_store_end();
 }
+static void sl_go(int s) {sl_go_entry(s,glob.sl[s%SL_N]);}
 
 /* into flash now. Writing it stops the chip a moment (it runs from the same flash), so while the music
  * plays it fades out (en_hush), holds still while the store is written, and fades back in where it was:
@@ -2406,9 +2419,12 @@ static void store_tick(int force)               /* the music faded out (or long 
     } else if (ui.store_kind == 2) {
         project_flush_globals();
     } else if (ui.store_kind == 4) {
-        rs_state = plat_store_restore(rs_obj, rs_buf, rs_len) == 0 ? 2 : 3;
+        const int result=plat_store_restore(rs_obj,rs_buf,rs_len);
+        if(result==PLAT_STORE_BUSY) {ui.store_wait=1;return;}
+        rs_state = result == 0 ? 2 : 3;
     } else {
         const int r = project_flush();
+        if(r==PLAT_STORE_BUSY) {ui.store_wait=1;return;}
         if (ui.store_msg[0])
             say(ui.store_msg, r == 0 ? 0 : "NOT WRITTEN");
     }
@@ -2431,9 +2447,13 @@ void ui_restore_start(uint32_t obj, const uint8_t *b, uint32_t len)
         ui.store_t = plat_ms();
         say("RESTORING", 0);
     } else {
-        rs_state = plat_store_restore(rs_obj, rs_buf, rs_len) == 0 ? 2 : 3;
-        ui.store_kind = 0;
-        say("RESTORING", rs_state == 2 ? "DONE" : "NOT WRITTEN");
+        const int result=plat_store_restore(rs_obj,rs_buf,rs_len);
+        if(result==PLAT_STORE_BUSY) {
+            ui.store_wait=1;ui.store_t=plat_ms(); /* rs_state1 and source lease remain pending */
+        } else {
+            rs_state = result == 0 ? 2 : 3;ui.store_kind = 0;
+        }
+        say("RESTORING", result==PLAT_STORE_BUSY?0:rs_state==2?"DONE":"NOT WRITTEN");
     }
 }
 int ui_restore_state(void) { return rs_state; }
@@ -2442,8 +2462,10 @@ int ui_restore_state(void) { return rs_state; }
  * ui_init afterwards starts from nothing (left alone, a store caught mid-fade kept the output hushed and unsaved voices were lost) */
 void ui_flush(void)
 {
+    if(ui_io_pending || ui_genre_pending>=0)return;
     if (ui.store_wait) {
         store_tick(1);
+        if(ui.store_wait)return; /* denied restore/project write still owns its pending operation */
     }
     if (ui.vox_dirty) {
         ui.vox_dirty = 0;
@@ -2463,6 +2485,7 @@ int ui_flush_pending(void)
         ui.vox_dirty || ui.set_dirty || ui.set_lazy || rs_state == 1 ||
         project_pending() || project_pending_globals();
 }
+int ui_storage_loading(void) {return ui_io_pending!=0;}
 
 static void piece_store(void)                   /* Global, SAVE: the piece as it is, stored */
 {
@@ -3272,7 +3295,10 @@ static int mm_ok(const uint8_t *b, uint32_t len)   /* a map as the Install page 
 }
 static void mm_load(void)
 {
-    if (plat_store_load(OBJ_MMAP, &mm, sizeof mm) != (int)sizeof mm || !mm_ok((const uint8_t *)&mm, sizeof mm))
+    const int result=plat_store_load(OBJ_MMAP,&mm,sizeof mm);
+    if(result==PLAT_STORE_BUSY) {ui_io_pending|=UI_IO_MAP;return;}
+    ui_io_pending&=(uint8_t)~UI_IO_MAP;
+    if (result != (int)sizeof mm || !mm_ok((const uint8_t *)&mm, sizeof mm))
         mm.n = 0;
 }
 static void set_mode(int m);
@@ -7369,6 +7395,8 @@ typedef struct { uint32_t magic, n; uint8_t v[EN_NUSER][128]; } vox_t;
 typedef char vox_fits[sizeof(vox_t) <= PLAT_STORE_MAX ? 1 : -1];
 static void voices_save(void)
 {
+    if(ui_io_pending&UI_IO_VOICES) {ui.vox_dirty=1;return;}
+    if(plat_store_begin()!=0) {ui.vox_dirty=1;ui.act_t=plat_ms();return;}
     vox_t x;
     int i, n = en_user_count();
 #if !EN_RUST_FORMATS
@@ -7379,21 +7407,24 @@ static void voices_save(void)
     for (i = 0; i < n; i++)
         memcpy(x.v[i], en_user_get(i), 128);
 #if EN_RUST_FORMATS
-    if(fm1_rust_formats_voices(&x.v[0][0],(uint32_t)n,(uint8_t*)&x,sizeof x)!=(int32_t)sizeof x) return;
+    if(fm1_rust_formats_voices(&x.v[0][0],(uint32_t)n,(uint8_t*)&x,sizeof x)!=(int32_t)sizeof x) {ui.vox_dirty=1;plat_store_end();return;}
 #endif
-    plat_store_save(OBJ_VOICES, &x, sizeof x);
+    if(plat_store_save(OBJ_VOICES,&x,sizeof x)!=0) {ui.vox_dirty=1;ui.act_t=plat_ms();}
+    plat_store_end();
 }
 static void voices_load(void)
 {
     static vox_t x;
     uint32_t i;
+    const int loaded=plat_store_load(OBJ_VOICES,&x,sizeof x);
+    if(loaded==PLAT_STORE_BUSY) {ui_io_pending|=UI_IO_VOICES;return;}
+    ui_io_pending&=(uint8_t)~UI_IO_VOICES;
 #if EN_RUST_STORAGE
-    { int n=plat_store_load(OBJ_VOICES,&x,sizeof x);
-      int count=fm1_rust_persist_ui(1,(const uint8_t*)&x,n>0?(uint32_t)n:0,0,0,0,0);
+    { int count=fm1_rust_persist_ui(1,(const uint8_t*)&x,loaded>0?(uint32_t)loaded:0,0,0,0,0);
       if(count<0) return;
       x.n=(uint32_t)count; }
 #else
-    if (plat_store_load(OBJ_VOICES, &x, sizeof x) != (int)sizeof x || x.magic != VOX_MAGIC || x.n > EN_NUSER)
+    if (loaded != (int)sizeof x || x.magic != VOX_MAGIC || x.n > EN_NUSER)
         return;
 #endif
     for (i = 0; i < x.n; i++)
@@ -7477,6 +7508,8 @@ void ui_voices_changed(int n, int kind)
 }
 static void settings_save(void)
 {
+    if(ui_io_pending&UI_IO_SET) {ui.set_dirty=1;return;}
+    if(plat_store_begin()!=0) {ui.set_dirty=1;ui.act_t=plat_ms();return;}
     set_t s;
     int i;
     memset(&s, 0, sizeof s);
@@ -7511,11 +7544,13 @@ static void settings_save(void)
 #endif
 #if EN_RUST_FORMATS
     { uint8_t raw[sizeof s];
-      if(fm1_rust_formats_settings(s.fxs,EN_NFXS,s.uiv,&s.gx_preset,s.gx_pat,s.usb,raw,sizeof raw)!=(int32_t)sizeof raw) return;
-      if (plat_store_save(OBJ_SET, raw, sizeof raw) == 0) {
+      if(fm1_rust_formats_settings(s.fxs,EN_NFXS,s.uiv,&s.gx_preset,s.gx_pat,s.usb,raw,sizeof raw)!=(int32_t)sizeof raw) {ui.set_dirty=1;plat_store_end();return;}
+      int result=plat_store_save(OBJ_SET,raw,sizeof raw);
 #else
-    if (plat_store_save(OBJ_SET, &s, sizeof s) == 0) {
+    int result=plat_store_save(OBJ_SET,&s,sizeof s);
 #endif
+    if(result!=0) {ui.set_dirty=1;ui.act_t=plat_ms();}
+    if(result==0) {
         set_disk = s;
         set_have = 1;
         ui.set_lazy = 0;
@@ -7523,17 +7558,20 @@ static void settings_save(void)
 #if EN_RUST_FORMATS
     }
 #endif
+    plat_store_end();
 }
-static void settings_load(void)
+static int settings_load(void)
 {
     set_t s={0};
     uint8_t raw[sizeof(set_t)];
     int p, c, n = plat_store_load(OBJ_SET, raw, sizeof raw);
+    if(n==PLAT_STORE_BUSY) {ui_io_pending|=UI_IO_SET;return PLAT_STORE_BUSY;}
+    ui_io_pending&=(uint8_t)~UI_IO_SET;
 #if EN_RUST_STORAGE
-    if(fm1_rust_persist_ui(0,raw,n>0?(uint32_t)n:0,EN_FXS_DEF,EN_NFXS,(uint8_t*)&s,sizeof s)!=(int)sizeof s) return;
+    if(fm1_rust_persist_ui(0,raw,n>0?(uint32_t)n:0,EN_FXS_DEF,EN_NFXS,(uint8_t*)&s,sizeof s)!=(int)sizeof s) return -1;
 #else
 #if EN_RUST_FORMATS
-    if(n<=0 || !fm1_rust_formats_restore(OBJ_SET,raw,(uint32_t)n,EN_NFXS,sizeof(set_t))) return;
+    if(n<=0 || !fm1_rust_formats_restore(OBJ_SET,raw,(uint32_t)n,EN_NFXS,sizeof(set_t))) return -1;
 #endif
     if (n >= 8 && n < (int)sizeof s && raw[0] == 'S' && raw[1] == 'E' && raw[2] == 'T' && raw[3] == '1' && (raw[4] | raw[5] << 8) < EN_NFXS && (raw[6] | raw[7] << 8) == 12) {
         /* a record from before the newest effect settings (fewer fxs, 0.14.10 on): its fields by their old places, the new settings at their defaults */
@@ -7556,15 +7594,15 @@ static void settings_load(void)
         if (q & 1)
             q++;
         if (q + 4 > n)
-            return;
+            return -1;
         s.gx_pat = (uint16_t)(raw[q] | raw[q + 1] << 8);
         s.usb = (uint16_t)(raw[q + 2] | raw[q + 3] << 8);
     } else if (n == (int)sizeof s) {
         memcpy(&s, raw, sizeof s);
         if (s.magic != SET_MAGIC || s.nfxs != EN_NFXS || s.nui != 12)
-            return;
+            return -1;
     } else {
-        return;
+        return -1;
     }
 #endif
 #if EN_RUST_STORAGE
@@ -7623,6 +7661,26 @@ static void settings_load(void)
     ui.centre_imp = (uint8_t)(s.viz >> 7);
 #endif
     ui.set_dirty = 0;
+    return 0;
+}
+
+/* Retry only from the foreground, before UI snapshots/borrows. A flash lease
+ * does not prove LCD completion; ui_init/drawing retain their LCD_READY gate. */
+static void ui_io_retry(void)
+{
+    if(!ui_io_pending && ui_genre_pending<0)return;
+    if(plat_store_locked())return; /* restored bytes are authoritative until restart */
+    if(ui_io_pending&UI_IO_INIT) {ui_init();if(ui_io_pending&UI_IO_INIT)return;}
+    if(ui_io_pending&UI_IO_SET) {if(settings_load()==0)ui_fx_apply();}
+    if(ui_io_pending&UI_IO_VOICES)voices_load();
+    if(ui_io_pending&UI_IO_MAP)mm_load();
+    if(ui_io_pending || ui.store_wait || ui_genre_pending<0)return;
+    {
+        const uint16_t action=(uint16_t)ui_genre_pending;
+        ui_genre_pending=-1;
+        if(action&UI_SWITCH_SETLIST)sl_go_entry((action>>8)&15u,action&255u);
+        else genre_step((int)action-proj.genre);
+    }
 }
 
 /* what's left waiting for flash (a store is written at once, store_now): stopped, all of it after a
@@ -7871,11 +7929,13 @@ static void splash_tick(void)                    /* the HYP-1 card's steps, fill
 
 void ui_init(void)
 {
+    if(plat_store_begin()!=0) {ui_io_pending|=UI_IO_INIT;return;}
+    ui_io_pending&=(uint8_t)~UI_IO_INIT;
     if (rm.on)
         en_mute(0);
     memset(&rm, 0, sizeof rm);
 #if EN_RUST_APP
-    if(fm1_rust_ui_initialize(&ui,EN_FXS_DEF,GX_PRE[0].pat)<0)return;
+    if(fm1_rust_ui_initialize(&ui,EN_FXS_DEF,GX_PRE[0].pat)<0) {plat_store_end();return;}
 #else
     memset(&ui, 0, sizeof ui);
 #endif
@@ -7926,6 +7986,7 @@ void ui_init(void)
         if (!en_playing)
             en_play(1);                          /* it plays from the start */
     }
+    plat_store_end();
 }
 
 /* Clear legacy performance state on entry or pack activation, including the
@@ -7947,6 +8008,8 @@ static void jam_helper_sync(void)
 
 void ui_frame(void)
 {
+    ui_io_retry();
+    if(ui_io_pending)return; /* no edits/default writeback before saved state is known */
 #if CV_RETAINED_LCD
     if(cv_dma_pending==2) { /* an uncertain display transfer owns the old strip */
         ui.sig[0]=ui.sig[1]=ui.sig[2]=0;
@@ -8080,6 +8143,7 @@ void ui_frame(void)
 
 void ui_input_only(void)
 {
+    if(ui_io_pending)return;
     if (rm.on)
         rm_tick();
     else
