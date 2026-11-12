@@ -22,6 +22,7 @@ loader / no restart), 6 wrong model, or another identity after the install.
 import argparse
 import struct
 import rust_codecs as _codecs
+import rust_tooling as _tools
 import queue
 import re
 import sys
@@ -79,15 +80,26 @@ class Identity:
         return self.model.lower().startswith("ota-")
 
 
-def parse_identity(pkt):
-    if len(pkt) < 2 or pkt[0] != 0xF0 or pkt[-1] != 0xF7:
-        return None
+def _tool(method, args=(), adapter=None, **values):
+    global HS_FULL
+    if adapter is not None and HS_FULL is None:
+        HS_FULL = _codecs.call(95, [1])
     try:
-        text = _codecs.call(94, [1], [pkt]).rstrip(b'\0').decode('latin-1')
-    except _codecs.CodecError:
-        return None
-    m = re.fullmatch(r'([^_]+)_(\d+)', text)
-    return Identity(text, m[1], int(m[2])) if m else None
+        return _tools.call('install.' + method, args, adapter, **values)
+    except _tools.ToolError as error:
+        if error.kind == 'InstallError':
+            raise InstallError(error.code, str(error)) from error
+        kind = {'ValueError': ValueError, 'OSError': OSError, 'ZeroDivisionError': ZeroDivisionError}.get(error.kind, RuntimeError)
+        raise kind(str(error)) from error
+
+
+def _identity(value):
+    return Identity(value['text'], value['model'], int(value['version'])) if value else None
+
+
+def parse_identity(pkt):
+    return _identity(_tool('identity', [list(pkt)]))
+
 
 def product_of(raw):
     try:
@@ -102,8 +114,7 @@ def logical_image(raw):
         raise InstallError('badpkg', 'not an FM-1 package (too short or damaged)') from error
 
 def model_of(text):
-    head = text.split("_")[0]
-    return head[4:] if head.startswith("ota-") else head   # (removeprefix: Python 3.9+)
+    return _tool('model', [text])
 
 
 # ------------------------------------------------------------------ MIDI ---
@@ -173,13 +184,7 @@ class MidoBackend:
 
 
 def pair_output(name, outs):
-    if name in outs:
-        return name
-    base = re.sub(r"\s+\d+$", "", name)     # Windows numbers each port
-    same = [o for o in outs if re.sub(r"\s+\d+$", "", o) == base]
-    if len(same) == 1:
-        return same[0]
-    return outs[0] if len(outs) == 1 else None
+    return _tool('pair', [name, list(outs)])
 
 
 # --------------------------------------------------------------- updater ---
@@ -189,163 +194,107 @@ class Device:
         self.link, self.id, self.name = link, ident, name
 
 
+class _Adapter:
+    """Link handles are local to this serialized call; Rust retains no OS object."""
+    def __init__(self, backend=None, links=(), want=None, step=None, progress=None):
+        self.backend, self.want = backend, want
+        self.step, self.progress = step, progress
+        self.links = list(links)
+
+    def device(self, dev):
+        link = len(self.links)
+        self.links.append(dev.link)
+        return dict(link=link, id=dict(text=dev.id.text, model=dev.id.model,
+                                     version=dev.id.version, loader=dev.id.loader), name=dev.name)
+
+    def result(self, value):
+        return Device(self.links[value['link']], _identity(value['id']), value['name']) if value else None
+
+    def __call__(self, action):
+        kind, a = action['kind'], action['args']
+        if kind == 'inputs':
+            return self.backend.input_names()
+        if kind == 'outputs':
+            return self.backend.output_names()
+        if kind == 'open':
+            link = self.backend.open(*a)
+            self.links.append(link)
+            return len(self.links) - 1
+        if kind == 'clock':
+            return time.monotonic()
+        if kind == 'sleep':
+            time.sleep(a[0])
+            return None
+        if kind == 'want':
+            return bool(self.want(_identity(a[0])))
+        if kind == 'step':
+            self.step(a[0], a[1]) if a[1] is not None else self.step(a[0])
+            return None
+        if kind == 'progress':
+            self.progress(*a)
+            return None
+        link = self.links[a[0]]
+        if kind == 'read':
+            pkt = link.read(a[1])
+            return list(pkt) if pkt is not None else None
+        if kind == 'send':
+            return bool(link.send(bytes(a[1])))
+        if kind == 'lost':
+            return bool(link.lost)
+        if kind == 'drain':
+            link.drain()
+            return None
+        if kind == 'close':
+            link.close()
+            return None
+        raise RuntimeError('unknown installer I/O action: ' + kind)
+
+
 def ask(link, query, secs):
-    if not link.send(query):
-        return False
-    end = time.monotonic() + secs
-    while (left := end - time.monotonic()) > 0:
-        p = link.read(left)
-        if p is None:
-            break
-        ident = parse_identity(p)
-        if ident:
-            return ident
-    return None
+    value = _tool('ask', [0, list(query), secs], _Adapter(links=[link]), delay=DELAY)
+    return False if value is False else _identity(value)
 
 
 def handshake(link, tries=3):
-    global HS_FULL
-    if HS_FULL is None:
-        HS_FULL = _codecs.call(95, [1])
-    link.drain()
-    for _ in range(tries):
-        ident = ask(link, HS_QUERY, DELAY["hs"])
-        if ident is False:
-            return None
-        if ident is None:
-            continue
-        num = ident.text.split("_", 1)[1]
-        if len(num) != 3 or num[0] != "7":       # stock, the loader, an older PERF-1: as it answered
-            return ident
-        full = ask(link, HS_FULL, 0.6)          # "FM-1_700": PERF-1 0.16.13 and later tell their version this way
-        return full if full and full.model == ident.model else ident
-    return None
+    return _identity(_tool('handshake', [0, tries], _Adapter(links=[link]), delay=DELAY))
 
 
 class Updater:
     def __init__(self, backend, port=None):
-        self.backend = backend
-        self.port = port
+        self.backend, self.port = backend, port
 
     def candidates(self, only_port):
-        names = self.backend.input_names()
-        if self.port:
-            mine = [n for n in names if self.port.lower() in n.lower()]
-            if only_port:
-                return mine
-            return mine + [n for n in names if n not in mine and PORT_RE.search(n)]
-        return [n for n in names if PORT_RE.search(n)]
+        return _tool('candidates', [self.backend.input_names(), self.port, only_port])
 
     def find(self, want=None, only_port=True):
-        """the first matching port that answers the handshake (and want(identity))"""
-        outs = self.backend.output_names()
-        for name in self.candidates(only_port):
-            out = pair_output(name, outs)
-            if not out:
-                continue
-            try:
-                link = self.backend.open(name, out)
-            except Exception:
-                continue
-            ident = handshake(link, 2)
-            if ident and (want is None or want(ident)):
-                return Device(link, ident, name)
-            link.close()
-        return None
+        adapter = _Adapter(self.backend, want=want)
+        value = _tool('find', [only_port, 'callback' if want is not None else 'any'],
+                      adapter, port=self.port, delay=DELAY)
+        return adapter.result(value)
 
     def wait_for(self, want, secs):
-        end = time.monotonic() + secs
-        while time.monotonic() < end:
-            dev = self.find(want, only_port=False)
-            if dev:
-                return dev
-            time.sleep(DELAY["retry"])
-        return None
+        adapter = _Adapter(self.backend, want=want)
+        return adapter.result(_tool('wait', [secs], adapter, port=self.port, delay=DELAY))
 
     def serve(self, link, image, finish, idle, progress):
-        """answer read requests until the device asks for `finish`; -> (served, finished, lost)"""
-        served, last = 0, time.monotonic()
-        while True:
-            pkt = link.read(DELAY["poll"])
-            if pkt is None:
-                if link.lost:
-                    return served, False, True
-                if time.monotonic() - last > idle:
-                    return served, False, False
-                continue
-            r = parse_request(pkt)
-            if not r:
-                continue
-            fl, addr, n = r
-            last = time.monotonic()
-            if addr in (FINISH_CHECK, FINISH_WRITE):
-                link.send(response(addr, b"success\0"))
-                if addr == finish:
-                    return served, True, False
-                continue
-            if n > MAXDATA or addr + n > len(image):
-                raise InstallError("badreq", f"the device asked for {addr:#x}+{n}, outside the package")
-            time.sleep(DELAY["reply"])
-            if not link.send(response(addr, image[addr:addr + n], fl)):
-                return served, False, True
-            served += 1
-            progress(served, addr + n)
+        return tuple(_tool('serve', [0, list(image), finish, idle],
+                           _Adapter(links=[link], progress=progress), delay=DELAY))
 
     def check(self, dev, image, step):
-        """step 1: the running firmware checks the package and starts the loader"""
-        step("start", dev.id.text)
-        dev.link.send(UPGRADE)
-        time.sleep(DELAY["start"])
-        served, finished, lost = self.serve(dev.link, image, FINISH_CHECK, DELAY["idle_check"],
-                                            lambda k, end: step("check", k))
-        dev.link.close()
-        if not finished:
-            raise InstallError("lost" if lost else "stopped",
-                               f"the FM-1 {'was disconnected' if lost else 'stopped answering'} after "
-                               f"{served} requests; nothing was written")
-        step("loader")
-        time.sleep(DELAY["loader"])
-        ota = self.wait_for(lambda i: i.loader, DELAY["wait_loader"])
-        if not ota:
-            raise InstallError("noloader", "the update loader did not appear. Replug the USB cable and "
-                                           "run the install again: the FM-1 stays in update mode until it is done")
-        return ota
+        adapter = _Adapter(self.backend, step=step)
+        value = _tool('check', [adapter.device(dev), list(image)], adapter, port=self.port, delay=DELAY)
+        return adapter.result(value)
 
     def write(self, ota, image, step):
-        """step 2: the loader reads and writes the whole package, then restarts"""
-        step("write", 0)
-        ota.link.send(UPGRADE)
-        time.sleep(DELAY["start"])
-        served, finished, lost = self.serve(ota.link, image, FINISH_WRITE, DELAY["idle_write"],
-                                            lambda k, end: step("write", min(99, end * 100 // len(image))))
-        ota.link.close()
-        if not finished:
-            raise InstallError("lost" if lost else "stopped",
-                               f"the loader {'was disconnected' if lost else 'stopped answering'} after "
-                               f"{served} requests. Replug the USB cable and run the install again to finish")
-        step("write", 100)
+        adapter = _Adapter(self.backend, step=step)
+        return _tool('write', [adapter.device(ota), list(image)], adapter, port=self.port, delay=DELAY)
 
     def verify(self, product, step):
-        step("reboot")
-        time.sleep(DELAY["reboot"])
-        back = self.wait_for(lambda i: not i.loader, DELAY["wait_reboot"])
-        if not back:
-            raise InstallError("noreturn", "the FM-1 did not come back: power-cycle it")
-        back.link.close()
-        if back.id.text != product:
-            raise InstallError("mismatch", f"written, but the FM-1 reports {back.id.text} (expected {product})")
-        step("done", back.id.text)
-        return back.id.text
+        return _tool('verify', [product], _Adapter(self.backend, step=step), port=self.port, delay=DELAY)
 
     def install(self, dev, image, product, step=lambda *a: None):
-        """running firmware -> loader -> new firmware; dev from find(). A device already in
-        update mode only needs the write."""
-        if model_of(dev.id.text) != model_of(product):
-            dev.link.close()
-            raise InstallError("model", f"the device is {dev.id.text}, the package is for {product}")
-        ota = dev if dev.id.loader else self.check(dev, image, step)
-        self.write(ota, image, step)
-        return self.verify(product, step)
+        adapter = _Adapter(self.backend, step=step)
+        return _tool('install', [adapter.device(dev), list(image), product], adapter, port=self.port, delay=DELAY)
 
 
 # ------------------------------------------------------------------- CLI ---
@@ -355,13 +304,8 @@ def load_package(path, force):
         raw = open(path, "rb").read()
     except OSError as e:
         raise InstallError("badpkg", f"cannot read {path}: {e.strerror}")
-    product = product_of(raw)
-    if not re.fullmatch(r"[^_]+_\d+", product):
-        raise InstallError("badpkg", f"{path}: not an FM-1 package (identity {product!r})")
-    if LOADER_MARK not in raw and not force:
-        raise InstallError("badpkg", f"{path}: no Felucca update loader in this package; "
-                                     "only Felucca's own packages are installed (--force overrides)")
-    return product, logical_image(raw)
+    product, image = _tool('package', [list(raw), force, str(path)])
+    return product, bytes(image)
 
 
 def not_found(up):

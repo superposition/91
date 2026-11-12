@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "ticket": 22,
+  "checkpoint": "installer-and-diagnostics",
+  "status": "host slice qualified; whole R21 remains open",
+  "base": "551d56243ed26dae3dbe6aa52331ec1f8ae21c83",
+  "authoring_prerequisite_original": "09d3d5c295b7bf560b52997d5177ffabf425496c",
+  "local_prerequisite": "483438f622d9f084ec2530d6a35d423c7d8fe202",
+  "reference_manifest": {
+    "file": "tests/reference/source.sha256",
+    "bytes": 39958,
+    "sha256": "6148afa57b782c81e5a794f0ded441763fe986f35bf275014f304f6da76d88af",
+    "verified_files": 440
+  },
+  "differential": {
+    "cases": 2739,
+    "case_names_sha256": "3452595ea8c19c3ceeb8b33ea07b55fad43ddc70bf3fd9461e1de7b7e545112c",
+    "transactions": 64,
+    "transaction_trace_sha256": "8c6905a2eb9f68703dd111bc086ccde67d014610f909d28992fbaaa2193f0029",
+    "ports_opened": 0,
+    "real_sleeps": 0
+  },
+  "platforms": {
+    "linux": "Ubuntu-22.04 WSL, Python3.10.12, Rust1.94.1, x86_64-unknown-linux-gnu",
+    "windows": "Windows native Python3.8.3, Rust1.94.1, x86_64-pc-windows-msvc"
+  },
+  "workspace_tests": 151,
+  "checks": [
+    "workspace formatting",
+    "strict workspace all-target Clippy",
+    "existing threaded fake-device installer suite",
+    "logger selftest",
+    "native offline package/telemetry summary commands",
+    "standalone wasm-codec feature graph excludes tooling/authoring",
+    "CLI graph keeps native simulator C-app feature disabled; no third-party Python dependency"
+  ],
+  "source_fingerprint": "276f8604da95081877902e5930554f77269ea7057a7d5f072a41da320cf73c80",
+  "sources": {
+    "Cargo.lock": {
+      "bytes": 4795,
+      "sha256": "3daca799f124dd3afff39b2199f2438203a8dd07377f4ee4dbbf4fa93c30a913"
+    },
+    "Cargo.toml": {
+      "bytes": 679,
+      "sha256": "e1b0bd0471ff7e7fba904743b87a689affede01a317d6ada96b2ed2433c38bb3"
+    },
+    "rust/fm1-cli/Cargo.toml": {
+      "bytes": 444,
+      "sha256": "bd02753c37dc73b455cf6c54ec87aa47c70118f9a16854f69e230f1781b64a36"
+    },
+    "rust/fm1-cli/src/main.rs": {
+      "bytes": 5181,
+      "sha256": "60ea19a37ca1c39a240596cfaac6d7a50a5a36b8f638f813f41127cb4889bcdf"
+    },
+    "rust/fm1-tooling/Cargo.toml": {
+      "bytes": 209,
+      "sha256": "4684bb22d53472caa95af56817436eb460808285f2008627166f5bf423146a12"
+    },
+    "rust/fm1-tooling/src/installer.rs": {
+      "bytes": 17390,
+      "sha256": "6eafac243584c562c70516e39ad3b497c68a240c468e0c6c17b4d437cd075eb1"
+    },
+    "rust/fm1-tooling/src/lib.rs": {
+      "bytes": 6641,
+      "sha256": "f1f30dafb5896fcff9d23e14aafa4357fd52d35ab3ba61da811b7e55b0a0b407"
+    },
+    "rust/fm1-tooling/src/summary.rs": {
+      "bytes": 16717,
+      "sha256": "bdab66c28361694dac87ccb0c5471ed1e5962a42020062556bbe517f30e86592"
+    },
+    "rust/fm1-tooling/src/telemetry.rs": {
+      "bytes": 7737,
+      "sha256": "f6e579bf199f4bb5a37da0119630fb37cb088965fa5484e2b3be5a1ca8e12362"
+    },
+    "rust/fm1-tooling/src/telemetry_fields.rs": {
+      "bytes": 1600,
+      "sha256": "1f492167aa7ccebe71643d09fd3bbe736640f87980012f9cc0874fe9e2203dff"
+    },
+    "rust/fm1-tooling/tests/contracts.rs": {
+      "bytes": 3047,
+      "sha256": "fe754730e08fd447c812861221d986ef5b04e3292f5cca4fe66b888963cebb7d"
+    },
+    "tests/rust_tooling.sh": {
+      "bytes": 657,
+      "sha256": "e3772f849d1b3e079fe2271f6c2b24036e713f0a4458479818c117728eb6f8af"
+    },
+    "tests/tooling_differential.py": {
+      "bytes": 16225,
+      "sha256": "58c449d0dddca3858af474e458836c80d7c66f0d4db3f4df449d0d10758313ed"
+    },
+    "tools/fm1_install.py": {
+      "bytes": 14292,
+      "sha256": "9b8eff535211d62f9a758f420f477854ac528fd44d5cfccba19be8c7fb080396"
+    },
+    "tools/fm1log.py": {
+      "bytes": 6925,
+      "sha256": "69bf819daf87eec7b6dcd42609cef28f1073b21f7f8d42e38fbb820f0f819f99"
+    },
+    "tools/fm1sum.py": {
+      "bytes": 1158,
+      "sha256": "5f53188bd9ec3cc35517e5dd9eae381758ba9ec26659116c0fd993c64a2fe8fb"
+    },
+    "tools/rust_tooling.py": {
+      "bytes": 4354,
+      "sha256": "e356d7f4072652ce247a7f047db95893bede51779781811ef8e7f21114901312"
+    }
+  },
+  "artifacts": {
+    "build/tooling/linux-qualified3.log": {
+      "bytes": 2408,
+      "sha256": "05fcaff8206b8938c1726048de51d9c1314d406503c05834d0ecf0182b781ba9"
+    },
+    "build/tooling/windows-qualified3.log": {
+      "bytes": 2436,
+      "sha256": "e3b426e26530f922d9c41c684a69aff0cc84379e08c9bbd51214040e5fd514c3"
+    },
+    "build/tooling/workspace-qualified3.log": {
+      "bytes": 20769,
+      "sha256": "8903a5115d2148b5dc59d90480a6f2edd1292905ca9973ba4300d93e603b969d"
+    },
+    "build/tooling/clippy-qualified3.log": {
+      "bytes": 272,
+      "sha256": "b4e2c04785b6870895e7bc710453fd675c3951a3c886d8acf4b7f79027a5410c"
+    },
+    "build/tooling/fmt-qualified3.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "build/tooling/codec-features.txt": {
+      "bytes": 1059,
+      "sha256": "e2c4cdcfc4d4e625f46009963291eb789b7b0362a8cb819d0a2e09e12ae15877"
+    },
+    "build/tooling/cli-features.txt": {
+      "bytes": 3208,
+      "sha256": "13b2bdaff723c0e206c5e88cffc92bbdd1469c92f385f57c3d103292c7e34cde"
+    },
+    "build/tooling/linux/release/fm1-rs": {
+      "bytes": 1378304,
+      "sha256": "66b645107da7b8582dc9fb6a1e2aa4a60052c0d092c3faee45cfe043cc8e15fb"
+    },
+    "build/tooling/windows/release/fm1-rs.exe": {
+      "bytes": 1080832,
+      "sha256": "07c2f9b3d899d5bc5899a894389308e0cc392bed36a4f30f1f49ff2b8dd49f16"
+    }
+  },
+  "proof_scope": [
+    "64 corrected fixed virtual-clock install/discovery/error transactions with exact packet/backend/progress traces and elapsed time; each normal valid-model case asserts completed install",
+    "Legacy status/extra/diagnostic/benchmark words, malformed frames, outer identity framing and large bounded decimal versions",
+    "100 exact frozen live-event/CSV/display statements, keepalive thresholds, benchmark partial-output exception semantics",
+    "Synthetic package policy plus offline native package-info, all five report sections and native CSV summary outputs",
+    "Callback interruption, nested pure predicate helpers, same-process recovery after policy failures, truncated/oversized stream failure",
+    "Existing installer CLI/error/fake-backend tests; Node comparison is skipped because isolated build/amb.fwsc is absent"
+  ],
+  "bound_policy": {
+    "frame_bytes": 33554432,
+    "byte_input": 1100000,
+    "served_read_bytes": 512,
+    "csv_rows": 100000,
+    "csv_columns": 256,
+    "csv_cell_bytes": 1048576,
+    "report_integer_abs": 1099511627776,
+    "time": "finite f64"
+  },
+  "limits": [
+    "No MIDI/USB/audio backend was opened, no hardware read/reset/flash/install was performed, no physical timing or restore success is claimed",
+    "Native CSV row/quote validation and explicit host bounds reject inputs outside supported live telemetry domain",
+    "Python argparse, file/CSV/terminal, MidoLink OS I/O and callback adapters remain thin bindings",
+    "Full build/package/LZ4/SDK/memory gates, ROM rescue, debugger policy, acquisition/launchers and asset/site/manual generators remain issue22 work",
+    "No firmware/browser/export/hardware source was edited; full PCM/WASM replay is not required by this host-only boundary and was not rerun here",
+    "Prior failed/raw attempts remain under build/tooling; final identities refer only to listed qualified logs"
+  ]
+}

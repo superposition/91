@@ -36,6 +36,7 @@ dependencies = [
  "fm1-codecs-wasm",
  "fm1-engine",
  "fm1-formats",
+ "fm1-tooling",
  "fm1-types",
  "serde_json",
 ]
@@ -107,6 +108,14 @@ name = "fm1-sim"
 version = "0.1.0"
 dependencies = [
  "fm1-jam-bridge",
+]
+
+[[package]]
+name = "fm1-tooling"
+version = "0.1.0"
+dependencies = [
+ "fm1-formats",
+ "serde_json",
 ]
 
 [[package]]

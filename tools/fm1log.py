@@ -13,6 +13,7 @@ ten seconds without one and it stops. Needs: pip install mido python-rtmidi
 """
 import argparse
 import rust_codecs as _codecs
+import rust_tooling as _tools
 import csv
 import os
 import struct
@@ -20,10 +21,18 @@ import sys
 import time
 
 PREFIX = [0x7D, 0x50, 0x46]
-FIELDS = ["seq", "ms", "cpu", "cpu1", "core2", "xruns", "late", "max_us", "last_us", "nested", "shed", "playing",
-          "stores", "store_us", "crashes", "renders", "ui_frames", "budget_us", "gap_us", "ui_us", "genre", "piece",
-          "p_clear", "p_bassacid", "p_pluck", "w_pad", "p_merge", "p_drums", "p_echo", "w_rev", "p_master", "chunks", "isr_in", "isr_out", "batt",
-          "stk_main", "stk_irq", "stk_c1u", "stk_c1s", "midi_last"]   # (the stacks' deepest, bytes: 0.16.5 on)
+def _tool(method, args=()):
+    try:
+        return _tools.call(method, args)
+    except _tools.ToolError as error:
+        kind = {'ValueError': ValueError, 'ZeroDivisionError': ZeroDivisionError}.get(error.kind, RuntimeError)
+        raise kind(str(error)) from error
+
+
+_NAMES = _tool('telemetry.fields')
+_TIMING = _tool('telemetry.timing')
+FIELDS, EXTRA, DIAG, BENCH_NAMES = (_NAMES[k] for k in ('fields', 'extra', 'diag', 'bench_names'))
+DIAG_PIECES = [k[2:] for k in DIAG if k.startswith('d_')]
 
 
 def pack7(data):
@@ -33,97 +42,27 @@ def unpack7(data):
     return list(_codecs.call(73, [1_100_000], [data])[4:])
 
 def decode(msg):
-    """msg: the SysEx data bytes without F0/F7. Returns a dict, or None if it is not a status frame."""
-    msg = list(msg)
-    if msg[:3] != PREFIX:
-        return None
-    raw = _codecs.call(103, [msg[2], len(FIELDS)], [msg])
-    k = min(len(FIELDS), len(raw) // 4)          # (an older firmware sends fewer: the rest read 0)
-    if k < 35:
-        return None
-    d = dict(zip(FIELDS, struct.unpack("<%dI" % k, bytes(raw[:4 * k]))))
-    for f in FIELDS[k:]:
-        d[f] = 0
-    d["chorus"] = d["shed"] >> 8 & 1              # the pad's chorus on the first core (the firmware balances it)
-    d["bass"] = d["shed"] >> 9 & 1                # the drone and the acid on the other core
-    d["flash"] = d["shed"] >> 12 & 3              # the flash part (0.16.23): 1 P25Q80, 2 UC25HQ80, 3 another (flash off), 0 an older build
-    d["susp_bad"] = d["shed"] >> 14 & 1           # its erase didn't suspend: saves stop the audio
-    d["boot"] = d["shed"] >> 15 & 3               # the startup code (0.16.25): 1 M-VAVE's V15, 2 V16 (the chip 12.5% slower), 3 another
-    d["shed"] &= 0xFF
-    return d
-
-
-BENCH_NAMES = ["float mul-add x10 (flash code)", "float mul-add x10 (RAM code)", "float divide x4", "float<->int x4",
-               "table lerp (flash table)", "table lerp (RAM table)", "rational soft clip (1 divide)", "integer chain x4", "RAM copy+sum (per word)"]
-
-
-EXTRA = ["pk_clear", "pk_bassacid", "pk_pluck", "pk_w_pad", "pk_merge", "pk_drums", "pk_echo", "pk_w_rev", "pk_master", "pk_total", "pk_info",
-         "h_lt5", "h_5", "h_6", "h_7", "h_8", "h_9", "h_10", "h_11", "h_ge12",
-         "pkr_us", "pkr_stages", "pkr_chunks", "pkr_isr", "pkr_nested", "pkr_where", "pkr_waits",
-         "sm_clear", "sm_bassacid", "sm_pluck", "sm_w_pad", "sm_merge", "sm_drums", "sm_echo", "sm_w_rev", "sm_master", "sm_n", "sm_frames",
-         "taps0123", "taps45_drops"]   # (0.16.6: the drums tapped from MIDI, a byte each, kick first; the TRS bytes lost)
-
-
-DIAG_PIECES = ["bass", "acid", "cm", "fm", "dj", "noise", "padmix", "side", "drums", "bassmix", "echoes", "fxm", "dyn", "clip"]
-DIAG = ["d_" + p for p in DIAG_PIECES] + ["ds_" + p for p in DIAG_PIECES] + ["hc_lt64", "hc_lt128", "hc_lt256", "hc_256", "r_drain", "r_control", "r_pulse", "r_hits"]
+    return _tool('telemetry.decode', [0x46, list(msg)])
 
 
 def decode_diag(msg):
-    """the third frame (0.14.3 on, F0 7D 50 5B): fourteen pieces inside the stages (us, all chunks: d_*, the chunks shorter than 256 frames again:
-    ds_*), the chunk sizes (counts), and the work between chunks (us: drain, control, the clock pulse, the hits that waited)"""
-    msg = list(msg)
-    if msg[:3] != [0x7D, 0x50, 0x5B]:
-        return None
-    raw = _codecs.call(103, [msg[2], len(DIAG)], [msg])
-    n = min(len(DIAG), len(raw) // 4)
-    if n < 36:
-        return None
-    return dict(zip(DIAG, struct.unpack("<%dI" % n, bytes(raw[:4 * n]))))
+    return _tool('telemetry.decode', [0x5B, list(msg)])
 
 
 def decode_extra(msg):
-    """the second frame: the slowest chunk of the window (its stages in us, its total, its info: step 0-3, size 4-11, tick at start 12, the drone and
-    acid on core 2 13, the chorus on core 1 14, shed 15-16, section 17-18), how many renders took <5, 5-6 ... 11-12, >=12 ms, and (0.14.1 on) the
-    slowest half dissected: its us, the sum of its chunks' stages, its chunks, the timer interrupt's us inside it and those ticks, its step | the
-    main loop's place << 8 (0 between, 1 the UI frame, 2 the USB services) | the half << 12, and its waits for the other core (us); and (0.14.3 on)
-    the stages of the chunks shorter than 256 frames (us), how many there were and their frames, so that with the totals each stage's fixed
-    cost a chunk can be solved (fm1sum.py). Older firmware sends 20 or 27 words: the rest read 0."""
-    msg = list(msg)
-    if msg[:3] != [0x7D, 0x50, 0x5A]:
-        return None
-    raw = _codecs.call(103, [msg[2], len(EXTRA)], [msg])
-    n = min(len(EXTRA), len(raw) // 4)
-    if n < 20:
-        return None
-    d = dict(zip(EXTRA, struct.unpack("<%dI" % n, bytes(raw[:4 * n]))))
-    for k in EXTRA[n:]:
-        d[k] = 0
-    return d
+    return _tool('telemetry.decode', [0x5A, list(msg)])
 
 
 def decode_bench(msg):
-    msg = list(msg)
-    if msg[:3] != [0x7D, 0x50, 0x47]:
-        return None
-    raw = _codecs.call(103, [msg[2], 16], [msg])
-    if len(raw) < 64:
-        return None
-    return struct.unpack("<16I", bytes(raw[:64]))
+    value = _tool('telemetry.decode', [0x47, list(msg)])
+    return tuple(value) if value is not None else None
 
 
 def show_bench(w):
-    bn, tpu = w[0], w[1]
-    print("bench: %d turns each, %d ticks per us" % (bn, tpu))
-    base = w[9] / bn
-    for k, name in enumerate(BENCH_NAMES):
-        n = bn if k < 8 else (bn // 64) * 256
-        per = w[2 + k] / n
-        print("  %-34s %8.2f ticks/turn = %7.1f ns  (%.2fx the int chain)" % (name, per, per / tpu * 1000, per / base))
-    if w[3]:
-        print("  RAM code runs the float loop in %.0f%% of flash code's time" % (100.0 * w[3] / w[2]))
-    if w[7]:
-        print("  RAM table is read in %.0f%% of the flash table's time" % (100.0 * w[7] / w[6]))
-    print("  cache 0x1EEE008 %08X  0x1EEE00C %08X  0x1EEE010 %08X   PLL 0x16A00 %08X  0x10008 %08X" % tuple(w[11:16]))
+    result = _tool('telemetry.bench', [list(w)])
+    print(result['text'], end='')
+    if result['error']:
+        raise ZeroDivisionError(result['error'])
 
 
 def selftest():
@@ -167,7 +106,7 @@ def main():
         return
     ins, outs = mido.get_input_names(), mido.get_output_names()
     key = a.port.lower()
-    pick = lambda names: next((n for n in names if (key and key in n.lower()) or (not key and any(s in n.lower() for s in ("fm-1", "fm1", "perf", "m-vave", "mvave")))), None)
+    pick = lambda names: _tool('telemetry.pick', [list(names), key])
     pin, pout = pick(ins), pick(outs)
     if not pin or not pout:
         sys.exit("no FM-1 MIDI port found (ports: in %s, out %s). Use --port NAME." % (ins, outs))
@@ -177,14 +116,14 @@ def main():
     if a.bench:
         fin, fout = mido.open_input(pin), mido.open_output(pout)
         fout.send(mido.Message("sysex", data=_codecs.call(106, [2])[1:-1]))
-        t_end = time.time() + 5
+        t_end = time.time() + _TIMING['bench_seconds']
         while time.time() < t_end:
             for m in fin.iter_pending():
                 if m.type == "sysex":
                     w = decode_bench(m.data)
                     if w:
                         return show_bench(w)
-            time.sleep(0.02)
+            time.sleep(_TIMING['bench_poll_seconds'])
         sys.exit("no answer (is it the build with the bench?)")
     os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
     fin, fout = mido.open_input(pin), mido.open_output(pout)
@@ -200,7 +139,7 @@ def main():
         try:
             while True:
                 now = time.time()
-                if now - last_arm > 3.0:
+                if _tool('telemetry.arm', [now, last_arm]):
                     fout.send(arm)
                     last_arm = now
                 for m in fin.iter_pending():
@@ -216,34 +155,13 @@ def main():
                             if dg:
                                 diag = dg
                         continue
-                    ev = []
-                    if prev:
-                        if d["xruns"] > prev["xruns"]:
-                            ev.append("XRUN+%d" % (d["xruns"] - prev["xruns"]))      # a half that was never rendered: its buffer played again
-                        if d["late"] > prev["late"]:
-                            ev.append("LATE+%d" % (d["late"] - prev["late"]))        # a render that ran past its half (the next one started at once)
-                        if d["stores"] > prev["stores"]:
-                            ev.append("FLASH(%dus)" % d["store_us"])
-                        if d["seq"] != prev["seq"] + 1:
-                            ev.append("LOST%d" % (d["seq"] - prev["seq"] - 1))
-                        if d["shed"] != prev["shed"]:
-                            ev.append("SHED%d" % d["shed"])
-                        if d["crashes"] != prev["crashes"]:
-                            ev.append("CRASH")
-                    if d["max_us"] > d["budget_us"]:
-                        ev.append("OVER")
-                    if d["gap_us"] > 20000:
-                        ev.append("GAP%dms" % (d["gap_us"] // 1000))
+                    rendered = _tool('telemetry.row', [now, t0, d, prev, extra, diag])
                     prev = d
-                    cw.writerow(["%.2f" % (now - t0)] + [d[k] for k in FIELDS] + [d["chorus"], d["bass"], d["flash"], d["susp_bad"], d["boot"]] + [extra.get(k, 0) for k in EXTRA] +
-                                [diag.get(k, 0) for k in DIAG] + [" ".join(ev)])
-                    extra = {}
-                    diag = {}
+                    cw.writerow(rendered['row'])
+                    extra, diag = {}, {}
                     f.flush()
-                    print("\r%6.1fs cpu %3d%% c1 %3d%% xr %-4d max %5.1fms/%.1f gap %5.1fms ui %5.1fms shed %d %s        " % (
-                        now - t0, d["cpu"], d["cpu1"], d["xruns"], d["max_us"] / 1000, d["budget_us"] / 1000,
-                        d["gap_us"] / 1000, d["ui_us"] / 1000, d["shed"], " ".join(ev)), end="", flush=True)
-                time.sleep(0.01)
+                    print(rendered['live'], end='', flush=True)
+                time.sleep(_TIMING['poll_seconds'])
         except KeyboardInterrupt:
             pass
         finally:

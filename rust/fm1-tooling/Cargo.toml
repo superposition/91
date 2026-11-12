@@ -1,0 +1,10 @@
+[package]
+name = "fm1-tooling"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+fm1-formats.workspace = true
+serde_json.workspace = true
