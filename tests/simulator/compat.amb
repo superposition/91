@@ -1,0 +1,37 @@
+# Native-only commands absent from the historical94-scenario corpus.
+seed 428
+reboot
+wait 1200
+wav compatibility.wav
+strum 0 15 2
+strum 15 0
+frames 3 24
+frames 2
+wavstop
+expect parsbad 0
+bank76 3 7
+reboot
+wait 100
+expect parsbad 0
+dumpobj 0 @DIR@/object.bin
+loadobj 0 @DIR@/object.bin
+reboot
+wait 100
+tap PLAY
+wait 100
+press SEL
+tap EDIT
+release SEL
+wait 300
+autopilot 1
+wait 12000
+shot autopilot.png
+autopilot 0
+jamboot
+jampack rust/fm1-engine/tests/packs/harris-citypop.jmp
+jam 0 1
+wait 100
+jamstop
+expect jam_on 1
+expect playing 0
+shot jam_stopped.png

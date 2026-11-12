@@ -67,6 +67,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "fm1-sim"
+version = "0.1.0"
+dependencies = [
+ "fm1-jam-bridge",
+]
+
+[[package]]
 name = "fm1-types"
 version = "0.1.0"
 dependencies = [

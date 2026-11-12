@@ -11,6 +11,40 @@ permissions:
   contents: read
 
 jobs:
+  native_simulator:
+    name: Native Rust simulator and scenario compatibility
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: rustup toolchain install 1.94.1 --profile minimal --target wasm32-unknown-unknown
+      - run: python3 -m pip install --quiet Pillow
+      - name: Full scenario corpus and fresh-process repeatability
+        env:
+          RUSTUP_TOOLCHAIN: '1.94.1'
+          PARITY_JOBS: '4'
+        run: sh tests/rust_simulator.sh
+      - name: Existing native entry point and piece roundtrip
+        env:
+          RUSTUP_TOOLCHAIN: '1.94.1'
+          AMB_LEGACY_BOOT: '1'
+        run: |
+          sh host/build_host.sh
+          python3 tools/build_codecs.py
+          node tests/web_piece_test.js build/host/amb_host
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-simulator-proof
+          path: |
+            build/simulator/*.json
+            build/simulator/*.log
+            build/simulator/source-verification.log
   web_metadata:
     name: Web metadata and build safety
     runs-on: ubuntu-24.04

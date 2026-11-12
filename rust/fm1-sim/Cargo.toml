@@ -1,0 +1,20 @@
+[package]
+name = "fm1-sim"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "fm1-sim"
+path = "src/main.rs"
+required-features = ["c-app"]
+
+[features]
+default = []
+# Explicit transitional application ABI. Pure simulator components need no C.
+c-app = []
+rust-engine = ["c-app", "dep:fm1-jam-bridge"]
+
+[dependencies]
+fm1-jam-bridge = { path = "../fm1-jam-bridge", optional = true }

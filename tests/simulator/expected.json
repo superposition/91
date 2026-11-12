@@ -1,0 +1,45 @@
+{
+  "compat": {
+    "status": 0,
+    "assertions": []
+  },
+  "errors": {
+    "status": 2,
+    "assertions": [
+      "FAIL expect playing == 99, got 0",
+      "FAIL unknown expect nonexistent"
+    ]
+  },
+  "restarts": {
+    "status": 1,
+    "assertions": [
+      "FAIL expect parsbad == 0, got 170",
+      "FAIL expect parsbad == 0, got 188",
+      "FAIL expect parsbad == 0, got 86",
+      "FAIL expect parsbad == 0, got 59",
+      "FAIL expect parsbad == 0, got 445",
+      "FAIL expect parsbad == 0, got 200",
+      "FAIL expect parsbad == 0, got 17",
+      "FAIL expect parsbad == 0, got 41",
+      "FAIL expect parsbad == 0, got 175",
+      "FAIL expect parsbad == 0, got 27",
+      "FAIL expect parsbad == 0, got 273",
+      "FAIL expect parsbad == 0, got 52",
+      "FAIL expect parsbad == 0, got 56",
+      "FAIL expect parsbad == 0, got 348",
+      "FAIL expect parsbad == 0, got 67",
+      "FAIL expect parsbad == 0, got 73",
+      "FAIL expect parsbad == 0, got 483",
+      "FAIL expect parsbad == 0, got 137",
+      "FAIL expect parsbad == 0, got 290",
+      "FAIL expect parsbad == 0, got 98",
+      "FAIL expect parsbad == 0, got 204",
+      "FAIL expect parsbad == 0, got 189",
+      "FAIL expect parsbad == 0, got 29",
+      "FAIL expect parsbad == 0, got 133",
+      "FAIL expect parsbad == 0, got 58",
+      "FAIL expect parsbad == 0, got 343",
+      "FAIL expect parsbad == 0, got 132"
+    ]
+  }
+}

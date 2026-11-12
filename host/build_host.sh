@@ -1,9 +1,17 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-3.0-only
-# Build the AMB-1 host simulator (the whole app on this machine) into build/host/amb_host.
-# Same sources as the firmware, -ffp-contract=off like the device (no fused multiply-add).
+# Build the Rust native simulator into the existing build/host/amb_host path.
+# EN_RUST_HOST=0 retains the original C0 runner; the app ABI is transitional.
 set -e
 cd "$(dirname "$0")/.."
+if [ "${EN_RUST_HOST:-1}" != 0 ]; then
+    export RUSTUP_TOOLCHAIN="${RUSTUP_TOOLCHAIN:-1.94.1}"
+    cargo build --release --locked -p fm1-sim --features rust-engine --target-dir build/rust-native-host
+    mkdir -p build/host
+    cp build/rust-native-host/release/fm1-sim build/host/amb_host
+    echo "host: build/host/amb_host (Rust simulator; transitional application ABI)"
+    exit 0
+fi
 CC="${CC:-cc}"
 mkdir -p build/gen build/host
 [ -f build/gen/felucca_font.h ] || python3 tools/gen_font.py build/gen/felucca_font.h >/dev/null
