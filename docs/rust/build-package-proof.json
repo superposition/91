@@ -1,0 +1,50 @@
+{
+  "tested_source": "8fbf4bcd30ad77a4c344ccea28212d836495c9bb",
+  "platforms": {
+    "windows": {
+      "result": {
+        "cases": 814,
+        "compression_cases": 224,
+        "malformed_prefix_cases": 540,
+        "loader_cases": 36,
+        "native_cli_commands": 3,
+        "explicit_expansion_refusals": 1,
+        "source_hashes": 440,
+        "sha256": "4033b0955b6a73b9098edaacf7fcdaedf96ba9ce034db0d1e62c908cbd4dba0c"
+      },
+      "log": {
+        "bytes": 1692,
+        "sha256": "fe6747e312652d70243cfba69745d0b4b680e754e0aff033249d4d775c30017c"
+      }
+    },
+    "linux": {
+      "result": {
+        "cases": 814,
+        "compression_cases": 224,
+        "malformed_prefix_cases": 540,
+        "loader_cases": 36,
+        "native_cli_commands": 3,
+        "explicit_expansion_refusals": 1,
+        "source_hashes": 440,
+        "sha256": "4033b0955b6a73b9098edaacf7fcdaedf96ba9ce034db0d1e62c908cbd4dba0c"
+      },
+      "log": {
+        "bytes": 1901,
+        "sha256": "b9026da7d78a12ca3b12b7fff99ad76fd63193e6a5dc5233e715156fe9d89396"
+      }
+    }
+  },
+  "checks": [
+    "224 byte-identical compressor vectors through1,100,000bytes and65,535-byte offset boundaries.",
+    "540 prefix/malformed decoder cases preserve admitted bytes and exception classes.",
+    "36 byte-identical loader wrappers/refusals and3 native CLI file commands.",
+    "All440 pinned source hashes and formatting/strict tool-crate Clippy pass."
+  ],
+  "correction": "Explicit1,100,000-byte output cap refuses previously unbounded expansion; independent frozen witness included.",
+  "harness": "Assert live import paths after frozen build module mutates sys.path; use distinct Windows/Linux Cargo target directories.",
+  "scope": "Host-only packaging policy; Python APIs are transport bindings. No firmware/codec-WASM dependency, hardware I/O or generated firmware image.",
+  "remaining": [
+    "Full build/compiler orchestration,image/disassembly/MMIO/stub/SDK checks.",
+    "Bootstrap/acquisition/site/manual tooling and final physical qualification remain under22."
+  ]
+}
