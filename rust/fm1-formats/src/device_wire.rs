@@ -186,6 +186,29 @@ pub fn voice_ack(kind: u8, count: u8, output: &mut [u8]) -> Result<usize, CodecE
     Ok(7)
 }
 
+/// Firmware error replies echo even malformed high-bit op/token bytes. The
+/// normal strict Jam encoder remains available in `wire::jam_reply`.
+pub fn jam_reply_legacy(
+    op: u8,
+    token: u8,
+    status: u8,
+    raw: &[u8],
+    output: &mut [u8],
+) -> Result<usize, CodecError> {
+    if raw.len() > 68 {
+        return Err(CodecError::Range);
+    }
+    let length = 9 + raw.len() * 2;
+    if output.len() < length {
+        return Err(CodecError::Capacity);
+    }
+    output[..7].copy_from_slice(&[0xf0, 0x7d, 0x50, 0x61, op, token, status]);
+    wire::encode_nibbles(raw, &mut output[7..length - 2])?;
+    output[length - 2] = wire::sum7(&output[4..length - 2]);
+    output[length - 1] = 0xf7;
+    Ok(length)
+}
+
 fn scalar(output: &mut [u8], values: &[u32]) -> Result<usize, CodecError> {
     if output.len() < values.len() * 4 {
         return Err(CodecError::Capacity);
@@ -257,7 +280,7 @@ pub fn dispatch(
             scalar(output, &words[..count])
         }
         78 => scalar(output, &[jam_preflight(data)]),
-        79 => wire::jam_reply(byte(0)?, byte(1)?, byte(2)?, data, output),
+        79 => jam_reply_legacy(byte(0)?, byte(1)?, byte(2)?, data, output),
         80 => {
             let begin = JamBegin::parse(data)?;
             scalar(output, &[u32::from(begin.length), begin.crc])
@@ -342,6 +365,128 @@ pub fn dispatch(
         89 => wire::decode_nibbles(data, output),
         90 => wire::encode_nibbles(data, output),
         91 => scalar(output, &[u32::from(value14(data)?)]),
+        92 => {
+            let mut packet = [0u8; 10];
+            packet[..3].copy_from_slice(&[0xf0, 0x7d, 0x50]);
+            let length = match arg(0)? {
+                0 => {
+                    packet[3..6].copy_from_slice(&[0x42, 1, byte(1)?]);
+                    7
+                }
+                1 => {
+                    let length = arg(2)?;
+                    if length > 16383 {
+                        return Err(CodecError::Range);
+                    }
+                    packet[3..8].copy_from_slice(&[
+                        0x42,
+                        4,
+                        byte(1)?,
+                        (length >> 7) as u8,
+                        (length & 127) as u8,
+                    ]);
+                    9
+                }
+                2 => {
+                    packet[3..5].copy_from_slice(&[0x42, 5]);
+                    6
+                }
+                3 => {
+                    packet[3..5].copy_from_slice(&[0x42, 6]);
+                    6
+                }
+                4 => {
+                    packet[3..5].copy_from_slice(&[0x50, 2]);
+                    6
+                }
+                5 => {
+                    let parameter = arg(1)?;
+                    if parameter > 16383 {
+                        return Err(CodecError::Range);
+                    }
+                    let value = arg(2)?.wrapping_add(8192) & 16383;
+                    packet[3..9].copy_from_slice(&[
+                        0x50,
+                        1,
+                        (parameter >> 7) as u8,
+                        (parameter & 127) as u8,
+                        (value >> 7) as u8,
+                        (value & 127) as u8,
+                    ]);
+                    10
+                }
+                6 => {
+                    packet[3..6].copy_from_slice(&[0x56, 0x7e, byte(1)?]);
+                    7
+                }
+                _ => return Err(CodecError::Index),
+            };
+            if packet[1..length - 1].iter().any(|b| *b > 127) {
+                return Err(CodecError::Range);
+            }
+            if output.len() < length {
+                return Err(CodecError::Capacity);
+            }
+            packet[length - 1] = 0xf7;
+            output[..length].copy_from_slice(&packet[..length]);
+            Ok(length)
+        }
+        93 => {
+            if data.len() > 512 {
+                return Err(CodecError::Length);
+            }
+            let mut body = [0u8; 520];
+            body[0] = byte(1)?;
+            body[1..5].copy_from_slice(&arg(0)?.to_le_bytes());
+            body[5..8].copy_from_slice(&[data.len() as u8, (data.len() >> 8) as u8, 0]);
+            body[8..8 + data.len()].copy_from_slice(data);
+            wire::encode_ota(0x30, &body[..8 + data.len()], output)
+        }
+        94 => {
+            let mut scratch = [0u8; 640];
+            let message = wire::decode_ota(data, &mut scratch)?;
+            match arg(0)? {
+                0 => {
+                    let body = message.body();
+                    if message.command() != 0x30 || body.len() != 8 {
+                        return Err(CodecError::Length);
+                    }
+                    scalar(
+                        output,
+                        &[
+                            u32::from(body[0]),
+                            crate::read_u32(body, 1).unwrap(),
+                            u32::from(body[5])
+                                | (u32::from(body[6]) << 8)
+                                | (u32::from(body[7]) << 16),
+                        ],
+                    )
+                }
+                1 => {
+                    if message.command() != 0x11 || message.body().len() != 27 {
+                        return Err(CodecError::Length);
+                    }
+                    if output.len() < 27 {
+                        return Err(CodecError::Capacity);
+                    }
+                    output[..27].copy_from_slice(message.body());
+                    Ok(27)
+                }
+                _ => Err(CodecError::Index),
+            }
+        }
+        95 => match arg(0)? {
+            0 => wire::encode_ota(0x11, &[], output),
+            1 => wire::encode_ota(0x11, &[1], output),
+            2 => {
+                if output.len() < 6 {
+                    return Err(CodecError::Capacity);
+                }
+                output[..6].copy_from_slice(&[0xf0, 0x22, 0x24, 0x35, 0x7f, 0xf7]);
+                Ok(6)
+            }
+            _ => Err(CodecError::Index),
+        },
         _ => Err(CodecError::Index),
     }
 }
