@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! Scoped scheduling ABI. One render owner supplies initialized values and
 //! disjoint writable outputs/RNG; no borrow or caller pointer is retained.
-use core::sync::atomic::{AtomicU32, Ordering};
 use fm1_engine::sequencer::Drift;
 use fm1_engine::sequencer::{self, Hit, Lane, Rng};
+use fm1_rt::atomic::{AtomicU32, Ordering};
 static LANES: AtomicU32 = AtomicU32::new(0);
 static MUTATIONS: AtomicU32 = AtomicU32::new(0);
 static WAITS: AtomicU32 = AtomicU32::new(0);

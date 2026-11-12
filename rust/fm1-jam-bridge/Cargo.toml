@@ -11,6 +11,7 @@ crate-type = ["staticlib", "rlib"]
 [features]
 default = ["std"]
 std = []
+pi32v2 = ["fm1-rt/pi32v2"]
 
 [dependencies]
 fm1-types.workspace = true

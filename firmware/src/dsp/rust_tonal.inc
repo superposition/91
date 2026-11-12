@@ -1,4 +1,24 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
+/* Only existing scalar values cross this capture boundary. */
+static fm1_voice_droneinput_t voice_drone_input(void)
+{
+    const fm1_voice_droneinput_t r={en_playing,bass.play,bl_slide,HB(EN_V_DRONE),fxs_v[EN_FXS_FT_BASS],fxs_v[EN_FXS_SQ_TGT],fxs_v[EN_FXS_SQ_DRIVE],fxs_v[EN_FXS_SQ_AMT],bass_vol,reso_k,bass.env,bass.vd,drone_lfo.v,mod[9].v,arcm,motion,brk,bass_duck,pulse_vol,lk_kick,hb_semi,tunefac,trk_g[TR_DRONE],trk_g1[TR_DRONE],tg_inv};return r;
+}
+static fm1_voice_acidinput_t voice_acid_input(void)
+{
+    const fm1_voice_acidinput_t r={fxs_v[EN_FXS_FT_ACID],fxs_v[EN_FXS_SQ_TGT],fxs_v[EN_FXS_SQ_DRIVE],fxs_v[EN_FXS_SQ_AMT],fxs_v[EN_FXS_SQ_WOW],acid.sliding,HB(EN_V_ACID),acid_vol,lfo_acut,lfo_ares,acid.acc,hb_pf,trk_g[TR_ACID],trk_g1[TR_ACID],tg_inv};return r;
+}
+#if EN_RUST_VOICES
+static fm1_voice_drone_config_t voice_drone_config(void)
+{
+    const fm1_voice_droneinput_t raw=voice_drone_input();fm1_voice_drone_config_t c;fm1_rust_voice_drone_config(par,&raw,&c);return c;
+}
+static fm1_voice_acid_config_t voice_acid_config(void)
+{
+    const fm1_voice_acidinput_t raw=voice_acid_input();fm1_voice_acid_config_t c;fm1_rust_voice_acid_config(par,&raw,&c);return c;
+}
+#else
+/* SPDX-License-Identifier: GPL-3.0-only */
 /* Scalar block inputs. Keep original f32 association across the ABI seam. */
 static fm1_voice_drone_config_t voice_drone_config(void)
 {
@@ -33,3 +53,5 @@ static fm1_voice_acid_config_t voice_acid_config(void)
         0.75f+0.5f*accamt*acid.acc,acid.sliding?0.0012f:1.0f,HB(EN_V_ACID)?hb_pf:1.0f,trk_g[TR_ACID],trk_g1[TR_ACID],tg_inv,
         ACID_FM[sn].fr,ACID_FM[sn].i0,ACID_FM[sn].i1,ACID_FM[sn].rise};return c;
 }
+
+#endif

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! C render/application roles call scoped operations; no C reference is kept.
-use core::sync::atomic::{AtomicU32, Ordering};
+use fm1_rt::atomic::{AtomicU32, Ordering};
 use fm1_rt::CommandQueue;
 use fm1_types::CommandWord;
 

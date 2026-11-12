@@ -7,6 +7,9 @@ extern crate fm1_types;
 use core::cell::UnsafeCell;
 use fm1_engine::planner::{bass_event, plan_into, Phrase, Seed, Settings};
 use fm1_formats::jam::JamPack;
+#[cfg(feature = "atomic-probe")]
+#[path = "atomic_probe.rs"]
+mod atomic_probe;
 
 struct ProbeCell(UnsafeCell<u32>);
 // SAFETY: the private cell is reachable only through the explicitly unsafe,

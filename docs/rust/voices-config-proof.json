@@ -1,0 +1,1412 @@
+{
+  "ticket": "https://github.com/superposition/91/issues/11",
+  "date": "2026-11-12",
+  "base_commit": "72a4c6658f3c81d531761cd7a613a553c4f94926",
+  "status": "verified numeric block configuration checkpoint; per-note/app initialization arithmetic follow-up remains R10",
+  "reference": {
+    "verified_source_files": 440,
+    "source_log_sha256": "02103818921d558fa092601f4329ba6740cf2ad792676fb0331e24f2fadfbd85",
+    "native_source_log_sha256": "02103818921d558fa092601f4329ba6740cf2ad792676fb0331e24f2fadfbd85",
+    "worker_source_log_sha256": "02103818921d558fa092601f4329ba6740cf2ad792676fb0331e24f2fadfbd85",
+    "fixture_sha256": "1358d0ae98838818f1a0ef139e942bb74bf3a921e6ed764301e09959df3db039",
+    "adapter_sha256": "cb6e35747fc0dcf02512cf0c77b931400607c6dbf07c4be4a1695cf3375f24c5",
+    "frozen_archive_sha256": "3d20587f825b8a26cd1f9ab6a715e65e78838fce0c19b5c27ce0427c15fa6263",
+    "frozen_wasm_sha256": "a3d08947713bda76b64f76ed39b55aa26bdd182a65bf88fbd1efe0cbc12f8036"
+  },
+  "representation": {
+    "borrowed_parameter_count": 176,
+    "parameter_copies_per_block": 0,
+    "raw_capture_bytes": {
+      "drone": 100,
+      "acid": 60,
+      "pad": 104,
+      "pad_bus": 32,
+      "drums": 84,
+      "pluck": 28
+    },
+    "persistent_state_added": 0,
+    "table_caches_added": 0,
+    "diagnostic_bytes_added": 0,
+    "allocator_required": false,
+    "config_calls": "one bounded FFI call per applicable block; existing output Config sizes unchanged",
+    "immutable_recipes": "borrow same exported Rust readonly views; no duplicate production array bank"
+  },
+  "isolated": {
+    "configurations": 1536,
+    "per_kind": 256,
+    "comparison": "every parameter/raw capture and derived output binary32/u32 word; complete R01/C0/Rust JSON fixture equality",
+    "coverage": [
+      "all sounds",
+      "negative/high sound fallback",
+      "all eight drone modulation destinations",
+      "all three squash targets",
+      "manual/held/line/slide",
+      "all filters",
+      "genres",
+      "gain ramps",
+      "bend",
+      "detune/comp mode",
+      "pad breath/vowel recipe data"
+    ],
+    "output_words": 36352
+  },
+  "kernel_regressions": {
+    "voices": {
+      "cases": 136,
+      "source_log_sha256": "02103818921d558fa092601f4329ba6740cf2ad792676fb0331e24f2fadfbd85",
+      "output_values": 11260800,
+      "peak": 0.593205869,
+      "summaries_sha256": "1622f2fb872be95c58398936ea284bc205f18c83494849bde0227219f8184154",
+      "host_costs": {
+        "scope": "WSL host release; 128-frame block including clears and periodic retrigger; no hardware deadline claim",
+        "cases": [
+          {
+            "test": 0,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 82184838,
+                "nanoseconds_per_frame": 64.2069046875,
+                "trials": [
+                  88246398,
+                  82184838,
+                  81499705
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 95542859,
+                "nanoseconds_per_frame": 74.64285859375,
+                "trials": [
+                  95542859,
+                  91188943,
+                  100759837
+                ]
+              }
+            },
+            "rust_over_c": 1.162536318438688
+          },
+          {
+            "test": 1,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 14692513,
+                "nanoseconds_per_frame": 11.47852578125,
+                "trials": [
+                  14785996,
+                  14692513,
+                  14536073
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 22866379,
+                "nanoseconds_per_frame": 17.86435859375,
+                "trials": [
+                  22746296,
+                  23363305,
+                  22866379
+                ]
+              }
+            },
+            "rust_over_c": 1.5563286552817752
+          },
+          {
+            "test": 2,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 11369013,
+                "nanoseconds_per_frame": 8.88204140625,
+                "trials": [
+                  11984203,
+                  11369013,
+                  11321208
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 24422599,
+                "nanoseconds_per_frame": 19.08015546875,
+                "trials": [
+                  23904244,
+                  24422599,
+                  25415270
+                ]
+              }
+            },
+            "rust_over_c": 2.148172317157171
+          },
+          {
+            "test": 3,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 8651800,
+                "nanoseconds_per_frame": 6.75921875,
+                "trials": [
+                  8439258,
+                  8651800,
+                  8657449
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 9619903,
+                "nanoseconds_per_frame": 7.51554921875,
+                "trials": [
+                  9619903,
+                  9294491,
+                  9695290
+                ]
+              }
+            },
+            "rust_over_c": 1.1118961372200005
+          },
+          {
+            "test": 4,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 13527089,
+                "nanoseconds_per_frame": 10.56803828125,
+                "trials": [
+                  13527089,
+                  13022435,
+                  14670315
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 13038631,
+                "nanoseconds_per_frame": 10.18643046875,
+                "trials": [
+                  12848870,
+                  13038631,
+                  13290377
+                ]
+              }
+            },
+            "rust_over_c": 0.963890383215487
+          },
+          {
+            "test": 5,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 18069515,
+                "nanoseconds_per_frame": 14.11680859375,
+                "trials": [
+                  16528283,
+                  18069515,
+                  18427188
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 28694824,
+                "nanoseconds_per_frame": 22.41783125,
+                "trials": [
+                  30916848,
+                  28187542,
+                  28694824
+                ]
+              }
+            },
+            "rust_over_c": 1.588024028315093
+          },
+          {
+            "test": 6,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 146447227,
+                "nanoseconds_per_frame": 114.41189609375,
+                "trials": [
+                  145592469,
+                  146920480,
+                  146447227
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 180838965,
+                "nanoseconds_per_frame": 141.28044140625,
+                "trials": [
+                  180838965,
+                  186400860,
+                  178253252
+                ]
+              }
+            },
+            "rust_over_c": 1.2348404862592584
+          },
+          {
+            "test": 97,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 143949952,
+                "nanoseconds_per_frame": 112.4609,
+                "trials": [
+                  146717398,
+                  143949952,
+                  142741344
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 182931756,
+                "nanoseconds_per_frame": 142.915434375,
+                "trials": [
+                  182181657,
+                  188923641,
+                  182931756
+                ]
+              }
+            },
+            "rust_over_c": 1.2708010906457265
+          },
+          {
+            "test": 100,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 12048775,
+                "nanoseconds_per_frame": 9.41310546875,
+                "trials": [
+                  13988439,
+                  12048775,
+                  11613424
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 23022642,
+                "nanoseconds_per_frame": 17.9864390625,
+                "trials": [
+                  23022642,
+                  23279143,
+                  22657707
+                ]
+              }
+            },
+            "rust_over_c": 1.9107869472207755
+          },
+          {
+            "test": 113,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 41235796,
+                "nanoseconds_per_frame": 32.215465625,
+                "trials": [
+                  41235796,
+                  40959096,
+                  43703567
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 78648262,
+                "nanoseconds_per_frame": 61.4439546875,
+                "trials": [
+                  82484490,
+                  78648262,
+                  77790975
+                ]
+              }
+            },
+            "rust_over_c": 1.9072812854152252
+          },
+          {
+            "test": 135,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 45099181,
+                "nanoseconds_per_frame": 35.23373515625,
+                "trials": [
+                  42427002,
+                  46264936,
+                  45099181
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 80789388,
+                "nanoseconds_per_frame": 63.116709375,
+                "trials": [
+                  80789388,
+                  82739974,
+                  79525679
+                ]
+              }
+            },
+            "rust_over_c": 1.7913715107154606
+          }
+        ]
+      }
+    },
+    "tonal": {
+      "cases": 222,
+      "source_log_sha256": "02103818921d558fa092601f4329ba6740cf2ad792676fb0331e24f2fadfbd85",
+      "output_values": 4595400,
+      "peak": 1.44339418,
+      "summaries_sha256": "3f0d3bac4158461ccbe3af6cee8ba676bf468685163317bf58d3e5669eabcdca",
+      "host_costs": {
+        "scope": "WSL host release; 128-frame block including clears and periodic retrigger; no hardware deadline claim",
+        "cases": [
+          {
+            "test": 0,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 32750633,
+                "nanoseconds_per_frame": 25.58643203125,
+                "trials": [
+                  32750633,
+                  33023402,
+                  31053573
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 44778177,
+                "nanoseconds_per_frame": 34.98295078125,
+                "trials": [
+                  43881700,
+                  44778177,
+                  45032164
+                ]
+              }
+            },
+            "rust_over_c": 1.3672461536850296
+          },
+          {
+            "test": 16,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 25849303,
+                "nanoseconds_per_frame": 20.19476796875,
+                "trials": [
+                  26196224,
+                  25849303,
+                  25717013
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 37048023,
+                "nanoseconds_per_frame": 28.94376796875,
+                "trials": [
+                  36709510,
+                  37048023,
+                  37518841
+                ]
+              }
+            },
+            "rust_over_c": 1.4332310236759576
+          },
+          {
+            "test": 36,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 25299722,
+                "nanoseconds_per_frame": 19.7654078125,
+                "trials": [
+                  25631659,
+                  24949247,
+                  25299722
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 43565222,
+                "nanoseconds_per_frame": 34.0353296875,
+                "trials": [
+                  43565222,
+                  43570405,
+                  42034739
+                ]
+              }
+            },
+            "rust_over_c": 1.7219644547872897
+          },
+          {
+            "test": 68,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 47425660,
+                "nanoseconds_per_frame": 37.051296875,
+                "trials": [
+                  48703598,
+                  47425660,
+                  46977536
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 67935929,
+                "nanoseconds_per_frame": 53.07494453125,
+                "trials": [
+                  67935929,
+                  70042696,
+                  67074976
+                ]
+              }
+            },
+            "rust_over_c": 1.4324719782497493
+          },
+          {
+            "test": 92,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 27312467,
+                "nanoseconds_per_frame": 21.33786484375,
+                "trials": [
+                  27312467,
+                  28438033,
+                  25287715
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 39778166,
+                "nanoseconds_per_frame": 31.0766921875,
+                "trials": [
+                  40845886,
+                  39778166,
+                  38099098
+                ]
+              }
+            },
+            "rust_over_c": 1.4564105834892176
+          },
+          {
+            "test": 100,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 20551991,
+                "nanoseconds_per_frame": 16.05624296875,
+                "trials": [
+                  20297692,
+                  20551991,
+                  23858226
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 28377305,
+                "nanoseconds_per_frame": 22.16976953125,
+                "trials": [
+                  34191401,
+                  27648500,
+                  28377305
+                ]
+              }
+            },
+            "rust_over_c": 1.3807569787277545
+          },
+          {
+            "test": 112,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 14632386,
+                "nanoseconds_per_frame": 11.4315515625,
+                "trials": [
+                  14960527,
+                  14632386,
+                  14235007
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 17634864,
+                "nanoseconds_per_frame": 13.7772375,
+                "trials": [
+                  19355432,
+                  16234317,
+                  17634864
+                ]
+              }
+            },
+            "rust_over_c": 1.2051940127877983
+          },
+          {
+            "test": 145,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 37068256,
+                "nanoseconds_per_frame": 28.959575,
+                "trials": [
+                  36945465,
+                  37068256,
+                  37470686
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 53179381,
+                "nanoseconds_per_frame": 41.54639140625,
+                "trials": [
+                  53179381,
+                  53758182,
+                  52079258
+                ]
+              }
+            },
+            "rust_over_c": 1.434634016771655
+          },
+          {
+            "test": 160,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 18154029,
+                "nanoseconds_per_frame": 14.18283515625,
+                "trials": [
+                  18154029,
+                  18604061,
+                  17627111
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 26096764,
+                "nanoseconds_per_frame": 20.388096875,
+                "trials": [
+                  26096764,
+                  27465339,
+                  25965174
+                ]
+              }
+            },
+            "rust_over_c": 1.4375191314280704
+          },
+          {
+            "test": 196,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 25903286,
+                "nanoseconds_per_frame": 20.2369421875,
+                "trials": [
+                  26492550,
+                  25903286,
+                  25365947
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 36818601,
+                "nanoseconds_per_frame": 28.76453203125,
+                "trials": [
+                  36490290,
+                  36818601,
+                  39108032
+                ]
+              }
+            },
+            "rust_over_c": 1.4213872710975743
+          },
+          {
+            "test": 220,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 20516918,
+                "nanoseconds_per_frame": 16.0288421875,
+                "trials": [
+                  20516918,
+                  23163480,
+                  20450743
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 34303461,
+                "nanoseconds_per_frame": 26.79957890625,
+                "trials": [
+                  32732062,
+                  34942696,
+                  34303461
+                ]
+              }
+            },
+            "rust_over_c": 1.6719597456109148
+          }
+        ]
+      }
+    },
+    "pad": {
+      "cases": 312,
+      "source_log_sha256": "02103818921d558fa092601f4329ba6740cf2ad792676fb0331e24f2fadfbd85",
+      "output_values": 6439056,
+      "peak": 2.11818099,
+      "summaries_sha256": "98ac69896610aad8dcae4d89c1c64f01fcd5d895cf2941cc02687e9f44573b3c",
+      "host_costs": {
+        "scope": "WSL host release; 128-frame block including clears and periodic retrigger; no hardware deadline claim",
+        "cases": [
+          {
+            "test": 0,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 153295142,
+                "nanoseconds_per_frame": 119.7618296875,
+                "trials": [
+                  153295142,
+                  155819861,
+                  148594336
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 204309336,
+                "nanoseconds_per_frame": 159.61666875,
+                "trials": [
+                  204309336,
+                  202828160,
+                  210443142
+                ]
+              }
+            },
+            "rust_over_c": 1.3327841530685949
+          },
+          {
+            "test": 10,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 154042588,
+                "nanoseconds_per_frame": 120.345771875,
+                "trials": [
+                  148045998,
+                  154042588,
+                  158056871
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 177128928,
+                "nanoseconds_per_frame": 138.381975,
+                "trials": [
+                  179593244,
+                  176213063,
+                  177128928
+                ]
+              }
+            },
+            "rust_over_c": 1.1498698528747129
+          },
+          {
+            "test": 20,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 166464147,
+                "nanoseconds_per_frame": 130.05011484375,
+                "trials": [
+                  182416800,
+                  159329238,
+                  166464147
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 197730334,
+                "nanoseconds_per_frame": 154.4768234375,
+                "trials": [
+                  197730334,
+                  195451168,
+                  202612583
+                ]
+              }
+            },
+            "rust_over_c": 1.1878253519660302
+          },
+          {
+            "test": 30,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 170621808,
+                "nanoseconds_per_frame": 133.2982875,
+                "trials": [
+                  170621808,
+                  166063636,
+                  174036161
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 242148039,
+                "nanoseconds_per_frame": 189.17815546875,
+                "trials": [
+                  242148039,
+                  243386178,
+                  241957287
+                ]
+              }
+            },
+            "rust_over_c": 1.4192091962828104
+          },
+          {
+            "test": 60,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 147272233,
+                "nanoseconds_per_frame": 115.05643203125,
+                "trials": [
+                  147272233,
+                  146338364,
+                  147941513
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 200877932,
+                "nanoseconds_per_frame": 156.935884375,
+                "trials": [
+                  203702528,
+                  200877932,
+                  199162789
+                ]
+              }
+            },
+            "rust_over_c": 1.363990535812681
+          },
+          {
+            "test": 80,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 161088849,
+                "nanoseconds_per_frame": 125.85066328125,
+                "trials": [
+                  161491305,
+                  160651801,
+                  161088849
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 194035351,
+                "nanoseconds_per_frame": 151.59011796875,
+                "trials": [
+                  195198552,
+                  192395724,
+                  194035351
+                ]
+              }
+            },
+            "rust_over_c": 1.2045237904704378
+          },
+          {
+            "test": 100,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 169170745,
+                "nanoseconds_per_frame": 132.16464453125,
+                "trials": [
+                  167884191,
+                  169170745,
+                  171445078
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 209558988,
+                "nanoseconds_per_frame": 163.717959375,
+                "trials": [
+                  207497127,
+                  209558988,
+                  214531013
+                ]
+              }
+            },
+            "rust_over_c": 1.2387424787896986
+          },
+          {
+            "test": 180,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 167448939,
+                "nanoseconds_per_frame": 130.81948359375,
+                "trials": [
+                  164487358,
+                  168790385,
+                  167448939
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 242480074,
+                "nanoseconds_per_frame": 189.4375578125,
+                "trials": [
+                  256749557,
+                  240780269,
+                  242480074
+                ]
+              }
+            },
+            "rust_over_c": 1.4480836692551393
+          },
+          {
+            "test": 230,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 119401874,
+                "nanoseconds_per_frame": 93.2827140625,
+                "trials": [
+                  118104543,
+                  119401874,
+                  121794008
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 154170524,
+                "nanoseconds_per_frame": 120.445721875,
+                "trials": [
+                  158546571,
+                  153401938,
+                  154170524
+                ]
+              }
+            },
+            "rust_over_c": 1.2911901533471744
+          },
+          {
+            "test": 300,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 7211885,
+                "nanoseconds_per_frame": 5.63428515625,
+                "trials": [
+                  6955124,
+                  7694736,
+                  7211885
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 7182777,
+                "nanoseconds_per_frame": 5.61154453125,
+                "trials": [
+                  7016135,
+                  7891587,
+                  7182777
+                ]
+              }
+            },
+            "rust_over_c": 0.9959638846154646
+          },
+          {
+            "test": 350,
+            "costs": {
+              "reference": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 6525699,
+                "nanoseconds_per_frame": 5.09820234375,
+                "trials": [
+                  6525699,
+                  7180083,
+                  6486754
+                ]
+              },
+              "rust": {
+                "blocks": 10000,
+                "frames": 1280000,
+                "median_nanoseconds": 7594999,
+                "nanoseconds_per_frame": 5.93359296875,
+                "trials": [
+                  7594999,
+                  6950839,
+                  7798011
+                ]
+              }
+            },
+            "rust_over_c": 1.1638598409151264
+          }
+        ]
+      }
+    }
+  },
+  "checks": {
+    "rust": "1.94.1",
+    "workspace_tests": 85,
+    "fmt": "pass",
+    "clippy_warnings_denied": "pass",
+    "isolated": "pass",
+    "full_native_with_rust_fm6_formats": "pass",
+    "seven_wasm": "pass",
+    "frozen_wasm": "pass",
+    "handoff": "pass",
+    "frozen_worker_modes": "pass"
+  },
+  "full_native": {
+    "cases": 43,
+    "render_calls": 295000,
+    "pcm_values": 161688822,
+    "midi_messages": 209246,
+    "midi_clocks": 86265,
+    "trace_hashes_unchanged_vs_melodic_checkpoint": true,
+    "executed_coverage": {
+      "recorded": true,
+      "motif": true,
+      "inverted": true,
+      "alternate": true,
+      "restated": true,
+      "bar_answer": true,
+      "loop_answer": true,
+      "bass_steps": true,
+      "max_midi_gates": 8
+    }
+  },
+  "wasm": {
+    "scenarios": {
+      "factory": {
+        "initial_pack": "factory",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "baeff971",
+        "peak": 0.3714040517807007,
+        "blits": 4679,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 0,
+          "plans": 8,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1037,
+          "sessions": 1,
+          "commands": {
+            "accepted": 961,
+            "consumed": 961,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6215,
+            "chunks": 28982,
+            "controls": 27668
+          },
+          "sequencer": {
+            "lanes": 6222,
+            "mutations": 0,
+            "waits": 463712,
+            "boundaries": 1037
+          },
+          "factory": {
+            "accesses": 13627,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 5292
+          }
+        }
+      },
+      "saved-v1": {
+        "initial_pack": "rust/fm1-engine/tests/packs/harris-citypop.jmp",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "28722449",
+        "peak": 0.4303741455078125,
+        "blits": 4673,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 1,
+          "plans": 10,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1033,
+          "sessions": 1,
+          "commands": {
+            "accepted": 751,
+            "consumed": 751,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6192,
+            "chunks": 34155,
+            "controls": 27682
+          },
+          "sequencer": {
+            "lanes": 6198,
+            "mutations": 0,
+            "waits": 546480,
+            "boundaries": 1033
+          },
+          "factory": {
+            "accesses": 13893,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 5292
+          }
+        }
+      },
+      "session": {
+        "scenario": "v2-hold-idea-save-restart",
+        "render_calls": 11663,
+        "compared_samples": 6570900,
+        "seconds": 74.5,
+        "peak": 0.22903597354888916,
+        "memory_bytes": 33554432,
+        "saved_session": [
+          74,
+          83,
+          77,
+          1,
+          1,
+          11,
+          1,
+          8,
+          2,
+          1,
+          83,
+          0,
+          7,
+          1,
+          190,
+          0,
+          3,
+          83,
+          0,
+          0
+        ],
+        "rust": {
+          "validations": 1,
+          "plans": 9,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 804,
+          "sessions": 2,
+          "commands": {
+            "accepted": 319,
+            "consumed": 319,
+            "dropped": 0,
+            "high_water": 208
+          },
+          "transport": {
+            "pulses": 4819,
+            "chunks": 12684,
+            "controls": 11829
+          },
+          "sequencer": {
+            "lanes": 4824,
+            "mutations": 0,
+            "waits": 202944,
+            "boundaries": 804
+          },
+          "factory": {
+            "accesses": 1340,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 5292
+          }
+        }
+      },
+      "sequencer": {
+        "scenario": "legacy-f4-piece-genre-transport",
+        "compared_samples": 2557800,
+        "render_calls": 4231,
+        "peak": 0.4515293836593628,
+        "sequencer": {
+          "lanes": 876,
+          "waits": 96752,
+          "boundaries": 21
+        },
+        "melodic": {
+          "acid": 153,
+          "mutations": 22,
+          "pluck": 153,
+          "bass": 153,
+          "bar": 4061,
+          "midi_transport": 48413
+        },
+        "voices": {
+          "drums": 6047,
+          "pluck": 6047,
+          "drone": 4957,
+          "acid": 6047,
+          "pad": 6047,
+          "pad_bus": 6047,
+          "controls": 5043,
+          "configs": 29145
+        },
+        "factory": {
+          "accesses": 3406,
+          "codecs": 0,
+          "rejections": 0,
+          "copied_bytes": 10512
+        },
+        "memory_bytes": 33554432
+      },
+      "factory-lines": {
+        "scenario": "stored-frozen-acid-pluck-save",
+        "compared_samples": 970200,
+        "render_calls": 1613,
+        "saved_bytes": 3836,
+        "factory": {
+          "accesses": 1400,
+          "codecs": 6,
+          "rejections": 0,
+          "copied_bytes": 5450
+        },
+        "formats": {
+          "decodes": 1,
+          "encodes": 2,
+          "rejections": 0,
+          "copied_bytes": 1304
+        },
+        "memory_bytes": 33554432
+      },
+      "effects": {
+        "scenario": "panel-effects-banks-release-tails",
+        "compared_samples": 2769480,
+        "render_calls": 5160,
+        "peak": 0.4538612365722656,
+        "pcm_hash": "fd659ab9",
+        "effects": {
+          "master_samples": 1384960,
+          "echo_samples": 1384960,
+          "tank_samples": 1384960,
+          "colour_sample_calls": 4154880
+        },
+        "memory_bytes": 33554432
+      },
+      "fm6": {
+        "scenario": "loaded-user-FM6-algorithms-key-retrigger-stop-tails",
+        "cases": [
+          {
+            "algorithm": 0,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.47700321674346924,
+            "pcm_hash": "d393a85d",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 3,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.4807950258255005,
+            "pcm_hash": "d9669c55",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 5,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.5013117790222168,
+            "pcm_hash": "abebadf5",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 31,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.48351776599884033,
+            "pcm_hash": "cafdb8b9",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          }
+        ]
+      }
+    },
+    "compared_samples": 45780596,
+    "http_compared_samples": 1048576,
+    "original_r01_f4_samples": 2557800,
+    "public_exports": 24,
+    "memory_bytes": 33554432,
+    "reference_sha256": "c89798041c4aa72ef3077996dacc5310cb61646badb515da8e4478da8a41ad14",
+    "rust_sha256": "18c282505ce67fdd379d434c1dec1695a89827dd2975ba32337d5a6b261a70d4",
+    "rust_bytes": 2386896
+  },
+  "handoff": {
+    "paths": [
+      "C0",
+      "Rust",
+      "frozen R01"
+    ],
+    "response_hash": "eff97ff8",
+    "result": "pass"
+  },
+  "workers": {
+    "comparison": "frozen R01/Rust complete PCM traces",
+    "cases": 48,
+    "results": [
+      "predelay=0 type=0 balance=1 serial d93ef055",
+      "predelay=0 type=0 balance=1 deferred d93ef055",
+      "predelay=0 type=0 balance=1 thread d93ef055",
+      "predelay=0 type=0 balance=1 mixed d93ef055",
+      "predelay=0 type=0 balance=2 serial d93ef055",
+      "predelay=0 type=0 balance=2 deferred d93ef055",
+      "predelay=0 type=0 balance=2 thread d93ef055",
+      "predelay=0 type=0 balance=2 mixed d93ef055",
+      "predelay=0 type=1 balance=1 serial 6ac68abe",
+      "predelay=0 type=1 balance=1 deferred 6ac68abe",
+      "predelay=0 type=1 balance=1 thread 6ac68abe",
+      "predelay=0 type=1 balance=1 mixed 6ac68abe",
+      "predelay=0 type=1 balance=2 serial 6ac68abe",
+      "predelay=0 type=1 balance=2 deferred 6ac68abe",
+      "predelay=0 type=1 balance=2 thread 6ac68abe",
+      "predelay=0 type=1 balance=2 mixed 6ac68abe",
+      "predelay=0 type=2 balance=1 serial e15e477b",
+      "predelay=0 type=2 balance=1 deferred e15e477b",
+      "predelay=0 type=2 balance=1 thread e15e477b",
+      "predelay=0 type=2 balance=1 mixed e15e477b",
+      "predelay=0 type=2 balance=2 serial e15e477b",
+      "predelay=0 type=2 balance=2 deferred e15e477b",
+      "predelay=0 type=2 balance=2 thread e15e477b",
+      "predelay=0 type=2 balance=2 mixed e15e477b",
+      "predelay=100 type=0 balance=1 serial f82821e2",
+      "predelay=100 type=0 balance=1 deferred f82821e2",
+      "predelay=100 type=0 balance=1 thread f82821e2",
+      "predelay=100 type=0 balance=1 mixed f82821e2",
+      "predelay=100 type=0 balance=2 serial f82821e2",
+      "predelay=100 type=0 balance=2 deferred f82821e2",
+      "predelay=100 type=0 balance=2 thread f82821e2",
+      "predelay=100 type=0 balance=2 mixed f82821e2",
+      "predelay=100 type=1 balance=1 serial e296d9b4",
+      "predelay=100 type=1 balance=1 deferred e296d9b4",
+      "predelay=100 type=1 balance=1 thread e296d9b4",
+      "predelay=100 type=1 balance=1 mixed e296d9b4",
+      "predelay=100 type=1 balance=2 serial e296d9b4",
+      "predelay=100 type=1 balance=2 deferred e296d9b4",
+      "predelay=100 type=1 balance=2 thread e296d9b4",
+      "predelay=100 type=1 balance=2 mixed e296d9b4",
+      "predelay=100 type=2 balance=1 serial de110743",
+      "predelay=100 type=2 balance=1 deferred de110743",
+      "predelay=100 type=2 balance=1 thread de110743",
+      "predelay=100 type=2 balance=1 mixed de110743",
+      "predelay=100 type=2 balance=2 serial de110743",
+      "predelay=100 type=2 balance=2 deferred de110743",
+      "predelay=100 type=2 balance=2 thread de110743",
+      "predelay=100 type=2 balance=2 mixed de110743"
+    ]
+  },
+  "remaining": [
+    "numeric cm_trigger note duration/MIDI velocity, pending acid decay, voice apply/en_init arithmetic",
+    "application/hardware/MIDI/FM dispatch/publication capture only; harmonics #8 and application orchestration #23",
+    "FM6 #12, FX/mixer #13, job/buffer publication #14/#19",
+    "physical stack/RAM/atomic/deadline qualification separate; no hardware/live/server/remote actions"
+  ]
+}

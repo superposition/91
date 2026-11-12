@@ -54,6 +54,7 @@ version = "0.1.0"
 dependencies = [
  "fm1-engine",
  "fm1-formats",
+ "fm1-rt",
  "fm1-types",
 ]
 

@@ -7,6 +7,7 @@
 #include "fm1_time.h"
 #include "fm1_sys.h"
 #include "fm1_irq.h"
+#include "fm1_rust_atomic.h"
 #include "fm1_guard.h"
 #include "fm1_core1.h"
 #include "fm1_input.h"
