@@ -127,7 +127,7 @@ jobs:
       - run: cargo +1.94.1 check -p fm1-jam-bridge --no-default-features --features pi32v2 --target wasm32-unknown-unknown --locked
       - run: cargo +1.94.1 build --release --locked -p fm1-jam-bridge --no-default-features --features web --target wasm32-unknown-unknown
       - run: python tools/frozen_source.py build/r01-source
-      - run: bash tests/rust_tooling.sh build/r01-source
+      - run: python tests/rust_tooling.py build/r01-source
 
   emulator:
     runs-on: ubuntu-24.04
