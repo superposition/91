@@ -1,0 +1,91 @@
+{
+  "ticket": 19,
+  "base": "692dd3a6a8fb3ef81bf71c93f921ff51c747653e",
+  "rust": "1.94.1",
+  "flag": "EN_RUST_USB=1",
+  "scope": "real TRS parser/content consumer; remaining USB work open",
+  "hardware_accessed": false,
+  "physical_qualified": false,
+  "added_payload_bytes": 0,
+  "state_bytes": 24,
+  "ring_bytes": 128,
+  "queue_events": 64,
+  "cases": 12289,
+  "direct_byte_operations": 24576,
+  "dma_written_bytes": 1060122,
+  "polls": 8192,
+  "baseline_files_verified": 440,
+  "trace": [
+    {
+      "path": "build/usb-trs/reference.bin",
+      "bytes": 8016980,
+      "sha256": "551a1137552d8d079b655c41e663a829b1b1ad52ce7dc8951f908b5f6006627b"
+    },
+    {
+      "path": "build/usb-trs/c0.bin",
+      "bytes": 8016980,
+      "sha256": "551a1137552d8d079b655c41e663a829b1b1ad52ce7dc8951f908b5f6006627b"
+    },
+    {
+      "path": "build/usb-trs/rust.bin",
+      "bytes": 8016980,
+      "sha256": "551a1137552d8d079b655c41e663a829b1b1ad52ce7dc8951f908b5f6006627b"
+    }
+  ],
+  "wasm": [
+    {
+      "path": "build/usb-trs/c0.wasm",
+      "bytes": 17333,
+      "sha256": "71d4240765c9564af13272c2840310f2ef556f2914a7bbb292a361f52c3df39e"
+    },
+    {
+      "path": "build/usb-trs/rust.wasm",
+      "bytes": 577400,
+      "sha256": "65ce57f94707175369941ec25c9c58a9c7cc70018cf90dd4774b3aaae24e15f9"
+    }
+  ],
+  "logs": [
+    {
+      "path": "build/usb/trs.log",
+      "bytes": 19192,
+      "sha256": "dc6aedf976cdec3436478453b2e777eb15d977d16e4e142a9e2793e95fb26409"
+    },
+    {
+      "path": "build/usb/check.log",
+      "bytes": 5507,
+      "sha256": "ad46b9875bb11e961d4b943af9db46a05af80a962e63ad21dbdd89740fb3b4d0"
+    },
+    {
+      "path": "build/usb/miri.log",
+      "bytes": 1132,
+      "sha256": "f5e9b7da08ed66635110fd5099c6d99ceb7f0dc10f12c625461f08623098c8c7"
+    },
+    {
+      "path": "build/usb/lcd-integration.log",
+      "bytes": 5416,
+      "sha256": "164c9d04a074f50e7a9326721c96f26391670fff1b78741a4099d7f7064f6808"
+    },
+    {
+      "path": "build/usb/target.log",
+      "bytes": 103,
+      "sha256": "8df83d5b23da4bfb36552a6b702c1c6f8a949d181aa562d639f14c2642ce3942"
+    },
+    {
+      "path": "build/usb/compile-target.sh",
+      "bytes": 1123,
+      "sha256": "6106da6f09309ea63bf286b16ebab96b476a24fbbf3841df1640a86d16e355ee"
+    }
+  ],
+  "source_sha256": {
+    "firmware/hal/fm1_audio.h": "3c8b55da59f91c81f331ecc97a7eeaa8228d5f146e58e5948c4f1d42bd799f7c",
+    "firmware/src/dsp/rust_usb.h": "e199361214477ad772b040251814cd2a7bc9338c06decc3d89d4325c60f6e1ab",
+    "firmware/src/midi_uart.c": "66af8517e01625298fe3fb1197ddd50a3f4b108d2f91083c82c1336317583347",
+    "rust/fm1-hal/src/lib.rs": "ac29afb91fa752ad87701bb9e41657eef68e22d5d07271cc668b3c174dca825f",
+    "rust/fm1-hal/src/midi.rs": "839d43742c271fb5824a28f8355676e5a15ec7b003d0f24d265b8716d12aee89",
+    "rust/fm1-hal/tests/midi.rs": "19d926f94ad382c1835e35181ff345f3aa0c6c8cb11adc103f38d3450a5d20b8",
+    "rust/fm1-jam-bridge/src/lib.rs": "29e2a1c2ffbab33c3f99e7053e21d5963919cf8fca4d07db3285165f26348a64",
+    "rust/fm1-jam-bridge/src/usb_midi.rs": "5cce4dfc2c9263aa52759914d7a0ecbddd4626f5e8b8d841247425d6d3659591",
+    "tests/reference/usb_trs_reference.c": "2a5c864b7b9ccfbf8de806acfaa04631e1398b8997194ecd6c515e6033c72061",
+    "tests/rust_usb_trs.sh": "9b46f573926468f574e74478a3303722a0f985910fd85cf4e01245f98b3e6562"
+  }
+}

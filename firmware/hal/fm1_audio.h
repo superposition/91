@@ -118,7 +118,7 @@ static int fm1_hal_dma_boot_quiescent(void)
 #ifdef FM1_HAL_BOOT_QUIESCENT
     return FM1_HAL_BOOT_QUIESCENT();
 #else
-    return 0; /* requires ALNK/display/SPI quiescence AND confirmed CPU1 hold before BSS/pool */
+    return 0; /* requires ALNK/display/SPI/USB/UART DMA quiescence AND confirmed CPU1 hold before BSS/pool */
 #endif
 }
 #endif

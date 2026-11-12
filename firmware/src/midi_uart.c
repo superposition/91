@@ -17,11 +17,8 @@
 #define UM_RING 128u
 #define UM_EMPTY 0xFDu         /* an undefined realtime byte: never sent, it marks the slots not yet written */
 static volatile uint8_t um_ring[UM_RING] __attribute__((aligned(16)));
-static struct {
-    uint32_t rd;
-    uint32_t bytes, drops, msgs;
-    uint8_t st, need, got, d0, sysex;
-} um;
+#include "dsp/rust_usb.h"
+static fm1_trs_state_t um;
 
 static int um_put(uint32_t pkt)                    /* into midi_in_q (usb.c): 0 = full */
 {
@@ -35,9 +32,13 @@ static int um_put(uint32_t pkt)                    /* into midi_in_q (usb.c): 0 
 
 static void uart_midi_init(void)                   /* before TIMER5 starts: PORTH read-modify-write */
 {
+#if EN_RUST_USB
+    fm1_rust_usb_trs_clear(um_ring);
+#else
     uint32_t i;
     for (i = 0; i < UM_RING; i++)
         um_ring[i] = UM_EMPTY;
+#endif
     fm1_uart1_midi_init(um_ring, UM_RING);
 }
 
@@ -45,6 +46,9 @@ static uint32_t um_len(uint32_t s) { return (s & 0xE0u) == 0xC0u ? 1u : 2u; }   
 
 static void um_byte(uint32_t b)
 {
+#if EN_RUST_USB
+    fm1_rust_usb_trs_byte(&um,b,um_put);
+#else
     if (b >= 0xF8u) {                              /* real time: any time, keeps running status */
         if (b == 0xF8u || b == 0xFAu || b == 0xFBu || b == 0xFCu) {
             if (um_put(0xFu | b << 8))
@@ -76,6 +80,7 @@ static void um_byte(uint32_t b)
         else
             um.drops++;
     }
+#endif
 }
 
 /* the bytes the DMA has written since the last call, by content; n, its count, only tells an overrun (the DMA went
@@ -83,6 +88,9 @@ static void um_byte(uint32_t b)
  * (line noise) is passed over once the byte after it has landed. */
 static void uart_midi_take(uint32_t n)
 {
+#if EN_RUST_USB
+    (void)fm1_rust_usb_trs_take(&um,um_ring,n,um_put);
+#else
     uint32_t k;
     if (n > UM_RING) {                             /* the DMA lapped us: wait for a whole new status */
         um.drops += n - UM_RING;
@@ -98,6 +106,7 @@ static void uart_midi_take(uint32_t n)
         um.bytes++;
         um_byte(b);                                /* (UM_EMPTY is an unknown realtime byte: ignored) */
     }
+#endif
 }
 
 static void uart_midi_poll(void) { uart_midi_take(fm1_uart1_rx_take()); }   /* TIMER5, outside the render */

@@ -8,3 +8,4 @@ pub mod dma;
 pub mod drivers;
 pub mod flash;
 pub mod io;
+pub mod midi;

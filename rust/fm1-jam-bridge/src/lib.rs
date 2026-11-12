@@ -36,6 +36,7 @@ mod runner;
 mod sequencer;
 mod transport;
 mod ui;
+mod usb_midi;
 #[rustfmt::skip]
 mod ui_layout;
 mod voice_config;
