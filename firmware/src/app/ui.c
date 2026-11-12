@@ -482,6 +482,7 @@ uint32_t ui_splash_ms = 3200u;           /* the boot cards: RedtailWorks, then H
 #if EN_RUST_APP
 #include "../dsp/rust_ui.h"
 #include "../dsp/rust_ui_controller.h"
+#include "../dsp/rust_ui_buttons.h"
 #if !defined(EN_HOST) && !defined(EN_WEB)
 #include "../../hal/fm1_irq_state.h"
 #endif
@@ -2821,8 +2822,67 @@ static int key_locked(int k)                    /* ... and latched */
     return (int)(ui.fx_lock >> KEY_FX[fx_bank][k] & 1u) && (fp < 0 || fp == ui.flex_lock);
 }
 
+#if EN_RUST_APP
+static uint32_t ui_button_port(uint32_t op,uint32_t a,uint32_t b)
+{
+    if(op>=UIBQ_NOW && op<UIBN_SESSION_SAVED) {
+        uint32_t value=0;
+#if !defined(EN_HOST) && !defined(EN_WEB)
+        const uint32_t irq=fm1_irq_state_save();
+#endif
+        switch(op) {
+        case UIBQ_NOW:value=plat_ms();break;
+        case UIBQ_PLAYING:value=en_playing;break;
+        case UIBQ_JAM_ON:value=en_jam_on;break;
+        case UIBQ_FROZEN:value=en_frozen;break;
+        case UIBQ_SECTION:value=en_sec;break;
+        case UIBQ_SECTION_REQUESTED:value=en_sec_req;break;
+        case UIBQ_JAM_HOLD: {jp_settings_t s;en_jam_get(&s);value=s.hold;break;}
+        case UIBQ_OCTAVE_PARAMETER:value=(uint32_t)oct_par((int)a);break;
+        case UIBQ_PARAMETER:if(a<P_NPARAMS)value=(uint32_t)(int32_t)proj.par[a];break;
+        }
+#if !defined(EN_HOST) && !defined(EN_WEB)
+        fm1_irq_state_restore(irq);
+#endif
+        return value;
+    }
+    switch(op) {
+    case UIBA_SESSION:return (uint32_t)jam_session_save();
+    case UIBA_JAM_HOLD:en_jam_set(JAM_HOLD,(int)a);break;
+    case UIBA_JAM_IDEA:en_jam_set(JAM_IDEA,1);break;
+    case UIBA_VIEW:set_view((int)a);break;
+    case UIBA_PLAY:en_play((int)a);break;
+    case UIBA_SEED:en_seed(a);break;
+    case UIBA_NEXT:en_next();break;
+    case UIBA_FREEZE:en_freeze((int)a);break;
+    case UIBA_SCENE_RESET:scene_reset();break;
+    case UIBA_KNOB:if(a<P_NPARAMS)knob_set((int)a,(int32_t)b);break;
+    case UIBA_SECTION:en_section((int)a);break;
+    case UIBN_SESSION_SAVED:say("SESSION SAVED",0);break;
+    case UIBN_STOP_TO_SAVE:say("STOP TO SAVE",0);break;
+    case UIBN_VISUAL:say("VISUAL",VZ_NAME[a%VZ_N]);break;
+    case UIBN_FX_SETTINGS:if(a>0 && a<=NFXP)say(FXP[a-1].name,"SETTINGS");break;
+    case UIBN_FX:say("FX",a==1?"TAP: LATCH  HOLD: PLAY":a==2?"LATCHED ONES STAY ON":"OFF");break;
+    case UIBN_NEXT:say("NEXT CHORD",a?"ON THE BAR":0);break;
+    case UIBN_STOPPED:say("STOPPED",0);break;
+    case UIBN_PLAYING:say("PLAYING",0);break;
+    case UIBN_FREEZE:say("FREEZE",a?"OFF":"ON");break;
+    case UIBN_OCTAVE:if(a<P_NPARAMS) {char t[12];en_param_text((int)a,(int32_t)b,t);
+        say(a==P_PAD_OCT?"PAD OCTAVE":a==P_BASSOCT?"BASS OCTAVE":a==P_AC_OCT?"ACID OCTAVE":a==P_CM_OCT?"PLUCK OCTAVE":"SONG OCTAVE",t);}break;
+    case UIBN_BREAK_OFF:say("BREAKDOWN","OFF");break;
+    case UIBN_BREAK:say("BREAKDOWN",a?"NEXT BAR":0);break;
+    case UIBN_BUILD:say("BUILD","4 BARS, DROP");break;
+    case UIBN_DROP:say("DROP","NEXT BAR");break;
+    }
+    return 0;
+}
+#endif
+
 static void button(int b)
 {
+#if EN_RUST_APP
+    (void)fm1_rust_ui_button(&ui,(uint32_t)b,ui_button_port);
+#else
     int g;
     if(ui.view>=V_JAMHELP && ui.view<=V_JAMSWELL && !ui.fx_menu && b==B_SAVE) {
         say(jam_session_save()==0?"SESSION SAVED":"STOP TO SAVE",0); return;
@@ -2935,6 +2995,7 @@ static void button(int b)
         break;
     default: break;
     }
+#endif
 }
 
 /* PADS ON MIDI IN (0.15.8, the MIDI IN page's Notes: PADS): a pad controller plays PERF, sixteen pads a bank from note 36 (an MPC's default

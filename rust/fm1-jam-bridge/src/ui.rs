@@ -49,6 +49,56 @@ pub unsafe extern "C" fn fm1_rust_ui_accel(
 }
 
 type FrameCallback = unsafe extern "C" fn(u32, u32, u32) -> u32;
+struct ButtonPort {
+    ui: *mut State,
+    callback: FrameCallback,
+}
+impl fm1_app::buttons::Port for ButtonPort {
+    fn with_ui<R>(&mut self, f: impl FnOnce(&mut State) -> R) -> R {
+        // SAFETY: foreground-owned initialized state, with no callback or
+        // retained reference until this closure has completely returned.
+        f(unsafe { &mut *self.ui })
+    }
+    fn query(&mut self, q: fm1_app::buttons::Query, arg: u32) -> u32 {
+        // SAFETY: there is no outstanding UI borrow during any callback.
+        unsafe { (self.callback)(0x100 + q as u32, arg, 0) }
+    }
+    fn action(&mut self, a: fm1_app::buttons::Action, x: u32, y: u32) -> u32 {
+        // SAFETY: callbacks may reenter/access UI only between state closures.
+        unsafe { (self.callback)(a as u32, x, y) }
+    }
+    fn notice(&mut self, n: fm1_app::buttons::Notice, x: u32, y: u32) {
+        // SAFETY: message effects also run after the exclusive UI borrow ends.
+        unsafe { (self.callback)(0x200 + n as u32, x, y) };
+    }
+}
+/// # Safety
+/// State is initialized/aligned and foreground-owned. Callback is synchronous,
+/// may reenter/access state, and retains no reference to this stack adapter.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_ui_button(
+    state: *mut State,
+    button: u32,
+    callback: Option<FrameCallback>,
+) -> i32 {
+    let Some(callback) = callback else {
+        return crate::app::reject();
+    };
+    if state.is_null() {
+        return crate::app::reject();
+    }
+    if !fm1_app::buttons::button(
+        &mut ButtonPort {
+            ui: state,
+            callback,
+        },
+        button,
+    ) {
+        return crate::app::reject();
+    }
+    crate::app::game_call();
+    0
+}
 struct ForegroundPort {
     ui: *mut State,
     frame: *mut FrameState,
@@ -109,4 +159,106 @@ pub unsafe extern "C" fn fm1_rust_ui_frame(
     );
     crate::app::game_call();
     0
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::cell::{Cell, UnsafeCell};
+    thread_local! {static ACTIVE: Cell<*mut State> = const {Cell::new(core::ptr::null_mut())};}
+    struct Reset;
+    impl Drop for Reset {
+        fn drop(&mut self) {
+            ACTIVE.with(|state| state.set(core::ptr::null_mut()));
+        }
+    }
+    fn active() -> *mut State {
+        ACTIVE.with(Cell::get)
+    }
+    unsafe extern "C" fn leaf(op: u32, _a: u32, _b: u32) -> u32 {
+        if op == 0x100 {
+            return 45000;
+        }
+        if (0x100..0x200).contains(&op) {
+            return 0;
+        }
+        // SAFETY: the test's live UnsafeCell root; caller's scoped UI borrow
+        // must have ended before entering this callback.
+        unsafe { (*active()).frame += 1 };
+        0
+    }
+    unsafe extern "C" fn button(op: u32, a: u32, b: u32) -> u32 {
+        if op == fm1_app::buttons::Action::View as u32 {
+            let pointer = active();
+            // SAFETY: no reference is retained over the nested application call.
+            unsafe {
+                (*pointer).view = a as u8;
+            }
+            unsafe {
+                fm1_rust_ui_button(pointer, fm1_app::buttons::id::PLAY, Some(leaf));
+            }
+            return 0;
+        }
+        // SAFETY: identical callback contract, no retained reference.
+        unsafe { leaf(op, a, b) }
+    }
+    unsafe extern "C" fn frame(op: u32, _a: u32, _b: u32) -> u32 {
+        if op == 0x100 {
+            return 45000;
+        }
+        if op >= 0x100 {
+            return 0;
+        }
+        if op == Action::Input as u32 {
+            let pointer = active();
+            // SAFETY: these writes end before a nested button action reenters UI.
+            unsafe {
+                (*pointer).frame = 100;
+                (*pointer).mood = 73;
+            }
+            unsafe {
+                fm1_rust_ui_button(pointer, fm1_app::buttons::id::HOME, Some(button));
+            }
+        } else if op == Action::Main as u32 {
+            // SAFETY: exclusively borrowed only inside this callback.
+            unsafe {
+                let state = &mut *active();
+                state.frame += 1;
+                state.saver_on = 1;
+            }
+        } else if op == Action::Leds as u32 {
+            // SAFETY: the previous callback and every UI closure have returned.
+            unsafe {
+                (*active()).frame += 1;
+            }
+        }
+        0
+    }
+    #[test]
+    fn callbacks_reenter_ui_only_between_scoped_borrows() {
+        // SAFETY: all 193 fields are plain integers, floats or byte arrays;
+        // zero is valid for every field. No padding is inspected.
+        let state = Box::new(UnsafeCell::new(unsafe { core::mem::zeroed::<State>() }));
+        let auxiliary = Box::new(UnsafeCell::new(FrameState::default()));
+        ACTIVE.with(|active| active.set(state.get()));
+        let _reset = Reset;
+        // SAFETY: live, disjoint initialized roots retained throughout nested
+        // synchronous frame -> input -> button -> view -> button callbacks.
+        let result = unsafe {
+            fm1_rust_ui_frame(
+                state.get(),
+                auxiliary.get(),
+                Some(frame),
+                34 | (38 << 8) | (39 << 16) | (42 << 24),
+            )
+        };
+        assert_eq!(result, 0);
+        // SAFETY: no call-scoped UI reference survives the application call.
+        unsafe {
+            assert_eq!((*state.get()).frame, 106);
+            assert_eq!((*state.get()).mood, 73);
+            assert_eq!((*state.get()).view, 36);
+            assert_eq!((*state.get()).saver_on, 1);
+        }
+    }
 }

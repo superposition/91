@@ -2,6 +2,7 @@
 //! Allocation-free interaction and presentation over caller-owned state/storage.
 #![no_std]
 #![forbid(unsafe_code)]
+pub mod buttons;
 pub mod controller;
 pub mod controls;
 pub mod graphics;

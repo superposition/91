@@ -1,0 +1,46 @@
+{
+  "scope": "button actions and scoped callback reentry",
+  "toolchain": "Rust1.94.1; GCC11; Clang22 WASM",
+  "reference": {
+    "cases": 28896,
+    "bytes": 48835104,
+    "sha256": "8a14104a25a1af3cf274cdc71db36562fe9b5f4e232e93cc57dceb545cdbf5f9",
+    "targets": [
+      "R01/C0/Rust native",
+      "R01/C0/Rust WASM"
+    ],
+    "R01_manifest_files_verified": 440,
+    "null_index_guards": 4,
+    "corrupt_transient_FX_page_guard": 1
+  },
+  "miri": {
+    "toolchain": "nightly-2026-08-28",
+    "strict_provenance": "passed",
+    "normal_pinned_native_test": "passed",
+    "scope": "actual Rust adapters, Rust callback-ABI doubles, retained UnsafeCell roots and nested reentry"
+  },
+  "native": {
+    "cases": 97,
+    "artifacts": 538,
+    "pngs": 238,
+    "fresh_process_repeats": 3,
+    "status": "exact five-way incl original failure fingerprints"
+  },
+  "wasm": {
+    "compared_samples_including_HTTP_and_controls": 59649924,
+    "exports": 24,
+    "memory_bytes": 33554432,
+    "bytes": 2350863,
+    "sha256": "f971c0431336432904c0e42063e1ab323787f6a4c8c03c338d3d7909b19920dc",
+    "valid_scenario_application_rejections": 0,
+    "intentional_malformed_encoder_rejection": 1
+  },
+  "footprint": {
+    "added_mutable_state_bytes": 0,
+    "extra_payloads": 0,
+    "compact_group_metadata_bytes": 18,
+    "live_C_group_duplicate": "remains in unported helpers; remove after those ports",
+    "physical_RAM_ROM": "requires adopted-compiler gate"
+  },
+  "remaining": "held-button/key routing, helpers, page composition, visualizers and physical QA"
+}
