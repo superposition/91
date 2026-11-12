@@ -63,7 +63,7 @@ int en_user_count(void);                       /* how many are loaded */
 int en_user_next(void);                        /* the slot a single voice goes to: the next free one, or the last when all are in use */
 int en_ncm_snd(void);                          /* how many pluck sounds can be chosen now: the plain ones, the built-in DX voices, the loaded ones */
 const uint8_t *en_user_get(int slot);          /* a loaded voice's 128 bytes (to store) */
-void en_voice_unpack(const uint8_t *packed128, uint8_t *voice155);   /* the DX7's two formats: for single-voice dumps (155 bytes) and the tests */
+void en_voice_unpack(const uint8_t *packed128, uint8_t *voice156);   /* 155 DX7 bytes plus the existing terminating NUL; caller supplies156 bytes */
 void en_voice_pack(const uint8_t *voice155, uint8_t *packed128);
 extern volatile float en_cm_level;             /* the counter-melody's level, for the screen */
 void en_style_sounds(int16_t *par);             /* a piece stored with a style (before 1.0.27): its sounds and
@@ -497,4 +497,7 @@ int en_jam_snapshot(en_jam_snapshot_t *out);
 #define PARAMS (fm1_rust_factory_parameters())
 #define EN_MODE_POOL (fm1_rust_factory_modes())
 #include "rust_factory_names.inc"
+#endif
+#if EN_RUST_FORMATS
+#include "rust_formats.h"
 #endif

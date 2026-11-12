@@ -87,6 +87,10 @@ jobs:
         run: node tests/host/emu_browser_test.mjs build/emu/amb.wasm
       - name: Native clock, melodic/drum scheduling, mutation and event trace parity
         run: sh tests/rust_melodic_parity.sh
+      - name: Isolated analog voice state and PCM parity
+        run: sh tests/rust_voices_parity.sh
+      - name: Isolated drone and acid state and PCM parity
+        run: sh tests/rust_tonal_parity.sh
       - name: Compact factory tables and packed musical codecs
         run: sh tests/rust_factory_tables.sh
       - name: Native effects, master, output and state parity
@@ -109,6 +113,15 @@ jobs:
           path: |
             build/transport-parity/*.json
             build/transport-parity/source-verification.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: voice-parity
+          path: |
+            build/voices/*.json
+            build/voices/source-verification.log
+            build/tonal/*.json
+            build/tonal/source-verification.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:

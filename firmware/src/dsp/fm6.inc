@@ -54,6 +54,9 @@ static void fm6_sanitize(uint8_t *v)            /* every value inside its range 
 
 static void fm6_unpack(const uint8_t *b, uint8_t *v)   /* 128-byte packed record (VMEM) -> 155-byte voice */
 {
+#if EN_RUST_FORMATS
+    fm1_rust_formats_voice(0,b,128,v,156);
+#else
     uint32_t k, i;
     for (k = 0; k < 6u; k++) {
         const uint8_t *o = b + k * 17u;
@@ -85,6 +88,7 @@ static void fm6_unpack(const uint8_t *b, uint8_t *v)   /* 128-byte packed record
     for (i = 0; i < 10u; i++)
         v[FP_NAME + i] = b[118 + i] & 0x7Fu;
     fm6_sanitize(v);
+#endif
 }
 
 static void fm6_rom_patch(const fm6_rom_t *r, uint8_t *v)   /* a Melodee factory voice -> 155-byte voice */
@@ -600,6 +604,9 @@ void en_fm_float_path(int v) { fm6_float_path = v; }
 /* the DX7's other format: the 155-byte single-voice record -> the 128-byte packed one (the inverse of fm6_unpack) */
 static void fm6_pack(const uint8_t *v, uint8_t *b)
 {
+#if EN_RUST_FORMATS
+    fm1_rust_formats_voice(1,v,155,b,128);
+#else
     uint32_t k, i;
     for (i = 0; i < 128u; i++)
         b[i] = 0;
@@ -624,6 +631,7 @@ static void fm6_pack(const uint8_t *v, uint8_t *b)
     b[117] = v[FP_TRNSP] & 0x7Fu;
     for (i = 0; i < 10u; i++)
         b[118 + i] = v[FP_NAME + i] & 0x7Fu;
+#endif
 }
 void en_voice_unpack(const uint8_t *b, uint8_t *v) { fm6_unpack(b, v); }
 void en_voice_pack(const uint8_t *v, uint8_t *b) { fm6_pack(v, b); }

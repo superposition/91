@@ -11,10 +11,12 @@ use fm1_formats::session::JamSession;
 mod commands;
 mod effects;
 mod factory;
+mod formats;
 mod handoff;
 mod melodic;
 mod sequencer;
 mod transport;
+mod voices;
 
 static VALIDATIONS: AtomicU32 = AtomicU32::new(0);
 static PLANS: AtomicU32 = AtomicU32::new(0);
@@ -287,6 +289,8 @@ pub extern "C" fn fm1_rust_jam_stat(index: u32) -> u32 {
         22..=27 => melodic::stat(index),
         28..=31 => effects::stat(index),
         32..=35 => factory::stat(index),
+        36..=39 => formats::stat(index),
+        40..=47 => voices::stat(index),
         _ => 0,
     }
 }

@@ -2,6 +2,9 @@
 /* The instrument (amb.h). One compilation unit, -O2. */
 #include "amb.h"
 #include "fastmath.h"
+#if EN_RUST_VOICES
+#include "rust_voices.h"
+#endif
 #if EN_RUST_MELODIC
 #include "rust_melodic.h"
 #endif
@@ -1821,6 +1824,9 @@ static inline float blep_saw(float t, float dt)
  * when the chord changes); what moves is the filter: CUTOFF and RESO, its envelope (retriggered on
  * each chord or every 1 .. 8 bars), its LFO (to the cutoff, the pitch, the level or the drive), a slow
  * random drift, the arc, and the sections (it closes in a breakdown, opens through the build). */
+#if EN_RUST_VOICES
+static fm1_voice_drone_t bass;
+#else
 static struct {
     float ph[3], sph, mph, note, target, amp;   /* mph: Metal's modulator, Sync's slave */
     float s[4], c1[4], c2[4];                   /* the filters' states, their coefficients */
@@ -1830,8 +1836,17 @@ static struct {
     uint8_t play;                               /* played from the keys */
     float vd;                                   /* a key's velocity, as a gain less 1 (0: as the algorithm plays it; 0.15.23) */
 } bass;
+#endif
+#if EN_RUST_VOICES
+static fm1_voice_line_t bl_line;
+#define bl_env bl_line.env
+#define bl_gate bl_line.gate
+#define bl_up bl_line.up
+static uint8_t bl_kick,bl_beat;
+#else
 static float bl_env, bl_gate;                   /* the bass line's envelope, 0..1, and the samples its note still holds */
 static uint8_t bl_up, bl_kick, bl_beat;         /* attacking; the kick hit this step; the notes since the bar (the riff's place) */
+#endif
 static float bass_vol, reso_k = 1.0f;
 static const float GLIDE_K = 1.0f / (0.6f * EN_SR);
 static float brk;                               /* the sections, smoothed: +1 breakdown, -0.5 build, 0 groove */
@@ -1845,6 +1860,9 @@ static float duck_env, duck_dec = 0.9997f;      /* the kick's sidechain: 1 just 
  * low-passes in a row, the first resonant, driven between them; an envelope sweeps the cutoff (ENV MOD,
  * DECAY), an accent sweeps it further and plays louder (ACCENT); a slide glides the pitch without a
  * new attack. */
+#if EN_RUST_VOICES
+static fm1_voice_acid_t acid;
+#else
 static struct {
     float ph, inc, inc_t, amp, amp_t, env, edec, acc, s[4], c1[4], c2[4];
     int32_t gate_left;                          /* samples until the note's gate closes; -1 held (a slide) */
@@ -1852,6 +1870,7 @@ static struct {
     uint8_t play;                               /* played from the keys: the line steps on, silent */
     float ps, p3, p4, p5, lph;                  /* more phases (sync, sub, the trance saws, the supersaw's...), the PWM's LFO */
 } acid;
+#endif
 static int8_t ac_off[EN_NSTEP], ac_oct[EN_NSTEP];   /* each step: scale steps above the chord's degree, octave */
 static uint16_t ac_gate, ac_accent, ac_slide;       /* bit s: step s plays; is accented; slides into the next */
 static int ac_pos;
@@ -1876,6 +1895,9 @@ static int nz_color;
  * snare (two tuned sines and band-passed noise), a clap (three bursts of noise, then its tail), a
  * closed and an open hat (the 808's six squares' metal and noise, high-passed; the closed chokes the
  * open), a perc (an FM blip: a rim or a tom, by its tune). Each lane its level, tune and decay. */
+#if EN_RUST_VOICES
+typedef fm1_voice_drum_t drum_t;
+#else
 typedef struct {
     float ph, inc, inc_end, amp, adec, idx, x1, x2, att, mph[4], pend, t, hp, ph2, inc2;
     int32_t wait, wait2;                        /* swing, rolls: samples until a hit that waits (pend, pend2: its velocity) */
@@ -1886,6 +1908,7 @@ typedef struct {
     uint8_t rn;
     uint8_t on, note;
 } drum_t;
+#endif
 static drum_t drum[EN_NDRUM];
 #define DR_FADE (1.0f - 1.0f / (0.0008f * EN_SR))   /* the old hit's fade: ~0.8 ms, gone in ~4 */
 static float pulse_vol, swing, drive_k = 1.0f, lane_g[EN_NDRUM], lane_tune[EN_NDRUM], lane_dec[EN_NDRUM];
@@ -3442,7 +3465,11 @@ static const float FM_GAIN_DY[EN_NFMFACT] = {0.45f, 0.29f, 0.22f, 0.59f, 3.73f, 
 static float fm_fifo[FM_R] EN_POOL;
 static uint32_t fm_ctr;                         /* samples gone by (the first core's) */
 static float fm_ol[BLK_FM] EN_POOL, fm_or[BLK_FM] EN_POOL, fm_rs[BLK_FM] EN_POOL, fm_es[BLK_FM] EN_POOL;   /* the DX voices' part of the mix and the sends */
+#if EN_RUST_VOICES
+static fm1_voice_pluck_t cm[2];
+#else
 static struct { float ph, ps, inc, env, dm, vel; uint32_t age; } cm[2];
+#endif
 static float cm_vol;
 static int cm_i, cm_alt;
 static uint8_t cm_f[32], cm_g[32], cm_ix[32], cm_vl[32];   /* the pluck's loop (deja vu): a slot heard (f), its gate, its place in the chord's tones (octave leap in bit 7 and 6: up, down), its velocity */
@@ -7274,6 +7301,9 @@ static void drain(void)
 static float mixl[BLK], mixr[BLK], rsend[BLK], esend[BLK];
 static float busl[BLK], busr[BLK];              /* the punch-ins' bus (0.15.19) */
 static float dsn_l[BLK], dsn_r[BLK];            /* the mix before the drums (their crush, and the drums into the bus) */
+#if EN_RUST_EFFECTS
+#include "rust_mixer.inc"
+#endif
 
 /* the pad's bus: a 12 dB low-pass, darker than it sounds on paper (Brian Eno darkened everything: the
  * Synthi's filter below half, then tape). No chorus: a modulated delay against pure tones beats (on
@@ -7550,6 +7580,9 @@ static void render_pad(uint32_t n)
 /* (0.14.4 tried this in RAM, .ram_hot: on the device the bass costs about 200 us a chunk whatever the chunk's length, the most of any stage, which
  * looks like its code fetched cold from the flash each chunk. It makes 43 calls out to helpers the compiler keeps in the flash, and a pi32v2 call
  * cannot reach the flash from RAM (R_PI32V2_LONG_JUMP_23M2 truncated), so it needs those helpers inlined or in RAM with it first.) */
+#if EN_RUST_VOICES
+#include "rust_tonal.inc"
+#endif
 static void render_bass(uint32_t n)
 {
     if(jp_dx()) {
@@ -7557,6 +7590,10 @@ static void render_bass(uint32_t n)
         for(k=0;k<n;k++){float x=fm_bass_fifo[(rv_job.fm_w-FM_D+k)&(FM_R-1)]*g;bass_o[k]=x;peak=fm_maxf(peak,fm_fabsf(x));}
         en_bass_level=peak;return;
     }
+#if EN_RUST_VOICES
+    const fm1_voice_drone_config_t config=voice_drone_config();
+    en_bass_level=fm1_rust_voice_drone(&bass,&config,&bl_line,&dr_ctl,SINT,bass_o,n);
+#else
     const int ft_bass = fxs_v[EN_FXS_FT_BASS];
     uint32_t j;
     const drone_snd_t *DS = &DRONE_SOUND[(unsigned)par[P_DR_INST] < EN_NSOUND ? par[P_DR_INST] : 0];
@@ -7705,6 +7742,7 @@ static void render_bass(uint32_t n)
     bass.mph = mp;
     bass.amp = amp;
     en_bass_level = bl_on ? amp * bl_env : amp;
+#endif
 }
 
 static void render_dj(uint32_t n)               /* the snips, into the mix and its sends, before the sidechain */
@@ -7768,6 +7806,12 @@ static void render_fm(uint32_t n)
 
 static void render_cm(uint32_t n)
 {
+#if EN_RUST_VOICES
+    const int sn=par[P_CM_SND]<0?0:par[P_CM_SND]>=CM_NPLAIN?CM_NPLAIN-1:par[P_CM_SND];const cm_snd_t *s=&CM_SOUND[sn];
+    const fm1_voice_pluck_config_t c={cm_vol*0.5f*s->g,HB(EN_V_PLUCK)?hb_pf:1.0f,s->fr,s->i0,s->i1,trk_g[TR_CM],trk_g1[TR_CM],tg_inv,en_cm_level,s->rise,(uint32_t)(par[P_CM_SND]>=CM_NPLAIN)};
+    float *const outputs[4]={mixl,mixr,rsend,esend};cm_midi_step((int32_t)n);
+    en_cm_level=fm1_rust_voice_pluck(cm,&c,SINT,outputs,n);
+#else
     const int sn = par[P_CM_SND] < 0 ? 0 : par[P_CM_SND] >= CM_NPLAIN ? CM_NPLAIN - 1 : par[P_CM_SND];
     const cm_snd_t *S = &CM_SOUND[sn];
     const float g = cm_vol * 0.5f * S->g, pfc = HB(EN_V_PLUCK) ? hb_pf : 1.0f;   /* (a keyboard's bend) */
@@ -7809,10 +7853,15 @@ static void render_cm(uint32_t n)
         cm[v].env = fm_flush(cm[v].env);
     }
     en_cm_level = lvl;
+#endif
 }
 
 static void render_acid(uint32_t n)
 {
+#if EN_RUST_VOICES
+    const fm1_voice_acid_config_t config=voice_acid_config();
+    en_acid_level=fm1_rust_voice_acid(&acid,&config,&ac_ctl,SINT,acid_o,n);
+#else
     const int ft_acid = fxs_v[EN_FXS_FT_ACID];
     uint32_t j;
     const acid_snd_t *AS = &ACID_SOUND[(unsigned)par[P_AC_WAVE] < EN_NACID ? par[P_AC_WAVE] : 0];
@@ -8025,6 +8074,7 @@ static void render_acid(uint32_t n)
     acid.inc = inc;
     acid.amp = amp;
     en_acid_level = lvl * (0.6f + 0.4f * acid.env);
+#endif
 }
 
 /* the noise: one sample of a colour from a generator */
@@ -8277,6 +8327,13 @@ static void render_perc(drum_t *v, uint32_t n, float g)
 
 static void render_drums(uint32_t n)
 {
+#if EN_RUST_VOICES
+    const float g=pulse_vol*1.1f;
+    const fm1_voice_drums_config_t c={{g*lane_g[L_KICK]*1.15f,g*0.38f*lane_g[L_SNARE],g*0.42f*lane_g[L_CLAP],g*0.22f*lane_g[L_HAT],g*0.18f*lane_g[L_OHAT],g*0.3f*lane_g[L_PERC]},
+        {hat_inc[0],hat_inc[1],hat_inc[2],hat_inc[3]},drive_k*KK->k_drive,KK->k_drop,KK->k_click,KK->k_rumble,KS->sn_body,KS->sn_noise,KS->cl_gap,KH->h_noise,
+        {trk_g[TR_KICK],trk_g[TR_SNARE],trk_g[TR_HATS],trk_g[TR_PERC]},{trk_g1[TR_KICK],trk_g1[TR_SNARE],trk_g1[TR_HATS],trk_g1[TR_PERC]},tg_inv};
+    float *const outputs[4]={mixl,mixr,rsend,esend};fm1_rust_voice_drums(drum,&c,SINT,&noise,outputs,n);
+#else
     uint32_t j;
     const float g = pulse_vol * 1.1f;
     drum_t *v;
@@ -8332,6 +8389,7 @@ static void render_drums(uint32_t n)
     render_hat(&drum[L_HAT], n, g * 0.22f * lane_g[L_HAT], 0.75f, 1.0f);    /* a little right */
     render_hat(&drum[L_OHAT], n, g * 0.18f * lane_g[L_OHAT], 1.0f, 0.75f);  /* a little left */
     render_perc(&drum[L_PERC], n, g * 0.3f * lane_g[L_PERC]);
+#endif
 }
 
 _Static_assert(BLK == BLK_FM, "the DX voices' buffers are a chunk long");
@@ -8413,9 +8471,14 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
 {
     uint32_t j, pt0_ = en_prof_clock ? en_prof_clock() : 0u, bal_t0 = pt0_, bal_a = 0u, bal_w = 0u, cs_[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
     DIAG_LOCALS
+#if EN_RUST_EFFECTS
+    const float rg=fm1_rust_mix_reverb_gain(rev_send,rev_in_gain,arcm,brk),eg=echo_send;
+    const float depth=fm1_rust_mix_duck_depth(KK->duck,pulse_vol,trk_g1[TR_KICK]);
+#else
     const float rg = rev_send * rev_in_gain * (1.0f - 0.25f * arcm) * (1.0f + 0.7f * fm_maxf(brk, 0.0f)), eg = echo_send;
-    float dk[BLK], de = duck_env, gg = gate_g;
     const float depth = fm_minf(0.55f * KK->duck, 0.85f) * fm_minf(pulse_vol * 1.5f, 1.0f) * trk_g1[TR_KICK];   /* a muted kick ducks nothing */
+#endif
+    float dk[BLK], de = duck_env, gg = gate_g;
     const int gate = fx_on >> FX_GATE16 & 1u ? 1 : fx_on >> FX_GATE8 & 1u ? 2 : 0;
     const int odd = (int)((sixteenth - 1u) & 1u);         /* the sixteenth playing now: the second of an eighth? */
     int rv_c2;
@@ -8457,12 +8520,17 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
     DT(2);
     render_fm(n);                               /* the DX voices' samples from a chunk ago (the other core's), into the fm_ buffers added below */
     mx_end(3, n);
-    if (bus_m >> TR_CM & 1u)                    /* the plain pluck to the punch-ins' bus: it is all the mix holds so far */
+    if (bus_m >> TR_CM & 1u) {                  /* the plain pluck to the punch-ins' bus: it is all the mix holds so far */
+#if EN_RUST_EFFECTS
+        float *p[6];rust_mix_pointers(p,0);fm1_rust_mix_route_plain(p,n);
+#else
         for (j = 0; j < n; j++) {
             busl[j] = mixl[j];
             busr[j] = mixr[j];
             mixl[j] = mixr[j] = 0.0f;
         }
+#endif
+    }
     DT(3);
     render_dj(n);
     DT(4);
@@ -8478,6 +8546,9 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
         const uint32_t rp = pad_ctr - PAD_D;
         mx_gains(0, &pl, &pr, &ps);
         mx_gains(3, &fl, &fr, &fs);
+#if EN_RUST_EFFECTS
+        {const fm1_mix_merge_t c={{pl,pr,ps},{fl,fr,fs},(bus_m>>TR_PAD)&1u,(bus_m>>TR_CM)&1u};rust_mix_pad_fm(rp,n,&c);}
+#else
         {   /* (each into the punch-ins' bus when targeted: chosen once a chunk, 0.15.20, not tested a sample) */
             float *const pal = bus_m >> TR_PAD & 1u ? busl : mixl, *const par_ = bus_m >> TR_PAD & 1u ? busr : mixr;
             float *const fal = bus_m >> TR_CM & 1u ? busl : mixl, *const far_ = bus_m >> TR_CM & 1u ? busr : mixr;
@@ -8492,6 +8563,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
             esend[j] += ds * 0.2f + fm_es[j] * fs;
         }
         }
+#endif
         pad_ctr += n;
     }
     pad_midi_flush();
@@ -8567,13 +8639,18 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
         render_drums(n);                        /* (the kick sets duck_env for the next chunk) */
     }
     mx_end(4, n);
-    if (bus_m & 0x0Fu)                          /* the drums to the punch-ins' bus: what they added (crushed, through the mixer), out of the mix */
+    if (bus_m & 0x0Fu) {                        /* the drums to the punch-ins' bus: what they added (crushed, through the mixer), out of the mix */
+#if EN_RUST_EFFECTS
+        float *p[6];rust_mix_pointers(p,0);fm1_rust_mix_route_drums(p,dsn_l,dsn_r,n);
+#else
         for (j = 0; j < n; j++) {
             busl[j] += mixl[j] - dsn_l[j];
             busr[j] += mixr[j] - dsn_r[j];
             mixl[j] = dsn_l[j];
             mixr[j] = dsn_r[j];
         }
+#endif
+    }
     DT(8);
     PT(5);                                      /* the drums */
     if (rv_c2 && rv_job.bass) {                 /* the drone and the acid are the other core's: wait for them (the reverb goes on behind) */
@@ -8600,6 +8677,10 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
         float bl, br, bs, al, ar, as;
         mx_gains(1, &bl, &br, &bs);
         mx_gains(2, &al, &ar, &as);
+#if EN_RUST_EFFECTS
+        {const fm1_mix_merge_t c={{bl,br,bs},{al,ar,as},(bus_m>>TR_DRONE)&1u,(bus_m>>TR_ACID)&1u};
+         float *p[6];const float *input[4]={bass_o,acid_o,dk,gg_v};rust_mix_pointers(p,0);fm1_rust_mix_bass_acid(&c,p,input,n);}
+#else
         for (j = 0; j < n; j++) {
             const float b = bass_o[j], a = acid_o[j], dg = dk[j] * gg_v[j];
             float *const tbl = bus_m >> TR_DRONE & 1u ? busl : mixl, *const tbr = bus_m >> TR_DRONE & 1u ? busr : mixr;   /* (the punch-ins' bus when targeted) */
@@ -8611,6 +8692,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
             rsend[j] += (b * 0.06f * bs + a * 0.15f * as) * gg_v[j];
             esend[j] += (b * 0.04f * bs + a * 0.35f * as) * gg_v[j];
         }
+#endif
     }
     duck_env = fm_flush(de);
     DT(9);
@@ -8652,6 +8734,9 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
             tf_s[j] = fm_flush(tf_s[j]);
 #endif
     }
+#if EN_RUST_EFFECTS
+    rust_mix_echoes(n,dk,rg,eg);
+#else
     {
     const float thr = throw_amt * 0.5f, tdg = tdx_m * (float)fxs_v[EN_FXS_TD_SEND] * 0.006f;   /* (the bus is cleared each chunk, so 0 when unused) */
     for (j = 0; j < n; j++) {                   /* the echoes; the reverb's input into its line; the dry part of the mix */
@@ -8663,6 +8748,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
         dk[j] *= 1.3f * 0.36f;                  /* what the tank's output is scaled by */
     }
     }
+#endif
     DT(10);
     PT(6);                                      /* the echoes, the reverb's input */
     bal_a = pt0_;
@@ -8688,12 +8774,17 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
     PT(7);                                      /* the wait for the reverb */
     bal_w += pt0_ - bal_a;
     DT0();
+#if EN_RUST_EFFECTS
+    {float *p[6];rust_mix_pointers(p,0);fm1_rust_mix_tank(p,rv_wl,rv_wr,dk,n);}
+    for(j=0;j<n;j++)fx_master(&mixl[j],&mixr[j]);
+#else
     for (j = 0; j < n; j++) {                   /* the tank's output in, the performance effects */
         float l = mixl[j] + dk[j] * rv_wl[j], r = mixr[j] + dk[j] * rv_wr[j];
         fx_master(&l, &r);
         mixl[j] = l;
         mixr[j] = r;
     }
+#endif
     DT(11);
     master_dyn_block(mixl, mixr, n);            /* the compressor and the limiter */
     DT(12);

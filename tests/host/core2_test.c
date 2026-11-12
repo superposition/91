@@ -113,6 +113,9 @@ int main(int argc, char **argv)
     en_set(P_PL_CHO, 70);               /* and the pad's chorus */
     en_set(P_RV_TYPE, argc > 3 ? atoi(argv[3]) : 0);   /* the reverb's type: 0 plate, 1 shimmer, 2 gated (argv[3]) */
     en_set(P_RV_X, 60);
+    if(argc>7)en_set(P_RV_PRE,atoi(argv[7]));   /* mixer tests: both disjoint predelay spacing endpoints */
+    if(argc>8)en_set(P_ECHO,atoi(argv[8]));
+    if(argc>9)en_set(P_SIZE,atoi(argv[9]));
     en_fm_float_path(argc > 5 ? atoi(argv[5]) : 0);   /* argv[5] 1: the DX voices on the float buses */
     en_balance_force(argc > 4 ? atoi(argv[4]) : -1);   /* argv[4]: where the pad's chorus runs (0 the other core's, 1 the first's) */
     if(argc>6 && atoi(argv[6])==2){unsigned n;const uint8_t *p=en_jam_builtin(0,&n);en_jam_upload(p,n);}

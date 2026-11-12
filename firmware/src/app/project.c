@@ -177,6 +177,9 @@ static void pack_slot(const slot_t *s, int i)
             px[i][p] = s->prk[p];
             pending_px = 1;
         }
+#if EN_RUST_FORMATS
+    fm1_rust_formats_record_pack(s->par,s->pool,&s->pats[0][0],&s->mod[0][0],s->acl,s->cml,rec,IMG_REC);
+#else
     memset(rec, 0, IMG_REC);
     wr16(rec, s->pool);
     for (p = 0; p < EN_NPAT; p++)
@@ -192,6 +195,7 @@ static void pack_slot(const slot_t *s, int i)
     memcpy(rec + REC_ACL, s->acl, 18);
     memcpy(rec + REC_CML1, s->cml, 6);
     memcpy(rec + REC_CML2, s->cml + 6, 6);
+#endif
 }
 static int unpack_slot(int i, uint32_t npar, int tail, slot_t *s)   /* tail: the image has the progressions */
 {
@@ -202,6 +206,9 @@ static int unpack_slot(int i, uint32_t npar, int tail, slot_t *s)   /* tail: the
     else
         memset(s->prg, 0, EN_PRG_LEN);
     memcpy(s->prk, px[i], EN_PRK_LEN);
+#if EN_RUST_FORMATS
+    return fm1_rust_formats_record_unpack(rec,IMG_REC,npar,s->par,&s->pool,&s->pats[0][0],&s->mod[0][0],s->acl,s->cml)>0;
+#else
     for (p = 0; p < EN_NPAT; p++)
         for (l = 0; l < EN_NLANE; l++)
             s->pats[p][l] = rd16(rec + 2 + 2 * (p * EN_NLANE + l));
@@ -224,6 +231,7 @@ static int unpack_slot(int i, uint32_t npar, int tail, slot_t *s)   /* tail: the
         s->par[p] = clamp_par(p, v);
     }
     return !bad && pool_ok(s->pool);
+#endif
 }
 static void pluck_old(slot_t *s)               /* a piece stored when twenty-two DX voices were built in: the player's own voices (34 on) are now eight places up */
 {
@@ -280,6 +288,9 @@ static void old_bank_load(int n)
             int bad = 0;
             if (!(sv >> i & 1u))
                 continue;
+#if EN_RUST_FORMATS
+            bad=fm1_rust_formats_legacy(q,stride,npar,(uint32_t)old_tone|((uint32_t)old_rate<<1),s->par,&s->pool,&s->pats[0][0])<=0;
+#else
             for (p = 0; p < P_NPARAMS; p++) {
                 int v = (uint32_t)p < npar ? (int16_t)rd16(q + 2 * p) : en_param_info(p)->def;
                 if (p == P_AC_EVERY && old_tone)
@@ -289,15 +300,18 @@ static void old_bank_load(int n)
                 bad |= p != P_STYLE && v != clamp_par(p, v);   /* (the old style is converted below) */
                 s->par[p] = (int16_t)v;
             }
+#endif
             en_style_sounds(s->par);         /* stored with a style (before 1.0.27): its sounds and kit */
             ans_old(s);
             pluck_old(s);
+#if !EN_RUST_FORMATS
             q += 2u * npar;
             s->pool = rd16(q);
             q += 2;
             for (p = 0; p < EN_NPAT; p++)
                 for (l = 0; l < EN_NLANE; l++)
                     s->pats[p][l] = rd16(q + 2 * (p * EN_NLANE + l));
+#endif
             if (bad || !pool_ok(s->pool))
                 sv &= (uint16_t)~(1u << i);   /* out of range: not saved */
         }
