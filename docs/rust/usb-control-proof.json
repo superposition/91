@@ -1,0 +1,164 @@
+{
+  "ticket": 19,
+  "base": "99766ff92fdf32ffcd44c6fec1618ad844513ead",
+  "rust": "1.94.1",
+  "flag": "EN_RUST_USB=1",
+  "scope": "real device descriptor generation, EP0 request selection and transfer framing; whole ticket remains open",
+  "hardware_accessed": false,
+  "physical_qualified": false,
+  "added_payload_bytes": 0,
+  "added_global_production_state_bytes": 0,
+  "endpoint0_capacity": 68,
+  "packet_max_bytes": 64,
+  "descriptor_variants": [
+    {
+      "variant": "0-0-0",
+      "cdc": 0,
+      "uac": 0,
+      "loader": 0,
+      "cases": 67182,
+      "bytes": 796226,
+      "sha256": "21071ad07f5543c8b986e70f694e3c794282c86630587f83e155c7a1055d665f"
+    },
+    {
+      "variant": "0-0-1",
+      "cdc": 0,
+      "uac": 0,
+      "loader": 1,
+      "cases": 67182,
+      "bytes": 796466,
+      "sha256": "23431c5d97d2fdf2aba8db2606fe43bbb8992a5bbc31d48e2d6106f73ad2cd88"
+    },
+    {
+      "variant": "0-1-0",
+      "cdc": 0,
+      "uac": 1,
+      "loader": 0,
+      "cases": 67182,
+      "bytes": 820957,
+      "sha256": "91233636e69c62a6ee353ce0067dfba1ae04e856611134d9d1c8701df11f46b0"
+    },
+    {
+      "variant": "0-1-1",
+      "cdc": 0,
+      "uac": 1,
+      "loader": 1,
+      "cases": 67182,
+      "bytes": 821197,
+      "sha256": "c536464748698561569a8a1c0f43b5e40f582492e0ef16ab16be84c452b5dda9"
+    },
+    {
+      "variant": "1-0-0",
+      "cdc": 1,
+      "uac": 0,
+      "loader": 0,
+      "cases": 67182,
+      "bytes": 864560,
+      "sha256": "705196b966ad77c739d09dfb1359571684b5d9a92d89f44e1dd8e9c6a4ae0158"
+    },
+    {
+      "variant": "1-0-1",
+      "cdc": 1,
+      "uac": 0,
+      "loader": 1,
+      "cases": 67182,
+      "bytes": 864800,
+      "sha256": "463bfb415236421b63f941ad3523012fda392ff51f9e0207eacc5c1ba32e724a"
+    },
+    {
+      "variant": "1-1-0",
+      "cdc": 1,
+      "uac": 1,
+      "loader": 0,
+      "cases": 67182,
+      "bytes": 889241,
+      "sha256": "1321a52cd72b13c985430013196435ae50e4f5ed79d4fb60f71da3b965167fb0"
+    },
+    {
+      "variant": "1-1-1",
+      "cdc": 1,
+      "uac": 1,
+      "loader": 1,
+      "cases": 67182,
+      "bytes": 889481,
+      "sha256": "c22aaa5f9ac2c2bd8a2e3504bb13c50fb930d6bb278c1abf42998c32f13b3666"
+    }
+  ],
+  "baseline_files_verified": 440,
+  "checks": {
+    "linux_workspace_passed": 163,
+    "safe_hal_tests_passed": 13,
+    "bridge_tests_passed": 12,
+    "rustfmt": true,
+    "clippy_warnings_denied": true,
+    "no_std_wasm": true,
+    "miri_strict_provenance_retained_endpoint": true,
+    "vendor_c_main_engine_usb1_hal1_compile_only": true
+  },
+  "artifacts": [
+    {
+      "path": "build/usb-control/final.log",
+      "bytes": 2808,
+      "sha256": "16ba2d399adcbc9a0051778cef0cd512175396736cd0d386ef7a9820f1195b64"
+    },
+    {
+      "path": "build/usb-control/workspace.log",
+      "bytes": 24123,
+      "sha256": "bc11647f2334ebc4531c5d7ecbe973b2a1334882d553e5741e95f5f5205c890b"
+    },
+    {
+      "path": "build/usb-control/nostd.log",
+      "bytes": 342,
+      "sha256": "a26af0652e7cc298de5a061bee04720848b4ae89b9f66093c68a92934f2c0b10"
+    },
+    {
+      "path": "build/usb-control/miri.log",
+      "bytes": 663,
+      "sha256": "d9142aa82a56c7ce88b2e1d07773852d06ba2d62c58e3fde9a4deee59763a951"
+    },
+    {
+      "path": "build/usb-control/source-verification.log",
+      "bytes": 12678,
+      "sha256": "02103818921d558fa092601f4329ba6740cf2ad792676fb0331e24f2fadfbd85"
+    },
+    {
+      "path": "build/usb/target/main.o",
+      "bytes": 479504,
+      "sha256": "fe66e611cdad391b1621d853bde14326c03a68e858b7bac73b5cfadb273feaf6"
+    },
+    {
+      "path": "build/usb/target/engine.o",
+      "bytes": 418076,
+      "sha256": "fe190e19a53985a0c750ec53de7280b2f12c57d89e7330aa6e438b7127daeb68"
+    },
+    {
+      "path": "build/usb/target/main.log",
+      "bytes": 1176,
+      "sha256": "afca466260f0d3286e94855e5a02c65dcb925e84b2d4926be63ba6041f19ac0d"
+    },
+    {
+      "path": "build/usb/target/engine.log",
+      "bytes": 6193,
+      "sha256": "e5c2ef01925839deedb464859828ea2b59ef0e2d896546891a627471c6206463"
+    },
+    {
+      "path": "build/usb/compile-target.sh",
+      "bytes": 1123,
+      "sha256": "6106da6f09309ea63bf286b16ebab96b476a24fbbf3841df1640a86d16e355ee"
+    }
+  ],
+  "source_sha256": {
+    "firmware/src/usb.c": "174222468ffb79ad86adfdbb1fdd2b0c20e44959ac8c0849e3a1e429ca256dd0",
+    "firmware/src/dsp/rust_usb.h": "752a620faa8eb9bfa6feb200518db030016a8ad80e54280610549369d6809bb0",
+    "rust/fm1-hal/src/lib.rs": "e7f0f382b8e7ffe827c6f3d9f8e2164f81bc8d03465244227c3e764b177881a3",
+    "rust/fm1-hal/src/usb_control.rs": "a9b36cfa6bd31a7da6e09010c2c1fd7ad9affdac3acf471de468006b4bb33feb",
+    "rust/fm1-hal/src/usb_descriptors.rs": "3065ead3c3cd93bbc8721d396d67e554b85ea065ba718625ef3f8dd72643892a",
+    "rust/fm1-hal/tests/usb_control.rs": "3a6fdc9cf1e820702fc1010bbd68892f1e26d9ccd04c5d1edc9965c241ec0179",
+    "rust/fm1-jam-bridge/src/lib.rs": "0dd0c942006b3606e0a31486e79e50c362f6c67196588054847abd6a6f3bcff2",
+    "rust/fm1-jam-bridge/src/usb_control.rs": "4540281d83ae0469d2e85664c389f9fee89281cffd408dceffd353732c006f10",
+    "tests/reference/usb_control_reference.c": "81fa02d99a753bcc222f7fe44b027dad36b06205e75a6741f74e4c1d34b98508",
+    "tests/rust_usb_control.sh": "9eb07061c99c7693e1502577104693f2ff29da6d57c73737cff7eb48e476ca28",
+    "tools/usb_reference.py": "53610c7307ec5f33067ea855c933f500e4f7601204ecf1969ef5661e30941bc5"
+  },
+  "remaining": "Device lifecycle/SIE policy, MIDI/SysEx queues and publication, host enumeration/attach/loss/restart, UAC resampler/packet/stream ownership and physical stress/deadlines; unsafe MMIO/DMA and retained placements remain explicit seams"
+}

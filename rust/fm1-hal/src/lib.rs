@@ -9,3 +9,5 @@ pub mod drivers;
 pub mod flash;
 pub mod io;
 pub mod midi;
+pub mod usb_control;
+pub mod usb_descriptors;
