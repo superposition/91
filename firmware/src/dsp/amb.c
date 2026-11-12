@@ -1547,7 +1547,13 @@ void en_style_sounds(int16_t *p)                /* a stored style (1..4): its ki
         p[P_AC_WAVE] = ACIDS[st];
     p[P_STYLE] = 0;
 }
+#if EN_RUST_VOICES
+static fm1_voice_pad_runtime_t pad_runtime;
+#define stab_env pad_runtime.stab
+static float stab_k=0.99f;
+#else
 static float stab_env, stab_k = 0.99f;          /* the pad's stabs: the envelope, its fall each 32 samples */
+#endif
 
 /* ---------------------------------------------------------------- links --- */
 /* The drums patched into the voices (P_LINKS on, SEL + SEQ): each kick opens the drone's filter for a
@@ -1565,6 +1571,9 @@ static int links_on(void);
  * forms and dissolves rather than sitting there. The timbre: two saws a few
  * cents apart through two formant band-passes, a vowel that Bright moves from "oo" through "ah" to
  * "eh", with a little of the first formant's low-pass for body. */
+#if EN_RUST_VOICES
+typedef fm1_voice_pad_t pad_t;
+#else
 typedef struct {
     float ph[4], inc[4], sub;                   /* the two saws Detune apart, a second pair inside them (strings, supersaw), the sub's phase */
     float note, target;                         /* MIDI: the note of this breath, the next one's */
@@ -1581,8 +1590,14 @@ typedef struct {
     uint32_t pord;                              /* when it was played (the oldest is taken first) */
     float pamp;                                 /* a played note's envelope, 0..1 */
 } pad_t;
+#endif
 static pad_t pad[EN_NPAD];
+#if EN_RUST_VOICES
+static float pad_gate,pad_vol,bright,detune=0.00144f;
+#define pad_gain pad_runtime.gain
+#else
 static float pad_gate, pad_gain, pad_vol, bright, detune = 0.00144f;
+#endif
 static const float PAD_PAN[EN_NPAD] = {-0.55f, -0.18f, 0.18f, 0.55f};
 static const float BREATH[EN_NPAD] = {1.0f, 1.21f, 1.43f, 1.67f};    /* unequal cycles, as 2/1's 12..20 s loops */
 static const float START_T[EN_NPAD] = {0.0f, 0.9f, 0.82f, 0.95f};    /* the first breaths overlap */
@@ -1672,6 +1687,9 @@ static inline float svf_mm(float x, const float *c, float *s, int t)   /* the mu
 static void midi(uint32_t st, uint32_t d1, uint32_t d2);
 /* the pad's MIDI notes are queued, and sent by the first core once the pad's render is done (MIDI out is not for the other core to call) */
 static uint8_t pq_st[16], pq_d1[16], pq_d2[16], pq_n;
+#if EN_RUST_VOICES
+static fm1_voice_pad_breath_t voice_pad_breath_config(void);
+#endif
 static void pad_midi(uint32_t st, uint32_t d1, uint32_t d2)
 {
     if (pq_n < 16u) {
@@ -1690,6 +1708,9 @@ static void pad_midi_flush(void)
 }
 static void pad_breathe(pad_t *v, int i)        /* a new breath: its length, its strength, its note */
 {
+#if EN_RUST_VOICES
+    const fm1_voice_pad_breath_t c=voice_pad_breath_config();fm1_rust_voice_pad_breathe(v,&c,BREATH[i],&prng,pad_midi);
+#else
     float a = pe_atk_s(par[P_PE_ATK]), h = pe_hold_s(par[P_PE_HOLD]), r = pe_rel_s(par[P_PE_REL]),
           secs = a + h + r + pe_rest_s(par[P_PE_REST]);
     secs = fm_maxf(secs, 0.3f);
@@ -1706,6 +1727,7 @@ static void pad_breathe(pad_t *v, int i)        /* a new breath: its length, its
     v->midi_note = (uint8_t)v->target;
     if (en_playing && !par[P_PAD_MAN])
         pad_midi(0x90, v->midi_note, (uint32_t)(50.0f + 40.0f * v->peak));
+#endif
 }
 
 /* a new key (piece, root, scale): the voices still singing the old one fade out in about a second and
@@ -7306,7 +7328,12 @@ static float dsn_l[BLK], dsn_r[BLK];            /* the mix before the drums (the
  * Synthi's filter below half, then tape). No chorus: a modulated delay against pure tones beats (on
  * the FM-1's speaker above all), and that read as pulsing. The width comes from the voices' places,
  * the echo's two heads and the plate. */
+#if EN_RUST_VOICES
+#define pad_ctl pad_runtime.controls
+static uint32_t dr_ctl,ac_ctl;
+#else
 static uint32_t pad_ctl[EN_NPAD], dr_ctl, ac_ctl;      /* the control steps' counts (every 32 samples), kept across chunks */
+#endif
 static float padl[BLK] EN_POOL, padr[BLK] EN_POOL;
 static float plp[4];
 static float pad_ol[BLK] EN_POOL, pad_or[BLK] EN_POOL;   /* the job's working buffers: the pad's contribution to the mix, through the chorus, then into pad_ring (its dry sum goes straight there from pad_bus) */
@@ -7319,8 +7346,15 @@ static float ch_ph[3] = {0.0f, 0.3333f, 0.6667f};
 static uint32_t ch_i;
 static float pad_lk;                             /* the snare link, as it was when the chunk began (the pad may be rendered on the other core) */
 
+#if EN_RUST_VOICES
+#include "rust_pad.inc"
+#endif
 static void pad_bus(uint32_t n)
 {
+#if EN_RUST_VOICES
+    const fm1_voice_pad_bus_t c=voice_pad_bus_config();
+    float *const outputs[4]={padl,padr,pad_ol,pad_or};fm1_rust_voice_pad_bus(plp,&c,outputs,pad_ring[2],n);
+#else
     const float fc = fm_clampf(700.0f * PAD_SOUND[pad_snd()].fc * fm_exp2f(bright * 0.03f + 0.6f * arcm + 1.5f * pad_filt +
                                                          3.0f * (float)par[P_LK_SNARE] * 0.01f * pad_lk), 200.0f, 12000.0f);
     const float c = 1.0f - fm_expf(-FM_TWO_PI * fc * (1.0f / EN_SR));
@@ -7339,6 +7373,7 @@ static void pad_bus(uint32_t n)
     }
     for (j = 0; j < 4; j++)
         plp[j] = fm_flush(plp[j]);
+#endif
 }
 
 static void pad_publish(uint32_t w, uint32_t n)   /* the job's pad (after the chorus) into the ring, for the first core a chunk on (the dry sum went in from pad_bus) */
@@ -7403,6 +7438,12 @@ static void pad_chorus(uint32_t n)
 
 static void render_pad(uint32_t n)
 {
+#if EN_RUST_VOICES
+    const fm1_voice_pad_config_t c=voice_pad_config();fm1_voice_pad_publication_t result;unsigned i;
+    fm1_rust_voice_pad(pad,&pad_runtime,&c,&prng,SINT,padl,padr,&result,n,pad_midi);
+    for(i=0;i<EN_NPAD;i++)if(result.mask>>i&1u){en_pad_note[i]=result.notes[i];en_pad_amp[i]=result.amplitudes[i];}
+    en_pad_level=result.level;pad_bus(n);pad_chorus(n);
+#else
     const int ft_pad = fxs_v[EN_FXS_FT_PAD];   /* the FILTERS page's type for the saw sounds */
     int i;
     float lvl = 0.0f;
@@ -7572,6 +7613,7 @@ static void render_pad(uint32_t n)
     stab_env = fm_flush(stab_env);
     pad_bus(n);
     pad_chorus(n);
+#endif
 }
 
 /* (0.14.4 tried this in RAM, .ram_hot: on the device the bass costs about 200 us a chunk whatever the chunk's length, the most of any stage, which

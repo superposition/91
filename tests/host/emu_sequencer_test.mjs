@@ -48,6 +48,8 @@ const voices=Array.from({length:2},(_,index)=>rust.ex.web_rust_stat(40+index));
 assert(voices.every(value=>value>0),'percussion and plain pluck render blocks execute in Rust');
 const tonal=[rust.ex.web_rust_stat(43),rust.ex.web_rust_stat(44)];
 assert(tonal.every(value=>value>0),'drone and acid render blocks execute in Rust');
+const pad=[rust.ex.web_rust_stat(42),rust.ex.web_rust_stat(46)];
+assert(pad.every(value=>value>0),'pad worker and bus render blocks execute in Rust');
 assert(melodic.every(value=>value>0),'acid, mutation, pluck, bass, bar and MIDI/transport paths execute in Rust');
 assert.equal(rust.memory.buffer.byteLength,33554432);assert(peak>0.05 && peak<1);
 assert(rust.ex.web_rust_stat(35)>copiedBefore,'real legacy piece/genre changes copy Rust factory data');
@@ -55,5 +57,5 @@ assert.equal(rust.ex.web_rust_stat(34),0,'legacy factory calls stay in bounds');
 console.log(JSON.stringify({scenario:'legacy-f4-piece-genre-transport',compared_samples:samples,render_calls:calls,peak,
   sequencer:{lanes:rust.ex.web_rust_stat(18)-lanes,waits:rust.ex.web_rust_stat(20),boundaries:boundary},
   melodic:{acid:melodic[0],mutations:melodic[1],pluck:melodic[2],bass:melodic[3],bar:melodic[4],midi_transport:melodic[5]},
-  voices:{drums:voices[0],pluck:voices[1],drone:tonal[0],acid:tonal[1]},
+  voices:{drums:voices[0],pluck:voices[1],drone:tonal[0],acid:tonal[1],pad:pad[0],pad_bus:pad[1]},
   factory:{accesses:rust.ex.web_rust_stat(32),codecs:rust.ex.web_rust_stat(33),rejections:rust.ex.web_rust_stat(34),copied_bytes:rust.ex.web_rust_stat(35)},memory_bytes:rust.memory.buffer.byteLength}));
