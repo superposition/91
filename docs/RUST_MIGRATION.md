@@ -2,6 +2,37 @@
 
 Execution is tracked in [epic #1](https://github.com/superposition/91/issues/1). Its 25 tickets cover the complete owned firmware, simulator, browser, tools and media code. The last ticket is [How I did it](https://github.com/superposition/91/issues/26), the evidence-based Friday talk.
 
+## Current combined checkpoint — 12 November
+
+The maintained Rust implementation now includes the scheduler, phrase planner,
+named synthesis families and DJ voices, FM6, effects/master processing, bounded
+worker handoff, factory recipes and shared storage/wire/browser/package codecs.
+Project transaction policy, remaining legacy harmony, native simulator policy,
+the application/UI, platform drivers and other tools remain tracked work. The
+following sections retain the earlier checkpoint measurements; they should not
+be read as a claim that the whole repository has migrated.
+
+The combined source at `d1a2204` passes **110 Windows workspace tests**, **16**
+runtime tests through the opaque MCU atomic ABI, formatting, strict Clippy,
+no_std/WASM and release 32-bit MCU-feature checks. Nine complete browser audio
+scenarios compare **49,710,788 Float32 values**, with **1,048,576** more values
+through the HTTP audio fallback. Four direct comparisons against the immutable
+R01 WASM cover **8,948,772 values**. Native frozen-C/current-C0/Rust checks cover
+effects completion, worker faults/quarantine, DJ DSP, parameter application and
+the real SDK package writer. A subsequent test-only checkpoint `a87ffc9`
+requires observed DJ and Rust-worker execution together in all **48** worker
+configurations. No production audio source changed in that follow-up.
+
+The browser module is **2,364,109 bytes**, SHA-256
+`975b9aff3df287d7b2f34d08056893745f76c407f8432c4a1a19344754f6eef6`.
+It retains 24 public exports and fixed 32 MiB memory. These are software
+results; interactive browser/device behavior and physical timing are separate
+checks. [Combined results, source revisions and artifact/log hashes](rust/combined-checkpoint-20261112.json)
+record the scope. The [integrated MCU test](rust/PI32V2.md#integrated-hardware-test-in-progress)
+passes static/package gates but has an unresolved USB failure after restart;
+it has no audio/deadline qualification and is being restored to the working
+probe image.
+
 ## Compatibility and ownership
 
 The browser build now runs Rust command publication/consumption, Songbook validation, session encoding/validation, phrase planning, bass decisions, sample-clock cadence, bounded drum scheduling/drift/deadlines, Songbook display snapshots and staging arbitration inside the existing instrument. Musical event dispatch, remaining melodic/harmonic scheduling, synthesis, application state and UI drawing remain C. The physical firmware still uses its original C path. The current working-tree Songbook/DX7 changes are part of the baseline. Do not reset them to the Git HEAD baseline.
