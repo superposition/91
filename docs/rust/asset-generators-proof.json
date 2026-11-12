@@ -1,0 +1,276 @@
+{
+  "schema": 1,
+  "ticket": 22,
+  "checkpoint": "font-pattern-sine-generators",
+  "status": "qualified host generator slice; whole R21 remains open",
+  "base": "f354ad0ee93f8703490f8f9d4b6913c194f243cd",
+  "source_fingerprint": "83ef9ef3c9d9d2d0312f6386b9e28368330f9bd569fb7eaa7457cabd017bd5a4",
+  "source_fingerprint_encoding": "sha256 of sorted UTF-8 path + space + sha256 + LF",
+  "sources": {
+    "Cargo.lock": {
+      "bytes": 7030,
+      "sha256": "6a3201800d39efc96ab43ed77c0e48e8d0ea9d5b0ac5480892a694c7614d34cd"
+    },
+    "Cargo.toml": {
+      "bytes": 679,
+      "sha256": "e1b0bd0471ff7e7fba904743b87a689affede01a317d6ada96b2ed2433c38bb3"
+    },
+    "rust/fm1-cli/Cargo.toml": {
+      "bytes": 444,
+      "sha256": "bd02753c37dc73b455cf6c54ec87aa47c70118f9a16854f69e230f1781b64a36"
+    },
+    "rust/fm1-cli/src/main.rs": {
+      "bytes": 5181,
+      "sha256": "60ea19a37ca1c39a240596cfaac6d7a50a5a36b8f638f813f41127cb4889bcdf"
+    },
+    "rust/fm1-engine/src/effects/math.rs": {
+      "bytes": 4562,
+      "sha256": "d09469dea9f2650c369afcad2fd7929ec3660fc23524a6664817a845d62ac4ad"
+    },
+    "rust/fm1-tooling/Cargo.toml": {
+      "bytes": 321,
+      "sha256": "98fb1a64db2bc71c164fec4f08fc4ff73f91edf11abaee39a93ffe098d8e09ff"
+    },
+    "rust/fm1-tooling/src/assets.rs": {
+      "bytes": 6061,
+      "sha256": "6201d7c278b5b3067c28cd1a988916fb4a52d05fa5d5cb7a4bf8d95012d38dab"
+    },
+    "rust/fm1-tooling/src/assets/fonts.rs": {
+      "bytes": 24683,
+      "sha256": "5d516c925023e2e242baead24918d91c9d3ebed6a2afdcab669823f5aae85219"
+    },
+    "rust/fm1-tooling/src/lib.rs": {
+      "bytes": 9072,
+      "sha256": "1cb74c8c03964ee292e736b19e60755d93c71194d5488f3daebc12320a1a787d"
+    },
+    "tests/assets_differential.py": {
+      "bytes": 14792,
+      "sha256": "1c91623ea1f5ed35bf0a3cd82417d9b27a14f15ff28dccf92224024463b7823d"
+    },
+    "tests/reference/source.sha256": {
+      "bytes": 39958,
+      "sha256": "6148afa57b782c81e5a794f0ded441763fe986f35bf275014f304f6da76d88af"
+    },
+    "tests/rust_assets.sh": {
+      "bytes": 522,
+      "sha256": "21fc7de1b78c9922c2a32b2a061a7b2e5d0bb2ea225a7310b7a10cdc881987a8"
+    },
+    "tools/data/fontsets.json": {
+      "bytes": 2791,
+      "sha256": "4fd1ee769085f3b398f8c64f8ba5ab1cb80cdfbceb9e71506a950f05171b04ac"
+    },
+    "tools/data/patterns.json": {
+      "bytes": 12921,
+      "sha256": "5723eb287535feabffe7aa35fe7adda15d3024ac281683207444bc2f2adb32f9"
+    },
+    "tools/gen_font.py": {
+      "bytes": 4175,
+      "sha256": "54ffd6b63a502600cbb955a17fc60fce9cc4e12ce0797a91cea897596eb1daed"
+    },
+    "tools/gen_pats.py": {
+      "bytes": 1372,
+      "sha256": "e457e86142b5715f926ee8d706c3215fc477188cda646c2f4e5d3b9d403045b5"
+    },
+    "tools/gen_sint.c": {
+      "bytes": 930,
+      "sha256": "eebf64adb36cc2c0c598fe8ef118721718f06e17dd2cbd6db7b669d1aaca5e72"
+    },
+    "tools/gen_sint.py": {
+      "bytes": 259,
+      "sha256": "46151b0a54745951fb7db703354cd8c0e47caff2db3f76e77051de5deefb4e02"
+    },
+    "tools/rust_codecs.py": {
+      "bytes": 3639,
+      "sha256": "2efa2a8ee0cdbf61a563cc3d49e98487e05c633075eb0bf5747f284e51636e92"
+    },
+    "tools/rust_tooling.py": {
+      "bytes": 4282,
+      "sha256": "569183c6a84809ba386398ad450492e5fad35faf23c52910ab5b180edbacabbb"
+    }
+  },
+  "frozen_source_files": 440,
+  "toolchain": "rustc/cargo 1.94.1",
+  "platforms": {
+    "linux": {
+      "cases": 653,
+      "trace_sha256": "d19d2a3d90e05bf15c644f066a6aa7341b084d1ff2a2bf5838cacaf0b770a90a",
+      "python": "3.10.12",
+      "pillow": "12.3.0",
+      "frozen_files": 440
+    },
+    "linux_repeat_identical": true,
+    "windows": {
+      "cases": 653,
+      "trace_sha256": "3ed378a414259c49db51c604e6136c81e6d59a2c74e0154558434fdb3369280f",
+      "python": "3.8.3",
+      "pillow": "10.4.0",
+      "frozen_files": 440
+    }
+  },
+  "checks": {
+    "workspace_tests": 159,
+    "windows_tooling_tests": 13,
+    "fmt": true,
+    "clippy_all_targets_deny_warnings": true,
+    "previous_differential_cases": 3365,
+    "previous_fragment_refusals": 2,
+    "fake_installer": true,
+    "logger_selftest": true,
+    "unconfigured_native_bootstrap_header": {
+      "bytes": 403921,
+      "sha256": "45201e2caf40faad99ad7432b29d6725f51eb46db7c67b6f431fab364c7d7458"
+    },
+    "cli_feature_c_app": false,
+    "codec_wasm_tooling_dependency": false,
+    "mcu_bridge_tooling_dependency": false
+  },
+  "native_binaries": {
+    "linux": {
+      "bytes": 1639432,
+      "sha256": "d6af8febd8e27f8841606fef603ecc6bf8ef8e1a900dc5b94807f41a517d1558"
+    },
+    "windows": {
+      "bytes": 1329664,
+      "sha256": "c3b0d176c392c3cb8358c58717c24b451c62a35f0ec7541c9e3a1df6211b8c4c"
+    }
+  },
+  "evidence": {
+    "linux-stable.log": {
+      "bytes": 223,
+      "sha256": "72d5ea5f551f422aea3de871d970033b2f643a26ae3094b5ab453e1d4dfbcee1"
+    },
+    "linux-repeat.log": {
+      "bytes": 223,
+      "sha256": "fdf80e249e630ce1a785a9519caf521665623b02b5fb83dadaf3dd0e33fcd587"
+    },
+    "windows-stable.log": {
+      "bytes": 160,
+      "sha256": "1741e4dbd78cfff9b882af7676d36b3adef3efbafc728ede6fd718d11439589c"
+    },
+    "workspace-latest.log": {
+      "bytes": 20990,
+      "sha256": "a41b5f3393bcd91f392c7f49052ea3580fcc2cb56b0c583ff62b68fe2ef24340"
+    },
+    "clippy-latest.log": {
+      "bytes": 72,
+      "sha256": "e20efcb6f8e75e095337bfb1bbf2d5fdb02ebeb94c8073dede1b9a5c8c368bd3"
+    },
+    "fmt-latest.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "rescue-regression.log": {
+      "bytes": 2751,
+      "sha256": "b808483ab914347e80d4da16b6721b86c4572418d84f280627e1ae4223ff0565"
+    },
+    "bootstrap.log": {
+      "bytes": 1774,
+      "sha256": "bde212c42b4622e4b74b60fde6c5205c99b1d38ff52109f04a0a4fd01dc1ab4a"
+    },
+    "frozen-bootstrap.log": {
+      "bytes": 351,
+      "sha256": "b27088923ef4b12d680c0eb2e379665df2db05431e03cfb9520a965a6db49ece"
+    },
+    "cli-features-latest.txt": {
+      "bytes": 4965,
+      "sha256": "54b3c5205c9d22a58a818d266443e48f6bb79d0d84fb46d6a48f76f02ac8e828"
+    },
+    "codec-features-latest.txt": {
+      "bytes": 1056,
+      "sha256": "1a1ae9f119b8a61eb4346d567ad774cee73a5a0b2b93f5464bd919a040d368b4"
+    },
+    "bridge-features-latest.txt": {
+      "bytes": 1253,
+      "sha256": "532a39d6989705f3741049fdb5ff6bee65efc600fbd82f5705474d7d52e8d77c"
+    },
+    "windows-printf-mismatch.json": {
+      "bytes": 79969,
+      "sha256": "2ac060e6537dc09e9b1aae42e4f08737a5ab3e59becaf4ef0ddd90b5eea2f50f"
+    },
+    "windows-printf-mismatch.log": {
+      "bytes": 1076,
+      "sha256": "f5afac5382bb68f71f88e0af44c889a71aefea7a8aa1e4dcc8ae234aa7a1c7a2"
+    },
+    "linux-qualified.log": {
+      "bytes": 422,
+      "sha256": "6a6a37289055fdf7a096b28f79095fba8c04953da546835e9a57171229c4ba9a"
+    },
+    "windows-qualified.log": {
+      "bytes": 160,
+      "sha256": "1741e4dbd78cfff9b882af7676d36b3adef3efbafc728ede6fd718d11439589c"
+    },
+    "workspace-qualified.log": {
+      "bytes": 20991,
+      "sha256": "0ea22889f75cfe20f9129334ea4fb50ceb22ed144a3eb5f3d15c6250d44147eb"
+    },
+    "unit-qualified.log": {
+      "bytes": 1691,
+      "sha256": "1bf3b1d644b64141814deeea7e511964bf1f26541baff8e551d991e981b7c336"
+    },
+    "windows/tests-qualified.log": {
+      "bytes": 1741,
+      "sha256": "e4d1b883a703e773bdbde66065e5facd7239b5daa30aa0aac050406dd36ed5fd"
+    },
+    "clippy-qualified.log": {
+      "bytes": 270,
+      "sha256": "272fd15e534bf213ade8d06f148a4e7597294a8a3c512b76ab27563dbbb94bb5"
+    },
+    "fmt-qualified.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "coverage": {
+    "real_font_families": [
+      "terminus",
+      "barlow",
+      "chakra"
+    ],
+    "fake_ttf_recipes": [
+      "barlow",
+      "inter",
+      "rajdhani",
+      "chakra"
+    ],
+    "sine_points": 1025,
+    "random_pattern_grids": 400,
+    "random_bdf_cases": 75,
+    "physical_device_access": false,
+    "abi_changes": false,
+    "production_generated_headers_modified": false
+  },
+  "formatting": {
+    "windows_c_runtime": "legacy MinGW printf halfway away from zero",
+    "linux_c_runtime": "glibc halfway to even",
+    "example": {
+      "index": 889,
+      "bits": "bf3ca000",
+      "windows": "-7.368164063e-01f",
+      "linux": "-7.368164062e-01f"
+    },
+    "change": "exact integer rational midpoint detection for legacy Windows output; unchanged f32 sample"
+  },
+  "limits": {
+    "frame_bytes": 33554432,
+    "bdf_text_bytes": 16777216,
+    "bdf_stored_glyphs": 4096,
+    "requested_glyphs": 4097,
+    "dimension": 2048,
+    "scale": [
+      0,
+      16
+    ],
+    "pixels_per_font": 1100000,
+    "packed_font_data_bytes_less_than": 65536,
+    "font_integer_magnitude": 1099511627776,
+    "font_recipes": 64,
+    "label_bytes": 128,
+    "recipe_filename_bytes": 4096
+  },
+  "remaining": [
+    "root-owned build/package/LZ4/emitter policy",
+    "parameter metadata generation and application-source extraction",
+    "manual/site/assets/acquisition/bootstrap tools beyond this checkpoint",
+    "real Inter/Rajdhani font rasterization absent source files"
+  ]
+}

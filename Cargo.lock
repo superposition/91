@@ -159,6 +159,7 @@ dependencies = [
 name = "fm1-tooling"
 version = "0.1.0"
 dependencies = [
+ "fm1-engine",
  "fm1-formats",
  "serde_json",
  "sha2",

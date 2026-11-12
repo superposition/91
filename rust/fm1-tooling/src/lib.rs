@@ -2,6 +2,7 @@
 //! Offline installer and diagnostic policy. Actual ports and clocks are supplied
 //! by an explicit synchronous adapter; this crate never opens a device.
 #![forbid(unsafe_code)]
+pub mod assets;
 pub mod build;
 pub mod debugger;
 pub mod installer;
@@ -97,6 +98,8 @@ pub fn request(v: &Value, io: &mut impl Adapter) -> Result<Value> {
         rescue::request(method, v, io)
     } else if let Some(method) = method.strip_prefix("debug.") {
         debugger::request(method, v, io)
+    } else if let Some(method) = method.strip_prefix("asset.") {
+        assets::request(method, v, io)
     } else {
         telemetry::request(method, v)
     }
@@ -175,6 +178,13 @@ pub fn cli(args: &[String]) -> Result<()> {
             let output=if args[0]=="lz4-compress" {lz4::compress(&image)?}else{lz4::decompress(&image,&[])?};
             std::fs::write(&args[2],output)?;
         }
+        Some(kind @ ("sine" | "patterns")) if args.len() == 1 => {
+            let report = if kind == "sine" { assets::sine_header() }
+                else { assets::pattern_header(&assets::pattern_data())? };
+            #[cfg(windows)]
+            let report = report.replace('\n', "\r\n");
+            std::io::stdout().write_all(report.as_bytes())?;
+        }
         Some("rescue-plan") if args.len()==3=>{
             let image=rescue::stock(&read_file(&args[1],1_100_000)?,&args[1])?;
             let now=read_file(&args[2],rescue::FLASH_SIZE)?;
@@ -210,7 +220,7 @@ pub fn cli(args: &[String]) -> Result<()> {
         }
         _ => {
             return Err(Error::value(
-                "usage: fm1-rs tools package-info PACKAGE [--force] | decode KIND RAW-SYSEX-DATA | summary TELEMETRY.csv | rescue-plan V15-PACKAGE SNAPSHOT | debug-plan peek|poke|clock A [B]",
+                "usage: fm1-rs tools package-info PACKAGE [--force] | decode KIND RAW-SYSEX-DATA | summary TELEMETRY.csv | rescue-plan V15-PACKAGE SNAPSHOT | debug-plan peek|poke|clock A [B] | sine | patterns",
             ))
         }
     }
