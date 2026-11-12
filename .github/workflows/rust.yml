@@ -187,6 +187,10 @@ jobs:
         run: sh tests/rust_worker_handoff.sh
       - name: Physical backend completion and stopped-owner ordering
         run: sh tests/rust_mcu_hal.sh
+      - name: Nested saved IRQ-state binding
+        run: |
+          cc -O2 -Ifirmware/hal tests/host/hal_irq_state_test.c -o build/hal-irq-state
+          build/hal-irq-state
       - name: Complete MCU queue publication across render interruption
         run: sh tests/rust_command_irq.sh
       - name: Legacy harmonic policy, register search and progression callbacks

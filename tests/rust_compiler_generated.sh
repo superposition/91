@@ -36,5 +36,16 @@ for case in 0 1 2 3 4 5 6 7 8 20 30 31;do
     cmp "$out/c0-effects-$case.json" "$out/generated-effects-$case.json"
     sha256sum "$out/generated.trace" > "$out/effects-$case.sha256"
 done
+python3 tests/reference/runner_widgets_extract.py . build/gen/runner_widgets.inc
+for profile in policy draw;do
+    runner_flags=()
+    if [ "$profile" = draw ];then runner_flags+=(-DRUNNER_DRAW_TEST=1);fi
+    "$zig" cc "${native[@]}" "${common[@]}" "${runner_flags[@]}" tests/reference/runner_policy_reference.c -lm -o "$out/c0-runner-$profile"
+    "$zig" cc "${native[@]}" "${common[@]}" "${runner_flags[@]}" -DEN_RUST_APP=1 tests/reference/runner_policy_reference.c "$abi" "${objects[@]}" "$out/core.o" -lm -o "$out/generated-runner-$profile"
+    "$out/c0-runner-$profile" > "$out/c0-runner-$profile.bin"
+    "$out/generated-runner-$profile" > "$out/generated-runner-$profile.bin"
+    cmp "$out/c0-runner-$profile.bin" "$out/generated-runner-$profile.bin"
+    sha256sum "$out/generated-runner-$profile.bin" > "$out/runner-$profile.sha256"
+done
 sha256sum "$core/libcore.rlib.c" "$bridge"/*.rlib.c "$out/generated.pcm" > "$out/identities.sha256"
-echo 'Generated-C natural32-bit factory and12focused effects traces match current C0.'
+echo 'Generated-C natural32-bit factory,12 effects traces and full Runner policy/pixels match current C0.'
