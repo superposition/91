@@ -14,7 +14,7 @@ cargo build --release --locked -p fm1-jam-bridge --target-dir "$out/rust-build"
 common='-O2 -ffp-contract=off -std=gnu99 -DEN_HOST'
 cc $common -I"$baseline/firmware/src/dsp" tests/reference/dj_workers.c "$baseline/firmware/src/dsp/amb.c" -lpthread -lm -o "$out/reference"
 cc $common -Ifirmware/src/dsp tests/reference/dj_workers.c firmware/src/dsp/amb.c -lpthread -lm -o "$out/c0"
-cc $common -DEN_RUST_JAM=1 -DEN_RUST_COMMANDS=1 -DEN_RUST_TRANSPORT=1 -DEN_RUST_HANDOFF=1 -DEN_RUST_SCHEDULER=1 -DEN_RUST_MELODIC=1 -DEN_RUST_EFFECTS=1 -DEN_RUST_FACTORY=1 -DEN_RUST_VOICES=1 -DEN_RUST_FM6=1 -DEN_RUST_FORMATS=1 \
+cc $common -DEN_RUST_JAM=1 -DEN_RUST_COMMANDS=1 -DEN_RUST_TRANSPORT=1 -DEN_RUST_HANDOFF=1 -DEN_RUST_SCHEDULER=1 -DEN_RUST_MELODIC=1 -DEN_RUST_EFFECTS=1 -DEN_RUST_FACTORY=1 -DEN_RUST_VOICES=1 -DEN_RUST_FM6=1 -DEN_RUST_FORMATS=1 -DEN_RUST_WORKER=1 \
     -Ifirmware/src/dsp tests/reference/dj_workers.c firmware/src/dsp/amb.c "$out/rust-build/release/libfm1_jam_bridge.a" -lpthread -ldl -lm -o "$out/rust"
 : > "$out/results.txt"
 for pre in 0 100; do
