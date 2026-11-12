@@ -11,3 +11,4 @@ pub mod planner;
 pub mod scheduling_tables;
 pub mod sequencer;
 pub mod transport;
+pub mod voices;

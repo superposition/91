@@ -2,6 +2,9 @@
 /* The instrument (amb.h). One compilation unit, -O2. */
 #include "amb.h"
 #include "fastmath.h"
+#if EN_RUST_VOICES
+#include "rust_voices.h"
+#endif
 #if EN_RUST_MELODIC
 #include "rust_melodic.h"
 #endif
@@ -1876,6 +1879,9 @@ static int nz_color;
  * snare (two tuned sines and band-passed noise), a clap (three bursts of noise, then its tail), a
  * closed and an open hat (the 808's six squares' metal and noise, high-passed; the closed chokes the
  * open), a perc (an FM blip: a rim or a tom, by its tune). Each lane its level, tune and decay. */
+#if EN_RUST_VOICES
+typedef fm1_voice_drum_t drum_t;
+#else
 typedef struct {
     float ph, inc, inc_end, amp, adec, idx, x1, x2, att, mph[4], pend, t, hp, ph2, inc2;
     int32_t wait, wait2;                        /* swing, rolls: samples until a hit that waits (pend, pend2: its velocity) */
@@ -1886,6 +1892,7 @@ typedef struct {
     uint8_t rn;
     uint8_t on, note;
 } drum_t;
+#endif
 static drum_t drum[EN_NDRUM];
 #define DR_FADE (1.0f - 1.0f / (0.0008f * EN_SR))   /* the old hit's fade: ~0.8 ms, gone in ~4 */
 static float pulse_vol, swing, drive_k = 1.0f, lane_g[EN_NDRUM], lane_tune[EN_NDRUM], lane_dec[EN_NDRUM];
@@ -3442,7 +3449,11 @@ static const float FM_GAIN_DY[EN_NFMFACT] = {0.45f, 0.29f, 0.22f, 0.59f, 3.73f, 
 static float fm_fifo[FM_R] EN_POOL;
 static uint32_t fm_ctr;                         /* samples gone by (the first core's) */
 static float fm_ol[BLK_FM] EN_POOL, fm_or[BLK_FM] EN_POOL, fm_rs[BLK_FM] EN_POOL, fm_es[BLK_FM] EN_POOL;   /* the DX voices' part of the mix and the sends */
+#if EN_RUST_VOICES
+static fm1_voice_pluck_t cm[2];
+#else
 static struct { float ph, ps, inc, env, dm, vel; uint32_t age; } cm[2];
+#endif
 static float cm_vol;
 static int cm_i, cm_alt;
 static uint8_t cm_f[32], cm_g[32], cm_ix[32], cm_vl[32];   /* the pluck's loop (deja vu): a slot heard (f), its gate, its place in the chord's tones (octave leap in bit 7 and 6: up, down), its velocity */
@@ -7768,6 +7779,12 @@ static void render_fm(uint32_t n)
 
 static void render_cm(uint32_t n)
 {
+#if EN_RUST_VOICES
+    const int sn=par[P_CM_SND]<0?0:par[P_CM_SND]>=CM_NPLAIN?CM_NPLAIN-1:par[P_CM_SND];const cm_snd_t *s=&CM_SOUND[sn];
+    const fm1_voice_pluck_config_t c={cm_vol*0.5f*s->g,HB(EN_V_PLUCK)?hb_pf:1.0f,s->fr,s->i0,s->i1,trk_g[TR_CM],trk_g1[TR_CM],tg_inv,en_cm_level,s->rise,(uint32_t)(par[P_CM_SND]>=CM_NPLAIN)};
+    float *const outputs[4]={mixl,mixr,rsend,esend};cm_midi_step((int32_t)n);
+    en_cm_level=fm1_rust_voice_pluck(cm,&c,SINT,outputs,n);
+#else
     const int sn = par[P_CM_SND] < 0 ? 0 : par[P_CM_SND] >= CM_NPLAIN ? CM_NPLAIN - 1 : par[P_CM_SND];
     const cm_snd_t *S = &CM_SOUND[sn];
     const float g = cm_vol * 0.5f * S->g, pfc = HB(EN_V_PLUCK) ? hb_pf : 1.0f;   /* (a keyboard's bend) */
@@ -7809,6 +7826,7 @@ static void render_cm(uint32_t n)
         cm[v].env = fm_flush(cm[v].env);
     }
     en_cm_level = lvl;
+#endif
 }
 
 static void render_acid(uint32_t n)
@@ -8277,6 +8295,13 @@ static void render_perc(drum_t *v, uint32_t n, float g)
 
 static void render_drums(uint32_t n)
 {
+#if EN_RUST_VOICES
+    const float g=pulse_vol*1.1f;
+    const fm1_voice_drums_config_t c={{g*lane_g[L_KICK]*1.15f,g*0.38f*lane_g[L_SNARE],g*0.42f*lane_g[L_CLAP],g*0.22f*lane_g[L_HAT],g*0.18f*lane_g[L_OHAT],g*0.3f*lane_g[L_PERC]},
+        {hat_inc[0],hat_inc[1],hat_inc[2],hat_inc[3]},drive_k*KK->k_drive,KK->k_drop,KK->k_click,KK->k_rumble,KS->sn_body,KS->sn_noise,KS->cl_gap,KH->h_noise,
+        {trk_g[TR_KICK],trk_g[TR_SNARE],trk_g[TR_HATS],trk_g[TR_PERC]},{trk_g1[TR_KICK],trk_g1[TR_SNARE],trk_g1[TR_HATS],trk_g1[TR_PERC]},tg_inv};
+    float *const outputs[4]={mixl,mixr,rsend,esend};fm1_rust_voice_drums(drum,&c,SINT,&noise,outputs,n);
+#else
     uint32_t j;
     const float g = pulse_vol * 1.1f;
     drum_t *v;
@@ -8332,6 +8357,7 @@ static void render_drums(uint32_t n)
     render_hat(&drum[L_HAT], n, g * 0.22f * lane_g[L_HAT], 0.75f, 1.0f);    /* a little right */
     render_hat(&drum[L_OHAT], n, g * 0.18f * lane_g[L_OHAT], 1.0f, 0.75f);  /* a little left */
     render_perc(&drum[L_PERC], n, g * 0.3f * lane_g[L_PERC]);
+#endif
 }
 
 _Static_assert(BLK == BLK_FM, "the DX voices' buffers are a chunk long");
