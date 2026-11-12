@@ -49,8 +49,14 @@ static uint32_t ota_rd32(const uint8_t *p) { return ota_rd24(p) | (uint32_t)p[3]
 static void ota_wr16(uint8_t *p, uint32_t v) { p[0] = (uint8_t)v; p[1] = (uint8_t)(v >> 8); }
 static void ota_wr32(uint8_t *p, uint32_t v) { ota_wr16(p, v); ota_wr16(p + 2, v >> 16); }
 
+#if EN_RUST_FORMATS
+#include "dsp/rust_wire_formats.h"
+#endif
 static uint32_t ota_crc16(const uint8_t *p, uint32_t n, uint32_t c)   /* poly 0x1021, init 0 */
 {
+#if EN_RUST_FORMATS
+    return rust_wire_crc16(p,n,c);
+#else
     uint32_t i;
     while (n--) {
         c ^= (uint32_t)*p++ << 8;
@@ -59,20 +65,29 @@ static uint32_t ota_crc16(const uint8_t *p, uint32_t n, uint32_t c)   /* poly 0x
         c &= 0xFFFFu;
     }
     return c;
+#endif
 }
 
 static void ota_jl_enc(uint8_t *p, uint32_t n)   /* UFW header cipher, key 0xFFFF */
 {
+#if EN_RUST_FORMATS
+    (void)fm1_rust_wire_enc(p,n,0xffffu);
+#else
     uint32_t k = 0xFFFFu;
     while (n--) {
         *p++ ^= (uint8_t)k;
         k = ((k << 1) ^ (k & 0x8000u ? 0x1021u : 0u)) & 0xFFFFu;
     }
+#endif
 }
 
 /* 8-to-7, LSB first */
 static uint32_t ota_pack7(const uint8_t *in, uint32_t n, uint8_t *out)
 {
+#if EN_RUST_FORMATS
+    int32_t size=fm1_rust_wire(72,0,0,in,n,out,(n*8u+6u)/7u);
+    return size<0?0:(uint32_t)size;
+#else
     uint32_t acc = 0, nb = 0, o = 0;
     while (n--) {
         acc |= (uint32_t)*in++ << nb;
@@ -86,10 +101,14 @@ static uint32_t ota_pack7(const uint8_t *in, uint32_t n, uint8_t *out)
     if (nb)
         out[o++] = (uint8_t)(acc & 0x7Fu);
     return o;
+#endif
 }
 
 static uint32_t ota_unpack7(const uint8_t *in, uint32_t n, uint8_t *out, uint32_t max)
 {
+#if EN_RUST_FORMATS
+    return fm1_rust_wire_unpack7(in,n,out,max);
+#else
     uint32_t acc = 0, nb = 0, o = 0;
     while (n--) {
         acc |= (uint32_t)(*in++ & 0x7Fu) << nb;
@@ -103,13 +122,22 @@ static uint32_t ota_unpack7(const uint8_t *in, uint32_t n, uint8_t *out, uint32_
         }
     }
     return o;
+#endif
 }
 
-static uint8_t ota_msg[8 + 32], ota_wire[2 + 48];
+#if !EN_RUST_FORMATS
+static uint8_t ota_msg[8 + 32];
+#endif
+static uint8_t ota_wire[2 + 48];
 static uint8_t ota_dec[OTA_FRAME_MAX];           /* decoded host message */
 
 static int ota_send_msg(uint32_t cmd, const uint8_t *body, uint32_t n)   /* n <= 32 */
 {
+#if EN_RUST_FORMATS
+    uint32_t args[1]={cmd};
+    int32_t size=fm1_rust_wire(74,args,1,body,n,ota_wire,sizeof ota_wire);
+    return size<0?-1:ota_wire_send(ota_wire,(uint32_t)size);
+#else
     uint32_t i, s = 0, w;
     ota_msg[0] = 0;
     ota_msg[1] = 0x59;
@@ -126,6 +154,7 @@ static int ota_send_msg(uint32_t cmd, const uint8_t *body, uint32_t n)   /* n <=
     w = 1u + ota_pack7(ota_msg, 7u + n, ota_wire + 1);
     ota_wire[w++] = 0xF7;
     return ota_wire_send(ota_wire, w);
+#endif
 }
 
 #ifdef FELUCCA_LOADER                            /* the update loader, exactly as before ("ota-FM-1_900" passes M-UPGRADE 3.11) */
@@ -172,11 +201,17 @@ static int ota_is_hs(uint32_t d)
 static uint32_t ota_take(void)
 {
     const uint8_t *p;
-    uint32_t n, d, s = 0, i;
+    uint32_t n, d;
+#if !EN_RUST_FORMATS
+    uint32_t s = 0, i;
+#endif
     if (!ota_frame_get(&p, &n))
         return 0;
     d = ota_unpack7(p, n, ota_dec, sizeof ota_dec);
     ota_frame_done();
+#if EN_RUST_FORMATS
+    return fm1_rust_wire_ota_valid(ota_dec,d)?d:0;
+#else
     if (d < 7u || d > sizeof ota_dec || ota_dec[0] != 0 || ota_dec[1] != 0x59 || ota_rd24(ota_dec + 3) + 7u != d)
         return 0;
     for (i = 6; i + 1u < d; i++)
@@ -184,6 +219,7 @@ static uint32_t ota_take(void)
     if ((uint8_t)~s != ota_dec[d - 1u])
         return 0;
     return d;
+#endif
 }
 
 /* main loop, outside a session: answer handshakes */

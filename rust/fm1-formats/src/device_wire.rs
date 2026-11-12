@@ -419,6 +419,14 @@ pub fn dispatch(
                     packet[3..6].copy_from_slice(&[0x56, 0x7e, byte(1)?]);
                     7
                 }
+                7 => {
+                    let enabled = byte(1)?;
+                    if enabled > 1 {
+                        return Err(CodecError::Range);
+                    }
+                    packet[3..5].copy_from_slice(&[0x46, enabled]);
+                    6
+                }
                 _ => return Err(CodecError::Index),
             };
             if packet[1..length - 1].iter().any(|b| *b > 127) {

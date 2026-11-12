@@ -8,6 +8,9 @@
  * Uses the backup staging buffer; callers must serialize legacy backups. */
 #pragma once
 #include "../backup_proto.h"
+#if EN_RUST_FORMATS
+#include "../dsp/rust_wire_formats.h"
+#endif
 enum { JU_OK, JU_BAD, JU_CRC, JU_BUSY, JU_STOP, JU_STORE, JU_VERSION };
 typedef struct {
     uint32_t expected, touched;
@@ -33,12 +36,18 @@ static int ju_owner_set(unsigned next) {ju.owner=(uint8_t)next;return 1;}
 #endif
 static unsigned ju_reply(uint8_t *f,unsigned op,unsigned token,unsigned status,const uint8_t *raw,unsigned n)
 {
+#if EN_RUST_FORMATS
+    uint32_t args[3]={op,token,status};
+    int32_t size=fm1_rust_wire(79,args,3,raw,n,f,9+n*2);
+    return size<0?0:(unsigned)size;
+#else
     unsigned i,o=0;
     f[o++]=0xf0; f[o++]=0x7d; f[o++]=0x50; f[o++]=0x61;
     f[o++]=(uint8_t)op; f[o++]=(uint8_t)token; f[o++]=(uint8_t)status;
     for(i=0;i<n;i++) {f[o++]=raw[i]>>4;f[o++]=raw[i]&15;}
     f[o]=(uint8_t)bk_sum(f+4,o-4);o++;f[o++]=0xf7;
     return o;
+#endif
 }
 static void ju_poll(void)
 {
@@ -69,9 +78,18 @@ static unsigned ju_request(const uint8_t *m,unsigned n,uint8_t *buf,int legacy_b
     unsigned op=n>3?m[3]:0,token=n>4?m[4]:0,st=JU_OK,i,count=0;
     uint8_t raw[68]; const uint8_t *a=m+5; unsigned alen=n>=6?n-6:0;
     ju_poll();
+#if EN_RUST_FORMATS
+    {
+        uint8_t result[4];
+        int32_t size=fm1_rust_wire(78,0,0,m,n,result,4);
+        unsigned check=size<0?2:rust_wire_rd32(result);
+        if(check) return ju_reply(out,op,token,check==2?JU_CRC:JU_BAD,0,0);
+    }
+#else
     if(n<6 || m[0]!=0x7d || m[1]!=0x50 || m[2]!=0x60 || bk_sum(m+3,n-4)!=m[n-1])
         return ju_reply(out,op,token,JU_CRC,0,0);
     for(i=0;i<n;i++) if(m[i]>127) return ju_reply(out,op,token,JU_BAD,0,0);
+#endif
     if(op!=1 && op!=8 && legacy_busy) return ju_reply(out,op,token,JU_BUSY,0,0);
     switch(op) {
     case 1:
@@ -101,8 +119,16 @@ static unsigned ju_request(const uint8_t *m,unsigned n,uint8_t *buf,int legacy_b
         ju.len=(uint16_t)(a[0]<<7|a[1]);
         if(ju.len<JP_MIN || ju.len>JP_MAX) {st=JU_BAD;break;}
         ju.expected=0;
+#if EN_RUST_FORMATS
+        {
+            uint8_t result[8];
+            if(fm1_rust_wire(80,0,0,a,alen,result,8)<0) {st=JU_BAD;break;}
+            ju.expected=rust_wire_rd32(result+4);
+        }
+#else
         for(i=0;i<8;i++) {if(a[2+i]>15)st=JU_BAD;ju.expected=(ju.expected<<4)|a[2+i];}
         if(st)break;
+#endif
         if(!ju_owner_set(1)) {st=JU_BUSY;break;}
         ju.mask=0;ju.valid=0;ju.token=(uint8_t)token;break;
     case 4: {
@@ -110,6 +136,18 @@ static unsigned ju_request(const uint8_t *m,unsigned n,uint8_t *buf,int legacy_b
         if(alen<3 || ju_owner()!=1 || ju.token!=token || ju.valid) {st=JU_BAD;break;}
         ix=a[0];len=a[1]<<7|a[2];off=ix*256;
         if(ix>=15 || !len || len>256 || alen!=3+len*2 || off+len>ju.len || len!=(off+256<=ju.len?256:ju.len-off)) {st=JU_BAD;break;}
+#if EN_RUST_FORMATS
+        {
+            uint8_t decoded[264];
+            if(fm1_rust_wire(81,0,0,a,alen,decoded,8+len)<0) {st=JU_BAD;break;}
+            if(ju.mask>>ix&1u) {
+                for(i=0;i<len;i++) if(buf[off+i]!=decoded[8+i]) st=JU_BAD;
+            } else {
+                for(i=0;i<len;i++) buf[off+i]=decoded[8+i];
+                ju.mask|=(uint16_t)(1u<<ix);
+            }
+        }
+#else
         for(i=0;i<len*2;i++) if(a[3+i]>15) st=JU_BAD;
         if(st)break;
         if(ju.mask>>ix&1u) { /* retries must be byte-identical */
@@ -118,6 +156,7 @@ static unsigned ju_request(const uint8_t *m,unsigned n,uint8_t *buf,int legacy_b
             for(i=0;i<len;i++) buf[off+i]=(uint8_t)(a[3+i*2]<<4|a[4+i*2]);
             ju.mask|=(uint16_t)(1u<<ix);
         }
+#endif
         raw[0]=(uint8_t)ix;count=1;break;
     }
     case 5:
@@ -171,7 +210,15 @@ static unsigned ju_request(const uint8_t *m,unsigned n,uint8_t *buf,int legacy_b
     case 10:
         if(alen!=3 || a[0]>JAM_BRIGHTNESS) {st=JU_BAD;break;}
         if(a[0]==JAM_SLOT+1) en_play(a[2]!=0);
+#if EN_RUST_FORMATS
+        else {
+            uint8_t result[8];
+            if(fm1_rust_wire(82,0,0,a,alen,result,8)<0) {st=JU_BAD;break;}
+            en_jam_set((int)rust_wire_rd32(result),(int)rust_wire_rd32(result+4));
+        }
+#else
         else en_jam_set(a[0],a[1]<<7|a[2]);
+#endif
         break;
     default:st=JU_BAD;break;
     }

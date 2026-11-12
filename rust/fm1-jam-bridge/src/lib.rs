@@ -17,6 +17,7 @@ mod melodic;
 mod sequencer;
 mod transport;
 mod voices;
+mod wire_formats;
 
 static VALIDATIONS: AtomicU32 = AtomicU32::new(0);
 static PLANS: AtomicU32 = AtomicU32::new(0);

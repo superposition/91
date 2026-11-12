@@ -15,11 +15,11 @@ pub fn stat(index: u32) -> u32 {
         _ => 0,
     }
 }
-fn rejected() -> i32 {
+pub(crate) fn rejected() -> i32 {
     REJECT.fetch_add(1, Ordering::Relaxed);
     -1
 }
-fn done(encode: bool, n: usize) -> i32 {
+pub(crate) fn done(encode: bool, n: usize) -> i32 {
     if encode {
         ENCODE.fetch_add(1, Ordering::Relaxed);
     } else {
