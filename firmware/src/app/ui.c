@@ -4204,6 +4204,10 @@ static void text_c(int32_t cx, int32_t y, const felucca_font_t *f, const char *s
 /* a pixel blended over the canvas (16 steps from the canvas to the colour) */
 static void px_blend(int32_t x, int32_t y, uint16_t c, uint32_t a)
 {
+#if EN_RUST_APP
+    { const int32_t args[6]={x,y,c,(int32_t)a,0,0};(void)cv_rust(8,args,0,0);return; }
+#endif
+
     uint16_t *q;
     uint32_t bg;
     y += cv_oy;
@@ -7919,6 +7923,12 @@ static void jam_helper_sync(void)
 
 void ui_frame(void)
 {
+#if EN_RUST_APP
+    if(cv_dma_pending==2) { /* an uncertain display transfer owns the old strip */
+        ui.sig[0]=ui.sig[1]=ui.sig[2]=0;
+        if(ui.splash) {ui.splash=1;ui.splash_step=0;} /* retry the full card */
+    }
+#endif
     if (ui.splash) {
         uint32_t held = plat_buttons() | plat_keys();
         if (plat_ms() - ui.boot_t < ui_splash_ms && !held) {
