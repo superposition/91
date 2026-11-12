@@ -1124,9 +1124,19 @@ volatile uint8_t en_hushed;                      /* faded right out: the flash c
 extern void fm1_rust_commands_reset(void);
 extern int32_t fm1_rust_commands_push(uint32_t);
 extern int32_t fm1_rust_commands_pop(uint32_t *);
+#if EN_RUST_MCU_ATOMICS
+extern uint32_t fm1_mcu_command_enter(void);
+extern void fm1_mcu_command_exit(uint32_t);
+#endif
 static void post(uint32_t c, int a, int b)
 {
+#if EN_RUST_MCU_ATOMICS
+    uint32_t flags=fm1_mcu_command_enter();
+#endif
     fm1_rust_commands_push(c << 24 | ((uint32_t)a & 0xFFu) << 16 | ((uint32_t)b & 0xFFFFu));
+#if EN_RUST_MCU_ATOMICS
+    fm1_mcu_command_exit(flags);
+#endif
 }
 static int command_pop(uint32_t *word) { return fm1_rust_commands_pop(word); }
 #else

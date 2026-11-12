@@ -48,8 +48,8 @@ then clears the abandoned byte lock. It leaves the outstanding request intact
 so the later join reports lost output. CPU1 cannot recover a stuck CPU0 owner;
 it parks for CPU0's bounded join or the watchdog. This revised failure path
 still needs the physical stop/heartbeat proof and integrated worker tests.
-Per-sample diagnostic counters also need a
-measured hardware cost; they must not consume the render deadline unnoticed.
+The completing FX port batches its earlier per-sample counter updates. Its
+whole-image hardware cost still needs measurement against the render deadline.
 
 The physical bridge now routes panic, abort and mrustc's explicit
 `panic_impl` / `_Unwind_Resume` entries through one HAL panic boundary. CPU1
@@ -69,3 +69,27 @@ symbol being implemented. A C adapter preserves the standard void-pointer
 signature and immediately forwards to that Rust primitive. All overlapping
 ranges in a32-byte buffer match standard Rust byte movement, including
 zero-length/null input and a partially uninitialized object representation.
+
+## CPU0 command publication
+
+The queue has two CPU0 producer contexts: application input and render/drain
+code. In particular, `naiwan_bing` calls `en_note_v`, which posts queued notes
+from the render consumer. The earlier foreground-only source audit missed
+that path. Per-word atomics do not prevent a render interrupt from preempting
+a foreground push between loading and publishing its write index.
+
+The MCU `post` adapter now masks CPU0 IRQs around the complete Rust publication
+and diagnostic updates, restoring the exact previous ICFG word afterward.
+This makes those contexts one serialized logical producer without changing
+the 4,104-byte queue, capacity, order or overflow behavior. CPU1 is rejected
+before queue access; its worker retains the separate deferred MIDI list.
+The mask uses ICFG bit8 rather than the older flash-only cli/sti helper, which
+does not preserve an already-disabled interrupt state.
+
+`sh tests/rust_command_irq.sh` links the actual Rust queue through its opaque
+MCU ABI and extracts the real C post/guard functions. A hosted register model
+requests a render interruption at the first index read, defers it until the
+whole foreground publication returns, and verifies both commands in order.
+It also covers an already-masked caller, exact flag restoration and CPU1
+refusal. The model does not execute PI32 instructions or establish latency;
+real IRQ-preemption, timing and device qualification remain open.
