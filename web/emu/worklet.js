@@ -15,6 +15,7 @@ export class Amb extends ProcessorBase {
     this.audioTime = options?.audioTime || (() => currentTime);
     this.ex = null;
     this.input = null;
+    this.leftViews = this.rightViews = this.dataView = null;
     this.sentBlits = -1;
     this.sentWrites = -1;
     this.lastFrame = 0;
@@ -35,10 +36,10 @@ export class Amb extends ProcessorBase {
       const now = () => BigInt(Math.round(this.audioTime() * 1e9));
       const wasi = {
         clock_time_get: (id, prec, out) => {
-          new DataView(this.mem.buffer).setBigUint64(out, now(), true);
+          this.dataView.setBigUint64(out, now(), true);
           return 0;
         },
-        fd_write: (fd, iov, n, out) => { new DataView(this.mem.buffer).setUint32(out, 0, true); return 0; },
+        fd_write: (fd, iov, n, out) => { this.dataView.setUint32(out, 0, true); return 0; },
         proc_exit: () => {},
       };
       const stub = new Proxy(wasi, { get: (t, k) => (k in t ? t[k] : () => 0) });
@@ -47,7 +48,17 @@ export class Amb extends ProcessorBase {
       if (this.disposed) return;
       this.ex = instance.exports;
       this.mem = this.ex.memory;
+      this.dataView = new DataView(this.mem.buffer);
       if (this.ex._initialize) this.ex._initialize();
+      // Fixed WASM memory and stable output addresses: create every bounded
+      // audio view at startup, including unusual device render quantum sizes.
+      const left = new Float32Array(this.mem.buffer, this.ex.web_out_l(), 1024);
+      const right = new Float32Array(this.mem.buffer, this.ex.web_out_r(), 1024);
+      this.leftViews = new Array(1025); this.rightViews = new Array(1025);
+      for (let n = 0; n <= 1024; n++) {
+        this.leftViews[n] = left.subarray(0, n);
+        this.rightViews[n] = right.subarray(0, n);
+      }
       const max = this.ex.web_store_max();
       for (const [obj, bytes] of Object.entries(m.store || {})) {
         const b = new Uint8Array(bytes).subarray(0, max);
@@ -76,6 +87,7 @@ export class Amb extends ProcessorBase {
     if (this.disposed) return;
     this.disposed = true;
     this.ex = this.mem = this.input = null;
+    this.leftViews = this.rightViews = this.dataView = null;
     this.port.onmessage = null;
     this.port.close?.();
   }
@@ -135,11 +147,15 @@ export class Amb extends ProcessorBase {
     const out = outputs[0];
     const n = out[0].length;
     const t0 = clock();
-    this.ex.web_render(n);
+    for (let offset = 0; offset < n;) {
+      const chunk = Math.min(1024, n - offset);
+      this.ex.web_render(chunk);
+      out[0].set(this.leftViews[chunk], offset);
+      if (out[1]) out[1].set(this.rightViews[chunk], offset);
+      offset += chunk;
+    }
     this.busy += clock() - t0;
     this.frames += n;
-    out[0].set(new Float32Array(this.mem.buffer, this.ex.web_out_l(), n));
-    if (out[1]) out[1].set(new Float32Array(this.mem.buffer, this.ex.web_out_r(), n));
     if (this.audioTime() - this.lastFrame >= 1 / 30) {
       this.lastFrame = this.audioTime();
       this.publish();
@@ -157,9 +173,12 @@ export function createHttpAudioNode(context) {
   const processor = new Amb({ port: channel.port1, audioTime: () => context.currentTime });
   const node = context.createScriptProcessor(1024, 0, 2);
   node.port = channel.port2;
-  node.onaudioprocess = (event) => processor.process([], [[
-    event.outputBuffer.getChannelData(0), event.outputBuffer.getChannelData(1),
-  ]]);
+  const inputs = [], channels = [null, null], outputs = [channels];
+  node.onaudioprocess = (event) => {
+    channels[0] = event.outputBuffer.getChannelData(0);
+    channels[1] = event.outputBuffer.getChannelData(1);
+    return processor.process(inputs, outputs);
+  };
   let disposed = false;
   node.dispose = () => {
     if (disposed) return;

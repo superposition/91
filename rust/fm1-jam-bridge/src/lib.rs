@@ -29,6 +29,8 @@ mod transport;
 mod voice_config;
 mod voice_parameters;
 mod voices;
+#[cfg(feature = "web")]
+mod web_audio;
 mod wire_formats;
 mod worker;
 

@@ -6,3 +6,4 @@ pub mod graphics;
 pub mod runner;
 pub mod runner_draw;
 pub mod text;
+pub mod web_audio;

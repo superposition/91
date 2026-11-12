@@ -11,6 +11,7 @@ crate-type = ["staticlib", "rlib"]
 [features]
 default = ["std"]
 std = []
+web = []
 pi32v2 = ["fm1-rt/pi32v2"]
 
 [dependencies]
