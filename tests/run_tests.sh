@@ -90,7 +90,7 @@ run host-build sh host/build_host.sh
 if command -v node >/dev/null 2>&1; then run webpiece node tests/web_piece_test.js build/host/amb_host; fi
 if command -v emcc >/dev/null 2>&1; then
     run emu sh -c "sh web/emu/build.sh >/dev/null && node tests/host/emu_test.mjs build/emu/amb.wasm"
-    run app sh -c "sh web/app/build.sh >/dev/null && node tests/host/app_test.mjs build/app/amb.wasm"
+    run app sh -c "sh web/app/build.sh --legacy-test >/dev/null && node tests/host/app_test.mjs build/legacy-app-test/amb.wasm"
 fi
 for s in tests/scenarios/*.amb; do
     n=$(basename "$s" .amb)

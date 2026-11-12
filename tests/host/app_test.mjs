@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// The web app's engine (build/app/amb.wasm) in Node: the pieces' recipes, the parameters' texts, a minute
+// The archived API engine (build/legacy-app-test/amb.wasm) in Node: the pieces' recipes, the parameters' texts, a minute
 // of a piece rendered (sound, no NaN, bounded), a piece change, the state the page draws.
 import fs from "fs";
 const bytes = fs.readFileSync(process.argv[2]);
