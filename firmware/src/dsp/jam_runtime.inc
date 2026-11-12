@@ -218,14 +218,24 @@ static void jp_tick(int st)
 {
     jp_phrase_t *ph; unsigned i,bar,beat,vel,gate,pat; int n;
     if(!en_jam_on) return;
+#if EN_RUST_SCHEDULER
+    const uint32_t boundary=fm1_rust_seq_boundary(jp_pos,jp_phrase[jp_current].bars,(uint32_t)(jp_upload!=0),jp_now.hold,en_jam_pending);
+    if(boundary) {
+        if(boundary==1) {
+#else
     if(jp_pos>=jp_phrase[jp_current].bars*16u) {
         if(jp_upload) {
+#endif
             jp_current^=1; jp_section=0; jp_copy_upload(); jp_now=jp_want;
             jp_sound_apply();
             if(jp_dx())jp_plan_wait=1024;else jp_prepare(0);
             en_jam_pending=0;
         }
+#if EN_RUST_SCHEDULER
+        else if(boundary==2) {
+#else
         else if(!jp_now.hold || en_jam_pending) {
+#endif
             jp_current^=1; jp_section++; jp_now=jp_want;
             if(en_jam_pending) jp_key_apply();
             if(jp_dx())jp_plan_wait=1024;else jp_prepare(0);

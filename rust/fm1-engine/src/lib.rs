@@ -4,4 +4,5 @@
 #![forbid(unsafe_code)]
 
 pub mod planner;
+pub mod sequencer;
 pub mod transport;

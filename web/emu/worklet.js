@@ -96,6 +96,8 @@ export class Amb extends ProcessorBase {
       handoff: { published: ex.web_rust_stat(13), copied: ex.web_rust_stat(14),
         claims: ex.web_rust_stat(15), activations: ex.web_rust_stat(16),
         rejected: ex.web_rust_stat(17) },
+      sequencer: { lanes: ex.web_rust_stat(18), mutations: ex.web_rust_stat(19),
+        waits: ex.web_rust_stat(20), boundaries: ex.web_rust_stat(21) },
     };
     if (ex.web_bg) msg.bg = Array.from(new Float32Array(this.mem.buffer, ex.web_bg(), 12));   // for the stream view's background
     if (this.frames >= 44100) {                       // the share of real time spent running the device

@@ -1,0 +1,45 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Enter the legacy instrument through its real F4 key and compare the WASM
+// scheduler during irregular audio callbacks, piece/genre changes and transport.
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+async function boot(path) {
+  let memory;
+  const wasi=new Proxy({
+    clock_time_get:(_id,_p,out)=>{new DataView(memory.buffer).setBigUint64(out,0n,true);return 0;},
+    fd_write:(_fd,_iov,_n,out)=>{new DataView(memory.buffer).setUint32(out,0,true);return 0;}
+  },{get:(object,key)=>key in object?object[key]:()=>0});
+  const {instance}=await WebAssembly.instantiate(fs.readFileSync(path),{wasi_snapshot_preview1:wasi,env:new Proxy({},{get:()=>()=>0})});
+  const ex=instance.exports;memory=ex.memory;if(ex._initialize)ex._initialize();
+  ex.web_seed(91);ex.web_master(2800);ex.web_boot();return {ex,memory};
+}
+const reference=await boot(process.argv[2]),rust=await boot(process.argv[3]);
+let calls=0,samples=0,peak=0;
+const sizes=[1,127,128,129,255,256,511,1024];
+function input(name,...args){reference.ex[name](...args);rust.ex[name](...args);}
+function advance(ms){
+  let remaining=Math.round(ms*44.1);
+  while(remaining>0){
+    const frames=Math.min(remaining,sizes[calls++%sizes.length]);input('web_render',frames);
+    for(const channel of ['web_out_l','web_out_r']){
+      const a=new Uint32Array(reference.memory.buffer,reference.ex[channel](),frames);
+      const b=new Uint32Array(rust.memory.buffer,rust.ex[channel](),frames);
+      assert.deepEqual(b,a,`legacy irregular PCM call ${calls}`);
+      for(const value of new Float32Array(rust.memory.buffer,rust.ex[channel](),frames)){assert(Number.isFinite(value));peak=Math.max(peak,Math.abs(value));}
+    }
+    remaining-=frames;samples+=frames*2;
+  }
+  assert.deepEqual(new Uint16Array(rust.memory.buffer,rust.ex.web_fb(),240*240),new Uint16Array(reference.memory.buffer,reference.ex.web_fb(),240*240));
+  assert.equal(rust.ex.web_lit_keys(),reference.ex.web_lit_keys());assert.equal(rust.ex.web_lit_buttons(),reference.ex.web_lit_buttons());
+}
+function tap(button){input('web_buttons',1<<button);advance(100);input('web_buttons',0);advance(100);}
+advance(6000);tap(6);input('web_keys',1<<12);advance(100);input('web_keys',0);advance(100);advance(1000);
+const boundary=rust.ex.web_rust_stat(21),lanes=rust.ex.web_rust_stat(18);
+advance(5000);input('web_enc',2,1);advance(5000);tap(10);advance(1000);tap(10);advance(4000);
+input('web_buttons',1<<5);advance(100);input('web_enc',2,1);advance(100);input('web_buttons',0);advance(6000);
+assert.equal(rust.ex.web_rust_stat(21),boundary,'F4 leaves Songbook boundary scheduling');
+assert(rust.ex.web_rust_stat(18)>lanes,'legacy drum decisions execute in Rust');
+assert(rust.ex.web_rust_stat(20)>0,'legacy delayed-hit deadlines execute in Rust');
+assert.equal(rust.memory.buffer.byteLength,33554432);assert(peak>0.05 && peak<1);
+console.log(JSON.stringify({scenario:'legacy-f4-piece-genre-transport',compared_samples:samples,render_calls:calls,peak,
+  sequencer:{lanes:rust.ex.web_rust_stat(18)-lanes,waits:rust.ex.web_rust_stat(20),boundaries:boundary},memory_bytes:rust.memory.buffer.byteLength}));

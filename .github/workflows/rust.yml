@@ -2,15 +2,35 @@ name: Rust migration checks
 
 on:
   push:
-    paths: ['Cargo.toml', 'Cargo.lock', 'rust/**', 'firmware/**', 'host/**', 'web/emu/**', 'tests/host/emu*', 'tests/host/browser_doubles.mjs', 'tests/reference/**', 'tests/rust_*', 'assets/fonts/**', 'tools/gen_font.py', '.github/workflows/rust.yml']
+    paths: ['Cargo.toml', 'Cargo.lock', 'rust/**', 'firmware/**', 'host/**', 'web/**', 'tests/host/emu*', 'tests/host/browser_doubles.mjs', 'tests/host/gparams.c', 'tests/reference/**', 'tests/rust_*', 'tests/web*', 'assets/fonts/**', 'tools/gen_font.py', 'tools/make_params.py', 'tools/make_pages_site.py', 'tools/web*.py', 'tools/release.sh', '.github/workflows/rust.yml']
   pull_request:
-    paths: ['Cargo.toml', 'Cargo.lock', 'rust/**', 'firmware/**', 'host/**', 'web/emu/**', 'tests/host/emu*', 'tests/host/browser_doubles.mjs', 'tests/reference/**', 'tests/rust_*', 'assets/fonts/**', 'tools/gen_font.py', '.github/workflows/rust.yml']
+    paths: ['Cargo.toml', 'Cargo.lock', 'rust/**', 'firmware/**', 'host/**', 'web/**', 'tests/host/emu*', 'tests/host/browser_doubles.mjs', 'tests/host/gparams.c', 'tests/reference/**', 'tests/rust_*', 'tests/web*', 'assets/fonts/**', 'tools/gen_font.py', 'tools/make_params.py', 'tools/make_pages_site.py', 'tools/web*.py', 'tools/release.sh', '.github/workflows/rust.yml']
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
+  web_metadata:
+    name: Web metadata and build safety
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python3 tools/make_params.py --check
+      - run: python3 tests/web_build_test.py
+      - run: node tests/web_metadata_test.mjs
+      - run: node tests/web_backup_test.js
+      - run: node tests/web_piece_test.js
+      - run: node tests/web_syx_test.js
+      - run: node tests/web_ota_test.mjs
+      - run: node tests/web_idle_test.mjs
+
   portable:
     strategy:
       matrix:
@@ -65,8 +85,8 @@ jobs:
         run: sh tests/rust_emulator_parity.sh
       - name: Browser bindings and lifecycle
         run: node tests/host/emu_browser_test.mjs build/emu/amb.wasm
-      - name: Native transport, external clock and chunk trace parity
-        run: sh tests/rust_transport_parity.sh
+      - name: Native clock, sequencer, mutation and scheduled-event trace parity
+        run: sh tests/rust_sequencer_parity.sh
       - name: Songbook snapshot and staging handoffs
         run: sh tests/rust_handoff.sh
       - uses: actions/upload-artifact@v4
