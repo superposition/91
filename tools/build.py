@@ -144,18 +144,10 @@ def generate():
 # ---- update loader
 
 def crc16(d, c=0):
-    for b in d:
-        c ^= b << 8
-        for _ in range(8):
-            c = ((c << 1) ^ 0x1021) if c & 0x8000 else c << 1
-        c &= 0xFFFF
-    return c
-
+    return fm1pkg_make.crc16(d, c)
 
 def ldr_head(dcrc, a, b, attr, name):
-    body = struct.pack("<HIIBBH16s", dcrc, a, b, attr, 0, 0, name)
-    return struct.pack("<H", crc16(body)) + body
-
+    return fm1pkg_make.entry(dcrc, a, b, attr, 0, 0, name)
 
 def ldr_wrap(image):
     """ota.bin = outer JLFS head (32 B) + inner head (32 B, load address) +

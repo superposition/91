@@ -17,6 +17,7 @@ node tests/web_syx_test.js
 node tests/web_ota_test.mjs
 python3 tools/make_params.py --check
 node tests/web_metadata_test.mjs
+python3 tests/package_codecs_test.py
 python3 tools/gen_font.py "$out/gen/felucca_font.h" > "$out/font.log"
 flags="-O2 -ffp-contract=off -std=gnu99 -I. -Ifirmware/src -Ifirmware/src/dsp -I$out/gen"
 cc $flags -o "$out/constructors-c0" tests/reference/constructors_reference.c firmware/src/dsp/amb.c -lm
@@ -31,6 +32,7 @@ if [ "$#" -gt 0 ]; then
     (cd "$baseline" && cc -O2 -ffp-contract=off -std=gnu99 -I. -Ifirmware/src -Ifirmware/src/dsp -I"$repo/$out/gen" -o "$repo/$out/constructors-frozen" "$repo/tests/reference/constructors_reference.c" firmware/src/dsp/amb.c -lm)
     "$out/constructors-frozen" > "$out/constructors.json"
     cmp "$out/constructors.json" "$out/constructors-rust.json"
+    python3 tests/reference/tool_codecs_reference.py "$baseline"
     python3 tests/reference/codec_vectors.py
     sha256sum -c tests/reference/browser-codecs.sha256
 fi

@@ -7,6 +7,7 @@
 set -e
 cd "$(dirname "$0")/.."
 V="${1:?usage: tools/release.sh VERSION [--no-tests]}"
+python3 tools/build_codecs.py
 python3 tools/make_params.py
 python3 tools/manual_html.py
 if [ "${2:-}" != "--no-tests" ]; then

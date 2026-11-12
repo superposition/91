@@ -92,7 +92,7 @@ pub(super) fn run(op: u32, r: &Request<'_>, out: &mut [u8]) -> Result<usize, Cod
                 1 => ExtensionKind::Bass,
                 _ => return Err(CodecError::Version),
             },
-            genres: a(1)? as u8,
+            genres: u8::try_from(a(1)?).map_err(|_| CodecError::Index)?,
             reserved: [a(2)? as u8, a(3)? as u8],
             records: b(0)?,
         }
@@ -115,7 +115,7 @@ pub(super) fn run(op: u32, r: &Request<'_>, out: &mut [u8]) -> Result<usize, Cod
             .encode_preserving(if b(1)?.is_empty() { None } else { Some(b(1)?) }, out)
         }
         56 => BankParts {
-            genre: a(0)? as u8,
+            genre: u8::try_from(a(0)?).map_err(|_| CodecError::Index)?,
             parameters: a(1)? as u16,
             saved: a(2)? as u16,
             answer_encoding: a(3)? as u8,
@@ -190,7 +190,7 @@ pub(super) fn run(op: u32, r: &Request<'_>, out: &mut [u8]) -> Result<usize, Cod
                 if a(0)? == 255 {
                     *b(0)?.get(5).ok_or(CodecError::Length)?
                 } else {
-                    a(0)? as u8
+                    u8::try_from(a(0)?).map_err(|_| CodecError::Index)?
                 },
             )?;
             let mut w = Writer::new(out);
@@ -208,7 +208,8 @@ pub(super) fn run(op: u32, r: &Request<'_>, out: &mut [u8]) -> Result<usize, Cod
             Ok(w.len())
         }
         61 => {
-            let bank = storage::Bank::parse(b(0)?, a(0)? as u8)?;
+            let bank =
+                storage::Bank::parse(b(0)?, u8::try_from(a(0)?).map_err(|_| CodecError::Index)?)?;
             let slot = a(1)? as usize;
             if slot >= 10 {
                 return Err(CodecError::Index);
@@ -218,7 +219,7 @@ pub(super) fn run(op: u32, r: &Request<'_>, out: &mut [u8]) -> Result<usize, Cod
             }
             let record = bank.record(slot)?;
             PieceParts {
-                genre: a(0)? as u8,
+                genre: u8::try_from(a(0)?).map_err(|_| CodecError::Index)?,
                 slot: slot as u8,
                 parameter_count: bank.parameter_count(),
                 flags: 0,
@@ -254,7 +255,7 @@ pub(super) fn run(op: u32, r: &Request<'_>, out: &mut [u8]) -> Result<usize, Cod
             b(0)?,
             a(0)? as usize,
             a(1)? as usize,
-            a(2)? as u8,
+            u8::try_from(a(2)?).map_err(|_| CodecError::Index)?,
             a(3)?,
             optional(b(1)?)?,
             optional(b(2)?)?,
@@ -339,7 +340,10 @@ pub(super) fn run(op: u32, r: &Request<'_>, out: &mut [u8]) -> Result<usize, Cod
                     Ok(w.len())
                 }
                 4 => {
-                    let bank = storage::Bank::parse(bytes, a(1)? as u8)?;
+                    let bank = storage::Bank::parse(
+                        bytes,
+                        u8::try_from(a(1)?).map_err(|_| CodecError::Index)?,
+                    )?;
                     let mut w = Writer::new(out);
                     w.u32(relative(bytes, bank.bytes()) as u32)?;
                     Ok(w.len())

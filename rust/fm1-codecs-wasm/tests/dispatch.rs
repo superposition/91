@@ -85,3 +85,20 @@ fn bounded_decoder_mutations_and_hostile_descriptors_do_not_escape_windows() {
     }
     assert!(attempts > 20_000);
 }
+#[test]
+fn wire_and_genre_indices_do_not_wrap_through_the_scalar_abi() {
+    let mut input = vec![0; 256];
+    let mut out = [0xa5; 64];
+    for (args, op, error) in [
+        ([2, 7, 65536], 104, fm1_formats::CodecError::Range),
+        ([1, 256, 0], 104, fm1_formats::CodecError::Index),
+        ([256, 0, 0], 60, fm1_formats::CodecError::Index),
+    ] {
+        input.fill(0);
+        for (i, value) in args.iter().enumerate() {
+            input[i * 4..i * 4 + 4].copy_from_slice(&(*value as u32).to_le_bytes());
+        }
+        assert_eq!(api::run(op, &input, &mut out), Err(error));
+        assert_eq!(out, [0xa5; 64]);
+    }
+}

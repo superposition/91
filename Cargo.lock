@@ -6,6 +6,7 @@ version = 4
 name = "fm1-cli"
 version = "0.1.0"
 dependencies = [
+ "fm1-codecs-wasm",
  "fm1-engine",
  "fm1-formats",
  "fm1-types",

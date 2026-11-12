@@ -2,11 +2,17 @@
 use fm1_engine::planner::{self, Phrase, Seed, Settings};
 use fm1_formats::{crc32, jam::JamPack};
 use serde_json::json;
+mod codecs;
 use std::{env, fs, process};
 
 fn run() -> Result<(), String> {
     let args: Vec<_> = env::args().skip(1).collect();
     match args.first().map(String::as_str) {
+        Some("codec") => {
+            let op=args.get(1).ok_or("usage: fm1-rs codec OP < ABI1-request")?.parse::<u32>().map_err(|e|e.to_string())?;
+            codecs::once(op).map_err(|e|e.to_string())?;
+        },
+        Some("codec-stream") => codecs::stream().map_err(|e|e.to_string())?,
         Some("layouts") => println!("{}",json!({
             "parameters":fm1_types::PARAMETER_COUNT,
             "pattern_bytes":std::mem::size_of::<fm1_types::PatternBank>(),
