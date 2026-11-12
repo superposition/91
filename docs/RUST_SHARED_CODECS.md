@@ -1,6 +1,6 @@
-# Shared binary codecs: R05 checkpoint
+# Shared binary codecs: R05
 
-This is the verified implementation slice for [R05 / #6](https://github.com/superposition/91/issues/6), on top of the compact factory port. It adds maintained, allocation-free `fm1-formats` codecs and selects them in real C consumers with `EN_RUST_FORMATS`. It does **not** claim that every remaining storage constructor, device service or browser implementation has moved to Rust. The exact follow-up boundary is listed below.
+This is the verified implementation slice for [R05 / #6](https://github.com/superposition/91/issues/6), on top of the compact factory port. It adds maintained, allocation-free `fm1-formats` codecs and selects them in real C consumers with `EN_RUST_FORMATS`. The subsequent [browser and constructor integration](RUST_BROWSER_CODECS.md) replaces the duplicated web binary helpers and adds explicit typed storage constructors. The byte layouts and frozen oracle evidence below remain applicable.
 
 ## Source inventory and current execution
 
@@ -77,14 +77,9 @@ The actual WASM saved-piece test loads an HYP3 bank and VOX1 user voice, plays t
 
 With only `EN_RUST_FORMATS` toggled, this checkout's linked WASM changes from 2,534,254 to 2,531,838 bytes: file **−2,416**, code section **+4,719**, data section **+544**, custom sections **−7,711**. File shrinkage includes metadata changes and is not an MCU flash or timing claim. These measurements cover the codecs actually linked into the emulator; unused package/tool APIs are not charged as live emulator code. Linear memory remains 32 MiB without growth.
 
-## Explicit remaining acceptance for #6
+## Completion audit
 
-1. **New storage-object constructors:** PMGL, SET1, VOX1, PCX1/KND1/BSQ1 and MIDI-map new-save assembly still use existing C/JS constructors. Rust provides validated field views and lossless copies of existing objects; this checkpoint does not replace every constructor with a typed Rust encoder.
-2. **Browser distribution:** connected tools still invoke their existing JS file/packet helpers. Frozen JS differential tests guard compatibility, but the browser is not yet loading a shared Rust codec module. The emulator retains its 24-export interface.
-3. **Remaining device-service bindings:** the C OTA service still calls its original CRC/ENC/pack7 primitives, despite qualified Rust equivalents. DX service checksum/dispatch, Jam transfer operation policy and per-command debug/telemetry schemas remain in C. USB collection/IRQ/publication are deliberately unchanged and belong to hardware/driver qualification.
-4. **Platform qualification:** this branch has native C/Rust and clang-WASM evidence. Physical MIDI/device writes, MCU linker-map/ROM/RAM/timing and Emscripten browser/device testing are not claimed. Root must rerun qualification after combining parallel DSP slices.
-
-These are concrete follow-ups; #6 must not be represented as fully closed by this checkpoint alone.
+The browser/constructor extension is documented in [RUST_BROWSER_CODECS.md](RUST_BROWSER_CODECS.md). It supplies typed new-save construction, browser WASM execution, and OTA/Jam/telemetry primitive bindings. The SDK packager's remaining Python primitive bindings are being qualified separately; it retains its existing package assembly and recovery policy. Physical USB/IRQ/driver behavior belongs to #19, browser application policy to #23, and project/storage transaction policy to #7. Browser audio/device QA is not implied by Node execution.
 
 ## Reproduce
 

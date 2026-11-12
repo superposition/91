@@ -39,6 +39,14 @@ pub struct JamPack<'a> {
 }
 
 impl<'a> JamPack<'a> {
+    /// Copy a validated pack without changing unknown metadata/reserved bytes.
+    pub fn encode_into(self, output: &mut [u8]) -> Result<usize, crate::CodecError> {
+        if output.len() < self.bytes.len() {
+            return Err(crate::CodecError::Capacity);
+        }
+        output[..self.bytes.len()].copy_from_slice(self.bytes);
+        Ok(self.bytes.len())
+    }
     pub fn parse(p: &'a [u8]) -> Result<Self, PackError> {
         let pack = Self::parse_structural(p)?;
         for i in 0..p[8] as usize {

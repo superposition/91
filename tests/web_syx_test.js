@@ -11,7 +11,7 @@ function grab(start, endMarker) {
   return src.slice(i, j);
 }
 const code = grab("const nameOf =", "let voices = [];") + "\n" + grab("const vmsg =", "$(\"vsend\")");
-const { nameOf, parseSyx, vmsg } = new Function(code + "; return { nameOf, parseSyx, vmsg };")();
+const { nameOf, parseSyx, vmsg } = new Function(require("./codec_test_support.cjs").prelude() + code + "; return { nameOf, parseSyx, vmsg };")();
 let bad = 0;
 const check = (name, ok) => { console.log((ok ? "  ok   " : "  FAIL ") + name); if (!ok) bad++; };
 

@@ -6,7 +6,7 @@
 const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");
-const src = fs.readFileSync(path.join(__dirname, "..", "web", "fm1piece.js"), "utf8").replace(/^export /gm, "");
+const src = require("./codec_test_support.cjs").prelude() + fs.readFileSync(path.join(__dirname, "..", "web", "fm1piece.js"), "utf8").replace(/^export /gm, "").replace(/^import .*;\r?\n/gm, "");
 const M = new Function(src + "; return { PC_HDR, PC_REC, PC_LEN, PC_PRG, PC_REC_PAR, PC_RECIPE, PC_VOX_LEN, PC_GLOB_LEN, pcBankCheck, pcSaved, pcFromBank, pcGet, pcSet, pcEncode, pcDecode, pcDecodeAny, pcToCode, pcFromCode, pcIntoBank, pcVoiceName, pcUserSlot, pcVoices, pcVoicePlan, pcVoicesWith, pcParseAbout, pcAboutMsg, pcSetEncode, pcSetDecode, pcSetPlaces, pcGlobWith, pcGlobList, pcSetVoices, pcHash, pcKindsOf, pcKindsWith, PC_KND_MAGIC, pcFxOf, pcExtrasWith, pcBassOf, pcBassWith };")();
 let bad = 0;
 const check = (name, ok) => { console.log((ok ? "  ok   " : "  FAIL ") + name); if (!ok) bad++; };

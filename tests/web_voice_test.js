@@ -6,7 +6,7 @@ const path = require("path");
 const src = fs.readFileSync(path.join(__dirname, "..", "web", "editor", "index.html"), "utf8");
 const i = src.indexOf("const FP = {"), j = src.indexOf("function initVoice()");
 if (i < 0 || j < 0) { console.log("  FAIL the voice code was not found in the page"); process.exit(1); }
-const { unpackVoice, packVoice, sanitize, FP } = new Function(src.slice(i, j) + "; return { unpackVoice, packVoice, sanitize, FP };")();
+const { unpackVoice, packVoice, sanitize, FP } = new Function(require("./codec_test_support.cjs").prelude() + src.slice(i, j) + "; return { unpackVoice, packVoice, sanitize, FP };")();
 const vec = JSON.parse(fs.readFileSync(process.argv[2] || path.join(__dirname, "..", "build", "voices.json"), "utf8"));
 let badU = 0, badR = 0, badP = 0;
 for (const e of vec) {

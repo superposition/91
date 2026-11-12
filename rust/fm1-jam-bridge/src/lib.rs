@@ -17,8 +17,10 @@ mod handoff;
 #[cfg(all(feature = "pi32v2", not(feature = "std"), not(target_arch = "wasm32")))]
 mod mcu;
 mod melodic;
+mod object_formats;
 mod sequencer;
 mod transport;
+mod voice_config;
 mod voices;
 mod wire_formats;
 
@@ -425,3 +427,5 @@ mod tests {
         }
     }
 }
+
+mod voice_data;

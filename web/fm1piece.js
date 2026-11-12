@@ -6,116 +6,67 @@
 export const PC_HDR = 16, PC_REC = 376, PC_NPIECES = 10, PC_PRG = 6, PC_REC_PAR = 2 + 2 * 6 * 6, PC_RECIPE = 0xFF;   // IMG_HDR, IMG_REC, NPIECES, EN_PRG_LEN, REC_PAR, REC_RECIPE
 export const PC_TAIL = PC_HDR + PC_NPIECES * PC_REC, PC_LEN = PC_TAIL + PC_NPIECES * PC_PRG;
 export const PC_NUSER = 16, PC_VOX_LEN = 8 + PC_NUSER * 128;
-const IMG_MAGIC = 0x33505948, VOX_MAGIC = 0x31584F56;            // "HYP3", "VOX1"
-
-const rd16 = (b, o) => b[o] | (b[o + 1] << 8);
-const rd32 = (b, o) => (rd16(b, o) | (rd16(b, o + 2) << 16)) >>> 0;
-const wr16 = (b, o, v) => { b[o] = v & 255; b[o + 1] = (v >> 8) & 255; };
-const wr32 = (b, o, v) => { wr16(b, o, v & 0xFFFF); wr16(b, o + 2, v >>> 16); };
-
-function crc32(a) {
-  let c = ~0;
-  for (let i = 0; i < a.length; i++) {
-    c ^= a[i];
-    for (let k = 0; k < 8; k++) c = (c >>> 1) ^ (0xEDB88320 & -(c & 1));
-  }
-  return ~c >>> 0;
-}
-
+import { getCodecs, codecWords, codecIntegers, codecConcat } from "./codec-runtime.mjs";
+const pcCall = (op, args = [], blobs = []) => getCodecs().call(op, args, blobs);
+const pcView = (bank, genre) => codecWords(pcCall(60, [genre], [bank]));
+const crc32 = a => codecWords(pcCall(1, [], [a]))[0];
+const pcJson = b => { try { return JSON.parse(new TextDecoder().decode(b)) || {}; } catch (_) { return {}; } };
+const pcTake = (b, v, i) => b.slice(v[i], v[i] + v[i + 1]);
 // ---- a genre's bank (the flash object): its header, and a piece out of it
 // what is wrong with it for the pieces page (null: nothing), or "empty"
 export function pcBankCheck(bank, genre) {
-  if (!bank || !bank.length) return "empty";
-  if (bank.length < PC_TAIL || rd32(bank, 0) !== IMG_MAGIC || bank[4] !== 2 || bank[5] !== genre || rd16(bank, 10) !== PC_REC) return "old";
-  if (bank[12] !== 1 || bank[13] !== 1) return "old";             // the acid answer and the pluck's numbering as they are now (an older bank: save once first)
-  return null;
+  if (!bank?.length) return "empty";
+  try { const v = pcView(bank, genre); return v[0] && v[4] === 1 && v[5] === 1 ? null : "old"; } catch (_) { return "old"; }
 }
-export const pcSaved = (bank) => (pcBankCheck(bank, bank && bank.length > 5 ? bank[5] : -1) ? 0 : rd16(bank, 8));
+export const pcSaved = bank => { try { const v = pcView(bank, 255); return v[0] && v[4] === 1 && v[5] === 1 ? v[3] : 0; } catch (_) { return 0; } };
 
 // the piece in slot `slot` (0-9) of a genre's bank, as the file keeps it
 export function pcFromBank(bank, genre, slot) {
   const bad = pcBankCheck(bank, genre);
   if (bad) throw new Error(bad === "empty" ? "nothing saved in this genre" : "this genre uses a different saved-piece layout: save a piece in NAIWAN 91 once, then try again");
-  if (!((rd16(bank, 8) >> slot) & 1)) throw new Error("that piece is not saved");
-  const rec = bank.slice(PC_HDR + slot * PC_REC, PC_HDR + (slot + 1) * PC_REC);
-  const tail = bank[14] === 1 && bank.length >= PC_LEN;
-  const prg = tail ? bank.slice(PC_TAIL + slot * PC_PRG, PC_TAIL + (slot + 1) * PC_PRG) : new Uint8Array(PC_PRG);
-  return { genre, slot, npar: rd16(bank, 6), rec, prg, voice: null, kinds: null, fx: null, bass: null, meta: {} };
+  if (!(pcSaved(bank) >> slot & 1)) throw new Error("that piece is not saved");
+  return pcDecode(pcCall(61, [genre, slot], [bank]));
 }
 
 // a setting of the piece (index p; lo: its lowest, params.json's min), or undefined when the piece predates it
 export function pcGet(piece, p, lo) {
-  if (p >= piece.npar || piece.rec[PC_REC_PAR + p] === PC_RECIPE) return undefined;
-  return lo + piece.rec[PC_REC_PAR + p];
+  const v = codecWords(pcCall(68, [p, lo, piece.npar], [piece.rec])); return v[0] ? v[1] | 0 : undefined;
 }
-export function pcSet(piece, p, lo, v) { piece.rec[PC_REC_PAR + p] = v - lo; }
+export function pcSet(piece, p, lo, v) { piece.rec.set(pcCall(68, [p, lo, piece.npar, 1, v - lo], [piece.rec])); }
 
 // ---- the Progression page's chord types (0.16.6, project.c knd_t "KND1": magic, then 3 bytes for each genre's ten pieces; OBJ_KINDS, its own object as
 // the banks are full). A piece's three bytes (eight slots, three bits each; all 0: every slot the piece's own type) travel in the note's JSON as "k", so
 // a page from before them reads the piece as it always did (without the types) and nothing about the file's layout changes.
 export const PC_KND_LEN = 3, PC_KND_MAGIC = 0x31444E4B;          // EN_PRK_LEN, "KND1"
-const kndAt = (genre, slot) => 4 + (genre * PC_NPIECES + slot) * PC_KND_LEN;
 // 0.16.28: the object is the pieces' extras ("PCX1", project.c): magic, 16, the genres, 2 spare; then 16 bytes a piece: its 3 types, flags (bit 0:
 // its FILTERS and SCREAM saved with it), those 7 settings (the FILTERS page's types: pad, bass, acid; SCREAM's drive, amount, wow, target), spare
 export const PC_PX_MAGIC = 0x31584350, PC_PX_HDR = 8, PC_PX_LEN = 16, PC_PX_NFX = 7;
-const pxAt = (genre, slot) => PC_PX_HDR + (genre * PC_NPIECES + slot) * PC_PX_LEN;
-const isPx = (o) => o && o.length >= PC_PX_HDR && rd32(o, 0) === PC_PX_MAGIC && o[4] === PC_PX_LEN;
 // 0.16.29: the pieces' bass steps, their own object ("BSQ1", project.c OBJ_BSTEP): magic, 16, the genres, 2 spare; then 16 bytes a piece (amb.h EN_BS_*)
 export const PC_BS_MAGIC = 0x31515342, PC_BS_HDR = 8, PC_BS_LEN = 16;
-const bsAt = (genre, slot) => PC_BS_HDR + (genre * PC_NPIECES + slot) * PC_BS_LEN;
-const isBs = (o) => o && o.length >= PC_BS_HDR && rd32(o, 0) === PC_BS_MAGIC && o[4] === PC_BS_LEN;
 // a piece's bass steps (null: none set)
-export function pcBassOf(bs, genre, slot) {
-  if (!isBs(bs) || bs.length < bsAt(genre, slot) + PC_BS_LEN) return null;
-  const s = bs.slice(bsAt(genre, slot), bsAt(genre, slot) + PC_BS_LEN);
-  return s.some((v) => v) ? s : null;
+export function pcBassOf(bytes, genre, slot) {
+  const value = pcCall(63, [genre, slot, 2], [bytes]); return value.length ? value : null;
 }
 // the object with a piece's steps put in (null clears them), for a firmware with `ngenres` genres
 export function pcBassWith(bs, genre, slot, steps, ngenres) {
-  const n = Math.max(PC_BS_HDR + ngenres * PC_NPIECES * PC_BS_LEN, bsAt(genre, slot) + PC_BS_LEN);
-  const out = new Uint8Array(n);
-  if (isBs(bs)) out.set(bs.subarray(0, Math.min(bs.length, n)));
-  wr32(out, 0, PC_BS_MAGIC); out[4] = PC_BS_LEN; out[5] = ngenres; out[6] = out[7] = 0;
-  out.fill(0, bsAt(genre, slot), bsAt(genre, slot) + PC_BS_LEN);
-  if (steps) out.set(steps.subarray(0, PC_BS_LEN), bsAt(genre, slot));
-  return out;
+  return pcCall(64, [genre, slot, ngenres, 2], [bs, null, null, steps]);
 }
 // a piece's types out of the object, either form (null: the piece's own in every slot, or no object)
-export function pcKindsOf(knd, genre, slot) {
-  let k = null;
-  if (isPx(knd) && knd.length >= pxAt(genre, slot) + PC_PX_LEN) k = knd.slice(pxAt(genre, slot), pxAt(genre, slot) + PC_KND_LEN);
-  else if (knd && knd.length >= kndAt(genre, slot) + PC_KND_LEN && rd32(knd, 0) === PC_KND_MAGIC) k = knd.slice(kndAt(genre, slot), kndAt(genre, slot) + PC_KND_LEN);
-  return k && k.some((v) => v) ? k : null;
+export function pcKindsOf(bytes, genre, slot) {
+  const value = pcCall(63, [genre, slot, 0], [bytes]); return value.length ? value : null;
 }
 // its FILTERS and SCREAM, when they were saved with it (null: the defaults)
-export function pcFxOf(px, genre, slot) {
-  if (!isPx(px) || px.length < pxAt(genre, slot) + PC_PX_LEN || !(px[pxAt(genre, slot) + 3] & 1)) return null;
-  return px.slice(pxAt(genre, slot) + 4, pxAt(genre, slot) + 4 + PC_PX_NFX);
+export function pcFxOf(bytes, genre, slot) {
+  const value = pcCall(63, [genre, slot, 1], [bytes]); return value.length ? value : null;
 }
 // the extras object (a firmware of 0.16.28 on: the about answer's version 2) with a piece's types and settings put in (null: none), for a firmware
 // with `ngenres` genres; what else it held stays (an older KND1 object's types carried over)
 export function pcExtrasWith(px, genre, slot, kinds, fx, ngenres) {
-  const n = Math.max(PC_PX_HDR + ngenres * PC_NPIECES * PC_PX_LEN, pxAt(genre, slot) + PC_PX_LEN);
-  const out = new Uint8Array(n);
-  if (isPx(px)) out.set(px.subarray(0, Math.min(px.length, n)));
-  else if (px && px.length >= 4 && rd32(px, 0) === PC_KND_MAGIC)
-    for (let k = 0; k * PC_KND_LEN + 4 + PC_KND_LEN <= px.length && PC_PX_HDR + (k + 1) * PC_PX_LEN <= n; k++)
-      out.set(px.subarray(4 + k * PC_KND_LEN, 4 + (k + 1) * PC_KND_LEN), PC_PX_HDR + k * PC_PX_LEN);
-  wr32(out, 0, PC_PX_MAGIC); out[4] = PC_PX_LEN; out[5] = ngenres; out[6] = out[7] = 0;
-  const at = pxAt(genre, slot);
-  out.fill(0, at, at + PC_PX_LEN);
-  if (kinds) out.set(kinds.subarray(0, PC_KND_LEN), at);
-  if (fx) { out[at + 3] = 1; out.set(fx.subarray(0, PC_PX_NFX), at + 4); }
-  return out;
+  return pcCall(64, [genre, slot, ngenres, 1], [px, kinds, fx]);
 }
 // the object with a piece's types put in (null clears them), for a firmware with `ngenres` genres; what else it held stays
 export function pcKindsWith(knd, genre, slot, kinds, ngenres) {
-  const out = new Uint8Array(Math.max(4 + ngenres * PC_NPIECES * PC_KND_LEN, kndAt(genre, slot) + PC_KND_LEN));
-  if (knd && knd.length >= 4 && rd32(knd, 0) === PC_KND_MAGIC) out.set(knd.subarray(0, Math.min(knd.length, out.length)));
-  wr32(out, 0, PC_KND_MAGIC);
-  out.fill(0, kndAt(genre, slot), kndAt(genre, slot) + PC_KND_LEN);
-  if (kinds) out.set(kinds.subarray(0, PC_KND_LEN), kndAt(genre, slot));
-  return out;
+  return pcCall(64, [genre, slot, ngenres, 0], [knd, kinds]);
 }
 const bytesOk = (a, n) => Array.isArray(a) && a.length === n && a.every((v) => Number.isInteger(v) && v >= 0 && v < 256);
 const kindsOk = (k) => bytesOk(k, PC_KND_LEN);
@@ -136,32 +87,14 @@ function kindsOut(meta) {                                         // the note wi
 // the progression, the voice (128 bytes, when flagged), a little JSON (title, by, note, names; "k" the chord types) and the CRC-32 of all before it
 export function pcEncode(piece) {
   const meta = new TextEncoder().encode(JSON.stringify(kindsIn(piece.meta || {}, piece.kinds, piece.fx, piece.bass)));
-  const vlen = piece.voice ? 128 : 0;
-  const out = new Uint8Array(14 + PC_REC + PC_PRG + vlen + meta.length + 4);
-  out.set([0x50, 0x31, 0x50, 0x43, 1, piece.genre, piece.slot, piece.voice ? 1 : 0], 0);
-  wr16(out, 8, piece.npar); wr16(out, 10, PC_REC); wr16(out, 12, meta.length);
-  let p = 14;
-  out.set(piece.rec, p); p += PC_REC;
-  out.set(piece.prg, p); p += PC_PRG;
-  if (piece.voice) { out.set(piece.voice, p); p += 128; }
-  out.set(meta, p); p += meta.length;
-  wr32(out, p, crc32(out.subarray(0, p)));
-  return out;
+  return pcCall(41, [piece.genre, piece.slot, piece.npar, piece.voice ? 1 : 0], [piece.rec, piece.prg, piece.voice, meta]);
 }
 export function pcDecode(buf) {
-  if (buf.length < 18 || buf[0] !== 0x50 || buf[1] !== 0x31 || buf[2] !== 0x50 || buf[3] !== 0x43) throw new Error("not a compatible NAIWAN 91 piece");
-  if (buf[4] !== 1) throw new Error("this piece format is not supported: open the current NAIWAN 91 pieces page");
-  if (crc32(buf.subarray(0, buf.length - 4)) !== rd32(buf, buf.length - 4)) throw new Error("the piece is damaged");
-  const reclen = rd16(buf, 10), ml = rd16(buf, 12), vlen = buf[7] & 1 ? 128 : 0;
-  if (reclen !== PC_REC || 14 + reclen + PC_PRG + vlen + ml + 4 !== buf.length) throw new Error("the piece is damaged");
-  let p = 14;
-  const rec = buf.slice(p, p + reclen); p += reclen;
-  const prg = buf.slice(p, p + PC_PRG); p += PC_PRG;
-  const voice = vlen ? buf.slice(p, p + 128) : null; p += vlen;
-  let meta = {};
-  try { meta = JSON.parse(new TextDecoder().decode(buf.subarray(p, p + ml))) || {}; } catch (_) { meta = {}; }
-  const km = kindsOut(meta);
-  return { genre: buf[5], slot: buf[6], npar: rd16(buf, 8), rec, prg, voice, kinds: km.kinds, fx: km.fx, bass: km.bass, meta: km.meta };
+  let v;
+  try { v = codecWords(pcCall(42, [], [buf])); }
+  catch (e) { throw new Error(e.code === -2 || e.code === -1 && buf.length < 18 ? "not a compatible NAIWAN 91 piece" : e.code === -3 ? "this piece format is not supported: open the current NAIWAN 91 pieces page" : "the piece is damaged"); }
+  const km = kindsOut(pcJson(pcTake(buf, v, 10)));
+  return { genre: v[0], slot: v[1], npar: v[2], rec: pcTake(buf, v, 4), prg: pcTake(buf, v, 6), voice: v[9] ? pcTake(buf, v, 8) : null, ...km };
 }
 
 // ---- the code (and a link's #p=): the file, deflated, in base64url, after "P1."
@@ -200,51 +133,27 @@ export function pcSetEncode(set) {
   if (Object.keys(x).length) m1.x = x;
   if (Object.keys(sb).length) m1.s = sb;
   const meta = new TextEncoder().encode(JSON.stringify(m1));
-  const ps = set.pieces, vs = set.voices;
-  const out = new Uint8Array(4 + 1 + 16 + 2 + 2 + 2 + ps.length * (5 + PC_REC + PC_PRG) + vs.length * 128 + meta.length + 4);
-  out.set([0x50, 0x31, 0x53, 0x54, 1], 0);
-  let p = 5;
-  for (let i = 0; i < 16; i++) out[p++] = set.list[i] || 0;
-  out[p++] = set.on ? 1 : 0; out[p++] = set.mix || 0;
-  out[p++] = ps.length; out[p++] = vs.length;
-  wr16(out, p, meta.length); p += 2;
-  for (const pc of ps) {
-    out.set([pc.genre, pc.slot, pc.vidx === undefined || pc.vidx < 0 ? 0xFF : pc.vidx], p); p += 3;
-    wr16(out, p, pc.npar); p += 2;
-    out.set(pc.rec, p); p += PC_REC;
-    out.set(pc.prg, p); p += PC_PRG;
-  }
-  for (const v of vs) { out.set(v, p); p += 128; }
-  out.set(meta, p); p += meta.length;
-  wr32(out, p, crc32(out.subarray(0, p)));
-  return out;
+  const ps = set.pieces;
+  return pcCall(43, [set.on ? 1 : 0, set.mix || 0], [Uint8Array.from({length: 16}, (_, i) => set.list[i] || 0),
+    codecIntegers(ps.flatMap(pc => [pc.genre, pc.slot, pc.npar, pc.vidx === undefined || pc.vidx < 0 ? 255 : pc.vidx])),
+    codecConcat(ps.map(pc => pc.rec)), codecConcat(ps.map(pc => pc.prg)), codecConcat(set.voices), meta]);
 }
 export function pcSetDecode(buf) {
-  if (buf.length < 30 || buf[0] !== 0x50 || buf[1] !== 0x31 || buf[2] !== 0x53 || buf[3] !== 0x54) throw new Error("not a compatible NAIWAN 91 set");
-  if (buf[4] !== 1) throw new Error("this set format is not supported: open the current NAIWAN 91 pieces page");
-  if (crc32(buf.subarray(0, buf.length - 4)) !== rd32(buf, buf.length - 4)) throw new Error("the set is damaged");
-  let p = 5;
-  const list = Array.from(buf.slice(p, p + 16)); p += 16;
-  const on = !!buf[p++], mix = buf[p++], np = buf[p++], nv = buf[p++], ml = rd16(buf, p); p += 2;
-  if (p + np * (5 + PC_REC + PC_PRG) + nv * 128 + ml + 4 !== buf.length) throw new Error("the set is damaged");
+  let v;
+  try { v = codecWords(pcCall(44, [], [buf])); }
+  catch (e) { throw new Error(e.code === -2 || e.code === -1 && buf.length < 30 ? "not a compatible NAIWAN 91 set" : e.code === -3 ? "this set format is not supported: open the current NAIWAN 91 pieces page" : "the set is damaged"); }
+  const list = Array.from(buf.slice(v[0], v[0] + 16)), on = !!v[1], mix = v[2], np = v[3], nv = v[4];
   const pieces = [], voices = [];
-  for (let i = 0; i < np; i++) {
-    const genre = buf[p], slot = buf[p + 1], vi = buf[p + 2], npar = rd16(buf, p + 3);
-    p += 5;
-    pieces.push({ genre, slot, vidx: vi === 0xFF ? -1 : vi, npar, rec: buf.slice(p, p + PC_REC), prg: buf.slice(p + PC_REC, p + PC_REC + PC_PRG), voice: null, meta: {} });
-    p += PC_REC + PC_PRG;
-  }
-  for (let i = 0; i < nv; i++) { voices.push(buf.slice(p, p + 128)); p += 128; }
-  let meta = {};
-  try { meta = JSON.parse(new TextDecoder().decode(buf.subarray(p, p + ml))) || {}; } catch (_) { meta = {}; }
-  for (const pc of pieces) if (pc.vidx >= 0 && pc.vidx < voices.length) pc.voice = voices[pc.vidx];
-  const { k, x, s, ...rest } = meta && typeof meta === "object" ? meta : {};
+  for (let i = 0; i < np; i++) { const at = 7 + i * 6; pieces.push({genre: v[at], slot: v[at + 1], vidx: v[at + 2] === 255 ? -1 : v[at + 2], npar: v[at + 3], rec: buf.slice(v[at + 4], v[at + 4] + PC_REC), prg: buf.slice(v[at + 5], v[at + 5] + PC_PRG), voice: null, meta: {}}); }
+  for (let i = 0; i < nv; i++) { const at = v[7 + np * 6 + i]; voices.push(buf.slice(at, at + 128)); }
+  const { k, x, s, ...rest } = pcJson(pcTake(buf, v, 5));
   pieces.forEach((pc, i) => {
-    pc.kinds = k && kindsOk(k[i]) && k[i].some((v) => v) ? Uint8Array.from(k[i]) : null;
+    if (pc.vidx >= 0 && pc.vidx < voices.length) pc.voice = voices[pc.vidx];
+    pc.kinds = k && kindsOk(k[i]) && k[i].some(v => v) ? Uint8Array.from(k[i]) : null;
     pc.fx = x && bytesOk(x[i], PC_PX_NFX) ? Uint8Array.from(x[i]) : null;
-    pc.bass = s && bytesOk(s[i], PC_BS_LEN) && s[i].some((v) => v) ? Uint8Array.from(s[i]) : null;
+    pc.bass = s && bytesOk(s[i], PC_BS_LEN) && s[i].some(v => v) ? Uint8Array.from(s[i]) : null;
   });
-  return { kind: "set", list, on, mix, pieces, voices, meta: rest };
+  return {kind: "set", list, on, mix, pieces, voices, meta: rest};
 }
 // the set list's places as genre and piece (null: empty)
 export const pcSetPlaces = (list) => list.map((x) => (x ? { genre: Math.floor((x - 1) / 10), slot: (x - 1) % 10 } : null));
@@ -253,15 +162,12 @@ export const pcSetPlaces = (list) => list.map((x) => (x ? { genre: Math.floor((x
 // an empty one (or the old 12 bytes) takes the defaults given (tune, midi, theme)
 export const PC_GLOB_LEN = 32;
 export function pcGlobWith(glob, set, defs) {
-  const out = new Uint8Array(PC_GLOB_LEN);
-  if (glob && glob.length >= 12 && rd32(glob, 0) === 0x4C474D50) out.set(glob.subarray(0, Math.min(glob.length, PC_GLOB_LEN)));
-  else { wr32(out, 0, 0x4C474D50); wr16(out, 4, defs.tune & 0xFFFF); wr16(out, 6, defs.midi & 0xFFFF); wr16(out, 8, defs.theme & 0xFFFF); }
-  out.set(set.list.slice(0, 16), 12);
-  out[28] = set.on ? 1 : 0;
-  out[30] = set.mix || 0;
-  return out;
+  let values = [defs.tune, defs.midi, defs.theme, 0], tail = new Uint8Array(20);
+  try { const raw = pcCall(69, [0], [glob]), v = codecWords(raw.slice(0, 16)); values = v; if (raw.length > 16) tail.set(raw.slice(16)); } catch (_) {}
+  const list = tail.slice(0, 16); list.set(set.list.slice(0, 16));
+  return pcCall(50, [set.on ? 1 : 0, tail[17], set.mix || 0, tail[19]], [codecIntegers(values, 2), list]);
 }
-export const pcGlobList = (glob) => (glob && glob.length === PC_GLOB_LEN && rd32(glob, 0) === 0x4C474D50 ? { list: Array.from(glob.slice(12, 28)), on: !!glob[28], mix: glob[30] } : { list: new Array(16).fill(0), on: false, mix: 0 });
+export const pcGlobList = glob => { try { const b = pcCall(69, [0], [glob]); if (b.length !== 36) throw new Error(); return {list: Array.from(b.slice(16, 32)), on: !!b[32], mix: b[34]}; } catch (_) { return {list: new Array(16).fill(0), on: false, mix: 0}; } };
 
 // a set's voices into the voices' object: each to a voice already loaded, else the next empty slot; the answer maps the set's voice i to a slot (-1: no room)
 export function pcSetVoices(vox, voices) {
@@ -283,43 +189,20 @@ export function pcSetVoices(vox, voices) {
 // (the about answer). Settings the piece predates are written as "the recipe's" (0xFF); so are those of the bank's other pieces when the bank was saved by a
 // firmware with fewer. Settings the firmware does not know are dropped. The answer: the new bank, and what was lost or filled.
 export function pcIntoBank(bank, genre, slot, piece, npar) {
-  const bad = pcBankCheck(bank, genre);
-  if (bad === "old") throw new Error("this genre on the FM-1 uses a different saved-piece layout: save a piece in NAIWAN 91 once, then try again");
-  const out = new Uint8Array(PC_LEN);
-  let nb = npar;
-  if (bad === "empty") {
-    wr32(out, 0, IMG_MAGIC); out[4] = 2; out[5] = genre; wr16(out, 10, PC_REC);
-  } else {
-    out.set(bank.subarray(0, Math.min(bank.length, PC_LEN)));
-    if (!(bank[14] === 1 && bank.length >= PC_LEN)) out.fill(0, PC_TAIL);   // a bank from before the progressions: none, as it loads
-    nb = rd16(bank, 6);
-  }
-  const saved = rd16(out, 8);
-  if (nb < npar)                                                  // the others: what they predate is their recipe's, as the firmware would read them
-    for (let i = 0; i < PC_NPIECES; i++)
-      if (i !== slot && ((saved >> i) & 1)) out.fill(PC_RECIPE, PC_HDR + i * PC_REC + PC_REC_PAR + nb, PC_HDR + i * PC_REC + PC_REC_PAR + npar);
-  const rec = piece.rec.slice();
-  if (piece.npar < npar) rec.fill(PC_RECIPE, PC_REC_PAR + piece.npar, PC_REC_PAR + npar);
-  else if (piece.npar > npar) rec.fill(0, PC_REC_PAR + npar, PC_REC_PAR + piece.npar);
-  out.set(rec, PC_HDR + slot * PC_REC);
-  out.set(piece.prg, PC_TAIL + slot * PC_PRG);
-  wr16(out, 6, npar); wr16(out, 8, saved | (1 << slot));
-  out[12] = 1; out[13] = 1; out[14] = 1;
-  return { bank: out, dropped: Math.max(0, piece.npar - npar), filled: Math.max(0, npar - piece.npar), replaced: !!((saved >> slot) & 1) };
+  if (pcBankCheck(bank, genre) === "old") throw new Error("this genre on the FM-1 uses a different saved-piece layout: save a piece in NAIWAN 91 once, then try again");
+  const raw = pcCall(62, [genre, slot, npar, piece.npar], [bank, piece.rec, piece.prg]), v = codecWords(raw.slice(0, 12));
+  return { bank: raw.slice(12), dropped: v[0], filled: v[1], replaced: !!v[2] };
 }
 
 // ---- the DX7 voice: the pluck's sound (P_CM_SND) past the plain ones (nplain) and the built-in DX voices (nfmfact) is one of the player's 16 slots
-export const pcVoiceName = (v) => String.fromCharCode(...Array.from(v.slice(118, 128)).map((c) => (c < 32 || c > 126 ? 32 : c))).trimEnd() || "(no name)";
+export const pcVoiceName = v => String.fromCharCode(...Array.from(pcCall(69, [2], [v])).map(c => c < 32 || c > 126 ? 32 : c)).trimEnd() || "(no name)";
 export function pcUserSlot(piece, iSnd, nplain, nfmfact) {
   const v = pcGet(piece, iSnd, 0);
   return v === undefined ? -1 : v - nplain - nfmfact;
 }
 // the voices' object (OBJ_VOICES; maybe empty): how many are loaded, and each
 export function pcVoices(vox) {
-  if (!vox || vox.length !== PC_VOX_LEN || rd32(vox, 0) !== VOX_MAGIC || rd32(vox, 4) > PC_NUSER) return [];
-  const n = rd32(vox, 4), out = [];
-  for (let k = 0; k < n; k++) out.push(vox.slice(8 + k * 128, 8 + (k + 1) * 128));
-  return out;
+  try { const bytes = pcCall(69, [1], [vox]); return Array.from({length: bytes.length / 128}, (_, i) => bytes.slice(i * 128, (i + 1) * 128)); } catch (_) { return []; }
 }
 const same = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
 // where the piece's voice goes: "same" (already loaded there: nothing to write), "free" (the next empty slot), or "conflict" (its own slot holds another
@@ -334,17 +217,12 @@ export function pcVoicePlan(vox, voice, want) {
 // the voices' object with `voice` in `slot` (at most one past the loaded ones: slots fill in order)
 export function pcVoicesWith(vox, voice, slot) {
   const have = pcVoices(vox);
-  if (slot > have.length || slot >= PC_NUSER) throw new Error("no room for the voice");
-  have[slot] = voice;
-  const out = new Uint8Array(PC_VOX_LEN);
-  wr32(out, 0, VOX_MAGIC); wr32(out, 4, have.length);
-  have.forEach((v, i) => out.set(v, 8 + i * 128));
-  return out;
+  if (slot < 0 || slot > have.length || slot >= PC_NUSER) throw new Error("no room for the voice");
+  have[slot] = voice; return pcCall(52, [], [codecConcat(have)]);
 }
 
 // the answer to "about" (F0 7D 50 45 ver npar(2) genres voices F7, firmware/src/backup_proto.h), or null
 export function pcParseAbout(d) {
-  if (d.length !== 10 || d[0] !== 0xF0 || d[1] !== 0x7D || d[2] !== 0x50 || d[3] !== 0x45 || d[9] !== 0xF7) return null;
-  return { ver: d[4], npar: (d[5] << 7) | d[6], genres: d[7], voices: d[8] };
+  try { const v = codecWords(pcCall(35, [], [d])); return v[0] === 0x45 ? {ver: v[1], npar: v[2], genres: v[3], voices: v[4]} : null; } catch (_) { return null; }
 }
-export const pcAboutMsg = () => [0xF0, 0x7D, 0x50, 0x42, 0x06, 0xF7];
+export const pcAboutMsg = () => Array.from(pcCall(92, [3]));
