@@ -12,6 +12,7 @@ cp build/emu/amb.wasm "$out/reference.wasm"
 EN_RUST_JAM=1 sh web/emu/build_clang.sh
 cp build/emu/amb.wasm "$out/rust.wasm"
 node tests/host/emu_test.mjs "$out/rust.wasm"
+node tests/host/emu_http_test.mjs "$out/rust.wasm"
 node tests/host/emu_rust_test.mjs "$out/reference.wasm" "$out/rust.wasm" > "$out/factory.json"
 cat "$out/factory.json"
 node tests/host/emu_rust_test.mjs "$out/reference.wasm" "$out/rust.wasm" rust/fm1-engine/tests/packs/harris-citypop.jmp > "$out/saved-v1.json"

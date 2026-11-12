@@ -5,9 +5,14 @@
 
 const clock = globalThis.performance ? () => globalThis.performance.now() : () => Date.now();
 
-class Amb extends AudioWorkletProcessor {
-  constructor() {
-    super();
+const ProcessorBase = globalThis.AudioWorkletProcessor || class {
+  constructor(options) { this.port = options.port; }
+};
+
+export class Amb extends ProcessorBase {
+  constructor(options) {
+    super(options);
+    this.audioTime = options?.audioTime || (() => currentTime);
     this.ex = null;
     this.input = null;
     this.sentBlits = -1;
@@ -20,7 +25,7 @@ class Amb extends AudioWorkletProcessor {
 
   async onMessage(m) {
     if (m.type === "load") {
-      const now = () => BigInt(Math.round(currentTime * 1e9));
+      const now = () => BigInt(Math.round(this.audioTime() * 1e9));
       const wasi = {
         clock_time_get: (id, prec, out) => {
           new DataView(this.mem.buffer).setBigUint64(out, now(), true);
@@ -102,12 +107,28 @@ class Amb extends AudioWorkletProcessor {
     this.frames += n;
     out[0].set(new Float32Array(this.mem.buffer, this.ex.web_out_l(), n));
     if (out[1]) out[1].set(new Float32Array(this.mem.buffer, this.ex.web_out_r(), n));
-    if (currentTime - this.lastFrame >= 1 / 30) {
-      this.lastFrame = currentTime;
+    if (this.audioTime() - this.lastFrame >= 1 / 30) {
+      this.lastFrame = this.audioTime();
       this.publish();
     }
     return true;
   }
 }
 
-registerProcessor("amb", Amb);
+if (typeof registerProcessor === "function") registerProcessor("amb", Amb);
+
+// AudioWorklet is restricted to secure origins. A local-network HTTP preview
+// can run the same processor through the older main-thread Web Audio callback.
+export function createHttpAudioNode(context) {
+  const channel = new MessageChannel();
+  const processor = new Amb({ port: channel.port1, audioTime: () => context.currentTime });
+  const node = context.createScriptProcessor(1024, 0, 2);
+  node.port = channel.port2;
+  node.onaudioprocess = (event) => processor.process([], [[
+    event.outputBuffer.getChannelData(0), event.outputBuffer.getChannelData(1),
+  ]]);
+  node.dispose = () => {
+    node.disconnect(); channel.port1.close(); channel.port2.close();
+  };
+  return node;
+}
