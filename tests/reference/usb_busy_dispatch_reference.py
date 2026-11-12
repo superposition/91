@@ -11,10 +11,15 @@ def function(signature):
     start=source.index(signature);end=re.search(r'(?m)^}',source[start:]);assert end
     return source[start:start+end.end()]
 parser='\n'.join(function(s) for s in ['static void px_end(', 'static void dx_end(', 'static void sysex_byte('])
+if '/* Exact raw roots only:' in source:
+    start=source.rfind('#if EN_RUST_USB',0,source.index('/* Exact raw roots only:'))
+    end=source.index('/* SysEx assembly:',start)
+    parser=source[start:end]+'\n'+parser
 text=(out/'test.c').read_text(encoding='utf-8')
-text=text.replace('#include "dx_proto.h"','#include "dx_proto.h"\n#define USB_DX 1\n#define DX_MAX 4112u')
+text=text.replace('#include "dx_proto.h"','#include "dx_proto.h"\n#include "rust_usb.h"\n#define USB_DX 1\n#define DX_MAX 4112u')
 text=text.replace('static uint8_t dx_buf[4112],dx_state,dx_kind;static uint32_t dx_pos;', 'static uint8_t dx_buf[4112],dx_state,dx_kind,dx_on,px_on,px_buf[16];static uint32_t dx_pos,px_pos;')
-text=text.replace('static struct {uint8_t ota_req,uboot_req;}usb;', 'static struct {uint8_t ota_req,uboot_req,sysex[16],sx_len,sx_on;}usb;')
+text=text.replace('static struct {uint8_t ota_req,uboot_req;}usb;', 'static struct {uint8_t sysex[16],sx_len,sx_on,uboot_req,ota_req,tel_req;}usb;')
+text=text.replace('static uint32_t px_q[32],px_r,px_w;', 'static uint32_t px_q[32],px_r,px_w,midi_in_q[64],mi_w,mi_r;')
 needle='static unsigned raw_request('
 assert text.count(needle)==1
 text=text.replace(needle,parser+'\n'+needle)

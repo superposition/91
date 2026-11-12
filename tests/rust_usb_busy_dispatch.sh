@@ -17,4 +17,8 @@ cc $common -I"$out/current" "$out/current/test.c" firmware/src/dsp/amb.c -lm -o 
 "$out/current/test" > "$out/current/results.txt"
 cmp "$out/frozen/results.txt" "$out/current/results.txt"
 cat "$out/current/results.txt"
+cargo build --release --locked -p fm1-jam-bridge --target-dir "$out/native"
+cc $common -DEN_RUST_USB=1 -DEN_RUST_FORMATS=1 -I"$out/current" "$out/current/test.c" firmware/src/dsp/amb.c "$out/native/release/libfm1_jam_bridge.a" -lm -ldl -lpthread -o "$out/current/test-rust"
+"$out/current/test-rust" > "$out/current/results-rust.txt"
+cmp "$out/current/results.txt" "$out/current/results-rust.txt"
 echo 'Frozen ready-length loss witnessed; current retained payload/length survives incoming F0 and Busy dispatch retries.'

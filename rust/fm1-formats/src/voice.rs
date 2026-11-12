@@ -141,28 +141,38 @@ pub enum IncomingKind {
 /// Original USB collector classification, before checksum/service policy. Input
 /// is the bytes between F0/F7; seven-bit filtering belongs to the collector.
 pub fn classify_legacy(m: &[u8]) -> Option<IncomingKind> {
-    let n = m.len();
+    classify_legacy_with(m.len(), |index| m[index])
+}
+/// The collector can inspect its raw initialized header without making a Rust
+/// reference into a foreign ready-message lease. Only indexes 0..4 are visited,
+/// and each access is below `length`; no payload is copied or retained.
+pub fn classify_legacy_with(
+    length: usize,
+    mut byte: impl FnMut(usize) -> u8,
+) -> Option<IncomingKind> {
+    let n = length;
     let mut kind = None;
-    if n >= 5 && m[0] == 0x43 && m[1] & 0xf0 == 0 {
-        if m[2..5] == [9, 32, 0] && n == 4102 {
+    if n >= 5 && byte(0) == 0x43 && byte(1) & 0xf0 == 0 {
+        if byte(2) == 9 && byte(3) == 32 && byte(4) == 0 && n == 4102 {
             kind = Some(IncomingKind::Bulk);
-        } else if m[2..5] == [0, 1, 27] && n == 161 {
+        } else if byte(2) == 0 && byte(3) == 1 && byte(4) == 27 && n == 161 {
             kind = Some(IncomingKind::Single);
         }
-    } else if n >= 4 && m[..3] == [0x7d, 0x50, 0x56] {
-        if n == 133 && m[3] < 16 {
+    } else if n >= 4 && byte(0) == 0x7d && byte(1) == 0x50 && byte(2) == 0x56 {
+        if n == 133 && byte(3) < 16 {
             kind = Some(IncomingKind::Slot);
-        } else if n == 4 && m[3] == 127 {
+        } else if n == 4 && byte(3) == 127 {
             kind = Some(IncomingKind::Clear);
         }
-    } else if n >= 12 && m[..4] == [0x7d, 0x50, 0x42, 3] {
+    } else if n >= 12 && byte(0) == 0x7d && byte(1) == 0x50 && byte(2) == 0x42 && byte(3) == 3 {
         kind = Some(IncomingKind::BackupChunk);
     }
-    if n >= 6 && m[..3] == [0x7d, 0x50, 0x60] {
+    if n >= 6 && byte(0) == 0x7d && byte(1) == 0x50 && byte(2) == 0x60 {
         kind = Some(IncomingKind::Jam);
     }
     kind
 }
+
 #[derive(Clone, Copy)]
 pub struct DxMessage<'a> {
     bytes: &'a [u8],

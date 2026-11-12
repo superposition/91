@@ -112,7 +112,7 @@ static void setup(uint32_t request,uint32_t value,uint32_t iface,uint32_t length
     }
 #endif
 }
-#ifdef __wasm__
+#if defined(__wasm__) && !defined(USB_CONTROL_EMBEDDED)
 __attribute__((export_name("run")))
 #endif
 int usb_control_run(void){
@@ -169,6 +169,6 @@ int usb_control_run(void){
     }
     return (int)cases;
 }
-#ifndef __wasm__
+#if !defined(__wasm__) && !defined(USB_CONTROL_EMBEDDED)
 int main(void){return usb_control_run()<0;}
 #endif

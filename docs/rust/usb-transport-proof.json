@@ -1,0 +1,191 @@
+{
+  "ticket": 19,
+  "base": "80f65c68f66892a8077f10e1e0ca77e062edd830",
+  "rust": "1.94.1",
+  "flag": "EN_RUST_USB=1",
+  "hardware_accessed": false,
+  "physical_qualified": false,
+  "scope": "actual EP1 traversal and short/DX/OTA SysEx collectors with input/parameter queue admission; full ticket open",
+  "added_global_state_bytes": 0,
+  "added_global_payload_bytes": 0,
+  "scoped_context_bytes_pi32v2": 92,
+  "scoped_context_bytes_native64": 184,
+  "capacities": {
+    "midi_events": 64,
+    "parameter_events": 32,
+    "short_bytes": 16,
+    "parameter_bytes": 16,
+    "dx_bytes": 4112,
+    "ota_bytes": 640
+  },
+  "intentional_frozen_difference": "F0 preserves ready DX payload length (80f65c6); separate unmodified-frozen Busy witness retained",
+  "full_input_per_variant": {
+    "direct_sysex_bytes": 238126,
+    "endpoint_packets": 4177,
+    "cin_cable_status_pairs": 65536
+  },
+  "variants": [
+    {
+      "suite": "usb-transport",
+      "variant": "0-0",
+      "dx": 0,
+      "ota": 0,
+      "cases": 59981,
+      "bytes": 22102384,
+      "sha256": "7f2d6e21f4ecad9debcb19e86c263788d98fdeb9872086d87a54b4311b9b5847"
+    },
+    {
+      "suite": "usb-transport",
+      "variant": "0-1",
+      "dx": 0,
+      "ota": 1,
+      "cases": 59981,
+      "bytes": 31590384,
+      "sha256": "b716bf4d18a5b47b980c6d2fa9a4504bfd616aa5bb17b279521ceff3f943ea4f"
+    },
+    {
+      "suite": "usb-transport",
+      "variant": "1-0",
+      "dx": 1,
+      "ota": 0,
+      "cases": 59981,
+      "bytes": 90977552,
+      "sha256": "40a32d4e91fae542b011e0ce316796effbc609e7b4388fd5b00ff12910ed6968"
+    },
+    {
+      "suite": "usb-transport",
+      "variant": "1-1",
+      "dx": 1,
+      "ota": 1,
+      "cases": 59981,
+      "bytes": 100465552,
+      "sha256": "a8d544a5d2f02ac3c27af64e8ee1b0507a3a081cc3cdc34771f2be9f69469fbe"
+    },
+    {
+      "suite": "usb-transport-edge",
+      "variant": "0-0",
+      "dx": 0,
+      "ota": 0,
+      "cases": 579,
+      "bytes": 204012,
+      "sha256": "8cb817cbec48b314f33cbad7a7045593a5e2b6f9d0c8a88132a031a92613627b"
+    },
+    {
+      "suite": "usb-transport-edge",
+      "variant": "0-1",
+      "dx": 0,
+      "ota": 1,
+      "cases": 579,
+      "bytes": 211692,
+      "sha256": "a8b1c01702493965413ab85c81922b1197c98262839edffbed155b7c8d533598"
+    },
+    {
+      "suite": "usb-transport-edge",
+      "variant": "1-0",
+      "dx": 1,
+      "ota": 0,
+      "cases": 579,
+      "bytes": 327660,
+      "sha256": "5554c87e49305d26ef8399e2dd6d89d7ad638777ea10882e1c9915483fb5ba1b"
+    },
+    {
+      "suite": "usb-transport-edge",
+      "variant": "1-1",
+      "dx": 1,
+      "ota": 1,
+      "cases": 579,
+      "bytes": 335340,
+      "sha256": "74e803c818285c88148eda21f283848e9cd40944ba3036d62fb3ba05fad70a89"
+    }
+  ],
+  "checks": {
+    "linux_workspace_passed": 165,
+    "miri_strict_provenance_retained_roots": true,
+    "shared_header_bounds_test": true,
+    "actual_foreground_busy_f0_retry_c0_and_rust": true,
+    "fmt": true,
+    "clippy_warnings_denied": true,
+    "no_std_wasm": true,
+    "vendor_c_main_engine_usb1_hal1_compile_only": true
+  },
+  "artifacts": [
+    {
+      "path": "build/usb-transport/final.log",
+      "bytes": 1514,
+      "sha256": "e3ad261dae2cd667171f9c6cab6fd2eb13f0e55f487831d606a00884a2fd9c3b"
+    },
+    {
+      "path": "build/usb-transport-edge/final.log",
+      "bytes": 2656,
+      "sha256": "c8179fddefb61a8299b67862fd9258c73882608c1c25ec0f1b5aa5a5c821becf"
+    },
+    {
+      "path": "build/usb-transport/busy.log",
+      "bytes": 941,
+      "sha256": "63fa23353d7ecb1c996df8527e500c9083d7346cf6d372205aac305703f2b1df"
+    },
+    {
+      "path": "build/usb-transport/miri.log",
+      "bytes": 1131,
+      "sha256": "f66e9efdc7c6aa66b2e6008721977a85692fb84a384fe364e310e8f319dfe82a"
+    },
+    {
+      "path": "build/usb-transport/workspace.log",
+      "bytes": 24332,
+      "sha256": "7890ee22ee2012f733f6f5b1cbda5a49cee1de61f88d90a159c713f0fe4a3b95"
+    },
+    {
+      "path": "build/usb-transport/nostd.log",
+      "bytes": 632,
+      "sha256": "05cb13216f428ae7f0375b8e68cf346f6a199d0c421a4b4a8b3c8ad34d4e73fc"
+    },
+    {
+      "path": "build/usb-transport/source-verification.log",
+      "bytes": 12678,
+      "sha256": "02103818921d558fa092601f4329ba6740cf2ad792676fb0331e24f2fadfbd85"
+    },
+    {
+      "path": "build/usb/target/main.o",
+      "bytes": 479708,
+      "sha256": "63cf3dfa8c891105d0ee48e5e3ca6f2cbdd9a5b17c36a05c6d2801e125a64748"
+    },
+    {
+      "path": "build/usb/target/engine.o",
+      "bytes": 418076,
+      "sha256": "fe190e19a53985a0c750ec53de7280b2f12c57d89e7330aa6e438b7127daeb68"
+    },
+    {
+      "path": "build/usb/target/main.log",
+      "bytes": 1176,
+      "sha256": "582d7ff0e542ccd914a4c3d6e49e8baecd50056b6b3bbe9b94c2ab02551cf215"
+    },
+    {
+      "path": "build/usb/target/engine.log",
+      "bytes": 6193,
+      "sha256": "e5c2ef01925839deedb464859828ea2b59ef0e2d896546891a627471c6206463"
+    },
+    {
+      "path": "build/usb/compile-target.sh",
+      "bytes": 1123,
+      "sha256": "6106da6f09309ea63bf286b16ebab96b476a24fbbf3841df1640a86d16e355ee"
+    }
+  ],
+  "source_sha256": {
+    "firmware/src/dsp/rust_usb.h": "16ef559b9c6a4187d1978cb30c6b14c48c4d45eb9f3c42f24620067af34ba38d",
+    "firmware/src/usb.c": "4e873cfbdbc0b1d37ab8a331ee82b370a2224d09d8db71c13bd525608a596953",
+    "rust/fm1-formats/src/voice.rs": "dd738d56db2f1bd7219da351d53c49173049b51d4aab5e8f9c8c17d08c586c97",
+    "rust/fm1-formats/tests/collector_header.rs": "68c20f9de0b29cc9ee91804daa812f4eecddd34da65aae62cf7dba1abea46092",
+    "rust/fm1-hal/src/lib.rs": "7d2f560f892faed450729c8f6f73ba1faf1a6e8668dc313bf8a5f2b114b1b1d9",
+    "rust/fm1-hal/src/usb_transport.rs": "88e241d34a95c1fc8dd384e25b7d651c8b7f97f2b725c9d4f5c81436b2cb20c5",
+    "rust/fm1-jam-bridge/src/lib.rs": "ff259e32b6b5843c7067cce24bc1be0828805f852683add87411b53f3f190340",
+    "rust/fm1-jam-bridge/src/usb_transport.rs": "ef034206c7be85c29666769d74c125a90bf30388e49323abc1182fd1bc79d3ac",
+    "tests/reference/usb_busy_dispatch_reference.py": "76761a094f2f9dab47d9e7c62a70b37005eb36ddc524a67390e7c41e93721088",
+    "tests/reference/usb_control_reference.c": "64e8c500ad549404ead1bcfd215814850cc05a0f72899d0939203ce411c45dd1",
+    "tests/reference/usb_transport_reference.c": "1fd3bc3f0b0514d72176c9ef9d113a93416f7d2d95cdaf2e10c5e5e1c73e362d",
+    "tests/reference/usb_transport_edge_reference.c": "9f90ae24281d8a39956a9fb2c6526bae6965d47776f81740bccd53b6f48d5433",
+    "tests/rust_usb_busy_dispatch.sh": "b0b65bdadb9dcc752d4d57b63a43f6c8d58bd48969e1e1d33e100f98362307c9",
+    "tests/rust_usb_transport.sh": "d8d96451c5eab7e96ca3615abfa1fbb688d75724a27bbadbdafb24058ad5dc81",
+    "tools/usb_reference.py": "6bd0aefe016970b1abc5048dd2f28ead3ac10327369e2f51762af4434df988ee"
+  },
+  "remaining": "output/CDC queues+SysEx TX arbitration; SIE/device lifecycle; host control/enumeration/attach/loss/restart; UAC producer/resampling/packet/stream ownership and physical combined-stress/deadlines"
+}

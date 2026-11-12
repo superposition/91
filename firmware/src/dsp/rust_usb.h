@@ -13,6 +13,18 @@ extern "C" {
 void fm1_rust_usb_trs_clear(volatile uint8_t *ring);
 void fm1_rust_usb_trs_byte(fm1_trs_state_t *,uint32_t,int (*send)(uint32_t));
 uint32_t fm1_rust_usb_trs_take(fm1_trs_state_t *,volatile uint8_t *,uint32_t,int (*send)(uint32_t));
+/* Scoped immutable descriptor, not retained state. On PI32v2 this is92B of
+ * caller stack: flags,21 raw roots and a no-reentry publication barrier. */
+typedef struct {
+    uint32_t flags;
+    void *slots[21];
+    void (*publish)(void);
+} fm1_usb_transport_t;
+_Static_assert(offsetof(fm1_usb_transport_t,slots)==sizeof(void *) &&
+               offsetof(fm1_usb_transport_t,publish)==22u*sizeof(void *) &&
+               sizeof(fm1_usb_transport_t)==23u*sizeof(void *),"transport context ABI");
+int32_t fm1_rust_usb_sysex(const fm1_usb_transport_t *,const void *input,uint32_t count);
+int32_t fm1_rust_usb_device_receive(const fm1_usb_transport_t *,const void *input,uint32_t count);
 uint32_t fm1_rust_usb_descriptor_length(uint32_t flags,uint32_t pid,uint32_t request);
 int32_t fm1_rust_usb_descriptor_copy(uint32_t flags,uint32_t pid,uint32_t request,uint32_t offset,void *output,uint32_t capacity);
 uint32_t fm1_rust_usb_ep0_start(uint32_t length,uint32_t wanted);

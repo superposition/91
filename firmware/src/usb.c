@@ -754,9 +754,39 @@ static void dx_end(void)
 }
 #endif
 
+#if EN_RUST_USB
+/* Exact raw roots only: no transport payload/state is duplicated. The caller
+ * stack descriptor ends with the call; a leaf barrier cannot retain/reenter it. */
+_Static_assert(offsetof(__typeof__(usb),sx_on)==offsetof(__typeof__(usb),sx_len)+1 &&
+               offsetof(__typeof__(usb),tel_req)==offsetof(__typeof__(usb),sx_len)+4,"short SysEx scalar spans");
+static void usb_transport_publish(void) { RING_PUBLISH(); }
+#if USB_DX
+#define USB_TRANSPORT_DX_FLAG 1u
+#define USB_TRANSPORT_DX_ROOTS px_buf,&px_pos,&px_on,px_q,(void *)&px_w,(void *)&px_r,dx_buf,&dx_pos,&dx_on,(void *)&dx_state,(void *)&dx_kind
+#else
+#define USB_TRANSPORT_DX_FLAG 0u
+#define USB_TRANSPORT_DX_ROOTS 0,0,0,0,0,0,0,0,0,0,0
+#endif
+#if FELUCCA_OTA
+#define USB_TRANSPORT_OTA_FLAG 2u
+#define USB_TRANSPORT_OTA_ROOTS sx_frame,&sx_pos,(void *)&sx_collect,(void *)&sx_ready,(void *)&sx_frame_len
+#else
+#define USB_TRANSPORT_OTA_FLAG 0u
+#define USB_TRANSPORT_OTA_ROOTS 0,0,0,0,0
+#endif
+#define USB_TRANSPORT_CONTEXT {USB_TRANSPORT_DX_FLAG|USB_TRANSPORT_OTA_FLAG, { \
+    usb.sysex,(uint8_t *)&usb+offsetof(__typeof__(usb),sx_len), \
+    USB_TRANSPORT_DX_ROOTS,USB_TRANSPORT_OTA_ROOTS, \
+    midi_in_q,(void *)&mi_w,(void *)&mi_r},usb_transport_publish}
+#endif
+
 /* SysEx assembly: only short commands matter here */
 static void sysex_byte(uint8_t b)
 {
+#if EN_RUST_USB
+    const fm1_usb_transport_t context=USB_TRANSPORT_CONTEXT;
+    (void)fm1_rust_usb_sysex(&context,&b,1);
+#else
 #if USB_DX
     if (b == 0xF0u) {
         dx_on = !dx_state;
@@ -828,11 +858,15 @@ static void sysex_byte(uint8_t b)
 #endif
         usb.sx_on = 0;
     }
+#endif
 }
 
 static void ep1_rx(void)
 {
-    uint32_t csr, n, i;
+    uint32_t csr, n;
+#if !EN_RUST_USB
+    uint32_t i;
+#endif
     sie_wr(S_INDEX, 1);
     csr = sie_rd(S_RXCSR1) | (sie_rd(S_RXCSR2) << 8);
     if (!(csr & 1u))
@@ -841,6 +875,10 @@ static void ep1_rx(void)
     if (n > 64u)
         n = 64u;
     fm1_usb_rx_sync();
+#if EN_RUST_USB
+    const fm1_usb_transport_t context=USB_TRANSPORT_CONTEXT;
+    (void)fm1_rust_usb_device_receive(&context,ep1rx,n);
+#else
     for (i = 0; i + 3u < n; i += 4u) {
         uint32_t cin = ep1rx[i] & 15u, pkt = (uint32_t)ep1rx[i] | (uint32_t)ep1rx[i + 1] << 8 |
                                             (uint32_t)ep1rx[i + 2] << 16 | (uint32_t)ep1rx[i + 3] << 24;
@@ -855,6 +893,7 @@ static void ep1_rx(void)
             mi_w++;
         }
     }
+#endif
     usb.rx_pkts++;
     csr = (csr & ~0x164u) | 0x10u;
     sie_wr(S_RXCSR1, csr & 0xFFu);

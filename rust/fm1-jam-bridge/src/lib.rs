@@ -38,6 +38,7 @@ mod transport;
 mod ui;
 mod usb_control;
 mod usb_midi;
+mod usb_transport;
 #[rustfmt::skip]
 mod ui_layout;
 mod voice_config;
