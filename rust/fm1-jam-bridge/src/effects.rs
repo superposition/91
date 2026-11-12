@@ -8,6 +8,209 @@ static ECHO_SAMPLES: AtomicU32 = AtomicU32::new(0);
 static REVERB_SAMPLES: AtomicU32 = AtomicU32::new(0);
 static COLOUR_SAMPLES: AtomicU32 = AtomicU32::new(0);
 
+/// Valid effect setting values are bounded by the C parameter schema.
+#[no_mangle]
+pub extern "C" fn fm1_rust_fx_setting(kind: u32, value: i32) -> f32 {
+    match kind {
+        0 => effects::config::send(value),
+        1 => effects::config::pump(value),
+        2 => effects::config::trim(value),
+        _ => 0.0,
+    }
+}
+#[no_mangle]
+pub extern "C" fn fm1_rust_fx_duck_decay(step: f32) -> f32 {
+    effects::config::duck_decay(step)
+}
+#[no_mangle]
+pub extern "C" fn fm1_rust_fx_reduction(hold: f32) -> f32 {
+    effects::config::reduction(hold)
+}
+/// # Safety
+/// Output is an aligned exclusively writable pair; value is in 0..=100.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_fx_size(value: i32, output: *mut f32) {
+    unsafe {
+        output
+            .cast::<[f32; 2]>()
+            .write(effects::config::size(value));
+    }
+}
+/// # Safety
+/// Output provides three aligned writable f32s and is exclusively held.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_fx_gains(
+    previous: f32,
+    target: f32,
+    muted: u32,
+    q12: u32,
+    output: *mut f32,
+) {
+    unsafe {
+        output
+            .cast::<[f32; 3]>()
+            .write(effects::config::gains(previous, target, muted != 0, q12));
+    }
+}
+/// # Safety
+/// State provides two initialized exclusively writable f32s. Output/optional
+/// non-null USB cover 2*n initialized i32/i16s. All spans are aligned, disjoint
+/// and exclusively held until return; no outstanding worker accesses them.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_fx_fades(
+    state: *mut f32,
+    gap: u32,
+    hush: u32,
+    out: *mut i32,
+    usb: *mut i16,
+    n: u32,
+) -> u32 {
+    let n = n as usize * 2;
+    let usb = if usb.is_null() {
+        None
+    } else {
+        Some(unsafe { core::slice::from_raw_parts_mut(usb, n) })
+    };
+    u32::from(effects::config::fades(
+        unsafe { &mut *state.cast::<[f32; 2]>() },
+        gap != 0,
+        hush != 0,
+        unsafe { core::slice::from_raw_parts_mut(out, n) },
+        usb,
+    ))
+}
+
+/// # Safety
+/// Eight initialized aligned start/end values are disjoint, with start
+/// exclusively writable. Frames is nonzero, as enforced by render chunking.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_fx_hold(start: *mut f32, end: *const f32, frames: u32) -> f32 {
+    effects::config::hold(
+        unsafe { &mut *start.cast::<[f32; 8]>() },
+        unsafe { &*end.cast::<[f32; 8]>() },
+        frames,
+    )
+}
+
+/// # Safety
+/// Initialized scalar state/config, performance ring(42000i16), tape/flanger
+/// (each2x512f32), seed and two n-f32 outputs are aligned/pairwise disjoint.
+/// Foreground owns all writable spans until return; spectrum/UI readers must
+/// remain serialized. No worker accesses these spans. No pointer is retained.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_fx_render(
+    sampler: *mut effects::sampler::State,
+    sampler_config: *const effects::sampler::Config,
+    tone: *mut effects::tone::State,
+    tone_config: *const effects::tone::Config,
+    ring: *mut i16,
+    tape: *mut f32,
+    flanger: *mut f32,
+    seed: *mut u32,
+    left: *mut f32,
+    right: *mut f32,
+    n: u32,
+) {
+    let mut rng = fm1_engine::sequencer::Rng(unsafe { seed.read() });
+    effects::render::process(
+        effects::render::State {
+            sampler: unsafe { &mut *sampler },
+            tone: unsafe { &mut *tone },
+            rng: &mut rng,
+        },
+        unsafe { &*sampler_config },
+        unsafe { &*tone_config },
+        effects::render::Buffers {
+            ring: unsafe { &mut *ring.cast::<[i16; 42000]>() },
+            tape: unsafe { &mut *tape.cast::<[[f32; 512]; 2]>() },
+            flanger: unsafe { &mut *flanger.cast::<[[f32; 512]; 2]>() },
+            left: unsafe { core::slice::from_raw_parts_mut(left, n as usize) },
+            right: unsafe { core::slice::from_raw_parts_mut(right, n as usize) },
+        },
+    );
+    unsafe {
+        seed.write(rng.0);
+    }
+    COLOUR_SAMPLES.fetch_add(n.wrapping_mul(2), Ordering::Relaxed);
+}
+
+/// # Safety
+/// State/config/tank33383i16/shimmer2048f32 and n-f32 outputs are
+/// initialized, aligned and pairwise disjoint. Worker owns writable spans until
+/// stage release. Input borrows ONLY the current consumed predelay span, which
+/// cannot overlap the foreground's current write span, including ring wrap.
+/// `input` covers `first` i16s and `wrapped` covers n-first; first<=n<=256.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_fx_reverb_block(
+    state: *mut effects::reverb::State,
+    config: *const effects::reverb::Config,
+    tank: *mut i16,
+    shimmer: *mut f32,
+    input: *const i16,
+    first: u32,
+    wrapped: *const i16,
+    left: *mut f32,
+    right: *mut f32,
+    n: u32,
+) {
+    let first = first as usize;
+    let n = n as usize;
+    let state = unsafe { &mut *state };
+    let config = unsafe { &*config };
+    let tank = unsafe { &mut *tank.cast::<[i16; 33383]>() };
+    let shimmer = unsafe { &mut *shimmer.cast::<[f32; 2048]>() };
+    let (l0, l1) = unsafe { core::slice::from_raw_parts_mut(left, n) }.split_at_mut(first);
+    let (r0, r1) = unsafe { core::slice::from_raw_parts_mut(right, n) }.split_at_mut(first);
+    effects::reverb::process(
+        state,
+        config,
+        tank,
+        shimmer,
+        unsafe { core::slice::from_raw_parts(input, first) },
+        l0,
+        r0,
+    );
+    effects::reverb::process(
+        state,
+        config,
+        tank,
+        shimmer,
+        unsafe { core::slice::from_raw_parts(wrapped, n - first) },
+        l1,
+        r1,
+    );
+    REVERB_SAMPLES.fetch_add(n as u32, Ordering::Relaxed);
+}
+/// # Safety
+/// State and tank33383i16 are aligned, initialized, disjoint and exclusively
+/// held after confirmed join/stop or at serialized boot. No live worker.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_fx_reverb_reset(
+    state: *mut effects::reverb::State,
+    tank: *mut i16,
+) {
+    effects::reverb::reset(unsafe { &mut *state }, unsafe {
+        &mut *tank.cast::<[i16; 33383]>()
+    });
+}
+/// # Safety
+/// Scalar state/head packets, tape21800i16 and plex7100i16 are initialized,
+/// aligned and disjoint. The serialized engine owns them all with no live job.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_fx_echo_reset(
+    state: *mut effects::echo::State,
+    heads: *mut effects::echo::Heads,
+    tape: *mut i16,
+    plex: *mut i16,
+) {
+    effects::echo::reset(
+        unsafe { &mut *state },
+        unsafe { &mut *heads },
+        unsafe { &mut *tape.cast::<[i16; 21800]>() },
+        unsafe { &mut *plex.cast::<[i16; 7100]>() },
+    );
+}
+
 // Six distinct foreground working arrays; these never include a shared ring.
 unsafe fn mix_buffers<'a>(p: *const *mut f32, n: u32) -> effects::mix::Buffers<'a> {
     let p = unsafe { &*p.cast::<[*mut f32; 6]>() };
@@ -303,6 +506,35 @@ pub unsafe extern "C" fn fm1_rust_fx_engage(
 }
 
 /// # Safety
+/// Aligned initialized state/grid/config/seed packets are disjoint and owned
+/// by the foreground. Table provides the immutable 27x16 Flex bytes. Pattern,
+/// arm and repeat indices obey existing engine bounds; no pointer is retained.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_fx_grid(
+    s: *mut effects::control_abi::Engage,
+    g: *mut effects::control_abi::Grid,
+    q: *const effects::control_abi::Config,
+    seed: *mut u32,
+    table: *const u8,
+    kind: u32,
+    step: i32,
+) {
+    let mut rng = fm1_engine::sequencer::Rng(unsafe { seed.read() });
+    effects::grid::apply(
+        unsafe { &mut *s },
+        unsafe { &mut *g },
+        unsafe { &*q },
+        &mut rng,
+        unsafe { &*table.cast::<[[u8; 16]; 27]>() },
+        kind,
+        step,
+    );
+    unsafe {
+        seed.write(rng.0);
+    }
+}
+
+/// # Safety
 /// Initialized aligned scalar packets and four `n`-sample arrays are disjoint.
 /// The render owner exclusively holds state and all four writable arrays until
 /// return; no callback or retained pointer crosses the worker ownership seam.
@@ -474,14 +706,15 @@ pub unsafe extern "C" fn fm1_rust_fx_chorus(
     left: *mut f32,
     right: *mut f32,
     n: u32,
-    amount: f32,
+    amount: i32,
+    shed: u32,
 ) {
     effects::chorus::process(
         unsafe { &mut *state },
         unsafe { &mut *buffers.cast::<[[f32; 512]; 2]>() },
         unsafe { core::slice::from_raw_parts_mut(left, n as usize) },
         unsafe { core::slice::from_raw_parts_mut(right, n as usize) },
-        amount,
+        effects::config::chorus(amount, shed),
     );
     COLOUR_SAMPLES.fetch_add(n, Ordering::Relaxed);
 }

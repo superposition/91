@@ -29,8 +29,12 @@ static void rust_mix_echoes(uint32_t n,float *duck,float rg,float eg)
     tape_w=s.tape_write;tape_ph=s.phase;tape_acc=s.accumulator;tape_lp=s.low;tape_hp=s.high;
     tape_p1=s.previous1;tape_p2=s.previous2;tape_c1=s.current1;tape_c2=s.current2;
     plex_w=s.plex_write;plex_lp=s.plex_low;plex_lp2=s.plex_low2;echo_len=s.length;head2=s.head2;
-    /* rsend is no longer an input after this phase. It now holds the predelay
-     * values. Commit in original sample order; these write slots are disjoint
+    /* Each consumed rsend slot holds an exactly representable quantized i16
+     * value in f32. Only storage/cursor plumbing remains here. Commit in sample
+     * order; these write slots are disjoint
      * from the worker's old reads (256 <= rv_pre <= 1322; PRE_LP = 1579). */
-    for(j=0;j<n;j++)push(&dl[L_PRE],rsend[j]);
+    for(j=0;j<n;j++){
+        dl_t *d=&dl[L_PRE];d->b[d->i]=(int16_t)rsend[j];
+        if(++d->i>=d->n)d->i=0;
+    }
 }

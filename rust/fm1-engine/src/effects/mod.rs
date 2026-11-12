@@ -2,16 +2,19 @@
 //! Allocation-free effects over caller-owned state and fixed delay storage.
 pub mod bus;
 pub mod chorus;
+pub mod config;
 pub mod control;
 #[rustfmt::skip]
 pub mod control_abi;
 pub mod echo;
 pub mod engage;
+pub mod grid;
 pub mod master;
 pub mod math;
 pub mod mix;
 #[rustfmt::skip]
 mod ids;
+pub mod render;
 pub mod reverb;
 pub mod sampler;
 pub mod tone;

@@ -15,7 +15,7 @@ pub struct Config {
     pub phase: [f32; 2],
     pub filter_mix: f32,
     pub phase_mix: f32,
-    pub wet: f32,
+    pub mix: i32,
     pub kind: u32,
 }
 const _: [(); 56] = [(); core::mem::size_of::<State>()];
@@ -27,6 +27,7 @@ pub struct Buffers<'a> {
     pub mix_right: &'a mut [f32],
 }
 pub fn process(s: &mut State, c: &Config, b: Buffers<'_>) {
+    let wet = c.mix as f32 * 0.005;
     let n = b.left.len();
     assert_eq!(b.right.len(), n);
     assert_eq!(b.mix_left.len(), n);
@@ -58,7 +59,7 @@ pub fn process(s: &mut State, c: &Config, b: Buffers<'_>) {
                     y = v;
                 }
                 s.feedback[ch] = flush(y);
-                *x += c.wet * (y - *x) * c.phase_mix;
+                *x += wet * (y - *x) * c.phase_mix;
             }
         }
         b.left[j] = x[0];

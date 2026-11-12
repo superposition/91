@@ -20,6 +20,37 @@ pub const LENGTHS: [usize; 12] = [
 ];
 pub const WORDS: usize = 33383;
 pub const SHIMMER: usize = 2048;
+/// Only the exact retained predelay read span is borrowed. The foreground may
+/// concurrently write its disjoint span elsewhere in the same C allocation.
+pub fn process(
+    s: &mut State,
+    c: &Config,
+    tank: &mut [i16; WORDS],
+    shimmer: &mut [f32; SHIMMER],
+    input: &[i16],
+    left: &mut [f32],
+    right: &mut [f32],
+) {
+    assert_eq!(input.len(), left.len());
+    assert_eq!(input.len(), right.len());
+    for j in 0..input.len() {
+        let x = sample(input[j] as f32 * (1.0 / 16384.0), s, c, tank, shimmer);
+        left[j] = x[0];
+        right[j] = x[1];
+    }
+}
+/// This is deliberately the historical partial reset, including leaving the
+/// shimmer payload/write position/phase and gated envelope untouched.
+pub fn reset(s: &mut State, tank: &mut [i16; WORDS]) {
+    tank.fill(0);
+    s.positions.fill(0);
+    s.bandwidth = 0.0;
+    s.damp_left = 0.0;
+    s.damp_right = 0.0;
+    s.shimmer_dc = 0.0;
+    s.sine = 0.0;
+    s.cosine = 1.0;
+}
 #[repr(C)]
 pub struct Settings {
     pub kind: i32,

@@ -374,3 +374,25 @@ const _: [(); 172] = [(); core::mem::offset_of!(Engage,flx_p)];
 const _: [(); 176] = [(); core::mem::offset_of!(Engage,vr_lp)];
 const _: [(); 184] = [(); core::mem::offset_of!(Engage,gn_st)];
 const _: [(); 200] = [(); core::mem::offset_of!(Engage,gn_pos)];
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default)]
+pub struct Grid {
+    pub flx_arm: u32,
+    pub flx_held: u32,
+    pub flx_wait_rel: u32,
+    pub flx_phys: u32,
+    pub flx_pat: u32,
+    pub en_flx_done: u32,
+    pub rp_ref: u32,
+    pub rp_ok: u32,
+}
+const _: [(); 32] = [(); core::mem::size_of::<Grid>()];
+const _: [(); 4] = [(); core::mem::align_of::<Grid>()];
+const _: [(); 0] = [(); core::mem::offset_of!(Grid,flx_arm)];
+const _: [(); 4] = [(); core::mem::offset_of!(Grid,flx_held)];
+const _: [(); 8] = [(); core::mem::offset_of!(Grid,flx_wait_rel)];
+const _: [(); 12] = [(); core::mem::offset_of!(Grid,flx_phys)];
+const _: [(); 16] = [(); core::mem::offset_of!(Grid,flx_pat)];
+const _: [(); 20] = [(); core::mem::offset_of!(Grid,en_flx_done)];
+const _: [(); 24] = [(); core::mem::offset_of!(Grid,rp_ref)];
+const _: [(); 28] = [(); core::mem::offset_of!(Grid,rp_ok)];
