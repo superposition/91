@@ -62,7 +62,7 @@ RUSTUP_TOOLCHAIN=1.94.1 sh tests/rust_emulator_parity.sh
 
 | Remaining boundary | Follow-up ownership |
 | --- | --- |
-| DJ/snippet `dj_voice` / `render_dj` and bounded sample helpers | Additional #11 voice scope, next checkpoint |
+| DJ/snippet `dj_voice` / `render_dj` and bounded sample helpers | Completed by the subsequent [DJ voice checkpoint](VOICES_DJ.md) |
 | Harmonic/register target construction, compositional arc and harmonic source policy | #8 |
 | Protocol/UI argument interpretation, application dispatch/init ordering, callbacks and publications | #15; browser controllers are separately #23 |
 | Shared section/application control, JP/FM orchestration and sampler routing | #15 with the relevant #8/#12/#13 subsystem |
