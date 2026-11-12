@@ -1,0 +1,458 @@
+{
+  "ticket": 6,
+  "status": "software acceptance complete",
+  "source_parent": "ad1b312928acdd318fa06694497f8d163d121d77",
+  "checkpoints": [
+    "c48aaaa41162d6b266b40a6c386dea2ef27b8a71",
+    "8da4926cd44bcd456352f2b80263a3349a8de53c"
+  ],
+  "rust": "1.94.1",
+  "native": {
+    "workspace_release_tests": 96,
+    "workspace_clippy": "pass",
+    "frozen_constructor_and_c0_rust_differential": "pass",
+    "shared_formats": {
+      "decodes": 3495402,
+      "encodes": 40035,
+      "rejections": 65492,
+      "copied_bytes": 63468621
+    },
+    "device_wire": {
+      "bytes": 2526273,
+      "sha256": "6094adefee3b9f962afdc11ef82ed9136a1e5774011dc5ee185c1f9f97e8482e",
+      "jam_response_hash": "eff97ff8",
+      "simulated_nor_ota": "pass"
+    }
+  },
+  "wasm": {
+    "scenarios": {
+      "effects": {
+        "scenario": "panel-effects-banks-release-tails",
+        "compared_samples": 2769480,
+        "render_calls": 5160,
+        "peak": 0.4538612365722656,
+        "pcm_hash": "fd659ab9",
+        "effects": {
+          "master_samples": 1384960,
+          "echo_samples": 1384960,
+          "tank_samples": 1384960,
+          "colour_sample_calls": 4154880
+        },
+        "memory_bytes": 33554432
+      },
+      "factory-lines": {
+        "scenario": "stored-frozen-acid-pluck-save",
+        "compared_samples": 970200,
+        "render_calls": 1613,
+        "saved_bytes": 3836,
+        "factory": {
+          "accesses": 1400,
+          "codecs": 6,
+          "rejections": 0,
+          "copied_bytes": 5450
+        },
+        "formats": {
+          "decodes": 1,
+          "encodes": 6,
+          "rejections": 0,
+          "copied_bytes": 1352
+        },
+        "memory_bytes": 33554432
+      },
+      "factory": {
+        "initial_pack": "factory",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "baeff971",
+        "peak": 0.3714040517807007,
+        "blits": 4679,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 0,
+          "plans": 8,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1037,
+          "sessions": 1,
+          "commands": {
+            "accepted": 961,
+            "consumed": 961,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6215,
+            "chunks": 28982,
+            "controls": 27668
+          },
+          "sequencer": {
+            "lanes": 6222,
+            "mutations": 0,
+            "waits": 463712,
+            "boundaries": 1037
+          },
+          "factory": {
+            "accesses": 13627,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 5292
+          }
+        }
+      },
+      "fm6": {
+        "scenario": "loaded-user-FM6-algorithms-key-retrigger-stop-tails",
+        "cases": [
+          {
+            "algorithm": 0,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.47700321674346924,
+            "pcm_hash": "d393a85d",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 3,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.4807950258255005,
+            "pcm_hash": "d9669c55",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 5,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.5013117790222168,
+            "pcm_hash": "abebadf5",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 31,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.48351776599884033,
+            "pcm_hash": "cafdb8b9",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          }
+        ]
+      },
+      "handoff": {
+        "snapshot_bytes": 220,
+        "published": 134,
+        "copied": 134,
+        "detail_pages": 4,
+        "staging_claims": 0,
+        "staging_activations": 0,
+        "staging_rejections": 0,
+        "memory_bytes": 33554432
+      },
+      "saved-v1": {
+        "initial_pack": "rust/fm1-engine/tests/packs/harris-citypop.jmp",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "28722449",
+        "peak": 0.4303741455078125,
+        "blits": 4673,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 1,
+          "plans": 10,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1033,
+          "sessions": 1,
+          "commands": {
+            "accepted": 751,
+            "consumed": 751,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6192,
+            "chunks": 34155,
+            "controls": 27682
+          },
+          "sequencer": {
+            "lanes": 6198,
+            "mutations": 0,
+            "waits": 546480,
+            "boundaries": 1033
+          },
+          "factory": {
+            "accesses": 13893,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 5292
+          }
+        }
+      },
+      "sequencer": {
+        "scenario": "legacy-f4-piece-genre-transport",
+        "compared_samples": 2557800,
+        "render_calls": 4231,
+        "peak": 0.4515293836593628,
+        "sequencer": {
+          "lanes": 876,
+          "waits": 96752,
+          "boundaries": 21
+        },
+        "melodic": {
+          "acid": 153,
+          "mutations": 22,
+          "pluck": 153,
+          "bass": 153,
+          "bar": 4061,
+          "midi_transport": 48413
+        },
+        "voices": {
+          "drums": 6047,
+          "pluck": 6047,
+          "drone": 4957,
+          "acid": 6047,
+          "pad": 6047,
+          "pad_bus": 6047,
+          "controls": 5043,
+          "configs": 29145
+        },
+        "factory": {
+          "accesses": 3406,
+          "codecs": 0,
+          "rejections": 0,
+          "copied_bytes": 10512
+        },
+        "memory_bytes": 33554432
+      },
+      "session": {
+        "scenario": "v2-hold-idea-save-restart",
+        "render_calls": 11663,
+        "compared_samples": 6570900,
+        "seconds": 74.5,
+        "peak": 0.22903597354888916,
+        "memory_bytes": 33554432,
+        "saved_session": [
+          74,
+          83,
+          77,
+          1,
+          1,
+          11,
+          1,
+          8,
+          2,
+          1,
+          83,
+          0,
+          7,
+          1,
+          190,
+          0,
+          3,
+          83,
+          0,
+          0
+        ],
+        "rust": {
+          "validations": 1,
+          "plans": 9,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 804,
+          "sessions": 2,
+          "commands": {
+            "accepted": 319,
+            "consumed": 319,
+            "dropped": 0,
+            "high_water": 208
+          },
+          "transport": {
+            "pulses": 4819,
+            "chunks": 12684,
+            "controls": 11829
+          },
+          "sequencer": {
+            "lanes": 4824,
+            "mutations": 0,
+            "waits": 202944,
+            "boundaries": 804
+          },
+          "factory": {
+            "accesses": 1340,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 5292
+          }
+        }
+      }
+    },
+    "compared_samples": 45780596,
+    "http_compared_samples": 1048576,
+    "engine_bytes": 2391397,
+    "engine_sha256": "c36e7c290a92f76075f75de8790e49d83d5b50807ea2f39b99619af959e5f395",
+    "reference_sha256": "7a23be09baea21922612c9ebff00d0f96af6259ca64bf3077e629d05661fa89c",
+    "public_exports": 24,
+    "engine_linear_memory": 33554432,
+    "codecs": {
+      "vectors": 2923,
+      "attempts": 10219,
+      "dxFieldMutations": 72448,
+      "keyBlobs": 65536,
+      "memoryBytes": 4194304,
+      "guards": true
+    },
+    "codec_artifact": {
+      "abi": 1,
+      "rust": "1.94.1",
+      "bytes": 119837,
+      "sha256": "badbc70b6038a16d599e040f55a719e73b86bf03afcc65d7cb8f7af0733c7f3f",
+      "source": "2219170bcc70002f4efaee4d1a669df324320ea47888f9af1841da7fe9ba94b2"
+    },
+    "formats_toggle_footprint": {
+      "formats_disabled": {
+        "path": "build/formats/formats-disabled.wasm",
+        "bytes": 2392267,
+        "sha256": "b39b862749818fb9b65fe92fb0daaeba3030f22aef08e36f7b11a23a2f25e77d",
+        "code_bytes": 657969,
+        "data_section_bytes": 158804,
+        "custom_section_bytes": 1573873
+      },
+      "formats_enabled": {
+        "path": "build/emu-parity/rust.wasm",
+        "bytes": 2391397,
+        "sha256": "c36e7c290a92f76075f75de8790e49d83d5b50807ea2f39b99619af959e5f395",
+        "code_bytes": 665042,
+        "data_section_bytes": 159460,
+        "custom_section_bytes": 1565234
+      },
+      "delta": {
+        "file_bytes": -870,
+        "code_bytes": 7073,
+        "data_section_bytes": 656,
+        "custom_section_bytes": -8639
+      },
+      "note": "same Rust engine, toggle only EN_RUST_FORMATS; hardware remains C0"
+    }
+  },
+  "browser": {
+    "lifecycle": {
+      "browser_api_contract": "pass",
+      "secure_http_boot_and_pcm": true,
+      "startup_cancel_timeout_retry": true,
+      "input_midi_stream_storage_lifecycle": true,
+      "interactive_browser_qa": "not run"
+    },
+    "site": {
+      "routes": 9,
+      "local_links_and_assets": 141,
+      "parsed_scripts": 6,
+      "parsed_module_copies": 18,
+      "css_asset_dependencies": 42,
+      "hosted_subpath": true,
+      "manifest_verified": true,
+      "shared_theme": true,
+      "standalone_assets": true,
+      "current_captures": 5,
+      "preserved_control_ids": 152,
+      "retired_engineering_ids": 2,
+      "baseline_manual_duplicate_ids": {
+        "the-perform-screen": 2
+      }
+    },
+    "metadata": {
+      "metadata_drift": "pass",
+      "locales": [
+        "en",
+        "ja"
+      ],
+      "capability_connection_busy_import_tests": "pass",
+      "legacy_backup_map_bytes": "identical",
+      "dx_user_offset": 42,
+      "hardware_qa": "not run"
+    },
+    "interactive_browser": "not run"
+  },
+  "windows_python38": {
+    "version": "C:/Python38/python.exe",
+    "rust": "1.94.1-x86_64-pc-windows-msvc",
+    "native_codec_pipe": {
+      "frozen_package_sha256": "e5424ccb8cef76c6eb4b9b256ce27d9e6c61c416d6847c6f5031dd5bd7533888",
+      "full_sdk_package": "not requested",
+      "host_transport": {
+        "concurrent_calls": 256,
+        "explicit_failure_retry": "pass",
+        "oversized_truncated_messages": "pass",
+        "required_executable": "pass"
+      },
+      "primitive_consumer_checks": 1377,
+      "rust_execution_required": true
+    },
+    "installer": "pass, including Node reader comparison via file URI",
+    "logger": "188-byte selftest pass",
+    "jam_tools": "8 tests,0failed,0skipped",
+    "install_logger_jam_help": "pass",
+    "pure_build_recovery_site_debug_helpers": "pass",
+    "default_host_build": "Windows Python 3.8 default host build: pass",
+    "device_access": false
+  },
+  "posix_default_host_build": "WSL default host build: pass",
+  "compatibility": {
+    "numeric_ids_magic_and_addresses": "unchanged",
+    "reserved_unknown_bytes": "preserved by views/compatible encoders",
+    "pinned_recovery_stub": "unchanged",
+    "remaining_software_codec_consumers": [],
+    "state_storage_policy_owner": "#7",
+    "irq_usb_flash_hardware_owner": "#19",
+    "browser_application_owner": "#23",
+    "music_compiler_owner": "#3"
+  },
+  "full_sdk_package": {
+    "app_sha256": "6b2ae6990de3cca6358906a2095266bc658a167080cba1421b0314fa25f4c4ac",
+    "bytes": 611251,
+    "flash_sha256": "9a40f4d267be68a1631f887cd2942da3381d97eb04e204409243d47a8daecb6f",
+    "loader_sha256": "fb264969d35b09657af9277527710c80af8dcc164de4946fa298da61420f2e85",
+    "package_sha256": "c4f6c00b4a5558101333893f7702d5ce7dd98c297b3391a3f847e7a1b962f61e",
+    "sdk": {
+      "cfg/eq_cfg_hw.bin": "41167491bffed4651750719c973d2758adeb9021a5670d02d6a53c85ed80ea7d",
+      "cfg_tool.bin": "276579954f076886a6a7694f65dc71c034a63a2c204b76749065c0ac7b010d1b",
+      "uboot.boot": "4e3b4c220dc96641cb5a723f41e68ce41d5261ae9434bb33fbd7f2c59976ded4"
+    },
+    "stub_version": 3
+  }
+}

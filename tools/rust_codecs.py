@@ -32,7 +32,8 @@ def executable():
     # This is a host tool, independent of the firmware cross-compiler flags.
     for key in ("CARGO_BUILD_TARGET", "RUSTFLAGS", "CARGO_ENCODED_RUSTFLAGS"):
         env.pop(key, None)
-    target = ROOT / "build/rust-codecs-host"
+    # Windows MIDI tools and WSL builds can run against the same checkout.
+    target = ROOT / "build/rust-codecs-host" / os.name
     subprocess.run(["cargo", "+1.94.1", "build", "--locked", "--release", "-p", "fm1-cli", "--target-dir", str(target)], cwd=ROOT, env=env, check=True)
     return target / "release" / ("fm1-rs.exe" if os.name == "nt" else "fm1-rs")
 
