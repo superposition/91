@@ -10,6 +10,7 @@ use fm1_formats::jam::JamPack;
 use fm1_formats::session::JamSession;
 mod commands;
 mod handoff;
+mod sequencer;
 mod transport;
 
 static VALIDATIONS: AtomicU32 = AtomicU32::new(0);
@@ -279,6 +280,7 @@ pub extern "C" fn fm1_rust_jam_stat(index: u32) -> u32 {
         6..=9 => commands::stat(index),
         10..=12 => transport::stat(index),
         13..=17 => handoff::stat(index),
+        18..=23 => sequencer::stat(index),
         _ => 0,
     }
 }

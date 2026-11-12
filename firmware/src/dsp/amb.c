@@ -2,6 +2,9 @@
 /* The instrument (amb.h). One compilation unit, -O2. */
 #include "amb.h"
 #include "fastmath.h"
+#if EN_RUST_SCHEDULER
+#include "rust_sequencer.h"
+#endif
 
 #ifdef EN_HOST
 #define EN_POOL
@@ -2732,6 +2735,11 @@ volatile uint8_t en_song;
 static const uint8_t SONG_BARS[EN_NGENRE] = {16, 8, 8, 16, 16, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 16, 8, 16, 16};   /* hypno, dubstep, dub, trip-hop, psy, forest: 16 */
 static int song_pool(void)                      /* the piece's patterns that differ from the ones before them, from the first (2 .. 4; 1: nothing to move to) */
 {
+#if EN_RUST_SCHEDULER
+    uint16_t patterns[EN_NPAT][EN_NLANE];int p,l;
+    for(p=0;p<EN_NPAT;p++)for(l=0;l<EN_NLANE;l++)patterns[p][l]=en_pats[p][l];
+    return (int)fm1_rust_seq_song_pool(&patterns[0][0]);
+#else
     int p, q, l, n = 1;
     for (p = 1; p < 4 && p < EN_NPAT; p++) {
         int same = 0;
@@ -2745,12 +2753,17 @@ static int song_pool(void)                      /* the piece's patterns that dif
         n++;
     }
     return n;
+#endif
 }
 static int song_on(void) { return en_song && !par[P_DD_CHANGE] && !par[P_DD_MUTATE] && song_pool() > 1; }
 static int dd_len(void)
 {
+#if EN_RUST_SCHEDULER
+    return (int)fm1_rust_seq_drift_length((uint32_t)song_on(),(uint32_t)chord_genre,(uint32_t)par[P_DD_EVERY]);
+#else
     static const uint8_t L[6] = {0, 4, 8, 16, 32, 64};
     return song_on() ? SONG_BARS[chord_genre] : L[(unsigned)par[P_DD_EVERY] < 6u ? par[P_DD_EVERY] : 0];
+#endif
 }
 volatile uint8_t en_lane_src[EN_NLANE];
 static uint8_t lane_src[EN_NLANE];              /* the pattern each lane plays (P_LSRC, taken at the bar) */
@@ -2760,6 +2773,9 @@ uint16_t en_lane_mask(int l, int pat, int dens)
 {
     static const uint8_t IMP[16] = {0, 8, 4, 12, 2, 10, 6, 14, 1, 3, 5, 7, 9, 11, 13, 15};   /* the steps, most important first */
     uint32_t b = en_pats[(unsigned)pat < EN_NPAT ? pat : 0][(unsigned)l < EN_NLANE ? l : 0];
+#if EN_RUST_SCHEDULER
+    return (uint16_t)fm1_rust_seq_density(b,dens);
+#else
     int pop = bits16(b), n, k;
     if (dens == 50)
         return (uint16_t)b;
@@ -2779,10 +2795,17 @@ uint16_t en_lane_mask(int l, int pat, int dens)
             }
     }
     return (uint16_t)b;
+#endif
 }
 
 static void dd_mutate(int p)
 {
+#if EN_RUST_SCHEDULER
+    uint16_t pattern[EN_NLANE];int l;
+    for(l=0;l<EN_NLANE;l++)pattern[l]=en_pats[p][l];
+    fm1_rust_seq_mutate(pattern,(uint32_t)(par[P_DD_MUTATE]==2),&rng);
+    for(l=0;l<EN_NLANE;l++)en_pats[p][l]=pattern[l];
+#else
     static const uint8_t LN[4] = {L_SNARE, L_HAT, L_OHAT, L_PERC};   /* the kick and the clap stay as written */
     int c;
     for (c = 0; c < 2; c++) {                   /* a hit or two, a step either way */
@@ -2814,6 +2837,7 @@ static void dd_mutate(int p)
         }
         en_pats[p][l] = (uint16_t)b;
     }
+#endif
     en_dd_mutations++;
 }
 
@@ -2821,6 +2845,14 @@ static void dd_bar(void)                        /* at each bar line, before the 
 {
     int len = dd_len();
     const int song = song_on(), chg = song ? 1 : par[P_DD_CHANGE];
+#if EN_RUST_SCHEDULER
+    fm1_drift_t state={dd_in,dd_bars,dd_fill,en_dd_left,pat_next,0,0};
+    const uint32_t pool=(uint32_t)(song?song_pool():par[P_DD_POOL]<2?2:par[P_DD_POOL]>EN_NPAT?EN_NPAT:par[P_DD_POOL]);
+    fm1_rust_seq_drift(&state,(uint32_t)len,(uint32_t)chg,(uint32_t)par[P_DD_MUTATE],pool,pat_now,&rng);
+    dd_in=(int8_t)state.countdown;dd_bars=state.bars;dd_fill=(uint8_t)state.fill;en_dd_left=(int8_t)state.left;
+    if(state.changed){pat_next=state.next;par[P_PATTERN]=(int16_t)state.next;en_dd_changes++;}
+    if(state.mutation)dd_mutate(pat_next);
+#else
     if (!chg && !par[P_DD_MUTATE]) {
         dd_in = en_dd_left = -1;
         dd_fill = 0;
@@ -2851,6 +2883,7 @@ static void dd_bar(void)                        /* at each bar line, before the 
     }
     dd_fill = dd_in == 1 && chg;
     en_dd_left = (int8_t)(dd_in >= 0 ? dd_in : len ? len - (int)dd_bars : -1);
+#endif
 }
 
 static void drum_publish(void)
@@ -2865,6 +2898,12 @@ static void drum_publish(void)
 
 static void section_cmd(int c)                  /* the player's: on the bar */
 {
+#if EN_RUST_SCHEDULER
+    const uint32_t result=fm1_rust_seq_section((uint32_t)c,sec,deg,nsteps,evolve,&rng);
+    sec=(int)(result&3u);
+    if(result&0x100u)sec_n=sec_bars=SECT[chord_genre].build;
+    if(result&0x200u){brk=0.0f;drop_imp=1;riser_cut=1;drop_tonic=(uint8_t)((result>>10)&1u);grv_bars=0;gap_on=0;if(result&0x800u)change_pending=1;}
+#else
     if (c == EN_CMD_BREAK) {
         sec = SEC_BREAK;
     } else if (c == EN_CMD_BUILD) {
@@ -2887,6 +2926,7 @@ static void section_cmd(int c)                  /* the player's: on the bar */
             change_pending = 1;
         }
     }
+#endif
 }
 
 static int kick_note(void) { return 28 + (par[P_ROOT] + 8) % 12; }   /* E1 .. Eb2, on the piece's root */
@@ -2980,11 +3020,16 @@ static const struct { uint8_t n, div; float rf, rm; } RATCHET[8] = {
 static void drum_chain(int d, float vel)        /* a hit of a ratchet has sounded: the next one waits */
 {
     drum_t *v = &drum[d];
+#if EN_RUST_SCHEDULER
+    int32_t wait;float level;uint32_t left=fm1_rust_seq_chain(v->rn,v->rgap,v->rmul,vel,&wait,&level);
+    if(left!=0xffffffffu){v->rn=(uint8_t)left;v->wait=wait;v->pend=level;}
+#else
     if (v->rn) {
         v->rn--;
         v->wait = v->rgap;
         v->pend = vel * v->rmul;
     }
+#endif
 }
 static void drum_ratchet(int d, float vel, int32_t wait, int r)   /* wait: the swing and the step's push */
 {
@@ -3053,6 +3098,11 @@ static void cm_midi_flush(void)
 }
 static int32_t drums_wait(void)                 /* samples to the next hit that waits; 0: none */
 {
+#if EN_RUST_SCHEDULER
+    int32_t waits[16]={cm_wait,ac_wait,bl_wait,stab_wait};int d;
+    for(d=0;d<EN_NDRUM;d++){waits[4+d*2]=drum[d].wait;waits[5+d*2]=drum[d].wait2;}
+    return fm1_rust_seq_earliest(waits);
+#else
     int32_t m = cm_wait > 0 ? cm_wait : 0;
     int d;
     if (ac_wait > 0 && (!m || ac_wait < m))
@@ -3068,35 +3118,42 @@ static int32_t drums_wait(void)                 /* samples to the next hit that 
             m = drum[d].wait2;
     }
     return m;
+#endif
 }
+
+#if EN_RUST_SCHEDULER
+#define SCHEDULED_DUE(wait,k) fm1_rust_seq_wait(&(wait),(k))
+#else
+#define SCHEDULED_DUE(wait,k) ((wait)>0 && ((wait)-=(k))<=0)
+#endif
 
 static void drums_wait_step(int32_t k)          /* k samples went by: hits whose wait is over */
 {
     int d;
-    if (cm_wait > 0 && (cm_wait -= k) <= 0) {   /* the swung pluck note */
+    if (SCHEDULED_DUE(cm_wait,k)) {   /* the swung pluck note */
         cm_wait = 0;
         cm_trigger(cm_pnote, cm_pvel);
     }
-    if (ac_wait > 0 && (ac_wait -= k) <= 0) {   /* the acid, the bass line and the pad's stab that waited */
+    if (SCHEDULED_DUE(ac_wait,k)) {   /* the acid, the bass line and the pad's stab that waited */
         ac_wait = 0;
         acid_fire();
     }
-    if (bl_wait > 0 && (bl_wait -= k) <= 0) {
+    if (SCHEDULED_DUE(bl_wait,k)) {
         bl_wait = 0;
         bl_note(bl_pn, bl_pfl);
     }
-    if (stab_wait > 0 && (stab_wait -= k) <= 0) {
+    if (SCHEDULED_DUE(stab_wait,k)) {
         stab_wait = 0;
         stab_fire(stab_pe);
     }
     for (d = 0; d < EN_NDRUM; d++) {
-        if (drum[d].wait > 0 && (drum[d].wait -= k) <= 0) {
+        if (SCHEDULED_DUE(drum[d].wait,k)) {
             const float pv = drum[d].pend;
             drum[d].wait = 0;
             drum_fire(d, pv);
             drum_chain(d, pv);
         }
-        if (drum[d].wait2 > 0 && (drum[d].wait2 -= k) <= 0) {
+        if (SCHEDULED_DUE(drum[d].wait2,k)) {
             drum[d].wait2 = 0;
             drum_fire(d, drum[d].pend2);
         }
@@ -3649,11 +3706,15 @@ static void stab_fire(float envv)
 }
 static int32_t loose(int32_t sw, float ms)      /* the swing's delay and a little more (Humanize, r*r: mostly small; ms at 100) for a voice that plays on the tick */
 {
+#if EN_RUST_SCHEDULER
+    return fm1_rust_seq_loose(sw,(uint32_t)par[P_HUMAN],ms,&rng);
+#else
     if (par[P_HUMAN]) {
         const float r = frand();
         sw += (int32_t)(r * r * (float)par[P_HUMAN] * 0.01f * ms * 0.001f * EN_SR);
     }
     return sw;
+#endif
 }
 
 /* the grid: one call a sixteenth (MIDI clock: 6 ticks) */
@@ -3734,7 +3795,11 @@ static void tick(void)
     static const uint8_t TRIG_BARS[6] = {0, 1, 2, 4, 8, 0};
     int l, st = (int)(sixteenth & 15u);
     const float pa = fm_clampf(1.0f + 0.4f * arcm, 0.6f, 1.1f);   /* the arc: the hats a little softer */
+#if EN_RUST_SCHEDULER
+    const int32_t sw = fm1_rust_seq_swing(sixteenth,swing,step_len);
+#else
     const int32_t sw = (st & 1) ? (int32_t)(fm_minf(swing, 0.5f) * step_len) : 0;
+#endif
     const float chop = KK->chop * (0.4f + 0.6f * evolve);   /* breakcore: how much the drums are chopped */
     int perc_hit = 0;
     step_t = 0;
@@ -3763,11 +3828,15 @@ static void tick(void)
         fill_bar = fill_q;                      /* the fill the DJ asked for a bar ahead */
         fill_q = 0;
         {   /* this bar's fill, if there is one: one the genre uses (FILL_OK), turning with the bars */
+#if EN_RUST_SCHEDULER
+            fill_kind=(uint8_t)fm1_rust_seq_fill(FILL_OK[chord_genre],bars,(uint32_t)chord_genre);
+#else
             const uint32_t ok = FILL_OK[chord_genre];
             uint32_t k = (bars + (uint32_t)chord_genre * 2u) % 8u, n;
             for (n = 0; n < 8u && !(ok >> k & 1u); n++)
                 k = (k + 1u) % 8u;
             fill_kind = (uint8_t)k;
+#endif
         }
         if (dj_sync && sec == SEC_GROOVE && en_playing && !en_frozen) {   /* the DJ follows the chords: the bar before a change is a fill, the change's bar a breakdown */
             if (change_pending)
@@ -3808,11 +3877,19 @@ static void tick(void)
             }
         }
         if (par[P_CHAIN] > 0 && par[P_CHAIN] <= 9) {   /* the chain: this bar's pattern, whatever was asked */
+#if EN_RUST_SCHEDULER
+            uint32_t index=chain_i;pat_next=(int)fm1_rust_seq_pattern_chain((uint32_t)par[P_CHAIN],&index);chain_i=(uint8_t)index;
+#else
             const uint8_t *ch = CHAIN[par[P_CHAIN] - 1];
             pat_next = (int)ch[1 + chain_i % ch[0]] - 1;
             chain_i = (uint8_t)((chain_i + 1u) % ch[0]);
+#endif
         }
+#if EN_RUST_SCHEDULER
+        slice_perm=(uint8_t)fm1_rust_seq_slice((uint32_t)par[P_SLICE],bars,&rng);
+#else
         slice_perm = (uint8_t)(par[P_SLICE] == 9 ? (bars % 4u == 3u ? 1 + irand(8) : 0) : par[P_SLICE]);
+#endif
         pat_now = pat_next;                     /* a new pattern: on the bar */
         for (l = 0; l < EN_NLANE; l++)          /* each lane's own source, from this bar */
             en_lane_src[l] = lane_src[l] = (uint8_t)(par[P_LSRC + l] ? par[P_LSRC + l] - 1 : pat_now);
@@ -3827,6 +3904,37 @@ static void tick(void)
         gap_on = 1;                             /* the drop gap: the beat before the drop, silence */
     perc_fall = (fill_hold || fill_bar || (dd_fill && sec == SEC_GROOVE)) && fill_kind == 7 && st >= 8 ? -0.9f * (float)(st - 8) : 0.0f;
     for (l = 0; l < EN_NDRUM; l++) {
+#if EN_RUST_SCHEDULER
+        fm1_lane_t request;fm1_hit_t result;unsigned a;uint32_t jam_mask=0;
+        const uint32_t ft=SECT[chord_genre].ft;const uint64_t fxm=fx_on;
+        if(en_jam_on){const jp_phrase_t *ph=&jp_phrase[jp_current];unsigned p=(ph->role+(en_jam_bar==ph->bars-1u))%jp_data[7];jam_mask=jp_u16(jp_data+JP_DRUM+p*16+(unsigned)l*2);}
+        request=(fm1_lane_t){
+            en_lane_mask(l,lane_src[l],par[P_DENS+l]),jam_mask,(uint32_t)l,sixteenth,bars,(uint32_t)par[P_LLEN+l],(uint32_t)par[P_COND+l],
+            fm1_rust_seq_time((uint32_t)par[P_TIME],ft,sec,grv_bars,sec_bars),slice_perm,
+            sec,sec_bars,sec_n,sec_req,grv_bars,SECT[chord_genre].fl,
+            SECT[chord_genre].kick | (uint32_t)SECT[chord_genre].hat<<1 | (uint32_t)SECT[chord_genre].snare<<2 | (uint32_t)SECT[chord_genre].kret<<3,
+            (uint32_t)chord_genre,fill_hold,fill_bar,dd_fill,fill_kind,drop_imp,en_jam_on,en_mod[l][sixteenth%(uint32_t)(par[P_LLEN+l]>=1&&par[P_LLEN+l]<16?par[P_LLEN+l]:16)],
+            (uint32_t)par[P_GHOST],(uint32_t)par[P_PROB+l],(uint32_t)par[P_ACCENT],(uint32_t)par[P_HUMAN],
+            (uint32_t)((fxm>>FX_HATROLL&1u) | (fxm>>FX_HATTRIP&1u)<<1 | (fxm>>FX_SNROLL&1u)<<2 | (fxm>>FX_FLAM&1u)<<3 | (fxm>>FX_DBLKICK&1u)<<4),
+            jp_now.energy,step_len,sw,pa,chop};
+        fm1_rust_seq_lane(&request,&rng,&result);en_lane_pos[l]=(uint8_t)result.step;
+        if(result.crash)crash_next=1;
+        if(l==L_KICK){bl_kick=(uint8_t)result.kick;if(result.kick)kick_age=0.0f;}
+        if(result.hat)lk_hat=1;if(result.perc)perc_hit=1;
+        if(result.hit){
+            drum[l].rn=0;
+            if(drum[l].wait>0){drum[l].wait=0;drum_fire(l,drum[l].pend);}
+            if(drum[l].wait2>0){drum[l].wait2=0;drum_fire(l,drum[l].pend2);}
+            for(a=0;a<result.count;a++){
+                const fm1_hit_action_t *event=&result.actions[a];
+                if(event->kind>=16){drum[l].rn=(uint8_t)(event->kind-16);drum[l].rgap=event->wait;drum[l].rmul=event->multiplier;}
+                else if(event->kind==1)drum_fire(l,event->velocity);
+                else if(event->kind==2){drum[l].wait=event->wait;drum[l].pend=event->velocity;}
+                else if(event->kind==3){drum[l].wait2=event->wait;drum[l].pend2=event->velocity;}
+                else if(event->kind==4)drum_chain(l,event->velocity);
+            }
+        }
+#else
         const int llen = par[P_LLEN + l] < 16 && par[P_LLEN + l] >= 1 ? par[P_LLEN + l] : 16;
         const int ls = llen < 16 ? (int)(sixteenth % (uint32_t)llen) : st;   /* a shorter lane runs against the bar: polymeter */
         int hit = pat_bit(en_lane_mask(l, lane_src[l], par[P_DENS + l]), ls, llen < 16) && (!par[P_COND + l] || cond_ok(l, fill_hold || fill_bar || (dd_fill && st >= 8))), dbl = 0;   /* dbl: a roll's extra hits (1: one at half a step; 2: two, in triplets; 3: a flam) */
@@ -3986,6 +4094,7 @@ static void tick(void)
                 drum_hit(l, vel, sw + push);
             }
         }
+#endif
     }
     if (!en_jam_on) bl_step(st, loose(sw, 4.0f));
     if (!en_jam_on && pad_stabs() && !par[P_PAD_MAN] && en_playing &&   /* the pad's stabs: a rhythm (Comp; Auto: the genre's), the off-beats with more with Evolve; in a breakdown

@@ -63,8 +63,8 @@ jobs:
           echo "$HOME/shim" >> "$GITHUB_PATH"
       - name: Full-instrument C/Rust differential playback
         run: sh tests/rust_emulator_parity.sh
-      - name: Native transport, external clock and chunk trace parity
-        run: sh tests/rust_transport_parity.sh
+      - name: Native clock, sequencer, mutation and scheduled-event trace parity
+        run: sh tests/rust_sequencer_parity.sh
       - name: Songbook snapshot and staging handoffs
         run: sh tests/rust_handoff.sh
       - uses: actions/upload-artifact@v4

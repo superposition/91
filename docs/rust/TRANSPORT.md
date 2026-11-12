@@ -45,4 +45,4 @@ Without the optional R01 path the native script compares the checkout's selectab
 
 ## Work remaining in R09
 
-Swing/humanization decisions, step conditions, lane sources, ratchets, polymeter, fills, generative mutations, section state and event dispatch still execute in C. Start/Stop voice cleanup and incoming-clock command routing also remain there. Their existing behavior is exercised by these tests but has not thereby been ported. Hardware exclusion/atomic backends, memory budgets and render deadlines remain unqualified for this Rust slice. R09 stays open.
+The subsequent [sequencer port](SEQUENCER.md) moves drum decisions, drift/mutation, ratchet and delayed-hit timing, and Songbook boundary choices into Rust. Legacy acid/pluck/bass note generation and harmonic/bar/FX orchestration still contain C scheduling logic. C also applies the returned actions to its voice state, performs Start/Stop cleanup, routes incoming clock commands and selects source pattern IDs. Hardware exclusion/atomic backends, memory budgets and render deadlines remain unqualified for these Rust slices. R09 stays open until the remaining musical scheduling is ported and verified.

@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include "amb.c"
 
 static uint32_t midi_hash=2166136261u, midi_count, clock_count, render_frame;
@@ -40,16 +41,55 @@ int main(int argc,char **argv)
             printf("%s%u",tempo==70?"":",",bits(step_len));
         }puts("]");return 0;
     }
-    if(scenario&2u)en_jam_set(JAM_ON,1);
+    if(scenario==9) {
+        unsigned density,mask;printf("[");
+        for(density=0;density<=100;density++){
+            uint32_t h=2166136261u;for(mask=0;mask<65536;mask++){en_pats[0][0]=(uint16_t)mask;h=word(h,en_lane_mask(0,0,(int)density));}
+            printf("%s%u",density?",":"",h);
+        }puts("]");return 0;
+    }
+    if(scenario==10) {
+        unsigned mode,index,l;printf("[");
+        for(mode=1;mode<=2;mode++){
+            uint32_t h=2166136261u;apply(P_DD_MUTATE,(int)mode);
+            for(index=0;index<4096;index++){
+                rng=(index+1u)*2654435761u;
+                for(l=0;l<EN_NLANE;l++)en_pats[0][l]=(uint16_t)((index*1103515245u+l*1013904223u)>>((l+index)%16));
+                dd_mutate(0);for(l=0;l<EN_NLANE;l++)h=word(h,en_pats[0][l]);h=word(h,rng);
+            }printf("%s%u",mode==1?"":",",h);
+        }puts("]");return 0;
+    }
+    if(scenario<16 && (scenario&2u))en_jam_set(JAM_ON,1);
     else {
-        unsigned l,s;en_genre(7);en_set(P_SWING,100);en_set(P_HUMAN,100);
+        unsigned l,s;en_genre(scenario>=16?(int)(scenario-16)%19:7);en_set(P_SWING,100);en_set(P_HUMAN,100);
         for(l=0;l<EN_NLANE;l++) {
             en_set(P_LLEN+(int)l,7+(int)l);
             for(s=0;s<16;s++)en_mod[l][s]=(uint8_t)(1+s%7 | (s%8)<<3 | (s%4)<<6);
         }
     }
+    if(scenario>=16) {
+        unsigned p,l;uint16_t patterns[EN_NPAT][EN_NLANE];
+        en_piece_pats_g((int)(scenario-16)%19,3,patterns);
+        for(p=0;p<EN_NPAT;p++)for(l=0;l<EN_NLANE;l++)en_pats[p][l]=patterns[p][l];
+        en_set(P_DD_CHANGE,2);en_set(P_DD_MUTATE,2);en_set(P_DD_EVERY,1);en_set(P_GHOST,100);en_set(P_ACCENT,75);en_set(P_KIT_KICK,4);
+        for(l=0;l<EN_NLANE;l++){en_set(P_COND+(int)l,(int)((scenario+l)%8));en_set(P_PROB+(int)l,75);en_set(P_DENS+(int)l,20+(int)l*15);en_set(P_LSRC+(int)l,1+(int)l);en_set(P_LLEN+(int)l,l&1?16:5+(int)l);}
+    }
     en_set(P_TEMPO,70);en_play(1);
     for(i=0;i<5000;i++) {
+        if(scenario>=16) {
+            if(i%400==0){en_set(P_CHAIN,1+(int)(i/400)%9);en_set(P_SLICE,9);en_set(P_TIME,(int)(i/400)%3);}
+            if(i==300)en_section(EN_CMD_BREAK);
+            if(i==500)en_section(EN_CMD_BUILD);
+            if(i==1800)en_section(EN_CMD_DROP);
+            if(i==2100)en_fill_next();
+            if(i==2200)en_fx(1ull<<FX_HATROLL|1ull<<FX_FLAM|1ull<<FX_DBLKICK);
+            if(i==2300)en_fx(1ull<<FX_HATTRIP|1ull<<FX_SNROLL);
+            if(i==2400)en_fx(0);
+            if(i==2700)en_fill_next();
+            if(i==2700)en_fx(1ull<<FX_FILL);
+            if(i==2800){en_fx(0);en_set(P_SWING,0);en_set(P_HUMAN,0);}
+            if(i==3200){en_set(P_SWING,100);en_set(P_HUMAN,100);}
+        }
         if(i==100)en_set(P_TEMPO,190);
         if(i==700)en_set(P_TEMPO,113);
         if(i==950)en_play(0);
@@ -90,10 +130,26 @@ int main(int argc,char **argv)
         state[4]=bits(step_len);state[5]=en_ext;state[6]=en_playing;
         state[7]=sixteenth;state[8]=(uint32_t)step_t;state[9]=en_prof[9];state[10]=en_jam_revision;
         trace_words(state,11);
+        {
+            const uint32_t scheduling[]={0x53u,rng,dd_bars,(uint32_t)dd_in,dd_fill,(uint32_t)sec,(uint32_t)sec_bars,(uint32_t)sec_req,
+                (uint32_t)pat_now,(uint32_t)pat_next,fill_kind,slice_perm,chain_i,en_dd_changes,en_dd_mutations,
+                (uint32_t)cm_wait,(uint32_t)ac_wait,(uint32_t)bl_wait,(uint32_t)stab_wait};
+            trace_words(scheduling,sizeof scheduling/4);
+            for(tempo=0;tempo<EN_NPAT;tempo++){unsigned l;for(l=0;l<EN_NLANE;l++){uint32_t m=en_pats[tempo][l];trace_words(&m,1);}}
+            for(tempo=0;tempo<EN_NDRUM;tempo++){
+                const uint32_t delayed[]={(uint32_t)drum[tempo].wait,(uint32_t)drum[tempo].wait2,bits(drum[tempo].pend),bits(drum[tempo].pend2),drum[tempo].rn,(uint32_t)drum[tempo].rgap,bits(drum[tempo].rmul)};
+                trace_words(delayed,7);
+            }
+        }
         for(tempo=0;tempo<11;tempo++)state_hash=word(state_hash,state[tempo]);
     }
     printf("{\"scenario\":%u,\"frames\":%u,\"chunks\":%u,\"state_hash\":%u,\"pcm_hash\":%u,\"midi_hash\":%u,\"midi_messages\":%u,\"midi_clocks\":%u}\n",
         scenario,render_frame,en_prof[9],state_hash,pcm_hash,midi_hash,midi_count,clock_count);
+#if EN_RUST_SCHEDULER
+    assert(fm1_rust_jam_stat(18)>0 && fm1_rust_jam_stat(20)>0);
+    if(scenario<16 && (scenario&2u))assert(fm1_rust_jam_stat(21)>0);
+    if(scenario>=16)assert(fm1_rust_jam_stat(19)>0);
+#endif
     if(trace && fclose(trace)){perror("transport trace close");return 2;}
     return 0;
 }
