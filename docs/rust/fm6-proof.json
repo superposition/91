@@ -17,7 +17,7 @@
     "rust": "1.94.1",
     "node": "22.14.0",
     "fmt": "pass",
-    "workspace_tests": 68,
+    "workspace_tests": 78,
     "clippy_warnings_denied": "pass",
     "no_std_release_check": "pass",
     "wasm_no_default_features_build": "pass",

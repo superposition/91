@@ -149,7 +149,12 @@ void en_init(void);
 /* The experimental second core: the plate reverb as a job another core can run (see render_chunk). submit runs
  * fn(ctx) there and returns 1, or returns 0 (run it here); join returns 1 when the job is done, 0 when that core was
  * lost (its results are dropped, the reverb restarts). Without it, or after a loss, the same job runs in place. fence publishes
- * memory between the cores (the job's stages); alive says whether the other core still runs (0: join it, it is retired). */
+ * memory between the cores (the job's stages); alive says whether the other core still runs (0: join it, it is retired).
+ * With EN_RUST_WORKER, join1 requires returned completion, join0 guarantees the
+ * callback and all future invocations are permanently stopped; negative means
+ * ownership remains unknown. Unknown ownership quarantines DSP spans and emits
+ * silence until a later bounded join confirms completion/stop. attach and init
+ * require no outstanding job. A timeout alone never grants buffer reuse. */
 void en_core2_attach(int (*submit)(void (*fn)(void *), void *ctx), int (*join)(void), void (*fence)(void), int (*alive)(void));
 extern volatile float en_comp_gr, en_lim_gr, en_out_peak;   /* the master bus now: the compressor's and the limiter's gain reduction (dB, positive), the output's peak (0..1 of full scale) */
 void en_shed(int level);                       /* the load is too high: 0 none, 1 the DX voices to four and no chorus, 2 to two, 3 also no Echoplex, no vinyl noise and the cheap output clip (the UI watches the CPU and says) */

@@ -23,6 +23,7 @@ mod transport;
 mod voice_config;
 mod voices;
 mod wire_formats;
+mod worker;
 
 static VALIDATIONS: AtomicU32 = AtomicU32::new(0);
 static PLANS: AtomicU32 = AtomicU32::new(0);
@@ -300,6 +301,7 @@ pub extern "C" fn fm1_rust_jam_stat(index: u32) -> u32 {
         36..=39 => formats::stat(index),
         40..=47 => voices::stat(index),
         48..=55 => fm6::stat(index),
+        56..=63 => worker::stat(index),
         _ => 0,
     }
 }
