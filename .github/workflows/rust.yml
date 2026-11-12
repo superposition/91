@@ -93,6 +93,12 @@ jobs:
         run: sh tests/rust_tonal_parity.sh
       - name: Isolated pad worker and bus state and PCM parity
         run: sh tests/rust_pad_parity.sh
+      - name: FM6 tables and operator components
+        run: sh tests/rust_fm6_tables.sh
+      - name: FM6 allocator, FIFO and voice lifecycle
+        run: sh tests/rust_fm6_parity.sh
+      - name: FM6 keys and bass worker placements
+        run: sh tests/rust_fm6_workers.sh
       - name: Compact factory tables and packed musical codecs
         run: sh tests/rust_factory_tables.sh
       - name: Shared native, browser and package codec compatibility
