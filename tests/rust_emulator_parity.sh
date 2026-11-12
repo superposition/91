@@ -12,7 +12,11 @@ cp build/emu/amb.wasm "$out/reference.wasm"
 EN_RUST_JAM=1 sh web/emu/build_clang.sh
 cp build/emu/amb.wasm "$out/rust.wasm"
 node tests/host/emu_test.mjs "$out/rust.wasm"
-if [ "${EN_RUST_APP:-1}" = 1 ];then node tests/host/emu_app_test.mjs "$out/rust.wasm";fi
+if [ "${EN_RUST_APP:-1}" = 1 ];then
+    node tests/host/emu_app_test.mjs "$out/rust.wasm"
+    node tests/host/emu_runner_test.mjs "$out/reference.wasm" "$out/rust.wasm" > "$out/runner.json"
+    cat "$out/runner.json"
+fi
 node tests/host/emu_http_test.mjs "$out/rust.wasm"
 node tests/host/emu_rust_test.mjs "$out/reference.wasm" "$out/rust.wasm" > "$out/factory.json"
 cat "$out/factory.json"

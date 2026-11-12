@@ -22,6 +22,10 @@
 static const uint8_t KR_ORDER[5] = {EN_TR_HATS, EN_TR_SNARE, EN_TR_ACID, EN_TR_DRONE, EN_TR_PAD};   /* the parts that come back */
 static const char *const KR_PART[5] = {"HATS", "SNARE", "ACID", "DRONE", "PAD"};
 
+#if EN_RUST_APP
+#include "../dsp/rust_runner.h"
+static fm1_runner_state kr;
+#else
 static struct {
     uint8_t on, over, lane, layer, ships;
     float start_beat;                            /* the run's first beat: two bars of gates only */
@@ -36,6 +40,7 @@ static struct {
     char banner[20];
     struct { float beat; uint8_t wall, gate, done, taken; } row[KR_NROW];
 } kr;
+#endif
 
 static uint32_t kr_rnd(void)
 {
@@ -61,6 +66,11 @@ static void kr_say(const char *s, uint32_t ms)
 /* the mask: every part not yet back muted; the filters closed after a crash */
 static void kr_fx(void)
 {
+#if EN_RUST_APP
+    { fm1_runner_observation o={0};uint32_t a[8]={FX_LP,KR_ORDER[0],KR_ORDER[1],KR_ORDER[2],KR_ORDER[3],KR_ORDER[4],0,0};
+      if(fm1_rust_runner(5,&kr,&o,a)<0)return;
+      en_fx(kr.on?a[6]:ui.fx_mask);en_trk(kr.on?a[7]:ui.trk_m,kr.on?0u:ui.trk_s);return; }
+#endif
     uint32_t m = 0, tm = 0;
     int k;
     if (kr.on && !kr.over) {
@@ -75,6 +85,10 @@ static void kr_fx(void)
 
 static void kr_reset(void)
 {
+#if EN_RUST_APP
+    { fm1_runner_observation o={0};uint32_t a[8]={0};if(fm1_rust_runner(1,&kr,&o,a)<0)return;
+      kr.banner_until=plat_ms()+2500u;return; }
+#endif
     memset(kr.row, 0, sizeof kr.row);
     kr.over = 0;
     kr.layer = 0;
@@ -88,6 +102,12 @@ static void kr_reset(void)
 
 static void runner_start(void)
 {
+#if EN_RUST_APP
+    { fm1_runner_observation o={0};uint32_t a[8]={0};
+      o.now=plat_ms();o.bars=en_bars;a[0]=plat_ms();a[1]=plat_ms();a[2]=plat_ms();
+      if(fm1_rust_runner(0,&kr,&o,a)<0)return;
+      ui.fx_menu=0;ui.help=0;lcd_fill(0,0,240,240,RGB(0,0,0));kr_fx();return; }
+#endif
     kr.on = 1;
     kr.rng ^= plat_ms() * 2654435761u | 1u;
     kr.lane = 0;
@@ -107,6 +127,10 @@ static void runner_start(void)
 
 static void runner_stop(void)
 {
+#if EN_RUST_APP
+    { fm1_runner_observation o={0};uint32_t a[8]={0};if(fm1_rust_runner(7,&kr,&o,a)<0)return;
+      kr_fx();ui.sig[0]=ui.sig[1]=ui.sig[2]=0;ui.act_t=plat_ms();lcd_fill(0,0,240,240,K_BG);return; }
+#endif
     kr.on = 0;
     kr_fx();                                     /* the effects back as the FX menu had them */
     ui.sig[0] = ui.sig[1] = ui.sig[2] = 0;
@@ -157,6 +181,13 @@ static void kr_spawn(void)
 
 static void runner_update(void)
 {
+#if EN_RUST_APP
+    { fm1_runner_observation o;uint32_t a[8]={0},i;
+      o.now=plat_ms();o.bars=en_bars;o.playing=en_playing;o.kick=en_drum_glow[0];
+      if(fm1_rust_runner(2,&kr,&o,a)<0)return;
+      for(i=0;i<KR_NROW;i++){a[0]=i;if(fm1_rust_runner(3,&kr,&o,a)==1)kr.banner_until=plat_ms()+1400u;}
+      kr_fx();return; }
+#endif
     uint32_t now = plat_ms();
     int k;
     if (en_bars != kr.s16) {                     /* the clock: a sixteenth went by */
@@ -311,6 +342,14 @@ static void kr_pt(float z, float lane, float *x, float *y)
 
 static void runner_draw(int half)
 {
+#if EN_RUST_APP
+    { uint32_t now=plat_ms();const uint16_t colors[4]={K_PULSE,K_TEXT,K_DIM,K_ACC};
+      const fm1_canvas_font fonts[3]={cv_font_view(&FONT_XS),cv_font_view(&FONT_S),cv_font_view(&FONT_B)};
+      fm1_canvas_state canvas={cv_w,cv_h,cv_oy,cv_y0,cv_y1,cv_scan};
+      if(!cv_ready())return;
+      if(fm1_rust_runner_draw(&kr,now,en_playing,(uint32_t)half,cv_px,CV_MAX,&canvas,colors,fonts)<0)return;
+      cv_w=canvas.width;cv_h=canvas.height;cv_oy=canvas.origin;cv_y0=canvas.top;cv_y1=canvas.bottom;cv_scan=(uint8_t)canvas.scan;return; }
+#endif
     uint32_t now = plat_ms();
     float frac = kr.beat - fm_floorf(kr.beat);
     uint16_t line = K_PULSE, wallc = RGB(255, 64, 48), gatec = RGB(70, 255, 160), bg = RGB(0, 0, 0);   /* walls red, gates green, whatever the theme */
@@ -426,6 +465,12 @@ static void runner_draw(int half)
 /* the lights: PLAY; black keys 1-6 the drums; white keys 1-8 the lanes, yours lit, walls coming blinking */
 static void runner_leds(void)
 {
+#if EN_RUST_APP
+    { uint32_t a[4]={en_playing,ui.frame,B_PLAY,B_FX},out[2]={0},i;float glow[EN_NDRUM];
+      for(i=0;i<EN_NDRUM;i++)glow[i]=en_drum_glow[i];
+      if(fm1_rust_runner_leds(&kr,a,glow,EN_NDRUM,WHITE_KEY,BLACK_KEY,out)<0)return;
+      plat_glow(0);plat_leds(out[0],out[1]);return; }
+#endif
     uint32_t b = 0, k = 0, i;
     if (en_playing)
         b |= 1u << B_PLAY;
@@ -454,29 +499,56 @@ static void runner_leds(void)
 static void runner_input(uint32_t btn, uint32_t keys)
 {
     uint32_t press = btn & ~ui.btn, i;
+#if EN_RUST_APP
+    uint32_t actions;
+#endif
     int32_t e;
     int r;
     for (i = 0; i < NB; i++)
         if (press >> i & 1u)
             ui.down_t[i] = plat_ms();
+#if EN_RUST_APP
+    { fm1_runner_observation o={0};uint32_t a[8]={keys,ui.keys,0,0,0,0,0,0};
+      if(fm1_rust_runner(8,&kr,&o,a)==1){o.now=plat_ms();if(fm1_rust_runner(9,&kr,&o,a)==1)kr.banner_until=plat_ms()+2500u;} }
+#else
     if ((keys & ~ui.keys) && kr.over && plat_ms() - kr.over_ms > 900u)
         kr_reset();
+#endif
     if ((e = plat_enc(EN_SELECT)) != 0)
+#if EN_RUST_APP
+    { fm1_runner_observation o={0};uint32_t a[8]={(uint32_t)e,0,0,0,0,0,0,0};(void)fm1_rust_runner(4,&kr,&o,a); }
+#else
         kr.lane = (uint8_t)(((int)kr.lane + (e > 0 ? 1 : -1) + KR_LANES) % KR_LANES);
+#endif
     for (r = 0; r < NE; r++)
         if (r != EN_SELECT)
             (void)plat_enc(r);
+#if EN_RUST_APP
+    if(press>>B_OCTDN&1u || press>>B_OCTUP&1u) {
+        fm1_runner_observation o={0};uint32_t a[8]={0,(press>>B_OCTDN)&1u,(press>>B_OCTUP)&1u,0,0,0,0,0};(void)fm1_rust_runner(4,&kr,&o,a);
+    }
+#else
     if (press >> B_OCTDN & 1u)
         kr.lane = (uint8_t)((kr.lane + KR_LANES - 1) % KR_LANES);
     if (press >> B_OCTUP & 1u)
         kr.lane = (uint8_t)((kr.lane + 1) % KR_LANES);
+#endif
     if (btn || keys)
         ui.act_t = plat_ms();
+#if EN_RUST_APP
+    { fm1_runner_observation o={0};uint32_t a[8]={press,btn,1u<<B_PLAY,1u<<B_HOME,1u<<B_EDIT,1u<<B_SEL,0,0};int32_t result=fm1_rust_runner(10,&kr,&o,a);actions=result<0?0u:(uint32_t)result; }
+    if(actions&1u)
+#else
     if (press >> B_PLAY & 1u)
+#endif
         en_play(!en_playing);
     ui.keys = keys;
     ui.shift_keys = keys;                        /* held keys, once back: not notes */
+#if EN_RUST_APP
+    if(actions&2u) {
+#else
     if ((press >> B_HOME & 1u) || ((press >> B_EDIT & 1u) && (btn >> B_SEL & 1u))) {
+#endif
         ui.btn_used |= btn;                      /* their release does nothing */
         ui.btn = btn;
         runner_stop();

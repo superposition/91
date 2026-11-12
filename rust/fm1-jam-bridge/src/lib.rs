@@ -23,6 +23,7 @@ mod melodic;
 mod object_formats;
 mod persistence;
 mod project;
+mod runner;
 mod sequencer;
 mod transport;
 mod voice_config;
