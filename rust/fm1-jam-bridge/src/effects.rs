@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! Scoped audio-owner borrows. State, input/output and delay regions are aligned,
 //! initialized and disjoint; the worker must not access these master arrays.
-use core::sync::atomic::{AtomicU32, Ordering};
 use fm1_engine::effects::{self, master};
+use fm1_rt::atomic::{AtomicU32, Ordering};
 static MASTER_SAMPLES: AtomicU32 = AtomicU32::new(0);
 static ECHO_SAMPLES: AtomicU32 = AtomicU32::new(0);
 static REVERB_SAMPLES: AtomicU32 = AtomicU32::new(0);

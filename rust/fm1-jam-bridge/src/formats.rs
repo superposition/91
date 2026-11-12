@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! Fixed-copy ABI for legacy C codec consumers. No pointers are retained.
-use core::sync::atomic::{AtomicU32, Ordering};
 use fm1_formats::{storage, voice, wire, CodecError};
+use fm1_rt::atomic::{AtomicU32, Ordering};
 static DECODE: AtomicU32 = AtomicU32::new(0);
 static ENCODE: AtomicU32 = AtomicU32::new(0);
 static REJECT: AtomicU32 = AtomicU32::new(0);

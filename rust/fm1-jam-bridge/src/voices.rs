@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! Scoped voice-owner borrows; no pointer/callback/state copy survives a block.
-use core::sync::atomic::{AtomicU32, Ordering};
 use fm1_engine::voices::{self, Drum, DrumsConfig, Mix, Pluck, PluckConfig};
+use fm1_rt::atomic::{AtomicU32, Ordering};
 static COUNTERS: [AtomicU32; 8] = [const { AtomicU32::new(0) }; 8];
 const _: [(); 96] = [(); core::mem::size_of::<voices::drone::State>()];
 const _: [(); 12] = [(); core::mem::size_of::<voices::drone::Line>()];
