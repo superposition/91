@@ -176,6 +176,10 @@ jobs:
         run: sh tests/rust_worker_handoff.sh
       - name: Physical backend completion and stopped-owner ordering
         run: sh tests/rust_mcu_hal.sh
+      - name: Complete MCU queue publication across render interruption
+        run: sh tests/rust_command_irq.sh
+      - name: Legacy harmonic policy, register search and progression callbacks
+        run: sh tests/rust_harmony_parity.sh
       - name: Songbook snapshot and staging handoffs
         run: sh tests/rust_handoff.sh
       - uses: actions/upload-artifact@v4
@@ -234,3 +238,6 @@ jobs:
             build/persistence/*verification.log
             build/persistence/scenarios/*/*.rc
             build/persistence/scenarios/*/*.normalized
+            build/harmony-parity/*.json
+            build/harmony-parity/results.jsonl
+            build/harmony-parity/source-verification.log
