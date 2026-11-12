@@ -1,0 +1,7 @@
+# The complete generated fuzz/restart sweep is added by simulator_compare.py.
+seed 37
+reboot
+storefuzz 0
+reboot
+wait 10
+expect parsbad 0

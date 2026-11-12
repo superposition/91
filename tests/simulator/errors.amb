@@ -1,0 +1,10 @@
+# Continue ordinary assertion/I/O failures, then stop on unknown commands.
+expect playing 99
+expect nonexistent 0
+expect jam_nonexistent 0
+loadobj 0 build/simulator/missing-object-for-error-proof.bin
+dumpobj 31 build/simulator/invalid-object.bin
+wav /no-such-simulator-parent/audio.wav
+wait 10
+wavstop
+not_a_command 4

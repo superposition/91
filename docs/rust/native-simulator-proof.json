@@ -1,0 +1,2154 @@
+{
+  "ticket": "https://github.com/superposition/91/issues/16",
+  "date": "2026-11-12",
+  "base_commit": "eae9807a40f3b361275069d4c0522ec410e555ab",
+  "status": "qualified maintained Rust native simulator policy and default entrypoint; production C application ABI remains, so full ticket stays open",
+  "reference": {
+    "source_head": "5b78ae77897d8bc08981c0a620ab2cce192a2d20",
+    "archive_sha256": "3d20587f825b8a26cd1f9ab6a715e65e78838fce0c19b5c27ce0427c15fa6263",
+    "verified_source_files": 440,
+    "source_verification_sha256": "02103818921d558fa092601f4329ba6740cf2ad792676fb0331e24f2fadfbd85",
+    "historical_scenario_manifest": {
+      "tests/scenarios/acsteps.amb": "26d21ebffdc1a5d6e12ef6ff0abba552db8c82fc4264d4fe131141636297b581",
+      "tests/scenarios/answer.amb": "52162d04f82d5899e4a817a9b5531dd5cfd43456a390c4d3bf6ac04d3a45fa7c",
+      "tests/scenarios/arrange.amb": "b43e83eb3f468082cb912678466ea1016e38ba0510d57f03f0385b3f7644551e",
+      "tests/scenarios/autofx.amb": "b89f6cb2a3f0445ba517a4884e7f9b9d26ff1d79a3bf33333e712d5b76031f78",
+      "tests/scenarios/bassline.amb": "8bdb3fa687af79cc941a2aa410efbfa38219debdd61cad66f79118a1264bb50c",
+      "tests/scenarios/basssteps.amb": "dcb9e65c29c52b96e49789dcf87a63c8347173d0f92ef6c125ed0d411163891b",
+      "tests/scenarios/battery.amb": "3e6289db10ada76c0da5bfa34aeb3a7af8f41fc5f62f1674eca94856ff91330f",
+      "tests/scenarios/beatfx.amb": "2446eafd79b0604a7d3ccc6b12627b42d2d468f22af12af7c3614e020effb932",
+      "tests/scenarios/capture.amb": "886d4f239e295e4b266babb74625e660eca01a357149f9e3017fa9ec8b7c457d",
+      "tests/scenarios/chordkeys.amb": "daaaa2fd40c9b12f6702873dd8eb339e9292cf7aa1443eae6765ffb9d6cac250",
+      "tests/scenarios/chords.amb": "680df9cc869a239255802cbc244168e21ac3e9484faef9d0689a9cc80c69f7a3",
+      "tests/scenarios/circle.amb": "80d0513db51033f39fbb9f416ce187412b8e58b8c8ed7392581112a0efcb0952",
+      "tests/scenarios/dancer_sections.amb": "b7d1feb8bcdda9e0c49d6faacd5d59b0eddbbb976501a0ca58c446f5fb5b3359",
+      "tests/scenarios/dejavu.amb": "1a282ea631e75b24c0ef0146b599af1f4f3cbd3f22075166a60ca1efd56805d4",
+      "tests/scenarios/dj.amb": "6cb834a31bb9825e0cb1b99f5bc8a6eb60626a06f8a30e518ad80c44d208b36b",
+      "tests/scenarios/drumdrift.amb": "2220fad2b75d1461f61931737014572eab2ffe333242f68bed6a04a782eedd2d",
+      "tests/scenarios/dyvoices.amb": "04e6303cb928448937d38a2fcec5751400f0c86b2825c50761a425575c30b880",
+      "tests/scenarios/feel.amb": "7a6fd383779a7fecb903263aecea10a0b47bbb694bd1d5c3cd305779d3f756cd",
+      "tests/scenarios/filters.amb": "73371519b82ab396d91f0a34e250ba75240c6f2a3233c211aec0af36454f007b",
+      "tests/scenarios/first.amb": "e21eb5bdd1c54f03db46b830713fe79b612aa8f1915c6601de3bf901cc04a2b9",
+      "tests/scenarios/flex.amb": "2ec0f9d221d1ea3860bcfabd2521e4f3aee2f62fa397f5f677fe9dbd9284c0c6",
+      "tests/scenarios/fx.amb": "d2cf520c2d77b8ed9b27c686dde591f994455c176dd53325630e823344b50636",
+      "tests/scenarios/fxclose.amb": "648f45d2718a11327a8bbae5b40b3c5246ed9e33e92bc661a94defaaa8335561",
+      "tests/scenarios/fxedit.amb": "2043ea6c96ee2b4b52fbe3c1a92b656d1d318c1b9d828cdae0cee505015e611b",
+      "tests/scenarios/fxjump.amb": "5eebcb89a510403d433b5c547e97ea3b0e913680c50ca41a59637b87f793bf2c",
+      "tests/scenarios/fxknobs.amb": "8f35fbd006398ba29c0e38641973b8c86e2e3545587a096b6a628d91fc3a7744",
+      "tests/scenarios/fxperf.amb": "8c70793486a76da031b59f69706278afa410ee2eb8f002718e0328232cfe2fba",
+      "tests/scenarios/fxscopes.amb": "4757ae3d0b9bc010c628b8ff4860ad156bf571b54eee47efb2be3cf32468b040",
+      "tests/scenarios/genre.amb": "503adc7c12add18836bc4fd15017afa39cc6d62303265eddb577406d47abdfdf",
+      "tests/scenarios/genrestore.amb": "3a9bf927182eb64b1e30727341dc918493e52a8a5d6b8ddc6de99a23700a705d",
+      "tests/scenarios/groups.amb": "14939d208ce8702fec1cbb6fb8caab2e77a8ef158a62cf18c473f38c25124094",
+      "tests/scenarios/help.amb": "5663371f48d9217fbc9e951f576b85d5562eb4571a228b628ddb6a14c9267814",
+      "tests/scenarios/hero.amb": "17a19a4441862c9712a2581bd2378af1e5b5539dcb39680c92753425570a85d2",
+      "tests/scenarios/imp.amb": "b515f79fe18ef43b506ec158894285e71b6615856c467f45f05e3b7b83026973",
+      "tests/scenarios/jam-helper.amb": "580d3178f6366503a698c19a20369cef74d7dcd090681d3bd557c84c3e6b481f",
+      "tests/scenarios/jam.amb": "964768c4c8686e1e2cb628a57632537508ce5feac44f56b40c2dba811a8db902",
+      "tests/scenarios/kaleido.amb": "a7e698b45424fefce143261c9c9e44e310ee6333254213ca323ca41ee0ededcb",
+      "tests/scenarios/keydrop.amb": "694460c669df43e47acf49d643d378bb08fc7fb219039b3677651656832fd64c",
+      "tests/scenarios/keymap.amb": "5febe25636d76ad6dbed628897dbc76963348691268a35d118bfcfaa7b913c7f",
+      "tests/scenarios/links.amb": "dadc68ae08dcda04d73823741f15f1e3ae14ed4e61a056513100e2c45cc22d72",
+      "tests/scenarios/look.amb": "8eb6623eca3ec0e77bf32490151dfeb2938e15d02dab4eb865f8328df4ddcfd3",
+      "tests/scenarios/midimap.amb": "09fdeadb004c4f2a55b3be12c51cfa10f354482b811e4234dd77dd1d8f58ce93",
+      "tests/scenarios/mix.amb": "5f4857c73272f77a3c8c27ce733b69eab91dad1be5e0215326b9c4ead55bf193",
+      "tests/scenarios/mixglide.amb": "38fc973b71a8ecd52b13707c42575a7f1875895eec462fdb19e0c2ecc199e995",
+      "tests/scenarios/mood.amb": "f06ef9a9e475494121b5b3db9b325d8cbd6832be3b596ac3a4650bea648e40ef",
+      "tests/scenarios/motion.amb": "3c6c6fca80f7113c8ae1c0179fc82625725ce24559c7289d5d2686ab84b2cf8d",
+      "tests/scenarios/mpk.amb": "c1a53033ea3512f03206c2c392ca8555d9f5f7d1aac3a27b97e161d0102b00a4",
+      "tests/scenarios/mscc.amb": "a9cd4d166fe0fedb9f8dce2df713f253a3e3c583288c6bb1722c752797b4752d",
+      "tests/scenarios/n1.amb": "a20c7ea361f33e93646ab0705ea3257ec47d735ca27ef5586b7c9439e50f10df",
+      "tests/scenarios/octave.amb": "773affb2ef0bfc6cc20a314674fe17dba05520d745b5c93ba2f1679c82701396",
+      "tests/scenarios/pads.amb": "02b1b47f9c3980b7b3c9e451ceb7281078762f3d9191727871a233ec7c645dd0",
+      "tests/scenarios/pedal.amb": "8b78ffc70d901c006dd37e30c7c7585d1ac84be06e269c1bef5fa18783501351",
+      "tests/scenarios/perf.amb": "544c993a9775b21f0ee5a9ad5769d8397108a6990c2e393cb9b531990bba8d7f",
+      "tests/scenarios/phrase.amb": "bdb27c74f88a424f0f423da4bdc2a7858781b248aaee4939506ece1d9b8918ce",
+      "tests/scenarios/pieces.amb": "2bc302d83b605a670b2d47600e158b390e2ea7e7dc79709be3c1e2b6ddff029b",
+      "tests/scenarios/playmap.amb": "b18fa90a29ad62f807db5d986f2bf110ec33457a06b12b5c32cbe40c298a47ed",
+      "tests/scenarios/pluck.amb": "fc74564d6fb3e9a0ae93a5d785fc4b992962385ed2bd0f990c4cacf95f6bd011",
+      "tests/scenarios/pluckmig.amb": "c52c6397aa9054d9b248d337aae030b239d62321b39dc6f52276beccafd7d4e5",
+      "tests/scenarios/plucksteps.amb": "308263afebd7ba178052e6a2196abd370b33f42d8001b8466806e6fe0b21fc22",
+      "tests/scenarios/progression.amb": "559088c56d58f142b57ac1081bc061e8f77676ec276aae2685cebb53149e88e5",
+      "tests/scenarios/remote.amb": "84f237e11137595a82081b764e1a48a6b9dd8b6b1a5309865d3a9447aa534adc",
+      "tests/scenarios/restore.amb": "e25a914d60f90681c91815aa7064928e2ffe6eb71348b9d0d1a27aa5c6a4469e",
+      "tests/scenarios/restore_old.amb": "adceb1b90df5ca4ebe678e7a753786e0b3a36c2ac430e6a3874f492c3ac15f6f",
+      "tests/scenarios/restore_save.amb": "ffc951a369aef437bb0e14b8cd9db55d3f4548c2ccc711adbb3995f5595b198b",
+      "tests/scenarios/restore_shared.amb": "a28bbc5782036a0ed2693f2318a51a9b72317799aea9d92dfc34d9680df3ed1e",
+      "tests/scenarios/resume.amb": "d783ef69cff6162939382e670ee85ac391e97521192eadedf54b537b05f1491d",
+      "tests/scenarios/rptwav.amb": "35c4a11a6466149bca90d0b8dbe647d5ef897c6c228dfde40b7b14ac6ef52e30",
+      "tests/scenarios/runner.amb": "596981e758da7209854b38ea0b9a7c780c32607ac1ca793dbe929164c44e9520",
+      "tests/scenarios/samplehelp.amb": "a245c7082e0a8c2867f302962306d1e2269815eef5e00f2d37f189ff3eaf953c",
+      "tests/scenarios/sampler.amb": "c42b3b1a4d2cac47817cd3e8f6507705556510a001a3ac90050145f7d5aae34f",
+      "tests/scenarios/scale.amb": "ab5691866e7057e27dee99dff9e443ca4c376a6dfd415c8b22e3c0657f7e89e8",
+      "tests/scenarios/scene.amb": "26c2eba8fd164668944b0c1d8410ecda3bdb16a8372da58aee57b5317824a8b4",
+      "tests/scenarios/seamless.amb": "25a8f0e85dec21113e0aef9a07ae2869ec66a816a07b9436f2ff31e05347fa41",
+      "tests/scenarios/sections.amb": "75a6d6d5444ec7de92c031c8e3e8da578dfbb5e1d6fffff5b474d97d6a35b640",
+      "tests/scenarios/seq.amb": "27edacea07986c10d02eefc831224649a00138393b12a71598f333c9a107526a",
+      "tests/scenarios/seqtricks.amb": "d9d38527159049aaa0a79facfbb8694a31ddd80b873fdf20afe63a9e07872679",
+      "tests/scenarios/setlist.amb": "4ba71910740a7f15890793d2415861a2c4f58b9f6ab44284c79c896ac24e280f",
+      "tests/scenarios/setmap.amb": "35980127180faf30deb0646979ad65cb6b644fe4074496d82c7469c995666b54",
+      "tests/scenarios/setmem.amb": "485c3298c8a3a85c6959d9844326d286aa9a20fcd7a539b9f6578dcad86e10ee",
+      "tests/scenarios/setpage.amb": "d57adfba81380ca0a1a56fb3d00cb301a8cacb52266d84e73714706ba7d092d2",
+      "tests/scenarios/settings.amb": "780d4caabc2974c7199807ceae05af454c3b1e013abd3c2deb3115d70471218c",
+      "tests/scenarios/shift.amb": "43a1205853bdaeb5745eef38be40b36db5ed409948fcdc8a2427ea3089f1b2cf",
+      "tests/scenarios/songbook.amb": "3445a50639a87c38811d0b2f52224e9c020cd669033c245456f365e9a81d7fbb",
+      "tests/scenarios/sounds.amb": "c1640d907fd06347754df6debe171c258a9797ced42935b5cfa6f388ac670547",
+      "tests/scenarios/stage.amb": "7401c0aa518fd3879cf2bf1726d884a5535983a04d5720b91a65863d9e23c19e",
+      "tests/scenarios/start.amb": "25b28696cc88ddaea7d34e13539cce24df71e10a12c5a4724ad9e5e482509d07",
+      "tests/scenarios/steps.amb": "6f96143509dad73f177976e36fff68223077e3b749086557efbf274c799815da",
+      "tests/scenarios/store.amb": "012f489a1d5eac404c098382c614a2af69035797a874646da3e8c76f13833913",
+      "tests/scenarios/theme.amb": "660cf9cae1224508983f1c24387804d9afdf2b62566c0633c84eb03bcf3cc4bb",
+      "tests/scenarios/theory.amb": "21abedb6403005129763c5d5ba1e0d13c2c3022d99b68f95c18168215dfdcc08",
+      "tests/scenarios/theory_walk.amb": "d2f0a466c29c9345aeb88b4bc113dd417385eccf0636fa419e545bc23d9d18c1",
+      "tests/scenarios/usbhost.amb": "eb39233346b6890049cf60056a55255fedbd81f4aee0ef8458217f75ba7d7208",
+      "tests/scenarios/viz.amb": "cac2ee1efa90696694ed6a13b093350607d5ca64bbba32ea15871f7f82b58897",
+      "tests/scenarios/zoom.amb": "e964920a83190cc6b44cc423c97162124a90015f34258564f677d9bc2db966dc"
+    }
+  },
+  "representation": {
+    "object_count": 31,
+    "object_bytes": 3840,
+    "backing_bytes": 119040,
+    "framebuffer_bytes": 115200,
+    "midi_queue_slots": 256,
+    "midi_queue_bytes": 1024,
+    "cc_counters": 128,
+    "encoder_accumulators": 7,
+    "retained_restore_bytes": 3840,
+    "retained_upload_bytes": 3840,
+    "render_frames": 256,
+    "render_output_bytes": 2048,
+    "record_max_bytes": 511,
+    "token_max_bytes": [
+      31,
+      255,
+      63,
+      63
+    ],
+    "native_single_thread": true,
+    "portable_library_forbids_unsafe": true
+  },
+  "checks": {
+    "rust": "1.94.1",
+    "workspace_tests": 113,
+    "windows_simulator_tests": 5,
+    "fmt": "pass",
+    "workspace_clippy_warnings_denied": "pass",
+    "featured_cli_clippy_warnings_denied": "pass",
+    "complete_scenarios": "pass",
+    "fresh_process_repeatability": "pass",
+    "default_entrypoint": "pass",
+    "piece_save_import_voice_extras_set_list_roundtrip": "pass",
+    "c0_fallback": "pass"
+  },
+  "comparison": {
+    "audio_frames": 80748288,
+    "integer_pcm_values": 161496576,
+    "artifact_count": 538,
+    "artifact_bytes_per_flavor": 753826710,
+    "artifact_extensions": {
+      ".png": 238,
+      ".pcm": 97,
+      ".txt": 98,
+      ".bin": 97,
+      ".wav": 8
+    },
+    "cpu_telemetry": "deterministic virtual0; original-host test adapter replaces only measured CPU clock with0",
+    "normalization": "only final measured host CPU summary; no PCM/MIDI/pixel/assertion/state normalization",
+    "full_results": {
+      "flavors": [
+        "reference",
+        "c0",
+        "frozen-runner",
+        "c0-runner",
+        "rust"
+      ],
+      "cases": 97,
+      "historical_cases": 94,
+      "known_failures": 19,
+      "artifact_count": 538,
+      "results": [
+        {
+          "scenario": "acsteps",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 770048,
+          "artifact_count": 4,
+          "artifact_bytes": 6585448,
+          "artifacts": {
+            "acsteps.png": "7e6275cc50f51c59008cd2e5d2e8f223f5f9601f9aa377c729777853ab9f7034",
+            "audio.pcm": "f532cb4cfda21ea3b3bef1f1f3a0a5fff809f2779f397b5f2ed3b08676948b25",
+            "midi_out.txt": "78f229335795eb479f7d9e74ff8b505977caa9050a90a622d9c27c5437a67378",
+            "platform.bin": "6911b5d834da6e841feda395b2290fac400618ee20fbd5d4cce048f0109a68fa"
+          },
+          "normalized_log_sha256": "6ec8bc6a8b2815781566abf0dddcfc1427641136f8f6824ffe3513e917bfc00b"
+        },
+        {
+          "scenario": "answer",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 472320,
+          "artifact_count": 6,
+          "artifact_bytes": 4543355,
+          "artifacts": {
+            "answer_mirror.png": "d4fc2c2b2cbd4e312526d6ebff88e60f4f0bec3b19195a4085c3c3e07232b728",
+            "answer_page.png": "6aad3f0a3b479377399083deba10f1020e88ae207326811603b1c1e9c9474a8f",
+            "answer_reverse.png": "4d47aa5211da5229af8bade9a9efcfc88aa38953414e646f42bbb89d61516ac6",
+            "audio.pcm": "44b0a024aec1fb558586a240c2e3e3d9065b78acb1c934fa12a6ef398fbe5abf",
+            "midi_out.txt": "326bea16dcb01fa5ab9fae378690ce005b4d4499847b3c3e375e7124fdf22fde",
+            "platform.bin": "d69cd756a9fde26289169bc95951bb838f164fd023bc954f9a2a4023cbf0a6a2"
+          },
+          "normalized_log_sha256": "d82ae9e477ffba07abcfa9439cc3d62a1b324619bcddf52266d321fd0a9043e0"
+        },
+        {
+          "scenario": "arrange",
+          "status": 1,
+          "historical": true,
+          "failures": [
+            "FAIL expect chordroot == 6, got 2",
+            "FAIL expect chordroot == 9, got 11",
+            "FAIL expect chordroot == 2, got 4",
+            "FAIL expect chordroot == 7, got 9",
+            "FAIL expect chordroot == 1, got 2",
+            "FAIL expect chordroot == 5, got 2"
+          ],
+          "audio_frames": 1846528,
+          "artifact_count": 4,
+          "artifact_bytes": 15219530,
+          "artifacts": {
+            "audio.pcm": "57d2a920dd3e6d01601ac7e83ec6254eddffaaf5d7eaa7d99dea703f7e2404b3",
+            "groove.png": "69f7479c4a6f12aaa266ffe646a5df436735d109b53d18a859dc44a18c8bb48c",
+            "midi_out.txt": "6cb5cc4a03ac831fcefade7046b844493461c152b466cec4c16c5fb67009a933",
+            "platform.bin": "d06d18a0fef019c17697332942d81430590f4dad95026a6d56a8836865c28dfd"
+          },
+          "normalized_log_sha256": "705f58d9cc6181634d0e3f5142ce7943f6ab3e88d5a0ec6218232de90eb7334f"
+        },
+        {
+          "scenario": "autofx",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 1778688,
+          "artifact_count": 5,
+          "artifact_bytes": 14850042,
+          "artifacts": {
+            "audio.pcm": "b57804317e449b56d1e32e0f79136995d3768bdf75205405531c2b0c47bb10f7",
+            "autofx_live.png": "42f259290ec6b5c5f9d4ead9b27e0385c13a6100aa71ac67694e7ca5bf11ba09",
+            "autofx_page.png": "aab11169c65224fe71641a2ef9950b755267121ec65f4bbe8a2c422e19fc3956",
+            "midi_out.txt": "65ebcb6136d40c5a37967d028b1905e39e3886a90dd0553d7ab80cc9462fa6bd",
+            "platform.bin": "1cf613cf51f13765118d2860744bc2097a1080161ed0c4341e8eb6d33c702026"
+          },
+          "normalized_log_sha256": "4b102cbdf612e122508e56a09a0fb11da98acd7a71d611980642f97fd00c70ff"
+        },
+        {
+          "scenario": "bassline",
+          "status": 1,
+          "historical": true,
+          "failures": [
+            "FAIL expect par152 == 6, got 3",
+            "FAIL expect par152 == 8, got 5",
+            "FAIL expect par153 == 42, got 56",
+            "FAIL expect par154 == 28, got 24",
+            "FAIL expect par155 == 10, got 18"
+          ],
+          "audio_frames": 194560,
+          "artifact_count": 4,
+          "artifact_bytes": 1969792,
+          "artifacts": {
+            "audio.pcm": "548271e55aceee67deb5a381398b1daffdda064db0eec014f7b40ba664345743",
+            "bassline.png": "bfaa73506022be981c5dfd1beed1cb0f22516a1a4e565bfe45215c09fb509669",
+            "midi_out.txt": "b92eb5fe7dca3373c4f6da019edffa132fdd6956d9aaf01b0c2f9ff00100cfe4",
+            "platform.bin": "bfe7fca2c111f80309562919e505bf89db691c0090bc61d8ccccb63ce58b78e8"
+          },
+          "normalized_log_sha256": "b15ca7b8d8b9b2083d082860031e885314eba51a5380835d1a71366f5c9f41b0"
+        },
+        {
+          "scenario": "basssteps",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 983040,
+          "artifact_count": 4,
+          "artifact_bytes": 8289488,
+          "artifacts": {
+            "audio.pcm": "512493fe7b23670f2c106980d9a8ec7f38d705bec421dc6ab32a36b602bc86ea",
+            "basssteps.png": "d5b24a827e03d4e270ed385a1cb4dff31a6e4919a8bd26759aae0d264a48b30f",
+            "midi_out.txt": "ba3c927c2c5c980e3c9e55f88b367d16269f84ebc9e9ff4c36b9d77af1fd8a8f",
+            "platform.bin": "45db633a4163571c23a1c3e95d98cd6d428f7d6d3481fa99bb185282585ed00f"
+          },
+          "normalized_log_sha256": "1c0ca7c9f9cfae54ad0bca2fc5d521addf11640646ad7ca8b2cc393a46bf7883"
+        },
+        {
+          "scenario": "battery",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 238336,
+          "artifact_count": 8,
+          "artifact_bytes": 3013228,
+          "artifacts": {
+            "audio.pcm": "8580f6b4db0c7b1ff0e5db3d399314fb8d273af403440028ec91c99494d9a891",
+            "battery_full.png": "f32723b4b6f0259df630f79381291ff06fa99b5091de667b38431496b7666438",
+            "battery_low.png": "67a6be04db76b82f619f1d682e4e6f853ec0f32799c80928cc631918da3504ac",
+            "battery_mid.png": "dc8b9124abb035c19e5d224d1e6546581e3fdb0d3f0134318a927e5596f60f3c",
+            "battery_none.png": "c01f47898ba7bce48ae5ba1241556cad22c43fad5912fb80a4cb03f3f06e7881",
+            "battery_usb.png": "63d1eb4f3160e6f92ac6077c22d18775ec2f4a2bb9901d9004f1cbc2e51c0fbc",
+            "midi_out.txt": "3d91f96ccfae2fbdd1feb31ce5e64f620d4bc15f91cb844ebbe92da33dcbae98",
+            "platform.bin": "e4852b5cdd651a3424df0d789d787cc486711c117677e881a9910d5e32bf31fd"
+          },
+          "normalized_log_sha256": "833403a2f9d2dacd2b3a225ebb6c393cd06279c8a495b86e9fcbd0804fcbde6b"
+        },
+        {
+          "scenario": "beatfx",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 956672,
+          "artifact_count": 4,
+          "artifact_bytes": 8082666,
+          "artifacts": {
+            "audio.pcm": "85e2e34fc303b391a59722814d74615b97bd0a30e32a36d30c53ae1ea768834c",
+            "beatfx_bank.png": "b3b7536133497db623aa21c25c042482c6e0d7d844d55c135e0b29addc10316f",
+            "midi_out.txt": "9f0c64bc4d7bead7eb7357b8fa9f486f836f77e74a288d600bc7a6e1d5886af8",
+            "platform.bin": "e9918320c0617076e1e7a1956d3c000280aee44e0da90ca5aa35c6200fcc400a"
+          },
+          "normalized_log_sha256": "c207ff7b51f61e5eafe1c3360814db469c8b4819cab5c97e25592b9de2055625"
+        },
+        {
+          "scenario": "capture",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 690688,
+          "artifact_count": 5,
+          "artifact_bytes": 6121432,
+          "artifacts": {
+            "audio.pcm": "6a99c05cee05d3ecbd7359926a9be4e54e5c949f41ee29080c7235febb32fa8d",
+            "capture_acid.png": "8b92a27191d4b12e9862626d7a8f2d8d87f9084253d082a1d72979902978de48",
+            "capture_pluck.png": "30f85d5d48c6f898640c0c0bafb735168878f6adae7efccd740c4883f8f305d2",
+            "midi_out.txt": "8db7c903b3fc1e0b8e836b2e10d0f24216ccbad6f370feacfce76c24f40cf28c",
+            "platform.bin": "9cf791c75d8c1ec292592a9d4aa78ba992401bb2ab567aa42aed7314459653ed"
+          },
+          "normalized_log_sha256": "9d7142748322cb86ecd8f25fbc611132338b98982452e179aea0522bc7e594e6"
+        },
+        {
+          "scenario": "chordkeys",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 523264,
+          "artifact_count": 5,
+          "artifact_bytes": 4778122,
+          "artifacts": {
+            "audio.pcm": "26e44ad2a0a90630e8fb235917385846826bc5cd6342980ef60f892e0e8c38af",
+            "jam_chord.png": "3fde7db3138d26e1bf8a13c2283a4d72c4fe7f9d2753b55d031963204eaefae9",
+            "jam_chord2.png": "b4f052aa5c7c09a8f2ed763549f97c3d01e758dda880265ab41ef6243e251145",
+            "midi_out.txt": "27020fa0178ce036824c52f0068dfea5267a5674bb879cd9148bb5d618ee572b",
+            "platform.bin": "c3444a89853a92026bf59eebd7198fcfd6aa84ce2c1abdd144df83d92ffecb0f"
+          },
+          "normalized_log_sha256": "d4338e3029abe7f7aad13a8204d4282f0a4eb842f01daaba4dff920ba0bf1afd"
+        },
+        {
+          "scenario": "chords",
+          "status": 1,
+          "historical": true,
+          "failures": [
+            "FAIL expect chordiv == 2193, got 2069",
+            "FAIL expect par92 == 2, got 3",
+            "FAIL expect par93 == 0, got 1",
+            "FAIL expect par92 == 5, got 6",
+            "FAIL expect chordiv == 0x40D, got 1065",
+            "FAIL expect par92 == 3, got 4",
+            "FAIL expect chordiv == 2069, got 2209",
+            "FAIL expect chordiv == 2117, got 2069",
+            "FAIL expect chordiv == 1061, got 1035",
+            "FAIL expect chordiv == 1061, got 1035",
+            "FAIL expect chordiv == 1061, got 2193"
+          ],
+          "audio_frames": 326912,
+          "artifact_count": 4,
+          "artifact_bytes": 3030948,
+          "artifacts": {
+            "audio.pcm": "62ce2a274ea9aef2fba57c5ce467e05915197cf78acedfaa48750e0cc0fbbb06",
+            "chords_9ths.png": "66eee631deef816a1203f614dd8fc1e798d4e2cba9c6fcd034338c358b390fea",
+            "midi_out.txt": "156f5e88dd482ccedefd570e6ae1e5cec92934fff3b5ac9d383678e98ccac3ec",
+            "platform.bin": "ce216df119b83de9d9891c1d330a3d380292c1bbaa105ce879c0bbcd21f18b36"
+          },
+          "normalized_log_sha256": "79f8712946d498764d52a0613a214cba87b00f4e028cb79e57f7c2310d707d74"
+        },
+        {
+          "scenario": "circle",
+          "status": 1,
+          "historical": true,
+          "failures": [
+            "FAIL expect prgbars0 == 4, got 2",
+            "FAIL expect prgbars3 == 4, got 2"
+          ],
+          "audio_frames": 776192,
+          "artifact_count": 6,
+          "artifact_bytes": 6973235,
+          "artifacts": {
+            "audio.pcm": "23c1c6080de107c2b67c51ee2796602f102c5e614fe6cfe0370e6dbf244b2c19",
+            "circle_page.png": "0f9f764a7a1b96e38c0c05c8dbe3924755f6a453b7f1d748bf456fba4fe37e30",
+            "circle_theory.png": "ea5d89490785c039b6d19437dde967e6163e374da428f9a38fa20544b623e051",
+            "circle_whole.png": "a6ac70ae7889b3629c11bf4b5b8fc89268b771fbb74439090f77becb26cf2453",
+            "midi_out.txt": "665ec2841493a014ff481e25e01efed988e3a877ebf0fcbf4391496559326866",
+            "platform.bin": "5ad9605205df3df649cd436feed134ccda994cb2c90019ce1f6d75dadbdb451d"
+          },
+          "normalized_log_sha256": "f4d2a03de5a147d80473a4de16aa0a116924c1163b3043b5e7e9f2c8c839457e"
+        },
+        {
+          "scenario": "dancer_sections",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 865536,
+          "artifact_count": 10,
+          "artifact_bytes": 8387214,
+          "artifacts": {
+            "audio.pcm": "5a7387885e868914e155c7cc305c0ff61e41afcfb3193f9c2c789277f67de01f",
+            "midi_out.txt": "9a13e0a2b0cbd03a82236241fb3dff0ac2a1fcca23d903e2943f3a3fb4396023",
+            "platform.bin": "4932a6db6712947fe10d3e7f22b52d98f96ee7657ebf7439b44dfdbf855bf8ee",
+            "s_jump.png": "bb84bc336f4cffd1b2d8c67aa091cfedb07137528dd5e0789140da9dd9abe2fd",
+            "s_jump2.png": "b00234f4c8296f3b903bc80ee9088dfe5bf74110f3e072fb3c22d418a608f1b3",
+            "s_jump3.png": "8b1e4cc998a4cb48cb7da8b14a0086b7780994ed84ad5df84ddbcea547592a9f",
+            "s_shake.png": "f23253dd204fdc229ab601323f0f23bfa4d0d2a63b04bdc1be97a1de8dfc3d97",
+            "s_shake2.png": "d3d3db335405b36337b5467ac278337862eae6535000db9de3ea5c35fecc678e",
+            "s_sleep.png": "4b539c2bb80605b57baa984197648a6a486b35f7dcc1e8c4018faa2674892707",
+            "s_sleep2.png": "bf7ed339d03d0610a44eafc864a3feb6255bdabe470a3f2337f810d9ce2397a4"
+          },
+          "normalized_log_sha256": "85c671eae1112aa8a2db19442b188c5622a6ed91e9328e0617d6071a30a66c44"
+        },
+        {
+          "scenario": "dejavu",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 261120,
+          "artifact_count": 4,
+          "artifact_bytes": 2503442,
+          "artifacts": {
+            "audio.pcm": "1a7ae261e60b8fbf2324d6bee4e30128e83898c96bc7cd9af9ea15cb6734d664",
+            "dejavu.png": "16ef1239944c4c9c2f6737a963e2b730f7a46f9c4e1d232f457a54846935ed2a",
+            "midi_out.txt": "02c16635e6b55da944d9e22bc9a8926ba65fac4af47f2c22276706ac0d2a7cf9",
+            "platform.bin": "7b454435d5449afb1567f2b22053c7a165f9b5deb20e0ce193ded87f21145602"
+          },
+          "normalized_log_sha256": "8c32def757d2527d76eb02625e17c018656f774315b6504d9a1352ebd86f4e12"
+        },
+        {
+          "scenario": "dj",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 3770624,
+          "artifact_count": 3,
+          "artifact_bytes": 30472392,
+          "artifacts": {
+            "audio.pcm": "6dfad8ee5509fd68a7dfe19f1882778b5e1a201e5ad5df8a4224ca756f93fcf0",
+            "midi_out.txt": "dfc6d19f6f57782dc45c2d0d0c4fa001959d12590e4a3f3b9b0ee1153ba30f7b",
+            "platform.bin": "8637e5a6f0b894fb8ac08719898812765f7addf075057893a6f7b70eea280a39"
+          },
+          "normalized_log_sha256": "2b390f8e041f58c44f09b74a5cfcb0ce29d148ca50bb375523fa7a6ff1c6fe1c"
+        },
+        {
+          "scenario": "drumdrift",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 1701888,
+          "artifact_count": 4,
+          "artifact_bytes": 14061287,
+          "artifacts": {
+            "audio.pcm": "8991d1f15478bf3879976cc1a3eb0300f761947f21712112a0f5c94b0eda5c52",
+            "drumdrift.png": "a06eabc8411b5aeb462856a69f1fcb2e287182082f3553716f527be0d37bc5f2",
+            "midi_out.txt": "910f720156c44ae3fa355526da796908a838eec42e878564abe54735d33a1750",
+            "platform.bin": "56c346dda6c266434393efea1cd19049bd05aba36f1e7d6ced95a1a58110f2a8"
+          },
+          "normalized_log_sha256": "ff17a184cb072dd730ed83904af0d309c5ff517a45eb9e868a00762be5802449"
+        },
+        {
+          "scenario": "dyvoices",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 573952,
+          "artifact_count": 5,
+          "artifact_bytes": 5185345,
+          "artifacts": {
+            "audio.pcm": "d88b70f106e7716f6c8d246dd2ada610fb0c2abcedba49e7914bf96cee3b6053",
+            "dyvoices.png": "b018ea9bdcac2a5fb12ce4cf9f3d85dfc1f481b73cfd91956bdf749a8a358e47",
+            "dyvoices_pluck.png": "0bf530b8d64eb43e8f4d514203477a4609e0be509a4f2a4e9babff066ca3ec2d",
+            "midi_out.txt": "74711c69d86bac7c7f096d8b01691435c173ec43fbebe0bf4767fa4fe6dfeadc",
+            "platform.bin": "2559902f1ad0484699fd430355070a1ab99cd5fe87803e31ceb3384d660fd40e"
+          },
+          "normalized_log_sha256": "9caadabcb2ebf4a938325566461b5a85fc6891a025a76e83e119790c6ab4dea6"
+        },
+        {
+          "scenario": "feel",
+          "status": 1,
+          "historical": true,
+          "failures": [
+            "FAIL expect par160 == 2, got 4",
+            "FAIL expect par163 == 30, got 40"
+          ],
+          "audio_frames": 269312,
+          "artifact_count": 4,
+          "artifact_bytes": 2569266,
+          "artifacts": {
+            "audio.pcm": "8e2b638acfa850c54d52d5f9a081b6b3b8b35f796fad7c49db2503644b288b5d",
+            "feel.png": "ed6099b9623c4cd0575a925d9bebbd8b93635643a7a26e890962a7377d7ef24d",
+            "midi_out.txt": "5101a3448fe2f99684e527938bd7439fb22fd4f56b32ad69e7e8d51e47e8c969",
+            "platform.bin": "e28c038145f9f807da62fa07ae9cfeac5232c25fcf2e0dcab87a088278fd4f90"
+          },
+          "normalized_log_sha256": "08d321efe6fad74d98833abffd0b37ab57809b4905232e27c8ee141b9837eb8a"
+        },
+        {
+          "scenario": "filters",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 1236480,
+          "artifact_count": 4,
+          "artifact_bytes": 10317906,
+          "artifacts": {
+            "audio.pcm": "6693a0eb7bc20b5b9c28430e9885708dd7342baeeb61a31e84959c6931687dae",
+            "filters_page.png": "78a4209f614a75f544741d829366e2e7fe59149c96cf0aacd48ca150639bfbfe",
+            "midi_out.txt": "3bbac5dbd2253e169c5425f93c7ebe4c18ab2f0c9cfc7b14d9af54d379ca938e",
+            "platform.bin": "74f681c494bcfe55a9fe6e942ec145d40d30c243fedf427a3fb5adb2e37c0c64"
+          },
+          "normalized_log_sha256": "f21cba8f5f5eea9bc4f0dedfc084a9689509b8d046e1261043f692311f556c30"
+        },
+        {
+          "scenario": "first",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 1790464,
+          "artifact_count": 21,
+          "artifact_bytes": 23928018,
+          "artifacts": {
+            "acid.png": "2eef3c6cdad9bcccf93050661772c9a3ee64a2f6afe372c738bac0e72c209c5e",
+            "acid_line.png": "5426156c4700cb839704e09c493bea11098688e56412f566175c940c78898ff4",
+            "audio.pcm": "210353de0fed41c4536eeb7ed5edafbc490c0c33ddb6fcd4f1227ed6ace6d68e",
+            "chords.png": "67c690924be2f5d44bf0bc16e332add066d809d34c23bf2fb5b15c0f4b8224b7",
+            "drone.png": "27a747de78bf46355842b31458c3dd19d8e3c4d2237f4f22d58b04cc3fa7b028",
+            "drone_lfo.png": "86f72b943d625fb25bfaef39c9b12abe02e11dcabed7fe28c4bb750168042d1d",
+            "drums.png": "b8e893e1c8f0cd9157f743c67ab2b4d26012b91b4744e1f956bf795085d0d5d1",
+            "first.wav": "4fee5b2e8d24c0c39e361014b03068665b1be44b26678ca0b1933458dfd7f8d5",
+            "flow.png": "a4a7119a9a18ff0f8a70d2d39f16ced6249d9a66142ebb7062a9b9e4b5122d91",
+            "flow30.png": "6886b5c47ab790b32bbe09e6da59c9fd46422ac2870be7fa912d9437e28f5e83",
+            "global.png": "3afbd09421872ee9cabd29632b78c0ba701e58e6f7e4c2c89cbc00c34dec9526",
+            "master.png": "873d17d23f30b395ed9a7712356fa615e70199eef8f2057ec0b341d3885acbb6",
+            "midi_out.txt": "8bebc573cfd043703fc871fc275b05d3249b6060161c28f528bf0f4131f254cb",
+            "mixer.png": "2f6d003eeaf7d5d859fc1f676f0a879d151a0240f7b0bc1ebdcdfdc1c05491c7",
+            "noise.png": "ece425faa6dcbfc3fbd76b83e5b1672cf3648a22a0d63973f52b6d95852671fb",
+            "pad.png": "7e4d9bb87d59deae628abe7f3ef994357a50ddf6e213a1795e8139b106475008",
+            "pad_env.png": "79bbb4406aec71a8c7de0bcfcc8e6b1f79b89e12a2b96fc56dfc6e1f0444cd3e",
+            "pad_lfo.png": "44194fab43fa850bb4afd201f8f087f51842de4afd32ddcee361eaa29f1dcc4d",
+            "platform.bin": "1a25fa7b5265546e46a6292cd65d2f979abf266ca124204138d73cb30c90de32",
+            "reverb.png": "42e382568194dfb840895dd6439a592465451092271142e61acb0d7c507d2048",
+            "space.png": "9bf3d6b139eb9cb56963604da39de060f5c505d6d6bb1e34288a12d45e103401"
+          },
+          "normalized_log_sha256": "1cdf3aff51724e38c6522276c546b0058c0c3bdea414eba223ea93c6784a6cbb"
+        },
+        {
+          "scenario": "flex",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 1004032,
+          "artifact_count": 4,
+          "artifact_bytes": 8462272,
+          "artifacts": {
+            "audio.pcm": "7056d2aa1fa25349f15c989203f64b17d19c8eb639011b09db67f1fe8c2eea2b",
+            "flex_bank.png": "f03f0e84a9751b217a809d030817f6c7413de5a24b4fc390d9c89b4ce1d3f629",
+            "midi_out.txt": "d0151814d4ce2b6ed0d41a3e346b984712c40f54bc216afcacaf0d4699b04490",
+            "platform.bin": "b2ef9b611a6e207af3d339d7941d6d964a07e0d43941b4c53ccfaca6ef1484e9"
+          },
+          "normalized_log_sha256": "7e11122c1dcae413c684baaeb0df3a1dbfb925cceccb8c0b374191d94d08d245"
+        },
+        {
+          "scenario": "fx",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 2448640,
+          "artifact_count": 9,
+          "artifact_bytes": 29830964,
+          "artifacts": {
+            "audio.pcm": "a7667377795696d98e237fbeb2887407958e451b8f3f476f751a5a84086d661e",
+            "fx.wav": "611d55b12a32749d52ae05cbc454c2827fbe666717091b1f40559a48f9f15d4c",
+            "fx_closed_locked.png": "b8a5cebfaab8f48794ae4bf0a3ffd360007b0d8f0a608d8414296796083cba62",
+            "fx_held.png": "5b12fd7b999217d49984e13cd7386297ff8a16d54c723d2d779541c76749f48b",
+            "fx_latched.png": "07bfb78baa80546b62297bdcce7ad146320d9bff91cb77307083bf0bac7f707c",
+            "fx_locked.png": "2d04c4c10cee9861af27a196291af26dcd036a8d8aff55cf3eb1bdad86d7a7a6",
+            "fx_menu.png": "62968b5799219333d808b16947d038e6f0ad98b2cffb433c87172b3a2d99f290",
+            "midi_out.txt": "f532dad4c1769129d7aba87935c38e5d2dc4a8933127c7c33ac1ff8ca5427ded",
+            "platform.bin": "f693bbcaae4b23ddb05b5ee64fe4611dd47e9722b5b73664d2664590942682b3"
+          },
+          "normalized_log_sha256": "4fb82d7e830e50f389620baaeb928a88bda160da73927fb3e4dedcd608875bfe"
+        },
+        {
+          "scenario": "fxclose",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 158464,
+          "artifact_count": 3,
+          "artifact_bytes": 1507078,
+          "artifacts": {
+            "audio.pcm": "b0f9ec8608fe3578cc87b2144f6ddebbb62e6ebe0632f80a32d095824f751e67",
+            "midi_out.txt": "599a44eae5d4a33f91d4cd8d8e00aa4fbe6ca0c0b157ac0829cc4525c11db19d",
+            "platform.bin": "59989908bb9f5a9b0bf98e1aee5216723966e12e49155696e94f98c9fa832fba"
+          },
+          "normalized_log_sha256": "127d3976c960a6568ceb6b2f4a7c21d793d406a3fba9ea24d97cf50341f9dd38"
+        },
+        {
+          "scenario": "fxedit",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 705280,
+          "artifact_count": 6,
+          "artifact_bytes": 6411578,
+          "artifacts": {
+            "audio.pcm": "ceeb2e2f5eecdcfb8f1a422ff2cd4d39d28c4e30f839a656ef38ae3d5dca9d43",
+            "fx_punch_filter.png": "cf45c5beb780e8dd509236d0e47f9b36dacaff7f4f4ebbccfcba6465faec7f12",
+            "gate_page.png": "4fe68edd43c5a681e67de1c6710c10d05c33b017b8beb4dced5238506c34d811",
+            "gate_tres.png": "fdabbd03527b4cdc8a17cd9d63816445bee0e990c6cb91c51ce8831f4e2220e8",
+            "midi_out.txt": "50ccdb8ed89ae692396b6c47705dc489388df08b12a3753c3d5181e147fa4eec",
+            "platform.bin": "06e83c515e113bb4b5fa950bcaaf5df3e6f49667964d6dc90b2ebfd59cbd2d7e"
+          },
+          "normalized_log_sha256": "5ceb74f1176e5a6c0772c7260c4e954bbc1b2db19ad35bb5d78a8354a8daf62a"
+        },
+        {
+          "scenario": "fxjump",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 250880,
+          "artifact_count": 3,
+          "artifact_bytes": 2248242,
+          "artifacts": {
+            "audio.pcm": "fea4efeea5531c403e8a01a28ee55d20d82f48887f29100e60a9f4f2174d5c13",
+            "midi_out.txt": "c55fcdbc14c45aa56aff30f49c9158c1c610db86d7448827e2f687bce14a460a",
+            "platform.bin": "b38c0929cead8e3e514f78e9b53efc098a543f8662f4e4c7758e0e24737ddb41"
+          },
+          "normalized_log_sha256": "a72cb486ed12287b4e5a958d45ce4cf7d93428876c5b14f6fae063020e38b479"
+        },
+        {
+          "scenario": "fxknobs",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 1480448,
+          "artifact_count": 10,
+          "artifact_bytes": 18365372,
+          "artifacts": {
+            "audio.pcm": "308f1c52804892ac7fd622525ac4979f07b3650c92679ea6d81c9669949424fd",
+            "fxknobs.wav": "824ec903c0bf6820a1807ccf31e090675c363d973b74b8542dbb3504781bb761",
+            "fxknobs_closed.png": "7fc9a1b39cfbb7216488eb111fdc9af54e90d5abe8f9d299417e91d6cc325d01",
+            "fxknobs_crush.png": "480cc0ffbaa9fc8e9d411360b5eaf51944cef23d64214533355ce94b790c6fd4",
+            "fxknobs_hp.png": "150c776214a84319c78306b710f79ca3f184ff5eb050c77eca0e3d3d76c33e61",
+            "fxknobs_lp.png": "1c6d7803fec2ee9f86e1c73c0a4d99e46a3d34ee2903100d37aefc8bb91fea46",
+            "fxknobs_menu.png": "defdc592fa62275dd14fa1b44df59d5f2f2205c408aa2cd84c53d2878df1bac8",
+            "fxknobs_wash.png": "2030fc865bd33df63f063ddfcd9a9f419ee864885b761654112451c252adfc68",
+            "midi_out.txt": "ffcdd1a7ebebe0ada40ec533697b1a3b4c599258cc265cdb5c0a75204f6663b9",
+            "platform.bin": "195075faf92cde58ed478a2e6edf5de7b324c0a812ae0120e08b33cf31c28592"
+          },
+          "normalized_log_sha256": "a7f69457cdcaf5a7ea9deac007b4ae1735917c0c662b9b66af92326bbd1609b5"
+        },
+        {
+          "scenario": "fxperf",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 1114880,
+          "artifact_count": 5,
+          "artifact_bytes": 13104701,
+          "artifacts": {
+            "audio.pcm": "5f8043bcb4b545b87fd90dc6456ff276cf10b637cd3a91249521cbbce8ccacb8",
+            "fxperf.wav": "b4608e8ebeb6278db8263e7cca112fb2582d2126fd5964921fa98cd7a586d686",
+            "fxperf_riser.png": "453af6b0a218b45a753c2236bcf952ea9c40d601a4b390eef8bde9e4f0857a2e",
+            "midi_out.txt": "1c551ce02d11efc214d5c9b80b308e5cf9e775ef3ed638c7147d51e6d3b257a6",
+            "platform.bin": "7cf174fe18e5b9cfe34b8d63f60cbdf963ba1bbb67e6c852a219afcedbed3a7d"
+          },
+          "normalized_log_sha256": "fb9efcda0cf85d7d4ee9161f7fe7d1f15de37ee355487256a7f7da8778648ae2"
+        },
+        {
+          "scenario": "fxscopes",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 428032,
+          "artifact_count": 17,
+          "artifact_bytes": 6092332,
+          "artifacts": {
+            "audio.pcm": "3fa1e76708d9f9cf445d8a9c811e631abadc0c59c9399bffc0da995bb2a2b2c0",
+            "fxs_brake.png": "2a971202cd74c77c1fe7bd75d4ce1094b958ff2e334263a76e05a674a05917d6",
+            "fxs_flanger.png": "7f28a712765ccc3b92b92584b0c9b8bf37a794b431b614a6e622971c1bfc393b",
+            "fxs_half.png": "b9140c036443dc16617a9754f40be74e39d271adaa91ea3b0553ae1add0e049b",
+            "fxs_phaser.png": "b2a724d97a362468e1652ba485c9c0e75607b144af72406889dccbfb244c1615",
+            "fxs_pump.png": "a2c2a164d7e437d44b39ce5d6def3ac3b721e7c40925dbfbe42b8c21418ff284",
+            "fxs_riser.png": "b4ee85405f13b49adffc47bb5f3554149e8b0d13fc250fd2456266557636c382",
+            "fxs_roll.png": "5aadddca0f1f7808c7f779501de42c8ebf4494a84d926568be92230685555a07",
+            "fxs_rvswell.png": "c5d1421583034921db2b6d58fc10fb6b491ce21390572db20a304ef089dc5372",
+            "fxs_scatter.png": "6234af2b2daa6531e3613038e72c2fefc7ff6b721020d69670083d6a67d7a9bd",
+            "fxs_sweep.png": "599dc60532ae00c37af2664395428e246080ace184271f552fba4bce5260996b",
+            "fxs_talk.png": "c2a072cf3bd29f481d92710726ed7f7bc8e0fb55336930e70707b944b298ecb8",
+            "fxs_tape.png": "0709d0ff6609794dbe61871aa91afa624372cf07130a851778c45b5d69878b7e",
+            "fxs_vinyl.png": "55eb29a9f9fe757edad89fabc75be9c40fbf4074e60b12b4210fe3ad1c9439b9",
+            "fxs_wah.png": "d1f994cd818fe0a10b2e8e246578a41423aafbfc7bd3830e7f08aa9b0dadb751",
+            "midi_out.txt": "18975f97011a4e4f834ab20106a00818b2006d11c43e74a1792db4648e5b284e",
+            "platform.bin": "a5371faa75fd6a91c5959969c0388990dc9003a07a3d427b9f7615aa48568c02"
+          },
+          "normalized_log_sha256": "a0d0e25bd5508bf0504bdce6b1dc31f9381ca28906b79f93cbf7a17f7fcc6c28"
+        },
+        {
+          "scenario": "genre",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 2271488,
+          "artifact_count": 9,
+          "artifact_bytes": 19493136,
+          "artifacts": {
+            "audio.pcm": "437fd7f439e00adb6b55887630acb627fce50dd5f9c583eaf72b0af7c68f903a",
+            "genre_dub.png": "882f9c3fea4448d5a31642d5ba6cd1be144671a334cd8b783e077087aa95a66c",
+            "genre_forest.png": "adc784ddd5f3175186319c3eb103043fbe720cd1c80ba53edd622231bb55579d",
+            "genre_house.png": "221a438a26dfb3692d6d987ea60d796557b254f43c5c2d9f9eb893d8ff7fa4e7",
+            "genre_indus.png": "8183c31ecbd47f0a71cb269bf2cb545697f522822829f0db41d54829e738069f",
+            "genre_lofi.png": "5e75a2639bac702cc2adf94c6620e77330427b18e81761d70e688724c85b65b2",
+            "genre_psy.png": "ead94a2d999493a73bbf0db0a2346f674b7bb17f880676c56ff755bcbd330a71",
+            "midi_out.txt": "95c73ee332398fcbe8b6d810b8c4761033f5159f9929a7e4e4d27f81d1b9e9de",
+            "platform.bin": "0212c01d9e16507ed9e2be382c97ee03296d97794ebf0c3d79824a3ddd528223"
+          },
+          "normalized_log_sha256": "a58492356d627e21758da50a7b2cfe9e67498e5e87db85b5e46e26419fae2cd8"
+        },
+        {
+          "scenario": "genrestore",
+          "status": 1,
+          "historical": true,
+          "failures": [
+            "FAIL expect par0 == 30, got 44",
+            "FAIL expect par0 == 30, got 44",
+            "FAIL expect par0 == 30, got 44"
+          ],
+          "audio_frames": 439808,
+          "artifact_count": 3,
+          "artifact_bytes": 3764256,
+          "artifacts": {
+            "audio.pcm": "f97cf6a0b67504ee12681f7cb893dda3dd6f7b029066e993e5a08e4892d2b297",
+            "midi_out.txt": "d7a2a9c2327ca432d4c54c97a98b9d7c6bd618e99d82d8e348dd2adaf203b514",
+            "platform.bin": "b4c2ecc1c4f0156ccf77823f334b0229c9c740bfd8753e13cada90d37da56d4c"
+          },
+          "normalized_log_sha256": "5cd6723098ff0e04a23e697e80ac046e932f2dfa4724e870e89b4e5e2732ca43"
+        },
+        {
+          "scenario": "groups",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 199424,
+          "artifact_count": 3,
+          "artifact_bytes": 1835622,
+          "artifacts": {
+            "audio.pcm": "8d222858e8ad057cbfd440f40cff354d5de5b17f65e1ed95dad92dbcad8f3ac0",
+            "midi_out.txt": "07ec6f4a389949a05f8a1ddcff771e97b2494ab60bb6fbed27800a00efa32abf",
+            "platform.bin": "97673f56e2db6ecc67d21f4cf14848c729cf823cf5812073f8466c22b419f636"
+          },
+          "normalized_log_sha256": "d5e799a19265b266286cbb8a4e7bdd5ceb1921831455e1e5a29618dcd1f0371a"
+        },
+        {
+          "scenario": "help",
+          "status": 1,
+          "historical": true,
+          "failures": [
+            "FAIL expect par0 == 52, got 66",
+            "FAIL expect par0 == 55, got 69",
+            "FAIL expect par0 == 52, got 66"
+          ],
+          "audio_frames": 312832,
+          "artifact_count": 5,
+          "artifact_bytes": 3091156,
+          "artifacts": {
+            "audio.pcm": "02320ee43099005ab8ce7c94f372fe33531b3fb4338dbca116309167bc795915",
+            "help_lfo.png": "bf666b7130edd9a99454c53a6b34b10065cac59627b5df14da5bb25e8507dd27",
+            "help_rec.png": "d3d19dd44270be3f37a3412c368b715b572e942029455d5c0cff3bfac7c03291",
+            "midi_out.txt": "0e00b887915fc092371a20d3f4a4360a708ba9f84105b03b0e1088a9acea02c8",
+            "platform.bin": "a10e5b725c2e926308f8b1cec247aad4c760d7dcbad187708bc4fc0c648a5576"
+          },
+          "normalized_log_sha256": "250402b8d33272825615ac2d1f28dd8bd79b44e90bf947e95ecf69da69e89685"
+        },
+        {
+          "scenario": "hero",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 616192,
+          "artifact_count": 7,
+          "artifact_bytes": 5870223,
+          "artifacts": {
+            "audio.pcm": "17e85c1577203600c874e69f700f03d1ae9a8b086573d03b0ccb7f064b3f4d3b",
+            "kaleido.png": "28d5efa16f2d6addced5b474653dfd0644531c2b4b6560e4d46f1a046b360328",
+            "master_hard.png": "9a82707207ccb6d5952d62ea130209b0ab6382d2919f7cec4b7a6915d0f34485",
+            "master_hard2.png": "82a9c5ebc7941dded31f8b7c6ff9118d6f66137003c4c12110de5004ea5b1b7a",
+            "master_hard3.png": "dff0af6328b3d5d1a778ca9df6e29a5a9262571af64a8d9cd10a49416f1c64c7",
+            "midi_out.txt": "031dd4c22bc5c4f78a0aaacd79272eb733339cdbfe6ac85815ea632c29ae626f",
+            "platform.bin": "27aa7ff31e2a04ca5016d3c1e15f08853df8825f3568151f49782811e84026fa"
+          },
+          "normalized_log_sha256": "5f1c46a618d655d3c75a10b4e4f73b398dcb2e850135c692eb57d5fa3edbc3fb"
+        },
+        {
+          "scenario": "imp",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 729088,
+          "artifact_count": 21,
+          "artifact_bytes": 9199418,
+          "artifacts": {
+            "audio.pcm": "c547de8c00150651c1fc76bade21aefd984ddbd8f9db27096ac6a68836d2b71e",
+            "imp_acid.png": "b321d0d6c80d48b6c408ec9b59e0851e7f1fa5824842db11d6a84d12cca0bef5",
+            "imp_drone.png": "7ee760bc9c78161a26632ce18d436fbba05531ab13490562145810a7d6ded713",
+            "imp_drums.png": "c3e8b39bf89ae69f7a5915024a43923c884f1198383f4f2e69db9d9706169b69",
+            "imp_fx.png": "4f09074d27ec911074578ed933a4614629d28817e7db32e4ee512d04b329768a",
+            "imp_global.png": "614f52031edf5c12394ba0970623b2016f202583b8e2ddf39731031c2e51df85",
+            "imp_groove.png": "e313000e7c36b9d43eabe4a77fdcb0fc37206968d7c775fec822f4fbcc74e2bd",
+            "imp_hint.png": "bb29f5057840ad77e7ba5c413a7c57a21aeaf21726eb5e9d3e848bd7dcd17b25",
+            "imp_mixer.png": "00a53b3958ce42d29aed4f2b872ef503215abba2324cc64a177875851effc81b",
+            "imp_pad.png": "ad3bde9c35874f7af2a51b61db046c711e9c9ff84648d112f39220bff4ced8e8",
+            "imp_perform.png": "0a764fb0557088d97e1c425631d1f5f9674afe9ea6d0e6341ff251032ebf567c",
+            "imp_pluck.png": "2e5976df5abdcb85d607411b381722f58e32b84c489f156b66eb1e2c73b507cf",
+            "imp_space.png": "17289f0a33526e60e901ad0346c79a30eef74fcc36c7f21da6706d44db157eb2",
+            "imp_tempo.png": "834dffb35551ca767b73a78eafdc229861fa4cf3d901b7302954d760b4e4c83b",
+            "midi_out.txt": "90bdde0006ee014a6a7067c64396b2b62707deba40cd2587f9ac544457e1b650",
+            "platform.bin": "81ce3c3430afb7e2de728fe427b2fe8d6da551f5bc36577a2448603234b58ac4",
+            "theme_acid.png": "f80eda92590ec086d6c779ca826584e615ad7cc708b121a109f2031e5d691d30",
+            "theme_ember.png": "016bb47e39d72391945eeb8297da1f5376ce2dc5707fc887b3cd4004f2d131f3",
+            "theme_ice.png": "8b5efa2aeea0fe63a57a414ee72b566f48bfa2c6c258b7e93a6301213b5d412b",
+            "theme_phosphor.png": "a12d78d71de45a7fb83b3ce06e3c9f977bcb3c789aa32f1299495de3f2410c6e",
+            "theme_synth.png": "d297d8637b4ba87ffd3fdd47ae985ed7113a4cc2a7d66b1ed69cb75274d51ebd"
+          },
+          "normalized_log_sha256": "e36b4ee7871cb9420d5d9e9f37ecc6c1583895de612be6ca1a2af465e9d0c448"
+        },
+        {
+          "scenario": "jam-helper",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 1778944,
+          "artifact_count": 4,
+          "artifact_bytes": 14669131,
+          "artifacts": {
+            "audio.pcm": "35331fce91c556e725a3d188b1185246db4a79d6101ffdd1bb1d11ee569f3dab",
+            "jam_helper.png": "e5705c1718025f2a929655d406bd5cd5fe0f4a37adcae7b9a40ef3dc1622fa76",
+            "midi_out.txt": "770ad19d1f3e757aad55255a084674010fbfc614fde43586bae4a00addf3a951",
+            "platform.bin": "7555aa9f52a7c15f1cb9ebeba5b3e42a2bb870ce76b8b9b53da0bc15c3e8eb7f"
+          },
+          "normalized_log_sha256": "754e9bf16cb8807c3744bc7837c0d2514dd77512fc71b6f84fe69d507af9ec69"
+        },
+        {
+          "scenario": "jam",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 545280,
+          "artifact_count": 5,
+          "artifact_bytes": 4954616,
+          "artifacts": {
+            "audio.pcm": "022aa6bd832cbf03b44f974d76675a84f5b83079412fe30ec6c8f993ad2c39a7",
+            "jam_held.png": "a584655ecd16753d60162c075e0d3ce0ba43f0f87463519beb6da5a12f6a01d1",
+            "jam_pluck.png": "c80b5dbd612204ef5c4e7f5d1fc9f943370f91cc027a47467a6cfd304ef9f90e",
+            "midi_out.txt": "b6b2f79f1e2ce1000a61f94eac00b4493f127fcc018f3e1f5d4a67f70ccb3388",
+            "platform.bin": "739dcc1fb203c24bc3d30b9056b8f2b9593912799048fa21fb4dff04a71a226c"
+          },
+          "normalized_log_sha256": "98f931176c55c3248f5c3fac6b45a9c3d50bec4478c8e7e9eb231abfa563599f"
+        },
+        {
+          "scenario": "kaleido",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 589312,
+          "artifact_count": 5,
+          "artifact_bytes": 5308472,
+          "artifacts": {
+            "audio.pcm": "2ba02197d2334c3af064b9ebc70a9849dcda00bc2d58cde46e421a1b19209d07",
+            "midi_out.txt": "e7630d18b9bb48b3e96b068692d284d9504c43e2d5527f1605dcd7f5d212933a",
+            "platform.bin": "fd885c195d99f0c5a91648a226779bc0cc2af2aac80eb4c8a899acd4e45b4703",
+            "viz_bars2.png": "129145ff6f3d63da4fd61c8aa7edbea3e75adf2fe7ae19bd81a1bf7f134c51a9",
+            "viz_kaleido.png": "0270991daca77a70e22caeb9421c9451549bdd5e14f76de608abd9011f779933"
+          },
+          "normalized_log_sha256": "741eb7f4ba01761773eb50df03b0cf2975e8be337eda7bf24d729541829e7427"
+        },
+        {
+          "scenario": "keydrop",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 954112,
+          "artifact_count": 4,
+          "artifact_bytes": 8057761,
+          "artifacts": {
+            "audio.pcm": "29f7d26ba2c5adedff31a0e0e459c2c9725a6af0b6fbbdd17ecdd95e7c71a503",
+            "keydrop_on.png": "b82d19b4919da6de392e204ece5651665b38e4257c468ac888895885080918f3",
+            "midi_out.txt": "790ffa0621610d871cb53638b89cef4bb11f15510ae4b9d08f04b371d1be0067",
+            "platform.bin": "de1859e207b94378b97c9cddf87e9abbd8a8fd926e48ef29e43c4bea79af748f"
+          },
+          "normalized_log_sha256": "e113007b3105f8774e0a7a478f3af1abe0ecf3a370d49cce166c41f7b7172291"
+        },
+        {
+          "scenario": "keymap",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 275968,
+          "artifact_count": 6,
+          "artifact_bytes": 2968786,
+          "artifacts": {
+            "audio.pcm": "c37851fb888ccbfc2f869e2740b7816de580ef5f31824f096026f2a4871c89a8",
+            "keymap_perf_glo.png": "f8fa00d5b9d03057f6b17ce132bcd338e60b7a3210400dc2a993e66167fb6cd3",
+            "keymap_shift.png": "d0b59965b3736da7222d9dacdb58bc80a383ed36d628f1c9f560d8c531524dc2",
+            "keymap_shift_seq.png": "e5359288c4f08edd8c4ef9bcd46cca7868a296ad02d575a54481349c11eb8dfa",
+            "midi_out.txt": "d274262c2f31c4129fa7bbde3d1cbd664715819986d6e0ee277a35354ddfee22",
+            "platform.bin": "aa99f9b14ede278a01b0db07c036f19349ae0d3491fd13f413fa027873d67719"
+          },
+          "normalized_log_sha256": "6eca363f903899bde39eff93823fafe8609450e3b014f8d1ca47cea34697296f"
+        },
+        {
+          "scenario": "links",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 147200,
+          "artifact_count": 5,
+          "artifact_bytes": 1763040,
+          "artifacts": {
+            "audio.pcm": "15ed08e8517aa7df7d9faf23779ee63a4de189e241f3f228bc93feb6dc5ce386",
+            "links_off.png": "dfbc4da8d11890eece3b1c576f64953b3e853d9119b511dab48b52f341f2bf34",
+            "links_on.png": "c044cbcda9f0f10d6810bf179ceabca8687eadd75cae4d73538bbb7f43df7fb8",
+            "midi_out.txt": "a44d0b4b32341f0b0f0f68935265d7150a2d821f55b2ad1d375f5b5a817237c9",
+            "platform.bin": "cdb6b05ee009de55b1bb649d88f96a566e59a1f8a81f71582fde23ca593e272f"
+          },
+          "normalized_log_sha256": "23f00e02be289c92183b713d99306637badbaf6492fe25cb110bae870e26f8ed"
+        },
+        {
+          "scenario": "look",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 654080,
+          "artifact_count": 11,
+          "artifact_bytes": 6856626,
+          "artifacts": {
+            "audio.pcm": "826123b5384d2c112b24a75139388397279618469ce585b4591cbcd795d3dd5d",
+            "global.png": "ef147edad30b93f235e5e9d62abe395da450e1562eecf63a8abe2bf89093d6ea",
+            "home_imp.png": "61d9982176376af8c37e9c406603047a4d93bc76839b00854d1f3984c9d00704",
+            "home_synth.png": "abcdbbfe498a2120e0e06481716fcc26a520e04d18b8f70254cad84fca934ec8",
+            "home_synth_imp.png": "2329bb9035fb343471f1475b674a30180b404bbf2bc6af651dd2565d43e3e4e7",
+            "home_synth_scan.png": "e9cc6ae156a809df508b94e8c3093070c07171e5bff3e6c72765eac6f1bde22d",
+            "midi_out.txt": "35e398d2f36bb8a910281f133bc00faabc229a607acb4fe670cfcab8a320c574",
+            "pad_synth.png": "d8a7a5c78a127c365170f80ea54a99fd87b4fff3a68cd9cbf1a2a0e1e7fe7cba",
+            "platform.bin": "60f74a380c022f6848423056f758d2c22ebb78b2d05627b7b017833e65b16908",
+            "settings_scan.png": "8946a0682671fd9702f3b236bd5d82248d84fb8d67ba4de45668f873105d0fa3",
+            "splash.png": "60cb777b181ba97ce8269928a5984f7d55e58ddd31d6bb2aff0e729290ff7103"
+          },
+          "normalized_log_sha256": "823f3fb531413b074aa7a01b1baa3b016fb011e586f00e506485b13995ac66e8"
+        },
+        {
+          "scenario": "midimap",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 597504,
+          "artifact_count": 4,
+          "artifact_bytes": 5195371,
+          "artifacts": {
+            "audio.pcm": "07284d6ebdd0d90b8f464d637b4976ae930d3740f67838bc77eb084b22fcff3a",
+            "midi_out.txt": "a1f963e8dcfb7332071e67c1c3a8a829f1e0ac183a6546973233fba6dc4f4347",
+            "midimap.png": "a9f49f2288f2dcd78d019cdca8fe38322fe117b6f19b740f6d2739f1f8a677ad",
+            "platform.bin": "faa945dd4487cda45a24e7237bb609c46f105e8bdac0df02e1bcdd21c77079a7"
+          },
+          "normalized_log_sha256": "e27442010387ad34ee03291b8cfb2435d1d62e27dac244553ce4376079dd1ec6"
+        },
+        {
+          "scenario": "mix",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 231680,
+          "artifact_count": 5,
+          "artifact_bytes": 2440590,
+          "artifacts": {
+            "audio.pcm": "148b1244c4236592d890e1173bd6660760eab3b03d0b415fc0ecf53cf9697688",
+            "midi_out.txt": "f7a4daea198c65ae35cded2f713cbb30c6bd90c85059a0b876e2510c5ea275b9",
+            "mix_kick.png": "80fcbdb23ca58140b315a2c2048724687d06259fa013d5401339f71cf212121c",
+            "mix_solo.png": "c5756539e4a8ed068620895877fe158d1995117c99c9c8ddfcd4a31f96ec57a9",
+            "platform.bin": "9b2e140a193fca9616320097e9a347f43eb6d5cbd21969e258ff952a55d6a227"
+          },
+          "normalized_log_sha256": "3650bbb2157b6afbf65c4b5d2868736bb5a5f9d23c13779270a65cbe56002f07"
+        },
+        {
+          "scenario": "mixglide",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 718848,
+          "artifact_count": 3,
+          "artifact_bytes": 6000819,
+          "artifacts": {
+            "audio.pcm": "ba1ad2a874f2383e2175ac50ff2fcfd597c8bfce5ffa1b11551b7a7309f6790c",
+            "midi_out.txt": "2fdece171275c27c921cd24213f0ff101bea30fccb71ba55a4df2d887444984c",
+            "platform.bin": "7719f541bfae6f762d1c195fd7d74dd8e4a14a88e78150449c44b0c0b2af0378"
+          },
+          "normalized_log_sha256": "15fb0cfe7d1559d21c4caec50869ac1ca5f9bf8fe88853943820c62855bf42f5"
+        },
+        {
+          "scenario": "mood",
+          "status": 1,
+          "historical": true,
+          "failures": [
+            "FAIL expect moodacid == 35, got 18",
+            "FAIL expect moodacid == 41, got 24",
+            "FAIL expect moodacid == 65, got 48",
+            "FAIL expect moodacid == 5, got 0",
+            "FAIL expect moodacid == 35, got 18"
+          ],
+          "audio_frames": 530176,
+          "artifact_count": 5,
+          "artifact_bytes": 4833724,
+          "artifacts": {
+            "audio.pcm": "cbc6a66da2a2ad31d93a7ef9fa793b64aae0d55a614a512972ea319fd959830f",
+            "midi_out.txt": "6d486764632ab496ef11467c594637c38f2ea43ebab87de8dd82ebc803768059",
+            "mood_chill.png": "6c789eee02e04536b2f0d28f6edd5f5e9a2ddfd5186b2fa5752dbcd86fe182f7",
+            "mood_peak.png": "83f34df0b2d39d7b0a8f6295bc163fbfc3d534815a0493466febd6791d24bd10",
+            "platform.bin": "6d0867a9e9a0cc4247c84f262d47ee2f9b9ba1936f43b715134c25a6444619c0"
+          },
+          "normalized_log_sha256": "5c7faac581dbe52b75b8add49610bc97cff37de6fb4fa95a34248181ea7cd244"
+        },
+        {
+          "scenario": "motion",
+          "status": 1,
+          "historical": true,
+          "failures": [
+            "FAIL expect par0 == 32, got 46",
+            "FAIL expect par0 == 52, got 66"
+          ],
+          "audio_frames": 2867200,
+          "artifact_count": 5,
+          "artifact_bytes": 23528566,
+          "artifacts": {
+            "audio.pcm": "72a24cbaec957a5e95a1b7d6dd7a395992dd5b584378c0ffef8e7344a19a4349",
+            "frozen.png": "6605af5b78eb77999f76d2fd0af27779f0082aaf82e8ce355e7eca8e4035a474",
+            "midi_out.txt": "bb36e0503b573035fe789623dad7a60e68449b813f04883381a8b4338ae667ef",
+            "platform.bin": "8a4eef0f13694e87be61f75d6934ba397859fb5f0befe2567d74993a6ee30ff1",
+            "stopped.png": "2ccfa49942963081591f6f8d6ac848684c89551425d110db8ca65bae88d0f551"
+          },
+          "normalized_log_sha256": "99c21cc14c70d6286cc980a4d7baf0f5212965e5e804f66dd57aaad3230b6fc9"
+        },
+        {
+          "scenario": "mpk",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 816896,
+          "artifact_count": 4,
+          "artifact_bytes": 6954240,
+          "artifacts": {
+            "audio.pcm": "aa620241874978fef160bdf31597d88734dae09ec96b13a35f3fa2e168f1f08c",
+            "midi_out.txt": "2894b3f6efc4228c9fd6a9a1e07e244aee275fb53dcd894521db7e00954e192c",
+            "midiin_mpk.png": "0bdb1a9c3b02d9fec37408cdf58552bfedf234b2401f6e89762ba0c0e7fe2284",
+            "platform.bin": "b541acf414e422fc64c88449e53648ca2fb20501231408d1746e84ef22e7f5e6"
+          },
+          "normalized_log_sha256": "7fa18fe133f83d24b11d5cf6131fcbb90e9325c24712760d37a7a7565745743c"
+        },
+        {
+          "scenario": "mscc",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 895744,
+          "artifact_count": 4,
+          "artifact_bytes": 7593887,
+          "artifacts": {
+            "audio.pcm": "19980c0d8087e1aaf22197b7d922bc5122c9b8c503c178a02eba18e016475d9e",
+            "midi_out.txt": "844d649f429196d9b5617721bc7406b86b98b45bbec447f012b5fbef5a772f33",
+            "midiin_ms.png": "9f187443057ee559596b3517f9643db3f88cc4563773a55fd9960d688825bb22",
+            "platform.bin": "6ec77d41fd66994e10439a223ad88c25d5b770194c5989591ad106eab1811480"
+          },
+          "normalized_log_sha256": "7ad04dbd95e7ca7f5e0775afb3def7f4c3836acfe6a4e68391a668d1e1af2bd5"
+        },
+        {
+          "scenario": "n1",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 325888,
+          "artifact_count": 3,
+          "artifact_bytes": 2849890,
+          "artifacts": {
+            "audio.pcm": "d68ee16df0c217ee17cfa9662f51c1e3fd6b4b0da269e3e063eec620ca3994fb",
+            "midi_out.txt": "0dc046f38ce26ec557128aa748540ccba3d601212a570cfb19b2686f6995418b",
+            "platform.bin": "04f4fc21e29c7981dbe3da86aec16f41f2393114ff757cc99614cb1de1102636"
+          },
+          "normalized_log_sha256": "c58fa366caf620a31a21800970ef650d224c4cebc1088aa2fc5a9d3ea5fc500e"
+        },
+        {
+          "scenario": "octave",
+          "status": 1,
+          "historical": true,
+          "failures": [
+            "FAIL expect par23 == -2, got -3",
+            "FAIL expect par23 == -2, got -3"
+          ],
+          "audio_frames": 475648,
+          "artifact_count": 5,
+          "artifact_bytes": 4394100,
+          "artifacts": {
+            "audio.pcm": "0e9abf75771ab06516bd7306bdf8fd6e2d8130136db63b1d3ad98c8c6f79d4e7",
+            "midi_out.txt": "25b26bb32ada8fe2e989cfcab2c0a81c1e499a034929ec43be510d43f1dcc712",
+            "pad_up.png": "1ab6ef1d3056e3c620b4b49846cea7ccc023c391866c1303f35dc4fc2431f97f",
+            "platform.bin": "e033ad6c1e111dccb23007f26807372a3d3184dcb1c1eda60f43f598508e557d",
+            "song_up.png": "09cb34b078ed8ddff74c26f6b1728fe353f80771513d26b142bdc4a142c33c80"
+          },
+          "normalized_log_sha256": "cacb3f094073b3bbcb6deb9fd8f632250cd808c435f1575c24601aa6c1b3a9a0"
+        },
+        {
+          "scenario": "pads",
+          "status": 1,
+          "historical": true,
+          "failures": [
+            "FAIL expect chordroot == 2, got 11",
+            "FAIL expect chordroot == 2, got 4"
+          ],
+          "audio_frames": 877312,
+          "artifact_count": 4,
+          "artifact_bytes": 7438819,
+          "artifacts": {
+            "audio.pcm": "28325eb52e3a843a276660297dd1df28c77725668a7cc9838a7bb0120d3b2ce0",
+            "midi_in_page.png": "8f5f00a1eddb63845ae66330854f2ba8022f755ff5b8da6e50ee23694842cf87",
+            "midi_out.txt": "65ed9f52c27bc802411deaf90e7772e18568b2110fdb45154649807f93385ef0",
+            "platform.bin": "06b3c3dc7e2f510ed259c8c1401c71b6f49bdc5790ba379660f18a6d0eda04cd"
+          },
+          "normalized_log_sha256": "c1b5fd8d053892ab31352d7f0e8eb0417c241b2544731ea5123df10ef1983f31"
+        },
+        {
+          "scenario": "pedal",
+          "status": 1,
+          "historical": true,
+          "failures": [
+            "FAIL expect padheld1 == 1, got 8",
+            "FAIL expect padheld3 == 8, got 1"
+          ],
+          "audio_frames": 751616,
+          "artifact_count": 6,
+          "artifact_bytes": 6776548,
+          "artifacts": {
+            "audio.pcm": "80bfa3bfb0f71e4b72bc3696b5a7d477a35819a286b093d666d09f1fa1dcbcfa",
+            "midi_out.txt": "b923c7b51a05e8e780b0a738872d2c7d7f28ae44795629c12c591e80bb358d49",
+            "pedal_after_reboot.png": "2bcee6fb2b630362883c8ea86c37ae2cba644d059e74cfe00cfbbac028783368",
+            "pedal_pad.png": "8c897e82a5db00b46a2550e238b78495419c37de41fd0756951cff444f3f0a45",
+            "pedal_page.png": "fa77836879d72de619922a0f0d44d8a392fe23da06ee9d9860cdf665a2ab2f48",
+            "platform.bin": "8b99640209ac44d705fbfe9d69643e9957c6e3ecd7530ba6a255d6df11ba8c74"
+          },
+          "normalized_log_sha256": "b714d8c6500dfda8fcb004e61122c200a99aa42b8ce08335e122d26e1e39ffc8"
+        },
+        {
+          "scenario": "perf",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 595712,
+          "artifact_count": 6,
+          "artifact_bytes": 5532828,
+          "artifacts": {
+            "audio.pcm": "2a0676bec01e87501c36c495a2acbb7a5b87b127568b0f89b83a37faa776761f",
+            "midi_out.txt": "51660a7d9acdc230884f72dcacecbe807dbb72fc9eaba957d491ad5ebefd8114",
+            "perf_dj.png": "7a6173914d024b1da3ed970523e0f3486a31c52e37a8ddbd247e8e3c33393d98",
+            "perf_queued.png": "8730cc4df329c778002ba9513d785fc78a702a4b25849e398db2c5c0bbd1b080",
+            "perf_screen.png": "1abb91319c67e846a57382016150f72ca626f8772bd3bc27dd1fbc4de11aa0ef",
+            "platform.bin": "306d90f83a600c3df7edd3d082e288e38d19943b46125e698ea9590c4d7d8645"
+          },
+          "normalized_log_sha256": "6cd49baa37933da8a74654150cba928522bdc7e048990db8b9585e69f27443fd"
+        },
+        {
+          "scenario": "phrase",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 626688,
+          "artifact_count": 4,
+          "artifact_bytes": 5433848,
+          "artifacts": {
+            "audio.pcm": "ad9811b137968925d5addc8a28f2820e591537e567dac2c9581af03f55cf2692",
+            "midi_out.txt": "36205e690db8053097f44a24430d59c5216f8467cfb0bfdebbd79c25a0b14c10",
+            "phrase.png": "ca02a427aae2b9840cd0f073a13e057537906c98a1f4762c6792d6dc150f215d",
+            "platform.bin": "c6bdef394e639324ee94045c4a4193a3ed2fba3bf5b64245ee43d41ef01f7499"
+          },
+          "normalized_log_sha256": "2c57c0c73b1e2cd4ef2e19e4b8cbb4e0d07fb14c78154bfae3e3b843d3db589a"
+        },
+        {
+          "scenario": "pieces",
+          "status": 1,
+          "historical": true,
+          "failures": [
+            "FAIL expect par0 == 42, got 56",
+            "FAIL expect par2 == 78, got 86",
+            "FAIL expect par1 == 30, got 12",
+            "FAIL expect par72 == 2, got 1",
+            "FAIL expect par0 == 42, got 56",
+            "FAIL expect par0 == 42, got 56",
+            "FAIL expect par0 == 52, got 66"
+          ],
+          "audio_frames": 887296,
+          "artifact_count": 5,
+          "artifact_bytes": 7701601,
+          "artifacts": {
+            "audio.pcm": "01ca888ef86414b48bc2226d2dcfaf828c23547cf6cef66610c6f682fb6d31d4",
+            "edited.png": "59bf927cddf1c5446df9fb8ee15a0f3b2bda671af5a3a400df20ade3b5ea66fd",
+            "midi_out.txt": "5c26ca7d6211ae4bf87521fa351f0e0bf8f69a82854628a49a301e818b82e1b2",
+            "piece02.png": "631e9c2b46f0297939bba53179b5661c0df72dba183626d26084c36333505142",
+            "platform.bin": "b819f4532963391f76aaa69d28fe9a4e42655e6362107b6c0fad695ff588c34f"
+          },
+          "normalized_log_sha256": "aa51eed8dff0c027fd2f711d387a18a2cfd9b21878bb6ce8c507ea8089992788"
+        },
+        {
+          "scenario": "playmap",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 280064,
+          "artifact_count": 3,
+          "artifact_bytes": 2482195,
+          "artifacts": {
+            "audio.pcm": "aca8a122704e2971121124a7f4bf8fd9e3dc80779a583d2cae852c6f9715bd26",
+            "midi_out.txt": "46b280b3e4a4f0841de325e1bef89281293cfb21b4c93b6d7caa3610b2002b95",
+            "platform.bin": "e3cc165864abbcc285925df8f78fad29212f2e73f81c5ebc7e661f129f5abe71"
+          },
+          "normalized_log_sha256": "3e6ee7e2bd8825d9d9aea9301c67ed81717c632814d79105c0f2fe644f083420"
+        },
+        {
+          "scenario": "pluck",
+          "status": 1,
+          "historical": true,
+          "failures": [
+            "FAIL expect par98 == 50, got 37",
+            "FAIL expect par98 == 51, got 38",
+            "FAIL expect par99 == 14, got 17",
+            "FAIL expect par99 == 15, got 18"
+          ],
+          "audio_frames": 377856,
+          "artifact_count": 5,
+          "artifact_bytes": 3612770,
+          "artifacts": {
+            "audio.pcm": "ead18b7c50505751ae1d52d27aefe086be027c5d4443f4f57b3c6e40e0d6ab52",
+            "midi_out.txt": "79bb6e34a7eb27d2d559b7d29842ddf4fa135dc47b308a8c5dc1f69157409f8f",
+            "platform.bin": "db89029a91eed0a9a26ba8719d7f47413a3a1294b6a33c40115194134bf7d333",
+            "pluck1.png": "c389a88c8650636fc7997c908b3f8ce3b7e168e943ba87cee49b0c7df0f10952",
+            "pluck2.png": "9020eb2bc233c7fdb50c9445afab1c82c37108f4dde76fd280b4e84b5c1e6e86"
+          },
+          "normalized_log_sha256": "67e31ae952b0820fe8b13057c413453f96031cc0a61bb0240dd5dc196b0c0113"
+        },
+        {
+          "scenario": "pluckmig",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 239104,
+          "artifact_count": 3,
+          "artifact_bytes": 2153890,
+          "artifacts": {
+            "audio.pcm": "2b9a162df353581d0fcd0fa01d519da851d9f54cd9c9010d6cd682dc6cc214b0",
+            "midi_out.txt": "146dc167821e7d6f35cacc68608a431411e5a5347db6d499febb3b834bd97e5c",
+            "platform.bin": "fdc4d1afaba178482be2c905294b847e5b1bd6598f6491c098070a3096eaa180"
+          },
+          "normalized_log_sha256": "4fa669a6eed9c380e7eed7d96ef9945d97a5a01f17006333d87a2ee598b0d0df"
+        },
+        {
+          "scenario": "plucksteps",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 313344,
+          "artifact_count": 6,
+          "artifact_bytes": 3268442,
+          "artifacts": {
+            "audio.pcm": "07d43469ea8934b0cdcb13db3c877cdfd32a01c09cb00e6e5520d9e7fb91a459",
+            "midi_out.txt": "ba64306c87021bc8a9fb31193030058c167f33d5e94baaed04503f0651bb29f7",
+            "platform.bin": "fbfc9dbfc0432f7a58bb8915e4181aaaeee3b0a7ab4a89647422468ab452bcc1",
+            "plucksteps.png": "8eaa8221ddeabce6e8ec59952275396fca8414102f86e609be13d0891b1added",
+            "plucksteps_free.png": "561938f567ecd86f2dcd1d89c38e7e5c42cf586ff2858cd6ef76b4f4be77edc0",
+            "plucksteps_play.png": "0700632266eddbce0feaa3db7d49d78521849635d6167d68fc8f767d6cfc9884"
+          },
+          "normalized_log_sha256": "6a6c6b2007c53a4482afb06a4d6f711ce251507f9e1ce7ace259442d37bc484d"
+        },
+        {
+          "scenario": "progression",
+          "status": 1,
+          "historical": true,
+          "failures": [
+            "FAIL expect progpos == -1, got 0",
+            "FAIL expect progpos == 0, got 4",
+            "FAIL expect chordiv == 2085, got 2193"
+          ],
+          "audio_frames": 2079232,
+          "artifact_count": 10,
+          "artifact_bytes": 18123271,
+          "artifacts": {
+            "audio.pcm": "4ddf5a6fbcf7b219b34eaab61af8860d1b1462af01fb6b81f20172550fc9e692",
+            "midi_out.txt": "0ddc50908a3834045d3153c9fc881a71732a139af8d8401cc06fa1330cdb6e4c",
+            "platform.bin": "91b52f5fe13fe847b0e7e9048522d9c3dd02a90768b4cf0f86cc66515c6a7caa",
+            "progression.png": "4f7410e658e770d1d3919fdc3a687208e33a6ecb584840ff04904f5d646bc562",
+            "progression_heard.png": "0f9f764a7a1b96e38c0c05c8dbe3924755f6a453b7f1d748bf456fba4fe37e30",
+            "progression_hold.png": "e87a5fc78c9d0d3d901b0aa4f2583d0772c63a27ce8be425866885084cca507a",
+            "progression_play.png": "fae2d1e56c7295643e168bec2adbc3bab7eddcffd70267fc0644ab9603950d99",
+            "progression_types.png": "ebc2437161f5aeb891e80f3ead01074cd0157b7e3df797d2b3b3a2fd92ae8109",
+            "tempo_drift_bars.png": "78968635504c2baef23c757e05a7a26bec9986a85e85a01313c826a9fd73fd54",
+            "theory_loop.png": "115a4c108db9fb190f8b3faadaa2329850d3dce03e67ce42f6b5f9d4662f4870"
+          },
+          "normalized_log_sha256": "d15b4be6d7afc9a7871becd55498d1a6a9e6a4804e67bac3dd03f4b3f37d0d94"
+        },
+        {
+          "scenario": "remote",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 359168,
+          "artifact_count": 5,
+          "artifact_bytes": 3458342,
+          "artifacts": {
+            "audio.pcm": "56309d164b06be58c6f327fcd89aa82eccde48e0b89ed758da7955a4f0796cce",
+            "midi_out.txt": "b010aecea5edd79d21ba52930236d3486aeaf0aa6ff19eda5a9856110be68ce5",
+            "platform.bin": "fb537a5433675db80469e2aaea35352fea3357e4d8d3c7d0aa5e9cfc118a7152",
+            "remote_link.png": "3b239ca96d65619e4395f74623a4a3a3c01d5b98c5a7757d52fc21bbbb57652d",
+            "remote_wait.png": "8466e66706dbd037d7aae1415ba63e536d5c1b36ef7f3cac345d0a6421839977"
+          },
+          "normalized_log_sha256": "228c48c9c33d54109361bc326081660eb7989a24dd1df8d47021b083cd6c6e8f"
+        },
+        {
+          "scenario": "restore",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 265728,
+          "artifact_count": 3,
+          "artifact_bytes": 2366720,
+          "artifacts": {
+            "audio.pcm": "9459fbe7dd988973c42e41134f04d8072d6f3b8252d728c8fa6e5f3ad9f17bd3",
+            "midi_out.txt": "9e1f41401834b909db9c5a877137049fd494f116530b24276d0215570ff175d5",
+            "platform.bin": "2780017cb44e16c8fd332123ed2aa5d19281d2a0e3debce879a4a3b995f42434"
+          },
+          "normalized_log_sha256": "422da6a32d52e01f4fd11943f728680d70a10b6952756b12360ba3896dda161e"
+        },
+        {
+          "scenario": "restore_old",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 961792,
+          "artifact_count": 3,
+          "artifact_bytes": 7950455,
+          "artifacts": {
+            "audio.pcm": "d43b231d68578fec6972695472566dcc5259448d035fe71bcd8a7546d3f9f20a",
+            "midi_out.txt": "e0c6f918b08e4b94d65f2fe2d7eb246bbcb1f1ab536b6b5a95f8df5459efec89",
+            "platform.bin": "74e0755d62568ee3b289c62f80cfaf08ae680a4a3a63d71d4283d60966e5c068"
+          },
+          "normalized_log_sha256": "3b1cad9cbbe1e1d809d230843212dfd1d98dd1a3109c36f738577127335ee755"
+        },
+        {
+          "scenario": "restore_save",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 266496,
+          "artifact_count": 3,
+          "artifact_bytes": 2373296,
+          "artifacts": {
+            "audio.pcm": "e43aa2a5a52513e2f9c862e1a9370e9e3debd3f06c90a548459b3b7587a5d1ee",
+            "midi_out.txt": "2694ebf1cfd1c63f362438ad3300d46172f3e1cba2e83356c5af4ab9103a328d",
+            "platform.bin": "8a44208a23b9b3026ac7c2c69356df4d4b8e0ea68d875f00f312e9d3ca3331fa"
+          },
+          "normalized_log_sha256": "c50f9d71b142634b48502b9741296c0d09a0284cbf7c6d620fdd65dff3b2cc1b"
+        },
+        {
+          "scenario": "restore_shared",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 340736,
+          "artifact_count": 3,
+          "artifact_bytes": 2968890,
+          "artifacts": {
+            "audio.pcm": "8d9d091f0c288d7f0da0e74c84c7580b1a0e636d51a60fead60c27b26ac11c27",
+            "midi_out.txt": "2abbf4e4a2de8a9bf70a93a93db423106cf88ea0f090c4eaeb39d7b2a51f9383",
+            "platform.bin": "929f49063e2f7c8018f6d5ebd3ce5e69264bd57900a58d9d9df886bf252e3a83"
+          },
+          "normalized_log_sha256": "e875e7b747c802ab894b3a03a0219d903450c6f9e65725c57e7e8ecebe32e8c8"
+        },
+        {
+          "scenario": "resume",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 1656832,
+          "artifact_count": 3,
+          "artifact_bytes": 13516026,
+          "artifacts": {
+            "audio.pcm": "011a461f9f6e5413b9ad28bfc8b4b175cb31647c84daac5b49d42d227e2c9193",
+            "midi_out.txt": "8bb1802b3588a76d160a6b218917c98afe6c0eadfc15c861b6977db8c738dd54",
+            "platform.bin": "48654447a19050e4cf3bb10bd938d16662c3542d76f12cfe3741c43690a9cf39"
+          },
+          "normalized_log_sha256": "4f465a915548c329369e03d32a8e35aa596428d3f0b8ff68c607946b17045ba7"
+        },
+        {
+          "scenario": "rptwav",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 568576,
+          "artifact_count": 5,
+          "artifact_bytes": 6297069,
+          "artifacts": {
+            "audio.pcm": "c7dadee98c24facea64501f09886097d2c8ad1b9bc182c50caed3679ae9c66af",
+            "midi_out.txt": "5310ec34729529101404c201e3c91ffc7a4cdf258a1dbb4b22772e73e733a4eb",
+            "platform.bin": "89991021523d52b9c3cfa0a15a1bfe258b453fc5a720699557bd564e8542487b",
+            "roll.wav": "ae894f77e4843c52e7df614d2247aab3cc74c29837066db5d2656cf5f6f7b82a",
+            "rpt8.wav": "05cfc85f6cb195835e5e1bebddd19a14a394e5c19a68648078ddf0e26d059e6b"
+          },
+          "normalized_log_sha256": "92d051072ed0401668868835292bfdb034378b57d2e8575dd553bb47063567b3"
+        },
+        {
+          "scenario": "runner",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 2052608,
+          "artifact_count": 5,
+          "artifact_bytes": 17046845,
+          "artifacts": {
+            "audio.pcm": "a3b2cf9c0b1ba2cc6092a6c1e3822ab7e0f966b33125b004ab482b817ba11ee5",
+            "midi_out.txt": "89f8125f9d18e562583eccd76e3f51f5b55fd7c26a5e9c8df924a43f61a04835",
+            "platform.bin": "2acda1c0e9837e07202f8f218311ca110615ef7f970690d90140a1e475f25a27",
+            "runner.png": "b3b082b5208eeebdf698f8d198b1d1dac6d021432322d6082a08cf3ed09caba1",
+            "runner2.png": "79cef92c97fd6998583eeb82493c6a90f1546f2c48c3009f4d2f81f233afbff3"
+          },
+          "normalized_log_sha256": "ab7a6fc426cf43ef34869f5e284a7c4dc28fc8e07e38522656b95b58ab2069f3"
+        },
+        {
+          "scenario": "samplehelp",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 868352,
+          "artifact_count": 5,
+          "artifact_bytes": 7534305,
+          "artifacts": {
+            "audio.pcm": "94ae84b730e2052f759f591b6672db74650462eda2417db11dc93a6812281335",
+            "midi_out.txt": "7036c2d39d6f8039efd2298d5e6488860d2446d1bbc6db63b4070dd0d2ccc297",
+            "platform.bin": "247381e3963103f060d55b5e260fe6f4c401cafaf8a1c23adbc8881e2835ccb4",
+            "sample_page.png": "ba1e71d18782982091a0514f8954be68db389d549cc60b3ad2cd22207873c61e",
+            "sample_run.png": "ef61c9e20422eefdbd8217a2d5d79a4635ebbbf09dd01d0476f3fda4665cd3ad"
+          },
+          "normalized_log_sha256": "f01b732bfd246166ad5cdfbd57d5c2d31600f3e9e4a7e8b6e97f77f547947788"
+        },
+        {
+          "scenario": "sampler",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 392192,
+          "artifact_count": 5,
+          "artifact_bytes": 3727476,
+          "artifacts": {
+            "audio.pcm": "27d77d4298dfda8abe9e0788806ce9511c64115e3dd3a19137c246868617107c",
+            "midi_out.txt": "7a8f6c08a45746e7b69e31bdad44282eefb72ff8a50fe4b7a120d9fc372e3132",
+            "platform.bin": "95c22f8cd94e1dd44ebc1c6af09da2c56a380e015d4678b759a391513aac16d4",
+            "snips_held.png": "c3bf466e74f829d5d663e5d6358c6530c0a630279d68fafa7d29711830968978",
+            "snips_page.png": "8ab45acee4f1db8ab8b0376b8757a7209f99bd91d681d766443d2653a91db877"
+          },
+          "normalized_log_sha256": "b9e073adb827f2fa6b6d0926bf610136061859c49c5112504536b68c0f79376f"
+        },
+        {
+          "scenario": "scale",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 99840,
+          "artifact_count": 5,
+          "artifact_bytes": 1382936,
+          "artifacts": {
+            "audio.pcm": "1b2d44c45620321f7fd74d87a5460fea9109ce509f20aa3b4e5877e542c42072",
+            "b_aeolian.png": "e19c424062c97f9cd7aefcaaa835a38d564449340595313fcb68448dc3a8b486",
+            "midi_out.txt": "f43e70d84c5cc56245ab2ab182939257baf4e05d990d9849504e47f08f99a3bc",
+            "platform.bin": "58ca88c9d8857fd92c8a5a0fdaf3a546aa0c5736bfc784c70077c032076ebcd1",
+            "three.png": "d62c5dfa94940e87580b812bc8385801c967747bf36f1ea0fcb6ceba04f17323"
+          },
+          "normalized_log_sha256": "5962f5afc53bcb67d9f598442c3bbd2e19a6dd61724c354199ede4c40a47ae9f"
+        },
+        {
+          "scenario": "scene",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 582144,
+          "artifact_count": 4,
+          "artifact_bytes": 5077820,
+          "artifacts": {
+            "audio.pcm": "223d887fe952a8b81f8cc6d42a8c3012370b1afb142b114a0b077a8cdbc7f7fa",
+            "midi_out.txt": "7b81873c87bfe453cda436dbb5bfb63a16526d639ef6991c7055aa320cf38dcd",
+            "platform.bin": "ff4c120b0ddb3920dd98db4562dd1bee86b53824038ffc3f685fc280f7b65c91",
+            "scene_stored.png": "7f448e3517362083bf5fcc215d2170c9c78b4fc6571bd3d1629037744bf1d4b2"
+          },
+          "normalized_log_sha256": "0d70d9696eb4309163d0978fe1e7ec18576d8065d28e2dcf6d2944ed7aa65184"
+        },
+        {
+          "scenario": "seamless",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 142080,
+          "artifact_count": 3,
+          "artifact_bytes": 1375844,
+          "artifacts": {
+            "audio.pcm": "5e168b1566f60ece1cc137e717495224bb52a65289fdac3ed4607ed05bb350f5",
+            "midi_out.txt": "fd199121060e76d11f9b4dfa69131dd2d7d73b045c59e53c5563ebde582a2ab6",
+            "platform.bin": "e7672d9c0de916cd408b4170ba14e91b1c8f70b2a17b4d31a1e337fdda6734c7"
+          },
+          "normalized_log_sha256": "b1d5e0283f766e1bca750ccf3e6da5119a8c9f4c8c571727b6c16fc6f9437cae"
+        },
+        {
+          "scenario": "sections",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 4108288,
+          "artifact_count": 6,
+          "artifact_bytes": 49959349,
+          "artifacts": {
+            "audio.pcm": "5dbedd66479b8d7ca8d6a17adb5a9b07ba65c859f37d2f97d7c35604fa0fe4af",
+            "breakdown.png": "170c67f2bed65a63ca539826871824be703dd1e5e269d9830c41d4989793266e",
+            "build.png": "cc67b591ed60c51f5f9019eb296745af328b9af553cb54d51914ef4dd365ecea",
+            "midi_out.txt": "8fd039bdbd5928cdceacca188d37e0fd5f7c3ac1289de24b96cbe9d3e54f9c37",
+            "platform.bin": "504bb6fb7d969bef25ba28ad321eb8184163e52c289dedce92a1885560ca0c5d",
+            "sections.wav": "14d2a154c86b56081fc3e79c5f87d67ca9c1c28aaf68041a84930eb4f1e70e71"
+          },
+          "normalized_log_sha256": "7b108538aa5377897c7abda46af1f01ad40335b30a7e9905ddaf37ce98f54116"
+        },
+        {
+          "scenario": "seq",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 427008,
+          "artifact_count": 6,
+          "artifact_bytes": 4177196,
+          "artifacts": {
+            "audio.pcm": "8d0ccac4e9b2b92cbd79ab87e30cec3aff3124fb5c9cd9e2c52e717fb87d0d14",
+            "midi_out.txt": "a176d8da13e952be705cb75ada03524aea4a7ac3ce83ee81a7a5617d478e6ede",
+            "platform.bin": "397cdb08a6f840dd14fd7400b4e3a3df31553975255c014fef8b22cbb859ccb0",
+            "seq.png": "22f6888507a617775f98b844ff7a54f5e3b9ccdd7b180ea5bb118cbbc5562ac8",
+            "seq_p3.png": "d165d33ae6b7e78e285d84fe9bcc383908c79870c9e350851339ad19918be273",
+            "theme_ice.png": "cd4c9b860fd0a0c725f67a5a25edf51d9497a5f2963391c26cc24f9f2d8daa28"
+          },
+          "normalized_log_sha256": "abcd84df03b09b66d283f7f57cd097493cf6a4e4d611e763cf7f70b70edae7d5"
+        },
+        {
+          "scenario": "seqtricks",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 162048,
+          "artifact_count": 4,
+          "artifact_bytes": 1708922,
+          "artifacts": {
+            "audio.pcm": "acfed86ab6c5f5371674ea7791fae2decf071400a8e2ef5ea066af44bb2a48d6",
+            "midi_out.txt": "72a1cdc43d51b314b7e5bf462653e6c018eda0dc79efe37764d1769372ef8491",
+            "platform.bin": "322f694ea3b2bc9e7c21756ac0ad46c4f722140aee8f734a85fb15c55b8fdc67",
+            "seq_tricks.png": "b78b4d2a17d91f7ac568551188ad537942f4d4a26958b60c7872cbf6f851f275"
+          },
+          "normalized_log_sha256": "bb06d476e5387661986b54fa41239e16ffb107fa94d60287f46efdc5387ce53f"
+        },
+        {
+          "scenario": "setlist",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 2435072,
+          "artifact_count": 5,
+          "artifact_bytes": 20120046,
+          "artifacts": {
+            "audio.pcm": "19360bd53999738d670476fa4c645ba19051a8908ce0e95594e9309798976a33",
+            "midi_out.txt": "161fb6fdbedf1dc0e9770d779c80caf7c2fd981caf4caf6ff20f833ca7f4135f",
+            "platform.bin": "497242566ad70f7fcd4c918fc211d0ea69c61118f1ad8c66c9886458b657b0a8",
+            "setlist.png": "f70556bb09b5b688a9f5227fd028df2c22818ff619388e3d311fecf7ff5fbb8f",
+            "setlist_empty.png": "fe1d05fa292056653518e91dd3bb70b575e425e4e3b7b0dd49d98433686a7668"
+          },
+          "normalized_log_sha256": "7199f06dab59827a4617b98ccbab20218f9547a9e5ba0051fb7ac5e2d1bc829d"
+        },
+        {
+          "scenario": "setmap",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 226048,
+          "artifact_count": 3,
+          "artifact_bytes": 2048933,
+          "artifacts": {
+            "audio.pcm": "7ccf7356b3e6e31520ae5bcb8d9faeecb9ddf3533b211d4953c5ee7fdf766152",
+            "midi_out.txt": "e6c432769c741f19da55667fb594cf91f0903330178fafb13be694578c8852c5",
+            "platform.bin": "eef8fc1b5d408da253f2fb38e04fa4482237cab8bd9e0c33176cd99b91e4db8c"
+          },
+          "normalized_log_sha256": "773497ce0fc8aafde18c6406753776173912151186ead720412bd31b9c4d4fb7"
+        },
+        {
+          "scenario": "setmem",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 765184,
+          "artifact_count": 3,
+          "artifact_bytes": 6372955,
+          "artifacts": {
+            "audio.pcm": "fcd916ecd8992cd0d309fdd755dbde976a42e1d528280a9e4147d2898b894a43",
+            "midi_out.txt": "8832b23f3e88750f1083f961729e4d54d7f4842ddba315460d5c3e49808a5198",
+            "platform.bin": "39bbe7c606b7ab42f3dc25ff94ff7a4e26ee8cdb9dd68d17c3bac4c7e12d9a0e"
+          },
+          "normalized_log_sha256": "8a17cd472a2957aaf2f8968590df7fdc428d79acecdfbed460147aed9b5ea421"
+        },
+        {
+          "scenario": "setpage",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 491008,
+          "artifact_count": 8,
+          "artifact_bytes": 5039212,
+          "artifacts": {
+            "audio.pcm": "25c6da97f4d23d72b8bfe2b89aa156f02028650b8541b1191b5865d6679f39f4",
+            "intro_header.png": "4097f6a5f87b9ac439cd54707188f730374395ae8472d6acdf4ccb64482e52a8",
+            "intro_home.png": "469f1cd341c1b6e7aabad834ae500a1378aedbab4b18467cca62613df540d7db",
+            "intro_mix.png": "0b61d0fa34be22eac2ed926f8d82b02b26b5540890bad19a1d8f176f6cf66e8b",
+            "midi_out.txt": "06400b6563659cfd25475438e7ed01a98102ef96d5d6282a03b4a3f3dd10c361",
+            "platform.bin": "c7a1ac414811dfb9277f1a3be181810cc1bf6a898a6a2ba30350b6aadf930fcf",
+            "set_page.png": "3e1435dc6a4febb565c99c745c3fe41b32a3eb347659282bb22f8fc7eb0c3eb8",
+            "set_page_on.png": "7c994ea2baa4a88e304bc6c6945685e38a8e45efd4f85267dff8f177caaa586c"
+          },
+          "normalized_log_sha256": "3294dff255ed29bb8fb444cc20cb8457f513d1edc5426b6d157d7ce8ca31b945"
+        },
+        {
+          "scenario": "settings",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 320000,
+          "artifact_count": 4,
+          "artifact_bytes": 2975724,
+          "artifacts": {
+            "audio.pcm": "1b96801eef5f248366ecf622dea5e8aa9378e6359749cc627109233e5d4695da",
+            "midi_out.txt": "e7cfe0f746985208a381457cbab26d6ebf191b06bfde8551c435e7c834d32fea",
+            "platform.bin": "4f603b83055817491e8cc6a8bb474855e3018abae0f5d16aec98fa34e5d4afb9",
+            "settings.png": "c393fbd5ed6c18b29c40ff9e54c603201d719317d12639fb4c03ba5c2cb776df"
+          },
+          "normalized_log_sha256": "1724823900b9430114bf58c7e3bb6fb95472a8d925efc26e353d188217d9c702"
+        },
+        {
+          "scenario": "shift",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 416768,
+          "artifact_count": 5,
+          "artifact_bytes": 3925524,
+          "artifacts": {
+            "audio.pcm": "15d034477d24f9cec60128672d1e710277bcaa0d3cf3038963be83e692f837e4",
+            "midi_out.txt": "138371ceef818c4f488d2bb7f8286cb81ea63ceb18f99a802f0137e0145bafa6",
+            "platform.bin": "c9686c51d5107879eced332916b1bf8920b929ada1b8f1044724b36a1fb5691b",
+            "shift_pattern.png": "55e2057c032f1480436443957b30c38f2461e52287d8670629c2b88e15b39041",
+            "shift_piece.png": "f973bd072275aa04634d61f87a069831ebca9d1ed60863055bd1182c967602b9"
+          },
+          "normalized_log_sha256": "1ddff7806b17c6fc719a087bc24383d7f870b46f3503624dd2b8b539877c8d57"
+        },
+        {
+          "scenario": "songbook",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 58112,
+          "artifact_count": 8,
+          "artifact_bytes": 1566831,
+          "artifacts": {
+            "afterhours.png": "7d5237054b8bdb204d7d9843140134a2e6b69d702dfdc66b31f66503ab498ae2",
+            "arrangement.png": "09b01bdd6edaa10e098ee6b36ca3b1018a725c74dc40b57c8f28c44ef919663b",
+            "audio.pcm": "8d054ab5eee4823c9f11aac69c8c8534315ba017ebfed3be51f41f52bf2123b2",
+            "dx-bass.png": "354097e46ce13ed8cd5ae80525bc4ae80bd75eb8bbe1b1f1e69f0d7370afa295",
+            "dx-keys.png": "49c23b6824b74332af411b759d8e62eadd311399fd3147ff53b2295156f4291f",
+            "midi_out.txt": "75fbbdd6aa39c97a6046a7952beeabf9c97148b4671a611b16f2f739a12a3beb",
+            "platform.bin": "b9df1d8c5d8f8119c330911a8592ec957df24d857554102f51a8c6d6b24587a0",
+            "swells.png": "2ebe6cde4f7db24d8938578d7d58b6deef720068c0a89164aa69fca594cd747a"
+          },
+          "normalized_log_sha256": "435683b971101195e65ade2fb81bce1ac485bb6d3e15107decef576be87b8b05"
+        },
+        {
+          "scenario": "sounds",
+          "status": 1,
+          "historical": true,
+          "failures": [
+            "FAIL expect par84 == 1, got 4",
+            "FAIL expect par84 == 0, got 1",
+            "FAIL expect par84 == 0, got 1"
+          ],
+          "audio_frames": 638976,
+          "artifact_count": 7,
+          "artifact_bytes": 6050963,
+          "artifacts": {
+            "audio.pcm": "200f692cf50d4f80770a5506bc2ae83e3dbbf5dd039a07cc82d869fec0a9a3c5",
+            "kit.png": "6aabb8f9f4040da51d53498cd29f99db575d0c74d203187804162e65f29e1d50",
+            "midi_out.txt": "5ff7d3d911bf71ddb06fc7d04c696410b0ef5da2c2621d16d771798cefb77945",
+            "platform.bin": "e48785ba9a5f09685f29ce46c1e460ebd2fe03aadf738cb5fcd9d481fbf13f12",
+            "playing_drone.png": "c3dce36f51901a91adc95cc52ee68003172b93c52f6bc4ecc4211aa0e3e2e1ea",
+            "sound_drone.png": "baad6e39dba48a3947dcf40ac58edd38a8958c0efa83263aa343179a4b2904b0",
+            "sound_pad.png": "ab7e3d41b9bcfe34930559e5977efc88180827e543cab521a5eaddfef9b0d08d"
+          },
+          "normalized_log_sha256": "52e0f376536a9858bdac64be0e057d2760cc74ba0d9cfcfab7d1cb92a58df2e7"
+        },
+        {
+          "scenario": "stage",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 2968832,
+          "artifact_count": 4,
+          "artifact_bytes": 24224201,
+          "artifacts": {
+            "audio.pcm": "e7ae7a10df5bb8f97a5e9be164dc782fbc7b592084299f0a2fce2e88acd7b739",
+            "midi_out.txt": "9da2ceab7be3da454d9f8c1d9afe123bb6e23b5c3ea7e22324ca8238d8f497a4",
+            "platform.bin": "bf52042cd6e66c7f1881cc0b8a6123f4e6d16d5a8f891ff6fef7c8316ea55dfd",
+            "saver.png": "0e8adf43864bd03df7ba4c0fbda17c82fd7d5dc5118866bb21de5a9842a58831"
+          },
+          "normalized_log_sha256": "0191cb754e8d3238d61e8ec825b333bc9506949498926cd46f44fdde3064c41b"
+        },
+        {
+          "scenario": "start",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 26624,
+          "artifact_count": 4,
+          "artifact_bytes": 622912,
+          "artifacts": {
+            "audio.pcm": "6e011f596481f6c85906868d3c09e54a69349885fe71c559c1ae17566fceaf72",
+            "midi_out.txt": "8d0fdc71f0292973c307e9cdd53409242761323f03ed1a4b6e09211057fb4c1d",
+            "platform.bin": "161cba01abc3b1e43c3b631495104ccb5d9d2489581ee3aca18d9ba4d41708a7",
+            "start.png": "a37d098df6132402646a41fe9c955d09097598f019b18dfd0bc874bf06a9712c"
+          },
+          "normalized_log_sha256": "3558c443fbc9471dae04418ac8dc4e035ff2612075e429bc04ea39823459cdf1"
+        },
+        {
+          "scenario": "steps",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 328704,
+          "artifact_count": 4,
+          "artifact_bytes": 3045284,
+          "artifacts": {
+            "audio.pcm": "eaf4da194cba29ed1945f3521003904758c8fe89f868b74e8c0a795c0ecb4652",
+            "midi_out.txt": "80c40faf1c866b6d6e89c512f3b289862dbf9d49d9f92dd5ad0110e26591cb97",
+            "platform.bin": "673002890be8fdcc71f2f9caceb4d3c8a5f7ecd369355d52285ed54faea0a79e",
+            "steps.png": "42cf264f9aa0c4c545807d7d8d258ab42809cff821804dfba834be189f4ccaa4"
+          },
+          "normalized_log_sha256": "4b570dac3b4053b86c37a458e056dd911829f9ed315a0a1a22279aa9effa1879"
+        },
+        {
+          "scenario": "store",
+          "status": 1,
+          "historical": true,
+          "failures": [
+            "FAIL expect par0 == 42, got 56",
+            "FAIL expect par0 == 52, got 66",
+            "FAIL expect par0 == 52, got 66"
+          ],
+          "audio_frames": 834048,
+          "artifact_count": 6,
+          "artifact_bytes": 7436690,
+          "artifacts": {
+            "audio.pcm": "2c66b4eb520262eb696b1d3bfefb227aaa3340b5acffc38ee233891fe316240a",
+            "global_edited.png": "136fabf101f1e64a00134c95af9aadb6bde1e7b703944c2b5d649f69ce7f9ea4",
+            "global_hold.png": "a417545acadc988f85cfbd9cc61e4c2d1c5b807bd98ed5e1db63c77bff5b4b9b",
+            "global_stored.png": "2cc9c19b3530c37d001990d6176835858e62399c8fc6abb81c163fd2243f9a59",
+            "midi_out.txt": "527c2dfa9a7cf2ba12366a46db0d00678d873bb3e65ad702e4a16c6932a40335",
+            "platform.bin": "3a070f05c486ddc25a1f4ab0445643ede1751dbe3f754eeadf6e6f2f172a42e9"
+          },
+          "normalized_log_sha256": "56e817884968457cfcaa617f996e27e3a81967309c1881b9398e33a1514572e5"
+        },
+        {
+          "scenario": "theme",
+          "status": 1,
+          "historical": true,
+          "failures": [
+            "FAIL expect par0 == 42, got 56"
+          ],
+          "audio_frames": 539136,
+          "artifact_count": 3,
+          "artifact_bytes": 4559939,
+          "artifacts": {
+            "audio.pcm": "add3f4ada0a5da53a03c9bfb09d4164a51cfa029ee4c844e82a3e328f7c46116",
+            "midi_out.txt": "39c4ea1cf47980e00037d60de673044ed31f4007a6b32a2478d0bebdbcaaffd8",
+            "platform.bin": "db8c621b3a3ac610e2d64ae7cd93ac515bae7e1e2b50308ac7146ac6d55f9fea"
+          },
+          "normalized_log_sha256": "2cc7e2fef8dd65ecb831e6e21d2ba8f3eb2894c8f2f290ba37223b1b92b152fc"
+        },
+        {
+          "scenario": "theory",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 1306112,
+          "artifact_count": 10,
+          "artifact_bytes": 11924612,
+          "artifacts": {
+            "audio.pcm": "22358484e24fe1e163ee049a03798759adcc5c8c438c75193570676c000f5b14",
+            "midi_out.txt": "2c4b30e7d55306d9f789209ec4967146635e5d0420efa09407933ef73fbe49cc",
+            "platform.bin": "99d1c7067b4c67ecb15a3a4f098679197775bf9eb43fb3562d34bdd17452e139",
+            "theory_a_minor_V.png": "7b6fab6500d77e8daa8f89523806bf5ac05e7a114ce9b099204be4eb94f1fbb3",
+            "theory_a_minor_i.png": "0c84c44f3d64b0f1df1309ab69d8dbcfc05711345ec194fbd20dfe09087600fd",
+            "theory_a_minor_iv.png": "54d432bec8747ca31a9670ca16a984ed97ee1031d1ff71f4dca31716ce233d28",
+            "theory_e_major.png": "dab7a03a1b3cb2e1c8a656d29ba24496a0aee1cab89139e7e1a2627b43fd2672",
+            "theory_e_minor.png": "0b556b59e25143744540385d8f6f190c71bf57d7464eca194ac2875615da9725",
+            "theory_eb_minor.png": "9ba2171b188b8fb19e91666111e9b36e88895aedf28053570052017ba979cf9c",
+            "theory_synth.png": "158a0c2d0975e31fa7b1f004941672ef03e93c35cffe39f0172c3de4ca8c3108"
+          },
+          "normalized_log_sha256": "087e90bc37e8504f40a86f121b715e65683b5b8e4424e5795ab99490f5f215e7"
+        },
+        {
+          "scenario": "theory_walk",
+          "status": 1,
+          "historical": true,
+          "failures": [
+            "FAIL expect walknext >-1, got -1"
+          ],
+          "audio_frames": 1008640,
+          "artifact_count": 7,
+          "artifact_bytes": 9024504,
+          "artifacts": {
+            "audio.pcm": "55347150d6e0f97017633893cf7c1b95f9c98326c576873f898d855ae40ba94d",
+            "midi_out.txt": "45e5234a1bba526d738713e267f1e701fb4191ad023e985b4e3fe8b7dd6587d1",
+            "platform.bin": "3319f67de9c686b951bae5b007a1b7c40dd2c8d14cd95b217e0a6b426cfdbc77",
+            "theory_walk_a.png": "4a3bffb7385ad098e86d2d938ac02046fb3a82ec114d5dabd9f91dedd2fb7ba3",
+            "theory_walk_b.png": "ad943c4f1396410f68b00907a1d2a1098e419d0f966e95c53f8f5505891337bd",
+            "theory_walk_c.png": "288c791616883f37b17c0357f2bc692d6ac2c70f11a59cab7d07fc522e6fcc55",
+            "theory_walk_d.png": "741188d8653ac57d906e3e7d16cc3582b3c7652dee28f577a898338af7830f74"
+          },
+          "normalized_log_sha256": "38ece2123d78ed01bdd0ee15bdce31184f6339b3e99e3fb2946c0d6223400f26"
+        },
+        {
+          "scenario": "usbhost",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 592384,
+          "artifact_count": 4,
+          "artifact_bytes": 5156309,
+          "artifacts": {
+            "audio.pcm": "d88bf03cb1857be8493febfae2332ad2b531141cbd37f937725f95595794f465",
+            "midi_out.txt": "e03376331ef9b909b0c58e077c8ff980c190d7f60fc4ea61745e786a5082f5c9",
+            "platform.bin": "0bfbabc969be9629289493fcbe11e16a56ca4fc8815edf7209275860d42c4888",
+            "usb_host_on.png": "63aea59d7d810d89d634e38e07520f2e5675c8c00325c4a39f062882a1f46ec6"
+          },
+          "normalized_log_sha256": "c86d4bbba04ec6c827c5ea757b4b44996fe77fe239b82bb19e759e1c02e5ee44"
+        },
+        {
+          "scenario": "viz",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 1487872,
+          "artifact_count": 13,
+          "artifact_bytes": 13894055,
+          "artifacts": {
+            "audio.pcm": "d8b37e22cf252780c8695bc5a8851ace23ad0ccc77d20cda23f1c73152c9e3f5",
+            "midi_out.txt": "b0751294a95dfdff308fd78271d04f20c48378b6a634d62a780e76622910ef24",
+            "platform.bin": "2946eb7fe7965b6487aae7e57713b3ffe938ee38186038aa55116642c1fd99ce",
+            "viz_auto.png": "931e1a96b4034e32d577f11c0b60b62ade47493a30984823e33c3aeb3ca7b25b",
+            "viz_bars.png": "c53f647f80db2319e25267dec54007ab37ccad0e86463379519e36311cca4430",
+            "viz_disco.png": "6429b5706a87e1df77a58fa7871f5046b2d7eac4d8aa48924a4b5373d0eed39e",
+            "viz_flux.png": "754923b8138dd4adf3c2d52176daf951ef505c0df6b4acabb12a59a71e4b9ba1",
+            "viz_kaleido.png": "99ebe17b9a6896337ebacff678352e4adffd0dbcd2ad9206b5f2fd1697277930",
+            "viz_life.png": "2ee31b6135fc4c30c8099a6d813a1870fcf04e3078345c38062a63fde85f9e64",
+            "viz_orbit.png": "600b4cffe5ccd59f0e2746a8e8318c12eb472c1bc8539a13cdce4b0ae5fc70f8",
+            "viz_plasma.png": "e6efe1604b1e3180176cb7ff895281fad1802b1dd8604c27aeae0351314e5c19",
+            "viz_theory.png": "a1295a60191afab30ad05463b73dbd4cc8fbbbf33508133742d857069a334606",
+            "viz_trip.png": "7aa32763810ea009b1c07d32cd05c1d34107d7c1832e74a5ad69ae47043b8841"
+          },
+          "normalized_log_sha256": "c999d73644e70d622a12cb8302556b3e26a8f1cdb5fe002ad594bf0e6656f38a"
+        },
+        {
+          "scenario": "zoom",
+          "status": 0,
+          "historical": true,
+          "failures": [],
+          "audio_frames": 773120,
+          "artifact_count": 5,
+          "artifact_bytes": 6783099,
+          "artifacts": {
+            "audio.pcm": "a30ce400482c0f97214d852fab1caaae40dee7a5e262d9ab5824cf1e5b781030",
+            "midi_out.txt": "77726bd2bd89612c2550e1c794dbb7095946527b4be023de88faa989ba680f3d",
+            "platform.bin": "9ed6af7b5cff092ed8a56ec50bf2cc36167824d01550d6777996e01029bc753d",
+            "zoom_setting.png": "5ee6613b5c367851c635cc2403de2dd1483efe0397a3c58dea2f6ca7eb5b44c8",
+            "zoom_tempo.png": "7e1decee311a3569c1ef90797c7e0419ef01309b3293617b79fbb8bd47fd582c"
+          },
+          "normalized_log_sha256": "d9626db105416da9eae080a14957db7af0ad5850b343d12f839d7ccaecccae76"
+        },
+        {
+          "scenario": "compat",
+          "status": 0,
+          "historical": false,
+          "failures": [],
+          "audio_frames": 652288,
+          "artifact_count": 13,
+          "artifact_bytes": 6788627,
+          "artifacts": {
+            "audio.pcm": "9f3c8cdbad5d0e862a012e7a12959bc1ca3c72226113f58f88a85b94756e6035",
+            "autopilot.png": "308f474706c976373135a0492cf9dd22750e534a25da58905d9bab9feec5df2c",
+            "compatibility.wav": "c00d3edf60d54d58fcf0c4062a6a4cd31d2bfae0110fcec85bccba77c8f62a27",
+            "frame_00000.png": "aeb950773078c2194e60bb895065eb1c6d5d9ec602d3b4ec118c263a017433be",
+            "frame_00001.png": "33c474bdf29280e2ad283cb86d02303436ac6063dfd23ccdd9b6ce6f5ed50033",
+            "frame_00002.png": "38238af13616dc33e06b8f8a5136ee5fd1f56dfbc4a35e4d2acedf28ceea0ff1",
+            "frame_00003.png": "db4ae28b8fe9056355415b402e35d734d8969018bf320873045e4ebdbcd72be1",
+            "frame_00004.png": "4a096d65c38bbc9d8e0f96710e8f0f169d77ae89137cce12c69dae90f4c75bbd",
+            "frames.txt": "a0d5f1bd0df11a944c78623b88979baca1143e1351d7f195cd574f1b21f5175e",
+            "jam_stopped.png": "da82eec73d22632570b9a57bb5a3bad3dba77ac327b17e774e0b6d1f5d4fce00",
+            "midi_out.txt": "a65214b7b0f80150a4e0aa01e8ebd4a7442794d2e4d328df7ff85d449a7d959c",
+            "object.bin": "a38051734ac7a5145791e9fe5780e19833856be0b8afc9d362b7f2d5a3ed3a79",
+            "platform.bin": "a6dcfa17211cf91bd438c476042a01caf21ecf9acc7f86cb1d64001ee1cfffa6"
+          },
+          "normalized_log_sha256": "30f8d1b114dbfb9d920414abf661435973931db7221bcb41e2dcf6e7a5f997b8"
+        },
+        {
+          "scenario": "errors",
+          "status": 2,
+          "historical": false,
+          "failures": [
+            "FAIL expect playing == 99, got 0",
+            "FAIL unknown expect nonexistent"
+          ],
+          "audio_frames": 512,
+          "artifact_count": 2,
+          "artifact_bytes": 4276,
+          "artifacts": {
+            "audio.pcm": "e75ae3e8936d06d07170215d97b4de492a1fdc26747593b5af266c3b711dd7d4",
+            "midi_out.txt": "796064b04f579ca6710a1bb4b6b945dbecf2ca70acb999f1bcddd8cbed28bd35"
+          },
+          "normalized_log_sha256": "a793c8ed2430c08f0782867ea68f226791755883d1c34e06f6b0b55546a2e9e3"
+        },
+        {
+          "scenario": "restarts",
+          "status": 1,
+          "historical": false,
+          "failures": [
+            "FAIL expect parsbad == 0, got 170",
+            "FAIL expect parsbad == 0, got 188",
+            "FAIL expect parsbad == 0, got 86",
+            "FAIL expect parsbad == 0, got 59",
+            "FAIL expect parsbad == 0, got 445",
+            "FAIL expect parsbad == 0, got 200",
+            "FAIL expect parsbad == 0, got 17",
+            "FAIL expect parsbad == 0, got 41",
+            "FAIL expect parsbad == 0, got 175",
+            "FAIL expect parsbad == 0, got 27",
+            "FAIL expect parsbad == 0, got 273",
+            "FAIL expect parsbad == 0, got 52",
+            "FAIL expect parsbad == 0, got 56",
+            "FAIL expect parsbad == 0, got 348",
+            "FAIL expect parsbad == 0, got 67",
+            "FAIL expect parsbad == 0, got 73",
+            "FAIL expect parsbad == 0, got 483",
+            "FAIL expect parsbad == 0, got 137",
+            "FAIL expect parsbad == 0, got 290",
+            "FAIL expect parsbad == 0, got 98",
+            "FAIL expect parsbad == 0, got 204",
+            "FAIL expect parsbad == 0, got 189",
+            "FAIL expect parsbad == 0, got 29",
+            "FAIL expect parsbad == 0, got 133",
+            "FAIL expect parsbad == 0, got 58",
+            "FAIL expect parsbad == 0, got 343",
+            "FAIL expect parsbad == 0, got 132"
+          ],
+          "audio_frames": 6144,
+          "artifact_count": 3,
+          "artifact_bytes": 288186,
+          "artifacts": {
+            "audio.pcm": "7de279e07cd402ad54cbb57b085b33b4d00b943ccc8388d492b5215a50f3fac5",
+            "midi_out.txt": "57e804b63b49b55e9c883657b0dc77f16c57ba08a3ebddab239d005db7b33c50",
+            "platform.bin": "42de18e79bb243835f044e26bdd15ce60e47cb666582fde2019bdcf595d3e69d"
+          },
+          "normalized_log_sha256": "3589d69bad555916d7798e0df9ba40324cac718e0ed15792f46f41aee9483fee"
+        }
+      ]
+    },
+    "repeat_results": [
+      {
+        "scenario": "first",
+        "status": 0,
+        "artifacts": {
+          "acid.png": "2eef3c6cdad9bcccf93050661772c9a3ee64a2f6afe372c738bac0e72c209c5e",
+          "acid_line.png": "5426156c4700cb839704e09c493bea11098688e56412f566175c940c78898ff4",
+          "audio.pcm": "210353de0fed41c4536eeb7ed5edafbc490c0c33ddb6fcd4f1227ed6ace6d68e",
+          "chords.png": "67c690924be2f5d44bf0bc16e332add066d809d34c23bf2fb5b15c0f4b8224b7",
+          "drone.png": "27a747de78bf46355842b31458c3dd19d8e3c4d2237f4f22d58b04cc3fa7b028",
+          "drone_lfo.png": "86f72b943d625fb25bfaef39c9b12abe02e11dcabed7fe28c4bb750168042d1d",
+          "drums.png": "b8e893e1c8f0cd9157f743c67ab2b4d26012b91b4744e1f956bf795085d0d5d1",
+          "first.wav": "4fee5b2e8d24c0c39e361014b03068665b1be44b26678ca0b1933458dfd7f8d5",
+          "flow.png": "a4a7119a9a18ff0f8a70d2d39f16ced6249d9a66142ebb7062a9b9e4b5122d91",
+          "flow30.png": "6886b5c47ab790b32bbe09e6da59c9fd46422ac2870be7fa912d9437e28f5e83",
+          "global.png": "3afbd09421872ee9cabd29632b78c0ba701e58e6f7e4c2c89cbc00c34dec9526",
+          "master.png": "873d17d23f30b395ed9a7712356fa615e70199eef8f2057ec0b341d3885acbb6",
+          "midi_out.txt": "8bebc573cfd043703fc871fc275b05d3249b6060161c28f528bf0f4131f254cb",
+          "mixer.png": "2f6d003eeaf7d5d859fc1f676f0a879d151a0240f7b0bc1ebdcdfdc1c05491c7",
+          "noise.png": "ece425faa6dcbfc3fbd76b83e5b1672cf3648a22a0d63973f52b6d95852671fb",
+          "pad.png": "7e4d9bb87d59deae628abe7f3ef994357a50ddf6e213a1795e8139b106475008",
+          "pad_env.png": "79bbb4406aec71a8c7de0bcfcc8e6b1f79b89e12a2b96fc56dfc6e1f0444cd3e",
+          "pad_lfo.png": "44194fab43fa850bb4afd201f8f087f51842de4afd32ddcee361eaa29f1dcc4d",
+          "platform.bin": "1a25fa7b5265546e46a6292cd65d2f979abf266ca124204138d73cb30c90de32",
+          "reverb.png": "42e382568194dfb840895dd6439a592465451092271142e61acb0d7c507d2048",
+          "space.png": "9bf3d6b139eb9cb56963604da39de060f5c505d6d6bb1e34288a12d45e103401"
+        }
+      },
+      {
+        "scenario": "compat",
+        "status": 0,
+        "artifacts": {
+          "audio.pcm": "9f3c8cdbad5d0e862a012e7a12959bc1ca3c72226113f58f88a85b94756e6035",
+          "autopilot.png": "308f474706c976373135a0492cf9dd22750e534a25da58905d9bab9feec5df2c",
+          "compatibility.wav": "c00d3edf60d54d58fcf0c4062a6a4cd31d2bfae0110fcec85bccba77c8f62a27",
+          "frame_00000.png": "aeb950773078c2194e60bb895065eb1c6d5d9ec602d3b4ec118c263a017433be",
+          "frame_00001.png": "33c474bdf29280e2ad283cb86d02303436ac6063dfd23ccdd9b6ce6f5ed50033",
+          "frame_00002.png": "38238af13616dc33e06b8f8a5136ee5fd1f56dfbc4a35e4d2acedf28ceea0ff1",
+          "frame_00003.png": "db4ae28b8fe9056355415b402e35d734d8969018bf320873045e4ebdbcd72be1",
+          "frame_00004.png": "4a096d65c38bbc9d8e0f96710e8f0f169d77ae89137cce12c69dae90f4c75bbd",
+          "frames.txt": "a0d5f1bd0df11a944c78623b88979baca1143e1351d7f195cd574f1b21f5175e",
+          "jam_stopped.png": "da82eec73d22632570b9a57bb5a3bad3dba77ac327b17e774e0b6d1f5d4fce00",
+          "midi_out.txt": "a65214b7b0f80150a4e0aa01e8ebd4a7442794d2e4d328df7ff85d449a7d959c",
+          "object.bin": "a38051734ac7a5145791e9fe5780e19833856be0b8afc9d362b7f2d5a3ed3a79",
+          "platform.bin": "a6dcfa17211cf91bd438c476042a01caf21ecf9acc7f86cb1d64001ee1cfffa6"
+        }
+      },
+      {
+        "scenario": "restarts",
+        "status": 1,
+        "artifacts": {
+          "audio.pcm": "7de279e07cd402ad54cbb57b085b33b4d00b943ccc8388d492b5215a50f3fac5",
+          "midi_out.txt": "57e804b63b49b55e9c883657b0dc77f16c57ba08a3ebddab239d005db7b33c50",
+          "platform.bin": "42de18e79bb243835f044e26bdd15ce60e47cb666582fde2019bdcf595d3e69d"
+        }
+      }
+    ],
+    "stress_expected": {
+      "compat": {
+        "status": 0,
+        "assertions": []
+      },
+      "errors": {
+        "status": 2,
+        "assertions": [
+          "FAIL expect playing == 99, got 0",
+          "FAIL unknown expect nonexistent"
+        ]
+      },
+      "restarts": {
+        "status": 1,
+        "assertions": [
+          "FAIL expect parsbad == 0, got 170",
+          "FAIL expect parsbad == 0, got 188",
+          "FAIL expect parsbad == 0, got 86",
+          "FAIL expect parsbad == 0, got 59",
+          "FAIL expect parsbad == 0, got 445",
+          "FAIL expect parsbad == 0, got 200",
+          "FAIL expect parsbad == 0, got 17",
+          "FAIL expect parsbad == 0, got 41",
+          "FAIL expect parsbad == 0, got 175",
+          "FAIL expect parsbad == 0, got 27",
+          "FAIL expect parsbad == 0, got 273",
+          "FAIL expect parsbad == 0, got 52",
+          "FAIL expect parsbad == 0, got 56",
+          "FAIL expect parsbad == 0, got 348",
+          "FAIL expect parsbad == 0, got 67",
+          "FAIL expect parsbad == 0, got 73",
+          "FAIL expect parsbad == 0, got 483",
+          "FAIL expect parsbad == 0, got 137",
+          "FAIL expect parsbad == 0, got 290",
+          "FAIL expect parsbad == 0, got 98",
+          "FAIL expect parsbad == 0, got 204",
+          "FAIL expect parsbad == 0, got 189",
+          "FAIL expect parsbad == 0, got 29",
+          "FAIL expect parsbad == 0, got 133",
+          "FAIL expect parsbad == 0, got 58",
+          "FAIL expect parsbad == 0, got 343",
+          "FAIL expect parsbad == 0, got 132"
+        ]
+      }
+    }
+  },
+  "binaries": {
+    "reference": {
+      "bytes": 752352,
+      "sha256": "c2e8fdf9629c2f25dabeffb30494301e213bc4d064510931346b51576ceab5b1"
+    },
+    "c0": {
+      "bytes": 752384,
+      "sha256": "d7c69f210a5aec5d817dde5474344b05a8e5a9014c253e9e7fb86c78cbacdb37"
+    },
+    "frozen-runner": {
+      "bytes": 1219800,
+      "sha256": "6d6d1e9907468c8ab01b24e17606197e8acb10e4fb04aae1a9e013854f398e4a"
+    },
+    "c0-runner": {
+      "bytes": 1220000,
+      "sha256": "807bc6ce6182668395aabd4e024ded4a5f8670310317d22c511bfccd8582b63c"
+    },
+    "rust": {
+      "bytes": 1398056,
+      "sha256": "af69c38acecee5089a406b15a0078322fed93ae9b787b85a7eba2e9e748dd9c8"
+    },
+    "entry-rust": {
+      "bytes": 1398056,
+      "sha256": "af69c38acecee5089a406b15a0078322fed93ae9b787b85a7eba2e9e748dd9c8"
+    },
+    "entry-c0": {
+      "bytes": 752368,
+      "sha256": "294f07f44b414e01b2f06966f7a9c93a1337940ad4c760e6cdab44ef555365c4"
+    }
+  },
+  "logs": {
+    "full.log": "ad50a283be1286eb739e024fb8ec493e903233f667c23cf149460db3a16b7389",
+    "portable.log": "6f3a534e60ad0cf882e9846051c0821fbaf1e4b56fc1f98924f4cb108c07564d",
+    "repeat.log": "a957521712231a3f1f8c8d8944bc2e6b7f66903463bba25384ff2dcaa29a91c8",
+    "entrypoint.log": "b132f1a97d3cfd9f72e706a7f9104d135d9334ce271d7e2ea214c348f48d1b6e",
+    "fallback.log": "6b1742beb2d706cdcb967d1c81104e6f76d2c0f0679b06c83d2aaa2f2aa2e425"
+  },
+  "source": {
+    "app_adapter_sha256": "61b71ff34c9797aeda0f19b5fa47ca42ba41857e291d4224ab713b5ef4308c03",
+    "build_entry_sha256": "ddb9d70ca351194c2374f45eea9737e514f4be2abefba1a8ff0d94e111b95599",
+    "test_oracle_sha256": "f808c7a16e10f9e07558ac78176b8e177187ad339ea9f37b7aa7569be5058198",
+    "simulator_files": {
+      "rust/fm1-sim/build.rs": "c49680112bbf19ccfc0affdd1749e14866603e35450436a57c5e14c3e69e004c",
+      "rust/fm1-sim/Cargo.toml": "31bd7f9ec75c971cd4af63147e13db4134b7e525399579e052fd9e85a39c09b6",
+      "rust/fm1-sim/src/abi.rs": "04c6d635b7a7de109a7b17ed216882554f4d5fb9e59bf6e3e07b91fcd1110472",
+      "rust/fm1-sim/src/clock.rs": "a3963fdb98990c74e2c219fbdeebcd6ab43a69b9862b8b57f820188d6361d950",
+      "rust/fm1-sim/src/lib.rs": "9d69811a841f37a0515f2a26826d799700c5705ab6abbe173a7f694d99fe0474",
+      "rust/fm1-sim/src/main.rs": "c99c1b950ac59b25aeba9886292437f656e84c6dce5b3edf737b9dfd1be276e1",
+      "rust/fm1-sim/src/platform.rs": "489ec97345e2a6ce3a3421758cf3de9c33a57656d7d047ca68305cfdfa7c409c",
+      "rust/fm1-sim/src/scenario.rs": "22c5ee5e8b6296dff21d69b123a255fd2797f313dbf0bfe6883a5bb4a55ba340",
+      "rust/fm1-sim/src/sinks.rs": "6d8850524262f5522e1c6970a451e99218c81c5ef7c4b870a521be3137751a02"
+    }
+  },
+  "remaining": [
+    "production C app/project/UI/gfx/engine ABI remains until #15/subsystem integration; no full #16 closure",
+    "native runtime qualified on Linux/WSL; Windows portable components only",
+    "private C app selectors retain original valid-range preconditions; no native worker threading added",
+    "MCU RAM/stack/flash/deadline and physical I/O qualification separate; no hardware/live/user-workspace/remote changes"
+  ]
+}
