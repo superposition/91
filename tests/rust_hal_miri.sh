@@ -5,3 +5,4 @@ cd "$(dirname "$0")/.."
 export MIRIFLAGS=-Zmiri-strict-provenance
 cargo +nightly-2026-08-28 miri test --locked -p fm1-jam-bridge --features hal-test retained_dma_root_pointer_remains_valid_between_call_scoped_updates
 cargo +nightly-2026-08-28 miri test --locked -p fm1-jam-bridge --features hal-test foreign_uninitialized_load_is_initialized_only_after_verified_success
+cargo +nightly-2026-08-28 miri test --locked -p fm1-jam-bridge --features hal-test retained_uart_root_survives_scoped_parser_calls_without_dma_references
