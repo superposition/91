@@ -448,6 +448,7 @@ int en_genre_donor(int g);                    /* the library column a genre take
 void en_genre(int g);                          /* the genre playing: its chords move in its own habits (the first bank keeps the original walk) */
 const char *en_piece_name_g(int g, int i);
 void en_piece_g(int g, int i, int16_t *par, uint16_t *pool);
+void en_piece_recipe_loaded(int g,int i); /* replay the deferred arc effect after portable project state is released */
 void en_piece_pats_g(int g, int i, uint16_t pats[EN_NPAT][EN_NLANE]);
 void en_piece_mods_g(int g, int i, uint8_t mod[EN_NLANE][16]);   /* its factory step tricks (en_mod) */
 void en_piece_pats(int i, uint16_t pats[EN_NPAT][EN_NLANE]);   /* its factory drum patterns */

@@ -55,6 +55,11 @@ static uint32_t st_sector(uint32_t obj, uint32_t copy)  /* flash offset of copy 
 
 static uint8_t st_buf[ST_PAYLOAD_MAX] __attribute__((aligned(4)));
 
+#if EN_RUST_STORAGE
+#include "dsp/rust_persistence.h"
+static const fm1_store_hooks st_rust_hooks = {st_read, st_erase, st_prog};
+#endif
+
 static int st_head(uint32_t obj, uint32_t copy, st_hdr_t *h)   /* commit record valid: 0 */
 {
     if (st_read(st_sector(obj, copy), h, sizeof *h))
@@ -100,6 +105,9 @@ static int st_current(uint32_t obj, st_hdr_t *h)
 /* load object into dst (up to max bytes); returns the length, or -1 */
 static int st_load(uint32_t obj, void *dst, uint32_t max)
 {
+#if EN_RUST_STORAGE
+    return fm1_rust_store(0, obj, dst, max, st_buf, &st_rust_hooks);
+#else
     uint32_t i;
     st_hdr_t h;
     if (st_current(obj, &h) < 0)
@@ -109,10 +117,14 @@ static int st_load(uint32_t obj, void *dst, uint32_t max)
     for (i = 0; i < h.len; i++)
         ((uint8_t *)dst)[i] = st_buf[i];
     return (int)h.len;
+#endif
 }
 
 static int st_save(uint32_t obj, const void *src, uint32_t len)
 {
+#if EN_RUST_STORAGE
+    return fm1_rust_store(1, obj, (void *)src, len, st_buf, &st_rust_hooks);
+#else
     uint32_t seq, base, off;
     int cur, rc;
     st_hdr_t h;
@@ -147,4 +159,5 @@ static int st_save(uint32_t obj, const void *src, uint32_t len)
             return -7;
     }
     return 0;
+#endif
 }

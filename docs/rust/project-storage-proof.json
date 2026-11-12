@@ -1,0 +1,524 @@
+{
+  "scope": "R06 / issue #7 software project state and A/B persistence acceptance",
+  "base": "81be48536ac2406edc6586c62b51cfc800754110",
+  "firstAbCheckpoint": "9ea700a",
+  "compiler": "Rust 1.94.1; clang wasm32; C floating point contraction disabled",
+  "flag": "EN_RUST_STORAGE",
+  "frozenSource": {
+    "manifest": "tests/reference/source.sha256",
+    "verifiedSourceFiles": 440,
+    "frozenWasmSha256": "a3d08947713bda76b64f76ed39b55aa26bdd182a65bf88fbd1efe0cbc12f8036"
+  },
+  "corpora": [
+    {
+      "family": "ab",
+      "scenarioCases": 47709,
+      "bytes": 2671736,
+      "sha256": "8d398663bfee5443f576cd2da7a8489a0eae639324a4561f40f6e74c07f9226e",
+      "executions": [
+        "immutable R01 C native",
+        "current C0 native",
+        "Rust production adapter native",
+        "current C0 WASM",
+        "Rust production adapter WASM"
+      ]
+    },
+    {
+      "family": "project",
+      "scenarioCases": 3199,
+      "bytes": 204744,
+      "sha256": "5600647c3aa19f68ab38eca6378dd640113a1676bb73e220e359395b18e264b4",
+      "executions": [
+        "immutable R01 C native",
+        "current C0 native",
+        "Rust production adapter native",
+        "current C0 WASM",
+        "Rust production adapter WASM"
+      ]
+    },
+    {
+      "family": "ui",
+      "scenarioCases": 10624,
+      "bytes": 1444872,
+      "sha256": "8bf2f2416d5515bbe80a5fec9ef27dd47f6908e22a35b16db17886b315f93804",
+      "executions": [
+        "immutable R01 C native",
+        "current C0 native",
+        "Rust production adapter native",
+        "current C0 WASM",
+        "Rust production adapter WASM"
+      ]
+    }
+  ],
+  "scenarioCases": 61532,
+  "additionalNullZeroBoundaryCalls": 2,
+  "unitTests": 8,
+  "malformedHeaderMutations": 32768,
+  "sessionByteMutations": 5120,
+  "nativeScenarios": {
+    "count": 16,
+    "assertionClean": 14,
+    "matchingExistingFailureScenarios": 2,
+    "failureManifest": "tests/reference/project-scenario-baseline.json",
+    "byteIdenticalPngs": 9,
+    "recordedWavFiles": 0,
+    "testCpuMode": "EN_HOST_FIXED_CPU=0; normal reporting unchanged"
+  },
+  "instrument": {
+    "publicExports": 24,
+    "memoryBytes": 33554432,
+    "comparedPcmPositions": 48766166,
+    "httpFallbackComparedSamples": 1048576,
+    "enabledWasmBytes": 2394638,
+    "enabledWasmSha256": "92dee074608bf62cfe202cfc41a0cc4223c3ff5be68f32abf98040b9ca4e37e9",
+    "c0WasmSha256": "dbfa17b7eb85e19044b13786deb5ca6574d841a70c3aac6e0795b2350ddb0a3c",
+    "reports": {
+      "factory": {
+        "initial_pack": "factory",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "baeff971",
+        "peak": 0.3714040517807007,
+        "blits": 4679,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 0,
+          "plans": 8,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1037,
+          "sessions": 1,
+          "commands": {
+            "accepted": 961,
+            "consumed": 961,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6215,
+            "chunks": 28982,
+            "controls": 27668
+          },
+          "sequencer": {
+            "lanes": 6222,
+            "mutations": 0,
+            "waits": 463712,
+            "boundaries": 1037
+          },
+          "factory": {
+            "accesses": 13390,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 72
+          }
+        }
+      },
+      "saved-v1": {
+        "initial_pack": "rust/fm1-engine/tests/packs/harris-citypop.jmp",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "28722449",
+        "peak": 0.4303741455078125,
+        "blits": 4673,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 1,
+          "plans": 10,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1033,
+          "sessions": 1,
+          "commands": {
+            "accepted": 751,
+            "consumed": 751,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6192,
+            "chunks": 34155,
+            "controls": 27682
+          },
+          "sequencer": {
+            "lanes": 6198,
+            "mutations": 0,
+            "waits": 546480,
+            "boundaries": 1033
+          },
+          "factory": {
+            "accesses": 13656,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 72
+          }
+        }
+      },
+      "session": {
+        "scenario": "v2-hold-idea-save-restart",
+        "render_calls": 11663,
+        "compared_samples": 6570900,
+        "seconds": 74.5,
+        "peak": 0.22903597354888916,
+        "memory_bytes": 33554432,
+        "saved_session": [
+          74,
+          83,
+          77,
+          1,
+          1,
+          11,
+          1,
+          8,
+          2,
+          1,
+          83,
+          0,
+          7,
+          1,
+          190,
+          0,
+          3,
+          83,
+          0,
+          0
+        ],
+        "rust": {
+          "validations": 1,
+          "plans": 9,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 804,
+          "sessions": 2,
+          "commands": {
+            "accepted": 319,
+            "consumed": 319,
+            "dropped": 0,
+            "high_water": 208
+          },
+          "transport": {
+            "pulses": 4819,
+            "chunks": 12684,
+            "controls": 11829
+          },
+          "sequencer": {
+            "lanes": 4824,
+            "mutations": 0,
+            "waits": 202944,
+            "boundaries": 804
+          },
+          "factory": {
+            "accesses": 1103,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 72
+          }
+        }
+      },
+      "sequencer": {
+        "scenario": "legacy-f4-piece-genre-transport",
+        "compared_samples": 2557800,
+        "render_calls": 4231,
+        "peak": 0.4515293836593628,
+        "sequencer": {
+          "lanes": 876,
+          "waits": 96752,
+          "boundaries": 21
+        },
+        "melodic": {
+          "acid": 153,
+          "mutations": 22,
+          "pluck": 153,
+          "bass": 153,
+          "bar": 4061,
+          "midi_transport": 48413
+        },
+        "voices": {
+          "drums": 6047,
+          "pluck": 6047,
+          "drone": 4957,
+          "acid": 6047,
+          "pad": 6047,
+          "pad_bus": 6047,
+          "controls": 5043,
+          "configs": 29145
+        },
+        "factory": {
+          "accesses": 3139,
+          "codecs": 0,
+          "rejections": 0,
+          "copied_bytes": 72
+        },
+        "memory_bytes": 33554432
+      },
+      "factory-lines": {
+        "scenario": "stored-frozen-acid-pluck-save",
+        "compared_samples": 970200,
+        "render_calls": 1613,
+        "saved_bytes": 3836,
+        "factory": {
+          "accesses": 1184,
+          "codecs": 6,
+          "rejections": 0,
+          "copied_bytes": 230
+        },
+        "formats": {
+          "decodes": 0,
+          "encodes": 0,
+          "rejections": 0,
+          "copied_bytes": 0
+        },
+        "persistence": {
+          "project_calls": 12,
+          "object_saves": 2,
+          "bytes": 6884
+        },
+        "memory_bytes": 33554432
+      },
+      "project": {
+        "legacy_project": [
+          {
+            "scenario": "recipes",
+            "compared_samples": 904050,
+            "render_calls": 1494,
+            "pcm_hash": "d5eb8651",
+            "project_calls": 7,
+            "object_saves": 0
+          },
+          {
+            "scenario": "corrupt-record",
+            "compared_samples": 904050,
+            "render_calls": 1494,
+            "pcm_hash": "d5eb8651",
+            "project_calls": 7,
+            "object_saves": 0
+          },
+          {
+            "scenario": "saved-factory-reset",
+            "compared_samples": 1177470,
+            "render_calls": 1950,
+            "pcm_hash": "d23160e5",
+            "project_calls": 10,
+            "object_saves": 2
+          }
+        ],
+        "frozen_reference": null
+      },
+      "fm6": {
+        "scenario": "loaded-user-FM6-algorithms-key-retrigger-stop-tails",
+        "cases": [
+          {
+            "algorithm": 0,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.47700321674346924,
+            "pcm_hash": "d393a85d",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 3,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.4807950258255005,
+            "pcm_hash": "d9669c55",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 5,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.5013117790222168,
+            "pcm_hash": "abebadf5",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 31,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.48351776599884033,
+            "pcm_hash": "cafdb8b9",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          }
+        ]
+      },
+      "effects": {
+        "scenario": "panel-effects-banks-release-tails",
+        "compared_samples": 2769480,
+        "render_calls": 5160,
+        "peak": 0.4538612365722656,
+        "pcm_hash": "fd659ab9",
+        "effects": {
+          "master_samples": 1384960,
+          "echo_samples": 1384960,
+          "tank_samples": 1384960,
+          "colour_sample_calls": 4154880
+        },
+        "memory_bytes": 33554432
+      }
+    },
+    "frozenLegacyReports": {
+      "legacy_project": [
+        {
+          "scenario": "recipes",
+          "compared_samples": 904050,
+          "render_calls": 1494,
+          "pcm_hash": "d5eb8651",
+          "project_calls": 7,
+          "object_saves": 0
+        },
+        {
+          "scenario": "corrupt-record",
+          "compared_samples": 904050,
+          "render_calls": 1494,
+          "pcm_hash": "d5eb8651",
+          "project_calls": 7,
+          "object_saves": 0
+        },
+        {
+          "scenario": "saved-factory-reset",
+          "compared_samples": 1177470,
+          "render_calls": 1950,
+          "pcm_hash": "d23160e5",
+          "project_calls": 10,
+          "object_saves": 2
+        }
+      ]
+    }
+  },
+  "memory": {
+    "existingRuntimeBytes": 6194,
+    "existingSlotBytes": 578,
+    "existingImageBytes": 3840,
+    "existingNorScratchBytes": 3840,
+    "extensionTemporaryBytes": 3048,
+    "additionalPersistentStateOrScratchBuffers": 0,
+    "counterStaticBytes": 32,
+    "constantCallbackDescriptorBytesOn32Bit": 52,
+    "patternSnapshotStackBytes": 168,
+    "performanceSnapshotBytes": 12,
+    "mcuMapAndStackQualified": false
+  },
+  "linkedWasmFootprint": {
+    "storage_disabled": {
+      "path": "build/persistence/storage-disabled.wasm",
+      "bytes": 2391607,
+      "sha256": "96e3a5c5620a9fef174bcf29fed43b4bf5cc99948b74595ca771c5a9be669ecc",
+      "code_bytes": 665091,
+      "data_section_bytes": 159460,
+      "custom_section_bytes": 1565395
+    },
+    "storage_enabled": {
+      "path": "build/emu-parity/rust.wasm",
+      "bytes": 2394638,
+      "sha256": "92dee074608bf62cfe202cfc41a0cc4223c3ff5be68f32abf98040b9ca4e37e9",
+      "code_bytes": 675185,
+      "data_section_bytes": 160276,
+      "custom_section_bytes": 1557475
+    },
+    "delta": {
+      "file_bytes": 3031,
+      "code_bytes": 10094,
+      "data_section_bytes": 816,
+      "custom_section_bytes": -7920
+    },
+    "note": "same Rust engine, toggle only EN_RUST_STORAGE; WASM accounting is not an MCU RAM or flash estimate"
+  },
+  "flagProfiles": {
+    "storage-disabled": {
+      "bytes": 2391607,
+      "sha256": "96e3a5c5620a9fef174bcf29fed43b4bf5cc99948b74595ca771c5a9be669ecc",
+      "basicSoundAndFramebuffer": "pass"
+    },
+    "formats-disabled": {
+      "bytes": 2396939,
+      "sha256": "c2fac401df248f4af4d7a53eb38378e1361ba4c3d1f27b2cbadbcba0ddb6f352",
+      "basicSoundAndFramebuffer": "pass"
+    },
+    "factory-disabled": {
+      "bytes": 2396150,
+      "sha256": "12106385af64cfb27407b2cfc5224e3bcf7e459a0e57753722eb26734b535623",
+      "basicSoundAndFramebuffer": "pass"
+    }
+  },
+  "softwareAcceptanceRemaining": [],
+  "integrationNotClaimed": [
+    "whole MCU emission/link/RAM/stack qualification",
+    "physical power-cut runs",
+    "interactive browser/MIDI/device QA"
+  ],
+  "physicalDeviceWrites": false,
+  "liveServerChanges": false,
+  "sourceSha256Lf": {
+    "firmware/src/app/jam_session.c": "a8f60b262f4da70c561246be5cce7ebc3cca51b2422ee785d310572a5526931a",
+    "firmware/src/app/plat_fm1.c": "3540b8d5b4ced1e791b9978435f8d1995c30671452ca04cf02f746966358e403",
+    "firmware/src/app/project.c": "eb6bf57a1f7cf4d9e449e5282e49d817ed9f6d100882d427f7c4651b3c9e3a69",
+    "firmware/src/app/ui.c": "482853735334e1f606b6049e1678b7bfaad8648f55392f5c67aeee1fc6c298d9",
+    "firmware/src/dsp/amb.c": "faccb1adef2c0bf710b4a8a040eb331c2b9dc043fedf38cc87a1e2d3bd07e652",
+    "firmware/src/dsp/amb.h": "3f28edd86b75c6eed7074309dcab556f161dbdfdf97b13d1c5b443ef800c0166",
+    "firmware/src/dsp/rust_persistence.h": "19d675e382af1fc050d50f33c2abe5c9f0a323b95a96b07efd518f1e6a52320b",
+    "firmware/src/dsp/rust_project.h": "587cbd030ad8644bf129499d2708d6f193f420e3a98a778bed97c347d02f9330",
+    "host/amb_host.c": "1b8d832ef1124e51d70a2e855ffc63cb1b00baf4d312b1296613ea66aabd6be3",
+    "rust/fm1-engine/src/lib.rs": "1c005577d5508ff94c7a66219031fcb9d5a4170c91a84de5f617d7f8c38110d1",
+    "rust/fm1-engine/src/persistence.rs": "2bb3466171b18ae41e62c6139c90bd8c8a2bb3897128d97015ed0fe9459739c6",
+    "rust/fm1-engine/src/persistence_ui.rs": "8c11565787f8bda24dbef27ebec53a75c5f534e6fd9ce4b85cb840735d2013d0",
+    "rust/fm1-engine/src/project.rs": "3e23a2e15c17d6efa310860b84833d316a50ca008b47e4ba5951fa2a6c2a8290",
+    "rust/fm1-engine/tests/persistence_ui.rs": "fb8d8db1e593982b171d2c86bfb3c4806a89ddb187ab1ac72ea32638ddd6dcf5",
+    "rust/fm1-jam-bridge/src/lib.rs": "b906e1e9af854040a6452eb20c4d2f5bfae317dde12c4d4ed5ef85dde8461d66",
+    "rust/fm1-jam-bridge/src/persistence.rs": "dc9c79502a0bafbf4ab6681bb8aaa550b9d17a76dd6a57e41f3640d67b6fc6b0",
+    "rust/fm1-jam-bridge/src/project.rs": "28ba650f1bac6abe4fd57a9cb3a02cdb1ee13e679d1a6a84960f276bb2e2f696",
+    "tests/host/emu_factory_test.mjs": "8bc17a616e1c54e141ef2bd8f4e6f636b235f1cf9fb4a3c73e829f2aa6275f73",
+    "tests/host/emu_project_test.mjs": "21770f92bf2166f4ac7e32f738903b295e0a80d276c9e4c4e27c60514f78fbd3",
+    "tests/host/emu_sequencer_test.mjs": "e27c8f8842eb55d43a4a559082a95dfd80b228bf7aa8ee204f562b746a2312e8",
+    "tests/host/project_wasm_test.mjs": "d823c071a99fa546bffd207d1b5c396f20b4f09ae56ce27d0a9abdc6bcc76a73",
+    "tests/reference/persistence.sha256": "d06be1a7b8cbb6506812cae512164006d71ecb0bd72b61f2284feb577cf3929e",
+    "tests/reference/persistence_reference.c": "c8dad93a540d17bcf30b2630afa09aa121b98ad0aefb7b294eaffeb575234dd3",
+    "tests/reference/persistence_ui_reference.c": "2fd48d034698db2dff1e97ace1625c1162a57fbad81c9d16f96aa8b7b38c9b52",
+    "tests/reference/project-scenario-baseline.json": "f93b45dad3a05095d6776d04e34b5ff7e6304aadd49a95b00008924616b3c863",
+    "tests/reference/project_reference.c": "5ee524ee8b84306541fda28526542f9f47e18311b09255e4ae223bbc48ebe46b",
+    "tests/rust_emulator_parity.sh": "78b10a0882671eec299cc092ef29c8179543ea3584caa8931838fbcf64b449f7",
+    "tests/rust_persistence.sh": "d2905d0e8d7d61b7df3df6224b387e1651b49093beb05c5dff8cfa20474f54b6",
+    "tests/rust_persistence_ui.sh": "45559999ca4080885648ed010206c9ea38df8c95bc2497c024b74eeb48e76072",
+    "tests/rust_project.sh": "b7de406290c9a3cf3f5849c4ab9f2ad041c88102259eedfc06727e238a98f831",
+    "tests/rust_project_scenarios.sh": "ab026ec6b3bc36ff95199b78eb5f3087220060eda24d5d05371b211932e8e5a5",
+    "tools/factory_footprint.mjs": "c271a641f01b6deab0d92db969b20db2ce8dea9eee0207fc88b8faa2f8d643b8",
+    "web/emu/build.sh": "fe905a4e7a37112c93c507935be7e40d3baced2cb5263ff58585aaddc5202d52",
+    "web/emu/build_clang.sh": "dfc8f88c62af66cb3c127a8fe0a0a876f6fa4c7ce8784eee9f3c0358da34d961"
+  }
+}

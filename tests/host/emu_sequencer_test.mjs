@@ -38,6 +38,7 @@ function tap(button){input('web_buttons',1<<button);advance(100);input('web_butt
 advance(6000);tap(6);input('web_keys',1<<12);advance(100);input('web_keys',0);advance(100);advance(1000);
 const boundary=rust.ex.web_rust_stat(21),lanes=rust.ex.web_rust_stat(18);
 const copiedBefore=rust.ex.web_rust_stat(35);
+const projectBefore=rust.ex.web_rust_stat(66);
 advance(5000);input('web_enc',2,1);advance(5000);tap(10);advance(1000);tap(10);advance(4000);
 input('web_buttons',1<<5);advance(100);input('web_enc',2,1);advance(100);input('web_buttons',0);advance(6000);
 assert.equal(rust.ex.web_rust_stat(21),boundary,'F4 leaves Songbook boundary scheduling');
@@ -56,7 +57,8 @@ const configs=rust.ex.web_rust_stat(47);
 assert(configs>0,'voice block configuration arithmetic executes in Rust');
 assert(melodic.every(value=>value>0),'acid, mutation, pluck, bass, bar and MIDI/transport paths execute in Rust');
 assert.equal(rust.memory.buffer.byteLength,33554432);assert(peak>0.05 && peak<1);
-assert(rust.ex.web_rust_stat(35)>copiedBefore,'real legacy piece/genre changes copy Rust factory data');
+if(rust.ex.web_rust_stat(66)>0) assert(rust.ex.web_rust_stat(66)>projectBefore,'real legacy piece/genre changes execute Rust project state');
+else assert(rust.ex.web_rust_stat(35)>copiedBefore,'real legacy piece/genre changes copy Rust factory data');
 assert.equal(rust.ex.web_rust_stat(34),0,'legacy factory calls stay in bounds');
 console.log(JSON.stringify({scenario:'legacy-f4-piece-genre-transport',compared_samples:samples,render_calls:calls,peak,
   sequencer:{lanes:rust.ex.web_rust_stat(18)-lanes,waits:rust.ex.web_rust_stat(20),boundaries:boundary},

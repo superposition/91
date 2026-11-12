@@ -642,6 +642,9 @@ static void edited(void) { proj.edited |= (uint16_t)(1u << proj.piece); }   /* t
  * the list's next slot (across genres), and PRESETS steps through the list instead of the bank (with SEL: on the next bar). */
 static int sl_find(void)                        /* the slot of the piece playing, or 0xFF */
 {
+#if EN_RUST_STORAGE
+    return fm1_rust_project_list(glob.sl,0,ui.sl_pos,0,proj.genre,proj.piece);
+#endif
     const int e = proj.genre * NPIECES + proj.piece + 1;
     int s;
     if (ui.sl_pos < SL_N && glob.sl[ui.sl_pos] == e)
@@ -653,6 +656,9 @@ static int sl_find(void)                        /* the slot of the piece playing
 }
 static int sl_step(int from, int d)             /* the slot set after (d 1) or before (d -1) slot from (0xFF: from the start), round the list; -1 none */
 {
+#if EN_RUST_STORAGE
+    return fm1_rust_project_list(glob.sl,1,from,d,0,0);
+#endif
     int s, i = from < SL_N ? from : d > 0 ? SL_N - 1 : 0;
     for (s = 0; s < SL_N; s++) {
         i = (i + d + SL_N) % SL_N;
@@ -7361,8 +7367,15 @@ static void voices_load(void)
 {
     static vox_t x;
     uint32_t i;
+#if EN_RUST_STORAGE
+    { int n=plat_store_load(OBJ_VOICES,&x,sizeof x);
+      int count=fm1_rust_persist_ui(1,(const uint8_t*)&x,n>0?(uint32_t)n:0,0,0,0,0);
+      if(count<0) return;
+      x.n=(uint32_t)count; }
+#else
     if (plat_store_load(OBJ_VOICES, &x, sizeof x) != (int)sizeof x || x.magic != VOX_MAGIC || x.n > EN_NUSER)
         return;
+#endif
     for (i = 0; i < x.n; i++)
         en_user_voice((int)i, x.v[i]);
 }
@@ -7452,18 +7465,30 @@ static void settings_save(void)
     s.nui = 12;
     for (i = 0; i < EN_NFXS; i++)
         s.fxs[i] = ui.fxs[i];
+#if EN_RUST_STORAGE
+    (void)fm1_rust_preserve_genre(s.fxs,set_disk.fxs,GENRE_FXS,EN_NFXS,proj.genre,(uint32_t)set_have);
+#else
     if (proj.genre && set_have)                  /* in another genre: its own tape / vinyl / pump settings are not the player's */
         for (i = 0; i < 12; i++)
             s.fxs[GENRE_FXS[i]] = set_disk.fxs[GENRE_FXS[i]];
+#endif
     for (i = 0; i < 11; i++)
         s.uiv[i] = *uiv(i);
+#if EN_RUST_STORAGE
+    { const fm1_persist_performance p={ui.usb_fixed,ui.fm_dy,ui.scan,ui.dj_rounds,ui.dj_ramp,ui.intro,ui.midi_map,ui.min_ch,ui.min_pads,ui.cc_mode,ui.viz,ui.centre_imp};
+      fm1_persist_performance_bytes b={0};
+      (void)fm1_rust_performance(0,&p,&b);s.uiv[11]=b.performance;s.usb=b.usb;s.viz=b.visualizer; }
+#else
     s.uiv[11] = (uint8_t)(ui.min_ch | (ui.viz == VZ_THEORY ? 1u : ui.viz == VZ_TRIP ? 2u : 0u) << 5);   /* (the spare byte: 0 in an older record, all channels; bits 5-6, 0.16.10: THEORY 1, TRIP 2, whose 7 in set_t.viz reads as AUTO in older builds) */
+#endif
     s.gx_preset = ui.gx_preset;
     s.gx_tgt = ui.gx_tgt;
     s.pm_tgt = ui.pm_tgt;
     s.gx_pat = ui.gx_pat;
+#if !EN_RUST_STORAGE
     s.usb = (uint16_t)(ui.usb_fixed | (!ui.fm_dy) << 1 | ui.scan << 2 |   /* (bit 1: the DX set chosen; DY is the default since 0.14.21, so older settings read as DY) */ (ui.dj_rounds & 7) << 3 | (ui.dj_ramp & 7) << 6 | (ui.intro & 7) << 9 | (ui.midi_map & 7) << 12 | (ui.min_pads == 1) << 15);
     s.viz = (uint8_t)((ui.viz >= VZ_TRIP ? 7u : ui.viz) | (ui.min_pads == 2) << 3 | (ui.cc_mode & 3) << 4 | (ui.min_pads == 3) << 6 | ui.centre_imp << 7);   /* (bits 3-6 free before 0.15.22: older records read 0) */
+#endif
 #if EN_RUST_FORMATS
     { uint8_t raw[sizeof s];
       if(fm1_rust_formats_settings(s.fxs,EN_NFXS,s.uiv,&s.gx_preset,s.gx_pat,s.usb,raw,sizeof raw)!=(int32_t)sizeof raw) return;
@@ -7481,9 +7506,12 @@ static void settings_save(void)
 }
 static void settings_load(void)
 {
-    set_t s;
+    set_t s={0};
     uint8_t raw[sizeof(set_t)];
     int p, c, n = plat_store_load(OBJ_SET, raw, sizeof raw);
+#if EN_RUST_STORAGE
+    if(fm1_rust_persist_ui(0,raw,n>0?(uint32_t)n:0,EN_FXS_DEF,EN_NFXS,(uint8_t*)&s,sizeof s)!=(int)sizeof s) return;
+#else
 #if EN_RUST_FORMATS
     if(n<=0 || !fm1_rust_formats_restore(OBJ_SET,raw,(uint32_t)n,EN_NFXS,sizeof(set_t))) return;
 #endif
@@ -7518,6 +7546,13 @@ static void settings_load(void)
     } else {
         return;
     }
+#endif
+#if EN_RUST_STORAGE
+    fm1_persist_performance performance={0};
+    { const fm1_persist_performance_bytes bytes={s.usb,s.uiv[11],s.viz};
+      (void)fm1_rust_performance(1,&bytes,&performance); }
+    typedef char rust_viz_ids[VZ_TRIP==7 && VZ_THEORY==8 && VZ_AUTO==9?1:-1];
+#endif
     set_disk = s;
     set_have = 1;
     for (p = 0; p < NFXP; p++)
@@ -7528,6 +7563,9 @@ static void settings_load(void)
             if (FXP[p].bit == 63) {              /* the UI's own (not the genre: 11) */
                 if (FXP[p].c[c].idx < 11)
                     fxp_set(k, s.uiv[FXP[p].c[c].idx]);
+#if EN_RUST_STORAGE
+                else { const int value=fm1_rust_performance_knob(&performance,FXP[p].c[c].idx);if(value>=0) fxp_set(k,value); }
+#else
                 else if (FXP[p].c[c].idx == 12)
                     fxp_set(k, s.usb & 1);
                 else if (FXP[p].c[c].idx == 13)
@@ -7544,6 +7582,7 @@ static void settings_load(void)
                     fxp_set(k, (s.viz >> 6 & 1u) ? 3 : (s.viz >> 3 & 1u) ? 2 : s.usb >> 15 & 1);   /* (M:S in set_t.viz's bit 3, 0.15.22; MPK bit 6, 0.15.23) */
                 else if (FXP[p].c[c].idx == 22)
                     fxp_set(k, s.viz >> 4 & 3u);
+#endif
             } else if (kind == KN_TGT) {
                 fxp_set(k, s.gx_tgt);
             } else if (kind == KN_PTGT) {
@@ -7557,8 +7596,12 @@ static void settings_load(void)
         ui.gx_pat = s.gx_pat;
         en_gate_pat(ui.gx_pat);
     }
+#if EN_RUST_STORAGE
+    ui.viz=performance.visualizer;ui.centre_imp=performance.centre;
+#else
     ui.viz = (uint8_t)((s.viz & 7u) == 7u ? ((s.uiv[11] >> 5 & 3u) == 1u ? VZ_THEORY : (s.uiv[11] >> 5 & 3u) == 2u ? VZ_TRIP : VZ_AUTO) : s.viz & 7u);
     ui.centre_imp = (uint8_t)(s.viz >> 7);
+#endif
     ui.set_dirty = 0;
 }
 
@@ -7566,6 +7609,24 @@ static void settings_load(void)
  * quiet moment; playing, the player's three (theme, Tune, MIDI out), with a moment's gap */
 static void autosave(void)
 {
+#if EN_RUST_STORAGE
+    { static uint32_t place_clock[2];
+      fm1_autosave_input input={plat_ms(),ui.act_t,(uint32_t)(proj.genre*NPIECES+proj.piece+1),(uint32_t)project_place(),
+        (uint32_t)en_playing,(uint32_t)plat_store_seamless(),ui.btn,ui.keys,ui.store_wait,
+        ui.vox_dirty,ui.set_dirty,ui.set_lazy,(uint32_t)project_pending(),(uint32_t)project_pending_globals(),GLOB_QUIET,KIT_QUIET};
+      const uint32_t plan=fm1_rust_autosave(&input,place_clock);
+      if(plan&256u) project_place_set((int)input.place);
+      if(plan&512u) ui.set_dirty=1;
+      switch(plan&255u) {
+      case 1: ui.vox_dirty=0; quiet_write(3); break;
+      case 2: ui.set_dirty=0; quiet_write(1); break;
+      case 3: project_flush(); break;
+      case 4: quiet_write(2); break;
+      }
+      return;
+    }
+#endif
+
     uint32_t now = plat_ms();
     {   /* START (0.16.26): the piece playing, kept for the next power-on once it has stayed 20 s (a write of the global record: only when it costs the
          * music nothing, stopped or with the flash's seamless erase) */

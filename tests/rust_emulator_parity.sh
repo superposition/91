@@ -25,6 +25,8 @@ node tests/host/emu_sequencer_test.mjs "$out/reference.wasm" "$out/rust.wasm" > 
 cat "$out/sequencer.json"
 node tests/host/emu_factory_test.mjs "$out/reference.wasm" "$out/rust.wasm" > "$out/factory-lines.json"
 cat "$out/factory-lines.json"
+node tests/host/emu_project_test.mjs "$out/reference.wasm" "$out/rust.wasm" > "$out/project.json"
+cat "$out/project.json"
 node tests/host/emu_fm6_test.mjs "$out/reference.wasm" "$out/rust.wasm" > "$out/fm6.json"
 cat "$out/fm6.json"
 node tests/host/emu_worker_test.mjs "$out/reference.wasm" "$out/rust.wasm" > "$out/worker.json"

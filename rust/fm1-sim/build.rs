@@ -74,6 +74,7 @@ fn main() {
                 "FM6",
                 "FORMATS",
                 "WORKER",
+                "STORAGE",
             ] {
                 c.arg(format!("-DEN_RUST_{flag}=1"));
             }

@@ -37,7 +37,8 @@ assert(rust.ex.web_rust_stat(33)>=decoded+2,'saving frozen acid/pluck lines enco
 const len=rust.ex.web_store_len(0);assert.equal(len,reference.ex.web_store_len(0));assert(len>0);
 assert.deepEqual(new Uint8Array(rust.memory.buffer,rust.ex.web_store(0),len),new Uint8Array(reference.memory.buffer,reference.ex.web_store(0),len));
 assert.equal(rust.ex.web_rust_stat(34),0);assert.equal(rust.memory.buffer.byteLength,33554432);
-assert(rust.ex.web_rust_stat(36)>0 && rust.ex.web_rust_stat(37)>0,'stored record decode/save execute through Rust formats');
+if(rust.ex.web_rust_stat(66)>0) assert(rust.ex.web_rust_stat(67)>0,'stored record load/save execute through Rust project policy');
+else assert(rust.ex.web_rust_stat(36)>0 && rust.ex.web_rust_stat(37)>0,'stored record decode/save execute through Rust formats');
 assert.equal(rust.ex.web_rust_stat(38),0,'valid saved record/voice paths reject no format data');
 console.log(JSON.stringify({scenario:'stored-frozen-acid-pluck-save',compared_samples:samples,render_calls:calls,saved_bytes:len,
- factory:{accesses:rust.ex.web_rust_stat(32),codecs:rust.ex.web_rust_stat(33),rejections:rust.ex.web_rust_stat(34),copied_bytes:rust.ex.web_rust_stat(35)},formats:{decodes:rust.ex.web_rust_stat(36),encodes:rust.ex.web_rust_stat(37),rejections:rust.ex.web_rust_stat(38),copied_bytes:rust.ex.web_rust_stat(39)},memory_bytes:rust.memory.buffer.byteLength}));
+ factory:{accesses:rust.ex.web_rust_stat(32),codecs:rust.ex.web_rust_stat(33),rejections:rust.ex.web_rust_stat(34),copied_bytes:rust.ex.web_rust_stat(35)},formats:{decodes:rust.ex.web_rust_stat(36),encodes:rust.ex.web_rust_stat(37),rejections:rust.ex.web_rust_stat(38),copied_bytes:rust.ex.web_rust_stat(39)},persistence:{project_calls:rust.ex.web_rust_stat(66),object_saves:rust.ex.web_rust_stat(67),bytes:rust.ex.web_rust_stat(71)},memory_bytes:rust.memory.buffer.byteLength}));

@@ -1,0 +1,7 @@
+{
+  "note": "Existing source scenario expectations predate the current factory pad levels. Do not silently alter them during the persistence port.",
+  "existingFailures": {
+    "store": ["FAIL expect par0 == 42, got 56", "FAIL expect par0 == 52, got 66", "FAIL expect par0 == 52, got 66"],
+    "genrestore": ["FAIL expect par0 == 30, got 44", "FAIL expect par0 == 30, got 44", "FAIL expect par0 == 30, got 44"]
+  }
+}

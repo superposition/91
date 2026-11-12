@@ -80,6 +80,33 @@ typedef struct {
 } old_kit_t;
 #define OLD_KIT_THEME (8 + 2 * EN_NPAT * EN_NLANE + 2 * 3 * EN_NLANE)   /* its theme's byte */
 
+#if EN_RUST_STORAGE
+#include "../dsp/rust_project.h"
+typedef char rust_slot_size[sizeof(slot_t)==578?1:-1];
+typedef char rust_project_size[sizeof(project_t)==6194?1:-1];
+typedef char rust_global_size[sizeof(glob_t)==32?1:-1];
+typedef char rust_slot_offset[__builtin_offsetof(project_t,slot)==414?1:-1];
+static const fm1_project_fields project_rust_fields={&proj,image,&saved,&pending,&pending_glob,&glob,&glob_from_old,px,pxl,&pending_px,&bs_dirty,plat_store_load,plat_store_save};
+static int project_rust_do(uint32_t op,uint32_t arg)
+{
+    fm1_project_patterns patterns={{{0}},{{0}}};
+    int p,l,r;
+    int32_t recipe_effect=-1;
+    if(op==2) {
+        for(p=0;p<EN_NPAT;p++) for(l=0;l<EN_NLANE;l++) patterns.patterns[p][l]=en_pats[p][l];
+        for(l=0;l<EN_NLANE;l++) for(p=0;p<16;p++) patterns.modifiers[l][p]=en_mod[l][p];
+    }
+    r=fm1_rust_project(op,&project_rust_fields,arg,&patterns,&recipe_effect);
+    if(r<0) return r;
+    if(recipe_effect>=0) en_piece_recipe_loaded(0,(int)recipe_effect);
+    if(op==1 || op==3 || op==5 || op==16 || op==17) {
+        for(p=0;p<EN_NPAT;p++) for(l=0;l<EN_NLANE;l++) en_pats[p][l]=patterns.patterns[p][l];
+        for(l=0;l<EN_NLANE;l++) for(p=0;p<16;p++) en_mod[l][p]=patterns.modifiers[l][p];
+    }
+    return r;
+}
+#endif
+
 const char *piece_name(int i) { return en_piece_name_g(proj.genre, i); }
 
 static void recipe(int i, slot_t *s)
@@ -110,6 +137,10 @@ static int pool_ok(uint32_t p)               /* the root and at least two more n
 
 static void take(int i)                      /* piece i's slot into play (its patterns too), the globals kept */
 {
+#if EN_RUST_STORAGE
+    (void)project_rust_do(3,(uint32_t)i); return;
+#endif
+
     const slot_t *s = &proj.slot[i];
     int p, l;
     for (p = 0; p < P_NPARAMS; p++)
@@ -131,6 +162,15 @@ static void take(int i)                      /* piece i's slot into play (its pa
 
 static void keep(void)                       /* the piece playing, into its slot */
 {
+#if EN_RUST_STORAGE
+    { slot_t *rs=&proj.slot[proj.piece];
+      ui_fx_snapshot(pxl[proj.piece]+1); pxl[proj.piece][0]=1;
+      if(proj.par[P_AC_LOCK]) en_acid_pack(rs->acl);
+      if(proj.par[P_CM_LOCK]) en_pluck_pack(rs->cml);
+      en_bass_steps_get(rs->bs);
+      (void)project_rust_do(2,0); return; }
+#endif
+
     slot_t *s = &proj.slot[proj.piece];
     int p, l;
     ui_fx_snapshot(pxl[proj.piece] + 1);     /* (its FILTERS and SCREAM, 0.16.28) */
@@ -332,6 +372,10 @@ static void px_load(int g);
 static void bs_load(int g);
 static void image_load(int g)
 {
+#if EN_RUST_STORAGE
+    (void)project_rust_do(0,(uint32_t)g); return;
+#endif
+
     int i, n;
     px_load(g);
     saved = 0;
@@ -376,6 +420,10 @@ static void image_load(int g)
 /* genre g's saved pieces' bass steps out of their object (none: all rests, the line's own) */
 static void bs_load(int g)
 {
+#if EN_RUST_STORAGE
+    (void)project_rust_do(12,(uint32_t)g); return;
+#endif
+
     uint8_t b[BS_SIZE];
     const int n = plat_store_load(OBJ_BSTEP, b, sizeof b);
     int i;
@@ -391,6 +439,10 @@ static void bs_load(int g)
 /* the marked pieces' steps into the object (written only if they changed it) */
 static int bs_save(void)
 {
+#if EN_RUST_STORAGE
+    return project_rust_do(13,0);
+#endif
+
     uint8_t b[BS_SIZE];
     int n = plat_store_load(OBJ_BSTEP, b, sizeof b), i, k, diff = 0;
     if (!(n >= (int)BS_HDR && rd32(b) == BS_MAGIC && b[4] == BS_LEN)) {
@@ -424,6 +476,10 @@ static int bs_save(void)
  * defaults), and this time's edits forgotten */
 static void px_load(int g)
 {
+#if EN_RUST_STORAGE
+    (void)project_rust_do(10,(uint32_t)g); return;
+#endif
+
     uint8_t b[PX_SIZE];
     const int n = plat_store_load(OBJ_KINDS, b, sizeof b);
     int i;
@@ -444,6 +500,10 @@ static void px_load(int g)
 /* the playing genre's extras into the object, the other genres' as they were (a KND1 object made PCX1 first, its types kept) */
 static int px_save(void)
 {
+#if EN_RUST_STORAGE
+    return project_rust_do(11,0);
+#endif
+
     uint8_t b[PX_SIZE];
     int n = plat_store_load(OBJ_KINDS, b, sizeof b);
     if (!(n >= (int)PX_HDR && rd32(b) == PX_MAGIC && b[4] == PX_LEN)) {
@@ -475,6 +535,12 @@ static int px_save(void)
 /* the playing piece's FILTERS and SCREAM (PX_FXS): as left this time in the genre, else as saved with it, else the defaults */
 void project_fx_get(uint8_t *v)
 {
+#if EN_RUST_STORAGE
+    { uint8_t defaults[PX_NFX]; int n;
+      for(n=0;n<PX_NFX;n++) defaults[n]=(uint8_t)EN_FXS_DEF[PX_FXS[n]];
+      fm1_rust_piece_effects(px[proj.piece],pxl[proj.piece],defaults,v); return; }
+#endif
+
     const int i = proj.piece;
     int k;
     if (pxl[i][0])
@@ -488,6 +554,10 @@ void project_fx_get(uint8_t *v)
 
 static void glob_load(void)                  /* the player's three: their object, else the old bank's header, else the defaults */
 {
+#if EN_RUST_STORAGE
+    (void)project_rust_do(7,0); return;
+#endif
+
     glob_t g;
     const int n = plat_store_load(OBJ_GLOB, &g, sizeof g);
     if ((n == (int)sizeof g || n == (int)GLOB_OLD) && g.magic == GLOB_MAGIC) {
@@ -507,6 +577,13 @@ static void glob_load(void)                  /* the player's three: their object
  * stay). A saved one starts as it was saved. Seed 0 (the tests'): the first piece, exact. */
 void project_start(uint32_t seed)
 {
+#if EN_RUST_STORAGE
+    if(project_rust_do(1,seed)) keep();
+    if(seed) en_seed(seed ^ seed >> 16);
+    en_genre(proj.genre);
+    return;
+#endif
+
     static const uint8_t NUDGE[] = {P_PAD, P_ACID, P_BASS, P_PULSE, P_NOISE, P_EVOLVE, P_DRIFT, P_MOTION, P_BRIGHT,
                                     P_DETUNE, P_DR_CUT, P_DR_RES, P_DE_AMT, P_DL_DEPTH, P_AC_CUT, P_AC_RES,
                                     P_AC_ENV, P_AC_DEC, P_AC_DENS, P_AC_MUT, P_ECHO, P_REVERB, P_SIZE, P_DRIVE};
@@ -552,12 +629,20 @@ void project_start(uint32_t seed)
 int project_place(void) { return glob.rsv & 0xFF; }
 void project_place_set(int pl)
 {
+#if EN_RUST_STORAGE
+    (void)project_rust_do(14,(uint32_t)pl); return;
+#endif
+
     glob.rsv = (int16_t)((glob.rsv & 0x100) | (pl & 0xFF));
     project_globals();
 }
 int project_start_random(void) { return glob.rsv >> 8 & 1; }
 void project_start_random_set(int on)
 {
+#if EN_RUST_STORAGE
+    (void)project_rust_do(15,(uint32_t)(on!=0)); return;
+#endif
+
     glob.rsv = (int16_t)((glob.rsv & 0xFF) | (on ? 0x100 : 0));
     project_globals();
 }
@@ -568,6 +653,10 @@ void project_apply(void)
     for (i = 0; i < P_NPARAMS; i++)
         en_set(i, proj.par[i]);
     en_pool(proj.pool);
+    #if EN_RUST_STORAGE
+    if(project_rust_do(18,0)&1) en_acid_unpack(proj.acl);
+    if(project_rust_do(18,0)&2) en_pluck_unpack(proj.cml);
+#else
     if (proj.par[P_AC_LOCK]) {               /* a frozen acid line: the piece's own (never an empty one: that is a line never stored) */
         int k, any = 0;
         for (k = 0; k < 18; k++)
@@ -582,6 +671,7 @@ void project_apply(void)
         if (any)
             en_pluck_unpack(proj.cml);
     }
+#endif
     en_prog(proj.prg);
     en_prog_kinds(proj.prk);
     en_bass_steps_set(proj.bs);
@@ -591,6 +681,10 @@ void project_apply(void)
 
 void project_piece(int i)
 {
+#if EN_RUST_STORAGE
+    keep(); (void)project_rust_do(16,(uint32_t)i); return;
+#endif
+
     keep();
     proj.piece = (uint8_t)((i % NPIECES + NPIECES) % NPIECES);
     take(proj.piece);
@@ -601,6 +695,11 @@ void project_piece(int i)
  * changes no longer wait for it while you are in another, which freed 5.5 KB of the tight RAM.) */
 void project_set_genre(int g)
 {
+#if EN_RUST_STORAGE
+    if(((g%EN_NGENRE)+EN_NGENRE)%EN_NGENRE==proj.genre) return;
+    keep(); (void)project_rust_do(17,(uint32_t)g); return;
+#endif
+
     g = ((g % EN_NGENRE) + EN_NGENRE) % EN_NGENRE;
     if (g == proj.genre)
         return;
@@ -615,6 +714,11 @@ void project_set_genre(int g)
 
 void project_piece_save(void)
 {
+#if EN_RUST_STORAGE
+    keep();
+    (void)project_rust_do(4,0); return;
+#endif
+
     keep();
     pack_slot(&proj.slot[proj.piece], proj.piece);
     {   /* its FILTERS and SCREAM go with it (0.16.28); the extras' object is written only when they changed (no memcmp in the emulator's libc) */
@@ -635,6 +739,10 @@ void project_piece_save(void)
 
 void project_piece_factory(void)
 {
+#if EN_RUST_STORAGE
+    (void)project_rust_do(5,0); return;
+#endif
+
     pxl[proj.piece][0] = 0;                  /* (its FILTERS and SCREAM: the defaults, unless it was saved with its own) */
     recipe(proj.piece, &proj.slot[proj.piece]);
     take(proj.piece);
@@ -652,6 +760,10 @@ void project_piece_factory(void)
 
 void project_globals(void)
 {
+#if EN_RUST_STORAGE
+    (void)project_rust_do(8,0); return;
+#endif
+
     glob_sync();
     pending_glob = 1;
 }
@@ -662,6 +774,10 @@ int project_pending_globals(void) { return pending_glob; }
 
 int project_flush(void)
 {
+#if EN_RUST_STORAGE
+    return project_rust_do(6,0);
+#endif
+
     if (!pending && !pending_glob && !pending_px && !bs_dirty)
         return 0;
     if (pending) {
@@ -684,6 +800,10 @@ int project_flush(void)
  * the music plays from power-on, so these are written without waiting for it to stop */
 int project_flush_globals(void)
 {
+#if EN_RUST_STORAGE
+    return project_rust_do(9,0);
+#endif
+
     if (!pending_glob)
         return 0;
     glob.magic = GLOB_MAGIC;

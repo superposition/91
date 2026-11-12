@@ -1,0 +1,15 @@
+{
+  "scope": "R06 first checkpoint: production A/B storage policy, not full project state",
+  "compiler": "Rust 1.94.1",
+  "flag": "EN_RUST_STORAGE",
+  "cases": 47709,
+  "corpusBytes": 2671720,
+  "corpusSha256": "13be5492724249e90816eee1886438f7022012dcd5d1f9a036e0c7e234546ad3",
+  "executions": ["immutable R01 C native (440 source hashes verified)", "current C0 native", "Rust adapter native", "current C0 WASM", "Rust adapter WASM"],
+  "safeCoreTests": ["all_commit_boundaries_keep_a_complete_object", "malformed_headers_are_bounded_and_fail_without_writes", "object_pairs_are_disjoint_and_fixed"],
+  "malformedHeaders": 32768,
+  "scratchBytes": 3840,
+  "additionalPersistentScratchBytes": 0,
+  "physicalDeviceWrites": false,
+  "remaining": ["project/runtime/defaults/global/extras/bass/set-list/session policy", "integration footprint and complete application scenarios"]
+}

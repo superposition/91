@@ -16,6 +16,7 @@ if [ "${EN_RUST_JAM:-1}" = 1 ]; then
     if [ "${EN_RUST_FM6:-1}" = 1 ]; then RUST_FLAGS="$RUST_FLAGS -DEN_RUST_FM6=1"; fi
     if [ "${EN_RUST_FACTORY:-1}" = 1 ]; then RUST_FLAGS="$RUST_FLAGS -DEN_RUST_FACTORY=1"; fi
     if [ "${EN_RUST_FORMATS:-1}" = 1 ]; then RUST_FLAGS="$RUST_FLAGS -DEN_RUST_FORMATS=1"; fi
+    if [ "${EN_RUST_STORAGE:-1}" = 1 ]; then RUST_FLAGS="$RUST_FLAGS -DEN_RUST_STORAGE=1"; fi
     RUST_LIB="build/rust-emu/wasm32-unknown-unknown/release/libfm1_jam_bridge.a"
 fi
 emcc -O2 -ffp-contract=off -std=gnu99 -Wall -Wno-unused-function -Wno-unused-parameter -Wno-unused-variable \

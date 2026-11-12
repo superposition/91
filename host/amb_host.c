@@ -128,6 +128,9 @@ void plat_midi_out(uint32_t pkt)
 /* the engine's MIDI out, as the device's glue sends it (USB-MIDI packet, cable 0) */
 void en_midi_out(uint32_t st, uint32_t d1, uint32_t d2) { plat_midi_out(st >> 4 | st << 8 | d1 << 16 | d2 << 24); }
 
+#if EN_RUST_STORAGE
+#include "../firmware/src/dsp/rust_persistence.h"
+#endif
 /* flash: one buffer per object, kept across a simulated reboot */
 static uint8_t store[OBJ_NOBJ][PLAT_STORE_MAX];
 static int store_len[OBJ_NOBJ] = {-1, -1, -1, -1};
@@ -165,8 +168,12 @@ int plat_store_save(uint32_t obj, const void *src, uint32_t len)
 {
     if (obj >= OBJ_NOBJ || len > PLAT_STORE_MAX)
         return -1;
+#if EN_RUST_STORAGE
+    { int gate=fm1_rust_store_access(1,(uint32_t)store_lock,0); if(gate) return gate; }
+#else
     if (store_lock)
         return -8;
+#endif
     memcpy(store[obj], src, len);
     store_len[obj] = (int)len;
     store_writes++;
@@ -176,7 +183,11 @@ int plat_store_restore(uint32_t obj, const void *src, uint32_t len)
 {
     if (obj >= OBJ_NOBJ || len > PLAT_STORE_MAX)
         return -1;
+#if EN_RUST_STORAGE
+    store_lock=fm1_rust_store_access(1,(uint32_t)store_lock,1);
+#else
     store_lock = 1;
+#endif
     memcpy(store[obj], src, len);
     store_len[obj] = (int)len;
     store_writes++;
@@ -184,7 +195,13 @@ int plat_store_restore(uint32_t obj, const void *src, uint32_t len)
 }
 
 static uint32_t cpu_pct;
-uint32_t plat_cpu_pct(void) { return cpu_pct; }
+uint32_t plat_cpu_pct(void) {
+#ifdef EN_HOST_FIXED_CPU
+    return EN_HOST_FIXED_CPU; /* deterministic framebuffer qualification only */
+#else
+    return cpu_pct;
+#endif
+}
 uint32_t plat_xruns(void) { return 0; }
 uint32_t plat_late(void) { return 0; }
 uint32_t plat_peak_pct(void) { return cpu_pct; }

@@ -19,6 +19,8 @@ mod handoff;
 mod mcu;
 mod melodic;
 mod object_formats;
+mod persistence;
+mod project;
 mod sequencer;
 mod transport;
 mod voice_config;
@@ -304,6 +306,7 @@ pub extern "C" fn fm1_rust_jam_stat(index: u32) -> u32 {
         40..=47 => voices::stat(index),
         48..=55 => fm6::stat(index),
         56..=63 => worker::stat(index),
+        64..=71 => persistence::stat(index),
         72..=73 => dj::stat(index),
         _ => 0,
     }
