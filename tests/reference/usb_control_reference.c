@@ -8,10 +8,22 @@
 #else
 #define assert(value) do{if(!(value))__builtin_trap();}while(0)
 #endif
+/* Explicit single-CPU test provider, never a physical fallback. */
+static uint32_t usb_tx_fixture_irq=256;
+static uint32_t usb_tx_fixture_enter(void){uint32_t flags=usb_tx_fixture_irq;usb_tx_fixture_irq&=~256u;return flags;}
+static void usb_tx_fixture_exit(uint32_t flags){usb_tx_fixture_irq=flags;}
+#ifndef USB_TX_IRQ_ENTER
+#define USB_TX_IRQ_ENTER() usb_tx_fixture_enter()
+#define USB_TX_IRQ_EXIT(flags) usb_tx_fixture_exit(flags)
+#endif
+#ifndef RING_PUBLISH
 #define RING_PUBLISH() __asm__ volatile("" ::: "memory")
+#endif
 static void fm1_delay_ms(uint32_t ms){(void)ms;}
 #include "usb_source.inc"
-#ifdef __wasm__
+#ifdef USB_TEST_SINK
+static void emit(const void *p,uint32_t n){USB_TEST_SINK(p,n);}
+#elif defined(__wasm__)
 __attribute__((import_module("env"),import_name("emit"))) extern void usb_emit(const void *,uint32_t);
 static void emit(const void *p,uint32_t n){usb_emit(p,n);}
 #else

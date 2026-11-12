@@ -1,0 +1,149 @@
+{
+  "ticket": 19,
+  "base": "f34ad6b329af54bd29e77e3d235db426615d903b",
+  "rust": "1.94.1",
+  "flag": "EN_RUST_USB=1",
+  "hardware_accessed": false,
+  "physical_qualified": false,
+  "scope": "explicit app reset/config epoch admission and exact IRQ publication; loader remains legacy polled",
+  "added_global_state_bytes": 0,
+  "added_global_payload_bytes": 0,
+  "tx_descriptor_pi32v2_bytes": 64,
+  "tx_descriptor_native64_bytes": 128,
+  "intentional_corrections": [
+    "no old tail after reset/reconfigure between publication steps",
+    "no app timer-consumer wait with incoming IRQs off",
+    "existing reset counter saturates/latches instead of epoch reuse",
+    "unconfigured/inactive app send is rejected"
+  ],
+  "reset_injection_cases_per_implementation": 21680,
+  "unmodified_frozen_stale_tail_witnesses": 3090,
+  "reset_traces": [
+    {
+      "variant": "c0",
+      "path": "build/usb-reset/c0.wasm",
+      "cases": 21680,
+      "bytes": 7718084,
+      "sha256": "73e600da0ee018fee5243d23f5fb38abc3466c5464d06f5912602fc0004afca7"
+    },
+    {
+      "variant": "rust",
+      "path": "build/usb-reset/rust.wasm",
+      "cases": 21680,
+      "bytes": 7718084,
+      "sha256": "cabfb851bad5240e30521e80921dbb9e5bc539d14d84e9abffd36ad70475fcfd"
+    }
+  ],
+  "ordinary_active_app_and_legacy_loader": [
+    {
+      "variant": "0-0",
+      "cases": 11681,
+      "bytes": 1650708,
+      "sha256": "6f92af4a55effbae819c169bd7bc138284615cea6f6627b85d1cf7a0986d9591"
+    },
+    {
+      "variant": "0-1",
+      "cases": 11681,
+      "bytes": 1650708,
+      "sha256": "6f92af4a55effbae819c169bd7bc138284615cea6f6627b85d1cf7a0986d9591"
+    },
+    {
+      "variant": "1-0",
+      "cases": 88601,
+      "bytes": 13493284,
+      "sha256": "a053be502e8025e9d6f541d94fcb693945072ab025a8f34d50aa400e2e0bb357"
+    },
+    {
+      "variant": "1-1",
+      "cases": 165521,
+      "bytes": 23109124,
+      "sha256": "f3af81e7e4f8dd5233bf4387ce5c1c13c30e3950fdb897795a37f863625971eb"
+    }
+  ],
+  "checks": {
+    "linux_workspace_passed": 169,
+    "miri_strict_provenance_retained_roots_irq_off_refusal": true,
+    "clippy_warnings_denied": true,
+    "fmt": true,
+    "no_std_wasm": true,
+    "ndebug_checks_remain_active": true,
+    "vendor_c_usb1_hal0_main_engine_compile_only": true,
+    "vendor_c_usb1_hal1_main_engine_compile_only": true
+  },
+  "artifacts": [
+    {
+      "path": "build/usb-reset/final.log",
+      "bytes": 408,
+      "sha256": "bf0e8376c05b8c450fec14e468fc363f54432ace9c1cc20782ce0f26dc0aa023"
+    },
+    {
+      "path": "build/usb-reset/ordinary.log",
+      "bytes": 1638,
+      "sha256": "1933426759cebf1cb07212c23e24b572a6b5f836a53d03696cd57539dab815a1"
+    },
+    {
+      "path": "build/usb-reset/workspace.log",
+      "bytes": 24081,
+      "sha256": "c71e29aac84fdf065b3adf2c85d574e1e2c4d5f6ce6f04111e4de1f24c23ce69"
+    },
+    {
+      "path": "build/usb-reset/nostd.log",
+      "bytes": 270,
+      "sha256": "d4c7c090bc96dce406353601070372f2f0b83019b87ca505511ab4cc8208454a"
+    },
+    {
+      "path": "build/usb-reset/miri.log",
+      "bytes": 647,
+      "sha256": "af39998a14ce5983b54177e6e46a8b0f58ac326c858269c5af9e0e619365e58d"
+    },
+    {
+      "path": "build/usb-reset/source-verification.log",
+      "bytes": 12678,
+      "sha256": "02103818921d558fa092601f4329ba6740cf2ad792676fb0331e24f2fadfbd85"
+    },
+    {
+      "path": "build/usb-reset/compile-target-0.sh",
+      "bytes": 1180,
+      "sha256": "1b5e17927bff82409ef7b602cde70848af7c315d530d976755d4cd94adb84c14"
+    },
+    {
+      "path": "build/usb-reset/compile-target-1.sh",
+      "bytes": 1180,
+      "sha256": "1b5e17927bff82409ef7b602cde70848af7c315d530d976755d4cd94adb84c14"
+    },
+    {
+      "path": "build/usb-reset/target-0/main.o",
+      "bytes": 523296,
+      "sha256": "db38263b309b39ed842a4598625e8b891d9fb4e079c469ec8d811f640f5e7921"
+    },
+    {
+      "path": "build/usb-reset/target-0/engine.o",
+      "bytes": 417252,
+      "sha256": "e8a852d865f4bd288f6727c5fbfe85c9de9cd2d162dc74318530137661d34de3"
+    },
+    {
+      "path": "build/usb-reset/target-1/main.o",
+      "bytes": 480924,
+      "sha256": "a604dd5f9f324e3e3c04396333586cf6cb132f4d3a0c3319833813e57b37cc3d"
+    },
+    {
+      "path": "build/usb-reset/target-1/engine.o",
+      "bytes": 418076,
+      "sha256": "fe190e19a53985a0c750ec53de7280b2f12c57d89e7330aa6e438b7127daeb68"
+    }
+  ],
+  "source_sha256": {
+    "firmware/hal/fm1_usb.h": "74e4eb289ce169bcdf0e45fa3d979908da4c64a1ee4c33d51790903cd8540480",
+    "firmware/src/dsp/rust_usb.h": "84b993ed763c705503a2dcb53ef59d80cb5a651616608ffdf8a610a88e126489",
+    "firmware/src/usb.c": "a3dfd910209aa7e8d81c1fb71e3e1b45789381b83e3d0e6eca1c0612c1cd3f6a",
+    "firmware/src/usb_host.c": "0909ac4867d3d25a4ec4a864305399a582ad113c507f20ee19c0c7600d815d64",
+    "rust/fm1-hal/src/usb_tx.rs": "39b35fe8edd6daa39fd087c7ff45d5c2022142715272c6f2229ec3d4146269bb",
+    "rust/fm1-jam-bridge/src/usb_tx.rs": "6694504dabefafcd621dddc5d832c35ecd1c6d17b5f8fa4bb743359f2f056dbc",
+    "tests/reference/usb_control_reference.c": "5cc03b9f9801221e7743db5081f39a9d86bfc43cd120c06f13327b6ff7a199d5",
+    "tests/reference/usb_tx_reference.c": "0dc43989601a6eab1229946f7f79c8f6ff2dc6f301d606f178b057746b36abe4",
+    "tests/reference/usb_reset_reference.c": "ed74eb1ca84c2ffa52cc7770e7ea4793193587fd4285fd429f3325fdd9c02d60",
+    "tests/rust_usb_tx.sh": "38ad3be4084f73fdac0a5c05214c51628ff00e620c295289cf30e19ac6f79b82",
+    "tests/rust_usb_reset.sh": "1565f69d27f5e2150cc512dcc6d82b2073dfc8f800cfcfce2f7b1c40e85009d3"
+  },
+  "remaining": "observed SIE success/uncertain endpoint arm leases/host role retirement; remaining device lifecycle/CDC/host/UAC/physical stress and timing"
+}

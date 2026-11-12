@@ -919,8 +919,24 @@ static void ota_idle(void);
 #define USB_TX_SYSEX_ROOTS 0,0,0,0
 #define USB_TX_CALLBACKS 0,0
 #endif
-#define USB_TX_CONTEXT {USB_TX_FEATURE,{midi_out_q,(void *)&mo_w,(void *)&mo_r, \
-    USB_TX_SYSEX_ROOTS,ep1tx,&usb.config},usb_transport_publish,USB_TX_CALLBACKS}
+#ifdef FELUCCA_LOADER
+#define USB_TX_ROLE 2u
+#define USB_TX_TRANSACTION_CALLBACKS 0,0,0
+#else
+#ifndef USB_TX_IRQ_ENTER
+#error "USB1 app requires an exact saved-IRQ transaction provider"
+#endif
+#define USB_TX_ROLE 0u
+static uint32_t usb_tx_epoch(void) {
+    return *(volatile uint8_t *)&usb.up && *(volatile uint8_t *)&usb.config ?
+        *(volatile uint32_t *)&usb.resets : 0xffffffffu;
+}
+static uint32_t usb_tx_enter(void) {return USB_TX_IRQ_ENTER();}
+static void usb_tx_exit(uint32_t flags) {USB_TX_IRQ_EXIT(flags);}
+#define USB_TX_TRANSACTION_CALLBACKS usb_tx_epoch,usb_tx_enter,usb_tx_exit
+#endif
+#define USB_TX_CONTEXT {USB_TX_FEATURE|USB_TX_ROLE,{midi_out_q,(void *)&mo_w,(void *)&mo_r, \
+    USB_TX_SYSEX_ROOTS,ep1tx,&usb.config},usb_transport_publish,USB_TX_CALLBACKS,USB_TX_TRANSACTION_CALLBACKS}
 #endif
 
 #if FELUCCA_OTA
@@ -1267,6 +1283,15 @@ static uint32_t usb_retry_t;                            /* the last retry (usb_r
 static void usb_poll(void)                              /* TIMER5 ISR, 2 kHz */
 {
     uint32_t iu, it, ir;
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+    if(*(volatile uint32_t *)&usb.resets==0xffffffffu){
+        usb.up=0;usb.detached=1;uh_out=0;
+#if PERF_USB_HOST
+        uh.run=0;
+#endif
+        return;
+    }
+#endif
 #if PERF_USB_HOST
     if (uh.run) {                                       /* a host: its endpoints, nothing of the device side */
         uh_poll();
@@ -1313,7 +1338,12 @@ static void usb_poll(void)                              /* TIMER5 ISR, 2 kHz */
     if (iu & 0x02u)                                     /* resume */
         usb.suspended = 0;
     if (iu & 0x04u) {                                   /* bus reset */
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+        usb.resets=fm1_rust_usb_next_epoch(usb.resets);
+        if(usb.resets==0xffffffffu){usb.up=0;usb.detached=1;}
+#else
         usb.resets++;
+#endif
         sie_wr(S_FADDR, 0);
         usb.config = 0;
         usb.suspended = 0;
@@ -1338,6 +1368,9 @@ static void usb_poll(void)                              /* TIMER5 ISR, 2 kHz */
         sie_wr(S_INTRUSBE, 0x07);
         sie_wr(S_INTRTX1E, 0x01);
         sie_wr(S_INTRRX1E, 0);
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+        if(usb.resets==0xffffffffu)return; /* no epoch reuse or new endpoint work */
+#endif
     }
     if (it & 0x01u)
         ep0_service();

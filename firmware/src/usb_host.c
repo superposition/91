@@ -279,6 +279,9 @@ static int uh_hub_probe(uint8_t addr, uint8_t mps, uint8_t cfgval, uh_midi_t *m)
 /* Host EP1 has independent RX/TX DMA slots. Both target endpoints belong to this device and alternate setting. */
 static void uh_start_ep(const uh_midi_t *m)
 {
+#if EN_RUST_USB
+    if(*(volatile uint32_t *)&usb.resets==0xffffffffu){uh.run=0;uh_out=0;return;}
+#endif
     sie_wr(S_FADDR, uh.dev);
     sie_wr(S_INDEX, 1);
     uh.in_ep = m->in_ep;
@@ -377,8 +380,17 @@ static void uh_connect(void)
 /* Main loop. The menu's USB HOST (uh.want) switches the port; as a host this finds and keeps a controller. */
 static void uh_task(uint32_t now)
 {
+#if EN_RUST_USB
+    if(*(volatile uint32_t *)&usb.resets==0xffffffffu){uh.run=0;uh_out=0;return;}
+#endif
     if (uh.want != uh.on) {
         usb.up = 0;                                     /* TIMER5 leaves the SIE to this context */
+#if EN_RUST_USB
+        /* Once device polling is off, its reset epoch cannot advance. Recheck
+         * after that publication to cover an IRQ between the entry check and it. */
+        RING_PUBLISH();
+        if(*(volatile uint32_t *)&usb.resets==0xffffffffu){uh.run=0;uh_out=0;uh.msg=UH_MSG_LOST;return;}
+#endif
         usb.config = 0;
         usb.suspended = 0;
         uh_session_end();

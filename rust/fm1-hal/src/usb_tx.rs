@@ -21,6 +21,10 @@ pub trait Io {
     fn publish(&mut self);
     fn now(&mut self) -> u32;
     fn idle(&mut self);
+    /// Reserved MAX means no active bus/configuration, or exhausted epoch.
+    fn epoch(&self) -> u32;
+    fn enter(&mut self) -> u32;
+    fn exit(&mut self, flags: u32);
 }
 fn output(io: &mut impl Io, offset: usize, word: u32) {
     for (index, byte) in word.to_le_bytes().into_iter().enumerate() {
@@ -75,7 +79,7 @@ pub fn packet(
 /// Reset-epoch admission is a separate explicit correction, not hidden here.
 // Preserve arithmetic supported by the pinned mrustc core subset.
 #[allow(clippy::manual_div_ceil)]
-pub fn send(io: &mut impl Io, total: usize, blocking: bool) -> bool {
+pub fn legacy_send(io: &mut impl Io, total: usize, blocking: bool) -> bool {
     if total > if blocking { 640 } else { 192 } {
         return false;
     }
@@ -116,4 +120,71 @@ pub fn send(io: &mut impl Io, total: usize, blocking: bool) -> bool {
     }
     io.set_busy(false);
     true
+}
+
+/// Reset generations never repeat. Exhaustion must latch the device inactive;
+/// the driver keeps its original buffers alive and admits no new endpoint work.
+pub fn next_epoch(previous: u32) -> u32 {
+    previous.saturating_add(1)
+}
+/// App producer transaction. Its only masked operations are scalar capture,
+/// a bounded three-byte event publication and flag/index updates. Every clock
+/// read/wait/idle executes after restoring the caller's exact incoming IRQ state.
+#[allow(clippy::manual_div_ceil)]
+pub fn send(io: &mut impl Io, total: usize, blocking: bool) -> bool {
+    if total > if blocking { 640 } else { 192 } {
+        return false;
+    }
+    let start = if blocking { io.now() } else { 0 };
+    let irq = io.enter();
+    let epoch = io.epoch();
+    let used = io
+        .write_index(Queue::Sysex)
+        .wrapping_sub(io.read_index(Queue::Sysex));
+    // The app's timer consumer cannot make progress with incoming IRQs off.
+    // A bounded message may still complete entirely from current free slots.
+    if epoch == u32::MAX
+        || used > 64
+        || (!blocking || irq & 256 == 0) && (total + 2) / 3 > 64 - used as usize
+    {
+        io.exit(irq);
+        return false;
+    }
+    io.set_busy(true);
+    io.exit(irq);
+    let mut index = 0;
+    while index < total {
+        let (word, n) = packet(total, index, |i| io.input(i)).unwrap();
+        loop {
+            let irq = io.enter();
+            if io.epoch() != epoch {
+                io.set_busy(false);
+                io.exit(irq);
+                return false;
+            }
+            let w = io.write_index(Queue::Sysex);
+            let r = io.read_index(Queue::Sysex);
+            if w.wrapping_sub(r) < 64 {
+                io.put(Queue::Sysex, (w % 64) as usize, word);
+                io.publish();
+                io.set_write(Queue::Sysex, w.wrapping_add(1));
+                io.exit(irq);
+                index += n;
+                break;
+            }
+            io.exit(irq);
+            if !blocking || io.now().wrapping_sub(start) > 200 {
+                let irq = io.enter();
+                io.set_busy(false);
+                io.exit(irq);
+                return false;
+            }
+            io.idle();
+        }
+    }
+    let irq = io.enter();
+    let complete = io.epoch() == epoch;
+    io.set_busy(false);
+    io.exit(irq);
+    complete
 }

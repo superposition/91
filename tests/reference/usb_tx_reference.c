@@ -55,6 +55,9 @@ int usb_tx_run(void){
     static uint8_t message[640];
     for(uint32_t n=0;n<=640;n++)for(uint32_t backlog=0;backlog<3;backlog++)for(uint32_t config=0;config<2;config++)for(uint32_t mode=0;mode<2;mode++)for(uint32_t feed=0;feed<2;feed++){
         tx_reset(0xfffffffcu,16,backlog==0?0:backlog==1?63:64,0,0);
+#if USB_TX_ACTIVE_CONFIG_ONLY
+        if(!config)continue;
+#endif
         usb.config=(uint8_t)config;now_ms=n&1u?0xfffffff0u:100;idles=0;drain=feed;
         for(uint32_t i=0;i<n;i++)message[i]=(uint8_t)(i&127u);if(n)message[0]=0xf0;if(n>1)message[n-1]=0xf7;
         const int result=mode?ota_wire_send(message,n):usb_sysex_try(message,n);

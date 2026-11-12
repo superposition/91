@@ -18,6 +18,11 @@
 #pragma once
 #include <stdint.h>
 #include "fm1_cc.h"
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+#include "fm1_irq_state.h"
+#define USB_TX_IRQ_ENTER() fm1_irq_state_save()
+#define USB_TX_IRQ_EXIT(flags) fm1_irq_state_restore(flags)
+#endif
 
 #define FM1_USB_CON0 (*(volatile uint32_t *)0x11800u)
 #define FM1_USB_CON1 (*(volatile uint32_t *)0x11804u)

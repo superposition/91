@@ -18,7 +18,7 @@ wasmflags='--target=wasm32 -O2 -ffp-contract=off -std=gnu99 -nostdlib -ffreestan
 for ota in 0 1;do
 for loader in 0 1;do
     flags="-DFELUCCA_CDC=1 -DFELUCCA_UAC=1 -DFELUCCA_OTA=$ota"
-    if [ "$loader" = 1 ];then flags="$flags -DFELUCCA_LOADER=1 -DFELUCCA_USB_PID=2";fi
+    if [ "$loader" = 1 ];then flags="$flags -DFELUCCA_LOADER=1 -DFELUCCA_USB_PID=2";else flags="$flags -DUSB_TX_ACTIVE_CONFIG_ONLY=1";fi
     name="$ota-$loader"
     cc $common $flags -I"$out/frozen" -I"$baseline/firmware/src" tests/reference/usb_tx_reference.c -lm -o "$out/reference"
     cc $common $flags -I"$out/current" -Ifirmware/src tests/reference/usb_tx_reference.c -lm -o "$out/c0"

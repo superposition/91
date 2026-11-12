@@ -8,8 +8,11 @@ pub struct Context {
     publish: Option<unsafe extern "C" fn()>,
     now: Option<unsafe extern "C" fn() -> u32>,
     idle: Option<unsafe extern "C" fn()>,
+    epoch: Option<unsafe extern "C" fn() -> u32>,
+    enter: Option<unsafe extern "C" fn() -> u32>,
+    exit: Option<unsafe extern "C" fn(u32)>,
 }
-const _: [(); 13 * core::mem::size_of::<*mut u8>()] = [(); core::mem::size_of::<Context>()];
+const _: [(); 16 * core::mem::size_of::<*mut u8>()] = [(); core::mem::size_of::<Context>()];
 struct Raw<'a> {
     context: &'a Context,
     input: *const u8,
@@ -109,6 +112,17 @@ impl Io for Raw<'_> {
             unsafe { f() }
         }
     }
+    fn epoch(&self) -> u32 {
+        self.context.epoch.map_or(u32::MAX, |f| unsafe { f() })
+    }
+    fn enter(&mut self) -> u32 {
+        self.context.enter.map_or(0, |f| unsafe { f() })
+    }
+    fn exit(&mut self, flags: u32) {
+        if let Some(f) = self.context.exit {
+            unsafe { f(flags) }
+        }
+    }
 }
 unsafe fn raw<'a>(
     context: *const Context,
@@ -134,6 +148,11 @@ unsafe fn raw<'a>(
     if mode != 0 && (context.flags & 1 == 0 || context.slots[8].is_null()) {
         return None;
     }
+    if mode != 0 && context.flags & 2 == 0 {
+        context.epoch?;
+        context.enter?;
+        context.exit?;
+    }
     if mode == 2 {
         context.now?;
         context.idle?;
@@ -143,6 +162,10 @@ unsafe fn raw<'a>(
         input,
         count: count as usize,
     })
+}
+#[no_mangle]
+pub extern "C" fn fm1_rust_usb_next_epoch(previous: u32) -> u32 {
+    usb_tx::next_epoch(previous)
 }
 /// # Safety
 /// Context and all mandatory roots cover live disjoint fixed buffers/initialized
@@ -163,7 +186,11 @@ pub unsafe extern "C" fn fm1_rust_usb_tx_fill(context: *const Context) -> i32 {
 /// unchanged for this call. One foreground producer owns the SysEx stream.
 /// Idle may consume/poll via disjoint scoped raw wrappers but cannot retain,
 /// modify the descriptor/input or start another producer. No wait occurs under
-/// an IRQ mask here. count<=640(blocking) or 192(try); invalid is no-mutation.
+/// an IRQ mask here. App epoch callback coherently returns the active reset
+/// generation or MAX while enter/exit excludes CPU0 IRQ publication and restores
+/// every incoming ICFG bit. An incoming disabled gate may not wait for the timer
+/// consumer. Loader bit 1 selects the explicit legacy polled policy and needs no
+/// app IRQ/epoch callbacks. count<=640(blocking) or 192(try); invalid is no-mutation.
 #[no_mangle]
 pub unsafe extern "C" fn fm1_rust_usb_tx_send(
     context: *const Context,
@@ -178,7 +205,13 @@ pub unsafe extern "C" fn fm1_rust_usb_tx_send(
     else {
         return -1;
     };
-    if usb_tx::send(&mut io, count as usize, blocking != 0) {
+    let legacy = io.context.flags & 2 != 0;
+    let success = if legacy {
+        usb_tx::legacy_send(&mut io, count as usize, blocking != 0)
+    } else {
+        usb_tx::send(&mut io, count as usize, blocking != 0)
+    };
+    if success {
         0
     } else {
         -1
@@ -194,9 +227,23 @@ mod tests {
         static ROOT:Cell<*const Context>=const{Cell::new(core::ptr::null())};
         static CLOCK:Cell<u32>=const{Cell::new(u32::MAX-3)};
         static WORDS:RefCell<Vec<u32>>=const{RefCell::new(Vec::new())};
+        static IRQ:Cell<u32>=const{Cell::new(0x100)};
         static IDLES:Cell<u32>=const{Cell::new(0)};
     }
     unsafe extern "C" fn publish() {}
+    unsafe extern "C" fn epoch() -> u32 {
+        0
+    }
+    unsafe extern "C" fn enter() -> u32 {
+        IRQ.with(|v| {
+            let old = v.get();
+            v.set(old & !256);
+            old
+        })
+    }
+    unsafe extern "C" fn exit(flags: u32) {
+        IRQ.with(|v| v.set(flags));
+    }
     unsafe extern "C" fn now() -> u32 {
         CLOCK.with(Cell::get)
     }
@@ -219,6 +266,7 @@ mod tests {
         });
     }
     unsafe extern "C" fn idle() {
+        assert_eq!(IRQ.with(Cell::get) & 256, 256);
         IDLES.with(|n| n.set(n.get() + 1));
         CLOCK.with(|n| n.set(n.get().wrapping_add(1)));
         unsafe { consume() };
@@ -266,6 +314,9 @@ mod tests {
                 publish: Some(publish),
                 now: Some(now),
                 idle: Some(idle),
+                epoch: Some(epoch),
+                enter: Some(enter),
+                exit: Some(exit),
             };
             let root = core::ptr::addr_of!(context);
             ROOT.with(|v| v.set(root));
@@ -284,6 +335,12 @@ mod tests {
                     .map(|i| usb_tx::packet(640, i, |at| at as u8).unwrap().0),
             );
             WORDS.with(|v| assert_eq!(*v.borrow(), expected));
+            IRQ.with(|v| v.set(0));
+            let before = IDLES.with(Cell::get);
+            assert_eq!(fm1_rust_usb_tx_send(root, message.get().cast(), 640, 1), -1);
+            assert_eq!(IRQ.with(Cell::get), 0);
+            assert_eq!(IDLES.with(Cell::get), before);
+            IRQ.with(|v| v.set(256));
             assert_eq!(fm1_rust_usb_tx_send(root, message.get().cast(), 641, 1), -1);
             assert_eq!(fm1_rust_usb_tx_send(root, message.get().cast(), 193, 0), -1);
             assert_eq!(fm1_rust_usb_tx_fill(core::ptr::null()), -1);
