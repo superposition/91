@@ -72,6 +72,7 @@ int ui_restore_valid(uint32_t obj, const uint8_t *b, uint32_t len);   /* a backu
 void ui_restore_start(uint32_t obj, const uint8_t *b, uint32_t len);    /* write it (the music fades out for it) */
 int ui_restore_state(void);              /* 0 none, 1 waiting, 2 written, 3 not written */
 void ui_flush(void);                    /* before an update session: a store or autosave in flight written now, the fade undone */
+int ui_flush_pending(void);             /* pending loads/writes/genre or dirty RAM: do not detach/reinitialize */
 void ui_frame(void);
 void ui_input_only(void);
 int ui_remote(void);                   /* remote (SEL + GLO): the panel plays the browser over USB */

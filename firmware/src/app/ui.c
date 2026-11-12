@@ -975,6 +975,8 @@ static void fxp_range(int k, int *lo, int *hi)
     *hi = kind == KN_PRESET ? NGXP - 1 : kind == KN_LEN ? 16 : kind == KN_TGT || kind == KN_PTGT ? NTGT - 1 :
           kind == KN_NAME ? FXP_CTL(k).n - 1 : kind == KN_RANGE ? FXP_CTL(k).n : 100;
 }
+static uint8_t ui_io_pending;          /* transient settings/voice/map reads; no payload buffer */
+static int8_t ui_genre_pending = -1;   /* absolute requested genre, replayed only after admission */
 static void genre_step(int d);
 static void fxp_set(int k, int v)
 {
@@ -2454,6 +2456,12 @@ void ui_flush(void)
     if (project_pending())
         project_flush();
     en_hush(0);
+}
+int ui_flush_pending(void)
+{
+    return ui_io_pending || ui_genre_pending >= 0 || ui.store_wait ||
+        ui.vox_dirty || ui.set_dirty || ui.set_lazy || rs_state == 1 ||
+        project_pending() || project_pending_globals();
 }
 
 static void piece_store(void)                   /* Global, SAVE: the piece as it is, stored */
