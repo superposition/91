@@ -238,6 +238,8 @@ jobs:
         run: sh tests/rust_ui_state.sh
       - name: Foreground UI frame and callback order
         run: sh tests/rust_ui_frame.sh
+      - name: Encoder acceleration and bounded input
+        run: sh tests/rust_ui_controls.sh
       - name: TRS MIDI parser and retained UART DMA
         run: sh tests/rust_usb_trs.sh
       - name: HAL registers, startup, IRQ and DMA fault contracts

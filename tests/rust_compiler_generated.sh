@@ -54,5 +54,21 @@ python3 tools/ui_abi.py --check
 "$out/generated-ui-state" > "$out/generated-ui-state.bin"
 cmp "$out/c0-ui-state.bin" "$out/generated-ui-state.bin"
 sha256sum "$out/generated-ui-state.bin" > "$out/ui-state.sha256"
+python3 tests/reference/ui_frame_extract.py . build/gen/ui_frame_port.inc port
+cp tests/reference/ui_frame_frozen.inc build/gen/ui_frame_frozen.inc
+"$zig" cc "${native[@]}" "${common[@]}" -DEN_RUST_HANDOFF=1 tests/reference/ui_frame_reference.c -lm -o "$out/c0-ui-frame"
+"$zig" cc "${native[@]}" "${common[@]}" -DEN_RUST_HANDOFF=1 -DEN_RUST_APP=1 tests/reference/ui_frame_reference.c "$abi" "${objects[@]}" "$out/core.o" -lm -o "$out/generated-ui-frame"
+"$out/c0-ui-frame" > "$out/c0-ui-frame.bin"
+"$out/generated-ui-frame" > "$out/generated-ui-frame.bin"
+cmp "$out/c0-ui-frame.bin" "$out/generated-ui-frame.bin"
+for profile in ui_controls usb_trs;do
+    options=()
+    if [ "$profile" = ui_controls ];then options+=(-DEN_RUST_APP=1);else options+=(-DEN_RUST_USB=1);fi
+    "$zig" cc "${native[@]}" "${common[@]}" tests/reference/${profile}_reference.c -lm -o "$out/c0-$profile"
+    "$zig" cc "${native[@]}" "${common[@]}" "${options[@]}" tests/reference/${profile}_reference.c "$abi" "${objects[@]}" "$out/core.o" -lm -o "$out/generated-$profile"
+    "$out/c0-$profile" > "$out/c0-$profile.bin"
+    "$out/generated-$profile" > "$out/generated-$profile.bin"
+    cmp "$out/c0-$profile.bin" "$out/generated-$profile.bin"
+done
 sha256sum "$core/libcore.rlib.c" "$bridge"/*.rlib.c "$out/generated.pcm" > "$out/identities.sha256"
-echo 'Generated-C natural32-bit factory,12 effects traces, full Runner policy/pixels and UI layout/defaults match current C0.'
+echo 'Generated-C natural32-bit factory,12 effects traces, Runner, UI layout/frame/encoders and TRS MIDI match current C0.'
