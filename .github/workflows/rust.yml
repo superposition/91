@@ -2,9 +2,9 @@ name: Rust migration checks
 
 on:
   push:
-    paths: ['Cargo.toml', 'Cargo.lock', 'rust/**', 'firmware/**', 'host/**', 'web/**', 'tests/host/emu*', 'tests/host/browser_doubles.mjs', 'tests/host/gparams.c', 'tests/host/worker_handoff_test.c', 'tests/reference/**', 'tests/rust_*', 'tests/web*', 'tests/codec_test_support.cjs', 'tests/package_codecs_test.py', 'tests/host/codecs_wasm_test.mjs', 'assets/fonts/**', 'tools/**', '.github/workflows/rust.yml']
+    paths: ['Cargo.toml', 'Cargo.lock', 'rust/**', 'firmware/**', 'host/**', 'web/**', 'tests/**', 'assets/fonts/**', 'tools/**', '.github/workflows/rust.yml']
   pull_request:
-    paths: ['Cargo.toml', 'Cargo.lock', 'rust/**', 'firmware/**', 'host/**', 'web/**', 'tests/host/emu*', 'tests/host/browser_doubles.mjs', 'tests/host/gparams.c', 'tests/host/worker_handoff_test.c', 'tests/reference/**', 'tests/rust_*', 'tests/web*', 'tests/codec_test_support.cjs', 'tests/package_codecs_test.py', 'tests/host/codecs_wasm_test.mjs', 'assets/fonts/**', 'tools/**', '.github/workflows/rust.yml']
+    paths: ['Cargo.toml', 'Cargo.lock', 'rust/**', 'firmware/**', 'host/**', 'web/**', 'tests/**', 'assets/fonts/**', 'tools/**', '.github/workflows/rust.yml']
   workflow_dispatch:
 
 permissions:
@@ -158,6 +158,14 @@ jobs:
         run: sh tests/rust_browser_codecs.sh
       - name: Device wire and Jam transfer compatibility
         run: sh tests/rust_device_wire.sh
+      - name: A/B flash transactions and interrupted writes
+        run: sh tests/rust_persistence.sh
+      - name: Project, slot and extension lifecycle
+        run: sh tests/rust_project.sh
+      - name: Settings, session and autosave lifecycle
+        run: sh tests/rust_persistence_ui.sh
+      - name: Persistent application scenarios and exact inherited failures
+        run: sh tests/rust_project_scenarios.sh
       - name: Native effects, master, output and state parity
         run: sh tests/rust_effects_parity.sh
       - name: Effects worker placement and ordered completion
@@ -222,3 +230,7 @@ jobs:
             build/worker-handoff/*.json
             build/worker-handoff/results.jsonl
             build/worker-handoff/source-verification.log
+            build/persistence/*.log
+            build/persistence/*verification.log
+            build/persistence/scenarios/*/*.rc
+            build/persistence/scenarios/*/*.normalized
