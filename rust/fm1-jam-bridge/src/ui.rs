@@ -59,6 +59,64 @@ pub unsafe extern "C" fn fm1_rust_ui_accel(
 }
 
 type FrameCallback = unsafe extern "C" fn(u32, u32, u32) -> u32;
+struct InputPort {
+    ui: *mut State,
+    seen: *mut u32,
+    held: *mut u8,
+    callback: FrameCallback,
+}
+impl fm1_app::input::Port for InputPort {
+    fn with_ui<R>(&mut self, f: impl FnOnce(&mut State) -> R) -> R {
+        // SAFETY: caller-owned initialized foreground UI; no callback inside the loan.
+        f(unsafe { &mut *self.ui })
+    }
+    fn with_cache<R>(&mut self, f: impl FnOnce(&mut u32, &mut u8) -> R) -> R {
+        // SAFETY: separate live initialized/aligned scalar roots, disjoint from UI.
+        f(unsafe { &mut *self.seen }, unsafe { &mut *self.held })
+    }
+    fn query(&mut self, q: fm1_app::input::Query, a: u32, b: u32) -> u32 {
+        // SAFETY: no UI/cache loan survives a state closure.
+        unsafe { (self.callback)(0x100 + q as u32, a, b) }
+    }
+    fn action(&mut self, a: fm1_app::input::Action, x: u32, y: u32) -> u32 {
+        // SAFETY: callbacks may access UI/cache between all exclusive loans.
+        unsafe { (self.callback)(a as u32, x, y) }
+    }
+    fn notice(&mut self, n: fm1_app::input::Notice, x: u32, y: u32) {
+        // SAFETY: text/view effects run only after state loans return.
+        unsafe { (self.callback)(0x200 + n as u32, x, y) };
+    }
+}
+/// # Safety
+/// UI/seen/held are initialized, aligned, disjoint foreground-owned roots.
+/// The synchronous callback may reenter leaf app APIs and retains no pointer
+/// to this stack adapter. IRQ/worker code never accesses these carriers.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_ui_input(
+    state: *mut State,
+    seen: *mut u32,
+    held: *mut u8,
+    callback: Option<FrameCallback>,
+) -> i32 {
+    let Some(callback) = callback else {
+        return crate::app::reject();
+    };
+    if state.is_null() || seen.is_null() || held.is_null() {
+        return crate::app::reject();
+    }
+    let mut port = InputPort {
+        ui: state,
+        seen,
+        held,
+        callback,
+    };
+    let rejected = fm1_app::input::poll(&mut port);
+    for _ in 0..rejected {
+        crate::app::reject();
+    }
+    crate::app::game_call();
+    rejected as i32
+}
 struct ButtonPort {
     ui: *mut State,
     callback: FrameCallback,
@@ -176,10 +234,18 @@ mod tests {
     use super::*;
     use std::cell::{Cell, UnsafeCell};
     thread_local! {static ACTIVE: Cell<*mut State> = const {Cell::new(core::ptr::null_mut())};}
+    thread_local! {
+        static SEEN: Cell<*mut u32> = const {Cell::new(core::ptr::null_mut())};
+        static HELD: Cell<*mut u8> = const {Cell::new(core::ptr::null_mut())};
+        static INPUT_CALLBACKS: Cell<u32> = const {Cell::new(0)};
+        static BAD_ENCODER: Cell<bool> = const {Cell::new(false)};
+    }
     struct Reset;
     impl Drop for Reset {
         fn drop(&mut self) {
             ACTIVE.with(|state| state.set(core::ptr::null_mut()));
+            SEEN.with(|state| state.set(core::ptr::null_mut()));
+            HELD.with(|state| state.set(core::ptr::null_mut()));
         }
     }
     fn active() -> *mut State {
@@ -270,5 +336,100 @@ mod tests {
             assert_eq!((*state.get()).view, 36);
             assert_eq!((*state.get()).saver_on, 1);
         }
+    }
+    unsafe extern "C" fn input(op: u32, _a: u32, _b: u32) -> u32 {
+        use fm1_app::input::{Action as A, Query as Q};
+        INPUT_CALLBACKS.with(|count| count.set(count.get() + 1));
+        // SAFETY: disjoint retained UnsafeCell roots. Every callback accesses all
+        // three roots, detecting any exclusive loan surviving a query/effect.
+        unsafe {
+            (*active()).frame += 1;
+            SEEN.with(|pointer| *pointer.get() = (*pointer.get()).wrapping_add(0));
+            HELD.with(|pointer| *pointer.get() ^= 0);
+        }
+        if op == 0x100 + Q::Now as u32 {
+            return 45000;
+        }
+        if op == 0x100 + Q::FlexDone as u32 {
+            return 1;
+        }
+        if op == 0x100 + Q::FlexEffect as u32 {
+            return 5;
+        }
+        if op == 0x100 + Q::Encoder as u32 {
+            return if _a == 1 && BAD_ENCODER.with(Cell::get) {
+                i32::MAX as u32
+            } else {
+                0
+            };
+        }
+        if op == A::Midi as u32 {
+            // SAFETY: the input adapter holds only raw pointer tuples here;
+            // its state and cache loans ended before this reentrant leaf call.
+            unsafe {
+                fm1_rust_ui_button(active(), fm1_app::buttons::id::HOME, Some(button));
+            }
+        }
+        0
+    }
+    #[test]
+    fn input_callbacks_reenter_ui_and_caches_between_scoped_borrows() {
+        // SAFETY: all UI fields admit zero; padding is never inspected.
+        let state = Box::new(UnsafeCell::new(unsafe { core::mem::zeroed::<State>() }));
+        let seen = Box::new(UnsafeCell::new(7u32));
+        let held = Box::new(UnsafeCell::new(1u8));
+        ACTIVE.with(|pointer| pointer.set(state.get()));
+        SEEN.with(|pointer| pointer.set(seen.get()));
+        HELD.with(|pointer| pointer.set(held.get()));
+        let _reset = Reset;
+        // SAFETY: separate initialized roots remain alive for all callbacks.
+        unsafe {
+            (*state.get()).fx_lock = 1 << 5;
+        }
+        for malformed in [false, true, false] {
+            BAD_ENCODER.with(|flag| flag.set(malformed));
+            INPUT_CALLBACKS.with(|count| count.set(0));
+            // SAFETY: the previous poll returned; avoid interpreting this
+            // repeated synthetic leaf call as the separate double-Home gesture.
+            unsafe {
+                (*state.get()).home_t = 0;
+                (*state.get()).view = 0;
+            }
+            // SAFETY: complete live disjoint roots, synchronous callbacks.
+            let result =
+                unsafe { fm1_rust_ui_input(state.get(), seen.get(), held.get(), Some(input)) };
+            assert_eq!(result, i32::from(malformed));
+            assert!(INPUT_CALLBACKS.with(Cell::get) > 10);
+            // SAFETY: all nested calls have returned; no state/cache loan lives.
+            unsafe {
+                assert_eq!(*seen.get(), 1);
+                assert_eq!(*held.get(), 0);
+                assert_eq!((*state.get()).fx_lock, 0);
+                assert_eq!((*state.get()).view, 36);
+                assert_eq!((*state.get()).mood, 0);
+            }
+        }
+        INPUT_CALLBACKS.with(|count| count.set(0));
+        // SAFETY: each call must reject its missing argument before any access;
+        // all non-null roots still satisfy the full contract.
+        unsafe {
+            assert_eq!(
+                fm1_rust_ui_input(core::ptr::null_mut(), seen.get(), held.get(), Some(input)),
+                -1
+            );
+            assert_eq!(
+                fm1_rust_ui_input(state.get(), core::ptr::null_mut(), held.get(), Some(input)),
+                -1
+            );
+            assert_eq!(
+                fm1_rust_ui_input(state.get(), seen.get(), core::ptr::null_mut(), Some(input)),
+                -1
+            );
+            assert_eq!(
+                fm1_rust_ui_input(state.get(), seen.get(), held.get(), None),
+                -1
+            );
+        }
+        assert_eq!(INPUT_CALLBACKS.with(Cell::get), 0);
     }
 }

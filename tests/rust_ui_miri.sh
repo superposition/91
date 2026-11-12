@@ -4,4 +4,4 @@
 set -eu
 cd "$(dirname "$0")/.."
 export MIRIFLAGS=-Zmiri-strict-provenance
-cargo +nightly-2026-08-28 miri test --locked -p fm1-jam-bridge ui::tests::callbacks_reenter_ui_only_between_scoped_borrows
+cargo +nightly-2026-08-28 miri test --locked -p fm1-jam-bridge ui::tests::

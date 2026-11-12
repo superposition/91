@@ -8,6 +8,7 @@ pub mod controls;
 pub mod graphics;
 #[cfg(feature = "host-platform")]
 pub mod host_platform;
+pub mod input;
 pub mod runner;
 pub mod runner_draw;
 pub mod text;

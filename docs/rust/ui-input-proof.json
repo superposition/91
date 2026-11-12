@@ -1,0 +1,47 @@
+{
+  "scope": "production held-button, key and seven-role encoder routing",
+  "toolchain": "Rust1.94.1; GCC11; Clang22 WASM",
+  "reference": {
+    "cases": 4096,
+    "bytes": 48713728,
+    "sha256": "af2f3884e7257027a7d75420b627d8516194c92c79acd9b3f241c647541ca2ae",
+    "R01_manifest_files_verified": 440,
+    "targets": [
+      "R01/C0/Rust native",
+      "R01/C0/Rust WASM"
+    ],
+    "real_input_consumer_witness": true,
+    "semantic_UI_fields": 193
+  },
+  "miri": {
+    "toolchain": "nightly-2026-08-28",
+    "strict_provenance": "passed",
+    "pinned_native": "passed",
+    "scope": "retained disjoint UI/u32/u8 roots; input to nested button/view callbacks",
+    "null_argument_guards": 4,
+    "arithmetic_overflow_rejection": 1,
+    "successful_input_after_rejection": true
+  },
+  "native": {
+    "cases": 97,
+    "artifacts": 538,
+    "pngs": 238,
+    "fresh_process_repeats": 3,
+    "status": "exact five-way, including historical assertion fingerprints"
+  },
+  "wasm": {
+    "compared_samples_including_HTTP_game_controls": 59649924,
+    "exports": 24,
+    "memory_bytes": 33554432,
+    "bytes": 2342041,
+    "sha256": "4cbf7c3c1d781de3286cbb941219f140f703e978f8f55e555b274a873b00b783"
+  },
+  "footprint": {
+    "added_mutable_state_bytes": 0,
+    "replaced_cache_bytes": 5,
+    "extra_pixel_or_storage_payloads": 0,
+    "new_diagnostic_counters": 0,
+    "target_ROM_RAM_stack": "requires adopted-compiler gate"
+  },
+  "remaining": "existing C application effects/helpers, MIDI policy, page composition, visualizers and physical QA"
+}

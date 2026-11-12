@@ -483,6 +483,7 @@ uint32_t ui_splash_ms = 3200u;           /* the boot cards: RedtailWorks, then H
 #include "../dsp/rust_ui.h"
 #include "../dsp/rust_ui_controller.h"
 #include "../dsp/rust_ui_buttons.h"
+#include "../dsp/rust_ui_input.h"
 #if !defined(EN_HOST) && !defined(EN_WEB)
 #include "../../hal/fm1_irq_state.h"
 #endif
@@ -3712,8 +3713,171 @@ static int runner_on(void);
 static void runner_input(uint32_t btn, uint32_t keys);
 static void runner_start(void);
 
+#if EN_RUST_APP
+static uint32_t ui_input_port(uint32_t op,uint32_t a,uint32_t b)
+{
+    if(op>=UIIQ_NOW && op<UIIN_FX_PAGE) {
+        volatile uint8_t *byte=0;volatile uint32_t *word=0;
+        switch(op) {
+        case UIIQ_PLAYING:byte=&en_playing;break;
+        case UIIQ_SECTION:byte=&en_sec;break;
+        case UIIQ_DRUM_POSITION:byte=&en_drum_pos;break;
+        case UIIQ_FLEX_DONE:word=&en_flx_done;break;
+        }
+        if(byte || word) {
+            uint32_t value;
+#if !defined(EN_HOST) && !defined(EN_WEB)
+            const uint32_t irq=fm1_irq_state_save();
+#endif
+            value=byte?*byte:*word;
+#if !defined(EN_HOST) && !defined(EN_WEB)
+            fm1_irq_state_restore(irq);
+#endif
+            return value;
+        }
+        switch(op) {
+        case UIIQ_NOW:return plat_ms();
+        case UIIQ_BUTTONS:return plat_buttons();
+        case UIIQ_KEYS:return plat_keys();
+        case UIIQ_ENCODER:return (uint32_t)plat_enc((int)a);
+        case UIIQ_RUNNER_ON:return (uint32_t)runner_on();
+        case UIIQ_FX_BANK:return fx_bank;
+        case UIIQ_PARAMETER:return a<P_NPARAMS?(uint32_t)(int32_t)proj.par[a]:0;
+        case UIIQ_FX_POSITION:return (uint32_t)fx_pos((int)a);
+        case UIIQ_SETTING_POSITION:return (uint32_t)st_pos((int)a);
+        case UIIQ_FX_ORDER:return a<FX_N?FX_ORDER[a]:0;
+        case UIIQ_SETTING_ORDER:return a<ST_N?ST_ORDER[a]:0;
+        case UIIQ_FX_COUNT:return FX_N;
+        case UIIQ_SETTING_COUNT:return ST_N;
+        case UIIQ_FX_PAGE_BIT:return a<NFXP?FXP[a].bit:63;
+        case UIIQ_FX_PAGE_HOLD:return a<NFXP?FXP[a].hold:0;
+        case UIIQ_FX_BIT_LOW:return a<NKEYS?(uint32_t)fxbit((int)a):0;
+        case UIIQ_FX_BIT_HIGH:return a<NKEYS?(uint32_t)(fxbit((int)a)>>32):0;
+        case UIIQ_KEY_FLEX:return (uint32_t)(a<NKEYS?key_flex((int)a):-1);
+        case UIIQ_FX_KEY_PAGE:return a<NKEYS?(uint32_t)fx_key_page((int)a):0;
+        case UIIQ_FLEX_PATTERN:return a<NKEYS?FLEX_PAT[a]:0;
+        case UIIQ_FILL_KEY:return FILL_KEY;
+        case UIIQ_FLEX_EFFECT:return FX_FLEX;
+        case UIIQ_FILL_EFFECT:return FX_FILL;
+        case UIIQ_RISER_EFFECT:return FX_RISER;
+        case UIIQ_SETLIST_PLAY:return (uint32_t)sl_play();
+        case UIIQ_SETLIST_STEP:return (uint32_t)sl_step((int)a,(int32_t)b);
+        case UIIQ_PIECE:return proj.piece;
+        case UIIQ_GENRE:return proj.genre;
+        case UIIQ_GLOBAL_RESERVED:return a<3?glob.sl_rsv[a]:0;
+        case UIIQ_REMOTE_ALLOWED:
+#ifdef EN_WEB
+            return 0;
+#else
+            return 1;
+#endif
+        case UIIQ_VIEW_KNOB:return a<4?(uint32_t)view_knob((int)a):K_NONE;
+        case UIIQ_GENRE_BARS:return (uint32_t)en_genre_bars();
+        case UIIQ_PROGRESSION_FILL_COUNT:return PGF_N;
+        case UIIQ_JAM: {
+            jp_settings_t settings;
+#if !defined(EN_HOST) && !defined(EN_WEB)
+            const uint32_t irq=fm1_irq_state_save();
+#endif
+            en_jam_get(&settings); /* only the bounded initialized ten-byte publication */
+#if !defined(EN_HOST) && !defined(EN_WEB)
+            fm1_irq_state_restore(irq);
+#endif
+            switch(a) {
+            case JAM_ON:return settings.on;case JAM_KEY:return settings.key+12u*settings.minor;
+            case JAM_BARS:return settings.bars;case JAM_FORM:return settings.form;
+            case JAM_MOVE:return settings.movement;case JAM_ENERGY:return settings.energy;
+            case JAM_HOLD:return settings.hold;case JAM_BASS:return settings.bass;
+            case JAM_SLOT:return settings.slot;case JAM_SONG:return (uint32_t)en_jam_source();
+            default:return (uint32_t)en_jam_option((int)a);
+            }
+        }
+        }
+        return 0;
+    }
+    switch(op) {
+    case UIIA_RUNNER_INPUT:runner_input(a,b);break;
+    case UIIA_RUNNER_START:runner_start();break;
+    case UIIA_BUTTON:if(a<NB)button((int)a);break;
+    case UIIA_REMOTE_ENTER:
+#ifndef EN_WEB
+        rm_enter();
+#endif
+        break;
+    case UIIA_PLAY:en_play((int)a);break;
+    case UIIA_KNOB:knob_set((int)a,(int32_t)b);break;
+    case UIIA_NOTE:if((a&255u)<=EN_V_PLUCK && (a>>8)<128)en_note((int)(a&255u),(int)(a>>8),(int)b);break;
+    case UIIA_SHIFT_LANE:shift_lane((int)a);break;
+    case UIIA_JAM_CAPTURE:jam_capture();break;
+    case UIIA_VIEW:set_view((int)a);break;
+    case UIIA_PIECE_STORE:piece_store();break;
+    case UIIA_SHIFT_KEY:if(a<NKEYS)shift_key((int)a);break;
+    case UIIA_MIX_KEY:if(a<NKEYS)mix_key((int)a);break;
+    case UIIA_FILL:en_fill_next();break;
+    case UIIA_FLEX_SELECT:en_flex_select((int)a);break;
+    case UIIA_FLEX_HOLD:en_flx_hold((int)a);break;
+    case UIIA_EFFECTS:en_fx((uint64_t)a|((uint64_t)b<<32));break;
+    case UIIA_SAMPLE_KEYS:smp_keys(a,b);break;
+    case UIIA_GATE_STEP:if(a<16)gx_step((int)a);break;
+    case UIIA_STEP_TOGGLE:if(a<16)step_toggle((int)a);break;
+    case UIIA_PROGRESSION_FILL:if(a<PGF_N)pg_fill((int)a);break;
+    case UIIA_GLOBAL_RESERVED:if(a<3)glob.sl_rsv[a]=(uint8_t)b;break;
+    case UIIA_PEDAL:en_pedal((int)a);break;
+    case UIIA_GLOBALS:project_globals();break;
+    case UIIA_JAM:en_jam_set((int)a,(int32_t)b);break;
+    case UIIA_PROJECT_APPLY:project_apply();break;
+    case UIIA_JAM_DOWN:if(a<NKEYS)jam_down((int)a);break;
+    case UIIA_JAM_UP:if(a<NKEYS)jam_up((int)a);break;
+    case UIIA_TOGGLE_NOTE:toggle_note((int)a);break;
+    case UIIA_MIDI:midi_in();break;
+    case UIIA_CONTROL_OUT:cc_out();break;
+    case UIIA_TURN:turn((int)(a&255u),(int)(a>>8),(int32_t)b);break;
+    case UIIA_FX_BANK:fx_bank=(uint8_t)a;break;
+    case UIIA_GENRE:genre_step((int32_t)a);break;
+    case UIIA_SETLIST:sl_go((int)a);break;
+    case UIIA_SETLIST_BAR:sl_go_bar((int)(a&255u),(int32_t)b,(int)((a>>8)&1u));break;
+    case UIIA_PIECE:set_piece((int32_t)a);break;
+    case UIIA_PIECE_BAR:set_piece((int)(a&255u));if(a>>8&1u)mix_start((int32_t)b);break;
+    case UIIA_MOOD:mood_apply();break;
+    case UIIA_SHIFT_SOUND:shift_sound((int32_t)a);break;
+    case UIIA_MODE:set_mode((int32_t)a);break;
+    case UIIA_PIECE_FACTORY:piece_factory();break;
+    case UIIA_SECTION:en_section((int)a);break;
+    case UIIA_SEQUENCE_TRICK:if(a<4)seq_trick((int)a,(int32_t)b);break;
+    case UIIA_PROGRESSION_UNIT:en_prg_put(proj.prg,EN_PRG_UNIT,2,(int)a);en_prog(proj.prg);edited();break;
+    case UIIA_HELP:help_tick(a,b);break;
+    case UIIN_FX_PAGE:if(a<=NFXP)say(a?FXP[a-1].name:"FX",a?(b?"SETTINGS":"EDIT"):"HOLD A KEY");break;
+    case UIIN_REMOTE_STOP:say("REMOTE","STOP FIRST");break;
+    case UIIN_STOP_FIRST:say("STOP FIRST",0);break;
+    case UIIN_BY_HAND_PAGE:say("BY HAND","ON A VOICE'S PAGE");break;
+    case UIIN_BY_HAND:if(a<3) {static const char*const who[3]={"PAD","BASS","ACID"};say(who[a],b?"BY HAND: PLAY THE KEYS":"BACK WITH THE MUSIC");}break;
+    case UIIN_LINKS:say("LINKS",a?"ON":"OFF");break;
+    case UIIN_PROGRESSION:say("PROGRESSION","WHITE KEYS: A SLOT");break;
+    case UIIN_FILL:say("FILL","NEXT BAR");break;
+    case UIIN_LANE_PATTERN:if(a<EN_NLANE) {char t[12]="PATTERN 1";t[8]=(char)('1'+b);say(LANE_SHORT[a],b<6?t:"FOLLOWS THE PIECE");}break;
+    case UIIN_PEDAL:say(a?"PAD":"BASS",b?"PEDAL: HOLDS THE KEY":"FOLLOWS THE CHORDS");break;
+    case UIIN_TEMPO: {char t[12];itoa_u((uint32_t)proj.par[P_TEMPO],t);say("TEMPO",t);break;}
+    case UIIN_VISUAL:say("VISUAL",VZ_NAME[a%VZ_N]);break;
+    case UIIN_MOOD: {char t[12];itoa_u(a,t);say("MOOD",t);break;}
+    case UIIN_SET_NEXT: {char t[12]="SET ";itoa_u(a+1,t+4);say(t,"NEXT BAR");break;}
+    case UIIN_PIECE_NEXT: {char t[12]="PIECE ";caps(t+6,piece_name((int)a),4);say(t,b?"STAYS":"NEXT BAR");break;}
+    case UIIN_FACTORY:say("KEEP HOLDING:","FACTORY");break;
+    case UIIN_DROP:say("DROP","NEXT BAR");break;
+    case UIIN_DRIFT:say("DRIFT",a==1?"IN BARS":"IN SECONDS");break;
+    case UIIN_MUTATES: {char t[16];knob_text(P_AC_CHG,t);say("MUTATES",t);break;}
+    case UIIN_FX_BANK:say(a==3?"DJ SNIPS":a==2?"FLEX BEAT":a?"BEAT FX":"FX","HOLD A KEY");break;
+    }
+    return 0;
+}
+#endif
+
 static void input(void)
 {
+#if EN_RUST_APP
+    static uint32_t flx_seen;
+    static uint8_t flxh_sent;
+    (void)fm1_rust_ui_input(&ui,&flx_seen,&flxh_sent,ui_input_port);
+#else
     uint32_t btn = plat_buttons(), keys = plat_keys(), ch, i;
     int32_t e;
     if (runner_on()) {                           /* the secret: the game has the panel */
@@ -4270,6 +4434,7 @@ static void input(void)
             ui.act_t = ui.turn_t = plat_ms();
         }
     help_tick(btn, keys);
+#endif
 }
 
 /* ------------------------------------------------------------- screen --- */

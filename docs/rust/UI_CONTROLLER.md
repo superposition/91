@@ -3,13 +3,13 @@
 The controller checkpoints adopt the complete existing UI carrier,
 initialization and foreground frame orchestration through `fm1-app`. The
 frame port preserves callback order while ending each UI state borrow before
-an application effect. Button actions and encoder acceleration use the same
-scoped boundary. Held-button/key routing, remaining helpers, page composition
+an application effect. Button actions, held/key routing and all seven encoder
+roles use the same scoped boundary. Remaining helpers, page composition
 and visualizers still need their Rust policy ports; graphics and Kick Runner
 are already ported.
 Issue #15 remains open. See [frame boundaries](UI_FRAME.md) and
 [storage retries](UI_STORAGE_BUSY.md), [encoder policy](UI_CONTROLS.md) and
-[button actions](UI_BUTTONS.md).
+[button actions](UI_BUTTONS.md) and [held controls](UI_INPUT.md).
 
 The carrier has 193 plain scalar/array fields. Its C declaration is identical
 to R01 after comments and whitespace are removed. `tools/ui_abi.py` maintains

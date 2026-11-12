@@ -42,7 +42,8 @@ nested button, then checks that later frame operations see all mutations.
 This tests actual Rust adapters with Rust implementations of the callback ABI;
 the C drivers and physical interrupt behavior are covered separately.
 
-Held-button/key routing, encoder routing, remaining application helpers, page
-composition and visualizers are still separate #15 work. C message formatting
+Held-button/key and encoder routing are now described in [UI_INPUT.md](UI_INPUT.md).
+Remaining application helpers, page composition and visualizers are still
+separate #15 work. C message formatting
 and view effects remain explicit transitional callbacks. Native/WASM evidence
 does not qualify physical interrupt latency, memory footprint or device use.
