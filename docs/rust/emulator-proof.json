@@ -1,5 +1,5 @@
 {
-  "scope": "Rust Songbook planner, bass decisions, pack validation and saved-session codecs inside C application/DSP/UI",
+  "scope": "Rust command queue, Songbook planner, bass decisions, pack validation and saved-session codecs inside C application/DSP/UI",
   "reference": "EN_RUST_JAM=0 rebuilt C instrument plus frozen R01 PCM fingerprints; session lifecycle also compared against original R01 WASM",
   "cases": [
     {
@@ -17,7 +17,13 @@
         "rejections": 0,
         "fallbacks": 0,
         "bass_events": 1037,
-        "sessions": 1
+        "sessions": 1,
+        "commands": {
+          "accepted": 961,
+          "consumed": 961,
+          "dropped": 0,
+          "high_water": 213
+        }
       }
     },
     {
@@ -35,7 +41,13 @@
         "rejections": 0,
         "fallbacks": 0,
         "bass_events": 1033,
-        "sessions": 1
+        "sessions": 1,
+        "commands": {
+          "accepted": 751,
+          "consumed": 751,
+          "dropped": 0,
+          "high_water": 213
+        }
       }
     },
     {
@@ -73,7 +85,13 @@
         "rejections": 0,
         "fallbacks": 0,
         "bass_events": 804,
-        "sessions": 2
+        "sessions": 2,
+        "commands": {
+          "accepted": 319,
+          "consumed": 319,
+          "dropped": 0,
+          "high_water": 208
+        }
       }
     }
   ],
@@ -81,24 +99,24 @@
   "total_simulated_seconds": 393.77437641723355,
   "artifacts": {
     "build/emu-parity/reference.wasm": {
-      "bytes": 1937538,
-      "sha256": "9c498c5425ab1164079cd7079977636880722c7e16349601baaf52e8c92cf6e5"
+      "bytes": 1937627,
+      "sha256": "c0f3a14d31d610404477e1d1b3671999a52a8ecfeee7aba6830a98b1c4c123b5"
     },
     "build/emu-parity/rust.wasm": {
-      "bytes": 2582356,
-      "sha256": "92eddb2188493e3d8ad22e42c824d9d7c9ef3099898da5427ac56944a2825760"
+      "bytes": 2574644,
+      "sha256": "64c45210eba35fceb9cacde4ed2df1d1d89a6457ea6afeba6544eabac408218c"
     },
     "build/emu-parity/factory.json": {
-      "bytes": 280,
-      "sha256": "c4a2cd94fc3a9994c64be089591ce22751023911de72a38194755ce7b7438759"
+      "bytes": 353,
+      "sha256": "e46cc5665727ee13599b338ec37f8aab3319dc51290a235cb04f0eec1eb11e07"
     },
     "build/emu-parity/saved-v1.json": {
-      "bytes": 320,
-      "sha256": "e430e38961e1205069a93523c8ff722b51504e46ed3dd7559180da2d2fdd4425"
+      "bytes": 393,
+      "sha256": "d1035af2ff34f6461713f8fbfa11feff2be40bf4d1047f77c41793ca40c1584b"
     },
     "build/emu-parity/session.json": {
-      "bytes": 316,
-      "sha256": "0e8d7ba21762dc72b87e3f896d33c3966318e4b46abaf63ef9e324d35e94e8d7"
+      "bytes": 389,
+      "sha256": "bda4744a1116c6ff0d05fd57d4ce0d8b545a1c9823aa9521b218efd054d10a6a"
     },
     "build/fm1-connected-before-rust.json": {
       "bytes": 3862,
@@ -107,7 +125,12 @@
   },
   "native_rust": "rustc 1.94.1 (e408947bf 2026-03-25)",
   "native_node": "v22.14.0",
-  "hosted_ci": "configured, not yet run",
+  "hosted_ci": {
+    "previous_revision": "4199c563e7ae20141d065fec23f01224c12f9b1e",
+    "previous_run": "https://github.com/superposition/91/actions/runs/43163122181",
+    "previous_conclusion": "success",
+    "queue_revision": "local checks passed; hosted run pending push"
+  },
   "browser_visual_qa": "not completed: URL verification stopped Computer Use; in-app browser host unavailable",
   "device": {
     "input": "HYP-1 FM-1 0",
@@ -118,6 +141,30 @@
     "voices": 0,
     "read_only_snapshot": "build/fm1-connected-before-rust.json",
     "firmware_flashed": false,
-    "rust_runtime_proof": "pending"
+    "rust_runtime_proof": "deferred by user; emulator-first",
+    "saved_object_backup": {
+      "path": "build/hardware/rust-r02-20261112/before/before-rust.p1bk",
+      "objects": 30,
+      "stored_bytes": 8077,
+      "verified_twice": true
+    }
+  },
+  "command_queue": {
+    "payload_bytes": 4096,
+    "total_bytes_including_indices": 4104,
+    "capacity": 1024,
+    "stable_command_kinds": 39,
+    "threaded_words_verified": 500000,
+    "frozen_c_cases": 4,
+    "accepted_per_case": 69520,
+    "dropped_per_case": 25856,
+    "ownership": "one producer / one consumer; acquire-release publication; boot reset exclusive",
+    "remaining": "coherent UI snapshots, staging leases, physical backend qualification"
+  },
+  "http_audio_fallback": {
+    "compared_samples": 1048576,
+    "peak": 0.19218111038208008,
+    "lan_url": "http://10.0.0.157:8001/emu/",
+    "user_confirmed_working": true
   }
 }

@@ -7,6 +7,8 @@ mod params;
 pub use params::*;
 mod jam;
 pub use jam::JamSettings;
+mod command;
+pub use command::{CommandKind, DecodedCommand};
 
 pub const SAMPLE_RATE: u32 = 44_100;
 pub const RENDER_FRAMES: usize = 256;
@@ -100,6 +102,9 @@ impl ScaleMask {
 pub struct CommandWord(u32);
 
 impl CommandWord {
+    pub const fn from_bits(bits: u32) -> Self {
+        Self(bits)
+    }
     pub const fn new(kind: u8, argument: u8, value: i16) -> Self {
         Self((kind as u32) << 24 | (argument as u32) << 16 | value as u16 as u32)
     }

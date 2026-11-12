@@ -20,4 +20,8 @@ cc -O2 -ffp-contract=off -std=gnu99 -I. -Ifirmware/src -Ifirmware/src/dsp -I"$ou
 "$out/session-reference" > "$out/session.json"
 cmp "$out/planner.json" "$repo/rust/fm1-engine/tests/reference.json"
 cmp "$out/session.json" "$repo/rust/fm1-formats/tests/session-reference.json"
+cc -O2 -ffp-contract=off -std=gnu99 -DEN_HOST -Ifirmware/src/dsp \
+    -o "$out/command-reference" "$repo/tests/reference/command_reference.c" -lm
+"$out/command-reference" > "$out/commands.json"
+cmp "$out/commands.json" "$repo/rust/fm1-rt/tests/legacy.json"
 echo "Frozen C planner/session oracles reproduced exactly: $out"

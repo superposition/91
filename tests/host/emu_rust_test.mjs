@@ -71,7 +71,7 @@ for(let block=0;block<blocks;block++) {
     assert.equal(rust.ex.web_lit_keys(),reference.ex.web_lit_keys());
   }
 }
-const counts=Array.from({length:6},(_,index)=>rust.ex.web_rust_stat(index));
+const counts=Array.from({length:10},(_,index)=>rust.ex.web_rust_stat(index));
 assert(counts[1]>=6,`Rust planner executed: ${counts}`);
 assert(counts[4]>=500,`Rust bass decisions executed: ${counts}`);
 assert.equal(counts[2],0,'no planner rejection');
@@ -79,6 +79,9 @@ assert.equal(counts[3],0,'no C planner fallback');
 assert.equal(rust.memory.buffer.byteLength,memoryBytes,'no memory growth during playback');
 if(process.argv[4])assert(counts[0]>0,'saved-pack startup calls Rust validation');
 assert(counts[5]>0,'startup calls Rust session validation');
+assert(counts[6]>176 && counts[7]>176,'Rust command producer and consumer execute');
+assert.equal(counts[8],0,'normal playback drops no commands');
+assert(counts[9]>0 && counts[9]<=1024,'bounded command queue high-water mark');
 assert(peak>0.05 && peak<1);
 const pcmHash=hash.toString(16).padStart(8,'0');
 const golden=JSON.parse(fs.readFileSync(new URL('./emu_rust_golden.json',import.meta.url)));
@@ -89,4 +92,5 @@ if(golden[scenario]) {
 }
 console.log(JSON.stringify({initial_pack:process.argv[4]||'factory',blocks,seconds:blocks*frames/44100,compared_samples:blocks*frames*2,
   pcm_hash:pcmHash,peak,blits:rust.ex.web_blits(),memory_bytes:memoryBytes,
-  rust:{validations:counts[0],plans:counts[1],rejections:counts[2],fallbacks:counts[3],bass_events:counts[4],sessions:counts[5]}}));
+  rust:{validations:counts[0],plans:counts[1],rejections:counts[2],fallbacks:counts[3],bass_events:counts[4],sessions:counts[5],
+    commands:{accepted:counts[6],consumed:counts[7],dropped:counts[8],high_water:counts[9]}}}));

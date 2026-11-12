@@ -35,6 +35,7 @@ version = "0.1.0"
 dependencies = [
  "fm1-engine",
  "fm1-formats",
+ "fm1-rt",
  "fm1-types",
 ]
 
@@ -45,6 +46,14 @@ dependencies = [
  "fm1-engine",
  "fm1-formats",
  "fm1-types",
+]
+
+[[package]]
+name = "fm1-rt"
+version = "0.1.0"
+dependencies = [
+ "fm1-types",
+ "serde_json",
 ]
 
 [[package]]

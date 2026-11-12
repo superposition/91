@@ -4,11 +4,11 @@ Execution is tracked in [epic #1](https://github.com/superposition/91/issues/1).
 
 ## Compatibility and ownership
 
-The browser build now runs Rust Songbook validation, session encoding/validation, phrase planning and bass decisions inside the existing instrument. Synthesis, application state, transport and UI remain C. The physical firmware still uses its original C path. The current working-tree Songbook/DX7 changes are part of the baseline. Do not reset them to the Git HEAD baseline.
+The browser build now runs Rust command publication/consumption, Songbook validation, session encoding/validation, phrase planning and bass decisions inside the existing instrument. Command dispatch, synthesis, application state, transport and UI remain C. The physical firmware still uses its original C path. The current working-tree Songbook/DX7 changes are part of the baseline. Do not reset them to the Git HEAD baseline.
 
 The device uses 256-frame render calls and 512-frame DMA halves at 44.1 kHz, allowing approximately 11,609 microseconds per half. Ordinary RAM is limited to 98,304 bytes, and the 344,064-byte pool must retain 4,096 bytes of reserve.
 
-The target Rust design assigns one owner to each mutable subsystem. This is the intended end state; the command queue and render/application owners have not migrated yet:
+The target Rust design assigns one owner to each mutable subsystem. The command ring now has Rust producer/consumer endpoints; the render/application owners and coherent UI snapshot have not migrated yet:
 
 ```mermaid
 flowchart LR
@@ -22,7 +22,7 @@ flowchart LR
   App <--> Store[Explicit codecs + A/B storage]
 ```
 
-Portable libraries use `no_std`, forbid unsafe code, and have no dependencies on an allocator or browser APIs. Native tools use `std`. Hardware, shared-memory and foreign-function boundaries will have separate safety invariants; `volatile` does not establish thread synchronization.
+Musical/format/type libraries use `no_std`, forbid unsafe code, and have no dependencies on an allocator or browser APIs. The separate `fm1-rt` queue owns a reviewed `UnsafeCell`/atomic publication boundary. Native tools use `std`. Hardware and foreign-function boundaries have separate safety invariants; `volatile` does not establish thread synchronization.
 
 The agreed upstream exception is the recovery stub: version **3**, SHA-256 `baee55ed142fe1cc336099902fa544d8844ba72182abf669f15cc78fc6bee87c`. Preserve its source and bytes, vendor assets, unavoidable assembly, and thin/generated browser bindings. Generated C may be an intermediate produced from maintained Rust source.
 
@@ -51,6 +51,7 @@ The workspace currently contains:
 | `fm1-types` | Stable parameter IDs and metadata, Songbook settings, step/scale masks, packed modifiers and command words |
 | `fm1-formats` | CRC-32, validated borrowed Jam Pack v1/v2 views, sound-parameter validation and the 20-byte session codec |
 | `fm1-engine` | v1/v2 phrase planning, deterministic random state and bass-event derivation |
+| `fm1-rt` | Fixed 1,024-word SPSC command ring with unique Rust producer/consumer endpoints |
 | `fm1-cli` | Layout reporting, parameter export, pack inspection/validation and phrase-plan inspection |
 | `fm1-jam-bridge` | Audited transitional C ABI used by the browser instrument; diagnostics count execution, rejection and C fallback |
 | `fm1-probe` | Compiler/ABI probes for the experimental hardware route; this package is not production firmware |
@@ -61,6 +62,7 @@ The synthesis engine, full application, hardware layer, remaining browser logic 
 | --- | ---: |
 | Six patterns × six lane masks | 72 bytes |
 | 1,024 packed command words | 4,096 bytes |
+| Command ring including two indices | 4,104 bytes |
 | One beat: four notes, node and flags | 6 bytes |
 | One phrase: four header bytes + 64 beats | 388 bytes |
 | Two phrase buffers | 776 bytes |
@@ -74,7 +76,7 @@ The planner preserves candidate scoring/tie order, random-number consumption, ca
 ```sh
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
-cargo check -p fm1-types -p fm1-formats -p fm1-engine --target wasm32-unknown-unknown
+cargo check -p fm1-types -p fm1-formats -p fm1-engine -p fm1-rt --target wasm32-unknown-unknown
 cargo run -p fm1-cli -- layouts
 cargo run -p fm1-cli -- validate packs/velvet-changes.jmp
 cargo run -p fm1-cli -- plan packs/velvet-changes.jmp 6 1 8
@@ -103,15 +105,23 @@ flowchart LR
   DSP --> WASM[WASM / AudioWorklet]
 ```
 
-`EN_RUST_JAM=1` is the browser default. `EN_RUST_JAM=0` builds the C reference. The normal hardware build does not enable this bridge. No reference or pointer survives a Rust call. A previous/output phrase may alias; the bridge first copies its initialized header and active beats, avoiding uninitialized C tails. The bridge uses stack copies, so its device stack cost still requires hardware qualification.
+`EN_RUST_JAM=1` is the browser default and also enables `EN_RUST_COMMANDS=1`. `EN_RUST_JAM=0` builds the C reference. The normal hardware build does not enable these bridges. No caller reference or pointer survives a Rust call. A previous/output phrase may alias; the bridge first copies its initialized header and active beats, avoiding uninitialized C tails. The bridge uses stack copies, so its device stack cost still requires hardware qualification.
 
-The current Rust unsafe inventory is confined to two packages. `fm1-jam-bridge` checks nullable/bounded pointers, copies initialized inputs, supports the documented phrase alias, and requires disjoint output/settings/pack/seed storage without concurrent mutation. Its relaxed atomic counters are telemetry, not synchronization. `fm1-probe` owns the experimental callback, `UnsafeCell`, section-placement and volatile-MMIO boundaries; its mutable cell requires exclusive boot-time access before audio/interrupt use. The three portable libraries forbid unsafe code. Hardware and multicore ownership still need their own reviewed boundaries as those tickets are implemented.
+The current Rust unsafe inventory is confined to three packages. `fm1-jam-bridge` checks nullable/bounded pointers, copies initialized inputs, supports the documented phrase alias, and requires disjoint output/settings/pack/seed storage without concurrent mutation. Its command calls require one serialized producer, one render consumer and exclusive boot-time reset. Its relaxed counters are telemetry, not synchronization. `fm1-rt` uses acquire/release publication and slot reuse; safe Rust obtains non-clonable producer/consumer handles from one exclusive `split`. `fm1-probe` owns the experimental callback, `UnsafeCell`, section-placement and volatile-MMIO boundaries; its mutable cell requires exclusive boot-time access before audio/interrupt use. The musical/format/type libraries forbid unsafe code. Hardware and multicore ownership still need their own reviewed boundaries as those tickets are implemented.
+
+### Command ownership — R08
+
+The ring stores exactly 1,024 `CommandWord(u32)` values and two wrapping `u32` indices: the same **4,104-byte** queue footprint as C. A temporary typed decode exposes one of 39 stable actions, the argument byte and signed 16-bit value; the queue never stores a larger command enum. The producer writes a free slot before release-publishing its index. The consumer acquire-loads that index, copies the word, then release-publishes reuse. The producer's acquire-load of the read index prevents overwriting a live slot. Slot access uses raw pointers without creating an exclusive reference to the whole shared array.
+
+Full queues reject the newest word without changing any queued word. Unsigned wrapping distance preserves full/empty behavior across `u32::MAX`, and the power-of-two capacity preserves physical slot order through that wrap. The frozen C corpus covers four starting positions, preset-like bursts, accepted/rejected publications and ordered drains: each case accepts and consumes 69,520 words and deliberately drops 25,856. An independent `VecDeque` model checks the same boundary cases. A real two-thread test transfers 500,000 patterned words without tearing, loss or reordering. All 39 command kinds preserve every signed payload, including a valid all-zero command word.
+
+In three full instrument scenarios the Rust queue accepts/consumes 961, 751 and 319 commands, drops none, and peaks at 213, 213 and 208 slots. The C command dispatcher and render-block drain points stay in place, so audio/framebuffer/lifecycle comparisons still match the frozen baseline. Telemetry reports accepted/consumed/dropped/high-water counts. The browser executes input/application/render on one worker (or the HTTP fallback's main thread); a physical backend must first supply/qualify 32-bit atomics or an appropriate interrupt-exclusion implementation. Coherent UI snapshots and transfer-buffer leases remain open parts of R08.
 
 `tests/rust_emulator_parity.sh` builds both variants from one checkout. Two 159.64-second playback runs compare **28,160,000 stereo Float32 values bit-for-bit**, sampled full framebuffers and LEDs, and frozen R01 PCM fingerprints. A third 74.5-second scenario restores a saved v2 pack, holds a phrase for 60 seconds without additional planning, requests New Idea, stops, saves and boots a fresh instance from the saved bytes. Its irregular render requests span **1 to 1,024 frames**, adding **6,570,900 matching audio values**.
 
 All three scenarios pass with **zero Rust rejections, zero C fallbacks and no WASM memory growth**. The preallocated WASM memory is 32 MiB; that is an emulator allocation, not a claim about physical RAM use. The module exposes exactly the 24 browser API/memory exports, with no public Rust implementation symbols. [rust/emulator-proof.json](rust/emulator-proof.json) records the results and artifact hashes.
 
-The GitHub workflow runs native checks on Windows/Linux and builds/tests both emulator variants with pinned Rust 1.94.1 and Zig 0.17.1. Workflow configuration is checked locally; hosted CI results require a pushed revision. Browser visual inspection is still outstanding: Computer Use stopped because it could not verify Chrome's URL, and the in-app browser host was unavailable. Node/WASM tests exercise the actual instrument and framebuffer but do not establish browser audio-device behavior.
+The GitHub workflow runs native checks on Windows/Linux and builds/tests both emulator variants with pinned Rust 1.94.1 and Zig 0.17.1. The HTTP fallback shares the same processor through a main-thread Web Audio callback when AudioWorklet is unavailable on an insecure LAN origin; its PCM matches 128-frame processing for 1,048,576 values. The user confirmed the LAN emulator works at `http://10.0.0.157:8001/emu/`. Automated browser visual inspection remains outstanding because Computer Use could not verify Chrome's URL and the in-app browser host was unavailable.
 
 ## Hardware compiler gate — R02
 

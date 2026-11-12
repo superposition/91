@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-use fm1_types::{CommandWord, ParamId, StepMod, PARAMETERS, PARAMETER_COUNT};
+use fm1_types::{CommandKind, CommandWord, ParamId, StepMod, PARAMETERS, PARAMETER_COUNT};
 
 #[test]
 fn parameter_metadata_matches_the_frozen_c_export() {
@@ -32,5 +32,27 @@ fn packed_signed_commands_and_step_fields_preserve_every_payload() {
         assert_eq!(step.ratchet(), value & 7);
         assert_eq!(step.push(), value >> 3 & 7);
         assert_eq!(step.level(), value >> 6);
+    }
+}
+
+#[test]
+fn typed_commands_preserve_all_kinds_and_signed_payloads() {
+    for kind in 0..=38 {
+        let typed = CommandKind::try_from(kind).unwrap();
+        for value in i16::MIN..=i16::MAX {
+            let word = CommandWord::encode(typed, 255, value);
+            let command = word.decode().unwrap();
+            assert_eq!(command.kind, typed);
+            assert_eq!(command.argument, 255);
+            assert_eq!(command.value, value);
+            assert_eq!(
+                word.bits(),
+                (kind as u32) << 24 | 255 << 16 | value as u16 as u32
+            );
+        }
+    }
+    assert_eq!(CommandKind::Jam as u8, 38);
+    for kind in 39..=255 {
+        assert!(CommandWord::new(kind, 0, 0).decode().is_err());
     }
 }

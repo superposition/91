@@ -989,6 +989,16 @@ static uint8_t hush;                             /* a store while playing: fade 
 static float hush_g = 1.0f;                      /* its gain, 0..1 */
 volatile uint8_t en_hushed;                      /* faded right out: the flash can be written */
 #define QN 1024u                                 /* about seven times every parameter at once (project_apply, a piece, a genre): a quick flick of PRESETS filled 256 and dropped commands */
+#if EN_RUST_COMMANDS
+extern void fm1_rust_commands_reset(void);
+extern int32_t fm1_rust_commands_push(uint32_t);
+extern int32_t fm1_rust_commands_pop(uint32_t *);
+static void post(uint32_t c, int a, int b)
+{
+    fm1_rust_commands_push(c << 24 | ((uint32_t)a & 0xFFu) << 16 | ((uint32_t)b & 0xFFFFu));
+}
+static int command_pop(uint32_t *word) { return fm1_rust_commands_pop(word); }
+#else
 static uint32_t q[QN];
 static volatile uint32_t q_w, q_r;
 static void post(uint32_t c, int a, int b)
@@ -1000,6 +1010,14 @@ static void post(uint32_t c, int a, int b)
     BARRIER();
     q_w = w + 1;
 }
+static int command_pop(uint32_t *word)
+{
+    if(q_r==q_w)return 0;
+    *word=q[q_r%QN];
+    BARRIER(); q_r++;
+    return 1;
+}
+#endif
 void en_set(int p, int v) { post(C_SET, p, v); }
 void en_pool(uint32_t pool) { post(C_POOL, 0, (int)(pool & 0xFFFu)); }
 void en_play(int on) { post(C_PLAY, on, 0); }
@@ -4795,7 +4813,11 @@ void en_init(void)
     head2 = head2_t = 0.75f;
     head2_v = 0.0f;
     echo_len = 0.0f;
+#if EN_RUST_COMMANDS
+    fm1_rust_commands_reset();
+#else
     q_r = q_w = 0;
+#endif
     for (i = 0; i < NMOD; i++) {
         mod[i].v = mod[i].tgt = 0.0f;
         mod[i].left = 0;
@@ -6378,11 +6400,9 @@ static void drain(void)
 {
     if(jp_upload && !en_playing) jp_activate(1);
     else if(jp_upload && !jp_upload_prepared && en_jam_on) {jp_prepare(0);jp_upload_prepared=1;}
-    while (q_r != q_w) {
-        uint32_t c = q[q_r % QN];
+    uint32_t c;
+    while (command_pop(&c)) {
         int a = (int)(c >> 16 & 0xFFu), b = (int)(int16_t)(c & 0xFFFFu);
-        BARRIER();
-        q_r++;
         switch (c >> 24) {
         case C_JAM: jp_control(a,b); break;
         case C_SET:

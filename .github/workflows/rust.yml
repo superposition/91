@@ -23,7 +23,7 @@ jobs:
       - run: cargo +1.94.1 fmt --all --check
       - run: cargo +1.94.1 test --workspace --locked
       - run: cargo +1.94.1 clippy --workspace --all-targets --locked -- -D warnings
-      - run: cargo +1.94.1 check -p fm1-types -p fm1-formats -p fm1-engine --target wasm32-unknown-unknown --locked
+      - run: cargo +1.94.1 check -p fm1-types -p fm1-formats -p fm1-engine -p fm1-rt --target wasm32-unknown-unknown --locked
       - run: cargo +1.94.1 build --release --locked -p fm1-jam-bridge --no-default-features --target wasm32-unknown-unknown
 
   emulator:
