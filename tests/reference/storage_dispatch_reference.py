@@ -72,12 +72,15 @@ static int fake_pending(void){return fake_io_pending;}
 static int fake_loading(void){return fake_io_loading;}
 static void fake_init(void){inits++;}
 static void ota_session(void){otas++;}
+static unsigned dispatch_param_calls;static int dispatch_param_id,dispatch_param_value;
+static void fake_param_set(int id,int value){dispatch_param_calls++;dispatch_param_id=id;dispatch_param_value=value;ui_param_set(id,value);}
 #define en_play fake_play
 #define en_panic fake_panic
 #define ui_flush fake_flush
 #define ui_flush_pending fake_pending
 #define ui_storage_loading fake_loading
 #define ui_init fake_init
+#define ui_param_set fake_param_set
 '''
 suffix=r'''
 #undef en_play
@@ -86,6 +89,7 @@ suffix=r'''
 #undef ui_flush_pending
 #undef ui_storage_loading
 #undef ui_init
+#undef ui_param_set
 #undef plat_store_load
 #undef plat_store_save
 static unsigned raw_request(unsigned op,const uint8_t *p,unsigned n){uint8_t m[540]={0x7d,0x50,0x60,0,42};m[3]=(uint8_t)op;memcpy(m+5,p,n);m[5+n]=(uint8_t)bk_sum(m+3,n+2);return ju_request(m,n+6,bk_buf,0,ju_ack);}
@@ -126,8 +130,8 @@ int main(void){
     dx_state=0;
     {int before=ui_param_get(P_TEMPO),value=before==190?70:before+1;
      px_q[px_w++%PX_N]=1u<<28|P_TEMPO<<14|(unsigned)(value+8192);
-     k=px_r;px_service();assert(px_r==k&&ui_param_get(P_TEMPO)==before);
-     fake_io_loading=0;px_service();assert(px_r==px_w&&ui_param_get(P_TEMPO)==value);}
+     k=px_r;n=dispatch_param_calls;px_service();assert(px_r==k&&ui_param_get(P_TEMPO)==before&&dispatch_param_calls==n);
+     fake_io_loading=0;px_service();assert(px_r==px_w&&dispatch_param_calls==n+1&&dispatch_param_id==P_TEMPO&&dispatch_param_value==value);}
     /* A valid restore leases the shared snapshot while edits are still pending.
      * The occupied queue head and its following command cannot be consumed. */
     memset(bk_buf,0,sizeof(glob));memcpy(bk_buf,&glob,sizeof(glob));wr32(bk_buf,GLOB_MAGIC);
