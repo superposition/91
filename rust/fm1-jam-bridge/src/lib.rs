@@ -11,6 +11,7 @@ use fm1_formats::session::JamSession;
 mod commands;
 mod effects;
 mod factory;
+mod fm6;
 mod formats;
 mod handoff;
 mod melodic;
@@ -291,6 +292,7 @@ pub extern "C" fn fm1_rust_jam_stat(index: u32) -> u32 {
         32..=35 => factory::stat(index),
         36..=39 => formats::stat(index),
         40..=47 => voices::stat(index),
+        48..=55 => fm6::stat(index),
         _ => 0,
     }
 }

@@ -13,7 +13,7 @@ fi
 cargo build --release --locked -p fm1-jam-bridge --target-dir build/effects-parity/rust-build
 cc -O2 -ffp-contract=off -std=gnu99 -DEN_HOST -I"$baseline/firmware/src/dsp" -o "$out/reference" tests/host/core2_test.c "$baseline/firmware/src/dsp/amb.c" -lpthread -lm
 cc -O2 -ffp-contract=off -std=gnu99 -DEN_HOST -Ifirmware/src/dsp -o "$out/c0" tests/host/core2_test.c firmware/src/dsp/amb.c -lpthread -lm
-cc -O2 -ffp-contract=off -std=gnu99 -DEN_HOST -DEN_RUST_JAM=1 -DEN_RUST_COMMANDS=1 -DEN_RUST_TRANSPORT=1 -DEN_RUST_HANDOFF=1 -DEN_RUST_SCHEDULER=1 -DEN_RUST_MELODIC=1 -DEN_RUST_EFFECTS=1 -DEN_RUST_FACTORY=1 -DEN_RUST_VOICES=1 \
+cc -O2 -ffp-contract=off -std=gnu99 -DEN_HOST -DEN_RUST_JAM=1 -DEN_RUST_COMMANDS=1 -DEN_RUST_TRANSPORT=1 -DEN_RUST_HANDOFF=1 -DEN_RUST_SCHEDULER=1 -DEN_RUST_MELODIC=1 -DEN_RUST_EFFECTS=1 -DEN_RUST_FACTORY=1 -DEN_RUST_VOICES=1 -DEN_RUST_FM6=1 -DEN_RUST_FORMATS=1 \
     -Ifirmware/src/dsp -o "$out/rust" tests/host/core2_test.c firmware/src/dsp/amb.c build/effects-parity/rust-build/release/libfm1_jam_bridge.a -lpthread -ldl -lm
 : > "$out/results.txt"
 for pre in 0 100; do
