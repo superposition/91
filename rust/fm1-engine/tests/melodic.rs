@@ -68,6 +68,47 @@ fn acid_generation_mutation_and_all_answer_previews_match_frozen_c() {
     }
 }
 #[test]
+fn scheduling_tables_and_all_bass_comp_selections_match_frozen_c() {
+    use fm1_engine::scheduling_tables::*;
+    let corpus: serde_json::Value =
+        serde_json::from_str(include_str!("scheduling-tables.json")).unwrap();
+    for genre in 0..19 {
+        let s = SECTIONS[genre];
+        let mut hash = 2_166_136_261;
+        for value in [
+            s.kick,
+            s.hat,
+            s.build,
+            s.pad,
+            s.kret,
+            s.snare,
+            s.bass,
+            s.ft,
+            s.fl,
+            FILL_OK[genre],
+        ] {
+            hash = word(hash, value as u32);
+        }
+        for mode in 0..=16 {
+            let (root, figure) = bass_recipe(genre, mode);
+            hash = word(word(hash, root as u32), figure.mask as u32);
+            for interval in figure.intervals {
+                hash = word(hash, interval as u8 as u32);
+            }
+        }
+        for jam in [false, true] {
+            for comp in 0..=8 {
+                hash = word(hash, comp_mask(jam, comp, genre) as u32);
+            }
+        }
+        assert_eq!(
+            hash,
+            corpus[genre].as_u64().unwrap() as u32,
+            "genre {genre}"
+        );
+    }
+}
+#[test]
 fn zero_mutation_keeps_notes_but_still_consumes_the_legacy_rng_draws() {
     let h = harmony();
     let c = AcidConfig {

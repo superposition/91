@@ -13,6 +13,12 @@ typedef struct {int32_t rate,level,manual,range,octave,loop_size,deja_vu,density
 typedef struct {uint32_t fire;int32_t note;float velocity;int32_t slot;uint32_t publish;uint8_t rungs[16],levels[16];} fm1_pluck_note_t;
 typedef struct {uint8_t steps[16],history[16];uint32_t set,beat;int32_t position;} fm1_bass_t;
 typedef struct {int32_t mode,manual,played,playing,section,keep;uint32_t root_mask,riff_mask;int32_t intervals[4],movement,octave,drop,kick;} fm1_bass_config_t;
+typedef struct {uint8_t kick,hat,build,pad,kret,snare,bass,ft,fl;} fm1_section_t;
+_Static_assert(sizeof(fm1_section_t)==9 && _Alignof(fm1_section_t)==1,"Rust section view ABI");
+extern const fm1_section_t FM1_RUST_SECTIONS[19];
+extern const uint8_t FM1_RUST_FILL_OK[19];
+extern void fm1_rust_bass_recipe(fm1_bass_config_t *,uint32_t);
+extern uint32_t fm1_rust_mel_comp(uint32_t,int32_t,uint32_t);
 typedef struct {uint32_t fire;int32_t note;uint32_t flags,publish;} fm1_bass_note_t;
 _Static_assert(sizeof(fm1_harmony_t)==92 && sizeof(fm1_acid_t)==64 && sizeof(fm1_acid_config_t)==56 && sizeof(fm1_acid_note_t)==28,"Rust acid ABI");
 _Static_assert(sizeof(fm1_pluck_t)==200 && sizeof(fm1_pluck_config_t)==48 && sizeof(fm1_pluck_note_t)==52,"Rust pluck ABI");

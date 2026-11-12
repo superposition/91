@@ -22,10 +22,11 @@ cc -O2 -ffp-contract=off -std=gnu99 -DEN_HOST \
 cmp "$out/tempo.json" rust/fm1-engine/tests/transport-tempo.json
 "$out/rust" 8 > "$out/tempo-rust.json"
 cmp "$out/tempo.json" "$out/tempo-rust.json"
-for oracle in 9 10 11; do
+for oracle in 9 10 11 12; do
     corpus=sequencer-density
     [ "$oracle" = 9 ] || corpus=sequencer-mutation
     [ "$oracle" != 11 ] || corpus=melodic-acid
+    [ "$oracle" != 12 ] || corpus=scheduling-tables
     "$out/reference" "$oracle" > "$out/$corpus.json"
     cmp "$out/$corpus.json" "rust/fm1-engine/tests/$corpus.json"
     "$out/rust" "$oracle" > "$out/$corpus-rust.json"
