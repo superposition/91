@@ -10,6 +10,7 @@ path = "../probe.rs"
 
 [features]
 atomic-probe = ["dep:fm1-rt"]
+static-export-probe = []
 
 [dependencies]
 fm1-types.workspace = true

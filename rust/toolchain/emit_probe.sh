@@ -27,7 +27,7 @@ mrustc/bin/mrustc "$repo/rust/toolchain/probe.rs" --crate-name fm1_probe --crate
     --extern "fm1_types=$out/libfm1_types.rlib" --extern "fm1_formats=$out/libfm1_formats.rlib" --extern "fm1_engine=$out/libfm1_engine.rlib" \
     -O -C panic=abort -o "$out/libfm1_probe.rlib" -C "emit-build-command=$out/probe-command.txt" > "$out/probe.log" 2>&1
 tc=${JIELI_TOOLCHAIN:?set the vendor toolchain root}
-freestanding=${FM1_FREESTANDING:?set the freestanding C include directory}
+freestanding=${FM1_FREESTANDING:-$repo/rust/toolchain/freestanding}
 for package in types formats engine probe; do
     "$tc/pi32v2/bin/clang" -target pi32v2 -mcpu=r3 -mfprev1 -ffp-contract=off -O2 \
         -ffunction-sections -fdata-sections -std=gnu11 -I"$freestanding" \

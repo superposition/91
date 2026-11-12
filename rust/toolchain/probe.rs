@@ -10,6 +10,9 @@ use fm1_formats::jam::JamPack;
 #[cfg(feature = "atomic-probe")]
 #[path = "atomic_probe.rs"]
 mod atomic_probe;
+#[cfg(feature = "static-export-probe")]
+#[path = "static_exports.rs"]
+mod static_exports;
 
 struct ProbeCell(UnsafeCell<u32>);
 // SAFETY: the private cell is reachable only through the explicitly unsafe,

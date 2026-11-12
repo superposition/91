@@ -1,0 +1,15 @@
+{
+  "base": "5205980b25d4d15494abdb45103e59e8dc309970",
+  "sha256": "a57ac7e1ec07386a9af5d4f53393a4bd8743f22fd64a5e7d94d647d7905cc191",
+  "files": [
+    "src/expand/codegen.cpp",
+    "src/hir/from_ast.cpp",
+    "src/trans/codegen_c.cpp"
+  ],
+  "scope": [
+    "readonly owned immutable statics, excluding UnsafeCell and foreign storage",
+    "export_name registration and legacy no_mangle static lowering",
+    "actual linker labels on owned static definitions"
+  ],
+  "regression": "static-export probe passes standard Rust, native generated C and vendor object symbol/section checks"
+}
