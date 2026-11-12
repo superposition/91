@@ -15,6 +15,8 @@ dispatchers retain the existing request and retry on a later loop turn.
 - A valid restore waits at its occupied queue head until pending UI saves have
   finished. One scalar leases the shared backup buffer during that wait; later
   transfers cannot overwrite it. The consumer index is never rolled backward.
+- DX/Jam imports and editor changes retain their request while saved UI state
+  is still being read, so an early edit cannot overwrite an unknown saved value.
 - Normal updater/ROM transitions stop playback and enqueue panic once, then
   wait for `ui_flush_pending()` to clear. Reinitialization/detachment cannot
   discard deferred edits. Safe Mode bypasses the application flush. A completed

@@ -54,7 +54,7 @@ static uint32_t px_q[32],px_r,px_w;
 #define PX_N 32u
 static uint8_t dx_buf[4112],dx_state,dx_kind;static uint32_t dx_pos;
 #define fm1_ms now_ms
-static unsigned sent,blocked,detaches,reboots,roms,stops,plays,panics,flushes,fake_io_pending,inits,otas;
+static unsigned sent,blocked,detaches,reboots,roms,stops,plays,panics,flushes,fake_io_pending,fake_io_loading,inits,otas;
 static uint8_t frames[64][148];static uint32_t frame_len[64];
 static struct {uint8_t ota_req,uboot_req;}usb;
 static struct {uint8_t pending;}bootguard;
@@ -69,12 +69,14 @@ static void fake_play(int n){(void)n;plays++;}
 static void fake_panic(void){panics++;}
 static void fake_flush(void){flushes++;}
 static int fake_pending(void){return fake_io_pending;}
+static int fake_loading(void){return fake_io_loading;}
 static void fake_init(void){inits++;}
 static void ota_session(void){otas++;}
 #define en_play fake_play
 #define en_panic fake_panic
 #define ui_flush fake_flush
 #define ui_flush_pending fake_pending
+#define ui_storage_loading fake_loading
 #define ui_init fake_init
 '''
 suffix=r'''
@@ -82,6 +84,7 @@ suffix=r'''
 #undef en_panic
 #undef ui_flush
 #undef ui_flush_pending
+#undef ui_storage_loading
 #undef ui_init
 #undef plat_store_load
 #undef plat_store_save
@@ -118,6 +121,13 @@ int main(void){
     p[0]=1;deny=1;saves0=saves;assert(raw_request(7,p,1)==0&&saves==saves0&&ju_owner()==0);
     deny=0;save_busy=1;assert(raw_request(7,p,1)==0&&depth==0&&ju_owner()==0);
     save_busy=0;n=raw_request(7,p,1);assert(n>9&&ju_ack[6]==JU_OK&&depth==0);
+    /* Imports and editor changes cannot replace not-yet-read saved state. */
+    fake_io_loading=1;dx_kind=4;dx_state=2;dx_service();assert(dx_state==2);
+    dx_state=0;
+    {int before=ui_param_get(P_TEMPO),value=before==190?70:before+1;
+     px_q[px_w++%PX_N]=1u<<28|P_TEMPO<<14|(unsigned)(value+8192);
+     k=px_r;px_service();assert(px_r==k&&ui_param_get(P_TEMPO)==before);
+     fake_io_loading=0;px_service();assert(px_r==px_w&&ui_param_get(P_TEMPO)==value);}
     /* A valid restore leases the shared snapshot while edits are still pending.
      * The occupied queue head and its following command cannot be consumed. */
     memset(bk_buf,0,sizeof(glob));memcpy(bk_buf,&glob,sizeof(glob));wr32(bk_buf,GLOB_MAGIC);

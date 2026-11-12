@@ -550,6 +550,7 @@ static void dx_service(void)
         return;
     RING_PUBLISH();
     if(ju_ack_n) return; /* backpressure: do not overwrite an unsent response */
+    if(ui_storage_loading())return; /* retain the import until saved state is known */
     kind = dx_kind;
     if(kind==6) {
         ju_ack_n=ju_request(dx_buf,dx_pos,bk_buf,bk_restore_deferred || bk_sess.mask || bk_rd_obj!=0xffffffffu || bk_wait_obj!=0xffffffffu || ui_restore_state()==1,ju_ack);
@@ -640,6 +641,7 @@ static void px_service(void)
     while (px_r != px_w) {
         const uint32_t e = px_q[px_r % PX_N];
         RING_PUBLISH();
+        if(e>>28==1u && ui_storage_loading())break;
         if(!bk_restore_ready(e))break; /* keep this head occupied; never roll back a published consumer */
         bk_restore_deferred=0;
         px_r++;
