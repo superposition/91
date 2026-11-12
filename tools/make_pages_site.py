@@ -14,6 +14,7 @@ import re
 import shutil
 import sys
 from pathlib import Path
+from web_metadata import device_javascript
 
 SRC = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SRC / "web"))
@@ -23,7 +24,7 @@ SHARING = "--no-sharing" not in sys.argv
 args = [a for a in sys.argv[1:] if a != "--no-sharing"]
 ver = args[0] if args else sys.exit(__doc__)
 OUT = Path(args[1] if len(args) > 1 else SRC / "build" / "site")
-REPO = "https://github.com/superposition/91"
+REPO = json.loads((SRC / "web/product.json").read_text(encoding="utf-8"))["source"]
 pkg = SRC / "build" / f"naiwan91-{ver}.fwsc"
 raw = pkg.read_bytes()
 app = SRC / "build" / "amb.bin"
@@ -53,13 +54,14 @@ page = (SRC / "web" / "amb_installer.html").read_text(encoding="utf-8")
 lib = strip_module((SRC / "web" / "fm1pkg.js").read_text(encoding="utf-8")) + "\n" + strip_module((SRC / "web" / "fm1ota.js").read_text(encoding="utf-8")) + "\n" + strip_module((SRC / "web" / "fm1backup.js").read_text(encoding="utf-8")) + "\n" + strip_module((SRC / "web" / "fm1idle.js").read_text(encoding="utf-8"))
 sha = hashlib.sha256(raw).hexdigest()
 meta = json.dumps({"version": ver, "product": product, "pkg": "../firmware/" + name, "sha": sha[:16]})
-page = page.replace("/*LIB*/", lib).replace("/*META*/", meta).replace("<h1>Install NAIWAN 91</h1>", f"<h1>Install NAIWAN 91 {ver}</h1>")
+device = device_javascript(SRC, json.loads(meta), strip_module)
+page = page.replace("/*DEVICE*/", device).replace("/*LIB*/", lib).replace("/*META*/", meta).replace("<h1>Install NAIWAN 91</h1>", f"<h1>Install NAIWAN 91 {ver}</h1>")
 (OUT / "install" / "index.html").write_text(page, encoding="utf-8", newline="\n")
 
 params = SRC / "build" / "params.json"
 if params.exists():
     (OUT / "editor").mkdir(exist_ok=True)
-    ed = (SRC / "web" / "editor" / "index.html").read_text(encoding="utf-8").replace("/*PARAMS*/", params.read_text(encoding="utf-8"))
+    ed = (SRC / "web" / "editor" / "index.html").read_text(encoding="utf-8").replace("/*DEVICE*/", device).replace("/*PARAMS*/", params.read_text(encoding="utf-8"))
     (OUT / "editor" / "index.html").write_text(ed, encoding="utf-8", newline="\n")
     plib = "\n".join(strip_module((SRC / "web" / f).read_text(encoding="utf-8")) for f in ("fm1backup.js", "fm1piece.js", "fm1card.js", "fm1share.js", "fm1idle.js"))
     lib_json = (SRC / "web" / "library" / "library.json").read_text(encoding="utf-8")
@@ -67,7 +69,7 @@ if params.exists():
     relay_json = relay.read_text(encoding="utf-8").strip() if relay.exists() else "{}"
     for d in ("pieces", "library") if SHARING else ():   # sharing pieces and sets, and the library of them: the modules, the parameters' names, the library's codes
         (OUT / d).mkdir(exist_ok=True)
-        pg = (SRC / "web" / d / "index.html").read_text(encoding="utf-8").replace("/*PARAMS*/", params.read_text(encoding="utf-8")).replace("/*LIB*/", plib)
+        pg = (SRC / "web" / d / "index.html").read_text(encoding="utf-8").replace("/*DEVICE*/", device).replace("/*PARAMS*/", params.read_text(encoding="utf-8")).replace("/*LIB*/", plib)
         (OUT / d / "index.html").write_text(pg.replace("/*LIBRARY*/", lib_json).replace("/*RELAY*/", relay_json), encoding="utf-8", newline="\n")
 manual = (SRC / "docs" / "manual.html").read_text(encoding="utf-8")
 manual = re.sub(r'<link rel="stylesheet" href="https://fonts.googleapis.com[^>]+>\n', "", manual)

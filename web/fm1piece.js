@@ -35,7 +35,7 @@ export const pcSaved = (bank) => (pcBankCheck(bank, bank && bank.length > 5 ? ba
 // the piece in slot `slot` (0-9) of a genre's bank, as the file keeps it
 export function pcFromBank(bank, genre, slot) {
   const bad = pcBankCheck(bank, genre);
-  if (bad) throw new Error(bad === "empty" ? "nothing saved in this genre" : "this genre's bank is from an older PERF-1: save a piece in it once, then try again");
+  if (bad) throw new Error(bad === "empty" ? "nothing saved in this genre" : "this genre uses a different saved-piece layout: save a piece in NAIWAN 91 once, then try again");
   if (!((rd16(bank, 8) >> slot) & 1)) throw new Error("that piece is not saved");
   const rec = bank.slice(PC_HDR + slot * PC_REC, PC_HDR + (slot + 1) * PC_REC);
   const tail = bank[14] === 1 && bank.length >= PC_LEN;
@@ -149,8 +149,8 @@ export function pcEncode(piece) {
   return out;
 }
 export function pcDecode(buf) {
-  if (buf.length < 18 || buf[0] !== 0x50 || buf[1] !== 0x31 || buf[2] !== 0x50 || buf[3] !== 0x43) throw new Error("not a PERF-1 piece");
-  if (buf[4] !== 1) throw new Error("a piece from a newer PERF-1 page: open the latest pieces page");
+  if (buf.length < 18 || buf[0] !== 0x50 || buf[1] !== 0x31 || buf[2] !== 0x50 || buf[3] !== 0x43) throw new Error("not a compatible NAIWAN 91 piece");
+  if (buf[4] !== 1) throw new Error("this piece format is not supported: open the current NAIWAN 91 pieces page");
   if (crc32(buf.subarray(0, buf.length - 4)) !== rd32(buf, buf.length - 4)) throw new Error("the piece is damaged");
   const reclen = rd16(buf, 10), ml = rd16(buf, 12), vlen = buf[7] & 1 ? 128 : 0;
   if (reclen !== PC_REC || 14 + reclen + PC_PRG + vlen + ml + 4 !== buf.length) throw new Error("the piece is damaged");
@@ -220,8 +220,8 @@ export function pcSetEncode(set) {
   return out;
 }
 export function pcSetDecode(buf) {
-  if (buf.length < 30 || buf[0] !== 0x50 || buf[1] !== 0x31 || buf[2] !== 0x53 || buf[3] !== 0x54) throw new Error("not a PERF-1 set");
-  if (buf[4] !== 1) throw new Error("a set from a newer PERF-1 page: open the latest pieces page");
+  if (buf.length < 30 || buf[0] !== 0x50 || buf[1] !== 0x31 || buf[2] !== 0x53 || buf[3] !== 0x54) throw new Error("not a compatible NAIWAN 91 set");
+  if (buf[4] !== 1) throw new Error("this set format is not supported: open the current NAIWAN 91 pieces page");
   if (crc32(buf.subarray(0, buf.length - 4)) !== rd32(buf, buf.length - 4)) throw new Error("the set is damaged");
   let p = 5;
   const list = Array.from(buf.slice(p, p + 16)); p += 16;
@@ -284,7 +284,7 @@ export function pcSetVoices(vox, voices) {
 // firmware with fewer. Settings the firmware does not know are dropped. The answer: the new bank, and what was lost or filled.
 export function pcIntoBank(bank, genre, slot, piece, npar) {
   const bad = pcBankCheck(bank, genre);
-  if (bad === "old") throw new Error("this genre's bank on the FM-1 is from an older PERF-1: save a piece in it once on the FM-1, then try again");
+  if (bad === "old") throw new Error("this genre on the FM-1 uses a different saved-piece layout: save a piece in NAIWAN 91 once, then try again");
   const out = new Uint8Array(PC_LEN);
   let nb = npar;
   if (bad === "empty") {

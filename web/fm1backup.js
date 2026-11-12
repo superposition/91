@@ -2,19 +2,19 @@
 // Backup and restore of PERF-1's stored data over USB MIDI (the installer page): the messages, the file, and nothing that touches the browser, so a node test can check
 // them against the firmware's (firmware/src/backup_proto.h, which describes the protocol).
 
-export const BK_CHUNK = 256, BK_FRAME = 64, BK_MAX = 3840;
+import { DEVICE_DATA } from "./device-data.js";
+export const BK_CHUNK = DEVICE_DATA.backup.chunk, BK_FRAME = DEVICE_DATA.backup.frame, BK_MAX = DEVICE_DATA.backup.max;
 
 // the flash objects worth keeping (plat.h OBJ_*; the panel's calibration, 1, is the unit's own and is never saved), in the order they are read and written
-const BK_GENRES = ["CITYPOP", "SUNSET", "AOR", "SHIBUYA", "BOOGIE", "YACHT", "TAPE", "NEON", "KAYO", "LOUNGE", "SURF", "BALEAR", "TROPIC", "SUMMER", "MARINA", "CALYPSO", "ISLAND", "SEASIDE", "SANDS"];
+const BK_GENRES = DEVICE_DATA.genres, BK_IDS = DEVICE_DATA.objects;
 export const BK_OBJECTS = [
-  { id: 2, name: "settings" }, { id: 3, name: "voices" }, { id: 4, name: "globals" }, { id: 0, name: BK_GENRES[0] },
-  ...BK_GENRES.slice(1).map((n, i) => ({ id: 5 + i, name: n })), { id: 5 + BK_GENRES.length - 1, name: "piece extras" },   // (0.16.6: the progression slots' types; 0.16.28: with FILTERS and SCREAM, plat.h OBJ_KINDS)
-  { id: 5 + BK_GENRES.length, name: "MIDI map" },                // (0.16.11: the player's MIDI map, plat.h OBJ_MMAP)
-  { id: 5 + BK_GENRES.length + 1, name: "bass steps" },          // (0.16.29: the pieces' bass steps, plat.h OBJ_BSTEP)
+  { id: BK_IDS.settings, name: "settings" }, { id: BK_IDS.voices, name: "voices" }, { id: BK_IDS.globals, name: "globals" },
+  ...BK_GENRES.map((name, i) => ({ id: BK_IDS.genres[i], name })),
+  { id: BK_IDS.extras, name: "piece extras" }, { id: BK_IDS.map, name: "MIDI map" }, { id: BK_IDS.bass, name: "bass steps" },
 ];
 
 // New objects are requested only after the separate Jam capability probe succeeds.
-export const BK_JAM_OBJECTS = [{id:26,name:"Jam pack 1"},{id:27,name:"Jam pack 2"},{id:28,name:"Jam pack 3"},{id:29,name:"Jam pack 4"},{id:30,name:"Jam session"}];
+export const BK_JAM_OBJECTS = [...Array.from({length:BK_IDS.jamLast-BK_IDS.jamFirst+1},(_,i)=>({id:BK_IDS.jamFirst+i,name:"Jam pack "+(i+1)})),{id:BK_IDS.session,name:"Jam session"}];
 export const bkJamCapsMsg = () => [0xF0,0x7D,0x50,0x60,1,0,127,0xF7];
 export function bkJamCaps(d) {
   if(d.length!==21 || d[0]!==0xF0 || d[3]!==0x61 || d[4]!==1 || d[5]!==0 || d[6]!==0 || d[20]!==0xF7 || bkSum(d.slice(4,-2))!==d[19]) return null;
@@ -28,7 +28,7 @@ export const bkObjects = (jam) => jam ? [...BK_OBJECTS,...BK_JAM_OBJECTS] : BK_O
 // the control: a button 0-13, 32 + a key, 64 + a knob). MASTER is the hardware's alone: not sent. The .perfmap file is the learned list as JSON.
 // A setting (0.16.18, learned on the editor page): {t: "p<parameter>", mode, name}, a CC only; its first byte has 0x80 set and the control is the parameter
 // (0 .. 175). A map with any setting is "MAP2" (a firmware before 0.16.18 refuses it whole); one without stays "MAP1", as before.
-export const MM_OBJ = 5 + BK_GENRES.length, MM_MAX = 48, MM_LEN = 8 + 3 * MM_MAX, MM_NPAR = 176;
+export const MM_OBJ = BK_IDS.map, MM_MAX = 48, MM_LEN = 8 + 3 * MM_MAX, MM_NPAR = DEVICE_DATA.parameters.count;
 const MM_MODE = { abs: 0, rel64: 1, rel2c: 2 };
 export function mmEncode(maps) {                                     // the bytes, and how many controls went in (and how many were left out)
   const out = new Uint8Array(MM_LEN);
@@ -122,7 +122,7 @@ export function bkEncode(objs, info) {
   return out;
 }
 export function bkDecode(buf) {
-  if (buf.length < 12 || buf[0] !== 0x50 || buf[1] !== 0x31 || buf[2] !== 0x42 || buf[3] !== 0x4B) throw new Error("not a PERF-1 backup");
+  if (buf.length < 12 || buf[0] !== 0x50 || buf[1] !== 0x31 || buf[2] !== 0x42 || buf[3] !== 0x4B) throw new Error("not a compatible " + DEVICE_DATA.product.name + " backup");
   if (buf[4] !== 1) throw new Error("a backup of a newer kind");
   const crc = (buf[buf.length - 4] | (buf[buf.length - 3] << 8) | (buf[buf.length - 2] << 16) | (buf[buf.length - 1] << 24)) >>> 0;
   if (bkCrc32(buf.subarray(0, buf.length - 4)) !== crc) throw new Error("the backup is damaged");
