@@ -2871,6 +2871,9 @@ static uint8_t fill_q, fill_bar, dj_sync, drop_imp;   /* a fill asked for the ne
 enum { SF_ROLL = 1, SF_WOB = 2, SF_HROLL = 4, SF_GAP = 8, SF_PBUILD = 16, SF_PFILL = 32, SF_KDROP = 64 };   /* SF_GAP: the whole mix cut for the build's last beat;
                                                  * SF_PBUILD: the build rolls on the perc, not the snare (genres that don't snare-roll); SF_PFILL: the triplet fill on the perc (garage's rim);
                                                  * SF_KDROP: the kick drops out for the last beat of every 8th bar (techno) */
+#if EN_RUST_MELODIC
+#define SECT FM1_RUST_SECTIONS
+#else
 static const struct { uint8_t kick, hat, build, pad, kret, snare, bass, ft, fl; } SECT[EN_NGENRE] = {
     {1, 0, 4, 90, 1, 0, 0, 0, SF_KDROP}, {0, 0, 2, 60, 0, 0, 0, 0, SF_PBUILD}, {1, 0, 8, 90, 1, 0, 0, 0, SF_GAP}, {0, 0, 8, 80, 0, 0, 0, 8, SF_ROLL | SF_WOB | SF_GAP},
     {1, 1, 4, 40, 0, 1, 1, 0, SF_PBUILD}, {0, 1, 8, 90, 0, 0, 0, 0, SF_ROLL | SF_GAP}, {1, 1, 4, 0, 0, 1, 0, 0, 0}, {0, 0, 4, 80, 0, 0, 0, 0, SF_PFILL},
@@ -2879,12 +2882,17 @@ static const struct { uint8_t kick, hat, build, pad, kret, snare, bass, ft, fl; 
     {0, 1, 4, 50, 1, 0, 0, 0, SF_ROLL | SF_HROLL | SF_GAP},   /* industrial: the hats grind on through the break, the kick back for the build's last bar */
     {0, 0, 8, 90, 0, 0, 0, 0, SF_ROLL | SF_GAP},               /* psy: the break all pad and atmosphere, 8 bars of build, the gap before the drop */
     {0, 1, 4, 70, 1, 0, 0, 0, SF_ROLL | SF_HROLL | SF_GAP}};   /* dark forest: the hats glitch on through the break */
+#endif
 /* (0.15.13, from the genre research: breaks and funk break to the drums alone; house, dubstep, DnB, trap, disco and synthwave cut the mix for the beat
  * before the drop; lofi, dub, reggae, amapiano and trip-hop build on the perc, not with a snare roll; garage's triplet fill is on the rim) */
 /* the fills each genre may use (0.15.13): bit k is fill kind k (0 the ramp, 1-5 FILLS, 6 a triplet roll on the last beat): house and disco ramp and rush,
  * dub and reggae drag and breathe, trap and dubstep roll */
+#if EN_RUST_MELODIC
+#define FILL_OK FM1_RUST_FILL_OK
+#else
 static const uint8_t FILL_OK[EN_NGENRE] = {0x3F, 0x16, 0x07, 0x49, 0x14, 0x7F, 0x7E, 0x5A, 0x3F, 0x64, 0x87, 0x9E, 0x14, 0x87, 0x12, 0x16, 0x70, 0x47, 0x7E};   /* (bit 7: a tom fill, the perc
                                                  * falling: disco, funk, synthwave) */
+#endif
 static uint8_t gap_on;                          /* the drop gap: the mix cut for the build's last beat (SF_GAP) */
 static float gap_g = 1.0f, perc_fall;           /* its gain; a tom fill's pitch, semitones under the perc's */
 static uint8_t grv_bars;                        /* bars of groove since the drop (the time plan) */
@@ -3725,6 +3733,7 @@ fm1_pluck_t s;fm1_pluck_config_t c;fm1_harmony_t h;fm1_pluck_note_t result;unsig
  * takes the first again), so a figure of four hits plays the same each bar. Move is how often a note goes up an octave, to the fifth or to the
  * scale note below the root instead. The fifth is the perfect fifth unless the chord has an altered one (bl_fifth; a 9th, Dub or Fourths chord
  * leaves the fifth out of its voicing, and the line used to take the chord's third tone, the seventh, for it). A breakdown plays none. */
+#if !EN_RUST_MELODIC
 static const uint16_t BL_ROOT[EN_NGENRE] = {0x1111, 0x0421, 0x1111, 0x0401, 0x0501, 0x0441, 0x1121, 0x0449, 0x5555, 0x2401, 0x5555, 0x4529, 0x0149, 0x5555, 0x2449, 0x0401, 0x0405, 0xEEEE, 0xEEEE};
 typedef struct { uint16_t mask; int8_t iv[4]; } bl_fig_t;
 static const bl_fig_t BL_RIFF[EN_NGENRE] = {
@@ -3744,6 +3753,7 @@ static const bl_fig_t BL_FIG[EN_NBLFIG] = {      /* the figures by name (the bas
     {0x0501, {0, 0, 7, 5}},                     /* Dub: 1, 3, and-of-3 */
     {0x7777, {0, 0, 0, 12}},                    /* Gallop: three sixteenths a beat, an octave moving through them */
 };
+#endif
 /* THE BASS STEPS (0.16.29, GitHub issue #6): the bass line's mode 16 plays sixteen steps of the player's (the Bass steps page), a byte a step (amb.h
  * EN_BS_*): a rest, a note, an accent (louder, the filter opened by it as a new note), a glide (into it from the note before, legato: no new
  * attack), or both; its note a number of the scale's steps above the chord's root (so the line follows the chords as the acid's steps do) and
@@ -3893,11 +3903,10 @@ static int bl_fifth(void)                       /* the fifth above the root, sem
 static void bl_step(int st, int32_t w)
 {
 #if EN_RUST_MELODIC
-fm1_bass_t s;fm1_bass_config_t c;fm1_harmony_t h;fm1_bass_note_t result;unsigned i;const int mode=par[P_BL_MODE],g=chord_genre;
-    const bl_fig_t *figure=mode==6?&BL_RIFF[gx(g)]:&BL_FIG[(mode>6?mode-7:0)%EN_NBLFIG];
+fm1_bass_t s;fm1_bass_config_t c;fm1_harmony_t h;fm1_bass_note_t result;const int mode=par[P_BL_MODE],g=chord_genre;
     melodic_bass_get(&s);melodic_harmony(&h,pedal);
-    c=(fm1_bass_config_t){mode,par[P_DR_MAN],bass.play,en_playing,sec,SECT[gx(g)].bass,BL_ROOT[gx(g)],figure->mask,{0,0,0,0},par[P_BL_MOVE],par[P_BASSOCT],drop_imp,bl_kick};
-    for(i=0;i<4;i++)c.intervals[i]=figure->iv[i];
+    c=(fm1_bass_config_t){mode,par[P_DR_MAN],bass.play,en_playing,sec,SECT[gx(g)].bass,0,0,{0,0,0,0},par[P_BL_MOVE],par[P_BASSOCT],drop_imp,bl_kick};
+    fm1_rust_bass_recipe(&c,(uint32_t)gx(g));
     fm1_rust_bass_step(&s,&c,&h,st,&rng,&result);melodic_bass_put(&s);if(result.publish)bs_publish();
     if(result.fire)bl_go_f(result.note,w,(int)result.flags);
 #else
@@ -4015,13 +4024,19 @@ static void rvs_engage(void);
 static void flx_tick(int st);
 static uint64_t fx_on;
 /* The pad's comping: the steps of the bar its stabs fall on. Comp 2 .. 8 chooses one; Auto takes the genre's (hypnotic: the off-beats, as ever). */
+#if !EN_RUST_MELODIC
 static const uint16_t COMP_MASK[7] = {0x4444, 0x1111, 0x4949, 0x0041, 0x2448, 0x0401, 0x5555};   /* off-beat, on-beat, 3-3-2, Charleston, syncopated, sparse, eighths */
 static const uint16_t COMP_GENRE[EN_NGENRE] = {0x4444, 0x0041, 0x4949, 0x0401, 0x4444, 0x0408, 0x0A48, 0x2448, 0x2222, 0x0401, 0x4545, 0x2448, 0x4444, 0x0401, 0x2448, 0x0401, 0x1249, 0x0101, 0x0001};
+#endif
 static uint16_t comp_mask(void)
 {
+#if EN_RUST_MELODIC
+    return (uint16_t)fm1_rust_mel_comp(en_jam_on,par[P_PAD_COMP],(uint32_t)chord_genre);
+#else
     const int c = par[P_PAD_COMP];
     if(en_jam_on) return 1;
     return c >= 2 ? COMP_MASK[c - 2] : COMP_GENRE[chord_genre];
+#endif
 }
 static int comp_hit(int st) { return comp_mask() >> st & 1; }
 

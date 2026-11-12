@@ -8,5 +8,6 @@ pub mod effects;
 pub mod factory;
 pub mod melodic;
 pub mod planner;
+pub mod scheduling_tables;
 pub mod sequencer;
 pub mod transport;

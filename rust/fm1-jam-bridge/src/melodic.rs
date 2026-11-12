@@ -8,7 +8,30 @@ use fm1_engine::melodic::{
     self, Acid, AcidConfig, AcidNote, Bass, BassConfig, BassNote, Harmony, Pluck, PluckConfig,
     PluckNote,
 };
+use fm1_engine::scheduling_tables::{self, Section};
 use fm1_engine::sequencer::Rng;
+#[no_mangle]
+pub static FM1_RUST_SECTIONS: [Section; 19] = scheduling_tables::SECTIONS;
+#[no_mangle]
+pub static FM1_RUST_FILL_OK: [u8; 19] = scheduling_tables::FILL_OK;
+const _: [(); 9] = [(); core::mem::size_of::<Section>()];
+const _: [(); 1] = [(); core::mem::align_of::<Section>()];
+
+/// # Safety
+/// Config is initialized/aligned and uniquely writable. Genre is already mapped
+/// to0..18 and config.mode is the validated0..16 firmware value.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_bass_recipe(config: *mut BassConfig, genre: u32) {
+    let config = unsafe { &mut *config };
+    let (root, figure) = scheduling_tables::bass_recipe(genre as usize, config.mode);
+    config.root_mask = root as u32;
+    config.riff_mask = figure.mask as u32;
+    config.intervals = figure.intervals.map(i32::from);
+}
+#[no_mangle]
+pub extern "C" fn fm1_rust_mel_comp(jam: u32, comp: i32, genre: u32) -> u32 {
+    scheduling_tables::comp_mask(jam != 0, comp, genre as usize) as u32
+}
 static COUNTERS: [AtomicU32; 6] = [const { AtomicU32::new(0) }; 6];
 fn count(index: usize) {
     COUNTERS[index].fetch_add(1, Ordering::Relaxed);

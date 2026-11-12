@@ -75,6 +75,25 @@ int main(int argc,char **argv)
             }printf("%s%u",test?",":"",h);
         }puts("]");return 0;
     }
+    if(scenario==12){
+        unsigned genre,mode,comp,jam,k;printf("[");
+        for(genre=0;genre<19;genre++){
+            uint32_t h=2166136261u;const uint8_t section[]={SECT[genre].kick,SECT[genre].hat,SECT[genre].build,SECT[genre].pad,SECT[genre].kret,SECT[genre].snare,SECT[genre].bass,SECT[genre].ft,SECT[genre].fl};
+            for(k=0;k<9;k++)h=word(h,section[k]);h=word(h,FILL_OK[genre]);
+            for(mode=0;mode<=16;mode++){
+#if EN_RUST_MELODIC
+                fm1_bass_config_t config={0};config.mode=(int32_t)mode;fm1_rust_bass_recipe(&config,genre);
+                h=word(word(h,config.root_mask),config.riff_mask);for(k=0;k<4;k++)h=word(h,(uint8_t)config.intervals[k]);
+#else
+                const bl_fig_t *figure=mode==6?&BL_RIFF[genre]:&BL_FIG[(mode>6?mode-7:0)%EN_NBLFIG];
+                h=word(word(h,BL_ROOT[genre]),figure->mask);for(k=0;k<4;k++)h=word(h,(uint8_t)figure->iv[k]);
+#endif
+            }
+            chord_genre=(int)genre;
+            for(jam=0;jam<2;jam++)for(comp=0;comp<=8;comp++){en_jam_on=(uint8_t)jam;par[P_PAD_COMP]=(int16_t)comp;h=word(h,comp_mask());}
+            printf("%s%u",genre?",":"",h);
+        }puts("]");return 0;
+    }
     if(scenario<16 && (scenario&2u))en_jam_set(JAM_ON,1);
     else {
         unsigned l,s;en_genre(scenario>=16?(int)(scenario-16)%19:7);en_set(P_SWING,100);en_set(P_HUMAN,100);

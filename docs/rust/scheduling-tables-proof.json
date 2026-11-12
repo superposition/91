@@ -1,0 +1,479 @@
+{
+  "ticket": "https://github.com/superposition/91/issues/10",
+  "date": "2026-11-12",
+  "status": "emulator scheduler implementation complete across clock/drum/melodic/table checkpoints; C application/voice/harmonic seam documented",
+  "base_commit": "9e9a6f372730a31bf74309ab987f2c814a24927d",
+  "reference": {
+    "verified_source_files": 440,
+    "baseline_archive_sha256": "3d20587f825b8a26cd1f9ab6a715e65e78838fce0c19b5c27ce0427c15fa6263",
+    "frozen_wasm_sha256": "a3d08947713bda76b64f76ed39b55aa26bdd182a65bf88fbd1efe0cbc12f8036",
+    "source_verification_log_sha256": "02103818921d558fa092601f4329ba6740cf2ad792676fb0331e24f2fadfbd85",
+    "native_adapter_sha256": "a0ccd819fe753a419e265a2e0d68ba0b1d2dab9d70acc2dd1dfaaa85b94cf50a",
+    "table_oracle_sha256": "ea218530719c2b6fa6267334d11de2274ded3ce537c0d2043818780157c9a8eb",
+    "table_oracle_fingerprints": [
+      1900350664,
+      3726487991,
+      1391437930,
+      653341801,
+      1191062675,
+      2181911934,
+      1189274025,
+      4208648956,
+      1154871365,
+      532266107,
+      1371973901,
+      3568669489,
+      3123233151,
+      507870997,
+      1626107104,
+      3696328987,
+      1607657675,
+      2175573565,
+      662645977
+    ]
+  },
+  "representation": {
+    "section_row_bytes": 9,
+    "section_row_alignment": 1,
+    "section_rows": 19,
+    "exported_section_bytes": 171,
+    "exported_allowed_fill_bytes": 19,
+    "logical_bass_bytes": 206,
+    "logical_comp_bytes": 52,
+    "logical_immutable_payload_bytes": 448,
+    "new_mutable_cache_bytes": 0,
+    "new_diagnostic_bytes": 0,
+    "allocator_required": false,
+    "abi": "two exported immutable static arrays plus scoped updates to existing64-byte BassConfig",
+    "native_symbol_evidence": {
+      "FM1_RUST_SECTIONS": {
+        "section": "R",
+        "bytes": 171
+      },
+      "FM1_RUST_FILL_OK": {
+        "section": "R",
+        "bytes": 19
+      }
+    }
+  },
+  "coverage": {
+    "genres": 19,
+    "section_fields": 171,
+    "allowed_fill_masks": 19,
+    "bass_genre_mode_selections": 323,
+    "comp_genre_jam_selections": 342,
+    "original_c_literals": "compiled only on C0 path for moved data",
+    "existing_rust_tables": [
+      "ghost/fill templates",
+      "ratchet values",
+      "chain/slice/rates",
+      "Songbook drum-drift lengths"
+    ]
+  },
+  "checks": {
+    "rust": "1.94.1",
+    "workspace_tests": 37,
+    "fmt": "pass",
+    "clippy_warnings_denied": "pass",
+    "native_runner": "pass, exit0",
+    "wasm_runner": "pass, exit0",
+    "original_r01_wasm": "pass",
+    "handoff": "pass, C0/Rust/R01 eff97ff8"
+  },
+  "toolchains": {
+    "rust": "1.94.1",
+    "node": "22.14.0",
+    "wasm_clang": "22.1.8 (existing Zig wrapper)",
+    "native_cc": "Ubuntu GCC11.4.0",
+    "native_os": "WSL Ubuntu-22.04",
+    "portable_checks_os": "Windows"
+  },
+  "native": {
+    "scenario_count": 43,
+    "render_calls": 295000,
+    "pcm_values": 161688822,
+    "midi_messages": 209246,
+    "midi_clocks": 86265,
+    "trace_comparison": "all reference/Rust binary bytes and JSON summaries equal",
+    "trace_hashes_unchanged_vs_melodic_checkpoint": true,
+    "trace_hashes": [
+      {
+        "scenario": 0,
+        "trace_sha256": "072e006e53f40d4c90e80f034bae84e5b07532b42fcf5b125edd75ec648cdc4b"
+      },
+      {
+        "scenario": 1,
+        "trace_sha256": "cef0430f2820071f1096d6f2d4e67b9018912d9f899e8407a0b5d3d02e5cbfbc"
+      },
+      {
+        "scenario": 2,
+        "trace_sha256": "12356bf633c0033ca5c357236e83bf5bfd6364cb8e85b91ecbe1e9a3dec6f82a"
+      },
+      {
+        "scenario": 3,
+        "trace_sha256": "16902607237eec1db9708a8b27898adfdc520e58b5952ded1111a11c1bdd1bb8"
+      },
+      {
+        "scenario": 4,
+        "trace_sha256": "31e18449346da71d87de1df1c519392d64e133a4323317747bcb9124dbe50efd"
+      },
+      {
+        "scenario": 5,
+        "trace_sha256": "d5c331517fc287f0ae5891752b70f80b49d5d8e511242384b97d529865092c2d"
+      },
+      {
+        "scenario": 6,
+        "trace_sha256": "47629a8e48f2340ab2f547e157132b4dd804013ad480f650036ac3badeeb5060"
+      },
+      {
+        "scenario": 7,
+        "trace_sha256": "3bfded3e6aa71f7c1216a1801d21a7a299bd3aead1e315b0daba39a2229155b8"
+      },
+      {
+        "scenario": 16,
+        "trace_sha256": "da7b5f9a8f9efb470892a135bbb2aadfdc267b85a7ba825ad7e91a6d841a11c9"
+      },
+      {
+        "scenario": 17,
+        "trace_sha256": "4e995c4a6fc191f38671eeec5e9cda89367ae0bbf35f3013dae3dd6d4f3bbbef"
+      },
+      {
+        "scenario": 18,
+        "trace_sha256": "23fcda8932ed423f075250210af4e701c8872a1a0d3b5c72100b71ad93a638ac"
+      },
+      {
+        "scenario": 19,
+        "trace_sha256": "ad5ac7b892d4332dc7e4a14f7b0b54c20f38f88e138a17592426eed216602e1e"
+      },
+      {
+        "scenario": 20,
+        "trace_sha256": "d5f883cab60c5466e99fbf08dff021b398aaf435f114ca64309c1941cf28ebdb"
+      },
+      {
+        "scenario": 21,
+        "trace_sha256": "d5082bc941288ab59ca2892a956e2a5bc374657eec22dbb797dad374203e1348"
+      },
+      {
+        "scenario": 22,
+        "trace_sha256": "bd6d4a22a0cf5d219c41fccbb899cf71caa9285a11d6b1d111d355bb7c2b26af"
+      },
+      {
+        "scenario": 23,
+        "trace_sha256": "96bbba710d2613438f3d1300eb602c7b8051126ee836ea01d917284af1ec3de8"
+      },
+      {
+        "scenario": 24,
+        "trace_sha256": "f72ae99a5041b6b3a4d77346f56c1ef64d12a7286ad1fcf7078a45226557e181"
+      },
+      {
+        "scenario": 25,
+        "trace_sha256": "e9b20c23a6777921b8e901cd56e30ff6f176fd61118d22da4280630b68bfe7bd"
+      },
+      {
+        "scenario": 26,
+        "trace_sha256": "23fcda8932ed423f075250210af4e701c8872a1a0d3b5c72100b71ad93a638ac"
+      },
+      {
+        "scenario": 27,
+        "trace_sha256": "5e5cb02436d6979ac4d0e149a3ba025996d41d8744a1b778b8b4742a7b9f9e91"
+      },
+      {
+        "scenario": 28,
+        "trace_sha256": "d5f883cab60c5466e99fbf08dff021b398aaf435f114ca64309c1941cf28ebdb"
+      },
+      {
+        "scenario": 29,
+        "trace_sha256": "ef128b1b3ba679761d563f1f54db3d3940b4280b5d760caed70b9a768c7b5620"
+      },
+      {
+        "scenario": 30,
+        "trace_sha256": "bd6d4a22a0cf5d219c41fccbb899cf71caa9285a11d6b1d111d355bb7c2b26af"
+      },
+      {
+        "scenario": 31,
+        "trace_sha256": "621040fb64de450e11cfc814edb9aded897438381f9a5302345bf401359e627a"
+      },
+      {
+        "scenario": 32,
+        "trace_sha256": "93f34866e28b7879074159ba39796b1b5a39ef3efdcc1af8c4a860629fd19ca7"
+      },
+      {
+        "scenario": 33,
+        "trace_sha256": "a18d493770643fc982fe850893d81ba1d8811b4883e03e54df74290ec6e33ee4"
+      },
+      {
+        "scenario": 34,
+        "trace_sha256": "f67583b17aea3a40162b79cde9fce68eca6529be722cd0135837833afad2959a"
+      },
+      {
+        "scenario": 35,
+        "trace_sha256": "bff7d981a598623a8864e235b18c28b113f4554f29d1be5ca7adc37ee78d685e"
+      },
+      {
+        "scenario": 36,
+        "trace_sha256": "19b7f3dbab7ad2738ba9087997af81c95fa98e4e16ff15c63f650244b2f098bc"
+      },
+      {
+        "scenario": 37,
+        "trace_sha256": "14f684e8d08a146bd307b7eac289fef99264b0e58bab03a64e32a1bb0e5ba46a"
+      },
+      {
+        "scenario": 38,
+        "trace_sha256": "18d87a0cbff2024a6b3fdfa9160b3e4313b3bfb1a87a60d65c6ae98752512622"
+      },
+      {
+        "scenario": 39,
+        "trace_sha256": "ca76ae73e7acd1e18b0b44e1a9b3605e54676497db4d6e32471d18f98a3aa35d"
+      },
+      {
+        "scenario": 40,
+        "trace_sha256": "47549c4175b125f9dd5bf4536331c543da5e188ac679fedb7fed95fa002e8ed7"
+      },
+      {
+        "scenario": 41,
+        "trace_sha256": "16cec0b0678b599be6f8095b47e44703f12a7e0139af0fb354e6cce184514512"
+      },
+      {
+        "scenario": 42,
+        "trace_sha256": "87ae67e9d99d6f1a4ccb2a9ad29b68121696475d17242aa33368dc5d8012025a"
+      },
+      {
+        "scenario": 43,
+        "trace_sha256": "0307faa47607016c8827df3a913784453e58b4d7e190314b79453dbcb6a91f3e"
+      },
+      {
+        "scenario": 44,
+        "trace_sha256": "a6e05e5cadb37354b16f320888ee50dc82b2d5facfe0bc8ee1b0295c3a7bd1ca"
+      },
+      {
+        "scenario": 45,
+        "trace_sha256": "8cabd10805be930d8f7af5008e5ce37378e2b58be7473535fecb846c5f20b803"
+      },
+      {
+        "scenario": 46,
+        "trace_sha256": "28d0b56ce6a326d1842a033f7a3dadbd973c79655d6759f441cb6f7b6c2dffef"
+      },
+      {
+        "scenario": 47,
+        "trace_sha256": "68e2617a54738879a5d16b2349010c10ccaa23d4b446f1581082bdac20c473e7"
+      },
+      {
+        "scenario": 48,
+        "trace_sha256": "07bfae49e695f84598f1d1e3d4620db5c2fbbca1cb3acc4c357b01febf579ebc"
+      },
+      {
+        "scenario": 49,
+        "trace_sha256": "23226e758404149d34b502491689e220b7fa23725a2f4a84b5de75c9c66f1320"
+      },
+      {
+        "scenario": 50,
+        "trace_sha256": "93a9ff2174a803523226bce3aeb64709d55186e153d3491891bbc4c9eb94552a"
+      }
+    ],
+    "executed_coverage": {
+      "recorded": true,
+      "motif": true,
+      "inverted": true,
+      "alternate": true,
+      "restated": true,
+      "bar_answer": true,
+      "loop_answer": true,
+      "bass_steps": true,
+      "max_midi_gates": 8
+    }
+  },
+  "wasm": {
+    "compared_samples": 37288700,
+    "http_compared_samples": 1048576,
+    "scenarios": {
+      "factory": {
+        "initial_pack": "factory",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "baeff971",
+        "peak": 0.3714040517807007,
+        "blits": 4679,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 0,
+          "plans": 8,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1037,
+          "sessions": 1,
+          "commands": {
+            "accepted": 961,
+            "consumed": 961,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6215,
+            "chunks": 28982,
+            "controls": 27668
+          },
+          "sequencer": {
+            "lanes": 6222,
+            "mutations": 0,
+            "waits": 463712,
+            "boundaries": 1037
+          }
+        }
+      },
+      "saved-v1": {
+        "initial_pack": "rust/fm1-engine/tests/packs/harris-citypop.jmp",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "28722449",
+        "peak": 0.4303741455078125,
+        "blits": 4673,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 1,
+          "plans": 10,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1033,
+          "sessions": 1,
+          "commands": {
+            "accepted": 751,
+            "consumed": 751,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6192,
+            "chunks": 34155,
+            "controls": 27682
+          },
+          "sequencer": {
+            "lanes": 6198,
+            "mutations": 0,
+            "waits": 546480,
+            "boundaries": 1033
+          }
+        }
+      },
+      "session": {
+        "scenario": "v2-hold-idea-save-restart",
+        "render_calls": 11663,
+        "compared_samples": 6570900,
+        "seconds": 74.5,
+        "peak": 0.22903597354888916,
+        "memory_bytes": 33554432,
+        "saved_session": [
+          74,
+          83,
+          77,
+          1,
+          1,
+          11,
+          1,
+          8,
+          2,
+          1,
+          83,
+          0,
+          7,
+          1,
+          190,
+          0,
+          3,
+          83,
+          0,
+          0
+        ],
+        "rust": {
+          "validations": 1,
+          "plans": 9,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 804,
+          "sessions": 2,
+          "commands": {
+            "accepted": 319,
+            "consumed": 319,
+            "dropped": 0,
+            "high_water": 208
+          },
+          "transport": {
+            "pulses": 4819,
+            "chunks": 12684,
+            "controls": 11829
+          },
+          "sequencer": {
+            "lanes": 4824,
+            "mutations": 0,
+            "waits": 202944,
+            "boundaries": 804
+          }
+        }
+      },
+      "sequencer": {
+        "scenario": "legacy-f4-piece-genre-transport",
+        "compared_samples": 2557800,
+        "render_calls": 4231,
+        "peak": 0.4515293836593628,
+        "sequencer": {
+          "lanes": 876,
+          "waits": 96752,
+          "boundaries": 21
+        },
+        "melodic": {
+          "acid": 153,
+          "mutations": 22,
+          "pluck": 153,
+          "bass": 153,
+          "bar": 4061,
+          "midi_transport": 48413
+        },
+        "memory_bytes": 33554432
+      },
+      "handoff": {
+        "snapshot_bytes": 220,
+        "published": 134,
+        "copied": 134,
+        "detail_pages": 4,
+        "staging_claims": 0,
+        "staging_activations": 0,
+        "staging_rejections": 0,
+        "memory_bytes": 33554432
+      }
+    },
+    "original_r01_legacy_comparison_samples": 2557800,
+    "original_r01_legacy_result": {
+      "scenario": "legacy-f4-piece-genre-transport",
+      "compared_samples": 2557800,
+      "render_calls": 4231,
+      "peak": 0.4515293836593628,
+      "sequencer": {
+        "lanes": 876,
+        "waits": 96752,
+        "boundaries": 21
+      },
+      "melodic": {
+        "acid": 153,
+        "mutations": 22,
+        "pluck": 153,
+        "bass": 153,
+        "bar": 4061,
+        "midi_transport": 48413
+      },
+      "memory_bytes": 33554432
+    },
+    "current_c0_wasm_sha256": "05264d7d8b0e33bdfae6f7c995d3323a42f82a55ca40d65d059bb20974b395e6",
+    "rust_wasm_sha256": "a3156d9ccc508c4cbaf3ef46256b714b5534ce7056ee6faada6d5202f7e951d7",
+    "rust_wasm_bytes": 2561647,
+    "memory_bytes": 33554432
+  },
+  "remaining_c_plumbing": [
+    "Musical storage/input capture/result application; pending-slot assignment/flush; immediate/delayed callback dispatch and UI publication.",
+    "Songbook activation/copy and application/parameter effects, platform MIDI byte emission and command traversal.",
+    "Harmonic construction, hr_bars/drift_reset and progression/scale/parameter changes under #8; bar/sample due decisions are Rust.",
+    "Voice oscillator/filter/envelope coefficients, gate/tail/transport cleanup and drone-envelope triggering under #11/#12.",
+    "FX callbacks/control/sample processing under #13 and factory/format paths under separate tickets.",
+    "Physical build remains C0; hardware atomic/stack/RAM/deadline qualification deferred; no device/live/server/remote changes."
+  ]
+}
