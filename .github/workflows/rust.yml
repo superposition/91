@@ -63,8 +63,12 @@ jobs:
           echo "$HOME/shim" >> "$GITHUB_PATH"
       - name: Full-instrument C/Rust differential playback
         run: sh tests/rust_emulator_parity.sh
+      - name: Songbook snapshot and staging handoffs
+        run: sh tests/rust_handoff.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: emulator-parity
-          path: build/emu-parity/
+          path: |
+            build/emu-parity/
+            build/handoff/

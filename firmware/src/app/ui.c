@@ -42,6 +42,32 @@ enum { V_TEMPO, V_PAD, V_PADENV, V_PADLFO, V_CHORDS, V_PROG, V_DRONE, V_DRENV, V
 static const char *const VIEW_NAME[NVIEWS] = {"Tempo", "Pad", "Pad env", "Pad LFO", "Chords", "Progression", "Bass", "Bass env",
                                               "Bass LFO", "Bass line", "Bass steps", "Acid", "Acid env", "Acid line", "Acid answer", "Acid steps", "Pluck", "Pluck 2", "Deja vu", "Pluck steps", "Drums", "Links", "Kit", "Drum drift", "Groove", "Steps", "Feel", "Phrase", "Space", "Reverb", "Comp/Limit", "Mixer", "Global", "Set list", "Jam",
                                               "Sequencer", "Perform", "Visual", "Songbook", "Arrangement", "DX Keys", "DX Bass", "Swells"};
+
+#if EN_RUST_HANDOFF
+static en_jam_snapshot_t jam_view;
+#define JV(field,legacy) (jam_view.field)
+static void jam_ui_get(jp_settings_t *s) {*s=jam_view.settings;}
+static const char *jam_ui_title(void) {return jam_view.title;}
+static const char *jam_ui_form(void) {return jam_view.form;}
+static const char *jam_ui_pending_title(void) {return jam_view.pending_title;}
+static int jam_ui_option(int field) {return field>=JAM_SWELL && field<=JAM_BRIGHTNESS?jam_view.options[field-JAM_SWELL]:0;}
+static void jam_ui_name(int next,char *b) {memcpy(b,next?jam_view.next:jam_view.chord,32);}
+static void jam_ui_voice_name(int field,char *b) {memcpy(b,field==JAM_KEYS_PROGRAM?jam_view.keys_name:jam_view.bass_name,11);}
+#else
+#define JV(field,legacy) (legacy)
+static void jam_ui_get(jp_settings_t *s) {en_jam_get(s);}
+static const char *jam_ui_title(void) {unsigned n;return (const char *)en_jam_data(&n)+16;}
+static const char *jam_ui_form(void) {return en_jam_form(1);}
+static const char *jam_ui_pending_title(void) {return en_jam_pending_title();}
+static int jam_ui_option(int field) {return en_jam_option(field);}
+static void jam_ui_name(int next,char *b) {en_jam_name(next,b);}
+static void jam_ui_voice_name(int field,char *b)
+{
+    unsigned n,q;const uint8_t *p=en_jam_data(&n);int value=en_jam_option(field);(void)n;
+    if(p[4]==2){for(q=0;q<10;q++)b[q]=(char)p[JP2_VOICE+value*128+118+q];b[10]=0;}
+    else {b[0]='-';b[1]=0;}
+}
+#endif
 enum { VZ_PLASMA, VZ_KALEIDO, VZ_BARS, VZ_FLUX, VZ_DISCO, VZ_LIFE, VZ_ORBIT, VZ_TRIP, VZ_THEORY, VZ_AUTO, VZ_N };   /* the visualizers (viz.c; TRIP and THEORY 0.16.10, THEORY not in AUTO's turn) */
 static const char *const VZ_NAME[VZ_N] = {"PLASMA", "KALEIDO", "BARS", "FLUX", "DISCO", "LIFE", "ORBIT", "TRIP", "THEORY", "AUTO"};
 /* the knobs of each page: a parameter, or one of these (the sequencer's: the lane's) */
@@ -4297,12 +4323,11 @@ static void draw_header(void)
     int msg = plat_ms() < ui.msg_until;
     uint32_t h;
     if(ui.view==V_JAMHELP && !ui.fx_menu && !msg) {
-        unsigned n;const uint8_t *p=en_jam_data(&n);(void)n;
-        uint32_t jh=hash(0x4a414d34u,en_jam_revision | en_playing<<24);
+        uint32_t jh=hash(0x4a414d34u,JV(revision,en_jam_revision) | JV(playing,en_playing)<<24);
         if(jh==ui.sig[0])return;
         ui.sig[0]=jh;
-        cv_begin(240,HDR_H,K_BG);cv_text(8,5,&FONT_B,(const char *)p+16,K_PAD);
-        cv_text(193,7,&FONT_XS,en_playing?"PLAY":"STOP",K_ACC);
+        cv_begin(240,HDR_H,K_BG);cv_text(8,5,&FONT_B,jam_ui_title(),K_PAD);
+        cv_text(193,7,&FONT_XS,JV(playing,en_playing)?"PLAY":"STOP",K_ACC);
         cv_rect(8,26,224,1,K_LINE);cv_blit(0,0);return;
     }
     mascot_step();
@@ -6417,24 +6442,22 @@ static void draw_main(void)
           {"TEXTURE","AMOUNT","VARIATION","ACTIVITY"}};
         static const int fields[4][4]={{JAM_FORM,JAM_BARS,JAM_VARIATION,JAM_SWELL},{JAM_KEYS_PROGRAM,JAM_TOUCH,JAM_BRIGHTNESS,JAM_RELEASE},
           {JAM_BASS_PROGRAM,JAM_BASS_ATTACK,JAM_BASS_GATE,JAM_ENERGY},{JAM_SWELL_VOICE,JAM_SWELL,JAM_VARIATION,JAM_MOVE}};
-        unsigned row=(unsigned)(ui.view-V_JAMARR),k;char text[32];jp_settings_t state;en_jam_get(&state);
-        h=hash(0x534f4e47u,ui.view);h=hash(h,en_jam_revision);h=hash(h,en_jam_beat);
+        unsigned row=(unsigned)(ui.view-V_JAMARR),k;char text[32];jp_settings_t state;jam_ui_get(&state);
+        h=hash(0x534f4e47u,ui.view);h=hash(h,JV(revision,en_jam_revision));h=hash(h,JV(beat,en_jam_beat));
         for(k=0;k<sizeof state;k++)h=hash(h,((const uint8_t *)&state)[k]);
         if(h==ui.sig[1])return;
         ui.sig[1]=h;
         cv_begin(240,MAIN_H,K_BG);cv_text(8,4,&FONT_B,titles[row],K_ACC);
         for(k=0;k<4;k++) {
-            int field=fields[row][k],value=en_jam_option(field);
+            int field=fields[row][k],value=jam_ui_option(field);
             if(field==JAM_FORM)value=state.form;
                 if(field==JAM_BARS)value=state.bars;
             if(field==JAM_MOVE)value=state.movement;
                 if(field==JAM_ENERGY)value=state.energy;
             cv_text(8,34+(int)k*29,&FONT_XS,names[row][k],K_DIM);
-            if(field==JAM_FORM)cv_text(118,34+(int)k*29,&FONT_XS,en_jam_form(1),K_FROST);
+            if(field==JAM_FORM)cv_text(118,34+(int)k*29,&FONT_XS,jam_ui_form(),K_FROST);
             else if(field==JAM_KEYS_PROGRAM || field==JAM_BASS_PROGRAM) {
-                unsigned n;const uint8_t *p=en_jam_data(&n);(void)n;
-                if(p[4]==2){unsigned q;for(q=0;q<10;q++)text[q]=(char)p[JP2_VOICE+value*128+118+q];text[10]=0;}
-                else {text[0]='-';text[1]=0;}
+                jam_ui_voice_name(field,text);
                 cv_text(100,34+(int)k*29,&FONT_XS,text,K_FROST);
             } else {itoa_u((unsigned)value,text);cv_text(174,34+(int)k*29,&FONT_B,text,K_FROST);}
         }
@@ -6443,24 +6466,24 @@ static void draw_main(void)
     if(ui.view==V_JAMHELP) {
         jp_settings_t s; char a[32],b[32],t[32],root[2]; unsigned k;
         static const char *const role[]={"VERSE","CHORUS","BRIDGE","RETURN"};
-        en_jam_get(&s);
-        h=hash(0x4a414d32u,en_jam_beat | en_jam_length<<8 | en_jam_pending<<16 | en_jam_busy()<<17 | (uint32_t)(en_jam_load+1)<<18 | (uint32_t)en_jam_source()<<22);
-        h=hash(h,en_jam_revision);h=hash(h,(unsigned)proj.par[P_TEMPO]);
+        jam_ui_get(&s);
+        h=hash(0x4a414d32u,JV(beat,en_jam_beat) | JV(length,en_jam_length)<<8 | JV(pending,en_jam_pending)<<16 | JV(busy,en_jam_busy())<<17 | (uint32_t)(JV(load,en_jam_load)+1)<<18 | (uint32_t)JV(source,en_jam_source())<<22);
+        h=hash(h,JV(revision,en_jam_revision));h=hash(h,(unsigned)proj.par[P_TEMPO]);
         for(k=0;k<sizeof s;k++) h=hash(h,((const uint8_t *)&s)[k]);
         if(h==ui.sig[1]) return;
         ui.sig[1]=h;
-        en_jam_name(0,a); en_jam_name(1,b); root[0]=a[0];root[1]=0;
+        jam_ui_name(0,a); jam_ui_name(1,b); root[0]=a[0];root[1]=0;
         cv_begin(240,MAIN_H,K_BG);
-        {unsigned n;cv_text(8,2,&FONT_XS,(const char *)en_jam_data(&n)+16,K_ACC);}
+        cv_text(8,2,&FONT_XS,jam_ui_title(),K_ACC);
         cv_text(8,22,&FONT_L,root,K_FROST); cv_text(34,36,&FONT_B,a+1,K_FROST);
         cv_text(142,24,&FONT_XS,"NEXT",K_DIM); cv_text(142,41,&FONT_B,b,K_PAD);
-        for(k=0;k<en_jam_length;k++) cv_rect(8+(int)k*(224/en_jam_length),72,224/en_jam_length-3,6,k==en_jam_bar?K_ACC:K_DIM);
-        itoa_u(en_jam_bar+1,t); cv_text(8,86,&FONT_XS,t,K_FROST);
-        cv_text(32,86,&FONT_XS,role[en_jam_section%4],K_DIM);
+        for(k=0;k<JV(length,en_jam_length);k++) cv_rect(8+(int)k*(224/JV(length,en_jam_length)),72,224/JV(length,en_jam_length)-3,6,k==JV(bar,en_jam_bar)?K_ACC:K_DIM);
+        itoa_u(JV(bar,en_jam_bar)+1,t); cv_text(8,86,&FONT_XS,t,K_FROST);
+        cv_text(32,86,&FONT_XS,role[JV(section,en_jam_section)%4],K_DIM);
         cv_text(160,86,&FONT_XS,s.hold?"HELD":"EVOLVING",K_ACC);
-        if(en_jam_pending || en_jam_busy() || en_jam_load>=0) {
-            cv_text(8,105,&FONT_XS,(en_jam_busy() || en_jam_load>=0)?en_jam_pending_title():en_jam_form(1),K_ACC);
-            itoa_u(en_jam_length-en_jam_bar,t); cv_text(8,122,&FONT_XS,t,K_ACC);
+        if(JV(pending,en_jam_pending) || JV(busy,en_jam_busy()) || JV(load,en_jam_load)>=0) {
+            cv_text(8,105,&FONT_XS,(JV(busy,en_jam_busy()) || JV(load,en_jam_load)>=0)?jam_ui_pending_title():jam_ui_form(),K_ACC);
+            itoa_u(JV(length,en_jam_length)-JV(bar,en_jam_bar),t); cv_text(8,122,&FONT_XS,t,K_ACC);
             cv_text(29,122,&FONT_XS,"BARS TO CHANGE",K_DIM);
         } else {
             cv_text(8,105,&FONT_XS,"PRESETS: SONG / SEL: DETAILS",K_DIM);
@@ -6692,7 +6715,7 @@ static void draw_knobs(void)
         static const char *const names[]={"KEY","BPM","BARS","MOVE"};
         static const char *const movement[]={"OFF","SPARSE","FLOW","ACTIVE"};
         uint32_t jh=hash(0x4a414d33u,(unsigned)proj.par[P_TEMPO]);
-        en_jam_get(&s);for(k=0;k<sizeof s;k++)jh=hash(jh,((const uint8_t *)&s)[k]);
+        jam_ui_get(&s);for(k=0;k<sizeof s;k++)jh=hash(jh,((const uint8_t *)&s)[k]);
         if(jh==ui.sig[2])return;
         ui.sig[2]=jh;
         cv_begin(240,KNB_H,K_BG);
@@ -7919,6 +7942,13 @@ void ui_frame(void)
         return;
     }
     cv_scan = ui.scan;
+#if EN_RUST_HANDOFF
+    /* One captured generation supplies Songbook's header, body and knob row.
+     * Input/application/render are serialized in the qualified emulator. */
+    if((ui.view==V_JAMHELP || (ui.view>=V_JAMARR && ui.view<=V_JAMSWELL)) && !en_jam_snapshot(&jam_view)) {
+        leds();ui.frame++;return; /* bounded contention: keep the previous frame */
+    }
+#endif
     if (!ui.saver_on)
         draw_header();                           /* (the screensaver has the whole screen) */
     draw_main();

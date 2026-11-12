@@ -11,7 +11,7 @@ RUST_FLAGS=""
 RUST_LIB=""
 if [ "${EN_RUST_JAM:-1}" = 1 ]; then
     cargo build --release --locked -p fm1-jam-bridge --no-default-features --target wasm32-unknown-unknown --target-dir build/rust-emu
-    RUST_FLAGS="-DEN_RUST_JAM=1 -DEN_RUST_COMMANDS=1"
+    RUST_FLAGS="-DEN_RUST_JAM=1 -DEN_RUST_COMMANDS=1 -DEN_RUST_HANDOFF=1"
     RUST_LIB="build/rust-emu/wasm32-unknown-unknown/release/libfm1_jam_bridge.a"
 fi
 emcc -O2 -ffp-contract=off -std=gnu99 -Wall -Wno-unused-function -Wno-unused-parameter -Wno-unused-variable \
