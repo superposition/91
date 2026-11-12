@@ -26,8 +26,144 @@ index cd330d1..223842e 100644
          // If there's no code, demangle the name (TODO: By ABI) and set linkage.
          else if( linkage.name == "" && !e.value().is_valid() ) {
              linkage.name = name.c_str();
+diff --git a/src/hir_conv/constant_evaluation.cpp b/src/hir_conv/constant_evaluation.cpp
+index e14a29c..0998550 100644
+--- a/src/hir_conv/constant_evaluation.cpp
++++ b/src/hir_conv/constant_evaluation.cpp
+@@ -1,3 +1,4 @@
++#include <cmath>
+ /*
+  * MRustC - Rust Compiler
+  * - By John Hodge (Mutabah/thePowersGang)
+@@ -1521,7 +1522,7 @@ namespace MIR { namespace eval {
+                     return EncodedLiteralSlice(el).read_float();
+                 }
+                 MIR_ASSERT(state, e.is_Float(), "Expected a float, got " << e);
+-                return e.as_Float().v;
++                return bits == 32 ? static_cast<double>(static_cast<float>(e.as_Float().v)) : e.as_Float().v;
+                 }
+             }
+             abort();
+@@ -1693,11 +1694,11 @@ namespace {
+             auto r = local_state.read_param_float(ti.bits, val_r);
+             switch(op)
+             {
+-            case ::MIR::eBinOp::ADD:    dst.write_float(state, ti.bits, l + r);  break;
+-            case ::MIR::eBinOp::SUB:    dst.write_float(state, ti.bits, l - r);  break;
+-            case ::MIR::eBinOp::MUL:    dst.write_float(state, ti.bits, l * r);  break;
+-            case ::MIR::eBinOp::DIV:    dst.write_float(state, ti.bits, l / r);  break;
+-            case ::MIR::eBinOp::MOD:
++            case ::MIR::eBinOp::ADD:    dst.write_float(state, ti.bits, ti.bits == 32 ? static_cast<double>(static_cast<float>(l) + static_cast<float>(r)) : l + r);  break;
++            case ::MIR::eBinOp::SUB:    dst.write_float(state, ti.bits, ti.bits == 32 ? static_cast<double>(static_cast<float>(l) - static_cast<float>(r)) : l - r);  break;
++            case ::MIR::eBinOp::MUL:    dst.write_float(state, ti.bits, ti.bits == 32 ? static_cast<double>(static_cast<float>(l) * static_cast<float>(r)) : l * r);  break;
++            case ::MIR::eBinOp::DIV:    dst.write_float(state, ti.bits, ti.bits == 32 ? static_cast<double>(static_cast<float>(l) / static_cast<float>(r)) : l / r);  break;
++            case ::MIR::eBinOp::MOD:    dst.write_float(state, ti.bits, ti.bits == 32 ? static_cast<double>(std::fmod(static_cast<float>(l), static_cast<float>(r))) : std::fmod(l, r)); break;
+             case ::MIR::eBinOp::ADD_OV:
+             case ::MIR::eBinOp::SUB_OV:
+             case ::MIR::eBinOp::MUL_OV:
+diff --git a/src/mir/from_hir.cpp b/src/mir/from_hir.cpp
+index 411260c..7a77712 100644
+--- a/src/mir/from_hir.cpp
++++ b/src/mir/from_hir.cpp
+@@ -2626,7 +2626,9 @@ namespace {
+             TU_ARMA(Float, e) {
+                 ASSERT_BUG(node.span(), node.m_res_type.data().is_Primitive(), "Non-primitive return type for Float literal - " << node.m_res_type);
+                 auto ity = node.m_res_type.data().as_Primitive();
+-                m_builder.set_result(node.span(), ::MIR::RValue::make_Constant( ::MIR::Constant::make_Float({ e.m_value, ity }) ));
++                // Literals are parsed into double storage. Narrow only once
++                // their resolved type is known, before any MIR folding/cast.
++                m_builder.set_result(node.span(), ::MIR::RValue::make_Constant( ::MIR::Constant::make_Float({ ity == ::HIR::CoreType::F32 ? static_cast<double>(static_cast<float>(e.m_value)) : e.m_value, ity }) ));
+                 }
+             TU_ARMA(Boolean, e) {
+                 m_builder.set_result(node.span(), ::MIR::RValue::make_Constant( ::MIR::Constant::make_Bool({e}) ));
+diff --git a/src/mir/mir.cpp b/src/mir/mir.cpp
+index 322cb35..a9fb16d 100644
+--- a/src/mir/mir.cpp
++++ b/src/mir/mir.cpp
+@@ -7,6 +7,7 @@
+  */
+ #include <mir/mir.hpp>
+ #include <algorithm>    // std::min
++#include <cstring>      // Structural floating-constant bit patterns
+ #include <hir_typeck/monomorph.hpp>
+ #include <hir/encoded_literal.hpp>
+ #include <trans/target.hpp> // Target_GetPointerBits
+@@ -88,8 +89,18 @@ namespace MIR {
+             return ::ord((unsigned)ae.t, (unsigned)be.t);
+             ),
+         (Float,
+-            if( ae.v != be.v )
+-                return ::ord(ae.v, be.v);
++            // Constant identity is structural: +0 and -0 (and distinct NaN
++            // payloads) cannot be merged before operations such as to_bits.
++            // This IEEE total-order key also preserves finite numeric order.
++            const auto key = [](double value) {
++                uint64_t bits;
++                static_assert(sizeof(bits) == sizeof(value), "double constant representation");
++                std::memcpy(&bits, &value, sizeof(bits));
++                const uint64_t sign = uint64_t(1) << 63;
++                return (bits & sign) ? ~bits : (bits ^ sign);
++            };
++            if( key(ae.v) != key(be.v) )
++                return ::ord(key(ae.v), key(be.v));
+             return ::ord((unsigned)ae.t, (unsigned)be.t);
+             ),
+         (Bool,
+diff --git a/src/mir/optimise.cpp b/src/mir/optimise.cpp
+index 66c462b..5ac04f8 100644
+--- a/src/mir/optimise.cpp
++++ b/src/mir/optimise.cpp
+@@ -3721,7 +3721,9 @@ bool MIR_Optimise_ConstPropagate(::MIR::TypeResolve& state, ::MIR::Function& fcn
+                                     break;
+                                 TU_ARMA(Float, le, re) {
+                                     MIR_ASSERT(state, le.t == re.t, "Mismatched types for eBinOp::ADD - " << val_l << " / " << val_r);
+-                                    new_value = ::MIR::Constant::make_Float({ le.v + re.v, le.t });
++                                    // Execute f32 folding as float arithmetic: round both
++                                    // operands and each result, not an entire double chain.
++                                    new_value = ::MIR::Constant::make_Float({ le.t == ::HIR::CoreType::F32 ? static_cast<double>(static_cast<float>(le.v) + static_cast<float>(re.v)) : le.v + re.v, le.t });
+                                     }
+                                 TU_ARMA(Int  , le, re) {
+                                     MIR_ASSERT(state, le.t == re.t, "Mismatched types for eBinOp::ADD - " << val_l << " + " << val_r);
+@@ -3740,7 +3742,7 @@ bool MIR_Optimise_ConstPropagate(::MIR::TypeResolve& state, ::MIR::Function& fcn
+                                     break;
+                                 TU_ARMA(Float, le, re) {
+                                     MIR_ASSERT(state, le.t == re.t, "Mismatched types for eBinOp::SUB - " << val_l << " / " << val_r);
+-                                    new_value = ::MIR::Constant::make_Float({ le.v - re.v, le.t });
++                                    new_value = ::MIR::Constant::make_Float({ le.t == ::HIR::CoreType::F32 ? static_cast<double>(static_cast<float>(le.v) - static_cast<float>(re.v)) : le.v - re.v, le.t });
+                                     }
+                                 TU_ARMA(Int, le, re) {
+                                     MIR_ASSERT(state, le.t == re.t, "Mismatched types for eBinOp::SUB - " << val_l << " - " << val_r);
+@@ -3759,7 +3761,7 @@ bool MIR_Optimise_ConstPropagate(::MIR::TypeResolve& state, ::MIR::Function& fcn
+                                     break;
+                                 TU_ARMA(Float, le, re) {
+                                     MIR_ASSERT(state, le.t == re.t, "Mismatched types for eBinOp::MUL - " << val_l << " / " << val_r);
+-                                    new_value = ::MIR::Constant::make_Float({ le.v * re.v, le.t });
++                                    new_value = ::MIR::Constant::make_Float({ le.t == ::HIR::CoreType::F32 ? static_cast<double>(static_cast<float>(le.v) * static_cast<float>(re.v)) : le.v * re.v, le.t });
+                                     }
+                                 TU_ARMA(Int  , le, re) {
+                                     MIR_ASSERT(state, le.t == re.t, "Mismatched types for eBinOp::MUL - " << val_l << " * " << val_r);
+@@ -3778,7 +3780,7 @@ bool MIR_Optimise_ConstPropagate(::MIR::TypeResolve& state, ::MIR::Function& fcn
+                                     break;
+                                 TU_ARMA(Float, le, re) {
+                                     MIR_ASSERT(state, le.t == re.t, "Mismatched types for eBinOp::DIV - " << val_l << " / " << val_r);
+-                                    new_value = ::MIR::Constant::make_Float({ le.v / re.v, le.t });
++                                    new_value = ::MIR::Constant::make_Float({ le.t == ::HIR::CoreType::F32 ? static_cast<double>(static_cast<float>(le.v) / static_cast<float>(re.v)) : le.v / re.v, le.t });
+                                     }
+                                 TU_ARMA(Int  , le, re) {
+                                     MIR_ASSERT(state, le.t == re.t, "Mismatched types for eBinOp::DIV - " << val_l << " / " << val_r);
+@@ -3805,6 +3807,10 @@ bool MIR_Optimise_ConstPropagate(::MIR::TypeResolve& state, ::MIR::Function& fcn
+                                 TU_MATCH_HDRA( (val_l, val_r), {)
+                                 default:
+                                     break;
++                                TU_ARMA(Float, le, re) {
++                                    MIR_ASSERT(state, le.t == re.t, "Mismatched float types for eBinOp::MOD");
++                                    new_value = ::MIR::Constant::make_Float({ le.t == ::HIR::CoreType::F32 ? static_cast<double>(std::fmod(static_cast<float>(le.v), static_cast<float>(re.v))) : std::fmod(le.v, re.v), le.t });
++                                    }
+                                 TU_ARMA(Int, le, re) {
+                                     MIR_ASSERT(state, le.t == re.t, "Mismatched types for eBinOp::MOD - " << val_l << " % " << val_r);
+                                     MIR_ASSERT(state, re.v != 0, "Const eval error: Constant division by zero");
 diff --git a/src/trans/codegen_c.cpp b/src/trans/codegen_c.cpp
-index b5ef33f..988f212 100644
+index b5ef33f..9f81814 100644
 --- a/src/trans/codegen_c.cpp
 +++ b/src/trans/codegen_c.cpp
 @@ -2457,11 +2457,12 @@ namespace {
@@ -97,3 +233,15 @@ index b5ef33f..988f212 100644
              //    m_of << "\t// Zero init static " << p << " : " << type << " = " << encoded << "\n";
              //}
  
+@@ -3979,9 +3988,9 @@ namespace {
+                     }
+                     else if( ve.op == ::MIR::eBinOp::MOD && (ty == ::HIR::CoreType::F32 || ty == ::HIR::CoreType::F64) ) {
+                         if( ty == ::HIR::CoreType::F32 )
+-                            m_of << "remainderf";
++                            m_of << "fmodf";
+                         else
+-                            m_of << "remainder";
++                            m_of << "fmod";
+                         m_of << "("; emit_param(ve.val_l); m_of << ", "; emit_param(ve.val_r); m_of << ")";
+                         break;
+                     }

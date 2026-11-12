@@ -5,7 +5,7 @@
 set -eu
 cd "$(dirname "$0")/.."
 core=$(realpath "${1:?generated core output directory}")
-bridge=$(realpath "${2:?generated five-crate output directory}")
+bridge=$(realpath "${2:?generated application output directory}")
 zig=$(realpath "${3:?pinned Zig compiler}")
 out=${4:-build/compiler-generated-regression}
 mkdir -p "$out" build/gen
@@ -13,7 +13,7 @@ mkdir -p "$out" build/gen
 native=(-target x86-linux-musl -msse2 -mfpmath=sse -ffp-contract=off -fexcess-precision=standard -O2 -std=gnu11 -w -ffunction-sections -fdata-sections)
 "$zig" cc "${native[@]}" -c "$core/libcore.rlib.c" -o "$out/core.o"
 objects=()
-for package in types formats engine rt jam_bridge;do
+for package in types formats engine rt app jam_bridge;do
     "$zig" cc "${native[@]}" -c "$bridge/libfm1_$package.rlib.c" -o "$out/$package.o"
     objects+=("$out/$package.o")
 done

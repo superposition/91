@@ -18,12 +18,13 @@ cargo +1.94.1 check --release --locked --manifest-path "$repo/Cargo.toml" \
 mkdir -p "$out"
 printf '%s\n' "$revision" > "$out/source-revision.txt"
 export MRUSTC_TARGET_VER=1.90
-for package in types formats engine rt jam-bridge; do
+for package in types formats engine rt app jam-bridge; do
     crate="fm1_${package//-/_}"
     args=()
     if [ "$package" != types ]; then args+=(--extern "fm1_types=$out/libfm1_types.rlib"); fi
-    if [ "$package" = engine ] || [ "$package" = jam-bridge ]; then args+=(--extern "fm1_formats=$out/libfm1_formats.rlib"); fi
-    if [ "$package" = jam-bridge ]; then args+=(--extern "fm1_engine=$out/libfm1_engine.rlib" --extern "fm1_rt=$out/libfm1_rt.rlib"); fi
+    if [ "$package" = engine ] || [ "$package" = app ] || [ "$package" = jam-bridge ]; then args+=(--extern "fm1_formats=$out/libfm1_formats.rlib"); fi
+    if [ "$package" = app ] || [ "$package" = jam-bridge ]; then args+=(--extern "fm1_engine=$out/libfm1_engine.rlib"); fi
+    if [ "$package" = jam-bridge ]; then args+=(--extern "fm1_rt=$out/libfm1_rt.rlib" --extern "fm1_app=$out/libfm1_app.rlib"); fi
     if [ "$package" = rt ] || [ "$package" = jam-bridge ]; then args+=(--cfg 'feature="pi32v2"'); fi
     "$compiler/bin/mrustc" "$repo/rust/fm1-$package/src/lib.rs" --crate-name "$crate" --crate-type rlib --edition 2021 \
         --target "$repo/rust/toolchain/pi32v2-mrustc.toml" -L "$out" -L "$core" --extern "core=$core/libcore.rlib" "${args[@]}" \
@@ -33,4 +34,4 @@ for package in types formats engine rt jam-bridge; do
         -c "$out/lib$crate.rlib.c" -o "$out/lib$crate.rlib.o" > "$out/$package-c.log" 2>&1
 done
 sha256sum "$out"/*.rlib.hir "$out"/*.rlib.c "$out"/*.rlib.o > "$out/bridge.sha256"
-printf 'All five Rust libraries emitted and vendor LTO compiled: %s\n' "$out"
+printf 'All six Rust libraries emitted and vendor LTO compiled: %s\n' "$out"

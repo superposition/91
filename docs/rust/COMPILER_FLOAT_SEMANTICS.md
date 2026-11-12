@@ -57,8 +57,8 @@ node tests/host/compiler_wasm_imports.mjs FIXED_INSTRUMENT_WASM
 
 The native commands require Linux with static i386 execution, pinned Zig 0.17.1 and rustup's installed 1.94.1 toolchain. The generated-output directories contain the real core and five crate `.rlib.c` / `.rlib` files. Raw exploratory commands are retained separately under `build/compiler-investigation/`; the two maintained scripts provide the repeatable gates.
 
-## Adoption boundary
+## Adoption and qualification boundary
 
-The additional patch SHA-256 is `f4f469d7184d6cdb134b6f8e751fa1534f5a5556f90c4658defd02aefa9a50cd`. The resulting combined diff is `9c6321c51f606dfc7b60151020023c8b01d311b7e8f11577bf2057f912ad9d26`. The tracked combined patch and verification manifest are deliberately left for parent review/adoption; their existing guard continues to reject an unrecorded compiler diff.
+The additional patch SHA-256 is `f4f469d7184d6cdb134b6f8e751fa1534f5a5556f90c4658defd02aefa9a50cd`. The resulting combined diff is `9c6321c51f606dfc7b60151020023c8b01d311b7e8f11577bf2057f912ad9d26`. Parent review adopted that exact combined diff in `mrustc-pi32v2.patch` and its verification manifest. A fresh checkout needs only the combined patch; the separate addition records the repair against the earlier compiler. The verifier continues to reject any unrecorded compiler diff. The old root compiler binary, diff and manifest were archived before applying the addition; rebuilding the compiler/core/application outputs is a separate gate from the clone evidence above.
 
 Vendor compilation, exported-static/map checks, physical atomics, stack/RAM/cycle qualification and device testing remain separate gates. The diagnostic MCU atomic helper is serial-only and panic traps remain active. These results establish compiler-semantic defects and their repair; they do not establish a cause for the separate device USB failure.

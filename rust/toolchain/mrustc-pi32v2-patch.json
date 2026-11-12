@@ -1,15 +1,22 @@
 {
   "base": "5205980b25d4d15494abdb45103e59e8dc309970",
-  "sha256": "a57ac7e1ec07386a9af5d4f53393a4bd8743f22fd64a5e7d94d647d7905cc191",
+  "sha256": "9c6321c51f606dfc7b60151020023c8b01d311b7e8f11577bf2057f912ad9d26",
   "files": [
     "src/expand/codegen.cpp",
     "src/hir/from_ast.cpp",
+    "src/hir_conv/constant_evaluation.cpp",
+    "src/mir/from_hir.cpp",
+    "src/mir/mir.cpp",
+    "src/mir/optimise.cpp",
     "src/trans/codegen_c.cpp"
   ],
   "scope": [
     "readonly owned immutable statics, excluding UnsafeCell and foreign storage",
     "export_name registration and legacy no_mangle static lowering",
-    "actual linker labels on owned static definitions"
+    "actual linker labels on owned static definitions",
+    "binary32 literal and arithmetic rounding in MIR and constant evaluation",
+    "structural floating constant identity preserves signed zero and NaN payloads",
+    "truncating floating remainder in evaluation and generated C"
   ],
-  "regression": "static-export probe passes standard Rust, native generated C and vendor object symbol/section checks"
+  "regression": "static-export section/symbol gate; 49 floating bit-pattern cases; 28 comparison predicates; generated-C factory and effects PCM parity"
 }

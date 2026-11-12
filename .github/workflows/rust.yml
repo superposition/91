@@ -180,6 +180,8 @@ jobs:
         run: sh tests/rust_command_irq.sh
       - name: Legacy harmonic policy, register search and progression callbacks
         run: sh tests/rust_harmony_parity.sh
+      - name: Exact graphics and retained display DMA source
+        run: sh tests/rust_app_graphics.sh
       - name: Songbook snapshot and staging handoffs
         run: sh tests/rust_handoff.sh
       - uses: actions/upload-artifact@v4
@@ -241,3 +243,4 @@ jobs:
             build/harmony-parity/*.json
             build/harmony-parity/results.jsonl
             build/harmony-parity/source-verification.log
+            build/app-graphics/*.json
