@@ -31,6 +31,7 @@ STB = OUT / "stub"
 sys.path.insert(0, str(SRC / "tools"))
 import fm1pkg_make  # noqa: E402
 import lz4blk  # noqa: E402
+import rust_tooling  # noqa: E402
 
 STUB_XIP = 0x02000120               # app.bin offset 0 in the XIP map, where the SPL jumps: the boot stub
 STUB_LEN = fm1pkg_make.STUB_LEN
@@ -152,16 +153,10 @@ def ldr_head(dcrc, a, b, attr, name):
 def ldr_wrap(image):
     """ota.bin = outer JLFS head (32 B) + inner head (32 B, load address) +
     blocks [clen u32][dlen u32][LZ4 block], dlen 4096 except the last"""
-    blocks = bytearray()
-    for i in range(0, len(image), 4096):
-        raw = image[i:i + 4096]
-        c = lz4blk.compress(raw)
-        if len(c) > 4096 or lz4blk.decompress(c) != raw:
-            raise SystemExit(f"loader: block {i // 4096} does not compress below 4096 B")
-        blocks += struct.pack("<II", len(c), len(raw)) + c
-    inner = ldr_head(crc16(image), len(image), LOADER_LOAD, 0, LOADER_NAME)
-    body = inner + bytes(blocks)
-    return ldr_head(crc16(body), 0x20, len(body), 0x41, LOADER_NAME) + body
+    try:
+        return bytes(rust_tooling.call('build.loader-wrap',[list(image)]))
+    except rust_tooling.ToolError as error:
+        raise SystemExit(str(error)) from None
 
 
 def build_loader():
