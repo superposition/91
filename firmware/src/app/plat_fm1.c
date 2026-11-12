@@ -101,17 +101,32 @@ void plat_leds(uint32_t buttons, uint32_t keys)
 /* MIDI: Felucca's rings carry 4-byte USB-MIDI event packets, byte 0 = cable / CIN */
 int plat_midi_in(uint32_t *pkt)
 {
+#if EN_RUST_USB
+    return fm1_rust_usb_midi_pop(midi_in_q,&mi_w,&mi_r,pkt,usb_transport_publish)>0;
+#else
     if (mi_r == mi_w)
         return 0;
     *pkt = midi_in_q[mi_r % MQ];
     mi_r++;
     return 1;
+#endif
 }
-void plat_midi_out(uint32_t pkt)                    /* the ring has one writer at a time: IRQs off */
+#if EN_RUST_USB
+#include "../../hal/fm1_irq_state.h"
+#endif
+void plat_midi_out(uint32_t pkt)                    /* the whole publication has one CPU0 writer */
 {
+#if EN_RUST_USB
+    const uint32_t f=fm1_irq_state_save();
+#else
     uint32_t f = irq_save();
+#endif
     midi_out_event(pkt);
+#if EN_RUST_USB
+    fm1_irq_state_restore(f);
+#else
     irq_restore(f);
+#endif
 }
 /* the engine's MIDI out (from the render): a USB-MIDI packet, cable 0, CIN = the status's high nibble */
 void en_midi_out(uint32_t st, uint32_t d1, uint32_t d2) { plat_midi_out(st >> 4 | st << 8 | d1 << 16 | d2 << 24); }

@@ -152,13 +152,20 @@ static uint32_t midi_in_q[MQ], midi_out_q[MQ];
 static volatile uint32_t mi_w, mi_r, mo_w, mo_r;
 static volatile uint8_t uh_out;                     /* the port is a host with an OUT endpoint (usb_host.c): MIDI out goes to the device */
 
+#if EN_RUST_USB
+static void usb_transport_publish(void);
+#endif
 static void midi_out_event(uint32_t pkt)            /* from the audio ISR */
 {
+#if EN_RUST_USB
+    (void)fm1_rust_usb_midi_push(midi_out_q,&mo_w,&mo_r,pkt,usb.config||uh_out,usb_transport_publish);
+#else
     if ((usb.config || uh_out) && mo_w - mo_r < MQ) {
         midi_out_q[mo_w % MQ] = pkt;
         RING_PUBLISH();
         mo_w++;
     }
+#endif
 }
 
 /* ------------------------------------------------------- descriptors --- */

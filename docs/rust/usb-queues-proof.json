@@ -1,0 +1,114 @@
+{
+  "ticket": 19,
+  "base": "385ca178038d82be515dff4059a27fdab8da45b3",
+  "rust": "1.94.1",
+  "flag": "EN_RUST_USB=1",
+  "hardware_accessed": false,
+  "physical_qualified": false,
+  "added_state_bytes": 0,
+  "added_payload_bytes": 0,
+  "capacity_words": 64,
+  "scope": "actual output push/input pop and exact incoming IRQ restoration independently of HAL",
+  "intentional_frozen_difference": "USB1 plat_midi_out preserves initial ICFG/disabled gate; frozen C0/HAL0 unconditional sti remains an explicit witness",
+  "oracle_cases_per_variant": 41600,
+  "safe_core_interleaving_schedules": 3640,
+  "trace": [
+    {
+      "variant": "c0",
+      "path": "build/usb-queues/c0.wasm",
+      "cases": 41600,
+      "bytes": 16883840,
+      "sha256": "2d08e7e418a7833683c7d9acfcc96d07ebcd73b2647b5beef4ac2e0244b36ef8"
+    },
+    {
+      "variant": "hal-0",
+      "path": "build/usb-queues/rust.wasm",
+      "cases": 41600,
+      "bytes": 16883840,
+      "sha256": "2d08e7e418a7833683c7d9acfcc96d07ebcd73b2647b5beef4ac2e0244b36ef8"
+    },
+    {
+      "variant": "hal-1",
+      "path": "build/usb-queues/rust.wasm",
+      "cases": 41600,
+      "bytes": 16883840,
+      "sha256": "2d08e7e418a7833683c7d9acfcc96d07ebcd73b2647b5beef4ac2e0244b36ef8"
+    }
+  ],
+  "checks": {
+    "linux_workspace_passed": 167,
+    "miri_strict_provenance_raw_roots_uninitialized_output": true,
+    "clippy_warnings_denied": true,
+    "fmt": true,
+    "no_std_wasm": true,
+    "vendor_c_usb1_hal0_main_engine_compile_only": true,
+    "vendor_c_usb1_hal1_main_engine_compile_only": true
+  },
+  "artifacts": [
+    {
+      "path": "build/usb-queues/final.log",
+      "bytes": 557,
+      "sha256": "07400f6be13246ab74e3cfa1cb05438266542647a5458382fc45904eb72b5ed4"
+    },
+    {
+      "path": "build/usb-queues/workspace.log",
+      "bytes": 24645,
+      "sha256": "acadb03aa8908af9d7881fe5c3f6b124ce8fa6b5e31e8250f63f33a3c8d7fddc"
+    },
+    {
+      "path": "build/usb-queues/nostd.log",
+      "bytes": 632,
+      "sha256": "c84a38f3ee55ccc920fb46266607350d67fde620f4faca0428a802e48d78cc8e"
+    },
+    {
+      "path": "build/usb-queues/miri.log",
+      "bytes": 1122,
+      "sha256": "4bdd9cfee6df181fee24e7b3395b263e036622aedacb5ddcea4a2136911ad640"
+    },
+    {
+      "path": "build/usb-queues/source-verification.log",
+      "bytes": 12678,
+      "sha256": "02103818921d558fa092601f4329ba6740cf2ad792676fb0331e24f2fadfbd85"
+    },
+    {
+      "path": "build/usb-queues/compile-target.sh",
+      "bytes": 1181,
+      "sha256": "e4deab62a12186eb054d65ddfcef3184b7b161a2020bd0e8175da9d70ef6edb6"
+    },
+    {
+      "path": "build/usb-queues/target-0/main.o",
+      "bytes": 521652,
+      "sha256": "321ea7d6e0d884ed2e6b38d682e272762af2b055145a4dbad5635788030fb2cd"
+    },
+    {
+      "path": "build/usb-queues/target-0/engine.o",
+      "bytes": 417252,
+      "sha256": "e8a852d865f4bd288f6727c5fbfe85c9de9cd2d162dc74318530137661d34de3"
+    },
+    {
+      "path": "build/usb-queues/target-1/main.o",
+      "bytes": 479940,
+      "sha256": "d4c44afe6c938263347d0bf91811ab698217b8211d44f55480fa6be3fe0ed2c8"
+    },
+    {
+      "path": "build/usb-queues/target-1/engine.o",
+      "bytes": 418076,
+      "sha256": "fe190e19a53985a0c750ec53de7280b2f12c57d89e7330aa6e438b7127daeb68"
+    }
+  ],
+  "source_sha256": {
+    "firmware/src/app/plat_fm1.c": "b45c264a04e9389ae7f9d623a428f41ffabcf0715ade521c7d284aa94be28607",
+    "firmware/src/dsp/rust_usb.h": "de1fab08dc4220f91cbbb9778166f3bae0e5eb1585554eddebe2180426767ba8",
+    "firmware/src/usb.c": "fbcf0ce115a768eefb0f3c08bd9d69b2a55b0afcb87b7e01f5f624ab69b603de",
+    "firmware/hal/fm1_irq_state.h": "b37141dc3516761b8b441e79e030557646f776a4055c879bf18b2178f9089b85",
+    "rust/fm1-hal/src/lib.rs": "74964341c9313e7bc1f26c455165c587484d848ccfdd86b802169fca60883519",
+    "rust/fm1-hal/src/usb_queues.rs": "6093857f1857e20332529fafc172e4abaeab092f70c30c0f9f40f2f6e935c051",
+    "rust/fm1-hal/tests/usb_queues.rs": "bce82e160cdac4c064e21b5c9e052aa7ca4f219dd25ef3da16237142349e13a5",
+    "rust/fm1-jam-bridge/src/lib.rs": "4c2c1b5c0bac480b1c6a93a56512cb2122041f0dfd1efa65207aaae22a20cece",
+    "rust/fm1-jam-bridge/src/usb_queues.rs": "f59a1792598455d443687a99310a4516c1ba40ea944ea182e518188b0af9de70",
+    "tests/reference/usb_queue_reference.c": "34de1932dada6ed739f23a53396fb7c0b3da64f1c04a909413c5345db9629dec",
+    "tests/reference/usb_queue_reference.py": "61c9c62e8d4993926903fcd5f681a25f37d5e0853eba5248dbe1ffb9b720a469",
+    "tests/rust_usb_queues.sh": "3ba4896fcd50a746ec18ef3ef7679079f9209af0b360b1584b86dc3d91261e51"
+  },
+  "remaining": "ep1 transmit/OTA SysEx TX/CDC/device lifecycle/SIE/host/UAC/physical stress and timing"
+}

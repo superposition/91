@@ -25,6 +25,8 @@ _Static_assert(offsetof(fm1_usb_transport_t,slots)==sizeof(void *) &&
                sizeof(fm1_usb_transport_t)==23u*sizeof(void *),"transport context ABI");
 int32_t fm1_rust_usb_sysex(const fm1_usb_transport_t *,const void *input,uint32_t count);
 int32_t fm1_rust_usb_device_receive(const fm1_usb_transport_t *,const void *input,uint32_t count);
+int32_t fm1_rust_usb_midi_push(uint32_t *data,volatile uint32_t *write,volatile uint32_t *read,uint32_t value,uint32_t enabled,void (*publish)(void));
+int32_t fm1_rust_usb_midi_pop(uint32_t *data,volatile uint32_t *write,volatile uint32_t *read,uint32_t *output,void (*publish)(void));
 uint32_t fm1_rust_usb_descriptor_length(uint32_t flags,uint32_t pid,uint32_t request);
 int32_t fm1_rust_usb_descriptor_copy(uint32_t flags,uint32_t pid,uint32_t request,uint32_t offset,void *output,uint32_t capacity);
 uint32_t fm1_rust_usb_ep0_start(uint32_t length,uint32_t wanted);
