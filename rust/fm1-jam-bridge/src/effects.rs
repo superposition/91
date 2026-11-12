@@ -8,6 +8,151 @@ static ECHO_SAMPLES: AtomicU32 = AtomicU32::new(0);
 static REVERB_SAMPLES: AtomicU32 = AtomicU32::new(0);
 static COLOUR_SAMPLES: AtomicU32 = AtomicU32::new(0);
 
+// Six distinct foreground working arrays; these never include a shared ring.
+unsafe fn mix_buffers<'a>(p: *const *mut f32, n: u32) -> effects::mix::Buffers<'a> {
+    let p = unsafe { &*p.cast::<[*mut f32; 6]>() };
+    let n = n as usize;
+    effects::mix::Buffers {
+        left: unsafe { core::slice::from_raw_parts_mut(p[0], n) },
+        right: unsafe { core::slice::from_raw_parts_mut(p[1], n) },
+        reverb: unsafe { core::slice::from_raw_parts_mut(p[2], n) },
+        echo: unsafe { core::slice::from_raw_parts_mut(p[3], n) },
+        bus_left: unsafe { core::slice::from_raw_parts_mut(p[4], n) },
+        bus_right: unsafe { core::slice::from_raw_parts_mut(p[5], n) },
+    }
+}
+/// # Safety
+/// Six initialized/aligned n-f32 working spans are disjoint and exclusively
+/// held by render. The initialized pointer table is readable for this call.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_mix_route_plain(p: *const *mut f32, n: u32) {
+    effects::mix::route_plain(unsafe { mix_buffers(p, n) });
+}
+/// # Safety
+/// The route_plain contract applies. The two initialized before spans are
+/// readable n-f32 regions, aligned and disjoint from all writable spans.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_mix_route_drums(
+    p: *const *mut f32,
+    l: *const f32,
+    r: *const f32,
+    n: u32,
+) {
+    effects::mix::route_drums(
+        unsafe { mix_buffers(p, n) },
+        unsafe { core::slice::from_raw_parts(l, n as usize) },
+        unsafe { core::slice::from_raw_parts(r, n as usize) },
+    );
+}
+/// # Safety
+/// Output spans/table obey route_plain. Config and seven input pointers are
+/// initialized/aligned/readable. Each input covers exactly n f32s, disjoint
+/// from output. Pad pointers describe only the consumed contiguous ring span;
+/// the worker's current write span is disjoint, including at ring wrap. No
+/// borrow of the rest of that shared ring is formed or retained.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_mix_pad_fm(
+    c: *const effects::mix::MergeConfig,
+    out: *const *mut f32,
+    input: *const *const f32,
+    n: u32,
+) {
+    let p = unsafe { &*input.cast::<[*const f32; 7]>() };
+    let len = n as usize;
+    effects::mix::pad_fm(
+        unsafe { mix_buffers(out, n) },
+        unsafe { &*c },
+        effects::mix::PadFm {
+            pad_left: unsafe { core::slice::from_raw_parts(p[0], len) },
+            pad_right: unsafe { core::slice::from_raw_parts(p[1], len) },
+            pad_dry: unsafe { core::slice::from_raw_parts(p[2], len) },
+            fm_left: unsafe { core::slice::from_raw_parts(p[3], len) },
+            fm_right: unsafe { core::slice::from_raw_parts(p[4], len) },
+            fm_reverb: unsafe { core::slice::from_raw_parts(p[5], len) },
+            fm_echo: unsafe { core::slice::from_raw_parts(p[6], len) },
+        },
+    );
+}
+/// # Safety
+/// Output spans/table obey route_plain. Config and four n-f32 input spans are
+/// initialized/aligned/readable and disjoint from output. C has joined/fenced
+/// the bass/acid stage before creating these scoped immutable input borrows.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_mix_bass_acid(
+    c: *const effects::mix::MergeConfig,
+    out: *const *mut f32,
+    input: *const *const f32,
+    n: u32,
+) {
+    let p = unsafe { &*input.cast::<[*const f32; 4]>() };
+    let len = n as usize;
+    effects::mix::bass_acid(
+        unsafe { mix_buffers(out, n) },
+        unsafe { &*c },
+        effects::mix::BassAcid {
+            bass: unsafe { core::slice::from_raw_parts(p[0], len) },
+            acid: unsafe { core::slice::from_raw_parts(p[1], len) },
+            duck: unsafe { core::slice::from_raw_parts(p[2], len) },
+            gate: unsafe { core::slice::from_raw_parts(p[3], len) },
+        },
+    );
+}
+#[no_mangle]
+pub extern "C" fn fm1_rust_mix_reverb_gain(send: f32, gain: f32, arc: f32, breakdown: f32) -> f32 {
+    effects::mix::reverb_gain(send, gain, arc, breakdown)
+}
+#[no_mangle]
+pub extern "C" fn fm1_rust_mix_duck_depth(kit: f32, pulse: f32, kick: f32) -> f32 {
+    effects::mix::duck_depth(kit, pulse, kick)
+}
+/// # Safety
+/// Output spans/table obey route_plain. Echo state, config, sends, the writable
+/// 21800/7100-i16 delays and n-f32 duck span are initialized/aligned and disjoint
+/// from those outputs and each other. Render exclusively holds mutation. No
+/// shared predelay borrow/callback is created. Reverb output slots hold values
+/// for C to commit later in original order into disjoint predelay write slots.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_mix_echo_block(
+    s: *mut effects::echo::State,
+    c: *const effects::echo::Config,
+    tape: *mut i16,
+    plex: *mut i16,
+    sends: *const effects::mix::EchoSends,
+    out: *const *mut f32,
+    duck: *mut f32,
+    n: u32,
+) {
+    effects::mix::echoes(
+        unsafe { &mut *s },
+        unsafe { &*c },
+        unsafe { &mut *tape.cast::<[i16; 21800]>() },
+        unsafe { &mut *plex.cast::<[i16; 7100]>() },
+        unsafe { &*sends },
+        unsafe { mix_buffers(out, n) },
+        unsafe { core::slice::from_raw_parts_mut(duck, n as usize) },
+    );
+    ECHO_SAMPLES.fetch_add(n, Ordering::Relaxed);
+}
+/// # Safety
+/// Output spans/table obey route_plain. Three n-f32 inputs are initialized,
+/// aligned/readable and disjoint from outputs. C has joined/fenced the tank
+/// stage before the immutable output borrows, even if the FM job is still live.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_mix_tank(
+    out: *const *mut f32,
+    l: *const f32,
+    r: *const f32,
+    duck: *const f32,
+    n: u32,
+) {
+    effects::mix::tank_return(
+        unsafe { mix_buffers(out, n) },
+        unsafe { core::slice::from_raw_parts(l, n as usize) },
+        unsafe { core::slice::from_raw_parts(r, n as usize) },
+        unsafe { core::slice::from_raw_parts(duck, n as usize) },
+    );
+}
+
 /// # Safety
 /// Initialized/aligned scalar packets and two writable n-f32 arrays are
 /// pairwise disjoint, exclusively held by render until return. No retained

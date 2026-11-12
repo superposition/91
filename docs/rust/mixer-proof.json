@@ -1,0 +1,313 @@
+{
+  "ticket": "R12 / #13 outer mixer follow-up",
+  "base_commit": "4bd423b4daaf1848c6396f2950ae4ddb01efecd6",
+  "date": "2026-11-12",
+  "scope": "Outer render mixer arithmetic; C voice generation/parameter application/storage and stage-lifetime plumbing retained",
+  "rust": "1.94.1 (e408947bf 2026-03-25)",
+  "node": "22.14.0",
+  "float_contract": "binary32 operation order; C -O2 -ffp-contract=off; no FMA/libm/allocator in portable core",
+  "native": {
+    "implementations": [
+      "frozen R01 C",
+      "fresh C0",
+      "Rust flags"
+    ],
+    "verified_baseline_source_files": 440,
+    "source_manifest_sha256": "6148afa57b782c81e5a794f0ded441763fe986f35bf275014f304f6da76d88af",
+    "cases": 23,
+    "frames_per_implementation": 12246104,
+    "reports": [
+      {
+        "mode": 0,
+        "frames": 168972,
+        "trace_hash": "b388f362",
+        "peak": 0.870960534
+      },
+      {
+        "mode": 1,
+        "frames": 564151,
+        "trace_hash": "e067f6e5",
+        "peak": 0.363251209
+      },
+      {
+        "mode": 2,
+        "frames": 564151,
+        "trace_hash": "ad9864c5",
+        "peak": 0.382166147
+      },
+      {
+        "mode": 3,
+        "frames": 564151,
+        "trace_hash": "e2a9a5ff",
+        "peak": 0.360722542
+      },
+      {
+        "mode": 4,
+        "frames": 564151,
+        "trace_hash": "82f5bb91",
+        "peak": 0.382166028
+      },
+      {
+        "mode": 5,
+        "frames": 564151,
+        "trace_hash": "d47d3288",
+        "peak": 0.382166624
+      },
+      {
+        "mode": 6,
+        "frames": 564151,
+        "trace_hash": "4fa9b0a2",
+        "peak": 0.382165551
+      },
+      {
+        "mode": 7,
+        "frames": 564151,
+        "trace_hash": "7898f640",
+        "peak": 0.38216579
+      },
+      {
+        "mode": 8,
+        "frames": 564151,
+        "trace_hash": "88620595",
+        "peak": 0.355569363
+      },
+      {
+        "mode": 9,
+        "frames": 564151,
+        "trace_hash": "0112ed0c",
+        "peak": 0.382166862
+      },
+      {
+        "mode": 10,
+        "frames": 564151,
+        "trace_hash": "5f7866c6",
+        "peak": 0.38216579
+      },
+      {
+        "mode": 11,
+        "frames": 564151,
+        "trace_hash": "d2c235f9",
+        "peak": 0.382165909
+      },
+      {
+        "mode": 12,
+        "frames": 564151,
+        "trace_hash": "6aa7d5fa",
+        "peak": 0.382166266
+      },
+      {
+        "mode": 13,
+        "frames": 564151,
+        "trace_hash": "657a6c09",
+        "peak": 0.382166505
+      },
+      {
+        "mode": 14,
+        "frames": 564151,
+        "trace_hash": "90fc2013",
+        "peak": 0.382165909
+      },
+      {
+        "mode": 15,
+        "frames": 564151,
+        "trace_hash": "06092075",
+        "peak": 0.382166266
+      },
+      {
+        "mode": 16,
+        "frames": 564151,
+        "trace_hash": "7975a1dc",
+        "peak": 0.382166386
+      },
+      {
+        "mode": 17,
+        "frames": 564151,
+        "trace_hash": "72291c74",
+        "peak": 0.382166743
+      },
+      {
+        "mode": 18,
+        "frames": 564151,
+        "trace_hash": "00a8e92d",
+        "peak": 0.382165909
+      },
+      {
+        "mode": 19,
+        "frames": 564151,
+        "trace_hash": "08796b86",
+        "peak": 0.382165909
+      },
+      {
+        "mode": 20,
+        "frames": 564151,
+        "trace_hash": "d5b59cf1",
+        "peak": 0.382166028
+      },
+      {
+        "mode": 30,
+        "frames": 397056,
+        "trace_hash": "03e7f876",
+        "peak": 0.0571992174
+      },
+      {
+        "mode": 31,
+        "frames": 397056,
+        "trace_hash": "2cd4e83a",
+        "peak": 0
+      }
+    ],
+    "comparison": "PCM, fixed USB, scalar state, periodic full ring payloads and RNG; all existing fingerprints unchanged"
+  },
+  "portable": {
+    "workspace_tests_passed": 42,
+    "new_mixer_tests": 4,
+    "fmt": "pass",
+    "clippy_all_targets": "pass",
+    "no_std_wasm_check": "pass"
+  },
+  "workers": {
+    "implementations": [
+      "frozen R01 C",
+      "fresh C0",
+      "Rust flags"
+    ],
+    "cases": 48,
+    "frames_per_case": 232050,
+    "frames_per_implementation": 11138400,
+    "predelay_settings": [
+      0,
+      100
+    ],
+    "predelay_spacings": [
+      256,
+      1322
+    ],
+    "reverb_types": [
+      0,
+      1,
+      2
+    ],
+    "work_placements": [
+      1,
+      2
+    ],
+    "echo_and_size": 100,
+    "modes": [
+      "serial",
+      "deferred",
+      "pthread",
+      "busy/refused"
+    ],
+    "comparison": "full PCM bytes plus output checksums",
+    "results": [
+      "predelay=0 type=0 balance=1 serial d93ef055",
+      "predelay=0 type=0 balance=1 deferred d93ef055",
+      "predelay=0 type=0 balance=1 thread d93ef055",
+      "predelay=0 type=0 balance=1 mixed d93ef055",
+      "predelay=0 type=0 balance=2 serial d93ef055",
+      "predelay=0 type=0 balance=2 deferred d93ef055",
+      "predelay=0 type=0 balance=2 thread d93ef055",
+      "predelay=0 type=0 balance=2 mixed d93ef055",
+      "predelay=0 type=1 balance=1 serial 6ac68abe",
+      "predelay=0 type=1 balance=1 deferred 6ac68abe",
+      "predelay=0 type=1 balance=1 thread 6ac68abe",
+      "predelay=0 type=1 balance=1 mixed 6ac68abe",
+      "predelay=0 type=1 balance=2 serial 6ac68abe",
+      "predelay=0 type=1 balance=2 deferred 6ac68abe",
+      "predelay=0 type=1 balance=2 thread 6ac68abe",
+      "predelay=0 type=1 balance=2 mixed 6ac68abe",
+      "predelay=0 type=2 balance=1 serial e15e477b",
+      "predelay=0 type=2 balance=1 deferred e15e477b",
+      "predelay=0 type=2 balance=1 thread e15e477b",
+      "predelay=0 type=2 balance=1 mixed e15e477b",
+      "predelay=0 type=2 balance=2 serial e15e477b",
+      "predelay=0 type=2 balance=2 deferred e15e477b",
+      "predelay=0 type=2 balance=2 thread e15e477b",
+      "predelay=0 type=2 balance=2 mixed e15e477b",
+      "predelay=100 type=0 balance=1 serial f82821e2",
+      "predelay=100 type=0 balance=1 deferred f82821e2",
+      "predelay=100 type=0 balance=1 thread f82821e2",
+      "predelay=100 type=0 balance=1 mixed f82821e2",
+      "predelay=100 type=0 balance=2 serial f82821e2",
+      "predelay=100 type=0 balance=2 deferred f82821e2",
+      "predelay=100 type=0 balance=2 thread f82821e2",
+      "predelay=100 type=0 balance=2 mixed f82821e2",
+      "predelay=100 type=1 balance=1 serial e296d9b4",
+      "predelay=100 type=1 balance=1 deferred e296d9b4",
+      "predelay=100 type=1 balance=1 thread e296d9b4",
+      "predelay=100 type=1 balance=1 mixed e296d9b4",
+      "predelay=100 type=1 balance=2 serial e296d9b4",
+      "predelay=100 type=1 balance=2 deferred e296d9b4",
+      "predelay=100 type=1 balance=2 thread e296d9b4",
+      "predelay=100 type=1 balance=2 mixed e296d9b4",
+      "predelay=100 type=2 balance=1 serial de110743",
+      "predelay=100 type=2 balance=1 deferred de110743",
+      "predelay=100 type=2 balance=1 thread de110743",
+      "predelay=100 type=2 balance=1 mixed de110743",
+      "predelay=100 type=2 balance=2 serial de110743",
+      "predelay=100 type=2 balance=2 deferred de110743",
+      "predelay=100 type=2 balance=2 thread de110743",
+      "predelay=100 type=2 balance=2 mixed de110743"
+    ],
+    "physical_retirement_qualification": false
+  },
+  "wasm": {
+    "c0_bytes": 1940097,
+    "rust_bytes": 2462323,
+    "rust_delta_from_FX_checkpoint_bytes": 6072,
+    "c0_sha256": "88ca2f67bb7630c728d0fca51791e6bcb7b09d2f3bcedd2dcd8cee60a6a5f4f9",
+    "rust_sha256": "c028a264fd15cbc1371eac5c01bdbeae90cba96f94537fa5415eab85fa7226b1",
+    "exports": 24,
+    "initial_and_final_memory_bytes": 33554432,
+    "full_suite_pcm_values": 40058180,
+    "http_extra_pcm_values": 1048576,
+    "factory_fingerprint": "baeff971",
+    "saved_v1_fingerprint": "28722449",
+    "panel_effects": {
+      "scenario": "panel-effects-banks-release-tails",
+      "compared_samples": 2769480,
+      "render_calls": 5160,
+      "peak": 0.4538612365722656,
+      "pcm_hash": "fd659ab9",
+      "effects": {
+        "master_samples": 1384960,
+        "echo_samples": 1384960,
+        "tank_samples": 1384960,
+        "colour_sample_calls": 4154880
+      },
+      "memory_bytes": 33554432
+    },
+    "independent_frozen_R01_wasm_sha256": "a3d08947713bda76b64f76ed39b55aa26bdd182a65bf88fbd1efe0cbc12f8036",
+    "independent_panel_audio": "same fd659ab9 / 2769480 values / peak0.4538612365722656",
+    "manual_browser_or_device_qa_claimed": false
+  },
+  "data_and_cost": {
+    "new_audio_payload_buffers": 0,
+    "new_mutable_delay_bytes": 0,
+    "existing_delay_payload_bytes": 233004,
+    "new_stats_flags_exports": 0,
+    "merge_packet_bytes": 32,
+    "echo_send_packet_bytes": 28,
+    "echo_state_config_capture_and_state_copyback_before": "160 bytes per sample",
+    "echo_state_config_capture_and_state_copyback_after": "160 bytes per block",
+    "tank_return_extra_working_write_bytes_per_frame": 8,
+    "traffic_and_target_stack_measured": false,
+    "scratch_reuse": "consumed rsend floats hold predelay inputs until ordered C push commits",
+    "pad_borrow": "exact old contiguous read span, split at wrap; never full shared ring",
+    "predelay_borrow": "none; worker read and foreground write spans disjoint by retained spacing"
+  },
+  "remaining_C": [
+    "intrinsic voice-kernel output/filter/ramp/pan/send math in pad_bus/render_fm/render_cm/render_dj/render_hat/render_clap/render_snare/render_perc/render_drums (#11/#12)",
+    "parameter application supplying raw source settings/scalars",
+    "buffer copies/clears and pad_publish",
+    "shared predelay push quantization/write and ring indices",
+    "render traversal, stage submission/join/fencing, retirement/reset orchestration"
+  ],
+  "remaining_physical": [
+    "PI32 link/map and pool reserve",
+    "absence of soft-double routines",
+    "interrupt stack and cycles/deadlines",
+    "worker exclusion/retirement",
+    "physical output qualification"
+  ]
+}

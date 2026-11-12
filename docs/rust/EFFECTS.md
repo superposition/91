@@ -1,5 +1,9 @@
 # R12 effects and master-bus checkpoint
 
+The subsequent [outer mixer follow-up](MIXER.md) moves the mapped outer C mixer
+arithmetic below and records its separate final artifact and worker evidence.
+This file preserves the earlier FX checkpoint's scope and measurements.
+
 This checkpoint enables allocator-free Rust effect/control kernels in the real
 emulator render path. It preserves the C fallback and the existing delay storage.
 It does **not** finish the whole mixer or qualify PI32 firmware. Issue #13 stays

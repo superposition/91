@@ -82,3 +82,14 @@ typedef struct {float gain,lowpass,hiss,pop,amplitude,gain0,gain1,inverse;uint32
 _Static_assert(sizeof(fm1_fx_vinyl_t)==124 && sizeof(fm1_fx_vinyl_config_t)==40,"Rust vinyl ABI");
 _Static_assert(sizeof(fm1_fx_rv_settings_t)==20 && sizeof(fm1_fx_duck_t)==8 && sizeof(fm1_fx_duck_config_t)==36 && sizeof(fm1_fx_crush_t)==12,"Rust FX scalar layout");
 extern void fm1_rust_fx_vinyl(fm1_fx_vinyl_t *,const fm1_fx_vinyl_config_t *,float *,float *,uint32_t);
+typedef struct {float first[3],second[3];uint32_t first_bus,second_bus;} fm1_mix_merge_t;
+typedef struct {float reverb_gain,echo_gain,reverb_send,throw_,track_mix;int32_t track_send;float wash;} fm1_mix_echo_sends_t;
+_Static_assert(sizeof(fm1_mix_merge_t)==32 && sizeof(fm1_mix_echo_sends_t)==28,"Rust mixer scalar ABI");
+extern void fm1_rust_mix_route_plain(float *const *,uint32_t);
+extern void fm1_rust_mix_route_drums(float *const *,const float *,const float *,uint32_t);
+extern void fm1_rust_mix_pad_fm(const fm1_mix_merge_t *,float *const *,const float *const *,uint32_t);
+extern void fm1_rust_mix_bass_acid(const fm1_mix_merge_t *,float *const *,const float *const *,uint32_t);
+extern float fm1_rust_mix_reverb_gain(float,float,float,float);
+extern float fm1_rust_mix_duck_depth(float,float,float);
+extern void fm1_rust_mix_echo_block(fm1_fx_echo_t *,const fm1_fx_echo_config_t *,int16_t *,int16_t *,const fm1_mix_echo_sends_t *,float *const *,float *,uint32_t);
+extern void fm1_rust_mix_tank(float *const *,const float *,const float *,const float *,uint32_t);
