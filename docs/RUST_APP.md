@@ -1,8 +1,10 @@
 # UI and graphics port
 
 The first `EN_RUST_APP` checkpoint replaces the production strip renderer with
-`fm1-app::graphics`. It does **not** complete issue #15: the page controller,
-input policy, visualizer state and Kick Runner remain C at this checkpoint.
+`fm1-app::graphics`. The subsequent Kick Runner slice ports its fixed state,
+decisions and drawing composition as documented in `rust/KICK_RUNNER.md`.
+The page controller, shared input bookkeeping and visualizers still keep
+issue #15 open.
 
 `fm1-app` is `no_std`, forbids unsafe code and depends on `fm1-types`,
 `fm1-formats` and `fm1-engine`. The engine does not depend on the application.
@@ -20,8 +22,8 @@ borrows the existing strip for one call. It clips rectangles/pixels, bounds
 line work, validates glyph spans, keeps byte-oriented font substitution and
 preserves swapped RGB565 blending, scanlines and draw order. Text is bounded
 to 256 bytes; normal UI strings fit this bound. A separate small text writer
-provides NUL termination and manual integer output for subsequent UI work.
-The controller has not adopted that writer yet.
+provides NUL termination and manual integer output, now used by the game.
+The page controller has not adopted that writer yet.
 
 The bridge never calls application or platform callbacks and retains no
 borrow. It initializes only the active strip through `MaybeUninit` before
@@ -59,8 +61,8 @@ stored in safe application state. MCU code size, stack and final memory maps
 require the generated-C target qualification; WASM sizes are not MCU estimates.
 
 The instrument keeps its 24 public WASM exports and 32 MiB memory. Stats 80
-and 81 show real instrument canvas calls/pixel writes, 82 is reserved for
-subsequent action dispatch and 83 counts rejected calls. Diagnostics stay out
+and 81 show real instrument canvas calls/pixel writes, 82 counts game
+policy/draw calls and 83 counts rejected calls. Diagnostics stay out
 of the player-facing UI.
 
 ## Independent proof
@@ -104,7 +106,7 @@ artifacts.
 | Buttons, keys, encoders and LEDs | C policy | Bounded actions; preserve cadence and held/tapped edges |
 | Themes/help/layout widgets | C composition | Bounded text and same primitive order |
 | Visualizers | C state and algorithms | Reuse existing 7,200-byte union; no extra feedback canvas |
-| Kick Runner | C state, policy and drawing | Fixed 16 rows; snapshot inputs and deferred effects |
+| Kick Runner | Rust state, policy and drawing | Fixed 16 rows; snapshot inputs and deferred effects |
 | Settings/session persistence | Qualified Rust policy from #7 | Preserve its saved bytes and scratch lifetime |
 
 Full UI effects must be dispatched only after mutable UI/project borrows end.

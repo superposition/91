@@ -9,9 +9,16 @@ pub fn stat(index: u32) -> u32 {
         .get(index.wrapping_sub(80) as usize)
         .map_or(0, |c| c.load(Ordering::Relaxed))
 }
-fn reject() -> i32 {
+pub(crate) fn reject() -> i32 {
     COUNTS[3].fetch_add(1, Ordering::Relaxed);
     -1
+}
+pub(crate) fn game_call() {
+    COUNTS[2].fetch_add(1, Ordering::Relaxed);
+}
+pub(crate) fn frame_writes(writes: u32) {
+    COUNTS[0].fetch_add(1, Ordering::Relaxed);
+    COUNTS[1].fetch_add(writes, Ordering::Relaxed);
 }
 #[repr(C)]
 pub struct RawFont {
@@ -25,7 +32,7 @@ pub struct RawFont {
     data: *const u8,
     length: u32,
 }
-unsafe fn font<'a>(raw: *const RawFont) -> Result<Font<'a>, ()> {
+pub(crate) unsafe fn font<'a>(raw: *const RawFont) -> Result<Font<'a>, ()> {
     if raw.is_null() {
         return Err(());
     }
