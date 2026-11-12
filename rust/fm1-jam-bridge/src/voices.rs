@@ -1,8 +1,251 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! Scoped voice-owner borrows; no pointer/callback/state copy survives a block.
-use core::sync::atomic::{AtomicU32, Ordering};
 use fm1_engine::voices::{self, Drum, DrumsConfig, Mix, Pluck, PluckConfig};
+use fm1_rt::atomic::{AtomicU32, Ordering};
 static COUNTERS: [AtomicU32; 8] = [const { AtomicU32::new(0) }; 8];
+pub(super) fn config_count() {
+    COUNTERS[7].fetch_add(1, Ordering::Relaxed);
+}
+use voices::setup;
+/// # Safety
+/// Four initialized/aligned pad states are exclusively writable. No reentry.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_voice_pad_handoff(s: *mut voices::pad::State, osc: u32) {
+    setup::pad_handoff(
+        unsafe { &mut *s.cast::<[voices::pad::State; 4]>() },
+        osc as u8,
+    );
+}
+/// # Safety
+/// Four initialized pad states and count<=4 pitch classes are aligned, live,
+/// disjoint. Only pads are written, with exclusive access. Nothing escapes.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_voice_pad_leave(
+    s: *mut voices::pad::State,
+    pcs: *const i32,
+    count: u32,
+) {
+    setup::pad_leave(
+        unsafe { &mut *s.cast::<[voices::pad::State; 4]>() },
+        unsafe { core::slice::from_raw_parts(pcs, count as usize) },
+    );
+}
+/// # Safety
+/// Four initialized pad states and output are aligned/disjoint/exclusively
+/// writable. MIDI dispatch occurs after return; no callback crosses a borrow.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_voice_stab(
+    s: *mut voices::pad::State,
+    osc: u32,
+    level: f32,
+    release: i32,
+    out: *mut setup::Events,
+) -> f32 {
+    let (decay, events) = setup::stab(
+        unsafe { &mut *s.cast::<[voices::pad::State; 4]>() },
+        osc as u8,
+        level,
+        release,
+    );
+    unsafe { out.write(events) };
+    decay
+}
+/// # Safety
+/// Initialized/aligned voice and output are disjoint and exclusively writable.
+/// MIDI dispatch occurs after return; no callback crosses a borrow.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_voice_bass_to(
+    s: *mut voices::drone::State,
+    pc: i32,
+    octave: i32,
+    line: u32,
+    playing: u32,
+    out: *mut setup::Events,
+) {
+    unsafe { out.write(setup::bass_to(&mut *s, pc, octave, line != 0, playing != 0)) };
+}
+/// # Safety
+/// Initialized/aligned voice, line and output are disjoint and exclusively
+/// writable. No callback/reference/pointer survives return.
+#[no_mangle]
+#[allow(clippy::too_many_arguments)]
+pub unsafe extern "C" fn fm1_rust_voice_bass_note(
+    s: *mut voices::drone::State,
+    line: *mut voices::drone::Line,
+    note: i32,
+    flags: i32,
+    glide: i32,
+    length: i32,
+    step: f32,
+    out: *mut setup::Events,
+) -> u32 {
+    let (slide, events) = setup::bass_note(
+        unsafe { &mut *s },
+        unsafe { &mut *line },
+        note,
+        flags,
+        glide,
+        length,
+        step,
+    );
+    unsafe { out.write(events) };
+    slide as u32
+}
+#[repr(C)]
+pub struct KeyResult {
+    pub held: u8,
+    pub glow: u8,
+    pub padding: [u8; 2],
+    pub events: setup::Events,
+}
+const _: [(); 44] = [(); core::mem::size_of::<setup::KeyConfig>()];
+const _: [(); 104] = [(); core::mem::size_of::<KeyResult>()];
+const _: [(); 20] = [(); core::mem::size_of::<setup::DrumConfig>()];
+const _: [(); 36] = [(); core::mem::size_of::<setup::AcidConfig>()];
+/// # Safety
+/// Four pads, drone, acid,24held bytes,3counts, sequence, config and output are
+/// initialized/aligned and pairwise disjoint. All mutable regions are owned by
+/// the serialized audio command handler. Config voice0..2/counts0..8 and C0
+/// allocator order limits were validated by the caller. MIDI/FM dispatch occurs
+/// after return. No pointer/reference/callback survives the call.
+#[no_mangle]
+#[allow(clippy::too_many_arguments)]
+pub unsafe extern "C" fn fm1_rust_voice_key(
+    pads: *mut voices::pad::State,
+    bass: *mut voices::drone::State,
+    acid: *mut voices::acid::State,
+    held: *mut u8,
+    counts: *mut u8,
+    seq: *mut u32,
+    c: *const setup::KeyConfig,
+    out: *mut KeyResult,
+) {
+    let (held, glow, events) = setup::key(
+        unsafe { &mut *pads.cast::<[voices::pad::State; 4]>() },
+        unsafe { &mut *bass },
+        unsafe { &mut *acid },
+        unsafe { &mut *held.cast::<[[u8; 8]; 3]>() },
+        unsafe { &mut *counts.cast::<[u8; 3]>() },
+        unsafe { &mut *seq },
+        unsafe { &*c },
+    );
+    unsafe {
+        out.write(KeyResult {
+            held,
+            glow: glow as u8,
+            padding: [0; 2],
+            events,
+        })
+    };
+}
+/// # Safety
+/// Initialized/aligned pads, drone, acid, six drums and3counts are disjoint and
+/// exclusively writable by the serialized audio command handler. No callback.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_voice_quiet(
+    pads: *mut voices::pad::State,
+    bass: *mut voices::drone::State,
+    acid: *mut voices::acid::State,
+    drums: *mut Drum,
+    counts: *mut u8,
+) {
+    setup::quiet(
+        unsafe { &mut *pads.cast::<[voices::pad::State; 4]>() },
+        unsafe { &mut *bass },
+        unsafe { &mut *acid },
+        unsafe { &mut *drums.cast::<[Drum; 6]>() },
+        unsafe { &mut *counts.cast::<[u8; 3]>() },
+    );
+}
+const _: [(); 100] = [(); core::mem::size_of::<setup::Events>()];
+#[no_mangle]
+pub extern "C" fn fm1_rust_voice_time(kind: u32, value: i32) -> f32 {
+    setup::time(kind, value)
+}
+/// # Safety
+/// Ten initialized motion states and seed are aligned, disjoint, exclusively
+/// writable for this serialized call. No references or callback escape.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_voice_motion(s: *mut setup::Motion, n: u32, seed: *mut u32) {
+    let mut rng = fm1_engine::sequencer::Rng(unsafe { seed.read() });
+    setup::motion(
+        unsafe { &mut *s.cast::<[setup::Motion; 10]>() },
+        n,
+        &mut rng,
+    );
+    unsafe { seed.write(rng.0) };
+    COUNTERS[5].fetch_add(1, Ordering::Relaxed);
+}
+/// # Safety
+/// State and seed are initialized, aligned, disjoint and exclusively writable.
+/// step is the engine's finite positive sixteenth duration; no reentry occurs.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_voice_lfo(
+    s: *mut setup::Lfo,
+    rate: i32,
+    shape: i32,
+    n: f32,
+    step: f32,
+    seed: *mut u32,
+) {
+    let mut rng = fm1_engine::sequencer::Rng(unsafe { seed.read() });
+    setup::lfo(unsafe { &mut *s }, rate, shape, n, step, &mut rng);
+    unsafe { seed.write(rng.0) };
+}
+/// # Safety
+/// The initialized/aligned drone is exclusively writable until return.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_voice_envelope(
+    s: *mut voices::drone::State,
+    n: u32,
+    attack: i32,
+    decay: i32,
+) {
+    setup::drone_envelope(unsafe { &mut *s }, n, attack, decay);
+}
+/// # Safety
+/// Six initialized drum states, config, pointer array and four immutable kit
+/// rows are aligned/live and disjoint. The drum bank is exclusively writable;
+/// lane is validated0..5. No pointer/reference/callback escapes.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_voice_drum_setup(
+    s: *mut Drum,
+    lane: u32,
+    c: *const setup::DrumConfig,
+    kits: *const *const voices::data::Kit,
+) {
+    let p = unsafe { &*kits.cast::<[*const voices::data::Kit; 4]>() };
+    setup::drum(
+        unsafe { &mut *s.cast::<[Drum; 6]>() },
+        lane as usize,
+        unsafe { &*c },
+        p.map(|v| unsafe { &*v }),
+    );
+}
+/// # Safety
+/// The initialized/aligned pluck state is exclusively writable until return.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_voice_pluck_setup(
+    s: *mut Pluck,
+    note: i32,
+    vel: f32,
+    decay: f32,
+    tuning: f32,
+) {
+    setup::pluck(unsafe { &mut *s }, note, vel, decay, tuning);
+}
+/// # Safety
+/// Initialized state/config and writable result are aligned/disjoint. State
+/// and result are exclusively writable. Bounded MIDI is dispatched by C only
+/// after return, so no callback crosses the mutable voice borrow.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_voice_acid_setup(
+    s: *mut voices::acid::State,
+    c: *const setup::AcidConfig,
+    result: *mut setup::Events,
+) {
+    unsafe { result.write(setup::acid(&mut *s, &*c)) };
+}
 const _: [(); 148] = [(); core::mem::size_of::<voices::pad::State>()];
 const _: [(); 24] = [(); core::mem::size_of::<voices::pad::Runtime>()];
 const _: [(); 164] = [(); core::mem::size_of::<voices::pad::Config>()];

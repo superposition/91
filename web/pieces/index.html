@@ -652,8 +652,7 @@ const fileOf = (x) => (x.kind === "set" ? pcSetEncode(x) : pcEncode(x));
 function zipOf(files) {
   const enc = new TextEncoder(), parts = [], dir = [];
   let off = 0;
-  const crcT = new Uint32Array(256).map((_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
-  const crc = (u8) => { let c = 0xFFFFFFFF; for (const b of u8) c = crcT[(c ^ b) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+  const crc = pcHash;
   const hdr = (n) => { const b = new Uint8Array(n); return [b, new DataView(b.buffer)]; };
   const seen = new Set();
   for (const f of files) {

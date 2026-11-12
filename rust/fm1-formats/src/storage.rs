@@ -251,6 +251,23 @@ impl<'a> Bank<'a> {
     pub fn bytes(self) -> &'a [u8] {
         self.bytes
     }
+    pub fn modern(self) -> bool {
+        self.legacy_count.is_none()
+    }
+    pub fn genre(self) -> u8 {
+        if self.modern() {
+            self.bytes[5]
+        } else {
+            0
+        }
+    }
+    pub fn encoding_flags(self) -> Option<[u8; 4]> {
+        if self.modern() {
+            Some(self.bytes[12..16].try_into().unwrap())
+        } else {
+            None
+        }
+    }
     pub fn parameter_count(self) -> u16 {
         self.legacy_count
             .map_or_else(|| read_u16(self.bytes, 6).unwrap(), |n| n as u16)
@@ -347,7 +364,7 @@ pub fn restore_valid(object: u32, bytes: &[u8], limits: RestoreLimits) -> bool {
     }
 }
 pub fn midi_map_valid(bytes: &[u8]) -> bool {
-    if bytes.len() != 152 || (&bytes[..4] != b"MAP1" && &bytes[..4] != b"MAP2") || bytes[4] > 48 {
+    if MidiMap::parse_compatible(bytes).is_err() {
         return false;
     }
     for e in bytes[8..8 + bytes[4] as usize * 3].chunks_exact(3) {
@@ -364,6 +381,51 @@ pub fn midi_map_valid(bytes: &[u8]) -> bool {
         }
     }
     true
+}
+
+#[derive(Clone, Copy)]
+pub struct MidiMap<'a>(&'a [u8]);
+impl<'a> MidiMap<'a> {
+    pub fn parse_compatible(bytes: &'a [u8]) -> Result<Self, CodecError> {
+        if bytes.len() != 152 {
+            return Err(CodecError::Length);
+        }
+        if &bytes[..4] != b"MAP1" && &bytes[..4] != b"MAP2" {
+            return Err(CodecError::Magic);
+        }
+        if bytes[4] > 48 {
+            return Err(CodecError::Index);
+        }
+        Ok(Self(bytes))
+    }
+    pub fn parse(bytes: &'a [u8]) -> Result<Self, CodecError> {
+        let view = Self::parse_compatible(bytes)?;
+        if !midi_map_valid(bytes) {
+            return Err(CodecError::Range);
+        }
+        Ok(view)
+    }
+    pub fn bytes(self) -> &'a [u8] {
+        self.0
+    }
+    pub fn len(self) -> usize {
+        self.0[4] as usize
+    }
+    pub fn is_empty(self) -> bool {
+        self.len() == 0
+    }
+    pub fn version(self) -> u8 {
+        self.0[3] - b'0'
+    }
+    pub fn reserved(self) -> [u8; 3] {
+        self.0[5..8].try_into().unwrap()
+    }
+    pub fn entry(self, index: usize) -> Result<[u8; 3], CodecError> {
+        if index >= self.len() {
+            return Err(CodecError::Index);
+        }
+        Ok(self.0[8 + index * 3..11 + index * 3].try_into().unwrap())
+    }
 }
 
 #[derive(Clone, Copy)]

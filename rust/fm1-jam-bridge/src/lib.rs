@@ -4,10 +4,10 @@
 //! application and render owner have migrated to Rust.
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use core::sync::atomic::{AtomicU32, Ordering};
 use fm1_engine::planner::{bass_event, plan_into, Phrase, Seed, Settings};
 use fm1_formats::jam::JamPack;
 use fm1_formats::session::JamSession;
+use fm1_rt::atomic::{AtomicU32, Ordering};
 mod commands;
 mod effects;
 mod factory;
@@ -15,9 +15,12 @@ mod fm6;
 mod formats;
 mod handoff;
 mod melodic;
+mod object_formats;
 mod sequencer;
 mod transport;
+mod voice_config;
 mod voices;
+mod wire_formats;
 mod worker;
 
 static VALIDATIONS: AtomicU32 = AtomicU32::new(0);
@@ -422,3 +425,5 @@ mod tests {
         }
     }
 }
+
+mod voice_data;

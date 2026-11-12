@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! Generation-checked job dispatch and stage publication for existing C DSP.
-use core::sync::atomic::{AtomicU32, Ordering};
+use fm1_rt::atomic::{AtomicU32, Ordering};
 use fm1_rt::job::{Generation, JobMailbox, Phase, Stage};
 #[repr(C)]
 #[derive(Clone, Copy)]

@@ -1,0 +1,151 @@
+{
+  "scope": "Physical cross-core Rust atomic ABI probe; original instrument application remains C",
+  "date": "2026-11-12",
+  "identity": "FM-1_7000303",
+  "backend_source": "fb29ca2; initial hardware-testset/ICFG/csync backend before stopped-owner recovery work",
+  "image_bytes": 512488,
+  "ordinary_ram_bytes": 97396,
+  "pool_bytes": 339420,
+  "recovery_stub_padded_sha256": "baee55ed142fe1cc336099902fa544d8844ba72182abf669f15cc78fc6bee87c",
+  "probe": {
+    "operations": 1,
+    "count": 32768,
+    "expected": 32768,
+    "submitted": 64,
+    "joined": 64,
+    "mismatches": 0,
+    "main_flags_before": 33883904,
+    "main_flags_after": 33883904,
+    "worker_flags_before": 1280,
+    "worker_flags_after": 1280,
+    "elapsed_us": 6490,
+    "max_main_batch_us": 103,
+    "worker_online": 1,
+    "lock_after": 0,
+    "worker_flags_preserved": 64,
+    "reserved": 0,
+    "checks": {
+      "all_operations": true,
+      "counter_exact": true,
+      "real_two_core_jobs": true,
+      "every_batch_exact": true,
+      "main_irq_state_preserved": true,
+      "worker_irq_state_preserved": true,
+      "lock_released": true,
+      "bounded_measured_batches": true
+    }
+  },
+  "capture": {
+    "before": {
+      "on": 1,
+      "bars": 8,
+      "bar": 1,
+      "beat": 4,
+      "hold": 0,
+      "pending": 0,
+      "slot": 2,
+      "crc32": "28246895",
+      "revision": 1,
+      "xruns": 0,
+      "key": 6,
+      "minor": 1,
+      "form": 0,
+      "movement": 3,
+      "energy": 60,
+      "playing": 1
+    },
+    "after": {
+      "on": 1,
+      "bars": 8,
+      "bar": 5,
+      "beat": 21,
+      "hold": 0,
+      "pending": 0,
+      "slot": 2,
+      "crc32": "28246895",
+      "revision": 1,
+      "xruns": 0,
+      "key": 6,
+      "minor": 1,
+      "form": 0,
+      "movement": 3,
+      "energy": 60,
+      "playing": 1
+    },
+    "seconds": 30.06,
+    "audio_device": 24,
+    "peak": 4662,
+    "rms": 891.1041536535774,
+    "capture_flags": [],
+    "telemetry_frames": 124,
+    "deltas": {
+      "xruns": 0,
+      "late": 0,
+      "crashes": 0
+    },
+    "render_max_us": 11159,
+    "budget_us": 11609,
+    "cpu_max": 79,
+    "shed": 0,
+    "main_stack": 6176,
+    "irq_stack": 2184
+  },
+  "saved_objects": {
+    "count": 30,
+    "bytes": 8077,
+    "byte_exact_after": true
+  },
+  "artifacts": [
+    {
+      "path": "proof-atomic-instrument/source/build/amb.bin",
+      "bytes": 512488,
+      "sha256": "276508c53d4b38c5c31826bfce6aadb001b46ea04bc53febf03ec68174e98696"
+    },
+    {
+      "path": "proof-atomic-instrument/source/build/amb.elf",
+      "bytes": 574500,
+      "sha256": "60541ed6025fec9f56b05d67ba5865ae4eb5304dd90363b42896ac2cfd5ddcc7"
+    },
+    {
+      "path": "proof-atomic-instrument/source/build/naiwan91-0.3.3.fwsc",
+      "bytes": 611251,
+      "sha256": "a6004e3acb7e1ffbd5f5b40d6f18c64afdfc1ac8fa0f4732374af0d72401d2a1"
+    },
+    {
+      "path": "proof-atomic-instrument/source/firmware/hal/fm1_rust_atomic.h",
+      "bytes": 1411,
+      "sha256": "035eab92304153a98d506c9f677c8a9d92cff5b219853c53cb657f27b7e71c6f"
+    },
+    {
+      "path": "proof-atomic-instrument/source/firmware/src/main.c",
+      "bytes": 9787,
+      "sha256": "d178b4f7fe3bac3f63dc60c5e0c4a10e80238cd823b51a1e0787782866b411e9"
+    },
+    {
+      "path": "proof-atomic-instrument/build.log",
+      "bytes": 1142,
+      "sha256": "208da2ce3024d276938a58459eaab95e75290c8ccaa133344c488d610a120725"
+    },
+    {
+      "path": "goal-hardware-proof-20261112/atomic-probe.json",
+      "bytes": 660,
+      "sha256": "de45a4e22725796d4e2e16e452c3ed61fb766ad445f1ac5b4b3a186641a175b3"
+    },
+    {
+      "path": "goal-hardware-proof-20261112/atomic-capture/report.json",
+      "bytes": 948,
+      "sha256": "78a2e45b7d8eb19b76457903cbc03033684d8703b747abbd6335475f9bbd360e"
+    },
+    {
+      "path": "goal-hardware-proof-20261112/atomic-capture/device.wav",
+      "bytes": 5302628,
+      "sha256": "f70a78424e8b6c56e580a553e660b143ec540e390a8eb81832fdc0ac452c40dc"
+    },
+    {
+      "path": "goal-hardware-proof-20261112/atomic-stores-verification.log",
+      "bytes": 66,
+      "sha256": "729938ad3615ffc915033bc20987810c663380818a9232eb45b2752f4c3565bc"
+    }
+  ],
+  "remaining": "Stopped-owner recovery/fail-stop semantics, full-engine hardware resource/stack/deadline/output qualification; prototype stays behind an explicit MCU feature."
+}

@@ -2,8 +2,11 @@
 //! Fixed voice state and block-scoped sample kernels over caller-owned buffers.
 use crate::effects::math::{flush, max, min, tanh};
 pub mod acid;
+pub mod config;
+pub mod data;
 pub mod drone;
 pub mod pad;
+pub mod setup;
 
 pub fn blep_saw(t: f32, dt: f32) -> f32 {
     let mut y = 2.0 * t - 1.0;

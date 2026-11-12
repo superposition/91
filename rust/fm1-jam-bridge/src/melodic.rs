@@ -3,13 +3,13 @@
 //! initialized unless documented as output; distinct arguments do not alias.
 //! C owns its source for the call and no pointer or callback borrow survives.
 #![allow(clippy::too_many_arguments)]
-use core::sync::atomic::{AtomicU32, Ordering};
 use fm1_engine::melodic::{
     self, Acid, AcidConfig, AcidNote, Bass, BassConfig, BassNote, Harmony, Pluck, PluckConfig,
     PluckNote,
 };
 use fm1_engine::scheduling_tables::{self, Section};
 use fm1_engine::sequencer::Rng;
+use fm1_rt::atomic::{AtomicU32, Ordering};
 #[no_mangle]
 pub static FM1_RUST_SECTIONS: [Section; 19] = scheduling_tables::SECTIONS;
 #[no_mangle]

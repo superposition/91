@@ -51,7 +51,7 @@ if product != expected_product:
     sys.exit(f"{pkg}: package identity {product!r} does not match release {ver} ({expected_product})")
 if b"FELUCCA-LOADER-1" not in raw:
     sys.exit(f"{pkg}: no update loader in it")
-for required in ("build/params.json", "build/emu/amb.wasm", "build/emu/index.html", "build/emu/worklet.js", "build/emu/src/app.mjs", "docs/manual.html"):
+for required in ("build/params.json", "build/emu/amb.wasm", "build/emu/index.html", "build/emu/worklet.js", "build/emu/src/app.mjs", "build/codecs/manifest.json", "build/codecs/fm1-codecs.wasm", "docs/manual.html"):
     if not (SRC / required).is_file():
         sys.exit(f"missing site input: {required}; build the browser bundle and parameter/manual data first")
 try:

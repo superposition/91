@@ -1,0 +1,15 @@
+[package]
+name = "fm1-codecs-wasm"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+fm1-formats.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true

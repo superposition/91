@@ -2,8 +2,8 @@
 //! One immutable job, three released output stages, and explicit retirement.
 //! This owns descriptor publication. External DSP buffers remain subject to the
 //! bridge's span/stop contracts; a timeout alone never releases those buffers.
+use crate::atomic::{AtomicU32, Ordering};
 use core::cell::UnsafeCell;
-use core::sync::atomic::{AtomicU32, Ordering};
 
 const IDLE: u32 = 0;
 const READY: u32 = 1;

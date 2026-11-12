@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #pragma once
 #include <stdint.h>
+#include "rust_voice_data.h"
 typedef struct {float ph,inc,inc_end,amp,adec,idx,x1,x2,att,mph[4],pend,t,hp,ph2,inc2;int32_t wait,wait2;float pend2;int32_t rgap;float rmul,xl,fo;uint8_t rn,on,note;} fm1_voice_drum_t;
 typedef struct {float gains[6],hat_inc[4],drive,drop,click,rumble,sn_body,sn_noise,cl_gap,h_noise,gains0[4],gains1[4],inverse;} fm1_voice_drums_config_t;
 typedef struct {float ph,ps,inc,env,dm,vel;uint32_t age;} fm1_voice_pluck_t;
@@ -30,3 +31,29 @@ typedef void (*fm1_voice_pad_midi_fn)(uint32_t,uint32_t,uint32_t);
 extern void fm1_rust_voice_pad(fm1_voice_pad_t *,fm1_voice_pad_runtime_t *,const fm1_voice_pad_config_t *,uint32_t *,const float *,float *,float *,fm1_voice_pad_publication_t *,uint32_t,fm1_voice_pad_midi_fn);
 extern void fm1_rust_voice_pad_breathe(fm1_voice_pad_t *,const fm1_voice_pad_breath_t *,float,uint32_t *,fm1_voice_pad_midi_fn);
 extern void fm1_rust_voice_pad_bus(float *,const fm1_voice_pad_bus_t *,float *const *,float *,uint32_t);
+typedef struct {float v,tgt,rate;uint32_t left;} fm1_voice_motion_t;
+typedef struct {float ph,v,a,b;} fm1_voice_lfo_t;
+typedef struct {uint32_t status,note,velocity;} fm1_voice_midi_t;
+typedef struct {uint32_t len;fm1_voice_midi_t events[8];} fm1_voice_events_t;
+typedef struct {float decay,tuning,tune,velocity;int32_t kick_note;} fm1_voice_drum_setup_t;
+typedef struct {int32_t note;uint32_t slid_ok,accent,hat,slide;int32_t hat_amount;float decay,step,tuning;} fm1_voice_acid_setup_t;
+_Static_assert(sizeof(fm1_voice_motion_t)==16 && sizeof(fm1_voice_lfo_t)==16 && sizeof(fm1_voice_events_t)==100,"Voice control ABI");
+extern float fm1_rust_voice_time(uint32_t,int32_t);
+extern void fm1_rust_voice_motion(fm1_voice_motion_t *,uint32_t,uint32_t *);
+extern void fm1_rust_voice_lfo(fm1_voice_lfo_t *,int32_t,int32_t,float,float,uint32_t *);
+extern void fm1_rust_voice_envelope(fm1_voice_drone_t *,uint32_t,int32_t,int32_t);
+extern void fm1_rust_voice_drum_setup(fm1_voice_drum_t *,uint32_t,const fm1_voice_drum_setup_t *,const fm1_voice_data_kit_t *const *);
+extern void fm1_rust_voice_pluck_setup(fm1_voice_pluck_t *,int32_t,float,float,float);
+extern void fm1_rust_voice_acid_setup(fm1_voice_acid_t *,const fm1_voice_acid_setup_t *,fm1_voice_events_t *);
+extern void fm1_rust_voice_pad_handoff(fm1_voice_pad_t *,uint32_t);
+extern void fm1_rust_voice_pad_leave(fm1_voice_pad_t *,const int32_t *,uint32_t);
+extern float fm1_rust_voice_stab(fm1_voice_pad_t *,uint32_t,float,int32_t,fm1_voice_events_t *);
+extern void fm1_rust_voice_bass_to(fm1_voice_drone_t *,int32_t,int32_t,uint32_t,uint32_t,fm1_voice_events_t *);
+extern uint32_t fm1_rust_voice_bass_note(fm1_voice_drone_t *,fm1_voice_line_t *,int32_t,int32_t,int32_t,int32_t,float,fm1_voice_events_t *);
+typedef struct {int32_t voice,key,velocity,octaves[3];uint32_t oscillator,playing,bass_line;int32_t acid_decay;float tuning;} fm1_voice_key_t;
+typedef struct {uint8_t held,glow;uint8_t padding[2];fm1_voice_events_t events;} fm1_voice_key_result_t;
+_Static_assert(sizeof(fm1_voice_key_t)==44 && sizeof(fm1_voice_key_result_t)==104 && sizeof(fm1_voice_drum_setup_t)==20 && sizeof(fm1_voice_acid_setup_t)==36,"Voice lifecycle ABI");
+extern void fm1_rust_voice_key(fm1_voice_pad_t *,fm1_voice_drone_t *,fm1_voice_acid_t *,uint8_t *,uint8_t *,uint32_t *,const fm1_voice_key_t *,fm1_voice_key_result_t *);
+extern void fm1_rust_voice_quiet(fm1_voice_pad_t *,fm1_voice_drone_t *,fm1_voice_acid_t *,fm1_voice_drum_t *,uint8_t *);
+
+#include "rust_voice_config.h"

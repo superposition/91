@@ -5,6 +5,9 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 
+[features]
+pi32v2 = []
+
 [dependencies]
 fm1-types.workspace = true
 

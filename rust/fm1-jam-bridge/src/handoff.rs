@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! Transitional ABI: serialized emulator source capture, Rust-owned copies and
 //! staging arbitration. Physical IRQ exclusion is deliberately not enabled.
-use core::sync::atomic::{AtomicU32, Ordering};
+use fm1_rt::atomic::{AtomicU32, Ordering};
 use fm1_rt::handoff::{SnapshotCell, StagingLease, StagingOwner};
 
 pub const SNAPSHOT_BYTES: usize = 220;

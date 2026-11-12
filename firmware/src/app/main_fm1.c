@@ -467,7 +467,10 @@ static void bk_ack_put(uint32_t obj, uint32_t idx, uint32_t status) { bk_ack_n =
  * ours, F0 7D 50 56 slot 128-bytes checksum F7: one slot, or 7F alone to clear), here it is checked and handed to the engine, and the UI keeps them. */
 static void dx_service(void)
 {
-    uint32_t i, k, sum = 0;
+    uint32_t k;
+#if !EN_RUST_FORMATS
+    uint32_t i, sum = 0;
+#endif
     uint8_t b[128], ack[7];
     int kind, r;                                     /* r: the voices taken; -1 a bad checksum; -2 not taken */
     if (dx_state != 2u)
@@ -492,9 +495,13 @@ static void dx_service(void)
         return;
     }
     if (kind == 1) {                                 /* bulk: 5 header bytes, 4096 data, the checksum */
+#if EN_RUST_FORMATS
+        if (fm1_rust_formats_sum7(dx_buf+5,4096u)!=(dx_buf[4101u]&127u)) {
+#else
         for (i = 0; i < 4096u; i++)
             sum += dx_buf[5u + i];
         if (((sum + dx_buf[5u + 4096u]) & 0x7Fu) != 0u) {
+#endif
             r = -1;
         } else {
             en_user_clear();
@@ -502,18 +509,26 @@ static void dx_service(void)
                 r += en_user_voice((int)k, dx_buf + 5u + k * 128u);
         }
     } else if (kind == 2) {                          /* a single voice: 155 bytes, packed, appended */
+#if EN_RUST_FORMATS
+        if (fm1_rust_formats_sum7(dx_buf+5,155u)!=(dx_buf[160u]&127u)) {
+#else
         for (i = 0; i < 155u; i++)
             sum += dx_buf[5u + i];
         if (((sum + dx_buf[5u + 155u]) & 0x7Fu) != 0u) {
+#endif
             r = -1;
         } else {
             en_voice_pack(dx_buf + 5u, b);
             r = en_user_voice(en_user_next(), b) ? 1 : -2;
         }
     } else if (kind == 3) {                          /* ours: one slot */
+#if EN_RUST_FORMATS
+        if (fm1_rust_formats_sum7(dx_buf+4,128u)!=(dx_buf[132u]&127u))
+#else
         for (i = 0; i < 128u; i++)
             sum += dx_buf[4u + i];
         if (((sum + dx_buf[4u + 128u]) & 0x7Fu) != 0u)
+#endif
             r = -1;
         else
             r = en_user_voice(dx_buf[3], dx_buf + 4u) ? 1 : -2;
@@ -522,7 +537,14 @@ static void dx_service(void)
         r = 0;
     }
     ui_voices_changed(r, kind);
+#if EN_RUST_FORMATS
+    {
+        uint32_t args[2]={(uint32_t)kind,r<0?0x7fu:(uint32_t)r};
+        (void)fm1_rust_wire(83,args,2,0,0,ack,sizeof ack);
+    }
+#else
     ack[0] = 0xF0, ack[1] = 0x7D, ack[2] = 0x50, ack[3] = 0x57, ack[4] = (uint8_t)kind, ack[5] = r < 0 ? 0x7Fu : (uint8_t)r, ack[6] = 0xF7;
+#endif
     dx_state = 0;                                    /* dx_buf free before the answer goes, so the next voice the answer releases is never dropped */
     usb_sysex_try(ack, sizeof ack);                  /* the answer: the page waits for it before the next voice */
 }
@@ -620,14 +642,21 @@ static void tel_service(void)
     uint8_t r = usb.tel_req;
     if (r == 3u) {                                  /* the bench, once */
         uint32_t w[16], i;
-        uint8_t f[4 + 16 * 5 + 2], b[16 * 4];
+        uint8_t f[4 + 16 * 5 + 2];
+#if !EN_RUST_FORMATS
+        uint8_t b[16 * 4];
+#endif
         usb.tel_req = 0;
         bench_run(w);
+#if EN_RUST_FORMATS
+        i=rust_wire_words(f,sizeof f,0x47,w,16);
+#else
         for (i = 0; i < 16u; i++)
             b[4 * i] = (uint8_t)w[i], b[4 * i + 1] = (uint8_t)(w[i] >> 8), b[4 * i + 2] = (uint8_t)(w[i] >> 16), b[4 * i + 3] = (uint8_t)(w[i] >> 24);
         f[0] = 0xF0, f[1] = 0x7D, f[2] = 0x50, f[3] = 0x47;
         i = 4u + ota_pack7(b, sizeof b, f + 4);
         f[i++] = 0xF7;
+#endif
         usb_sysex_try(f, i);
         return;
     }
@@ -646,7 +675,10 @@ static void tel_service(void)
     }
     if (extra == 1) {                               /* the second frame (F0 7D 50 5A): the slowest chunk's stages and when it was, the histogram of renders, the slowest half dissected */
         uint32_t w[40], i, o = 4;
-        uint8_t f[4 + 40 * 5 + 2], b[40 * 4];
+        uint8_t f[4 + 40 * 5 + 2];
+#if !EN_RUST_FORMATS
+        uint8_t b[40 * 4];
+#endif
         _Static_assert(4 + (40 * 4 * 8 + 6) / 7 + 1 <= 192, "the frame fits usb.c's SysEx queue (64 packets)");
         for (i = 0; i < 9u; i++)
             w[i] = en_peak_stage[i] / FM1_TICKS_PER_US;
@@ -662,11 +694,15 @@ static void tel_service(void)
         w[37] = en_prof_sm[10];
         w[38] = (uint32_t)tap_n[0] | (uint32_t)tap_n[1] << 8 | (uint32_t)tap_n[2] << 16 | (uint32_t)tap_n[3] << 24;   /* the drums tapped from MIDI (0.16.6: */
         w[39] = (uint32_t)tap_n[4] | (uint32_t)tap_n[5] << 8 | (um.drops & 0xFFFFu) << 16;   /* kick .. perc, a byte each) and the TRS bytes lost */
+#if EN_RUST_FORMATS
+        o=rust_wire_words(f,sizeof f,0x5a,w,40);
+#else
         for (i = 0; i < 40u; i++)
             b[4 * i] = (uint8_t)w[i], b[4 * i + 1] = (uint8_t)(w[i] >> 8), b[4 * i + 2] = (uint8_t)(w[i] >> 16), b[4 * i + 3] = (uint8_t)(w[i] >> 24);
         f[0] = 0xF0, f[1] = 0x7D, f[2] = 0x50, f[3] = 0x5A;
         o += ota_pack7(b, sizeof b, f + o);
         f[o++] = 0xF7;
+#endif
         if (usb_sysex_try(f, o) == 0) {
             en_peak_total = 0;
             for (i = 0; i < 9u; i++)
@@ -680,15 +716,22 @@ static void tel_service(void)
 #if EN_DIAG
     if (extra == 2) {                               /* the third frame (F0 7D 50 5B): the diagnostic pieces (amb.c en_diag), us and counts; EN_DIAG=1 builds only */
         uint32_t w[36], i, o = 4;
-        uint8_t f[4 + 36 * 5 + 2], b[36 * 4];
+        uint8_t f[4 + 36 * 5 + 2];
+#if !EN_RUST_FORMATS
+        uint8_t b[36 * 4];
+#endif
         _Static_assert(4 + (36 * 4 * 8 + 6) / 7 + 1 <= 4 + 36 * 5 + 2, "the frame fits its buffer");
         for (i = 0; i < 36u; i++)
             w[i] = i < 28u || i >= 32u ? en_diag[i] / FM1_TICKS_PER_US : en_diag[i];
+#if EN_RUST_FORMATS
+        o=rust_wire_words(f,sizeof f,0x5b,w,36);
+#else
         for (i = 0; i < 36u; i++)
             b[4 * i] = (uint8_t)w[i], b[4 * i + 1] = (uint8_t)(w[i] >> 8), b[4 * i + 2] = (uint8_t)(w[i] >> 16), b[4 * i + 3] = (uint8_t)(w[i] >> 24);
         f[0] = 0xF0, f[1] = 0x7D, f[2] = 0x50, f[3] = 0x5B;
         o += ota_pack7(b, sizeof b, f + o);
         f[o++] = 0xF7;
+#endif
         if (usb_sysex_try(f, o) == 0) {
             for (i = 0; i < 36u; i++)
                 en_diag[i] = 0;
@@ -742,6 +785,9 @@ static void tel_service(void)
         w[38] = stk_used(STK_W(_cpu1_stacks_lo + 4096), STK_W(_cpu1_stacks_lo + 8192));
         w[39] = ui.min_last;                        /* MIDI in's last message, a USB-MIDI packet (0.16.6; the drums tapped: the second frame) */
         tel_isr_in = tel_isr_out = 0;
+#if EN_RUST_FORMATS
+        n=rust_wire_words(f,sizeof f,0x46,w,40);
+#else
         f[0] = 0xF0, f[1] = 0x7D, f[2] = 0x50, f[3] = 0x46;
         {
             uint8_t b[40 * 4];
@@ -750,6 +796,7 @@ static void tel_service(void)
             n += ota_pack7(b, sizeof b, f + n);
         }
         f[n++] = 0xF7;
+#endif
         if (usb_sysex_try(f, n) == 0) {
             {                                       /* the slowest half's record goes with this window (the second frame carries it; a render may replace it before then) */
                 const uint32_t fl = irq_save();
