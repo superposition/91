@@ -13,6 +13,17 @@ fn run() -> Result<(), String> {
             "command_payload_bytes":std::mem::size_of::<[fm1_types::CommandWord;1024]>(),
             "phrase_bytes":std::mem::size_of::<Phrase>(),
             "phrase_pair_bytes":std::mem::size_of::<[Phrase;2]>(),
+            "acid_line_bytes":std::mem::size_of::<fm1_types::AcidLine>(),
+            "pluck_line_bytes":std::mem::size_of::<fm1_types::PluckLine>(),
+            "progression_bytes":std::mem::size_of::<fm1_types::Progression>(),
+            "chord_kind_bytes":std::mem::size_of::<fm1_types::ChordKinds>(),
+            "factory_preset_bytes":std::mem::size_of::<fm1_engine::factory::FactoryPreset>(),
+            "transport_bytes":std::mem::size_of::<fm1_engine::transport::Transport>(),
+            "melodic_harmony_bytes":std::mem::size_of::<fm1_engine::melodic::Harmony>(),
+            "acid_state_bytes":std::mem::size_of::<fm1_engine::melodic::Acid>(),
+            "pluck_state_bytes":std::mem::size_of::<fm1_engine::melodic::Pluck>(),
+            "bass_state_bytes":std::mem::size_of::<fm1_engine::melodic::Bass>(),
+            "master_scalar_bytes":std::mem::size_of::<fm1_engine::effects::master::State>(),
             "render_frames":fm1_types::RENDER_FRAMES,"dma_half_frames":fm1_types::DMA_HALF_FRAMES
         })),
         Some("params") => {
