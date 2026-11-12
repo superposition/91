@@ -1,0 +1,51 @@
+{
+  "date": "2026-11-12",
+  "qualified_wasm_sha256": "d22fdcca7cfc6e1cf13eceac460de3a1014eca38cb75dabce3e28f8e30ab1082",
+  "scope": "Actual local browsers, before integrating melodic, effects and factory branches",
+  "lan_http_chromium": {
+    "control": "wmux browser CLI in a dedicated QA workspace; workspace closed afterwards",
+    "viewport": [618, 1049],
+    "document_width": 603,
+    "audio_node": "ScriptProcessorNode",
+    "sample_rate": 44100,
+    "audio_context_state": "running",
+    "analyser_windows": 20,
+    "sampled_values": 40960,
+    "nonzero_windows": 20,
+    "nonfinite_values": 0,
+    "peak": 0.14510667324066162,
+    "rms_range": [0.0000498442557709717, 0.05941353641036318],
+    "elapsed_audio_seconds": 2.0201360544217657,
+    "page_errors": [],
+    "dom_event_checks": {
+      "delivery": "Browser-evaluated DOM events; physical keyboard/touch not claimed",
+      "key_down_held_count": 1,
+      "key_up_held_count": 0,
+      "blur_held_count": 0,
+      "latch_press_release": true,
+      "knob_arrow_and_wheel": true,
+      "stream_enter_exit_and_url": true,
+      "panel_restored_after_stream": true
+    }
+  },
+  "localhost_chrome_windows": {
+    "control": "Native @oai/sky computer use from the VS Code session",
+    "window_capture": [1644, 1248],
+    "browser_zoom_percent": 110,
+    "switch_on_pointer_click": "On status and live Songbook framebuffer observed",
+    "panel_hold_pointer_interaction": "STOPPED observed, then latch released and STOP retained",
+    "visible_focus": "Blue outline observed around PLAY control",
+    "audio_mode": "Not independently inspected in this browser",
+    "listening": "Not claimed",
+    "native_keyboard_control": "Not qualified; injected Space scrolled the page",
+    "browser_connector": "Unavailable access-host metadata; native computer use succeeded"
+  },
+  "remaining": [
+    "Physical phone touch and mobile OS browser review",
+    "Cross-browser desktop review and all-route visual/focus review",
+    "Explicit inspection of real AudioWorklet scheduling",
+    "Optional USB-MIDI/FM-1 remote behavior",
+    "Save/restart interactions in a real browser",
+    "Recheck the combined melodic/effects/factory artifact after integration"
+  ]
+}

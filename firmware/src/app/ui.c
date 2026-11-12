@@ -3232,6 +3232,9 @@ static int16_t mm_e[NE];                         /* the knobs' clicks from the m
 static uint8_t mm_last[MM_MAX], mm_acc[MM_MAX];  /* a place-sending knob: its last value (+1; 0 none yet) and its half click */
 static int mm_ok(const uint8_t *b, uint32_t len)   /* a map as the Install page sends it, every entry a control there is (bytes: a restore's may be unaligned) */
 {
+#if EN_RUST_FORMATS
+    return fm1_rust_formats_restore(OBJ_MMAP,b,len,0,0)>0;
+#else
     uint32_t i;
     const uint32_t mg = len >= 4u ? (uint32_t)(b[0] | b[1] << 8 | b[2] << 16 | (uint32_t)b[3] << 24) : 0u;
     if (len != sizeof(mmap_t) || (mg != MM_MAGIC && mg != MM_MAGIC2) || b[4] > MM_MAX)
@@ -3246,6 +3249,7 @@ static int mm_ok(const uint8_t *b, uint32_t len)   /* a map as the Install page 
             return 0;
     }
     return 1;
+#endif
 }
 static void mm_load(void)
 {
@@ -7361,6 +7365,9 @@ int ui_restore_valid(uint32_t obj, const uint8_t *b, uint32_t len)
 {
     if(obj>=OBJ_JAM0 && obj<=OBJ_JAM3) return en_jam_valid(b,len);
     if(obj==OBJ_JSESSION) return jam_session_valid(b,len);
+#if EN_RUST_FORMATS
+    return fm1_rust_formats_restore(obj,b,len,EN_NFXS,sizeof(set_t))>0;
+#else
     if (obj == OBJ_PROJ || (obj >= OBJ_G1 && obj <= OBJ_G18)) {   /* a genre's pieces (the original genre's may still be the old bank) */
         const int g = obj == OBJ_PROJ ? 0 : (int)(obj - OBJ_G1) + 1;
         if (obj >= OBJ_NOBJ || g >= EN_NGENRE || len < 20u)
@@ -7392,6 +7399,7 @@ int ui_restore_valid(uint32_t obj, const uint8_t *b, uint32_t len)
         return (nf == EN_NFXS && len == sizeof(set_t)) || (nf < EN_NFXS && len < sizeof(set_t) && len >= q + 4u);
     }
     return 0;                                    /* (not the panel's calibration: it is this unit's own) */
+#endif
 }
 void ui_param_set(int p, int v)               /* the editor (main_fm1.c px_service): a parameter as its knob sets it */
 {
@@ -7462,6 +7470,9 @@ static void settings_load(void)
     set_t s;
     uint8_t raw[sizeof(set_t)];
     int p, c, n = plat_store_load(OBJ_SET, raw, sizeof raw);
+#if EN_RUST_FORMATS
+    if(n<=0 || !fm1_rust_formats_restore(OBJ_SET,raw,(uint32_t)n,EN_NFXS,sizeof(set_t))) return;
+#endif
     if (n >= 8 && n < (int)sizeof s && raw[0] == 'S' && raw[1] == 'E' && raw[2] == 'T' && raw[3] == '1' && (raw[4] | raw[5] << 8) < EN_NFXS && (raw[6] | raw[7] << 8) == 12) {
         /* a record from before the newest effect settings (fewer fxs, 0.14.10 on): its fields by their old places, the new settings at their defaults */
         const int old = raw[4] | raw[5] << 8;

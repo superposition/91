@@ -623,6 +623,9 @@ static void px_end(void)
         px_w++;
     }
 }
+#if EN_RUST_FORMATS
+#include "dsp/rust_formats.h"
+#endif
 #define DX_MAX 4112u
 static uint8_t dx_buf[DX_MAX] __attribute__((section(".pool.dx")));
 static uint32_t dx_pos;
@@ -634,6 +637,9 @@ static void dx_end(void)
     const uint8_t *m = dx_buf;
     const uint32_t n = dx_pos;
     uint8_t kind = 0;
+#if EN_RUST_FORMATS
+    kind=(uint8_t)fm1_rust_formats_classify(m,n);
+#else
     if (n >= 5u && m[0] == 0x43u && (m[1] & 0xF0u) == 0u) {
         if (m[2] == 0x09u && m[3] == 0x20u && m[4] == 0x00u && n == 4102u)
             kind = 1;
@@ -648,6 +654,7 @@ static void dx_end(void)
         kind = 5;
     }
     if(n>=6u && m[0]==0x7du && m[1]==0x50u && m[2]==0x60u) kind=6;
+#endif
     dx_on = 0;
     if (kind) {
         dx_kind = kind;

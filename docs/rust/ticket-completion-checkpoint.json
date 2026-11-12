@@ -1,0 +1,244 @@
+{
+  "scope": "Integrated drum scheduling, authoritative device metadata, editor operation safety and canonical site generation",
+  "source_revision": "ed7508590d7ee127205f2c002d9a01e92c8ec9c4",
+  "agent_commits": {
+    "sequencer": "dc4841897626ae3a57f59d4e57730dd00d9d97dd",
+    "metadata": "360325bb843d476b3291adee42e0b400f5a12095",
+    "site_build": "4c5ae9a7f0ea0bde6b98154aa693ed4d390c4f49"
+  },
+  "rust_version": "1.94.1",
+  "windows": {
+    "workspace_tests": 31,
+    "fmt": "pass",
+    "clippy_deny_warnings": "pass",
+    "builder_tests": 11,
+    "builder_skips": 2
+  },
+  "linux": {
+    "builder_tests": 11,
+    "metadata_protocol_compatibility_tests": "pass",
+    "wasm_no_std": "pass"
+  },
+  "flags": [
+    "EN_RUST_JAM=1",
+    "EN_RUST_COMMANDS=1",
+    "EN_RUST_TRANSPORT=1",
+    "EN_RUST_HANDOFF=1",
+    "EN_RUST_SCHEDULER=1"
+  ],
+  "wasm_cases": [
+    {
+      "initial_pack": "factory",
+      "blocks": 55000,
+      "seconds": 159.63718820861678,
+      "compared_samples": 14080000,
+      "pcm_hash": "baeff971",
+      "peak": 0.3714040517807007,
+      "blits": 4679,
+      "memory_bytes": 33554432,
+      "rust": {
+        "validations": 0,
+        "plans": 8,
+        "rejections": 0,
+        "fallbacks": 0,
+        "bass_events": 1037,
+        "sessions": 1,
+        "commands": {
+          "accepted": 961,
+          "consumed": 961,
+          "dropped": 0,
+          "high_water": 213
+        },
+        "transport": {
+          "pulses": 6215,
+          "chunks": 28982,
+          "controls": 27668
+        },
+        "sequencer": {
+          "lanes": 6222,
+          "mutations": 0,
+          "waits": 463712,
+          "boundaries": 1037
+        }
+      }
+    },
+    {
+      "initial_pack": "rust/fm1-engine/tests/packs/harris-citypop.jmp",
+      "blocks": 55000,
+      "seconds": 159.63718820861678,
+      "compared_samples": 14080000,
+      "pcm_hash": "28722449",
+      "peak": 0.4303741455078125,
+      "blits": 4673,
+      "memory_bytes": 33554432,
+      "rust": {
+        "validations": 1,
+        "plans": 10,
+        "rejections": 0,
+        "fallbacks": 0,
+        "bass_events": 1033,
+        "sessions": 1,
+        "commands": {
+          "accepted": 751,
+          "consumed": 751,
+          "dropped": 0,
+          "high_water": 213
+        },
+        "transport": {
+          "pulses": 6192,
+          "chunks": 34155,
+          "controls": 27682
+        },
+        "sequencer": {
+          "lanes": 6198,
+          "mutations": 0,
+          "waits": 546480,
+          "boundaries": 1033
+        }
+      }
+    },
+    {
+      "scenario": "v2-hold-idea-save-restart",
+      "render_calls": 11663,
+      "compared_samples": 6570900,
+      "seconds": 74.5,
+      "peak": 0.22903597354888916,
+      "memory_bytes": 33554432,
+      "saved_session": [
+        74,
+        83,
+        77,
+        1,
+        1,
+        11,
+        1,
+        8,
+        2,
+        1,
+        83,
+        0,
+        7,
+        1,
+        190,
+        0,
+        3,
+        83,
+        0,
+        0
+      ],
+      "rust": {
+        "validations": 1,
+        "plans": 9,
+        "rejections": 0,
+        "fallbacks": 0,
+        "bass_events": 804,
+        "sessions": 2,
+        "commands": {
+          "accepted": 319,
+          "consumed": 319,
+          "dropped": 0,
+          "high_water": 208
+        },
+        "transport": {
+          "pulses": 4819,
+          "chunks": 12684,
+          "controls": 11829
+        },
+        "sequencer": {
+          "lanes": 4824,
+          "mutations": 0,
+          "waits": 202944,
+          "boundaries": 804
+        }
+      }
+    },
+    {
+      "scenario": "legacy-f4-piece-genre-transport",
+      "compared_samples": 2557800,
+      "render_calls": 4231,
+      "peak": 0.4515293836593628,
+      "sequencer": {
+        "lanes": 876,
+        "waits": 96752,
+        "boundaries": 21
+      },
+      "memory_bytes": 33554432
+    }
+  ],
+  "total_compared_float32_values": 37288700,
+  "http_compared_float32_values": 1048576,
+  "native_scenarios": 27,
+  "native_compared_int32_values": 73862374,
+  "native_midi_messages": 73613,
+  "native_midi_clocks": 30421,
+  "verified_frozen_source_files": 440,
+  "transfer_response_hash": "eff97ff8",
+  "device_metadata": {
+    "parameters": 176,
+    "first_user_dx_voice": 42,
+    "previous_wrong_offset": 34,
+    "languages": [
+      "en",
+      "ja"
+    ],
+    "map1_map2_p1bk_vectors": "unchanged",
+    "editor_stale_write_overlap_coalescing_tests": "pass",
+    "explicit_release_override": "0.3.0-demo tested independently by W06"
+  },
+  "site": {
+    "routes": 9,
+    "local_links_and_assets": 141,
+    "module_copies": 18,
+    "css_font_dependencies": 42,
+    "retained_control_ids": 152,
+    "retired_engineering_display_ids": 2,
+    "manifest_verified": true,
+    "hosted_subpath": true,
+    "pre_manifest_adoption": "retains the old tree, including edits inside known files"
+  },
+  "live": {
+    "url": "http://10.0.0.157:8001/emu/",
+    "server_restarted": false,
+    "module_mime_and_wasm_bytes_verified": true,
+    "site_manifest_verified": true,
+    "verified_legacy_assets_archived_outside_site": 25
+  },
+  "artifact": {
+    "bytes": 2525913,
+    "sha256": "d22fdcca7cfc6e1cf13eceac460de3a1014eca38cb75dabce3e28f8e30ab1082",
+    "memory_bytes": 33554432,
+    "exports": [
+      "memory",
+      "web_rust_stat",
+      "web_out_l",
+      "web_out_r",
+      "web_render",
+      "web_boot",
+      "web_seed",
+      "web_buttons",
+      "web_keys",
+      "web_enc",
+      "web_master",
+      "web_lit_buttons",
+      "web_lit_keys",
+      "web_fb",
+      "web_blits",
+      "web_now",
+      "web_cpu",
+      "web_store",
+      "web_store_len",
+      "web_store_set_len",
+      "web_store_writes",
+      "web_nobj",
+      "web_store_max",
+      "web_bg"
+    ]
+  },
+  "combined_log_sha256": "ff0383a02cff969a1b76cfbf6eaa83e4b7fb8aeb8b0fd30d80a5856be4825074",
+  "remaining": [
+    "R09 legacy acid/pluck/bass melodic scheduling, harmonic/bar/FX orchestration, source-ID selection and voice cleanup.",
+    "Real desktop/mobile layout, focus/contrast and touch review, real AudioWorklet/device audio and optional MIDI/USB qualification.",
+    "Archived Emscripten API harness was quarantined; its compiler is unavailable for a fresh rebuild here.",
+    "Physical Rust execution, backend exclusion/atomics, target resource/timing qualification and public release deployment."
+  ]
+}

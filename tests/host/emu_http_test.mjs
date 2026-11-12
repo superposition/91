@@ -8,9 +8,10 @@ const source=fs.readFileSync('web/emu/worklet.js').toString('base64');
 const {Amb,createHttpAudioNode}=await import('data:text/javascript;base64,'+source);
 const wasm=fs.readFileSync(process.argv[2]);
 let time=0;
+let disconnects=0;
 const context={currentTime:0,createScriptProcessor(frames,inputs,outputs) {
   assert.equal(frames,1024);assert.equal(inputs,0);assert.equal(outputs,2);
-  return {disconnect(){}};
+  return {disconnect(){disconnects++;}};
 }};
 const node=createHttpAudioNode(context);
 const messages=[];
@@ -44,5 +45,8 @@ assert(messages.some(message=>message.type==='frame' && message.fb?.length===240
 assert(messages.some(message=>message.rust?.plans>0 && message.rust?.fallbacks===0));
 assert(peak>0.05 && peak<1);
 node.dispose();
+node.dispose();
+assert.equal(disconnects,1,'HTTP node disposes once');
+assert.equal(node.onaudioprocess,null,'HTTP audio callback released');
 console.log(JSON.stringify({http_fallback:'pass',compared_samples:512*1024*2,peak,
   frame_messages:messages.filter(message=>message.type==='frame').length}));

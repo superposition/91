@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "amb.h"
+#include "app/plat.h"
+#include "backup_proto.h"
 
 void en_midi_out(uint32_t st, uint32_t d1, uint32_t d2) { (void)st; (void)d1; (void)d2; }
 
@@ -50,8 +52,11 @@ int main(int argc, char **argv)
             }
             putchar(']');
         }
-        printf("],\"nplain\":%d,\"nfmfact\":%d,\"nuser\":%d,\"prglen\":%d,\"npat\":%d,\"nlane\":%d}\n", EN_NCMSND - EN_NCMFM, EN_NFMFACT, EN_NUSER, EN_PRG_LEN,
+        printf("],\"nplain\":%d,\"nfmfact\":%d,\"nuser\":%d,\"prglen\":%d,\"npat\":%d,\"nlane\":%d", EN_NCMSND - EN_NCMFM, EN_NFMFACT, EN_NUSER, EN_PRG_LEN,
                EN_NPAT, EN_NLANE);
+        printf(",\"objects\":{\"settings\":%d,\"voices\":%d,\"globals\":%d,\"extras\":%d,\"map\":%d,\"bass\":%d,\"jamFirst\":%d,\"jamLast\":%d,\"session\":%d,\"count\":%d,\"genres\":[", OBJ_SET, OBJ_VOICES, OBJ_GLOB, OBJ_KINDS, OBJ_MMAP, OBJ_BSTEP, OBJ_JAM0, OBJ_JAM3, OBJ_JSESSION, OBJ_NOBJ);
+        for (g = 0; g < EN_NGENRE; g++) printf("%s%d", g ? "," : "", g ? OBJ_G1 + g - 1 : OBJ_PROJ);
+        printf("]},\"backup\":{\"max\":%u,\"frame\":%u,\"chunk\":%u}}\n", BK_MAX, BK_FRAME, BK_CHUNK);
         return 0;
     }
     printf("[\n");

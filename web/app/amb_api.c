@@ -3,7 +3,7 @@
  * One instance runs in the AudioWorklet (en_render); another on the page answers the pure questions
  * (parameter names and texts, chord names, the pieces' recipes). No device, no panel, no screen.
  *
- *   web/app/build.sh  ->  build/app/amb.wasm */
+ *   web/app/build.sh --legacy-test -> build/legacy-app-test/amb.wasm */
 #include <stdint.h>
 #include "amb.h"
 

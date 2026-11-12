@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NAIWAN 91 — A band to play with</title>
+  <meta name="description" content="Play along with three original city-pop songs. Choose your key and tempo, hold a phrase, and shape the keys, bass and swells in your browser.">
+  <link rel="stylesheet" href="fonts/fm1-fonts.css">
+  <link rel="stylesheet" href="site.css">
+  <style>
+    *{box-sizing:border-box}body{margin:0;font:16px/1.65 "Nunito","Segoe UI",sans-serif}main{max-width:1100px;margin:auto;padding:28px 20px 60px}
+    .site{display:flex;flex-wrap:wrap;gap:16px;align-items:center;padding-bottom:18px}.site .home{font-size:1.35rem;text-decoration:none;font-weight:800}.site nav{margin-left:auto;display:flex;gap:20px;flex-wrap:wrap}.site nav a{text-decoration:none;font-size:.9rem}
+    .hero{display:grid;grid-template-columns:1.1fr 1fr;gap:44px;align-items:center;padding:56px 0 40px}.hero h1{font-size:clamp(2.5rem,5.5vw,4.6rem);letter-spacing:-.04em;line-height:1.08;margin:12px 0 20px}.hero p{color:var(--color-muted);max-width:54ch}.hero h1 span{color:var(--color-accent-dark)}
+    .actions{display:flex;flex-wrap:wrap;gap:12px;margin:24px 0}.button{display:inline-block;border-radius:9px;padding:12px 18px;text-decoration:none;font-weight:800;background:var(--color-blue-dark);color:white}.button:hover{background:var(--color-accent-dark);color:white}.button.secondary{background:var(--color-surface);color:var(--color-blue-dark);border:1px solid var(--color-border)}
+    .screen-card{background:var(--color-surface);border:1px solid var(--color-border);padding:24px;border-radius:20px;box-shadow:0 20px 50px #14263a0d}.screen-card img{display:block;width:100%;max-width:360px;height:auto;margin:auto;image-rendering:pixelated;border-radius:6px}.screen-card figcaption{margin-top:16px;color:var(--color-muted);font-size:.85rem;text-align:center}
+    .section-head{display:flex;gap:24px;justify-content:space-between;align-items:baseline;margin:36px 0 16px}.section-head h2{margin:0;font-size:1.7rem}.section-head p{margin:0;color:var(--color-muted);font-size:.9rem}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:12px;padding:22px}.card h3{margin:0 0 10px;font-size:1.1rem}.card p{margin:0;color:var(--color-muted)}.card a{font-weight:700}.screens{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.screens figure{margin:0}.screens img{width:100%;height:auto;image-rendering:pixelated;border:1px solid var(--color-border);border-radius:8px}.screens figcaption{font-size:.8rem;color:var(--color-muted);padding-top:6px}
+    .scope{display:grid;grid-template-columns:1fr 1fr;gap:24px}.scope h3{font-size:1rem;margin:0 0 8px}.scope ul{padding-left:20px;margin:0;color:var(--color-muted)}.small{font-size:.85rem;color:var(--color-muted)}footer{border-top:1px solid var(--color-border);margin-top:44px;padding-top:22px}.package{overflow-wrap:anywhere}.quick-links:empty{display:none}.quick-links{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}.quick-links .card{padding:12px 16px}.quick-links span{display:none}
+    @media(max-width:760px){.hero{grid-template-columns:1fr;gap:20px;padding-top:32px}.hero h1{font-size:3rem}.hero .screen-card{max-width:420px;margin:0}.cards{grid-template-columns:1fr}.screens{grid-template-columns:1fr 1fr}.scope{grid-template-columns:1fr}.section-head{display:block}.site nav{margin-left:0;gap:14px}}
+  </style>
+</head>
+<body><main>
+  <header class="site"><a class="home" href="./" aria-current="page">内湾 91 / NAIWAN</a><nav aria-label="Main"><a href="emu/">Play</a><a href="editor/">Editor</a><a href="install/">Install</a><a href="manual/">Manual</a><a href="@@REPO@@">Source</a></nav></header>
+  <section class="hero">
+    <div><span class="site-kicker">City pop · Moving harmony · Room to play</span><h1>A small instrument.<br><span>A band to play with.</span></h1>
+      <p>Choose a song, set your key and tempo, and play along. NAIWAN 91 brings moving chords, electric keys, a rounded bass and gentle swells. Hold a section while you find a melody, then ask the band for a new idea.</p>
+      <div class="actions"><a class="button" href="emu/">Play in your browser</a><a class="button secondary" href="#controls">Explore the controls</a></div>
+      <p class="small">No FM-1 required. Press <b>Switch on</b> when you’re ready to hear it.</p>
+    </div>
+    <figure class="screen-card"><img src="img/naiwan91-performance.png" width="240" height="240" alt="Velvet Changes with chord movement, key, tempo and section controls"><figcaption>Velvet Changes · C major · 100 BPM</figcaption></figure>
+  </section>
+  <div class="section-head" id="controls"><h2>Play a song, then shape it</h2><p>Start simply. Find your sound as you go.</p></div>
+  <section class="cards" aria-label="Songbook features">
+    <article class="card"><h3>Three original songs</h3><p>Velvet Changes, Afterhours and Neon Turnaround each have their own electric-piano character, bass feel and harmonic journey. Turn PRESETS to choose one.</p></article>
+    <article class="card"><h3>Keys, bass and swells</h3><p>Soften the keys, brighten their attack, give the bass more space or bring in a swell. SELECT opens four pages of controls.</p></article>
+    <article class="card"><h3>Keep the phrase alive</h3><p>Hold a section, request a related idea or change the bass feel. Key and form changes land at the end of a phrase, keeping the music moving.</p></article>
+  </section>
+  <div class="section-head"><h2>Make it yours</h2><p>Four pages for the arrangement and the sound of your band.</p></div>
+  <div class="screens">
+    <figure><img src="img/naiwan91-arrangement.png" width="240" height="240" alt="Songbook Arrangement page"><figcaption>Arrangement</figcaption></figure>
+    <figure><img src="img/naiwan91-dx-keys.png" width="240" height="240" alt="DX Keys controls for program, touch, brightness and release"><figcaption>DX Keys</figcaption></figure>
+    <figure><img src="img/naiwan91-dx-bass.png" width="240" height="240" alt="DX Bass controls for program, attack, gate and energy"><figcaption>DX Bass</figcaption></figure>
+    <figure><img src="img/naiwan91-swells.png" width="240" height="240" alt="Swells controls for texture, amount, variation and tail"><figcaption>Swells</figcaption></figure>
+  </div>
+  <div class="section-head"><h2>Leave room for your part</h2><p>Bring an instrument, try a melody, or settle in and listen.</p></div>
+  <section class="card scope">
+    <div><h3>Find your starting point</h3><ul><li>Choose a song with PRESETS</li><li>Set a comfortable key and tempo</li><li>Choose an eight- or sixteen-bar section</li><li>Let the accompaniment play while you find your part</li></ul></div>
+    <div><h3>Try something new</h3><ul><li>Hold a phrase for another pass</li><li>Ask for a related variation</li><li>Change the bass feel</li><li>Save your session when you stop</li></ul></div>
+  </section>
+  <div class="section-head"><h2>Use it on an FM-1</h2><p>Hardware is optional for the browser instrument.</p></div>
+  <section class="cards">
+    <article class="card"><h3><a href="install/">Install and back up</a></h3><p>The USB-MIDI installer includes saved-object backup, restoration and recovery tools. Read the hardware instructions before installing.</p></article>
+    <article class="card"><h3><a href="editor/">Find your sound</a></h3><p>Connect an FM-1 to adjust sounds and edit DX voices. Use the Songbook pages to choose the sound and feel of the keys, bass and swells.</p></article>
+    <article class="card"><h3><a href="manual/">Explore the controls</a></h3><p>There are more generative pieces, sequencers, effects and visualizers to explore. The manual walks through the controls.</p></article>
+  </section>
+  <div class="quick-links">@@QUICK_CARDS@@</div>
+  <p class="small package"><a href="firmware/@@FIRMWARE_NAME@@?v=@@SHA@@">Download the FM-1 firmware · version @@VERSION@@</a></p>
+  <footer><p class="small">NAIWAN 91 is independent GPL-3.0-only firmware. Its lineage includes PERF-1, HYP-1 by <a href="https://www.redtail.works">RedtailWorks</a>, AMB-1 by Charles Vestal and Felucca by Leo Kuroshita (Hügelton Instruments). The FM engine descends from Melodee, Dexed and MSFA. Authors, licences and third-party assets are preserved in <a href="@@REPO@@/blob/master/LICENSING.md">LICENSING.md</a>.</p><p class="small">“M-VAVE” and “FM-1” are their owners’ trademarks. NAIWAN 91 is not affiliated with or endorsed by them. <a href="@@REPO@@/issues">Report a problem or contribute</a>.</p></footer>
+</main></body></html>

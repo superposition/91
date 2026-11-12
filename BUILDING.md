@@ -6,12 +6,12 @@ NAIWAN 91 builds on Linux x86-64 (or macOS/Windows through Docker or WSL: JieLi'
 | --- | --- |
 | `build/amb.bin` | the firmware app |
 | `build/loader/ota.bin` | the update loader |
-| `build/amb-VERSION.fwsc` | the installable package (app + loader) |
+| `build/naiwan91-VERSION.fwsc` | the installable package (app + loader) |
 | `build/emu/` | the browser emulator (WebAssembly) |
 
 ## Prerequisites
 
-- Python 3 with Pillow (`pip3 install Pillow`).
+- Python 3.10 or newer with Pillow (`pip3 install Pillow`).
 - **The JieLi Linux toolchain** (clang 4.0.1 for pi32v2, from JieLi's package server): `tools/get_toolchain.sh` installs it to `~/.jieli/toolchain` (`JIELI_TOOLCHAIN` overrides). On macOS or with `JIELI_DOCKER=1` each tool runs in a `linux/amd64` `debian:bookworm-slim` container.
 - **The JieLi AC79 SDK** (Apache-2.0). The package uses three of its files (`cpu/wl82/tools/uboot.boot`, `cfg_tool.bin`, `cfg/eq_cfg_hw.bin`); they are not part of this tree:
 
@@ -20,13 +20,13 @@ NAIWAN 91 builds on Linux x86-64 (or macOS/Windows through Docker or WSL: JieLi'
   ```
 
   (`AC79_SDK` overrides the location.)
-- A clang with the `wasm32` target (for the emulator), and Node.js (the web tests).
+- A clang with the `wasm32` target (for the emulator), Node.js 22 (the web tests), and Rust 1.94.1 with its `wasm32-unknown-unknown` target (the current browser build). The physical firmware retains its existing C build path.
 
 ## Build and test
 
 ```
-tools/release.sh 0.14.0            # parameter data, the manual's page, the tests, the package, the emulator
-tools/release.sh 0.14.0 --no-tests # without the tests
+tools/release.sh 0.3.0            # parameter data, the manual's page, the tests, the package, the emulator
+tools/release.sh 0.3.0 --no-tests # without the tests
 ./build.sh                        # a development build (version DEV)
 tests/run_tests.sh                # the tests alone
 ```
@@ -40,10 +40,14 @@ The DY voices (`firmware/src/dsp/fm6_dy.h`) are generated from DX7 bank files th
 ## The site
 
 ```
-python3 tools/make_pages_site.py 0.14.0 build/site
+python3 tools/make_pages_site.py 0.3.0 build/site
+python3 tests/web_build_test.py
+python3 tests/web_site_test.py build/site build/emu
 ```
 
-makes the landing page, the web installer with the package in it, the emulator, the editor and the manual as a static folder with relative links. Publish it with GitHub Pages (a `gh-pages` branch holding the folder's contents works) or any static host.
+makes the landing page, installer, player, editor and manual as a static folder with relative links. The canonical Pages workflow reads its default version from `web/product.json`; an explicit builder version must match the package identity. Full-site assets are shared once, while `build/emu` is also usable as a self-contained bundle.
+
+Output directories must be below `build/`. Generated outputs carry a verified inventory, and local changes stop replacement. Use a fresh directory for older builds, or `--adopt-existing` once to migrate a recognized pre-manifest site while retaining its entire old directory as a backup. See [web build qualification](docs/WEB_BUILD.md) for the entrypoint, subpath, metadata and remaining browser checks. Building a folder does not publish it; GitHub Pages deployment or another static host is a separate step.
 
 The printable quick manual (`docs/QUICK.md`, eight A4 pages) is made by `python tools/make_quick_manual.py` on Windows, which prints its HTML to `build/quick-manual.pdf` with Microsoft Edge; the site build copies the PDF to `manual/NAIWAN 91-quick-manual.pdf` when it is there. Bump the footer line at the top of `QUICK.md` with each release.
 
@@ -52,7 +56,7 @@ The printable quick manual (`docs/QUICK.md`, eight A4 pages) is made by `python 
 From the site, or from the command line (needs `pip3 install mido python-rtmidi`):
 
 ```
-python3 tools/fm1_install.py build/amb-0.14.0.fwsc
+python3 tools/fm1_install.py build/naiwan91-0.3.0.fwsc
 python3 tools/fm1_install.py --info          # identity of the connected FM-1
 ```
 

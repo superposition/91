@@ -2,6 +2,9 @@
 /* The instrument (amb.h). One compilation unit, -O2. */
 #include "amb.h"
 #include "fastmath.h"
+#if EN_RUST_FM6
+#include "rust_fm6.h"
+#endif
 #if EN_RUST_VOICES
 #include "rust_voices.h"
 #endif
@@ -4952,6 +4955,22 @@ static void reverb_job(void *p)
 }
 static void fm_job(const rv_job_t *c)           /* the DX voices' samples for this chunk, into the ring (they are played a chunk later) */
 {
+#if EN_RUST_FM6
+    uint32_t at=c->fm_w&(FM_R-1),left=(uint32_t)c->n;
+    if(!c->fm_on){
+        (void)fm1_rust_fm6_pool((fm1_fm6_slot_t *)fmx,0,0);
+        while(left){uint32_t count=left<FM_R-at?left:FM_R-at;fm_zero(fm_fifo+at,count*sizeof(float));left-=count;at=0;}
+        return;
+    }
+    const fm1_fm6_tables_t t=RUST_FM_TABLES;const fm1_fm6_scratch_t b=RUST_FM_SCRATCH;
+    const fm1_fm6_config_t config={(uint32_t)jp_dx(),fm_cur,fm_engine,(uint32_t)fm6_float_path,fm_tune,fm_bend};
+    fm1_fm6_ams_t cache={fm_ams_amd,{fm_ams_pt[0],fm_ams_pt[1],fm_ams_pt[2],fm_ams_pt[3]},fm_ams_ok};
+    const fm1_fm6_render_t r={(fm1_fm6_slot_t *)fmx,(fm1_fm6_lfo_t *)&fm_lfo,(fm1_fm6_lfo_t *)&fm_bass_lfo,fm_ed,fm_bass_ed,&config,&cache,&t,&b,fm_blk,&fm_pos,&fm_bass_sample};
+    /* Only exact write spans are borrowed; the foreground reads 256 frames
+     * behind. The inactive legacy upload/bass union is never borrowed. */
+    while(left){uint32_t count=left<FM_R-at?left:FM_R-at;fm1_rust_fm6_render(&r,fm_fifo+at,config.jam?fm_bass_fifo+at:0,count);left-=count;at=0;}
+    fm_ams_amd=cache.amd;fm_ams_ok=cache.valid;fm_ams_pt[0]=cache.points[0];fm_ams_pt[1]=cache.points[1];fm_ams_pt[2]=cache.points[2];fm_ams_pt[3]=cache.points[3];
+#else
     int j;
     if (!c->fm_on) {                             /* not the pluck's sound: the voices let go, nothing sounds */
         for (j = 0; j < FM_NV; j++)
@@ -4964,6 +4983,7 @@ static void fm_job(const rv_job_t *c)           /* the DX voices' samples for th
         fm_fifo[(c->fm_w + (uint32_t)j) & (FM_R - 1)] = fm_next();
         if(jp_dx())fm_bass_fifo[(c->fm_w+(uint32_t)j)&(FM_R-1)]=fm_bass_sample;
     }
+#endif
 }
 /* what the other core does in a chunk: the pad's voices (the stage the first core waits for, before it mixes), then the reverb's tank (the first core needs its
  * output at the end of the chunk), then the DX voices (needed a chunk on, so nothing waits for them) */
@@ -7504,6 +7524,9 @@ static void drain(void)
 static float mixl[BLK], mixr[BLK], rsend[BLK], esend[BLK];
 static float busl[BLK], busr[BLK];              /* the punch-ins' bus (0.15.19) */
 static float dsn_l[BLK], dsn_r[BLK];            /* the mix before the drums (their crush, and the drums into the bus) */
+#if EN_RUST_EFFECTS
+#include "rust_mixer.inc"
+#endif
 
 /* the pad's bus: a 12 dB low-pass, darker than it sounds on paper (Brian Eno darkened everything: the
  * Synthi's filter below half, then tape). No chorus: a modulated delay against pure tones beats (on
@@ -7806,9 +7829,16 @@ static void render_pad(uint32_t n)
 static void render_bass(uint32_t n)
 {
     if(jp_dx()) {
+#if EN_RUST_FM6
+        uint32_t done=0;float peak=0.0f,g=bass_vol*0.5f*FM_OUT*(float)jp_data[JP2_HEAD+9]*0.01f;
+        while(done<n){uint32_t at=(rv_job.fm_w-FM_D+done)&(FM_R-1),count=n-done;if(count>FM_R-at)count=FM_R-at;
+            peak=fm_maxf(peak,fm1_rust_fm6_bass_output(fm_bass_fifo+at,bass_o+done,g,count));done+=count;}
+        en_bass_level=peak;return;
+#else
         uint32_t k;float peak=0.0f,g=bass_vol*0.5f*FM_OUT*(float)jp_data[JP2_HEAD+9]*0.01f;
         for(k=0;k<n;k++){float x=fm_bass_fifo[(rv_job.fm_w-FM_D+k)&(FM_R-1)]*g;bass_o[k]=x;peak=fm_maxf(peak,fm_fabsf(x));}
         en_bass_level=peak;return;
+#endif
     }
 #if EN_RUST_VOICES
     const fm1_voice_drone_config_t config=voice_drone_config();
@@ -8002,7 +8032,11 @@ static void render_fm(uint32_t n)
 {
     const int on = jp_dx() || (par[P_CM_SND] >= CM_NPLAIN && cm_vol > 0.0f);
     const int cur = on && fm_cur >= 0 ? fm_cur : 0;   /* (the voice that is loaded: an empty user slot plays the first built-in one, at its own gain) */
+#if EN_RUST_FM6
+    const float g = jp_dx() ? pad_vol*0.5f*FM_OUT*(float)jp_data[JP2_HEAD+8]*0.01f : cm_vol * 0.5f * FM_OUT * fm1_rust_fm6_gain((uint32_t)cur,fm_dy_cur);
+#else
     const float g = jp_dx() ? pad_vol*0.5f*FM_OUT*(float)jp_data[JP2_HEAD+8]*0.01f : cm_vol * 0.5f * FM_OUT * (fm_dy_cur && cur < EN_NFMFACT ? FM_GAIN_DY[cur] : FM_GAIN[cur]);
+#endif
     uint32_t j;
     float lvl = 0.0f;
     if (!on) {
@@ -8011,6 +8045,15 @@ static void render_fm(uint32_t n)
         fm_ctr += n;
         return;
     }
+#if EN_RUST_FM6
+    j=0;
+    while(j<n){
+        const uint32_t at=(fm_ctr-FM_D+j)&(FM_R-1);uint32_t count=n-j;const int track=jp_dx()?TR_PAD:TR_CM;
+        if(count>FM_R-at)count=FM_R-at;
+        const fm1_fm6_output_t c={g,trk_g[track],trk_g1[track],tg_inv,j};float *const outputs[4]={fm_ol+j,fm_or+j,fm_rs+j,fm_es+j};
+        lvl=fm_maxf(lvl,fm1_rust_fm6_output(fm_fifo+at,outputs,&c,count));j+=count;
+    }
+#else
     for (j = 0; j < n; j++) {
         float x = fm_fifo[(fm_ctr - FM_D + j) & (FM_R - 1)];   /* (rendered a chunk ago, by the other core) */
         const float y = (x < -16.0f ? -16.0f : x > 16.0f ? 16.0f : x) * g * TG(jp_dx()?TR_PAD:TR_CM, j);
@@ -8020,6 +8063,7 @@ static void render_fm(uint32_t n)
         fm_es[j] = y * 0.5f;
         lvl = fm_maxf(lvl, y < 0.0f ? -y : y);
     }
+#endif
     en_cm_level = fm_minf(lvl * 4.0f, 1.0f);
     fm_ctr += n;
 }
@@ -8691,9 +8735,14 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
 {
     uint32_t j, pt0_ = en_prof_clock ? en_prof_clock() : 0u, bal_t0 = pt0_, bal_a = 0u, bal_w = 0u, cs_[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
     DIAG_LOCALS
+#if EN_RUST_EFFECTS
+    const float rg=fm1_rust_mix_reverb_gain(rev_send,rev_in_gain,arcm,brk),eg=echo_send;
+    const float depth=fm1_rust_mix_duck_depth(KK->duck,pulse_vol,trk_g1[TR_KICK]);
+#else
     const float rg = rev_send * rev_in_gain * (1.0f - 0.25f * arcm) * (1.0f + 0.7f * fm_maxf(brk, 0.0f)), eg = echo_send;
-    float dk[BLK], de = duck_env, gg = gate_g;
     const float depth = fm_minf(0.55f * KK->duck, 0.85f) * fm_minf(pulse_vol * 1.5f, 1.0f) * trk_g1[TR_KICK];   /* a muted kick ducks nothing */
+#endif
+    float dk[BLK], de = duck_env, gg = gate_g;
     const int gate = fx_on >> FX_GATE16 & 1u ? 1 : fx_on >> FX_GATE8 & 1u ? 2 : 0;
     const int odd = (int)((sixteenth - 1u) & 1u);         /* the sixteenth playing now: the second of an eighth? */
     int rv_c2;
@@ -8735,12 +8784,17 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
     DT(2);
     render_fm(n);                               /* the DX voices' samples from a chunk ago (the other core's), into the fm_ buffers added below */
     mx_end(3, n);
-    if (bus_m >> TR_CM & 1u)                    /* the plain pluck to the punch-ins' bus: it is all the mix holds so far */
+    if (bus_m >> TR_CM & 1u) {                  /* the plain pluck to the punch-ins' bus: it is all the mix holds so far */
+#if EN_RUST_EFFECTS
+        float *p[6];rust_mix_pointers(p,0);fm1_rust_mix_route_plain(p,n);
+#else
         for (j = 0; j < n; j++) {
             busl[j] = mixl[j];
             busr[j] = mixr[j];
             mixl[j] = mixr[j] = 0.0f;
         }
+#endif
+    }
     DT(3);
     render_dj(n);
     DT(4);
@@ -8756,6 +8810,9 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
         const uint32_t rp = pad_ctr - PAD_D;
         mx_gains(0, &pl, &pr, &ps);
         mx_gains(3, &fl, &fr, &fs);
+#if EN_RUST_EFFECTS
+        {const fm1_mix_merge_t c={{pl,pr,ps},{fl,fr,fs},(bus_m>>TR_PAD)&1u,(bus_m>>TR_CM)&1u};rust_mix_pad_fm(rp,n,&c);}
+#else
         {   /* (each into the punch-ins' bus when targeted: chosen once a chunk, 0.15.20, not tested a sample) */
             float *const pal = bus_m >> TR_PAD & 1u ? busl : mixl, *const par_ = bus_m >> TR_PAD & 1u ? busr : mixr;
             float *const fal = bus_m >> TR_CM & 1u ? busl : mixl, *const far_ = bus_m >> TR_CM & 1u ? busr : mixr;
@@ -8770,6 +8827,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
             esend[j] += ds * 0.2f + fm_es[j] * fs;
         }
         }
+#endif
         pad_ctr += n;
     }
     pad_midi_flush();
@@ -8845,13 +8903,18 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
         render_drums(n);                        /* (the kick sets duck_env for the next chunk) */
     }
     mx_end(4, n);
-    if (bus_m & 0x0Fu)                          /* the drums to the punch-ins' bus: what they added (crushed, through the mixer), out of the mix */
+    if (bus_m & 0x0Fu) {                        /* the drums to the punch-ins' bus: what they added (crushed, through the mixer), out of the mix */
+#if EN_RUST_EFFECTS
+        float *p[6];rust_mix_pointers(p,0);fm1_rust_mix_route_drums(p,dsn_l,dsn_r,n);
+#else
         for (j = 0; j < n; j++) {
             busl[j] += mixl[j] - dsn_l[j];
             busr[j] += mixr[j] - dsn_r[j];
             mixl[j] = dsn_l[j];
             mixr[j] = dsn_r[j];
         }
+#endif
+    }
     DT(8);
     PT(5);                                      /* the drums */
     if (rv_c2 && rv_job.bass) {                 /* the drone and the acid are the other core's: wait for them (the reverb goes on behind) */
@@ -8878,6 +8941,10 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
         float bl, br, bs, al, ar, as;
         mx_gains(1, &bl, &br, &bs);
         mx_gains(2, &al, &ar, &as);
+#if EN_RUST_EFFECTS
+        {const fm1_mix_merge_t c={{bl,br,bs},{al,ar,as},(bus_m>>TR_DRONE)&1u,(bus_m>>TR_ACID)&1u};
+         float *p[6];const float *input[4]={bass_o,acid_o,dk,gg_v};rust_mix_pointers(p,0);fm1_rust_mix_bass_acid(&c,p,input,n);}
+#else
         for (j = 0; j < n; j++) {
             const float b = bass_o[j], a = acid_o[j], dg = dk[j] * gg_v[j];
             float *const tbl = bus_m >> TR_DRONE & 1u ? busl : mixl, *const tbr = bus_m >> TR_DRONE & 1u ? busr : mixr;   /* (the punch-ins' bus when targeted) */
@@ -8889,6 +8956,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
             rsend[j] += (b * 0.06f * bs + a * 0.15f * as) * gg_v[j];
             esend[j] += (b * 0.04f * bs + a * 0.35f * as) * gg_v[j];
         }
+#endif
     }
     duck_env = fm_flush(de);
     DT(9);
@@ -8930,6 +8998,9 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
             tf_s[j] = fm_flush(tf_s[j]);
 #endif
     }
+#if EN_RUST_EFFECTS
+    rust_mix_echoes(n,dk,rg,eg);
+#else
     {
     const float thr = throw_amt * 0.5f, tdg = tdx_m * (float)fxs_v[EN_FXS_TD_SEND] * 0.006f;   /* (the bus is cleared each chunk, so 0 when unused) */
     for (j = 0; j < n; j++) {                   /* the echoes; the reverb's input into its line; the dry part of the mix */
@@ -8941,6 +9012,7 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
         dk[j] *= 1.3f * 0.36f;                  /* what the tank's output is scaled by */
     }
     }
+#endif
     DT(10);
     PT(6);                                      /* the echoes, the reverb's input */
     bal_a = pt0_;
@@ -8966,12 +9038,17 @@ static void render_chunk(int32_t *out, uint32_t n, float gain)
     PT(7);                                      /* the wait for the reverb */
     bal_w += pt0_ - bal_a;
     DT0();
+#if EN_RUST_EFFECTS
+    {float *p[6];rust_mix_pointers(p,0);fm1_rust_mix_tank(p,rv_wl,rv_wr,dk,n);}
+    for(j=0;j<n;j++)fx_master(&mixl[j],&mixr[j]);
+#else
     for (j = 0; j < n; j++) {                   /* the tank's output in, the performance effects */
         float l = mixl[j] + dk[j] * rv_wl[j], r = mixr[j] + dk[j] * rv_wr[j];
         fx_master(&l, &r);
         mixl[j] = l;
         mixr[j] = r;
     }
+#endif
     DT(11);
     master_dyn_block(mixl, mixr, n);            /* the compressor and the limiter */
     DT(12);
@@ -9116,7 +9193,11 @@ static void control(uint32_t n)                 /* once a chunk: the slow things
     if(jp_dx() && jp_patch_dirty) {
         unsigned part;
         for(part=0;part<2;part++)if(jp_patch_dirty>>(part)&1u) {
+#if EN_RUST_FM6
+            int busy=(int)fm1_rust_fm6_pool((fm1_fm6_slot_t *)fmx,2,part);
+#else
             int k,busy=0;for(k=0;k<FM_NV;k++)if(fmx[k].used && fmx[k].part==part)busy=1;
+#endif
             if(!busy){fm_jam_program(jp_data,part);jp_patch_dirty&=(uint8_t)~(1u<<part);}
         }
     }

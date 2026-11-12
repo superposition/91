@@ -1,0 +1,43 @@
+{
+  "source": "actual WASM RGB565 framebuffer",
+  "wasm_sha256": "64c45210eba35fceb9cacde4ed2df1d1d89a6457ea6afeba6544eabac408218c",
+  "seed": 91,
+  "master": 2800,
+  "captures": [
+    {
+      "page": "performance",
+      "file": "naiwan91-performance.png",
+      "width": 240,
+      "height": 240,
+      "sha256": "574ebaceb8b9277fb278a74fc7bef07fffb502eb7a00799d61f787d42b8aa3a7"
+    },
+    {
+      "page": "arrangement",
+      "file": "naiwan91-arrangement.png",
+      "width": 240,
+      "height": 240,
+      "sha256": "1079d720e142d113f6361766588a0e3c2426c4fd0aed1ac2efdffce496985fb3"
+    },
+    {
+      "page": "dx-keys",
+      "file": "naiwan91-dx-keys.png",
+      "width": 240,
+      "height": 240,
+      "sha256": "9da93034c1adf993c97213ec5e1bc8767634f41affcf7d58a4a388b98f6f2527"
+    },
+    {
+      "page": "dx-bass",
+      "file": "naiwan91-dx-bass.png",
+      "width": 240,
+      "height": 240,
+      "sha256": "68b0be5059928c9fc532f5188381bc1f186e8c1596fcd6f74e30451c1794ba99"
+    },
+    {
+      "page": "swells",
+      "file": "naiwan91-swells.png",
+      "width": 240,
+      "height": 240,
+      "sha256": "e2992369330120d30d2c931750558d3d28454cd971088c89eb8f952eebcd60fa"
+    }
+  ]
+}

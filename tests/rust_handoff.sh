@@ -10,7 +10,7 @@ cargo build --release --locked -p fm1-jam-bridge --target-dir build/rust-handoff
 common='-O2 -ffp-contract=off -std=c99 -D_POSIX_C_SOURCE=200809L -Wno-unused-function -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen'
 # The host compiler is separate from the WASM clang wrapper.
 ${CC:-cc} $common -o "$out/c" tests/host/jam_usb_test.c firmware/src/dsp/amb.c -lm
-${CC:-cc} $common -DEN_RUST_JAM=1 -DEN_RUST_COMMANDS=1 -DEN_RUST_HANDOFF=1 -DEN_RUST_TRANSPORT=1 -DEN_RUST_SCHEDULER=1 -DEN_RUST_MELODIC=1 -DEN_RUST_EFFECTS=1 -DEN_RUST_FACTORY=1 -DEN_RUST_VOICES=1 \
+${CC:-cc} $common -DEN_RUST_JAM=1 -DEN_RUST_COMMANDS=1 -DEN_RUST_HANDOFF=1 -DEN_RUST_TRANSPORT=1 -DEN_RUST_SCHEDULER=1 -DEN_RUST_MELODIC=1 -DEN_RUST_EFFECTS=1 -DEN_RUST_FACTORY=1 -DEN_RUST_VOICES=1 -DEN_RUST_FM6=1 -DEN_RUST_FORMATS=1 \
     -o "$out/rust" tests/host/jam_usb_test.c firmware/src/dsp/amb.c \
     build/rust-handoff/release/libfm1_jam_bridge.a -lm -ldl -lpthread
 env -u AMB_LEGACY_BOOT "$out/c" > "$out/c.log"

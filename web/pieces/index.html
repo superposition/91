@@ -1,6 +1,6 @@
 <!doctype html>
 <!-- SPDX-License-Identifier: GPL-3.0-only
-     PERF-1's pieces and library, one page (0.16.10; the Library page before it was its own, web/library now sends here). Three tabs:
+     NAIWAN 91's pieces and library, one page (0.16.10; the Library page before it was its own, web/library now sends here). Three tabs:
        Library   the pieces and sets people made: the maker's picks (web/library/library.json, /*LIBRARY*/) and what players submitted (the relay,
                  web/relay, its address at /*RELAY*/); hear one in the emulator or add it to an FM-1
        My FM-1   the pieces saved on the FM-1 and the set list, ticked one or many: download (a .piece, a .perfset, or a .zip of several), copy
@@ -13,15 +13,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PERF-1 pieces</title>
-<meta name="description" content="The PERF-1 library: pieces and sets made by players, to hear in the browser and add to your M-VAVE FM-1. Share and submit your own.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow+Semi+Condensed:wght@400;500;600&display=swap">
+<title>NAIWAN 91 pieces</title>
+<meta name="description" content="The NAIWAN 91 library: pieces and sets made by players, to hear in the browser and add to your M-VAVE FM-1. Share and submit your own.">
 <style>
-  :root { --ground: #130a0e; --card: #211219; --card-2: #2e1822; --ink: #f6ece0; --muted: #bba79a; --rule: #4a2a35;
-          --purple: #e0344f; --purple-2: #ff8f8f; --orange: #ffd447; --rust: #9c1d3a; --horn: #f2e6c4; color-scheme: dark; }
-  * { box-sizing: border-box; }
+    * { box-sizing: border-box; }
   body { margin: 0; background: var(--ground); color: var(--ink);
          font: 400 17px/1.6 "Barlow Semi Condensed", "Helvetica Neue", Arial, sans-serif; }
   main { max-width: 1040px; margin: 0 auto; padding: 28px 16px 56px; }
@@ -97,20 +92,12 @@
   [hidden] { display: none !important; }
 </style>
 <link rel="stylesheet" href="../fonts/fm1-fonts.css">
-<style>
-/* NAIWAN 91: the beach palette in three tiers — sand ground, white surfaces, navy type, coral for "now" */
-:root{{--ground:#FFF6E3;--bg:#FFF6E3;--panel:#FFFFFF;--card:#FFFFFF;--card-2:#FFF1D8;--ink:#14263A;--text:#14263A;
---muted:#6B5A3C;--dim:#6B5A3C;--rule:#E3D3AE;--line:#E3D3AE;--accent:#F2542D;--acc:#F2542D;--red:#E8302E;--orange:#F2542D;
---purple:#1B7FD6;--purple-2:#0F4A80;--rust:#0E9E7E;--horn:#F6E2A8;--green-1:#0E9E7E;--river:#1B7FD6;--river-2:#0F4A80}}
-html,body{{background:var(--ground);color:var(--ink)}}
-body{{font-family:"Nunito","Segoe UI",system-ui,sans-serif!important}}
-h1,h2,h3,h4,b,strong,.card b,.tag b,nav a,button{{font-family:"Quicksand","Nunito",system-ui,sans-serif!important;letter-spacing:.01em}}
-img.logo{{display:none}}
-</style>
+<link rel="stylesheet" href="../site.css">
+<link rel="icon" type="image/svg+xml" href="../img/naiwan91-mark.svg">
 </head>
 <body>
 <main>
-  <header class="site"><a class="home" href="../">PERF-1</a><nav><a href="../emu/">Emulator</a><a href="../editor/">Editor</a><a href="./" aria-current="page">Library &amp; pieces</a><a href="../install/">Install</a><a href="../manual/">Manual</a></nav></header>
+  <header class="site"><a class="home" href="../">NAIWAN 91</a><nav><a href="../emu/">Emulator</a><a href="../editor/">Editor</a><a href="./" aria-current="page">Library &amp; pieces</a><a href="../install/">Install</a><a href="../manual/">Manual</a></nav></header>
   <h1>Library &amp; pieces</h1>
   <nav class="tabs" role="tablist">
     <a href="#library" id="t-library" role="tab">Library<span class="n" id="libn"></span></a>
@@ -120,7 +107,7 @@ img.logo{{display:none}}
 
   <!-- ============================================================ the library -->
   <section id="s-library" hidden>
-    <p class="small">Pieces and sets made by PERF-1 players. <b>Hear</b> one in the browser emulator or <b>add</b> it to your FM-1 (it asks before it replaces anything of yours); a piece brings its own DX7 voice. <span class="pick">PICKED</span> ones are the maker's choice. Share yours from <a href="#mine">My FM-1</a>: tick them and press <b>Submit</b>.</p>
+    <p class="small">Pieces and sets made by NAIWAN 91 players. <b>Hear</b> one in the browser emulator or <b>add</b> it to your FM-1 (it asks before it replaces anything of yours); a piece brings its own DX7 voice. <span class="pick">PICKED</span> ones are the maker's choice. Share yours from <a href="#mine">My FM-1</a>: tick them and press <b>Submit</b>.</p>
     <div class="bar"><select id="genre"><option value="">Every genre</option></select><select id="which"><option value="">Everything</option><option value="pick">Picked</option><option value="new">Newest first</option><option value="mine">Mine</option></select><input type="search" id="find" placeholder="Search titles, makers, notes"></div>
     <div class="grid" id="grid"></div>
     <p style="text-align:center;margin-top:1rem"><button id="more" class="alt" hidden>Show more</button></p>
@@ -163,7 +150,7 @@ img.logo{{display:none}}
         <div class="info" id="ininfo"></div>
         <p id="slotrow"><label class="small" for="slot">Put it in </label><span id="ingenre" class="small"></span> <select id="slot"></select></p>
         <p><button id="add">Add to my FM-1</button> <button id="hear" class="alt">Hear it in the emulator</button> <button id="incard" class="alt">Card</button></p>
-        <p class="small">Adding writes into the FM-1 and restarts it (a few seconds). Save what you are playing first: changes you have not saved are lost in the restart. Adding needs PERF-1 0.16.3 or later.</p>
+        <p class="small">Adding writes into the FM-1 and restarts it (a few seconds). Save what you are playing first: changes you have not saved are lost in the restart. Adding requires the installed firmware to support backup and restore.</p>
       </div>
       <canvas id="incardview" class="card-img" hidden></canvas>
       <progress id="addbar" max="100" value="0"></progress>
@@ -180,6 +167,7 @@ img.logo{{display:none}}
 <script type="application/json" id="ldata">/*LIBRARY*/</script>
 <script type="application/json" id="rdata">/*RELAY*/</script>
 <script type="module">
+/*DEVICE*/
 /*LIB*/
 const $ = (id) => document.getElementById(id);
 const D = JSON.parse($("pdata").textContent), S = shareNames(D), { P, E, N } = S;
@@ -211,39 +199,35 @@ function route() {
 
 // ---------------------------------------------------------------- the FM-1's MIDI port
 let port = null;
-const NOANS = "The FM-1 did not answer. Replug it and try again.";
-idleRelease(() => false, () => { port = null; });   // the FM-1's port let go after 4 s quiet (web/fm1idle.js)
+const device = createDeviceClient(DEVICE_DATA, {
+  requestMidi: navigator.requestMIDIAccess ? () => midiAccess() : null,
+  onMessage: receiveDevice,
+  onDisconnect: (_session, error) => { port = null; $("scansay").textContent = $("addsay").textContent = error.message; },
+});
+window.addEventListener("pagehide", () => { device.close(); port = null; });
+const NOANS = device.text("noanswer");
+idleRelease(() => device.busy, () => { device.close(); port = null; });
 async function openPort() {
   if (port && port.inp.state !== "disconnected" && port.out.state !== "disconnected") return port;
-  if (!navigator.requestMIDIAccess) throw new Error("This browser cannot talk to the FM-1. Open the page in Chrome or Edge.");
-  let midi;
-  try { midi = await midiAccess(); } catch (e) { throw new Error("MIDI (SysEx) was not allowed. Allow MIDI in the site settings (address bar) and try again."); }
-  const pick = (m) => [...m.values()].find((x) => /fm-?1/i.test(x.name) && !/ota/i.test(x.name) && x.state !== "disconnected");
-  const inp = pick(midi.inputs), out = pick(midi.outputs);
-  if (!inp || !out) throw new Error("FM-1 not found. Check the USB cable (a data cable), close other apps that use MIDI, and try again.");
-  port = { inp, out, bkwait: [], onframe: null, onabout: null };
-  inp.onmidimessage = (ev) => {
+  port = await device.open(); Object.assign(port, { bkwait: [], onframe: null, onabout: null }); return port;
+}
+function receiveDevice(ev, session) {
     const d = ev.data;
     idleTouch();
     if (d[0] !== 0xF0 || d[1] !== 0x7D || d[2] !== 0x50) return;
-    if (d[3] === 0x43 && port.onframe) port.onframe(d);
-    else if (d[3] === 0x44) { const w = port.bkwait.shift(); if (w) w(bkParseAck(Array.from(d))); }
-    else if (d[3] === 0x45 && port.onabout) port.onabout(pcParseAbout(Array.from(d)));
-  };
-  return port;
+    if (d[3] === 0x43 && session.onframe) session.onframe(d);
+    else if (d[3] === 0x44) { const w = session.bkwait.shift(); if (w) w(bkParseAck(Array.from(d))); }
+    else if (d[3] === 0x45 && session.onabout) session.onabout(pcParseAbout(Array.from(d)));
+
 }
-function about(p) {                                               // what the firmware is, or null (older than 0.16.3: no answer)
-  return new Promise((res) => {
-    const tm = setTimeout(() => { p.onabout = null; res(null); }, 1500);
-    p.onabout = (a) => { clearTimeout(tm); p.onabout = null; res(a); };
-    p.out.send(pcAboutMsg());
-  });
-}
+function about(p) { return device.about(p); }
 function readObject(p, obj) {                                     // its bytes (an empty array: nothing stored), or undefined when the FM-1 goes quiet
   return new Promise((resolve) => {
     const got = new Map();
     let tm;
-    const finish = (r) => { clearTimeout(tm); p.onframe = null; resolve(r); };
+    const finish = (r) => { clearTimeout(tm); p.onframe = null; p.pending.delete(cancel); resolve(r); };
+    const cancel = () => finish(undefined);
+    p.pending.add(cancel);
     const arm = () => { clearTimeout(tm); tm = setTimeout(() => finish(undefined), 3000); };
     p.onframe = (d) => {
       const f = bkParseFrame(d);
@@ -268,7 +252,9 @@ function readObject(p, obj) {                                     // its bytes (
 async function readMust(p, obj) { const d = await readObject(p, obj); if (d === undefined) throw new Error(NOANS); return d; }
 function waitBk(p, ms) {
   return new Promise((res) => {
-    const w = (a) => { clearTimeout(tm); res(a); };
+    const w = (a) => { clearTimeout(tm); p.pending.delete(cancel); res(a); };
+    const cancel = () => w(null);
+    p.pending.add(cancel);
     p.bkwait.push(w);
     const tm = setTimeout(() => { const i = p.bkwait.indexOf(w); if (i >= 0) p.bkwait.splice(i, 1); res(null); }, ms);
   });
@@ -327,7 +313,7 @@ async function libItem(code, extra) {
 async function addItems(list, extra) {
   for (const it of list) {
     if (!it || !it.code || items.some((i) => i.code === it.code)) continue;
-    try { items.push(await libItem(it.code, { ...extra(it) })); } catch (_) { /* a code this page cannot read (a newer PERF-1's): left out */ }
+    try { items.push(await libItem(it.code, { ...extra(it) })); } catch (_) { /* a code this page cannot read (a newer NAIWAN 91's): left out */ }
   }
 }
 async function loadLibrary() {
@@ -433,7 +419,7 @@ function showIncoming(x) {
   }
   const genres = x.kind === "set" ? x.list.filter((v) => v).map((v) => pcSetPlaces([v])[0].genre) : [x.genre];
   const unknown = genres.some((g) => g >= N.genres.length);
-  if (unknown) add("sub", "This needs a genre this page does not know: a newer PERF-1.");
+  if (unknown) add("sub", "This file uses a genre this page does not know. Open the current NAIWAN 91 pieces page.");
   $("incoming").hidden = false;
   $("add").disabled = $("hear").disabled = unknown;
   $("addsay").textContent = "";
@@ -461,18 +447,18 @@ async function placeVoice(cur, voice, want) {
   if (to === null || to < 0) throw new Error("Not added.");
   return to;
 }
-$("add").addEventListener("click", async () => {
+$("add").addEventListener("click", deviceAction(device, async () => {
   const x = incoming, say = (t) => { $("addsay").textContent = t; };
   if (!x) return;
   $("add").disabled = true;
   try {
     const p = await openPort();
     const ab = await about(p);
-    if (!ab) throw new Error("This FM-1 has a PERF-1 older than 0.16.3: update it on the Install page first, then add it.");
+    if (!deviceCapabilities(ab).backup) throw device.error("unsupported");
     const pieces = x.kind === "set" ? x.pieces.map((q) => ({ ...q, rec: q.rec.slice() })) : [{ ...x, rec: x.rec.slice(), slot: +$("slot").value }];
     const genres = [...new Set((x.kind === "set" ? x.list.filter((v) => v).map((v) => pcSetPlaces([v])[0].genre) : []).concat(pieces.map((q) => q.genre)))];
     const missing = genres.filter((g) => g >= ab.genres);
-    if (missing.length) throw new Error("This FM-1 does not have " + missing.map(S.genreName).join(", ") + " yet: update PERF-1 on the Install page first.");
+    if (missing.length) throw new Error("This FM-1 does not have " + missing.map(S.genreName).join(", ") + " yet: update NAIWAN 91 on the Install page first.");
     // the voices
     let vox = null;
     const cur = await readMust(p, S.OBJ_VOICES);
@@ -507,14 +493,14 @@ $("add").addEventListener("click", async () => {
       throw new Error("Not added." + (x.kind === "set" ? "" : " Choose another place for it."));
     let glob = null;
     if (x.kind === "set") glob = pcGlobWith(await readMust(p, S.OBJ_GLOB), x, S.globDefs);
-    // the Progression page's chord types (0.16.6 on; an older PERF-1 does not answer for the object): each piece's, cleared when it has none
+    // the Progression page's chord types (0.16.6 on; an older NAIWAN 91 does not answer for the object): each piece's, cleared when it has none
     let knd = null;
     const kcur = await readObject(p, S.OBJ_KINDS);
     if (kcur !== undefined) {                                     // 0.16.28 on (about version 2): the pieces' extras, with FILTERS and SCREAM; before, the types alone
       knd = kcur;
       for (const q of pieces) knd = ab.ver >= 2 ? pcExtrasWith(knd, q.genre, q.slot, q.kinds || null, q.fx || null, ab.genres) : pcKindsWith(knd, q.genre, q.slot, q.kinds || null, ab.genres);
     }
-    else if (pieces.some((q) => q.kinds) && !(await ask("Its chord types", "This " + (x.kind === "set" ? "set" : "piece") + " sets chord types on the Progression page, which this PERF-1 is too old to keep: it will play each chord as the piece's own type. Update on the Install page to hear it as made.", [["Add it anyway", 1], ["Cancel", 0, true]])))
+    else if (pieces.some((q) => q.kinds) && !(await ask("Its chord types", "This " + (x.kind === "set" ? "set" : "piece") + " sets chord types on the Progression page, which this firmware does not store: it will play each chord as the piece's own type. Update on the Install page to hear it as made.", [["Add it anyway", 1], ["Cancel", 0, true]])))
       throw new Error("Not added.");
     // the writes, then the restart
     // the pieces' bass steps (0.16.29 on: about version 3), each piece's (cleared when it has none)
@@ -522,7 +508,7 @@ $("add").addEventListener("click", async () => {
     if (ab.ver >= 3) {
       const bcur = await readObject(p, S.OBJ_BSTEP);
       if (bcur !== undefined) { bst = bcur; for (const q of pieces) bst = pcBassWith(bst, q.genre, q.slot, q.bass || null, ab.genres); }
-    } else if (pieces.some((q) => q.bass) && !(await ask("Its bass steps", "This " + (x.kind === "set" ? "set" : "piece") + " has bass steps, which this PERF-1 is too old to keep: its bass plays its own line. Update on the Install page to hear it as made.", [["Add it anyway", 1], ["Cancel", 0, true]])))
+    } else if (pieces.some((q) => q.bass) && !(await ask("Its bass steps", "This " + (x.kind === "set" ? "set" : "piece") + " has bass steps, which this firmware does not store: its bass plays its own line. Update on the Install page to hear it as made.", [["Add it anyway", 1], ["Cancel", 0, true]])))
       throw new Error("Not added.");
     const steps = (vox ? 1 : 0) + Object.keys(banks).length + (glob ? 1 : 0) + (knd ? 1 : 0) + (bst ? 1 : 0);
     let done = 0;
@@ -539,10 +525,10 @@ $("add").addEventListener("click", async () => {
     originsSet(pieces.map((q) => ({ genre: q.genre, slot: q.slot, t: m.t || (x.kind === "set" ? "a shared set" : S.tagOf(x)), a: m.a, rec: q.rec })));
     say(x.kind === "set" ? "Added. The FM-1 restarts: GLO twice shows the set list." :
       "Added as " + S.tagOf(pieces[0]) + ". The FM-1 restarts: then GLO + PRESETS to " + S.genreName(x.genre) + ", PRESETS to " + S.pieceName(x.genre, pieces[0].slot) + "." +
-      (x.npar > ab.npar ? " It was made with a newer PERF-1: update yours to hear all of it." : ""));
+      (x.npar > ab.npar ? " It uses more settings than this firmware reported: check the Install page to hear all of it." : ""));
   } catch (err) { say(err.message); $("addbar").value = 0; }
   $("add").disabled = false;
-});
+}, (message) => $("addsay").textContent = message));
 $("hear").addEventListener("click", () => {
   if (!incoming) return;
   try { $("addsay").textContent = emuPut(S, incoming, +$("slot").value); window.open("../emu/", "_blank", "noopener"); }
@@ -552,7 +538,7 @@ $("hear").addEventListener("click", () => {
 // ---------------------------------------------------------------- my FM-1: read, tick one or many, then download, copy, card or submit
 let mine = [], mySet = null;
 const ticked = () => [...document.querySelectorAll("#mine input.one:checked")].map((r) => r.value);
-$("scan").addEventListener("click", async () => {
+$("scan").addEventListener("click", deviceAction(device, async () => {
   const say = (t) => { $("scansay").textContent = t; };
   $("scan").disabled = true;
   mine = []; mySet = null; $("mine").textContent = ""; $("sharebox").hidden = true;
@@ -561,7 +547,7 @@ $("scan").addEventListener("click", async () => {
     for (let g = 0; g < N.genres.length; g++) {
       say("Reading " + S.genreName(g) + "…"); $("scanbar").value = Math.round((100 * g) / N.genres.length);
       const bank = await readObject(p, S.objOf(g));
-      if (bank === undefined) { if (g === 0) throw new Error("The FM-1 did not answer (a PERF-1 without Backup?). Replug it and try again."); continue; }
+      if (bank === undefined) { if (g === 0) throw device.error("unsupported"); continue; }
       const saved = pcSaved(bank);
       for (let i = 0; i < 10; i++) if ((saved >> i) & 1) mine.push(pcFromBank(bank, g, i));
     }
@@ -592,7 +578,7 @@ $("scan").addEventListener("click", async () => {
   } catch (err) { say(err.message); }
   $("scanbar").value = 0;
   $("scan").disabled = false;
-});
+}, (message) => $("scansay").textContent = message));
 function showMine() {
   const box = $("mine");
   box.textContent = "";

@@ -1,0 +1,8 @@
+{
+  "name": "NAIWAN 91",
+  "slug": "naiwan91",
+  "releaseVersion": "0.3.0",
+  "hardware": "FM-1",
+  "source": "https://github.com/superposition/91",
+  "languages": ["en", "ja"]
+}

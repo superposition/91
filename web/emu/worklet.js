@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// AMB-1 in an AudioWorklet: amb.wasm is the whole FM-1 app (web/emu/amb_web.c). Each render
+// NAIWAN 91 in an AudioWorklet: amb.wasm is the whole FM-1 app (web/emu/amb_web.c). Each render
 // quantum asks it for 128 frames, which runs the device's clock forward; between quanta the page's
 // input goes in and, about 30 times a second, the screen, the lights and any saved objects go out.
 
@@ -20,10 +20,17 @@ export class Amb extends ProcessorBase {
     this.lastFrame = 0;
     this.busy = 0;
     this.frames = 0;
-    this.port.onmessage = (e) => this.onMessage(e.data);
+    this.disposed = false;
+    this.port.onmessage = (e) => {
+      this.onMessage(e.data).catch((error) => {
+        if (!this.disposed) this.port.postMessage({ type: "error", message: error.message || String(error) });
+      });
+    };
   }
 
   async onMessage(m) {
+    if (m.type === "dispose") { this.dispose(); return; }
+    if (this.disposed) return;
     if (m.type === "load") {
       const now = () => BigInt(Math.round(this.audioTime() * 1e9));
       const wasi = {
@@ -37,6 +44,7 @@ export class Amb extends ProcessorBase {
       const stub = new Proxy(wasi, { get: (t, k) => (k in t ? t[k] : () => 0) });
       const env = new Proxy({}, { get: () => () => 0 });
       const { instance } = await WebAssembly.instantiate(m.wasm, { wasi_snapshot_preview1: stub, env });
+      if (this.disposed) return;
       this.ex = instance.exports;
       this.mem = this.ex.memory;
       if (this.ex._initialize) this.ex._initialize();
@@ -64,6 +72,14 @@ export class Amb extends ProcessorBase {
     }
   }
 
+  dispose() {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.ex = this.mem = this.input = null;
+    this.port.onmessage = null;
+    this.port.close?.();
+  }
+
   publish() {
     const ex = this.ex;
     const blits = ex.web_blits();
@@ -73,6 +89,22 @@ export class Amb extends ProcessorBase {
       rejections: ex.web_rust_stat(2), fallbacks: ex.web_rust_stat(3),
       bassEvents: ex.web_rust_stat(4),
       sessions: ex.web_rust_stat(5),
+      commands: { accepted: ex.web_rust_stat(6), consumed: ex.web_rust_stat(7),
+        dropped: ex.web_rust_stat(8), highWater: ex.web_rust_stat(9) },
+      transport: { pulses: ex.web_rust_stat(10), chunks: ex.web_rust_stat(11),
+        controls: ex.web_rust_stat(12) },
+      handoff: { published: ex.web_rust_stat(13), copied: ex.web_rust_stat(14),
+        claims: ex.web_rust_stat(15), activations: ex.web_rust_stat(16),
+        rejected: ex.web_rust_stat(17) },
+      sequencer: { lanes: ex.web_rust_stat(18), mutations: ex.web_rust_stat(19),
+        waits: ex.web_rust_stat(20), boundaries: ex.web_rust_stat(21) },
+      melodic: { acidSteps: ex.web_rust_stat(22), acidMutations: ex.web_rust_stat(23),
+        pluckSteps: ex.web_rust_stat(24), bassSteps: ex.web_rust_stat(25),
+        barDecisions: ex.web_rust_stat(26), midiTransport: ex.web_rust_stat(27) },
+      effects: { masterSamples: ex.web_rust_stat(28), echoSamples: ex.web_rust_stat(29),
+        tankSamples: ex.web_rust_stat(30), colourSampleCalls: ex.web_rust_stat(31) },
+      factory: { accesses: ex.web_rust_stat(32), codecs: ex.web_rust_stat(33),
+        rejections: ex.web_rust_stat(34), copiedBytes: ex.web_rust_stat(35) },
     };
     if (ex.web_bg) msg.bg = Array.from(new Float32Array(this.mem.buffer, ex.web_bg(), 12));   // for the stream view's background
     if (this.frames >= 44100) {                       // the share of real time spent running the device
@@ -98,6 +130,7 @@ export class Amb extends ProcessorBase {
   }
 
   process(inputs, outputs) {
+    if (this.disposed) return false;
     if (!this.ex) return true;
     const out = outputs[0];
     const n = out[0].length;
@@ -127,7 +160,12 @@ export function createHttpAudioNode(context) {
   node.onaudioprocess = (event) => processor.process([], [[
     event.outputBuffer.getChannelData(0), event.outputBuffer.getChannelData(1),
   ]]);
+  let disposed = false;
   node.dispose = () => {
+    if (disposed) return;
+    disposed = true;
+    node.onaudioprocess = null;
+    processor.dispose();
     node.disconnect(); channel.port1.close(); channel.port2.close();
   };
   return node;
