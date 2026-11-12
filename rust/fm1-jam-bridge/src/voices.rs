@@ -3,6 +3,9 @@
 use core::sync::atomic::{AtomicU32, Ordering};
 use fm1_engine::voices::{self, Drum, DrumsConfig, Mix, Pluck, PluckConfig};
 static COUNTERS: [AtomicU32; 8] = [const { AtomicU32::new(0) }; 8];
+pub(super) fn config_count() {
+    COUNTERS[7].fetch_add(1, Ordering::Relaxed);
+}
 use voices::setup;
 /// # Safety
 /// Four initialized/aligned pad states are exclusively writable. No reentry.

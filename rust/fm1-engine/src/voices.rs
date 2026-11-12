@@ -2,6 +2,7 @@
 //! Fixed voice state and block-scoped sample kernels over caller-owned buffers.
 use crate::effects::math::{flush, max, min, tanh};
 pub mod acid;
+pub mod config;
 pub mod data;
 pub mod drone;
 pub mod pad;

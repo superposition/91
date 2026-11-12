@@ -7,6 +7,7 @@
 #endif
 #if EN_RUST_VOICES
 #include "rust_voices.h"
+_Static_assert(P_NPARAMS==176,"Rust block parameter ABI");
 #endif
 #if EN_RUST_MELODIC
 #include "rust_melodic.h"
@@ -7551,6 +7552,7 @@ static uint32_t ch_i;
 static float pad_lk;                             /* the snare link, as it was when the chunk began (the pad may be rendered on the other core) */
 
 #if EN_RUST_VOICES
+#include "rust_voice_config.inc"
 #include "rust_pad.inc"
 #endif
 static void pad_bus(uint32_t n)
@@ -8071,8 +8073,7 @@ static void render_fm(uint32_t n)
 static void render_cm(uint32_t n)
 {
 #if EN_RUST_VOICES
-    const int sn=par[P_CM_SND]<0?0:par[P_CM_SND]>=CM_NPLAIN?CM_NPLAIN-1:par[P_CM_SND];const cm_snd_t *s=&CM_SOUND[sn];
-    const fm1_voice_pluck_config_t c={cm_vol*0.5f*s->g,HB(EN_V_PLUCK)?hb_pf:1.0f,s->fr,s->i0,s->i1,trk_g[TR_CM],trk_g1[TR_CM],tg_inv,en_cm_level,s->rise,(uint32_t)(par[P_CM_SND]>=CM_NPLAIN)};
+    const fm1_voice_pluck_config_t c=voice_pluck_config();
     float *const outputs[4]={mixl,mixr,rsend,esend};cm_midi_step((int32_t)n);
     en_cm_level=fm1_rust_voice_pluck(cm,&c,SINT,outputs,n);
 #else
@@ -8592,10 +8593,7 @@ static void render_perc(drum_t *v, uint32_t n, float g)
 static void render_drums(uint32_t n)
 {
 #if EN_RUST_VOICES
-    const float g=pulse_vol*1.1f;
-    const fm1_voice_drums_config_t c={{g*lane_g[L_KICK]*1.15f,g*0.38f*lane_g[L_SNARE],g*0.42f*lane_g[L_CLAP],g*0.22f*lane_g[L_HAT],g*0.18f*lane_g[L_OHAT],g*0.3f*lane_g[L_PERC]},
-        {hat_inc[0],hat_inc[1],hat_inc[2],hat_inc[3]},drive_k*KK->k_drive,KK->k_drop,KK->k_click,KK->k_rumble,KS->sn_body,KS->sn_noise,KS->cl_gap,KH->h_noise,
-        {trk_g[TR_KICK],trk_g[TR_SNARE],trk_g[TR_HATS],trk_g[TR_PERC]},{trk_g1[TR_KICK],trk_g1[TR_SNARE],trk_g1[TR_HATS],trk_g1[TR_PERC]},tg_inv};
+    const fm1_voice_drums_config_t c=voice_drums_config();
     float *const outputs[4]={mixl,mixr,rsend,esend};fm1_rust_voice_drums(drum,&c,SINT,&noise,outputs,n);
 #else
     uint32_t j;

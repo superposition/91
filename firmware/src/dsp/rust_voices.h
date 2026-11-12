@@ -55,3 +55,5 @@ typedef struct {uint8_t held,glow;uint8_t padding[2];fm1_voice_events_t events;}
 _Static_assert(sizeof(fm1_voice_key_t)==44 && sizeof(fm1_voice_key_result_t)==104 && sizeof(fm1_voice_drum_setup_t)==20 && sizeof(fm1_voice_acid_setup_t)==36,"Voice lifecycle ABI");
 extern void fm1_rust_voice_key(fm1_voice_pad_t *,fm1_voice_drone_t *,fm1_voice_acid_t *,uint8_t *,uint8_t *,uint32_t *,const fm1_voice_key_t *,fm1_voice_key_result_t *);
 extern void fm1_rust_voice_quiet(fm1_voice_pad_t *,fm1_voice_drone_t *,fm1_voice_acid_t *,fm1_voice_drum_t *,uint8_t *);
+
+#include "rust_voice_config.h"

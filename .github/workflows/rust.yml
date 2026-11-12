@@ -95,6 +95,8 @@ jobs:
         run: sh tests/rust_pad_parity.sh
       - name: Voice recipes, controls, note lifecycle and MIDI order
         run: sh tests/rust_voice_setup.sh
+      - name: Voice block coefficients and raw capture compatibility
+        run: sh tests/rust_voice_config.sh
       - name: FM6 tables and operator components
         run: sh tests/rust_fm6_tables.sh
       - name: FM6 allocator, FIFO and voice lifecycle
@@ -138,6 +140,8 @@ jobs:
             build/pad/source-verification.log
             build/voice-setup/*.json
             build/voice-setup/source-verification.log
+            build/voice-config/*.json
+            build/voice-config/source-verification.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:

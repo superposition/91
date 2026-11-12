@@ -17,6 +17,7 @@ mod handoff;
 mod melodic;
 mod sequencer;
 mod transport;
+mod voice_config;
 mod voices;
 
 static VALIDATIONS: AtomicU32 = AtomicU32::new(0);
