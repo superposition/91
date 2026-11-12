@@ -1,5 +1,7 @@
 # Voice DSP checkpoints
 
+This document records its implementation checkpoint. The current qualified family/control boundary and remaining call map are in [VOICES_PARAMETERS.md](VOICES_PARAMETERS.md).
+
 [R10 / #11](https://github.com/superposition/91/issues/11) separates the analog voice sample loops from the surrounding application. This first checkpoint moves all six percussion lanes and both plain-pluck voices into safe `no_std` Rust. The active noise/vinyl generator already runs in the separately tested Rust effects module. Pad, drone/bass and acid DSP remain the next work; this checkpoint does not close the whole ticket.
 
 [`voices.rs`](../../rust/fm1-engine/src/voices.rs) operates on fixed state and borrowed buffers. Under `EN_RUST_VOICES`, the existing C drum/pluck objects have the matching Rust ABI layout. A bridge call borrows the six drums or two plucks, the read-only 1,025-value sine table and four disjoint mix/send buffers for the duration of a block. The shared drum noise seed is borrowed exclusively for the percussion call. No callback occurs during those borrows, and no pointer survives them. The original C0 definitions and functions remain selectable; the hardware build still selects C0.

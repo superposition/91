@@ -736,6 +736,15 @@ static float de_dec_s(int v) { return fm1_rust_voice_time(5,v); }
 #else
 static float de_dec_s(int v) { return 0.05f * fm_exp2f((float)v * 0.0832f); }         /* 0.05 .. 16 s */
 #endif
+static float voice_acid_decay(int v)
+{
+#if EN_RUST_VOICES
+    return fm1_rust_voice_acid_decay(v);
+#else
+    return 0.06f*fm_exp2f((float)v*0.05f);
+#endif
+}
+
 
 static char *itoa_s(int v, char *b)
 {
@@ -1622,11 +1631,19 @@ static const acid_snd_t ACID_SOUND[EN_NACID] = {
 static int pad_snd(void) { return (unsigned)par[P_PADTONE] < EN_NSOUND ? par[P_PADTONE] : 0; }
 static int pad_stabs(void)                      /* Comp: Hold never stabs, a rhythm always does, Auto as the sound is */
 {
+#if EN_RUST_VOICES
+    return (int)fm1_rust_voice_pad_identity(par,en_jam_on,0);
+#else
     const int c = par[P_PAD_COMP];
     if(en_jam_on) return 1;
     return c == 1 ? 0 : c >= 2 ? 1 : PAD_SOUND[pad_snd()].stabs;
+#endif
 }
+#if EN_RUST_VOICES
+static int pad_osc(void) { return (int)fm1_rust_voice_pad_identity(par,en_jam_on,1); }
+#else
 static int pad_osc(void) { return PAD_SOUND[pad_snd()].osc; }
+#endif
 static uint8_t stabs_were;                      /* the pad was stabbing (to start the breaths again after) */
 
 void en_style_sounds(int16_t *p)                /* a stored style (1..4): its kit and sounds, as it sounded */
@@ -1657,7 +1674,13 @@ static float stab_env, stab_k = 0.99f;          /* the pad's stabs: the envelope
  * moment (a rolling bass from the kick's pattern), each snare or clap flashes the pad's filter open, a
  * hat on an acid note accents it, and the perc lane can be the acid's clock (it steps only on a perc
  * hit; in a breakdown, with the drums out, it runs free again). Each by its amount (0: none). */
-static float lk_kick, lk_snare;                 /* their envelopes, 1 at a hit, falling */
+#if EN_RUST_VOICES
+static fm1_voice_links_t voice_links;
+#define lk_kick voice_links.kick
+#define lk_snare voice_links.snare
+#else
+static float lk_kick, lk_snare;
+#endif                 /* their envelopes, 1 at a hit, falling */
 static uint8_t lk_hat;                          /* a hat on this sixteenth */
 static int links_on(void);
 
@@ -2995,7 +3018,7 @@ fm1_acid_t s;fm1_acid_config_t c;fm1_harmony_t h;fm1_acid_note_t result;
     if(result.action==1){
         if(ac_wait>0){ac_wait=0;acid_fire();}
         ac_pend.n=result.note;ac_pend.beat=(uint8_t)result.beat;ac_pend.slid_ok=(uint8_t)result.slid_ok;
-        ac_pend.dec=0.06f*fm_exp2f((float)par[P_AC_DEC]*0.05f);ac_pend.acc=(uint8_t)result.accent;
+        ac_pend.dec=voice_acid_decay(par[P_AC_DEC]);ac_pend.acc=(uint8_t)result.accent;
         ac_pend.hat=(uint8_t)(lk_hat&&links_on());ac_pend.slide=(uint8_t)result.slide;
         if(wait>0)ac_wait=wait;else acid_fire();
     }else if(result.action==2){acid.gate_left=0;acid.amp_t=0.0f;}
@@ -3028,7 +3051,7 @@ fm1_acid_t s;fm1_acid_config_t c;fm1_harmony_t h;fm1_acid_note_t result;
         ac_pend.n = acid_note(ss, v);
         ac_pend.beat = (uint8_t)!(st & 3);
         ac_pend.slid_ok = (uint8_t)((ac_slide >> prev & 1u) && (ac_gate >> prev & 1u));
-        ac_pend.dec = 0.06f * fm_exp2f((float)par[P_AC_DEC] * 0.05f);   /* 0.06 .. 1.9 s */
+        ac_pend.dec = voice_acid_decay(par[P_AC_DEC]);   /* 0.06 .. 1.9 s */
         ac_pend.acc = (uint8_t)((ac_accent & m) != 0u);
         ac_pend.hat = (uint8_t)(lk_hat && links_on());
         ac_pend.slide = (uint8_t)((ac_slide & m) != 0u);
@@ -3332,7 +3355,7 @@ static int kick_note(void) { return 28 + (par[P_ROOT] + 8) % 12; }   /* E1 .. Eb
 static void drum_fire(int d, float vel)
 {
 #if EN_RUST_VOICES
-    const fm1_voice_drum_setup_t c={d==L_OHAT && crash_next?1.0f:lane_dec[d],tunefac,lane_tune[d]+(d==L_SNARE?snr_rise:d==L_PERC?perc_fall:0.0f),vel,kick_note()};
+    const fm1_voice_drum_setup_t c={lane_dec[d],tunefac,lane_tune[d],vel,kick_note(),snr_rise,perc_fall,crash_next};
     const kit_t *kits[4]={KK,KS,KH,KP};
     if(d==L_OHAT)crash_next=0;
     fm1_rust_voice_drum_setup(drum,(uint32_t)d,&c,kits);
@@ -3398,12 +3421,16 @@ static void drum_fire(int d, float vel)
     }
     }
 #endif
+#if EN_RUST_VOICES
+    fm1_rust_voice_links_hit(&voice_links,(uint32_t)d,vel,(uint32_t)links_on());
+#else
     if (links_on()) {                           /* the links: the hits into the voices */
         if (d == L_KICK)
             lk_kick = fm_maxf(lk_kick, vel);
         else if (d == L_SNARE || d == L_CLAP)
             lk_snare = fm_maxf(lk_snare, vel);
     }
+#endif
     en_drum_glow[d] = 1.0f;
     midi_drum(d, (uint32_t)(vel * 100.0f));
 }
@@ -3682,9 +3709,18 @@ volatile float en_cm_level;
 
 static void cm_trigger(int note, float vel)     /* a note: the next voice, its decay as the Decay knob has it */
 {
+#if EN_RUST_VOICES
+    fm1_voice_pluck_note_t c;fm1_rust_voice_pluck_note(&cm_alt,par[P_CM_DEC],(uint32_t)(par[P_CM_SND]>=CM_NPLAIN),vel,&c);const int voice=c.slot;
+#else
     const int voice = cm_alt ^= 1;
+#endif
     en_cm_note = (uint8_t)note;                 /* (for the screen: the sigil's rune at this note) */
     en_cm_count++;
+#if EN_RUST_VOICES
+    cm_midi_on(note,c.velocity,c.midi_samples);
+    if(par[P_CM_SND]>=CM_NPLAIN){fm_note_on(note,vel,c.key_samples);return;}
+    fm1_rust_voice_pluck_setup(&cm[voice],note,vel,c.decay,tunefac);
+#else
     const float dec = 0.1f * fm_exp2f((float)par[P_CM_DEC] * 0.045f);   /* the time to silence: 0.1 .. 2.2 s */
     const float dk = (float)par[P_CM_DEC] * 0.01f, key_s = 0.12f + 1.6f * dk * dk;   /* a DX voice's key time */
     cm_midi_on(note, (uint32_t)fm_clampf(40.0f + 87.0f * vel, 1.0f, 127.0f), (int32_t)((par[P_CM_SND] >= CM_NPLAIN ? key_s : dec) * EN_SR));
@@ -3692,9 +3728,6 @@ static void cm_trigger(int note, float vel)     /* a note: the next voice, its d
         fm_note_on(note, vel, (int32_t)(key_s * EN_SR));
         return;
     }
-#if EN_RUST_VOICES
-    fm1_rust_voice_pluck_setup(&cm[voice],note,vel,dec,tunefac);
-#else
     cm[voice].inc = mtof((float)note) * (1.0f / EN_SR);
     cm[voice].ps = 0.0f;
     cm[voice].env = 1.0f;
@@ -3705,12 +3738,16 @@ static void cm_trigger(int note, float vel)     /* a note: the next voice, its d
 }
 static void cm_play(int key, float vg)          /* a note played by hand (the JAM page, pads): the key is the pitch, within the song's and the pluck's octaves; vg the velocity / 100 */
 {
+#if EN_RUST_VOICES
+    fm1_voice_manual_pluck_t c;fm1_rust_voice_manual_pluck(par,key,vg,&c);cm_trigger(c.note,c.velocity);
+#else
     int note = key + 12 * (par[P_OCT] + par[P_CM_OCT]);
     while (note > 100)
         note -= 12;
     while (note < 36)
         note += 12;
     cm_trigger(note, fm_minf(0.95f * vg, 1.15f));
+#endif
 }
 
 
@@ -5261,6 +5298,11 @@ static void tempo_set(void)
     duck_dec = fm_expf(-4.0f / (step_len * 3.0f));   /* the duck: back up in about three sixteenths */
 }
 
+#if EN_RUST_VOICES
+#define VOICE_VALUE(id,v,legacy) fm1_rust_voice_parameter((uint32_t)(id),(v))
+#else
+#define VOICE_VALUE(id,v,legacy) (legacy)
+#endif
 static void apply(int p, int v)
 {
     const en_param_t *pi = &PARAMS[p];
@@ -5272,21 +5314,21 @@ static void apply(int p, int v)
     if (p >= P_LANE && p < P_ECHO) {             /* a drum lane's level, tune or decay */
         int l = (p - P_LANE) / 3, k = (p - P_LANE) % 3;
         if (k == 0)
-            lane_g[l] = (float)(v * v) * 0.0001f;
+            lane_g[l] = VOICE_VALUE(p,v,(float)(v * v) * 0.0001f);
         else if (k == 1)
-            lane_tune[l] = (float)v * 0.24f;     /* semitones: an octave either way */
+            lane_tune[l] = VOICE_VALUE(p,v,(float)v * 0.24f);     /* semitones: an octave either way */
         else
-            lane_dec[l] = (float)v * 0.01f;
+            lane_dec[l] = VOICE_VALUE(p,v,(float)v * 0.01f);
         return;
     }
     switch (p) {
-    case P_PAD: pad_vol = (float)(v * v) * 0.0001f; break;
-    case P_ACID: acid_vol = (float)(v * v) * 0.0001f; break;
-    case P_CM_LVL: cm_vol = (float)(v * v) * 0.0001f; break;
-    case P_BASS: bass_vol = (float)(v * v) * 0.0001f; break;
-    case P_PULSE: pulse_vol = (float)(v * v) * 0.0001f; break;
-    case P_NOISE: noise_vol = (float)(v * v) * 0.0001f; break;
-    case P_DETUNE: detune = 0.00144f * fm_exp2f((float)v * 0.0332f); break;   /* 2.5 .. 25 cents */
+    case P_PAD: pad_vol = VOICE_VALUE(p,v,(float)(v * v) * 0.0001f); break;
+    case P_ACID: acid_vol = VOICE_VALUE(p,v,(float)(v * v) * 0.0001f); break;
+    case P_CM_LVL: cm_vol = VOICE_VALUE(p,v,(float)(v * v) * 0.0001f); break;
+    case P_BASS: bass_vol = VOICE_VALUE(p,v,(float)(v * v) * 0.0001f); break;
+    case P_PULSE: pulse_vol = VOICE_VALUE(p,v,(float)(v * v) * 0.0001f); break;
+    case P_NOISE: noise_vol = VOICE_VALUE(p,v,(float)(v * v) * 0.0001f); break;
+    case P_DETUNE: detune = VOICE_VALUE(p,v,0.00144f * fm_exp2f((float)v * 0.0332f)); break;   /* 2.5 .. 25 cents */
     case P_CM_LOCK:
 #if EN_RUST_MELODIC
         {fm1_pluck_t s;fm1_pluck_config_t c;melodic_pluck_get(&s,&c);fm1_rust_pluck_parameter(&s,1,v);melodic_pluck_put(&s);}
@@ -5295,7 +5337,7 @@ static void apply(int p, int v)
 #endif
         break;  /* frozen: the line starts with the bar */
     case P_NZ_COLOR: nz_color = v; break;
-    case P_NZ_PUMP: nz_pump = (float)v * 0.01f; break;
+    case P_NZ_PUMP: nz_pump = VOICE_VALUE(p,v,(float)v * 0.01f); break;
     case P_BASSOCT:
         if (nsteps)
             bass_to(bass.midi_note % 12);
@@ -5334,13 +5376,17 @@ static void apply(int p, int v)
         cm_publish();
         break;
     case P_BL_MODE:                              /* back to the drone: the root again; a line starts from silence */
+#if EN_RUST_VOICES
+        fm1_rust_voice_line_reset(&bl_line);
+#else
         bl_up = 0;
         bl_env = 0.0f;
         bl_gate = 0.0f;
+#endif
         if (nsteps)
             bass_to(bass_pc());
         break;
-    case P_DR_RES: reso_k = 1.5f - 0.0138f * (float)v; break;   /* none .. near singing (k 1.5 .. 0.12) */
+    case P_DR_RES: reso_k = VOICE_VALUE(p,v,1.5f - 0.0138f * (float)v); break;   /* none .. near singing (k 1.5 .. 0.12) */
     case P_AC_LEN:
 #if EN_RUST_MELODIC
         {fm1_acid_t s;fm1_acid_config_t c;melodic_acid_get(&s,&c);fm1_rust_acid_length(&s,v);melodic_acid_put(&s);}
@@ -5354,7 +5400,7 @@ static void apply(int p, int v)
         if (nsteps)
             ac_regrow();
         break;
-    case P_DRIVE: drive_k = 1.0f + 0.04f * (float)v; break;
+    case P_DRIVE: drive_k = VOICE_VALUE(p,v,1.0f + 0.04f * (float)v); break;
     case P_SWING: swing = (float)v * 0.005f; break;   /* the off sixteenths up to half a step late */
     case P_PATTERN:                              /* waits for the bar (now, while stopped) */
         pat_next = v;
@@ -5380,25 +5426,33 @@ static void apply(int p, int v)
         pl_decay_t = 0.6f + 0.375f * (float)v * 0.01f;     /* to 0.975: a long hall */
         echo_fb = 0.5f + 0.32f * (float)v * 0.01f;
         break;
-    case P_BRIGHT: bright = (float)v; break;
+    case P_BRIGHT: bright = VOICE_VALUE(p,v,(float)v); break;
     case P_EVOLVE: evolve = (float)v * 0.01f; break;
     case P_PADTONE:                              /* the voices cross over as they did for a new key */
         if (stabs_were && !pad_stabs()) {        /* out of the stabs: the breaths start over, overlapping */
             int k;
+#if EN_RUST_VOICES
+            const fm1_voice_pad_breath_t c=voice_pad_breath_config();fm1_rust_voice_restart(pad,&c,&prng,0,pad_midi);
+#else
             for (k = 0; k < EN_NPAD; k++) {
                 pad[k].t = START_T[k];
                 pad_breathe(&pad[k], k);
             }
+#endif
         }
         stabs_were = (uint8_t)pad_stabs();
         pad_handoff();
         break;
-    case P_MOTION: motion = (float)v * 0.01f; break;
+    case P_MOTION: motion = VOICE_VALUE(p,v,(float)v * 0.01f); break;
     case P_AC_MAN:                               /* the acid off the algorithm: the line's note let go */
+#if EN_RUST_VOICES
+        fm1_rust_voice_acid_manual(&acid,(uint32_t)v);
+#else
         if (v && !acid.play) {
             acid.amp_t = 0.0f;
             acid.gate_left = 0;
         }
+#endif
         break;
     case P_DR_MAN:                               /* the drone back: to the chord's root */
         if (!v && !bass.play)
@@ -5410,10 +5464,14 @@ static void apply(int p, int v)
     case P_KIT_HAT: {
         int k;
         KH = &KITS[(unsigned)v < EN_NKIT ? v : 0];
+#if EN_RUST_VOICES
+        fm1_rust_voice_hat_setup(KH->h_metal,hat_inc);
+#else
         for (k = 0; k < 4; k++)
             hat_inc[k] = HAT_INC[k] * KH->h_metal;
+#endif
         break;
-    }    case P_TUNE: tunefac = fm_exp2f((float)v * (1.0f / 1200.0f)); break;
+    }    case P_TUNE: tunefac = VOICE_VALUE(p,v,fm_exp2f((float)v * (1.0f / 1200.0f))); break;
     case P_TEMPO:
         tempo_set();
         echo_time();
@@ -5686,6 +5744,9 @@ void en_init(void)
 #else
     q_r = q_w = 0;
 #endif
+#if EN_RUST_VOICES
+    fm1_rust_voice_initialize(pad,mod);
+#else
     for (i = 0; i < NMOD; i++) {
         mod[i].v = mod[i].tgt = 0.0f;
         mod[i].left = 0;
@@ -5706,6 +5767,7 @@ void en_init(void)
         pad[i].fh = 0.15f;
         pad[i].fr = 0.35f;
     }
+#endif
 #if EN_RUST_FACTORY
     { uint16_t boot[6][6];
       fm1_rust_factory_bank(0,0,2,(uint8_t*)boot,sizeof boot);
@@ -5783,13 +5845,21 @@ static void play_start(int from_top)
 #else
             en_lane_src[i] = lane_src[i] = (uint8_t)(par[P_LSRC + i] ? par[P_LSRC + i] - 1 : pat_now);
 #endif
+#if EN_RUST_VOICES
+        fm1_rust_voice_lfo_reset(&pad_lfo,&drone_lfo);
+#else
         pad_lfo.ph = drone_lfo.ph = 0.0f;
+#endif
     }
 #if !EN_RUST_TRANSPORT
     pulse_left = 0.0f;
 #endif
     en_playing = 1;
     pad_gate = 1.0f;
+#if EN_RUST_VOICES
+    if(!en_jam_on){const fm1_voice_pad_breath_t c=voice_pad_breath_config();fm1_rust_voice_restart(pad,&c,&prng,1,pad_midi);}
+    fm1_rust_voice_start_bass(&bass);
+#else
     for (i = 0; i < EN_NPAD; i++)               /* from silence: the breaths start over, overlapping */
         if (!en_jam_on && pad[i].amp < 1e-4f) {
             pad[i].t = START_T[i];
@@ -5799,6 +5869,7 @@ static void play_start(int from_top)
     if (bass.amp < 1e-4f)
         bass.note = bass.target;
     bass.env_up = 1;
+#endif
     if(!en_jam_on) midi(0x92, bass.midi_note, 80);
 #if EN_RUST_MELODIC
     {uint32_t status=fm1_rust_mel_message(en_ext,(uint32_t)from_top,0);if(status)midi(status,0,0);}
@@ -5825,8 +5896,12 @@ static void play_stop(void)
     jp_midi_gate=jp_pad_gate=0;jp_swell_phase=1.0f;
     for(d=0;d<2;d++){if(pad[d].pnote)midi(0x84,pad[d].pnote,0);pad[d].pnote=0;}
     pad_gate = 0.0f;
+#if EN_RUST_VOICES
+    fm1_rust_voice_acid_release(&acid);
+#else
     acid.amp_t = 0.0f;
     acid.gate_left = 0;
+#endif
 #if EN_RUST_MELODIC
     {uint32_t status=fm1_rust_mel_message(en_ext,0,1);if(status)midi(status,0,0);}
 #else
@@ -9367,6 +9442,9 @@ static void control(uint32_t n)                 /* once a chunk: the slow things
     en_drift_bars = drift_total > 0.0f && step_len > 1.0f ? fm_minf(drift_left / (step_len * 16.0f), 99.0f) : 99.0f;
     en_drift = drift_total > 0.0f ? 1.0f - fm_clampf(drift_left / drift_total, 0.0f, 1.0f) : 0.0f;
     en_acid_glow *= 0.93f;
+#if EN_RUST_VOICES
+    fm1_rust_voice_links_step(&voice_links,n,par[P_LK_KICK],par[P_LK_SNARE],(uint32_t)links_on());
+#else
     {   /* the links' envelopes: the amount sets how far and how long (kick 40 .. 160 ms, snare 80 .. 280 ms) */
         float ak = (float)par[P_LK_KICK] * 0.01f, as = (float)par[P_LK_SNARE] * 0.01f;
         lk_kick *= fm_expf(-(float)n / ((0.04f + 0.12f * ak) * EN_SR));
@@ -9374,8 +9452,19 @@ static void control(uint32_t n)                 /* once a chunk: the slow things
     }
     if (!links_on())
         lk_kick = lk_snare = 0.0f;
+#endif
     for (i = 0; i < EN_NDRUM; i++)
         en_drum_glow[i] *= 0.95f;
+#if EN_RUST_VOICES
+    {
+        fm1_voice_lfo_routes_t routes;
+        lfo_step(&pad_lfo,par[P_PL_RATE],par[P_PL_SHAPE],(float)n,step_len);
+        lfo_step(&drone_lfo,wob_rate>=0?wob_rate:par[P_DL_RATE],par[P_DL_SHAPE],(float)n,step_len);
+        fm1_rust_voice_lfo_routes(par,&pad_lfo,&drone_lfo,&routes);
+        pad_filt=routes.filter;pad_lvl=routes.level;pad_pan=routes.pan;pad_pitch=routes.pitch;
+        lfo_acut=routes.acid_cut;lfo_ares=routes.acid_resonance;lfo_echo=routes.echo;lfo_tcut=routes.punch;
+    }
+#else
     {   /* the LFOs, and where the pad's goes */
         float d = (float)par[P_PL_DEPTH] * 0.01f;
         lfo_step(&pad_lfo, par[P_PL_RATE], par[P_PL_SHAPE], (float)n, step_len);
@@ -9394,6 +9483,7 @@ static void control(uint32_t n)                 /* once a chunk: the slow things
             lfo_tcut = pd == 7 ? 3.0f * d * pv : 0.0f;
         }
     }
+#endif
 #if EN_RUST_VOICES
     fm1_rust_voice_envelope(&bass,n,par[P_DE_ATK],par[P_DE_DEC]);
 #else

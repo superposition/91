@@ -1,5 +1,7 @@
 # R10 analog voice controls, note lifecycle and immutable recipes
 
+This document records its implementation checkpoint. The current qualified family/control boundary and remaining call map are in [VOICES_PARAMETERS.md](VOICES_PARAMETERS.md).
+
 This checkpoint follows the percussion/pluck, drone/acid and pad kernel ports for [#11](https://github.com/superposition/91/issues/11). `EN_RUST_VOICES=1` now also executes slow random motion, tempo LFOs, the drone's chunk envelope, drum/pluck/acid attacks, pad handoff/shared-note transitions and stabs, bass target/line application, manual key allocation/legato/release, and panic cleanup in safe Rust. Hardware remains on the selectable C0 path.
 
 The portable code is [setup.rs](../../rust/fm1-engine/src/voices/setup.rs). Ten motion states and both LFO states directly reuse their existing C layout (16 bytes each). All existing voice counts and state sizes remain fixed. The common xorshift stream keeps its draw order, including motion expiry and zero-sized direct helper calls. The actual `en_render` path never calls the full chunk-control chain for zero frames.

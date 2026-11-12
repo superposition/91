@@ -119,9 +119,20 @@ pub struct DrumConfig {
     pub tune: f32,
     pub velocity: f32,
     pub kick_note: i32,
+    pub snare_rise: f32,
+    pub percussion_fall: f32,
+    pub crash: u32,
 }
 pub fn drum(states: &mut [Drum; 6], lane: usize, c: &DrumConfig, kits: [&data::Kit; 4]) {
-    let tf = exp2(c.tune * (1.0 / 12.0));
+    let tune = c.tune
+        + if lane == 1 {
+            c.snare_rise
+        } else if lane == 5 {
+            c.percussion_fall
+        } else {
+            0.0
+        };
+    let tf = exp2(tune * (1.0 / 12.0));
     let v = &mut states[lane];
     v.fo = if v.on != 0 { v.xl } else { 0.0 };
     v.on = 1;
@@ -129,7 +140,11 @@ pub fn drum(states: &mut [Drum; 6], lane: usize, c: &DrumConfig, kits: [&data::K
     v.att = 0.0;
     v.t = 0.0;
     v.note = data::DRUM_GM[lane];
-    let dec = c.decay;
+    let dec = if lane == 4 && c.crash != 0 {
+        1.0
+    } else {
+        c.decay
+    };
     let [kk, ks, kh, kp] = kits;
     match lane {
         0 => {
@@ -538,5 +553,135 @@ pub fn quiet(
         v.on = 0;
         v.wait = 0;
         v.rn = 0;
+    }
+}
+pub fn initialize(pads: &mut [pad::State; 4], motion: &mut [Motion; 10], pans: &[f32; 4]) {
+    // Reinitialization was partial: preserve motion rates, pad filters, phases
+    // not listed here, held envelopes and every other omitted voice field.
+    for s in motion {
+        s.value = 0.0;
+        s.target = 0.0;
+        s.left = 0;
+    }
+    for (i, v) in pads.iter_mut().enumerate() {
+        v.note = (50 + 7 * i) as f32;
+        v.target = v.note;
+        v.pan = pans[i];
+        v.amp = 0.0;
+        v.ph = [0.0, 0.37, 0.61, 0.19];
+        v.vib = 0.3 * i as f32;
+        v.midi_note = 0;
+        v.hf = 1.0;
+        v.hand = 0;
+        v.fa = 0.4;
+        v.fh = 0.15;
+        v.fr = 0.35;
+    }
+}
+pub fn restart(
+    pads: &mut [pad::State; 4],
+    c: &pad::Breath,
+    starts: &[f32; 4],
+    scales: &[f32; 4],
+    quiet_only: bool,
+    rng: &mut Rng,
+    midi: &mut impl FnMut(u8, u8, u8),
+) {
+    for (i, v) in pads.iter_mut().enumerate() {
+        if !quiet_only || v.amp < 1e-4 {
+            v.t = starts[i];
+            if quiet_only {
+                v.midi_note = 0;
+            }
+            pad::breathe(v, c, scales[i], rng, midi);
+        }
+    }
+}
+pub fn start_bass(bass: &mut drone::State) {
+    if bass.amp < 1e-4 {
+        bass.note = bass.target;
+    }
+    bass.env_up = 1;
+}
+pub fn acid_release(acid: &mut acid::State) {
+    acid.amp_t = 0.0;
+    acid.gate_left = 0;
+}
+pub fn acid_manual(acid: &mut acid::State, enabled: bool) {
+    if enabled && acid.play == 0 {
+        acid_release(acid);
+    }
+}
+pub fn reset_line(line: &mut drone::Line) {
+    line.up = 0;
+    line.env = 0.0;
+    line.gate = 0.0;
+}
+pub fn reset_lfos(a: &mut Lfo, b: &mut Lfo) {
+    a.phase = 0.0;
+    b.phase = 0.0;
+}
+#[repr(C)]
+#[derive(Clone, Copy, Default)]
+pub struct Links {
+    pub kick: f32,
+    pub snare: f32,
+}
+pub fn links_hit(s: &mut Links, lane: u32, velocity: f32, on: bool) {
+    if on {
+        if lane == 0 {
+            s.kick = max(s.kick, velocity);
+        } else if lane == 1 || lane == 2 {
+            s.snare = max(s.snare, velocity);
+        }
+    }
+}
+pub fn links_step(s: &mut Links, frames: u32, kick: i32, snare: i32, on: bool) {
+    let a = kick as f32 * 0.01;
+    let b = snare as f32 * 0.01;
+    s.kick *= exp(-(frames as f32) / ((0.04 + 0.12 * a) * SR));
+    s.snare *= exp(-(frames as f32) / ((0.08 + 0.2 * b) * SR));
+    if !on {
+        s.kick = 0.0;
+        s.snare = 0.0;
+    }
+}
+#[repr(C)]
+pub struct LfoRoutes {
+    pub filter: f32,
+    pub level: f32,
+    pub pan: f32,
+    pub pitch: f32,
+    pub acid_cut: f32,
+    pub acid_resonance: f32,
+    pub echo: f32,
+    pub punch: f32,
+}
+pub fn lfo_routes(params: &super::config::Params, pad: &Lfo, drone: &Lfo) -> LfoRoutes {
+    use fm1_types::ParamId as P;
+    let d = params[P::PL_DEPTH.index()] as f32 * 0.01;
+    let e = params[P::DL_DEPTH.index()] as f32 * 0.01;
+    let pd = params[P::PL_DEST.index()];
+    let dd = params[P::DL_DEST.index()];
+    let pv = pad.value;
+    let dv = drone.value;
+    LfoRoutes {
+        filter: if pd == 0 { d * pv } else { 0.0 },
+        level: if pd == 1 {
+            1.0 - 0.85 * d * (0.5 - 0.5 * pv)
+        } else {
+            1.0
+        },
+        pan: if pd == 2 { 0.9 * d * pv } else { 0.0 },
+        pitch: if pd == 3 { 0.5 * d * pv } else { 0.0 },
+        acid_cut: 2.5
+            * ((if pd == 4 { d * pv } else { 0.0 }) + (if dd == 5 { e * dv } else { 0.0 })),
+        acid_resonance: min(
+            (if pd == 5 { d * (0.5 + 0.5 * pv) } else { 0.0 })
+                + (if dd == 6 { e * (0.5 + 0.5 * dv) } else { 0.0 }),
+            1.0,
+        ),
+        echo: 0.06 * ((if pd == 6 { d * pv } else { 0.0 }) + (if dd == 7 { e * dv } else { 0.0 })),
+        punch: if pd == 7 { 3.0 * d * pv } else { 0.0 },
     }
 }

@@ -1,5 +1,7 @@
 # Drone and acid DSP checkpoint
 
+This document records its implementation checkpoint. The current qualified family/control boundary and remaining call map are in [VOICES_PARAMETERS.md](VOICES_PARAMETERS.md).
+
 This continues [R10 / #11](https://github.com/superposition/91/issues/11) after the [percussion/plain-pluck checkpoint](VOICES.md). The Rust-enabled emulator now executes the complete drone/bass and acid sample loops, including their control updates every 32 samples. Pad DSP remains the next implementation work. C0 and the default physical build retain the original C functions.
 
 [`voices/drone.rs`](../../rust/fm1-engine/src/voices/drone.rs) and [`voices/acid.rs`](../../rust/fm1-engine/src/voices/acid.rs) borrow the existing C voice object, control counter, sine table and mono output buffer for a block. They contain oscillator selection, phase updates, polyBLEP, lookup FM and phase distortion, TPT filter state/coefficients, drive, glide, gate/envelope evolution, ramps, level publication and denormal flushing. No C callback occurs while these references exist. The portable crate still forbids unsafe code and requires no allocator.
