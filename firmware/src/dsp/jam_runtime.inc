@@ -158,7 +158,8 @@ int en_jam_snapshot(en_jam_snapshot_t *out)
     jp_snapshot_text(s.title,(const char *)jp_data+16,sizeof s.title);
     jp_snapshot_text(s.form,en_jam_form(1),sizeof s.form);
     jp_snapshot_text(s.pending_title,en_jam_pending_title(),sizeof s.pending_title);
-    if(en_jam_on){en_jam_name(0,s.chord);en_jam_name(1,s.next);}
+    /* The page still shows its last/planned chords with Songbook switched off. */
+    en_jam_name(0,s.chord);en_jam_name(1,s.next);
     for(i=0;i<2;i++) {
         char *name=i?s.bass_name:s.keys_name;
         unsigned value=s.options[(i?JAM_BASS_PROGRAM:JAM_KEYS_PROGRAM)-JAM_SWELL],k;

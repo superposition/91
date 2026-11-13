@@ -1,0 +1,28 @@
+{
+  "scope": "Songbook off current/next chord labels in copied view",
+  "toolchain": "Rust1.94.1; GCC11; Clang22 WASM",
+  "cases": 64,
+  "bytes": 7508224,
+  "sha256": "3e724fced2a29617863e0799de023cb96fca952ef7352771d605cc7dcffae08e",
+  "targets": [
+    "R01/currentC0/Rust native",
+    "R01/currentC0/Rust WASM"
+  ],
+  "R01_manifest_files_verified": 440,
+  "profiles": [
+    "off/stopped",
+    "off/playing",
+    "on/stopped",
+    "on/playing"
+  ],
+  "witnesses": [
+    "both32-byte names against legacy getters",
+    "snapshot on/playing flags",
+    "name buffer bounds",
+    "all framebuffer bytes",
+    "PCM"
+  ],
+  "snapshot_bytes": 220,
+  "added_payload_or_mutable_bytes": 0,
+  "exclusion": "unchanged serialized emulator contract; physical qualification separate"
+}
