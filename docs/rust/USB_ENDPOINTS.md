@@ -113,9 +113,11 @@ The small register-save increases retain observed status and lease decisions
 across the scalar policy call. They add no payload temporary. An unresolved,
 compile-only opaque stop provider preserves the role/attach code for inspection;
 the real default-deny binding may optimize it away. These are object-frame
-measurements, not generated-Rust leaf, LTO call-chain peaks, measured target
-stack use or deadline qualification. Parent integration will emit the selected
-Rust entry with the adopted compiler and inspect its actual generated prologue.
+measurements, not LTO call-chain peaks, measured target stack use or deadline
+qualification. The combined integration separately measures the actual Rust
+leaf: moving its immutable table to read-only storage reduces the isolated
+frame from 48 to 8 B. [The inspection context and before/after evidence](USB_ENDPOINT_LEAF.md)
+do not replace a complete firmware call-chain bound.
 
 ## Reproduction and evidence
 

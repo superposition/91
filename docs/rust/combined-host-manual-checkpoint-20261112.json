@@ -1,0 +1,219 @@
+{
+  "tested_source": "2eb08f05cba78cd57ad99c1945b803460de0866d",
+  "integrated_source": "e9532a9e2e11d30538d48bea2cb0f930ef0090e7",
+  "windows_tests": 206,
+  "host": {
+    "cases": 552622,
+    "trace": {
+      "bytes": 38947344,
+      "sha256": "e0a13b6211c51c4670552d2665b7aadafe2f42a75e044645494989e2cd91c534"
+    },
+    "generated_natural32_exact": true,
+    "named_legacy_cases": 10
+  },
+  "tooling": {
+    "per_host": {
+      "linux": [
+        {
+          "cases": 996,
+          "trace_sha256": "2bbe6888b963c69a9a140521a1232b28fe0a95ea239ead52032c97e4fd753f8d",
+          "frozen_files": 440,
+          "current_c0_base": "0f0d4a1dfbbd6a26456c3b4609121a1563083a3c",
+          "python": "3.10.12",
+          "actual_pdf_rendering": false
+        },
+        {
+          "cases": 855,
+          "trace_sha256": "98cfe7888480167d006ac55693a140145f6ba35f247279c05b13845b61cc900a",
+          "frozen_files": 440,
+          "python": "3.10.12",
+          "edge_launched": false,
+          "pdf_rendered": false
+        },
+        {
+          "cases": 927,
+          "image_cases": 605,
+          "mmio_cases": 322,
+          "source_hashes": 440,
+          "sha256": "8871694d9b17bc4f70d63b2016b0e6c089181b16dcd88871718c745af9211ebe"
+        },
+        {
+          "cases": 814,
+          "compression_cases": 224,
+          "malformed_prefix_cases": 540,
+          "loader_cases": 36,
+          "native_cli_commands": 3,
+          "explicit_expansion_refusals": 1,
+          "source_hashes": 440,
+          "sha256": "4033b0955b6a73b9098edaacf7fcdaedf96ba9ce034db0d1e62c908cbd4dba0c"
+        }
+      ],
+      "windows": [
+        {
+          "cases": 996,
+          "trace_sha256": "dd358f4268489988e5416fe99ce40f60de3431b2822c23b7808bde9afe6dc8c0",
+          "frozen_files": 440,
+          "current_c0_base": "0f0d4a1dfbbd6a26456c3b4609121a1563083a3c",
+          "python": "3.8.3",
+          "actual_pdf_rendering": false
+        },
+        {
+          "cases": 855,
+          "trace_sha256": "e52d87f7a95db14d8506043aa673fdd51a2dc81089bdf13ff5585ca524e55863",
+          "frozen_files": 440,
+          "python": "3.8.3",
+          "edge_launched": false,
+          "pdf_rendered": false
+        },
+        {
+          "cases": 927,
+          "image_cases": 605,
+          "mmio_cases": 322,
+          "source_hashes": 440,
+          "sha256": "8827e47836614e7e21720d350f5a3f723539cf2c547cf735b2bf30b02d299aad"
+        },
+        {
+          "cases": 814,
+          "compression_cases": 224,
+          "malformed_prefix_cases": 540,
+          "loader_cases": 36,
+          "native_cli_commands": 3,
+          "explicit_expansion_refusals": 1,
+          "source_hashes": 440,
+          "sha256": "4033b0955b6a73b9098edaacf7fcdaedf96ba9ce034db0d1e62c908cbd4dba0c"
+        }
+      ]
+    },
+    "manual_cases_per_host": 1851,
+    "build_guard_cases_per_host": 927,
+    "block_wrapper_cases_per_host": 814
+  },
+  "endpoint_leaf": {
+    "before": {
+      "code_bytes": 224,
+      "table_stack_bytes": 32,
+      "saved_bytes": 16,
+      "isolated_frame_bytes": 48,
+      "text_bytes_including_sink": 226
+    },
+    "after": {
+      "code_bytes": 106,
+      "readonly_table_bytes": 32,
+      "saved_bytes": 8,
+      "local_bytes": 0,
+      "isolated_frame_bytes": 8,
+      "text_bytes_including_sink": 140
+    },
+    "calls": 0,
+    "mutable_sections": 0,
+    "allocation": "The single allocated section has AX flags, without W; the 32-byte symbol is in code/readonly memory.",
+    "context": "Actual exported scalar entry; same seven-library vendor clang LTO inspection link with pinned core and a disconnected 2-byte panic sink. No physical provider or full-image/call-chain bound is implied."
+  },
+  "artifacts": {
+    "build/round22-windows.log": {
+      "bytes": 38387,
+      "sha256": "a864fd00c6eba0010486956754beae5a8e505cc649b8c4c0f88c68d9ae117cc1"
+    },
+    "build/round22-focused.log": {
+      "bytes": 14914,
+      "sha256": "466bbaa46bffd2ec15179b45e655a57a70f9b6f47cd0ae97e47a28245dffdc15"
+    },
+    "build/round22-compiler.log": {
+      "bytes": 3367,
+      "sha256": "6a4c7d155cf52d2b5dcb4c106eeeae242b28b1d41e20f2be161f6f83a8344e53"
+    },
+    "build/usb-host/rust.bin": {
+      "bytes": 38947344,
+      "sha256": "e0a13b6211c51c4670552d2665b7aadafe2f42a75e044645494989e2cd91c534"
+    },
+    "build/usb-host/endpoints/rust.bin": {
+      "bytes": 28728,
+      "sha256": "9e0fefa5f1446adacb7cd03dc616672d444adfef6f130dd4581fd0dba51c649a"
+    },
+    "build/usb-reset/rust.bin": {
+      "bytes": 7718084,
+      "sha256": "45f12cdde4843ecb3f549186962ef71dfa50bf16124cb79decfb7dbc9ab17022"
+    },
+    "build/usb-endpoint-leaf/leaf.elf": {
+      "bytes": 1316,
+      "sha256": "07fe580948adde32ce29d4c3737c4733a886320a19168a63501b62c2410b225b"
+    },
+    "build/usb-endpoint-leaf/leaf.dis": {
+      "bytes": 2302,
+      "sha256": "8f9cb9bfe0df8f5beea88b07fa3f6b3b7b76389f22ea0e4b3a6e73e5c2f08583"
+    },
+    "build/usb-endpoint-leaf/leaf.symbols": {
+      "bytes": 363,
+      "sha256": "04bc0f63d25303a7e048a9c26c097e4424a26ed265390be22082be0b1979a645"
+    },
+    "build/hal-target/main.o": {
+      "bytes": 482288,
+      "sha256": "c7c54d5e55ed6408f15b4283d5df952a912a3a5094d320218012e5e0433a14ed"
+    },
+    "build/hal-target/main-app.o": {
+      "bytes": 476528,
+      "sha256": "aac01197072caa86732b11b3ec2305ba8772bb0bedb55bae16e5a59269c005e9"
+    },
+    "build/hal-target/engine.o": {
+      "bytes": 412928,
+      "sha256": "e2dd303698d397f5c5a0243d8380fad4732e78f2c18392d2c7e98434f5168623"
+    },
+    "build/hal-target/engine-app.o": {
+      "bytes": 412928,
+      "sha256": "e2dd303698d397f5c5a0243d8380fad4732e78f2c18392d2c7e98434f5168623"
+    },
+    "build/hal-target/ui-layout.bin": {
+      "bytes": 1552,
+      "sha256": "0a4bdc438a4763d6988c823b338e6c88dd7ab41ddaebaf75dae3c0544ebd7cfc"
+    }
+  },
+  "vendor_lto": {
+    "libfm1_types.rlib.o": {
+      "bytes": 83780,
+      "sha256": "359c7548d47a763bd5293ef4581290c2635f63f3224b507e3a78a127b47399b5"
+    },
+    "libfm1_rt.rlib.o": {
+      "bytes": 28252,
+      "sha256": "2f6fafa7b8b61ccc798d46a09d1330ae8f0d125d6d143a1fbc12c1d720fd4c2f"
+    },
+    "libfm1_hal.rlib.o": {
+      "bytes": 60172,
+      "sha256": "65dfccafed569aed001678e6d5ba8137c9728e9778f6b3d7f8139bd691572a15"
+    },
+    "libfm1_formats.rlib.o": {
+      "bytes": 353872,
+      "sha256": "207e7f926a6628e91f42fb94d54f53360cafd297c7adf518540ac704adf95db3"
+    },
+    "libfm1_engine.rlib.o": {
+      "bytes": 901248,
+      "sha256": "9222fd3e5651622ed9086a8e5501f68b3f52cfa4c027ab448d8a2066e4891d75"
+    },
+    "libfm1_app.rlib.o": {
+      "bytes": 416004,
+      "sha256": "f238ec596ec1675c7f761baa6c73adaa8b527816efb60a2e4ecb2035ece793f4"
+    },
+    "libfm1_jam_bridge.rlib.o": {
+      "bytes": 584076,
+      "sha256": "97a985c692681959edeb158cfa94635d7111e5ea1da2b0350e6b6640b74d1a71"
+    }
+  },
+  "completed_jobs": {
+    "windows_and_tooling": 0,
+    "focused": 0,
+    "compiler": 0
+  },
+  "qualification": [
+    "Actual host descriptor selection and bounded MIDI RX match frozen/current C0/Rust on native, WASM and generated natural32. All 16 descriptor result bytes, including padding, are initialized before publication.",
+    "Retained endpoint correction, healthy traffic, reset and TX pass with unchanged trace hashes after moving the immutable decision table to static readonly memory.",
+    "Manual HTML/isolated CLI and controlled PDF/process/geometry policies pass on Windows and Linux. Image/source guards and existing block/wrapper/native CLI cases pass on each host.",
+    "Strict-provenance HAL/endpoint/host raw-root and uninitialized-result Miri passes; workspace fmt/Clippy and pi32/i686/no_std checks pass.",
+    "Seven libraries freshly emitted/vendor-LTO compiled; full active-assertion natural32 factory/effects/Runner/UI/input/performance/automatic/MIDI/USB profiles and corrected per-implementation traces pass. USB1/HAL1 APP0/APP1 target C units compile."
+  ],
+  "runtime_scope": "Reuses the separately recorded R21 full browser/native instrument qualification. This batch freshly tests the changed USB host and offline tooling consumers; it does not claim a second fresh 97-scenario/browser run.",
+  "limits": [
+    "The endpoint frame is an isolated inspection result. C callers, other Rust callees, interrupt overlap and full-image/LTO context still require a complete stack bound.",
+    "No actual Edge/PDF render, physical flash, live preview update, positive USB stop provider, full-image fit or device deadline acceptance.",
+    "Host TX/lifecycle/control/hub/CDC/UAC, further UI helpers/pages/visualizers, C ABI retirement, boot/build/site/browser logic and final talk packaging remain open.",
+    "The original recovery stub and physical known-working 0.3.3 firmware remain unchanged."
+  ]
+}
