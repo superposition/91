@@ -45,7 +45,7 @@ with tempfile.TemporaryDirectory()as td:
         result=run([str(CLI),'author','compile',str(path),str(td/'bad.jmp')]);assert result.returncode==2 and result.stderr
         results.append(dict(command='invalid-'+bad,python_exit=1,rust_exit=2))
     # An unsuccessful request must leave the serialized binding usable.
-    good=json.loads((td/'frozen-0.json').read_text());bad=dict(good,version=3)
+    good=json.loads((td/'frozen-0.json').read_text());bad=dict(good,version=4)
     sys.path.insert(0,str(ROOT/'tools'));import rust_authoring
     try:rust_authoring.call('compile',document=bad)
     except ValueError:pass

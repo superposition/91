@@ -184,7 +184,7 @@ static void fm6_keyed(fm6_voice_t *s, const uint8_t *ed, uint32_t note)
 #define FM_NV 6                                  /* six voices: each is up to 6 operators a sample (the other core renders them, a chunk ahead) */
 typedef struct {
     fm6_voice_t s;
-    uint8_t used, gate, part;
+    uint8_t used, gate, part, owner;
     uint32_t age;                                /* the order the notes came in: the oldest is taken */
     int32_t gate_left;                           /* samples until the key goes up */
     int32_t kill_left;                           /* after the key is up: samples the note may ring on, then it is faded out (the heavy patches ring for seconds) */
@@ -234,12 +234,13 @@ static void fm_init(void)                        /* the tables, once, before any
 
 static void fm_reset(void)                       /* a new engine: no voices, no patch, the block queue empty */
 {
+    jp_held_flush();
 #if EN_RUST_FM6
     fm1_rust_fm6_reset((fm1_fm6_slot_t *)fmx,(fm1_fm6_lfo_t *)&fm_lfo);
 #else
     int k;
     for (k = 0; k < FM_NV; k++) {
-        fmx[k].used = 0;
+        fmx[k].used = fmx[k].owner = 0;
         fm_zero(&fmx[k].s, sizeof fmx[k].s);
     }
     fm_zero(&fm_lfo, sizeof fm_lfo);
@@ -357,6 +358,7 @@ static void fm_set_patch(int idx)                /* between chunks: a new patch 
     const uint32_t changed=fm1_rust_fm6_program(&s,&fm_user[0][0],fm_ed);
     fm_cur=s.current;fm_dy_cur=(uint8_t)s.dy_current;
     if(!changed)return;
+    jp_held_flush();
     fm1_rust_fm6_reset((fm1_fm6_slot_t *)fmx,(fm1_fm6_lfo_t *)&fm_lfo);fm_pos=FM6_N;
 #else
     int k;
@@ -371,6 +373,7 @@ static void fm_set_patch(int idx)                /* between chunks: a new patch 
     }
     if (idx == fm_cur)
         return;
+    jp_held_flush();
     if (idx >= EN_NFMFACT) {
         fm6_unpack(fm_user[idx - EN_NFMFACT], fm_ed);
     } else if (fm_dy_cur) {
@@ -384,7 +387,7 @@ static void fm_set_patch(int idx)                /* between chunks: a new patch 
     }
     fm_cur = idx;
     for (k = 0; k < FM_NV; k++) {
-        fmx[k].used = 0;
+        fmx[k].used = fmx[k].owner = 0;
         fm_zero(&fmx[k].s, sizeof fmx[k].s);
     }
     fm_zero(&fm_lfo, sizeof fm_lfo);
@@ -435,21 +438,21 @@ void en_fm_set_dy(int on)                        /* the main loop: the set, and 
 }
 
 /* a key goes down (Dx7Note::init); the key comes up after gate samples */
-static void fm_note_on(int note, float vel, int32_t gate)
+static uint32_t fm_note_on(int note, float vel, int32_t gate)
 {
 #if EN_RUST_FM6
     const uint8_t *ed=jp_dx()&&fm_trigger_part?fm_bass_ed:fm_ed;
     const fm1_fm6_note_t c={(uint32_t)jp_dx(),fm_trigger_part,fm_cur,en_shed_level};
-    (void)fm1_rust_fm6_note((fm1_fm6_slot_t *)fmx,(fm1_fm6_lfo_t *)&fm_lfo,(fm1_fm6_lfo_t *)&fm_bass_lfo,ed,&c,&fm_age,note,vel,gate);
+    return fm1_rust_fm6_note((fm1_fm6_slot_t *)fmx,(fm1_fm6_lfo_t *)&fm_lfo,(fm1_fm6_lfo_t *)&fm_bass_lfo,ed,&c,&fm_age,note,vel,gate);
 #else
     int k, best = 0, steal = 1;
-    uint32_t oldest = 0xFFFFFFFFu;
+    uint32_t oldest = 0xFFFFFFFFu,previous;
     fm_slot_t *x;
     fm6_voice_t *s;
     const uint8_t *ed = jp_dx() && fm_trigger_part ? fm_bass_ed:fm_ed;
     fm6_lfo_t *lfo = jp_dx() && fm_trigger_part ? &fm_bass_lfo:&fm_lfo;
     if (fm_cur < 0)
-        return;
+        return 0xffffffffu;
     {   /* a free voice, unless the load has capped them (shed: 4, then 2): then the oldest is taken */
         int cap = en_shed_level == 0 ? FM_NV : en_shed_level == 1 ? 4 : 2;
         if (!jp_dx() && fm_cur >= 0 && FM_CAP[fm_cur] < cap)
@@ -472,6 +475,8 @@ static void fm_note_on(int note, float vel, int32_t gate)
         }
     }
     x = &fmx[best];
+    previous=x->owner?((uint32_t)x->owner<<16)|((uint32_t)x->s.note<<24):0;
+    x->owner=0;
     x->part=jp_dx()?fm_trigger_part:0;
     s = &x->s;
     for (k = 0; k < FM_NV; k++)                  /* the first key down: the LFO restarts */
@@ -506,12 +511,14 @@ static void fm_note_on(int note, float vel, int32_t gate)
     x->kill_left = 0x7FFFFFFF;
     x->fade = 1.0f;
     x->age = ++fm_age;
+    return (uint32_t)best|((uint32_t)steal<<8)|previous;
 #endif
 }
 
-static void fm_jam_note(unsigned part,int note,float velocity,int32_t gate)
+static uint32_t fm_jam_note(unsigned part,int note,float velocity,int32_t gate)
 {
     if(jp_patch_dirty>>part&1u) {
+        if(!part)jp_held_flush();
         /* Commit at this part's next attack. Retire its old tails together;
          * never reinterpret them with a different DX program or touch bass. */
 #if EN_RUST_FM6
@@ -521,7 +528,7 @@ static void fm_jam_note(unsigned part,int note,float velocity,int32_t gate)
 #endif
         fm_jam_program(jp_data,part);jp_patch_dirty&=(uint8_t)~(1u<<part);
     }
-    fm_trigger_part=(uint8_t)part;fm_note_on(note,velocity,gate);fm_trigger_part=0;
+    uint32_t result;fm_trigger_part=(uint8_t)part;result=fm_note_on(note,velocity,gate);fm_trigger_part=0;return result;
 }
 
 static void fm_gates(uint32_t n, int32_t tail)  /* once a chunk, on the first core: the keys whose time is up; a note that has been let go for tail samples is faded out */
@@ -534,7 +541,7 @@ static void fm_gates(uint32_t n, int32_t tail)  /* once a chunk, on the first co
         if (!fmx[k].used)
             continue;
         if (fmx[k].gate) {
-            if ((fmx[k].gate_left -= (int32_t)n) <= 0) {
+            if (!fmx[k].owner && (fmx[k].gate_left -= (int32_t)n) <= 0) {
                 fmx[k].gate = 0;
                 fmx[k].kill_left = tail;
             }

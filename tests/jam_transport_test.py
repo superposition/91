@@ -150,7 +150,11 @@ class TransportIntegration(unittest.TestCase):
                     self.assertEqual(dev.read(),data)
                     dev.control('movement',2)
                     dev.control('keys_octave',-2);dev.control('bass_octave',2)
-                    chart['parts'].update(keys_octave=-2,bass_octave=2)
+                    dev.control('synth',1);dev.control('space',67)
+                    chart['parts'].update(keys_octave=-2,bass_octave=2,synth=1)
+                    sounds={item['parameter']:item['value'] for item in chart['sounds']}
+                    sounds[69]=67
+                    chart['sounds']=[{'parameter':parameter,'value':value} for parameter,value in sounds.items()]
                     data=fm1_jam.compile_pack(chart)
                     self.assertEqual(dev.read(),data)
                     dev.save(3)

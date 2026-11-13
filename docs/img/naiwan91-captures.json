@@ -1,6 +1,6 @@
 {
   "source": "actual WASM RGB565 framebuffer",
-  "wasm_sha256": "1e4472818b8d97def3ed8e0a373fa256855497a82efbb78463774d2fa8265a56",
+  "wasm_sha256": "5232ac420a875eb1f806c23f81edca0020249eee5e0c10e5e3316321bcb92542",
   "seed": 91,
   "master": 2800,
   "captures": [
@@ -9,35 +9,37 @@
       "file": "naiwan91-performance.png",
       "width": 240,
       "height": 240,
-      "sha256": "084acb01a6ede152f82850b04b3c5a4338c6a869b6591579d5af1fdcf97541db"
+      "sha256": "76210a0cffdd8c9429954e6504f9f0c5424e07a9f500d65ac80a231656a09ee7"
     },
     {
       "page": "arrangement",
       "file": "naiwan91-arrangement.png",
       "width": 240,
       "height": 240,
-      "sha256": "15ac5bc0c48ae9e31bfc0ea39830878656efebbd6a5f36cae5e8ce0dd0e6e6ac"
+      "sha256": "f15cf3fa10231e6edc1b83f04332ba7240518668dfe067ffaeb82dd03777f2d8"
     },
     {
       "page": "dx-keys",
       "file": "naiwan91-dx-keys.png",
       "width": 240,
       "height": 240,
-      "sha256": "8943b826cc4b1234eb92ae27c88130995813bb034b1061737bbb103d8aabfb08"
+      "sha256": "bc9e8d48b9480a348bed40cba1728d15c3acdb5199f9c074e310d803cf0b0be7"
     },
     {
       "page": "dx-bass",
       "file": "naiwan91-dx-bass.png",
       "width": 240,
       "height": 240,
-      "sha256": "0197dfd56d7074920be79fbe47d40790eb4af81fb65d49399df6211623dfab85"
+      "sha256": "b3216a1fcd2601835a4a855d16dc3554b54e16fe2bed65fe47446a1ecd9b0117"
     },
     {
-      "page": "swells",
-      "file": "naiwan91-swells.png",
+      "page": "synth-jam",
+      "file": "naiwan91-synth-jam.png",
       "width": 240,
       "height": 240,
-      "sha256": "7d9f0e3097d03f90e5c2acd554f665b6e830071bc5c9c63700df265ab5bf8ca9"
+      "sha256": "4aebf5b8a3703e001172908537577fe6f4302308600849c2c1896ad3f61f97f9",
+      "mode": "SYNTH",
+      "input": "KNOB1 +1 from BAND"
     }
   ]
 }

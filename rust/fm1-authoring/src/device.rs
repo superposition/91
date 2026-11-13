@@ -13,7 +13,7 @@ const ERRORS: [&str; 6] = [
     "persistent save/readback failed",
     "unsupported pack version",
 ];
-const FIELDS: [&str; 24] = [
+const FIELDS: [&str; 26] = [
     "on",
     "key",
     "bars",
@@ -38,6 +38,8 @@ const FIELDS: [&str; 24] = [
     "brightness",
     "keys_octave",
     "bass_octave",
+    "synth",
+    "space",
 ];
 fn runtime(message: impl Into<String>) -> Error {
     Error {
@@ -61,7 +63,7 @@ pub fn fields() -> Value {
 }
 pub fn control_check(field: &str, value: &Value) -> Result<Value> {
     let (lo, hi) = match field {
-        "on" | "hold" | "play" => (0, 1),
+        "on" | "hold" | "play" | "synth" => (0, 1),
         "key" | "swell_voice" => (0, 23),
         "bars" => (8, 16),
         "form" | "movement" | "variation" => (0, 3),
@@ -70,7 +72,7 @@ pub fn control_check(field: &str, value: &Value) -> Result<Value> {
         "song" => (0, 6),
         "release" | "bass_gate" => (1, 100),
         "keys_octave" | "bass_octave" => (-2, 2),
-        "energy" | "swell" | "touch" | "bass_attack" | "brightness" => (0, 100),
+        "energy" | "swell" | "touch" | "bass_attack" | "brightness" | "space" => (0, 100),
         _ => return Err(Error::missing(field)),
     };
     let n = integer(value, lo, hi, field)?;
@@ -460,6 +462,10 @@ pub fn advance(mut s: Value, value: &Value, error: Option<&Value>) -> Result<Val
                     .ok_or_else(|| Error::missing(field))?;
                 let value = if matches!(field, "keys_octave" | "bass_octave") {
                     integer(get(&a, "value")?, -2, 2, "octave")? + 2
+                } else if field == "synth" {
+                    integer(get(&a, "value")?, 0, 1, "synth mode")?
+                } else if field == "space" {
+                    integer(get(&a, "value")?, 0, 100, "space")?
                 } else {
                     integer(get(&a, "value")?, 0, 16383, "control value")?
                 };

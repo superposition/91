@@ -13,9 +13,15 @@ if [ "${EN_RUST_HOST:-1}" != 0 ]; then
     exit 0
 fi
 CC="${CC:-cc}"
+set --
+if [ -n "${FM1_TEST_FACTORY_HEADER:-}" ]; then
+    fixture=$(python3 tests/reference/factory_fixture.py "$FM1_TEST_FACTORY_HEADER" --path)
+    set -- "-DEN_TEST_FACTORY_HEADER=\"$fixture\""
+fi
 mkdir -p build/gen build/host
 [ -f build/gen/felucca_font.h ] || python3 tools/gen_font.py build/gen/felucca_font.h >/dev/null
 $CC -O2 -ffp-contract=off -std=c99 -Wall -Wextra -Wno-unused-function -Wno-unused-parameter \
+    "$@" \
     -DEN_HOST -D_POSIX_C_SOURCE=200809L -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen -o build/host/amb_host host/amb_host.c \
     firmware/src/dsp/amb.c -lm
 echo "host: build/host/amb_host"

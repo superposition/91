@@ -1,0 +1,59 @@
+# Current JMP3 factory and Synth Jam, compared against current C and Rust.
+# Historical v2 Songbook scenarios remain unchanged in tests/scenarios/.
+jamboot
+wait 250
+expect view 38
+expect jam_version 3
+expect jam_song 0
+expect jam_form 0
+tap PLAY
+wait 100
+expect playing 0
+spin PRESET 1
+wait 400
+expect jam_song 1
+expect jam_version 3
+spin SELECT 1
+wait 50
+expect view 39
+shot arrangement.png
+spin SELECT 1
+wait 50
+expect view 40
+spin K2 -1
+wait 50
+expect jam_touch 50
+shot dx-keys.png
+spin SELECT 1
+wait 50
+expect view 41
+shot dx-bass.png
+spin SELECT 1
+wait 50
+expect view 42
+spin K1 1
+wait 100
+key 0 down
+key 4 down
+key 7 down
+wait 400
+shot synth-held.png
+tap PLAY
+wait 1200
+expect playing 1
+tap PLAY
+wait 200
+expect playing 0
+shot synth-stopped.png
+tap HOME
+wait 100
+expect view 38
+expect playing 0
+expect jam_song 1
+key 0 up
+key 4 up
+key 7 up
+tap PLAY
+wait 8000
+expect playing 1
+shot band-resumed.png

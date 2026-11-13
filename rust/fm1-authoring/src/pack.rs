@@ -339,6 +339,7 @@ fn compile_v2(d: &Value, limits: Limits<'_>) -> Result<Vec<u8>> {
             b[V2_HEAD + offset] =
                 integer(p.get(name).unwrap_or(&json!(0)), -2, 2, name)? as i8 as u8;
         }
+        b[V2_HEAD + 25] = integer(p.get("synth").unwrap_or(&json!(0)), 0, 1, "synth mode")? as u8;
     }
     let charts = get(d, "charts")?;
     for mode in 0..2 {
@@ -546,6 +547,7 @@ fn decode_v2(b: &[u8], limits: Limits<'_>) -> Result<Document> {
         d["parts"]["voice_flags"] = json!(b[V2_HEAD + 22]);
         d["parts"]["keys_octave"] = json!(b[V2_HEAD + 23] as i8);
         d["parts"]["bass_octave"] = json!(b[V2_HEAD + 24] as i8);
+        d["parts"]["synth"] = json!(b[V2_HEAD + 25]);
     }
     d["sources"] = if b.len() == MIN_V2 {
         json!([])

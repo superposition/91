@@ -6,6 +6,7 @@ fn run(command: &mut Command) {
 }
 fn main() {
     println!("cargo:rerun-if-env-changed=FM1_SIM_SOURCE");
+    println!("cargo:rerun-if-env-changed=FM1_TEST_FACTORY_HEADER");
     println!("cargo:rerun-if-env-changed=CC");
     println!("cargo:rerun-if-env-changed=AR");
     // Nested Cargo invocations may inherit another build script's feature env.
@@ -25,6 +26,14 @@ fn main() {
     .canonicalize()
     .unwrap();
     let out = PathBuf::from(env::var_os("OUT_DIR").unwrap());
+    let factory = env::var_os("FM1_TEST_FACTORY_HEADER").map(|path| {
+        let path = PathBuf::from(path).canonicalize().unwrap();
+        run(Command::new("python3")
+            .arg(repo.join("tests/reference/factory_fixture.py"))
+            .arg(&path));
+        println!("cargo:rerun-if-changed={}", path.display());
+        path.to_string_lossy().replace('\\', "/")
+    });
     let mut includes = String::new();
     for (key, file) in [
         ("GFX", "gfx.c"),
@@ -62,6 +71,9 @@ fn main() {
         .arg(source.join("firmware/src"))
         .arg("-I")
         .arg(source.join("firmware/src/dsp"));
+        if let Some(header) = &factory {
+            c.arg(format!("-DEN_TEST_FACTORY_HEADER=\"{header}\""));
+        }
         if cfg!(feature = "rust-engine") {
             for flag in [
                 "JAM",

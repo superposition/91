@@ -30,13 +30,14 @@ function png(){
   return Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),chunk('IHDR',header),chunk('IDAT',zlib.deflateSync(rows)),chunk('IEND',Buffer.alloc(0))]);
 }
 const out='docs/img';fs.mkdirSync(out,{recursive:true});
-const pages=['performance','arrangement','dx-keys','dx-bass','swells'],captures=[];
+const pages=['performance','arrangement','dx-keys','dx-bass','synth-jam'],captures=[];
 advance(2800);
 for(let i=0;i<pages.length;i++){
   if(i){ex.web_enc(0,1);advance(200);}
+  if(pages[i]==='synth-jam'){ex.web_enc(3,1);advance(200);}
   const name='naiwan91-'+pages[i]+'.png',image=png();
   fs.writeFileSync(path.join(out,name),image);
-  captures.push({page:pages[i],file:name,width:240,height:240,sha256:crypto.createHash('sha256').update(image).digest('hex')});
+  captures.push({page:pages[i],file:name,width:240,height:240,sha256:crypto.createHash('sha256').update(image).digest('hex'),...(pages[i]==='synth-jam'?{mode:'SYNTH',input:'KNOB1 +1 from BAND'}:{})});
 }
 fs.writeFileSync(path.join(out,'naiwan91-captures.json'),JSON.stringify({source:'actual WASM RGB565 framebuffer',wasm_sha256:crypto.createHash('sha256').update(bytes).digest('hex'),seed:91,master:2800,captures},null,2)+'\n');
 console.log(JSON.stringify(captures));

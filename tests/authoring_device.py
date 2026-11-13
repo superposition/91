@@ -25,7 +25,7 @@ import rust_authoring
 spec=importlib.util.spec_from_file_location('frozen_jam_midi',BASE/'tools/jam_midi.py');old=importlib.util.module_from_spec(spec);spec.loader.exec_module(old)
 assert old.ERRORS==current.ERRORS
 assert all(current.FIELDS[name]==value for name,value in old.FIELDS.items())
-assert {name:value for name,value in current.FIELDS.items() if name not in old.FIELDS}=={'keys_octave':22,'bass_octave':23}
+assert {name:value for name,value in current.FIELDS.items() if name not in old.FIELDS}=={'keys_octave':22,'bass_octave':23,'synth':24,'space':25}
 results=[]
 
 

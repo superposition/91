@@ -49,7 +49,7 @@ def main():
     for cmd in ('audition','rollback'):
         p=sub.add_parser(cmd);p.add_argument('input');p.add_argument('--backup-dir',default=str(ROOT/'build/jam-backups'));p.add_argument('--no-wait',action='store_true')
     p=sub.add_parser('save');p.add_argument('slot',type=int,choices=range(1,5))
-    p=sub.add_parser('control');p.add_argument('field',choices=['on','key','bars','form','movement','energy','hold','bass','idea','play','song','swell','variation','keys_program','bass_program','touch','release','bass_gate','swell_voice','bass_attack','brightness','keys_octave','bass_octave']);p.add_argument('value',type=int)
+    p=sub.add_parser('control');p.add_argument('field',choices=['on','key','bars','form','movement','energy','hold','bass','idea','play','song','swell','variation','keys_program','bass_program','touch','release','bass_gate','swell_voice','bass_attack','brightness','keys_octave','bass_octave','synth','space']);p.add_argument('value',type=int)
     a=ap.parse_args()
     if a.cmd=='factory-song':
         from songbook import factory as factory_song

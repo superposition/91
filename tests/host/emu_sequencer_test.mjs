@@ -16,10 +16,11 @@ async function boot(path) {
   ex.web_seed(91);ex.web_master(2800);ex.web_boot();return {ex,memory};
 }
 const reference=await boot(process.argv[2]),rust=await boot(process.argv[3]);
-let calls=0,samples=0,peak=0;
+let calls=0,samples=0,peak=0,elapsed=0;
 const sizes=[1,127,128,129,255,256,511,1024];
 function input(name,...args){reference.ex[name](...args);rust.ex[name](...args);}
 function advance(ms){
+  elapsed+=ms;
   let remaining=Math.round(ms*44.1);
   while(remaining>0){
     const frames=Math.min(remaining,sizes[calls++%sizes.length]);input('web_render',frames);
@@ -31,7 +32,10 @@ function advance(ms){
     }
     remaining-=frames;samples+=frames*2;
   }
-  assert.deepEqual(new Uint16Array(rust.memory.buffer,rust.ex.web_fb(),240*240),new Uint16Array(reference.memory.buffer,reference.ex.web_fb(),240*240));
+  const actual=new Uint16Array(rust.memory.buffer,rust.ex.web_fb(),240*240);
+  const expected=new Uint16Array(reference.memory.buffer,reference.ex.web_fb(),240*240);
+  const firstMismatch=actual.findIndex((value,index)=>value!==expected[index]);
+  assert.equal(firstMismatch,-1,`framebuffer at ${elapsed} ms; first differing pixel ${firstMismatch}, C=${expected[firstMismatch]}, Rust=${actual[firstMismatch]}`);
   assert.equal(rust.ex.web_lit_keys(),reference.ex.web_lit_keys());assert.equal(rust.ex.web_lit_buttons(),reference.ex.web_lit_buttons());
 }
 function tap(button){input('web_buttons',1<<button);advance(100);input('web_buttons',0);advance(100);}

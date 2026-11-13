@@ -26,8 +26,20 @@ run fastmath sh -c "$CC -O2 -ffp-contract=off -Wall -Wextra -Werror -o $OUT/fast
 run jamtools python3 tests/jam_tools_test.py
 run jam sh -c "$CC -O2 -ffp-contract=off -std=c99 -Wall -Wextra -Werror -DEN_HOST -Ifirmware/src/dsp -o $OUT/jam_test tests/host/jam_test.c -lm && $OUT/jam_test"
 run songbook sh -c "$CC -O2 -ffp-contract=off -std=c99 -Wall -Wextra -Werror -DEN_HOST -Ifirmware/src/dsp -o $OUT/songbook_test tests/host/songbook_test.c -lm && $OUT/songbook_test"
-run jamusb sh -c "$CC -O2 -ffp-contract=off -std=c99 -D_POSIX_C_SOURCE=200809L -Wno-unused-function -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen -o $OUT/jam_usb_test tests/host/jam_usb_test.c firmware/src/dsp/amb.c -lm && env -u AMB_LEGACY_BOOT $OUT/jam_usb_test"
+run frozen-source python3 tools/frozen_source.py build/r01-source
+LEGACY_FACTORY="$PWD/build/r01-source/firmware/src/dsp/song_factory.inc"
+run frozen-factory python3 tests/reference/factory_fixture.py "$LEGACY_FACTORY"
+run jamusb sh -c "$CC -DEN_TEST_FACTORY_HEADER=\\\"$LEGACY_FACTORY\\\" -O2 -ffp-contract=off -std=c99 -D_POSIX_C_SOURCE=200809L -Wno-unused-function -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen -o $OUT/jam_usb_test tests/host/jam_usb_test.c firmware/src/dsp/amb.c -lm && env -u AMB_LEGACY_BOOT $OUT/jam_usb_test"
 run jamtransport sh -c "$CC -O2 -ffp-contract=off -std=c99 -D_POSIX_C_SOURCE=200809L -Wno-unused-function -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen -o $OUT/jam_transport_bridge tests/host/jam_transport_bridge.c firmware/src/dsp/amb.c -lm && python3 tests/jam_transport_test.py"
+# Current JMP3 music, registers and Synth Jam use the production factory bank.
+run chordchart python3 tests/chord_chart_test.py
+run nativevoicepy python3 tests/native_voice_test.py
+for proof in chord_plan native_voice jam_octave chord_dsp jam_synth; do
+    run "$proof" sh -c "$CC -O2 -ffp-contract=off -std=c99 -Wall -Wextra -Werror -DEN_HOST -Ifirmware/src/dsp -o $OUT/${proof}_test tests/host/${proof}_test.c -lm && $OUT/${proof}_test"
+done
+for proof in jam_octave_ui jam_synth_ui; do
+    run "$proof" sh -c "$CC -O2 -ffp-contract=off -std=c99 -D_POSIX_C_SOURCE=200809L -Wno-unused-function -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen -o $OUT/${proof}_test tests/host/${proof}_test.c firmware/src/dsp/amb.c -lm && env -u AMB_LEGACY_BOOT $OUT/${proof}_test"
+done
 run encoder sh -c "$CC -O2 -w -Ifirmware/hal -o $OUT/encoder_test tests/host/encoder_test.c && $OUT/encoder_test"
 run uac sh -c "$CC -O2 -w -Ifirmware/src -Ifirmware/hal -o $OUT/uac_test tests/host/uac_test.c -lm && $OUT/uac_test"
 run trs sh -c "$CC -O2 -w -Ifirmware/src -Ifirmware/hal -o $OUT/trs_test tests/host/trs_test.c && $OUT/trs_test"
@@ -86,7 +98,7 @@ if [ -f build/amb.fwsc ]; then
 else
     echo "  skip update-path tests (no build/amb.fwsc: run ./build.sh)"
 fi
-run host-build sh host/build_host.sh
+run host-build env FM1_TEST_FACTORY_HEADER="$LEGACY_FACTORY" sh host/build_host.sh
 if command -v node >/dev/null 2>&1; then run webpiece node tests/web_piece_test.js build/host/amb_host; fi
 if command -v emcc >/dev/null 2>&1; then
     run emu sh -c "sh web/emu/build.sh >/dev/null && node tests/host/emu_test.mjs build/emu/amb.wasm"

@@ -4,7 +4,7 @@ export const DEVICE_DATA = {
   "product": {
     "name": "NAIWAN 91",
     "slug": "naiwan91",
-    "releaseVersion": "0.4.3",
+    "releaseVersion": "0.4.4",
     "hardware": "FM-1",
     "source": "https://github.com/superposition/91",
     "languages": [

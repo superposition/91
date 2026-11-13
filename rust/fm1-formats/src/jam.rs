@@ -190,6 +190,7 @@ impl<'a> JamPack<'a> {
                 || (v3
                     && (!(-2..=2).contains(&(head[23] as i8))
                         || !(-2..=2).contains(&(head[24] as i8))))
+                || (v3 && head[25] > 1)
             {
                 return Err(PackError::Song);
             }

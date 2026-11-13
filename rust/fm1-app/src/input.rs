@@ -109,6 +109,7 @@ pub enum Action {
     SequenceTrick,
     ProgressionUnit,
     Help,
+    SynthKey,
 }
 #[repr(u32)]
 pub enum Notice {
@@ -158,6 +159,8 @@ enum Jam {
     Brightness,
     KeysOctave,
     BassOctave,
+    Synth,
+    Space,
 }
 pub trait Port {
     fn with_ui<R>(&mut self, f: impl FnOnce(&mut State) -> R) -> R;
@@ -203,6 +206,9 @@ fn note(p: &mut impl Port, voice: u8, key: u8, on: bool) {
 }
 fn jam(p: &mut impl Port, field: Jam) -> i32 {
     p.query(Query::Jam, field as u32, 0) as i32
+}
+fn synth(p: &mut impl Port) -> bool {
+    q(p, Query::JamVersion) == 3 && jam(p, Jam::On) != 0 && jam(p, Jam::Synth) != 0
 }
 fn set_jam(p: &mut impl Port, field: Jam, value: i32) {
     p.action(Action::Jam, field as u32, value as u32);
@@ -358,13 +364,32 @@ fn button_edges(p: &mut impl Port, buttons: u32, keys: u32) -> bool {
     false
 }
 
-fn key_edges(p: &mut impl Port, buttons: u32, keys: u32) -> u32 {
+fn key_edges(p: &mut impl Port, buttons: u32, keys: u32, synth_keys: bool) -> u32 {
     let changes = ui!(p, u, {
         let changed = keys ^ u.keys;
         u.keys = keys;
         u.shift_keys &= keys;
         changed
     });
+    let (keys, changes) = if synth_keys {
+        for key in 0..27u32 {
+            if held(changes, key) {
+                let velocity = if !held(keys, key) {
+                    0
+                } else if held(buttons, SEL) {
+                    127
+                } else {
+                    100
+                };
+                p.action(Action::SynthKey, key, velocity);
+            }
+        }
+        // The audio-core owner map retains pitches across page/mode changes.
+        // UI key consumers see an empty keyboard, including FX and mix pages.
+        (0, 0)
+    } else {
+        (keys, changes)
+    };
     let pattern = ui!(p, u, u.pat_key);
     if (0..27).contains(&pattern) && !held(keys, pattern as u32) {
         ui!(p, u, u.pat_key = -1);
@@ -1032,7 +1057,9 @@ fn knob_encoders(p: &mut impl Port, buttons: u32) -> u32 {
         let (view, menu) = ui!(p, u, (u.view, u.fx_menu));
         if detail(view) && menu == 0 {
             let mut field = FIELDS[(view - 39) as usize][knob as usize];
-            if q(p, Query::JamVersion) != 3 {
+            if q(p, Query::JamVersion) == 3 && view == page::SWELLS {
+                field = [Jam::Synth, Jam::KeysProgram, Jam::KeysOctave, Jam::Space][knob as usize];
+            } else if q(p, Query::JamVersion) != 3 {
                 field = match field {
                     Jam::KeysOctave => Jam::Touch,
                     Jam::BassOctave => Jam::BassAttack,
@@ -1174,14 +1201,20 @@ pub fn poll(p: &mut impl Port) -> u32 {
             let now = q(p, Query::Now);
             ui!(p, u, u.act_t = now);
         }
+        if synth(p) {
+            // External keys still need their releases while the panel sleeps.
+            act(p, Action::Midi);
+        }
         return 0;
     }
     if button_edges(p, buttons, keys) {
         return 0;
     }
-    let changes = key_edges(p, buttons, keys);
-    effects(p, keys, changes);
-    play_keys(p, keys, changes);
+    let synth_keys = synth(p);
+    let changes = key_edges(p, buttons, keys, synth_keys);
+    let page_keys = if synth_keys { 0 } else { keys };
+    effects(p, page_keys, changes);
+    play_keys(p, page_keys, changes);
     if buttons != 0 || keys != 0 || changes != 0 {
         let now = q(p, Query::Now);
         ui!(p, u, u.act_t = now);

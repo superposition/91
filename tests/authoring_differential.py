@@ -119,7 +119,8 @@ for index in range(160):
     compare('authored-roundtrip-'+str(index), 'decode', lambda b=b: old.decompile(bytes(b)), bytes=b)
 
 mutations = [
-    lambda d: d.__setitem__('version', 3), lambda d: d.__setitem__('name',''),
+    # JMP3 is supported now; version 4 remains invalid in both codecs.
+    lambda d: d.__setitem__('version', 4), lambda d: d.__setitem__('name',''),
     lambda d: d.__setitem__('name','A'*24), lambda d: d['scales'][0].__setitem__(1,0),
     lambda d: d['cadence'][0].__setitem__(0,100), lambda d: d['cadence'][0].__setitem__(0,8),
     lambda d: d['nodes'][0].__setitem__('bass',12), lambda d: d['nodes'][0].__setitem__('mode',2),

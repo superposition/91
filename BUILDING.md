@@ -31,8 +31,8 @@ NAIWAN 91 builds on Linux x86-64 (or macOS/Windows through Docker or WSL: JieLi'
 ## Build and test
 
 ```
-tools/release.sh 0.4.3            # parameter data, the manual's page, the tests, the package, the emulator
-tools/release.sh 0.4.3 --no-tests # without the tests
+tools/release.sh 0.4.4            # parameter data, the manual's page, the tests, the package, the emulator
+tools/release.sh 0.4.4 --no-tests # without the tests
 ./build.sh                        # a development build (version DEV)
 tests/run_tests.sh                # the tests alone
 ```
@@ -46,7 +46,7 @@ python3 tools/frozen_source.py build/r01-source
 sh tests/rust_simulator.sh "$PWD/build/r01-source"
 ```
 
-This requires Git history containing the checkpoint pinned in `tools/frozen_source.py`. Every reference file is verified against `tests/reference/source.sha256`. CI fetches that history explicitly. The legacy scenarios compare the frozen C engine, current C engine and native Rust engine; standards/chord tests cover the new Songbook behavior separately. A successful build is not a hardware qualification; see the [0.4.3 integration record](docs/RELEASE_0_4_3.md).
+This requires Git history containing the checkpoint pinned in `tools/frozen_source.py`. Every reference file is verified against `tests/reference/source.sha256`. CI fetches that history explicitly. Legacy comparisons give the current C and Rust builds the SHA-verified historical factory table, leaving the frozen oracle and its expected results unchanged. Separate current-factory cases compare C and Rust with the new standards and Synth Jam. Both families compare exact audio, frames and state; the release wrapper clears the test-only factory override before building. A successful build is not a hardware qualification; see the [0.4.4 integration record](docs/RELEASE_0_4_4.md).
 
 The build fails if a soft-double routine is linked (a `double` crept in) and checks the image, RAM and pool sizes. Build options: `EN_CORE2=0` builds single-core (the reverb on the second core is the default), `EN_CDC=1` adds Felucca's USB serial function, `EN_DIAG=1` adds the status log's third frame (timers inside the render's stages, the chunk sizes, the work between chunks) for a performance hunt.
 
@@ -57,7 +57,7 @@ The current Songbook has a separate reproducible bank: `tools/build_standards.py
 ## The site
 
 ```
-python3 tools/make_pages_site.py 0.4.3 build/site
+python3 tools/make_pages_site.py 0.4.4 build/site
 python3 tests/web_build_test.py
 python3 tests/web_site_test.py build/site build/emu
 ```
@@ -73,7 +73,7 @@ The printable quick manual (`docs/QUICK.md`, eight A4 pages) is made by `python 
 From the site, or from the command line (needs `pip3 install mido python-rtmidi`):
 
 ```
-python3 tools/fm1_install.py build/naiwan91-0.4.3.fwsc
+python3 tools/fm1_install.py build/naiwan91-0.4.4.fwsc
 python3 tools/fm1_install.py --info          # identity of the connected FM-1
 ```
 

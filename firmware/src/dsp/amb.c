@@ -51,7 +51,12 @@ _Static_assert(P_NPARAMS==176,"Rust block parameter ABI");
 #define BARRIER() __asm__ volatile("" ::: "memory")
 
 #include "jam_factory.inc"
+/* Only host regression builds may supply a frozen historical factory fixture. */
+#ifdef EN_TEST_FACTORY_HEADER
+#include EN_TEST_FACTORY_HEADER
+#else
 #include "song_factory.inc"
+#endif
 static uint8_t jp_active[JP_MAX]; /* BSS: preserve the pool's 4 KiB reserve. */
 static const uint8_t *jp_data=JP_SONG_0;
 static const uint8_t * volatile jp_upload;
@@ -67,6 +72,8 @@ static uint8_t jp_patch_dirty;
 static uint8_t jp_swell_amount=30,jp_variation=1,jp_song=0;
 _Static_assert(sizeof jp_active + sizeof jp_phrase + sizeof jp_want + sizeof jp_now + 320 <= 5500, "Jam static-memory budget");
 static int jp_dx(void) {return en_jam_on && jp_v2(jp_data);}
+static int jp_synth_on(void) {return en_jam_on && jp_synth(jp_data);}
+static void jp_held_flush(void);
 volatile uint8_t en_jam_on,en_jam_bar,en_jam_beat,en_jam_section,en_jam_pending,en_jam_length=16;
 volatile uint32_t en_jam_revision;
 
@@ -1165,7 +1172,7 @@ out:
 }
 
 /* ------------------------------------------------------------ commands --- */
-enum { C_SET, C_POOL, C_PLAY, C_NEXT, C_FREEZE, C_SEED, C_PANIC, C_CLOCK, C_REGROW, C_SECTION, C_FX, C_MUTE, C_NOTE, C_HUSH, C_FXK, C_TRK, C_GATEPAT, C_FXS, C_FILLQ, C_DJSYNC, C_FLXH, C_SHED, C_USERVOICE, C_USERCLEAR, C_ACSTEP, C_ACCAP, C_CMCAP, C_INTRO, C_CMSTEP, C_PROG, C_PROG2, C_PROGK, C_MAP, C_DTAP, C_DEG, C_BEND, C_PEDAL, C_BSSTEP, C_JAM };
+enum { C_SET, C_POOL, C_PLAY, C_NEXT, C_FREEZE, C_SEED, C_PANIC, C_CLOCK, C_REGROW, C_SECTION, C_FX, C_MUTE, C_NOTE, C_HUSH, C_FXK, C_TRK, C_GATEPAT, C_FXS, C_FILLQ, C_DJSYNC, C_FLXH, C_SHED, C_USERVOICE, C_USERCLEAR, C_ACSTEP, C_ACCAP, C_CMCAP, C_INTRO, C_CMSTEP, C_PROG, C_PROG2, C_PROGK, C_MAP, C_DTAP, C_DEG, C_BEND, C_PEDAL, C_BSSTEP, C_JAM, C_JAMKEY };
 static uint8_t muted;                            /* remote: no sound, no MIDI (C_MUTE, after what's queued) */
 static uint8_t hush;                             /* a store while playing: fade out, hold, fade back in (C_HUSH) */
 static float hush_g = 1.0f;                      /* its gain, 0..1 */
@@ -3840,6 +3847,7 @@ const char *const EN_CM_RATE[4] = {"1/4", "3/16", "1/8", "1/16"};
 #endif   /* slowest to fastest */
 static int32_t fm_bend;                          /* a keyboard's bend on the DX pluck, as a Q24 log (fm6's pitch; hb_tick sets it) */
 #include "fm6.inc"
+#include "jam_synth.inc"
 /* a keyboard's pitch bend and mod wheel (0.15.26: an MPK mini's) on the voice its keys play: the pluck (plain: its phase; DX: fm_bend), the drone, the acid.
  * Taken once a chunk (hb_tick): hb_semi semitones now (the bend, and the vibrato at 5.5 Hz), hb_pf the frequency's factor; the pad isn't bent. */
 static uint8_t hb_voice = 0xFF;
@@ -5793,6 +5801,7 @@ static void regrow(void)                        /* a new piece: a fresh acid lin
 
 static void notes_off(void)
 {
+    jp_held_flush();
     cm_midi_flush();
     midi_all_off();
 }
@@ -6180,7 +6189,7 @@ static void play_stop(void)
     if (!en_ext)
         midi(0xFC, 0, 0);
 #endif
-    notes_off();
+    if(jp_synth_on())jp_backing_stop();else notes_off();
 }
 
 /* --------------------------------------------------------- performance FX --- */
@@ -7804,6 +7813,7 @@ static void drain(void)
         int a = (int)(c >> 16 & 0xFFu), b = (int)(int16_t)(c & 0xFFFFu);
         switch (c >> 24) {
         case C_JAM: jp_control(a,b); break;
+        case C_JAMKEY: jp_held_key((unsigned)a,b&127,(b>>8)&127); break;
         case C_SET:
             if (a < P_NPARAMS)
                 apply(a, b);
@@ -7811,8 +7821,8 @@ static void drain(void)
         case C_POOL: pool_set((uint32_t)b & 0xFFFu); break;
         case C_PLAY:
             if (a && !en_playing) {
-                intro_t = 0;                     /* the intro from the start */
-                play_start(1);
+                if(!jp_synth_on())intro_t = 0;   /* manual keys keep sounding over backing transport */
+                play_start(jp_synth_on()?0:1);
             }
             else if (!a && en_playing)
                 play_stop();

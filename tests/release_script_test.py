@@ -26,6 +26,7 @@ class ReleaseExitStatus(unittest.TestCase):
                 "build.sh": "printf package > build/naiwan91-0.4.3.fwsc\n",
                 "web/emu/build_clang.sh": (
                     "[ \"$EN_VERSION\" = 0.4.3 ] || exit 99\n"
+                    "[ -z \"${FM1_TEST_FACTORY_HEADER:-}\" ] || exit 98\n"
                     "echo emulator-builder-ran\n"
                     f"exit {emulator_status}\n"
                 ),
@@ -37,6 +38,7 @@ class ReleaseExitStatus(unittest.TestCase):
             return subprocess.run(
                 ["sh", str(root / "tools/release.sh"), "0.4.3"],
                 cwd=root, capture_output=True, text=True,
+                env=dict(os.environ, FM1_TEST_FACTORY_HEADER="inherited-test-fixture"),
             )
 
     def test_failed_emulator_stops_release_even_when_package_exists(self):

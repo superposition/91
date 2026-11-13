@@ -102,6 +102,7 @@ static void kr_reset(void)
 
 static void runner_start(void)
 {
+    if(en_jam_option(JAM_SYNTH))en_jam_release();
 #if EN_RUST_APP
     { fm1_runner_observation o={0};uint32_t a[8]={0};
       o.now=plat_ms();o.bars=en_bars;a[0]=plat_ms();a[1]=plat_ms();a[2]=plat_ms();

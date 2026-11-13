@@ -21,12 +21,17 @@ class SimulatorReference(unittest.TestCase):
         for directory in ("tools", "tests/reference", "bin"):
             (self.root / directory).mkdir(parents=True)
         shutil.copyfile(ROOT / "tests/rust_simulator.sh", self.root / "tests/rust_simulator.sh")
+        shutil.copyfile(ROOT / "tests/reference/factory_fixture.py", self.root / "tests/reference/factory_fixture.py")
+        shutil.copyfile(ROOT / "tests/reference/build_inputs.py", self.root / "tests/reference/build_inputs.py")
+        (self.root / "Cargo.toml").write_text("# fixture\n")
+        (self.root / "Cargo.lock").write_text("# fixture\n")
         digest = hashlib.sha256(b"frozen\n").hexdigest()
-        (self.root / "tests/reference/source.sha256").write_text(digest + "  proof.txt\n")
+        (self.root / "tests/reference/source.sha256").write_text(digest + "  proof.txt\n" + digest + "  firmware/src/dsp/song_factory.inc\n")
         (self.root / "tools/frozen_source.py").write_text(
             "from pathlib import Path\nimport sys\n"
             "p=Path(sys.argv[1]);p.mkdir(parents=True,exist_ok=True)\n"
             "(p/'proof.txt').write_bytes(b'frozen\\n')\n"
+            "h=p/'firmware/src/dsp/song_factory.inc';h.parent.mkdir(parents=True,exist_ok=True);h.write_bytes(b'frozen\\n')\n"
         )
         for name in ("tools/gen_font.py", "tests/reference/simulator_oracle.py"):
             (self.root / name).write_text("pass\n")
@@ -51,6 +56,9 @@ class SimulatorReference(unittest.TestCase):
         reference = self.root / "external"
         reference.mkdir()
         (reference / "proof.txt").write_bytes(b"frozen\n")
+        header = reference / "firmware/src/dsp/song_factory.inc"
+        header.parent.mkdir(parents=True)
+        header.write_bytes(b"frozen\n")
         self.assertEqual(self.run_script(str(reference)).returncode, 73)
         (reference / "proof.txt").write_bytes(b"changed\n")
         result = self.run_script(str(reference))

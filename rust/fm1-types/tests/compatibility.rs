@@ -52,7 +52,42 @@ fn typed_commands_preserve_all_kinds_and_signed_payloads() {
         }
     }
     assert_eq!(CommandKind::Jam as u8, 38);
-    for kind in 39..=255 {
+    for kind in 40..=255 {
         assert!(CommandWord::new(kind, 0, 0).decode().is_err());
+    }
+}
+
+#[test]
+fn synth_key_command_matches_c_id_and_preserves_owner_note_velocity() {
+    let source = include_str!("../../../firmware/src/dsp/amb.c");
+    let commands = source
+        .split("enum { C_SET,")
+        .nth(1)
+        .unwrap()
+        .split("};")
+        .next()
+        .unwrap();
+    let ids = core::iter::once("C_SET")
+        .chain(commands.split(',').map(str::trim))
+        .collect::<Vec<_>>();
+    assert_eq!(ids[CommandKind::Jam as usize], "C_JAM");
+    assert_eq!(ids[CommandKind::JamKey as usize], "C_JAMKEY");
+    assert_eq!(CommandKind::JamKey as u8, 39);
+    for owner in [1, 27, 128, 188, 255] {
+        for note in 0..=127 {
+            for velocity in 0..=127 {
+                let value = note | velocity << 8;
+                let word = CommandWord::encode(CommandKind::JamKey, owner, value);
+                assert_eq!(
+                    word.bits(),
+                    39u32 << 24 | u32::from(owner) << 16 | value as u32
+                );
+                let decoded = word.decode().unwrap();
+                assert_eq!(decoded.kind, CommandKind::JamKey);
+                assert_eq!(decoded.argument, owner);
+                assert_eq!(decoded.value & 127, note);
+                assert_eq!((decoded.value >> 8) & 127, velocity);
+            }
+        }
     }
 }

@@ -13,7 +13,7 @@ Tracked in [web epic #28](https://github.com/superposition/91/issues/28), alongs
 | Backup/telemetry genre labels still showed HYPNO/LOFI while compiled metadata reports CITYPOP/SUNSET. | Align display labels with current `build/params.json`; preserve numeric IDs and saved bytes. |
 | README hero, tour and feature collages depicted the earlier fork. | Replace their references with five fresh, deterministic WASM framebuffer captures. |
 
-The current build uses Rust planning, bass decisions, pack/session codecs, command queue, sample-clock cadence, Songbook view copies and staging arbitration. C still dispatches musical events and draws/synthesizes the instrument. These details remain in development documentation; public pages explain choosing a song, key/tempo, Hold/New Idea and shaping keys/bass/swells. Hardware is optional for `/emu/`; the installer and connected editor retain their device-specific roles.
+The original web refactor shipped alongside Rust planning, bass decisions, pack/session codecs, command queue, sample-clock cadence, Songbook view copies and staging arbitration. Subsequent releases also migrated input and parts of synthesis; the current boundaries are recorded in the migration documentation. These details remain in development documentation. Public pages explain choosing a standard, setting key/tempo, shaping the keyboard and bass sounds, and playing the keyboard part in Synth Jam. Hardware is optional for `/emu/`; the installer and connected editor retain their device-specific roles.
 
 The public CPU/migration badges were intentionally removed after review. Their two non-interactive DOM IDs are recorded as retired in `tests/web-required-ids.json`; all actual controls remain covered by the original ID contract. Developer telemetry remains available through `window.ambLast` without being displayed to players.
 
@@ -47,6 +47,8 @@ node tools/capture_web_screens.mjs build/emu/amb.wasm
 
 This boots the actual WASM with seed 91 and master 2800, advances the instrument, captures the performance page and SELECT's four Songbook detail pages, and writes lossless 240×240 PNGs plus `docs/img/naiwan91-captures.json`. PNG bytes come from the same byte-swapped RGB565 buffer that the browser draws. These are instrument framebuffer captures, not browser layout screenshots or invented hardware renders.
 
+For 0.4.4, the last capture shows Synth Jam after its MODE knob is turned from BAND to SYNTH. The capture manifest records that input and the exact WASM hash. Historical release manifests retain their original image hashes.
+
 ## Tickets
 
 - [#29 — W01: inherited surface audit and product boundary](https://github.com/superposition/91/issues/29)
@@ -64,7 +66,7 @@ Rust WASM ownership and migrating browser application logic remain [#17](https:/
 Build the site with the existing compiled emulator and release package, then run the built-site check:
 
 ```sh
-python3 tools/make_pages_site.py 0.3.0 build/site-web-review
+python3 tools/make_pages_site.py 0.4.4 build/site-web-review
 python3 tests/web_site_test.py build/site-web-review
 node tests/host/emu_http_test.mjs build/emu/amb.wasm
 node tests/web_backup_test.js

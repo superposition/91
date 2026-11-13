@@ -226,7 +226,11 @@ pub unsafe extern "C" fn fm1_rust_fm6_note(
             if result.stolen {
                 COUNTERS[2].fetch_add(1, Ordering::Relaxed);
             }
-            result.slot as u32 | if result.stolen { 0x100 } else { 0 }
+            result.slot as u32
+                | if result.stolen { 0x100 } else { 0 }
+                | result.previous.map_or(0, |n| {
+                    (u32::from(n.owner) << 16) | (u32::from(n.pitch) << 24)
+                })
         }
         None => u32::MAX,
     }
@@ -319,6 +323,8 @@ pub unsafe extern "C" fn fm1_rust_fm6_render(
 /// # Safety
 /// Six live slots are exclusively held by render after joining the FM job.
 /// Mode 0 retires all;1 retires a part;2 reads part liveness;3 fades older keys.
+/// 4 marks held owner (slot | owner<<8);5 releases owner (0 or0x100|pitch);
+/// 6 counts held owners of a sounding pitch, for coalesced MIDI note-off.
 #[no_mangle]
 pub unsafe extern "C" fn fm1_rust_fm6_pool(slots: *mut Slot, mode: u32, value: u32) -> u32 {
     let slots = unsafe { &mut *slots.cast::<[Slot; 6]>() };
@@ -327,6 +333,18 @@ pub unsafe extern "C" fn fm1_rust_fm6_pool(slots: *mut Slot, mode: u32, value: u
         1 => pool::retire_part(slots, value as u8),
         2 => return u32::from(pool::part_busy(slots, value as u8)),
         3 => pool::fade_previous_keys(slots, value),
+        4 => {
+            return u32::from(fm6::held::mark(
+                slots,
+                (value & 255) as usize,
+                (value >> 8) as u8,
+            ))
+        }
+        5 => {
+            return fm6::held::release(slots, value as u8)
+                .map_or(0, |pitch| 0x100 | u32::from(pitch))
+        }
+        6 => return fm6::held::count(slots, value as u8),
         _ => panic!("invalid FM pool operation"),
     }
     0

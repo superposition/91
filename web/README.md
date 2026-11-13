@@ -22,12 +22,12 @@ The emulator is useful without hardware and starts audio only on **Switch on**. 
 Build with Python 3.10 or newer:
 
 ```sh
-python3 tools/make_pages_site.py 0.4.3 build/site
+python3 tools/make_pages_site.py 0.4.4 build/site
 python3 tests/web_build_test.py
 python3 tests/web_site_test.py build/site build/emu
 ```
 
-Build the firmware, emulator, browser codecs, parameter data and manual first with `tools/release.sh 0.4.3`. See [build prerequisites](../BUILDING.md). `web/product.json` is the release metadata source; `python3 tools/make_params.py` regenerates `web/device-data.js`, and `--check` rejects drift. Product release versions are separate from wire/storage format versions.
+Build the firmware, emulator, browser codecs, parameter data and manual first with `tools/release.sh 0.4.4`. See [build prerequisites](../BUILDING.md). `web/product.json` is the release metadata source; `python3 tools/make_params.py` regenerates `web/device-data.js`, and `--check` rejects drift. Product release versions are separate from wire/storage format versions.
 
 The full site shares root CSS, fonts and the icon once; standalone `build/emu` retains its own assets. All paths work below a host subpath. `site-build.json` records the release identity, firmware hash and a deterministic inventory; it records a build, not a deployment. Existing generated outputs are verified before replacement. Build into a fresh directory below `build/`, or use `--adopt-existing` once for a verified older pre-manifest bundle. That flag recognizes the old canonical routes and exact redundant emulator assets, rejects unknown files, and verifies every path against the new build before replacement. It retains the entire old directory beside the output and reports its location, preserving edits in known legacy filenames. It never adopts arbitrary nonempty directories. Local changes to manifest-owned files also require a fresh output directory.
 

@@ -227,7 +227,8 @@ static unsigned ju_request(const uint8_t *m,unsigned n,uint8_t *buf,int legacy_b
         if(ju_owner()==2) {st=JU_BUSY;break;}
         ju_owner_set(0);ju.valid=0;ju.mask=0;break;
     case 10:
-        if(alen!=3 || a[0]>JAM_BASS_OCTAVE) {st=JU_BAD;break;}
+        if(alen!=3 || a[0]>JAM_SPACE) {st=JU_BAD;break;}
+        if((a[0]==JAM_SYNTH && (a[1] || a[2]>1)) || (a[0]==JAM_SPACE && (a[1] || a[2]>100))) {st=JU_BAD;break;}
         if(a[0]==JAM_SLOT+1) en_play(a[2]!=0);
         else if(a[0]==JAM_KEYS_OCTAVE || a[0]==JAM_BASS_OCTAVE) {
             unsigned value=(unsigned)a[1]<<7|a[2];

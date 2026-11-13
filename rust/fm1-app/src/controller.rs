@@ -239,10 +239,9 @@ pub fn frame(port: &mut impl Port, views: Views) {
     }
     let scan = port.with_ui(|ui| ui.scan);
     port.action(Action::Scan, u32::from(scan), 0);
-    let needs_snapshot = port.with_ui(|ui| {
-        ui.view == views.songbook || (ui.view >= views.arrangement && ui.view <= views.swells)
-    });
-    if needs_snapshot && port.action(Action::JamSnapshot, 0, 0) == 0 {
+    // Song context appears in the header on every page. Capture after input,
+    // including a Songbook exit, so the header cannot retain the prior mode.
+    if port.action(Action::JamSnapshot, 0, 0) == 0 {
         effect(port, Action::Leds);
         port.with_ui(|ui| ui.frame = ui.frame.wrapping_add(1));
         return;

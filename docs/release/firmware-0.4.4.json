@@ -1,0 +1,243 @@
+{
+  "status": "qualified MCU package; installed and verified on FM-1; bounded physical runtime evidence recorded separately",
+  "qualified_at_utc": "2026-11-13T07:33:10.132411+00:00",
+  "version": "0.4.4",
+  "identity": "FM-1_7000404",
+  "package": {
+    "path": "build/naiwan91-0.4.4.fwsc",
+    "bytes": 611251,
+    "sha256": "d61d38a7f76d1142cc9a2bad0f39e0dd8cab1f07f31e89601bf16957f719b7d3"
+  },
+  "source_base": "2d27650",
+  "source_delta": [
+    ".github/workflows/pages.yml",
+    "BUILDING.md",
+    "README.md",
+    "docs/JAM_PACKS.md",
+    "firmware/src/app/jam_usb.h",
+    "firmware/src/app/runner.c",
+    "firmware/src/app/ui.c",
+    "firmware/src/dsp/amb.c",
+    "firmware/src/dsp/amb.h",
+    "firmware/src/dsp/fm6.inc",
+    "firmware/src/dsp/jam.h",
+    "firmware/src/dsp/jam_runtime.inc",
+    "firmware/src/dsp/rust_fm6.h",
+    "firmware/src/dsp/rust_ui_buttons.h",
+    "firmware/src/dsp/rust_ui_input.h",
+    "host/build_host.sh",
+    "rust/fm1-app/src/buttons.rs",
+    "rust/fm1-app/src/input.rs",
+    "rust/fm1-app/tests/jam_input.rs",
+    "rust/fm1-authoring/src/device.rs",
+    "rust/fm1-authoring/src/pack.rs",
+    "rust/fm1-authoring/tests/chords.rs",
+    "rust/fm1-engine/src/fm6/mod.rs",
+    "rust/fm1-engine/src/fm6/pool.rs",
+    "rust/fm1-engine/src/fm6/types.rs",
+    "rust/fm1-formats/src/jam.rs",
+    "rust/fm1-jam-bridge/src/fm6.rs",
+    "rust/fm1-sim/build.rs",
+    "rust/fm1-types/src/command.rs",
+    "rust/fm1-types/tests/compatibility.rs",
+    "tests/authoring_device.py",
+    "tests/authoring_differential.py",
+    "tests/host/emu_rust_test.mjs",
+    "tests/host/jam_usb_test.c",
+    "tests/jam_transport_test.py",
+    "tests/reference/simulator_compare.py",
+    "tests/release_script_test.py",
+    "tests/run_tests.sh",
+    "tests/rust_emulator_parity.sh",
+    "tests/rust_simulator.sh",
+    "tests/simulator_reference_test.py",
+    "tools/capture_web_screens.mjs",
+    "tools/fm1_jam.py",
+    "tools/release.sh",
+    "web/README.md",
+    "web/emu/build_clang.sh",
+    "web/emu/index.html",
+    "web/index.html",
+    "web/product.json"
+  ],
+  "source_added": [
+    "docs/RELEASE_0_4_4.md",
+    "docs/release/hardware-0.4.3.json",
+    "firmware/src/dsp/jam_synth.inc",
+    "rust/fm1-app/tests/synth_buttons.rs",
+    "rust/fm1-engine/src/fm6/held.rs",
+    "rust/fm1-engine/tests/held_synth.rs",
+    "tests/current-scenarios/songbook.amb",
+    "tests/host/emu_synth_jam_test.mjs",
+    "tests/host/jam_synth_test.c",
+    "tests/host/jam_synth_ui_test.c",
+    "tests/reference/factory_fixture.py"
+  ],
+  "source_manifest": "build/qualified-source-0.4.4-sha256.json",
+  "scope": "Optional Synth Jam mode: 27 chromatic held panel keys, raw incoming MIDI, five keyboard voices and protected backing bass. PLAY toggles backing while held notes remain; HOME releases held notes and returns to Band/Songbook. Four direct MODE/PROGRAM/OCTAVE/SPACE controls; mode and Space persist in JMP3. Authored charts, all seven canonical packs and factory constants byte-identical to installed 0.4.3.",
+  "build_architecture": "Default JieLi MCU uses C DSP/UI runtime with EN_RUST runtime flags disabled, Rust-backed build/package tools. Matching Rust host/browser modules separately tested; no new Rust MCU migration claim.",
+  "rollback": {
+    "path": "build/rollback-0.4.3/naiwan91-0.4.3.fwsc",
+    "sha256": "3aff7ba0a0f290a787b5ac1e2d13dedaa331b850eff66b15ad4dde599200f4a9"
+  },
+  "memory": {
+    "ram_used": 97196,
+    "ram_limit": 98304,
+    "pool_used": 339404,
+    "pool_limit": 344064,
+    "pool_reserve": 4096,
+    "body_bytes": 487408,
+    "body_limit": 573440,
+    "app_bytes": 491216,
+    "ram_delta_from_0_4_3": 0,
+    "pool_delta_from_0_4_3": 0
+  },
+  "recovery_stub": {
+    "bytes": 2268,
+    "sha256": "4e33bfbb5ebdadc6245a8ba36aff087231e42e66507df8a1e0dea0e620d098ef",
+    "padded_bytes": 3808,
+    "padded_sha256": "baee55ed142fe1cc336099902fa544d8844ba72182abf669f15cc78fc6bee87c",
+    "app_prefix_matches": true
+  },
+  "package_contents": {
+    "decoded_app_matches_build": true,
+    "decoded_protected_stub_matches": true,
+    "embedded_loader_matches_build": true
+  },
+  "packs": [
+    {
+      "path": "packs\\01-blue-bossa.jmp",
+      "bytes": 3181,
+      "sha256": "b40a8f777d6f5d9e27fb2e29640835feac3672f59c74e01684402c07ade59b92"
+    },
+    {
+      "path": "packs\\02-autumn-leaves.jmp",
+      "bytes": 3374,
+      "sha256": "cdd0b2d7fba702940e765acc6eb91204c6bf28008fa4a580728cead8f06a7327"
+    },
+    {
+      "path": "packs\\03-satin-doll.jmp",
+      "bytes": 3181,
+      "sha256": "e79db76cd50e39dbb22c648b98a2b7f8c51fb8cf64ede35dfc8ad7b339154919"
+    },
+    {
+      "path": "packs\\04-blue-bossa-deep.jmp",
+      "bytes": 3181,
+      "sha256": "2fe07f7799dbfa7f79889a73a8136a6a800472013eeb08f030950d4b17822e14"
+    },
+    {
+      "path": "packs\\05-leaves-drawbars.jmp",
+      "bytes": 3374,
+      "sha256": "07b54e045102653827d2f175fad6aa79cf61defe9094c761d2fd503253655a48"
+    },
+    {
+      "path": "packs\\06-satin-muted-guitar.jmp",
+      "bytes": 3181,
+      "sha256": "0c6596e2ef243d0be4b5e26858672848fa142154af9e52f6818ab2997800f51d"
+    },
+    {
+      "path": "packs\\07-major-minor-lab.jmp",
+      "bytes": 3200,
+      "sha256": "2d04206194aaedbda0d2e0d5fe5632fa04e87d46a7762a639ef5d6ec456ae9f0"
+    }
+  ],
+  "checks": [
+    "Protected recovery stub and loader exact, including decoded final delivered package",
+    "Installer simulator and actual JS/Python package decode parity; actual-package OTA NOR suite",
+    "Memory/pool/body/RAM-text/no-soft-double/HAL-only-MMIO gates",
+    "Frozen v1/v2 regressions and all17literalqualities/fourmovement modes",
+    "Full16/32/32-bar actualfactory DSP: exact MIDI, nonzero audio, zero fullscale",
+    "Native DX profile preservation and all25independent octave combinations with paired note-offs",
+    "Held Synth DSP: all27chromatic panel keys, raw MIDI, duplicate pitch coalescing, natural retirement/reuse, stealing, protectedbass, backingPLAY, patchchange/reset/modeexit cleanup, persistentSpace, zero fullscale",
+    "ActualUI: four directrows with boundedMODE/OCTAVE, all43pages plusFX keyboard routing, rawMIDI, SPACE andHOMEexit withoutpool edits; channel-change/remote/game entry flushes and screensaver MIDI releases",
+    "ActualUSB device bridge: literalv3/signedoctaves/mode/Space transfer, save/reboot/readback",
+    "Seven pack manifests and factory constants byte-identical to installed0.4.3"
+  ],
+  "files": {
+    "build/naiwan91-0.4.4.fwsc": {
+      "bytes": 611251,
+      "sha256": "d61d38a7f76d1142cc9a2bad0f39e0dd8cab1f07f31e89601bf16957f719b7d3"
+    },
+    "build/amb.bin": {
+      "bytes": 491216,
+      "sha256": "fee488c0f53891c06fc873051abc7e5e7caee714765f47246f06c2867482fffe"
+    },
+    "build/amb.elf": {
+      "bytes": 543444,
+      "sha256": "250b89191dd7deb95830c3aaa18664aed21a16669be1427096938fbdf252d8bb"
+    },
+    "build/stub/stub.bin": {
+      "bytes": 2268,
+      "sha256": "4e33bfbb5ebdadc6245a8ba36aff087231e42e66507df8a1e0dea0e620d098ef"
+    },
+    "build/loader/ota.bin": {
+      "bytes": 8095,
+      "sha256": "fb264969d35b09657af9277527710c80af8dcc164de4946fa298da61420f2e85"
+    },
+    "build/release-0.4.4.log": {
+      "bytes": 1505,
+      "sha256": "c308050f3407ed094c99f6f17f92924a026801214f6b0b4474c5a71f63a03147"
+    },
+    "build/release-0.4.4-installer.log": {
+      "bytes": 1972,
+      "sha256": "50e5d750278843e1d59acceb3b7eb29f2cde20bac470ef0786b6c9a4373c63c3"
+    },
+    "build/release-0.4.4-ota.log": {
+      "bytes": 1155,
+      "sha256": "adb70f19c776996c82cfe9cc6ead1a077fcb3edcd4c4c908f5d02dafa0e65d5c"
+    },
+    "build/qualified-source-0.4.4-sha256.json": {
+      "bytes": 144180,
+      "sha256": "1d42f65b10e125e85d785ddd82c2cdb987cd768d9a2eddd2f020f932e4ac3709"
+    },
+    "build/release-tests/chord_plan.log": {
+      "bytes": 176,
+      "sha256": "c67e72fee0104bb236833d4dd984cd3f2da2e6bce2909429da0017a26d865b39"
+    },
+    "build/release-tests/native_voice.log": {
+      "bytes": 179,
+      "sha256": "456ae2c5b2ea821984c98d2caa08bd4116449372bd49a1560d730b45e6cf61b1"
+    },
+    "build/release-tests/jam_octave.log": {
+      "bytes": 144,
+      "sha256": "96793904fb49a0153f5d63bb1c815378dbe011cf3c6f9f6d4fa596bd82edd354"
+    },
+    "build/release-tests/chord_dsp.log": {
+      "bytes": 534,
+      "sha256": "19b7fd7066bac0504df3c2bd1b449caaa9aee60a443769fc925c69c0bc23ba1f"
+    },
+    "build/release-tests/jam.log": {
+      "bytes": 142,
+      "sha256": "9e08f3755aad268ba860b1e3137de1d15235484b3aea2da0559fdcb157d8f07f"
+    },
+    "build/release-tests/songbook.log": {
+      "bytes": 147,
+      "sha256": "98bac0f592507d2e4e21d961e07e9328d65dfce99bb4677cd2710f318211ff21"
+    },
+    "build/release-tests/jam-octave-ui.log": {
+      "bytes": 117,
+      "sha256": "e162a1fee9e9e77b80a590127cb01f56f796334b8052ce38b2217c1b989ac333"
+    },
+    "build/release-tests/jam-transport-0.4.4.log": {
+      "bytes": 221,
+      "sha256": "c7621f67162b04f0511870b083d4b274b3c0b0c0b24cef8eeb959b0c24ae3d3b"
+    },
+    "build/release-tests/jam-synth.log": {
+      "bytes": 198,
+      "sha256": "2467d2b738d5fdc463266c7fb9ee19f60caf25a98d9d14ccde0fb77ca7c443e3"
+    },
+    "build/release-tests/jam-synth-ui.log": {
+      "bytes": 184,
+      "sha256": "9dfb5b4de7a658f67da1797a4dd4e9eef30decdcd3d9d75edf542e8e344fc18b"
+    },
+    "build/release-tests/native-python-0.4.4.log": {
+      "bytes": 164,
+      "sha256": "e7bc6cae2eaaebcc5197fafa0f90aa147936b2ca0569f47eb973a0bd05b38ce4"
+    },
+    "build/release-tests/chord-python-0.4.4.log": {
+      "bytes": 167,
+      "sha256": "e78a097d5277a20adc7c6ac6805af6c429deb6931e57b6b5696d4184f103efa0"
+    }
+  },
+  "hardware": "docs/release/hardware-0.4.4.json"
+}

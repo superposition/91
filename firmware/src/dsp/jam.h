@@ -28,6 +28,7 @@
 /* v3 shares the Songbook storage, voices and performance profiles. */
 static inline int jp_v2(const uint8_t *p) {return p[4]==2 || p[4]==3;}
 static inline int jp_v3(const uint8_t *p) {return p[4]==3;}
+static inline int jp_synth(const uint8_t *p) {return jp_v3(p) && p[JP2_HEAD+25]==1;}
 static inline int jp_octave(const uint8_t *p,unsigned part) {return jp_v3(p)?(int8_t)p[JP2_HEAD+23+part]:0;}
 static inline int jp_play_note(const uint8_t *p,unsigned part,int note) {return note+12*jp_octave(p,part);}
 static inline const uint8_t *jp_node(const uint8_t *p,unsigned n) {return p+(n<16 ? JP_NODE+n*8:JP2_EXTRA+(n-16)*8);}
@@ -84,7 +85,7 @@ static inline int jp_valid(const uint8_t *p, unsigned n)
     for(i=0;i<p[7];i++) if(p[JP_DRUM+i*16+14]>100) return 0;
     if(jp_v2(p)) {
         if(n<JP2_META || p[JP2_HEAD]!='S' || p[JP2_HEAD+1]!='N' || p[JP2_HEAD+2]!='G' || p[JP2_HEAD+3]!=p[3]) return 0;
-        if(jp_v3(p) && (p[JP2_HEAD+21]>1 || p[JP2_HEAD+22]>3))return 0;
+        if(jp_v3(p) && (p[JP2_HEAD+21]>1 || p[JP2_HEAD+22]>3 || p[JP2_HEAD+25]>1))return 0;
         if(jp_v3(p) && (jp_octave(p,0)<-2 || jp_octave(p,0)>2 || jp_octave(p,1)<-2 || jp_octave(p,1)>2))return 0;
         if(!p[JP2_HEAD+4] || p[JP2_HEAD+4]>8 || p[JP2_HEAD+5]>=p[JP2_HEAD+4] || p[JP2_HEAD+6]>=p[JP2_HEAD+4] || p[JP2_HEAD+7]>=24) return 0;
         for(i=18;i<=20;i++) if(p[JP2_HEAD+i]>100)return 0;

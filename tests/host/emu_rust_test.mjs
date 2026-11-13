@@ -26,8 +26,12 @@ async function boot(path,packPath) {
   return {ex,memory};
 }
 
-const reference=await boot(process.argv[2],process.argv[4]);
-const rust=await boot(process.argv[3],process.argv[4]);
+const currentFactory=process.argv.includes('--current-factory');
+const args=process.argv.slice(2).filter(value=>value!=='--current-factory');
+assert(args.length===2||args.length===3,'usage: emu_rust_test.mjs C.wasm RUST.wasm [PACK] [--current-factory]');
+const packPath=args[2];
+const reference=await boot(args[0],packPath);
+const rust=await boot(args[1],packPath);
 assert.equal(typeof rust.ex.web_rust_stat,'function','migration diagnostics export');
 const memoryBytes=rust.memory.buffer.byteLength;
 assert.equal(Object.keys(rust.ex).length,24,'bounded browser API and memory exports');
@@ -77,7 +81,7 @@ assert(counts[4]>=500,`Rust bass decisions executed: ${counts}`);
 assert.equal(counts[2],0,'no planner rejection');
 assert.equal(counts[3],0,'no C planner fallback');
 assert.equal(rust.memory.buffer.byteLength,memoryBytes,'no memory growth during playback');
-if(process.argv[4])assert(counts[0]>0,'saved-pack startup calls Rust validation');
+if(packPath)assert(counts[0]>0,'saved-pack startup calls Rust validation');
 assert(counts[5]>0,'startup calls Rust session validation');
 assert(counts[6]>176 && counts[7]>176,'Rust command producer and consumer execute');
 assert.equal(counts[8],0,'normal playback drops no commands');
@@ -89,12 +93,13 @@ assert(counts[32]>0 && counts[35]>=72,'Rust factory metadata/data paths execute'
 assert.equal(counts[34],0,'normal factory access rejects no inputs');
 const pcmHash=hash.toString(16).padStart(8,'0');
 const golden=JSON.parse(fs.readFileSync(new URL('./emu_rust_golden.json',import.meta.url)));
-const scenario=process.argv[4]?.replaceAll('\\','/').split('/').at(-1)||'factory';
-if(golden[scenario]) {
+const scenario=packPath?.replaceAll('\\','/').split('/').at(-1)||'factory';
+if(!currentFactory) {
+  assert(golden[scenario],`no frozen R01 fingerprint for ${scenario}; current fixtures must be explicitly named`);
   assert.equal(pcmHash,golden[scenario].pcm_hash,'frozen R01 audio fingerprint');
   assert.equal(rust.ex.web_blits(),golden[scenario].blits,'frozen R01 display count');
 }
-console.log(JSON.stringify({initial_pack:process.argv[4]||'factory',blocks,seconds:blocks*frames/44100,compared_samples:blocks*frames*2,
+console.log(JSON.stringify({fixture_family:currentFactory?'current-factory':'frozen-r01-factory',frozen_golden_checked:!currentFactory,initial_pack:packPath||'factory',blocks,seconds:blocks*frames/44100,compared_samples:blocks*frames*2,
   pcm_hash:pcmHash,peak,blits:rust.ex.web_blits(),memory_bytes:memoryBytes,
   rust:{validations:counts[0],plans:counts[1],rejections:counts[2],fallbacks:counts[3],bass_events:counts[4],sessions:counts[5],
     commands:{accepted:counts[6],consumed:counts[7],dropped:counts[8],high_water:counts[9]},

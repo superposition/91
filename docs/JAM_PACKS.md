@@ -1,4 +1,4 @@
-# Songbook and USB Jam Packs (0.4.3)
+# Songbook and USB Jam Packs (0.4.4)
 
 ## Current standards and instruments
 
@@ -21,6 +21,58 @@ Regenerate the reviewed current bank with `python tools/build_citypop.py`.
 `python tools/build_standards.py` regenerates the earlier instrument arrangements;
 run the city-pop generator afterward to restore the current factory bank.
 
+## Synth Jam: play the keyboard part
+
+Synth Jam requires firmware 0.4.4 or later and a v3 pack.
+
+Turn SELECT to **SYNTH JAM**, then turn its first knob from **BAND** to **SYNTH**.
+The automatic keyboard part gives way to your own playing. Drums and bass keep
+their place in the song; you can use its current sound straight away, without
+loading a different patch or resetting the chart.
+
+| Synth Jam knob | Action |
+|---|---|
+| MODE | BAND plays the authored keyboard accompaniment; SYNTH lets you play it |
+| PROGRAM | Choose a program from the current song's bank |
+| OCTAVE | Set the keyboard register from −2 to +2 |
+| SPACE | Adjust the existing reverb amount from 0 to 100 |
+
+All **27 piano keys** play chromatic notes in Synth mode, including the keys that
+serve as Songbook shortcuts in Band mode. Up to **five keyboard notes** sound at
+once, with a separate voice reserved for the bass. Hold a key to sustain its
+note and release it to let the program's envelope finish. MIDI notes received
+by the FM-1 play their received pitches; they are not snapped to a scale or
+shifted by the panel's octave setting. The browser's optional MIDI controller
+mapping operates its virtual panel keys, so it retains the panel's note range
+and octave control.
+
+**PLAY** starts or stops the drums and bass while the keyboard remains playable.
+**HOME** releases the held keyboard notes, returns to Band mode and shows the
+Songbook performance page. It does not restart the groove or chart. MODE also
+lets you switch back to BAND on the Synth Jam page. The detail-page header shows
+the current Songbook key and written chord.
+
+Synth Jam uses the existing keyboard program and octave settings. The new mode
+is `parts.synth`, stored as 0 (Band) or 1 (Synth) in v3 header byte 1120+25; an
+absent field defaults to Band. It is saved with the pack. To retain edited
+mode/program/register settings on the FM-1, use the explicit stopped USB pack
+save, as for other part settings. The front-panel SAVE command stores session
+settings; it is not a substitute for saving the edited pack.
+
+USB control field 24 is `synth` (0–1), and field 25 is `space` (0–100). SPACE
+updates the existing reverb entry in `sounds`; it does not create another
+effect parameter or duplicate storage field. For example:
+
+```sh
+python tools/fm1_jam.py control synth 1
+python tools/fm1_jam.py control space 38
+python tools/fm1_jam.py control synth 0
+```
+
+The panel's note number is `53 + key_index + 12 * keys_octave`, with key indices
+0–26. This is a live keyboard mode, independent of the chart's root/quality
+planner. v1/v2 packs retain the earlier Swells page and shortcut behavior.
+
 ## Written chord replay (v3)
 
 V3 plays the chord qualities written in the chart. A Cmaj7 contains C, E, G and B;
@@ -40,7 +92,7 @@ An eight-bar example is:
 Import it using an existing pack for the instruments, bass motifs and drums:
 
 ```sh
-python tools/chord_chart.py my-changes.txt packs/velvet-changes.json build/my-changes.json --key C --name "My Changes"
+python tools/chord_chart.py my-changes.txt packs/01-blue-bossa.json build/my-changes.json --key C --name "My Changes"
 python tools/fm1_jam.py validate build/my-changes.json
 python tools/fm1_jam.py audition build/my-changes.json
 python tools/fm1_jam.py control bars 8
@@ -146,7 +198,7 @@ Each song has major/minor realizations and separate 8/16-bar section charts: fou
 
 The harmony uses major/minor sixth-diminished families, relative-sixth upper structures for sevenths, half-diminished and dominant chords, borrowed notes that return to structural voices, and occasional diminished connectors. Destinations move twice per bar; eight- and sixteen-bar answers have written cadences. Four keyboard notes are voice-led within MIDI 48-72; bass stays within 28-52 and targets the next structural root. Bass motifs recur across sections with controlled answer variations. Factory grooves use straight sixteenths, written velocities and syncopation, without random timing offsets. Activity controls the amount of harmonic movement; Variation controls borrowed colors and motif changes.
 
-## Sound and panel
+## Earlier v1/v2 sound and panel
 
 Keys and bass each have an independent six-operator DX program. Six FM slots provide four keyboard notes, a protected bass slot and one keyboard release slot. Old-voicing overlap fades over about 50 ms, avoiding a fifth sustained keyboard note across chord changes. Programs, touch, brightness, keyboard gate/tail and bass attack/gate can be changed independently. A program change commits at that part's next attack and retires its old tails; it leaves the other part playing. Pitch modulation is disabled for the two accompaniment programs. Two existing pad voices produce two-beat, phrase-timed swells every fourth bar; their texture and amount are adjustable. A short quiet plate supplies space without automatic pitch drift, chorus or shimmer. This preserves the useful PERF-1 synthesis and swell behavior while keeping harmonic movement audible.
 
@@ -172,12 +224,12 @@ All 176 legacy parameter indices, old pieces, v1 Jam packs and four stored slots
 
 ## Computer workflow
 
-Run from `C:/Users/ericm/fm1/fw`. Compilation uses Python's standard library. MIDI files need `mido`; USB needs `python-rtmidi`. Preview uses the existing host toolchain (Ubuntu-22.04 WSL on Windows).
+Run from the repository root. The Python CLI uses the Rust authoring tools; see [build prerequisites](../BUILDING.md). MIDI files need `mido`; USB needs `python-rtmidi`. Preview uses the existing host toolchain (Ubuntu-22.04 WSL on Windows).
 
 ```sh
 python tools/fm1_jam.py features
 python tools/fm1_jam.py pull build/before.json
-python tools/fm1_jam.py factory-song build/my-song.json --song 0
+python tools/fm1_jam.py decode packs/01-blue-bossa.jmp build/my-song.json
 python tools/fm1_jam.py validate build/my-song.json
 python tools/fm1_jam.py preview build/my-song.json build/my-preview --bars 16 --bpm 100 --phrases 4
 python tools/fm1_jam.py audition build/my-song.json

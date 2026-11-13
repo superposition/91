@@ -19,6 +19,7 @@ pub struct Pool<'a> {
 pub struct Allocation {
     pub slot: usize,
     pub stolen: bool,
+    pub previous: Option<held::Note>,
 }
 pub fn keyed(s: &mut Voice, patch: &[u8; 155], note: u32) {
     for k in 0..6 {
@@ -78,7 +79,9 @@ pub fn note_on(
             best = k;
         }
     }
+    let previous = held::note(&pool.slots[best]);
     pool.slots[best].part = if jam { context.part as u8 } else { 0 };
+    pool.slots[best].owner = 0;
     if !pool
         .slots
         .iter()
@@ -132,7 +135,11 @@ pub fn note_on(
     x.fade = 1.0;
     *age = age.wrapping_add(1);
     x.age = *age;
-    Some(Allocation { slot: best, stolen })
+    Some(Allocation {
+        slot: best,
+        stolen,
+        previous,
+    })
 }
 pub fn gates(slots: &mut [Slot; 6], frames: u32, tail: i32) -> u32 {
     let mut released = 0;
@@ -141,11 +148,13 @@ pub fn gates(slots: &mut [Slot; 6], frames: u32, tail: i32) -> u32 {
             continue;
         }
         if x.gate != 0 {
-            x.gate_left = x.gate_left.wrapping_sub(frames as i32);
-            if x.gate_left <= 0 {
-                x.gate = 0;
-                x.kill_left = tail;
-                released += 1;
+            if x.owner == 0 {
+                x.gate_left = x.gate_left.wrapping_sub(frames as i32);
+                if x.gate_left <= 0 {
+                    x.gate = 0;
+                    x.kill_left = tail;
+                    released += 1;
+                }
             }
         } else if x.kill_left > 0x40000000 {
             x.kill_left = tail;
@@ -161,6 +170,7 @@ pub fn gates(slots: &mut [Slot; 6], frames: u32, tail: i32) -> u32 {
 pub fn reset(slots: &mut [Slot; 6], lfo: &mut Lfo) {
     for x in slots {
         x.used = 0;
+        x.owner = 0;
         x.s = Voice::default();
     }
     *lfo = Lfo::default();
@@ -168,12 +178,14 @@ pub fn reset(slots: &mut [Slot; 6], lfo: &mut Lfo) {
 pub fn retire_all(slots: &mut [Slot; 6]) {
     for x in slots {
         x.used = 0;
+        x.owner = 0;
     }
 }
 pub fn retire_part(slots: &mut [Slot; 6], part: u8) {
     for x in slots {
         if x.part == part {
             x.used = 0;
+            x.owner = 0;
         }
     }
 }

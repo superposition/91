@@ -4,6 +4,7 @@
 //! Six fixed FM voices; 64-frame operator blocks over caller-owned storage.
 pub mod envelopes;
 pub mod frames;
+pub mod held;
 pub mod lfo;
 pub mod operators;
 pub mod plan;

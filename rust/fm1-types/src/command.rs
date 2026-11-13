@@ -25,6 +25,7 @@ command_kinds! {
     PluckCapture = 26, Intro = 27, PluckStep = 28, Progression = 29,
     Progression2 = 30, ProgressionKinds = 31, MidiMap = 32, DrumTap = 33,
     ChordDegree = 34, Bend = 35, Pedal = 36, BassStep = 37, Jam = 38,
+    JamKey = 39,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

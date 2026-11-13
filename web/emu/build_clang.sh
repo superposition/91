@@ -6,6 +6,11 @@
 set -e
 cd "$(dirname "$0")/../.."
 mkdir -p build/gen build/emu
+set --
+if [ -n "${FM1_TEST_FACTORY_HEADER:-}" ]; then
+    fixture=$(python3 tests/reference/factory_fixture.py "$FM1_TEST_FACTORY_HEADER" --path)
+    set -- "-DEN_TEST_FACTORY_HEADER=\"$fixture\""
+fi
 [ -f build/gen/felucca_font.h ] || python3 tools/gen_font.py build/gen/felucca_font.h >/dev/null
 RUST_FLAGS=""
 RUST_LIB=""
@@ -23,6 +28,7 @@ if [ "${EN_RUST_JAM:-1}" = 1 ]; then
     RUST_LIB="build/rust-emu/wasm32-unknown-unknown/release/libfm1_jam_bridge.a"
 fi
 clang --target=wasm32 -O2 -ffp-contract=off -std=gnu99 -nostdlib -ffreestanding -w \
+    "$@" \
     -DEN_HOST -DEN_WEB $RUST_FLAGS "-DEN_VERSION=\"$(printf %s "${EN_VERSION:-DEV}" | tr a-z A-Z)\"" \
     -Iweb/emu/shim -Ifirmware/src -Ifirmware/src/dsp -Ibuild/gen \
     -Wl,--no-entry -Wl,--export-memory -Wl,--initial-memory=33554432 -Wl,--max-memory=33554432 -Wl,-z,stack-size=1048576 \

@@ -73,6 +73,8 @@ int en_jam_busy(void) { return jp_upload!=0; }
 const uint8_t *en_jam_data(unsigned *n) { *n=jp_len; return jp_data; }
 void en_jam_get(jp_settings_t *s) { *s=jp_want; }
 void en_jam_set(int field,int value) { post(C_JAM,field,value); }
+void en_jam_release(void) {post(C_JAMKEY,0,0);}
+void en_jam_key(int owner,int note,int velocity) {if((owner>=1 && owner<=27) || (owner>=128 && owner<=255))post(C_JAMKEY,owner,(note&127)|((velocity<0?0:velocity>127?127:velocity)<<8));}
 void en_jam_name(int next,char *b)
 {
     static const char *const suffix[]={"6","m7","m7b5","9","m6","dim7","maj9","7alt"};
@@ -111,6 +113,7 @@ static void jp_copy_upload(void)
 {
     unsigned i;
     if(jp_upload) {
+        jp_held_flush();
         const uint8_t *src=jp_upload;
         for(i=0;i<jp_upload_n;i++) jp_active[i]=src[i];
         jp_len=jp_upload_n; jp_data=jp_active; jp_want.slot=jp_upload_source>=3 && jp_upload_source<7 ? jp_upload_source-2:0;
@@ -138,6 +141,8 @@ static int jp_option_offset(int field)
 int en_jam_option(int field)
 {
     int off=jp_option_offset(field);
+    if(field==JAM_SYNTH)return jp_synth_on();
+    if(field==JAM_SPACE)return par[P_REVERB];
     if(field==JAM_KEYS_OCTAVE || field==JAM_BASS_OCTAVE)return jp_octave(jp_data,(unsigned)(field==JAM_BASS_OCTAVE));
     return jp_dx() && off>=0?jp_data[JP2_HEAD+off]:0;
 }
@@ -157,6 +162,7 @@ int en_jam_snapshot(en_jam_snapshot_t *out)
     s.section=en_jam_section;s.pending=en_jam_pending;s.length=en_jam_length;
     s.busy=(uint8_t)en_jam_busy();s.load=en_jam_load;s.source=(uint8_t)en_jam_source();
     s.playing=en_playing;s.version=jp_data[4];s.revision=en_jam_revision;
+    s.reserved=jp_v3(jp_data)?(uint8_t)(jp_synth_on() | ((unsigned)par[P_REVERB]<<1)):0;
     s.reserved_tail[0]=(uint8_t)jp_octave(jp_data,0);s.reserved_tail[1]=(uint8_t)jp_octave(jp_data,1);
     for(i=0;i<10;i++)s.options[i]=(uint8_t)en_jam_option(JAM_SWELL+(int)i);
     jp_snapshot_text(s.title,(const char *)jp_data+16,sizeof s.title);
@@ -182,6 +188,17 @@ static void jp_editable(void)
 }
 static void jp_control(int field,int value)
 {
+    if(jp_v3(jp_data) && field==JAM_SYNTH) {
+        int mode=value>0;if(mode!=jp_synth(jp_data)){jp_held_flush();jp_keys_stop();jp_editable();jp_active[JP2_HEAD+25]=(uint8_t)mode;}return;
+    }
+    if(jp_v3(jp_data) && field==JAM_SPACE) {
+        unsigned i;int v=value<0?0:value>100?100:value;
+        for(i=0;i<jp_data[8];i++)if(jp_u16(jp_data+JP_SOUND+4*i)==P_REVERB)break;
+        if(i==32)return;
+        jp_editable();if(i==jp_active[8])jp_active[8]++;
+        jp_active[JP_SOUND+4*i]=P_REVERB;jp_active[JP_SOUND+4*i+1]=0;
+        jp_active[JP_SOUND+4*i+2]=(uint8_t)v;jp_active[JP_SOUND+4*i+3]=0;apply(P_REVERB,v);return;
+    }
     if(field==JAM_SONG) {
         jp_song=(uint8_t)((value%7+7)%7);
         if(jp_upload && jp_upload_source!=255) {jp_upload=0;jp_upload_prepared=0;jp_prepare(0);}
@@ -201,7 +218,7 @@ static void jp_control(int field,int value)
         if(field==JAM_BASS_PROGRAM || field==JAM_BASS_ATTACK)jp_patch_dirty|=2;
         if(field==JAM_VARIATION){jp_seed+=7919u;jp_prepare(0);}return;
     }
-    if(field==JAM_ON) {jp_want.on=(uint8_t)(value!=0);en_jam_on=jp_want.on;
+    if(field==JAM_ON) {if(!value)jp_held_flush();jp_want.on=(uint8_t)(value!=0);en_jam_on=jp_want.on;
         if(en_jam_on) jp_activate(1); else {jp_now.on=0;pad_retarget();}
         return;
     }
@@ -261,7 +278,7 @@ static void jp_tick(int st)
         en_chord_root=(uint8_t)((jp_now.key+jp_node(jp_data,e->node)[0])%12); en_chord_n=4;
     }
     pat=(ph->role+(bar==ph->bars-1u))%jp_data[7];
-    if(jp_u16(jp_data+JP_DRUM+pat*16+12)>>st&1u) {
+    if(!jp_synth_on() && (jp_u16(jp_data+JP_DRUM+pat*16+12)>>st&1u)) {
         unsigned g=jp_data[JP_DRUM+pat*16+14];
         if(jp_dx())g=(ph->beat[beat].passing&16)?35:jp_data[JP2_HEAD+16];
         if(jp_dx()) {
@@ -283,7 +300,7 @@ static void jp_tick(int st)
         } else stab_fire(0.55f+0.004f*(float)jp_now.energy);
         jp_pad_gate=(uint32_t)(step_len*0.04f*(float)(g?g:80));
     }
-    if(jp_dx() && (bar%4u)==3u && st==8 && jp_swell_amount) {
+    if(jp_dx() && !jp_synth_on() && (bar%4u)==3u && st==8 && jp_swell_amount) {
         const jp_beat_t *e=&ph->beat[beat];jp_swell_phase=0.0f;
         for(i=0;i<2;i++){pad[i].note=pad[i].target=(float)e->note[i];pad[i].voices=PAD_SOUND[jp_data[JP2_HEAD+7]].osc;pad[i].hand=0;pad[i].hf=1.0f;
             if(pad[i].pnote)midi(0x84,pad[i].pnote,0);

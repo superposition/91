@@ -1,0 +1,129 @@
+{
+  "identity": "FM-1_7000403",
+  "sha256": "3aff7ba0a0f290a787b5ac1e2d13dedaa331b850eff66b15ad4dde599200f4a9",
+  "verified_restart": true,
+  "playback": {
+    "identity": "FM-1_7000403",
+    "source_commit": "2d27650",
+    "before": {
+      "on": 1,
+      "bars": 8,
+      "bar": 4,
+      "beat": 16,
+      "hold": 0,
+      "pending": 0,
+      "slot": 0,
+      "crc32": "b514a078",
+      "revision": 20,
+      "xruns": 0,
+      "key": 6,
+      "minor": 0,
+      "form": 0,
+      "movement": 0,
+      "energy": 62,
+      "playing": 1
+    },
+    "after": {
+      "on": 1,
+      "bars": 8,
+      "bar": 3,
+      "beat": 13,
+      "hold": 0,
+      "pending": 0,
+      "slot": 0,
+      "crc32": "b514a078",
+      "revision": 20,
+      "xruns": 0,
+      "key": 6,
+      "minor": 0,
+      "form": 0,
+      "movement": 0,
+      "energy": 62,
+      "playing": 1
+    },
+    "song": {
+      "song": 6,
+      "pack_version": 3,
+      "loading": 0
+    },
+    "frames": 128,
+    "seconds": 32,
+    "max_xruns": 0,
+    "max_crashes": 0,
+    "max_late": 1,
+    "cpu_range": [
+      66,
+      72
+    ],
+    "core2_active": true,
+    "playback_active": true,
+    "active_octaves": [
+      1,
+      1
+    ]
+  },
+  "bank": {
+    "saved": [
+      {
+        "slot": 1,
+        "bytes": 3181,
+        "crc32": "343e6331",
+        "already_matches": true
+      },
+      {
+        "slot": 2,
+        "bytes": 3374,
+        "crc32": "6eced595",
+        "already_matches": true
+      },
+      {
+        "slot": 3,
+        "bytes": 3181,
+        "crc32": "c62d9343",
+        "already_matches": true
+      },
+      {
+        "slot": 4,
+        "bytes": 3200,
+        "crc32": "b514a078",
+        "already_matches": true
+      }
+    ],
+    "status": {
+      "on": 1,
+      "bars": 8,
+      "bar": 0,
+      "beat": 0,
+      "hold": 0,
+      "pending": 0,
+      "slot": 0,
+      "crc32": "b514a078",
+      "revision": 20,
+      "xruns": 0,
+      "key": 6,
+      "minor": 0,
+      "form": 0,
+      "movement": 0,
+      "energy": 62,
+      "playing": 1
+    },
+    "song": {
+      "song": 6,
+      "pack_version": 3,
+      "loading": 0
+    },
+    "features": {
+      "pack_versions": [
+        1,
+        2,
+        3
+      ],
+      "voice_programs": 8,
+      "factory_songs": 3,
+      "fm_voices": 6
+    },
+    "octave_controls_verified": true,
+    "keys_octave": 1,
+    "bass_octave": 1
+  }
+}

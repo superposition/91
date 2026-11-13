@@ -71,6 +71,7 @@ pub enum Query {
     JamHold,
     OctaveParameter,
     Parameter,
+    JamSynth,
 }
 #[repr(u32)]
 pub enum Action {
@@ -85,6 +86,7 @@ pub enum Action {
     SceneReset,
     Knob,
     Section,
+    JamSynth,
 }
 #[repr(u32)]
 pub enum Notice {
@@ -153,6 +155,13 @@ pub fn button(port: &mut impl Port, button: u32) -> bool {
         return true;
     }
     if button == id::HOME && query(port, Query::JamOn) != 0 {
+        if query(port, Query::JamSynth) != 0 {
+            port.action(Action::JamSynth, 0, 0);
+            port.with_ui(|ui| {
+                ui.fx_menu = 0;
+                ui.fx_page = 0;
+            });
+        }
         view(port, page::SONGBOOK);
         return true;
     }
@@ -270,8 +279,10 @@ pub fn button(port: &mut impl Port, button: u32) -> bool {
                 port.action(Action::Play, 0, 0);
                 notice(port, Notice::Stopped);
             } else {
-                let now = query(port, Query::Now);
-                port.action(Action::Seed, now, 0);
+                if query(port, Query::JamSynth) == 0 {
+                    let now = query(port, Query::Now);
+                    port.action(Action::Seed, now, 0);
+                }
                 port.action(Action::Play, 1, 0);
                 notice(port, Notice::Playing);
             }

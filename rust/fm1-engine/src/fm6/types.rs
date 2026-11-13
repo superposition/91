@@ -59,6 +59,8 @@ pub struct Slot {
     pub used: u8,
     pub gate: u8,
     pub part: u8,
+    /// Held-key identity; occupies the existing padding byte before age.
+    pub owner: u8,
     pub age: u32,
     pub gate_left: i32,
     pub kill_left: i32,
@@ -85,3 +87,4 @@ const _: [(); 340] = [(); core::mem::offset_of!(Voice, fb)];
 const _: [(); 348] = [(); core::mem::offset_of!(Voice, pe)];
 const _: [(); 384] = [(); core::mem::offset_of!(Voice, spb)];
 const _: [(); 392] = [(); core::mem::offset_of!(Slot, age)];
+const _: [(); 391] = [(); core::mem::offset_of!(Slot, owner)];

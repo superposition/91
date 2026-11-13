@@ -114,7 +114,7 @@ fn literal_schema_rejects_malformed_banks_and_accepts_thirty_two_shared_nodes() 
 fn all_qualities_keys_and_voicings_preserve_exact_pitch_sets_and_bass_quality() {
     let d = chart();
     let mut b = compile(&d, None).unwrap();
-    for quality in 0..17 {
+    for (quality, tones) in TONES.iter().enumerate() {
         for root in 0..12 {
             let node = if quality < 16 { 64 + quality * 8 } else { 1152 };
             b[node] = root;
@@ -143,7 +143,7 @@ fn all_qualities_keys_and_voicings_preserve_exact_pitch_sets_and_bass_quality() 
                         for beat in phrase.active_beats() {
                             let mut want = [0u8; 12];
                             let mut got = [0u8; 12];
-                            for interval in &TONES[quality][..4] {
+                            for interval in &tones[..4] {
                                 want[((key + root + interval) % 12) as usize] += 1;
                             }
                             for n in beat.notes {
@@ -158,7 +158,7 @@ fn all_qualities_keys_and_voicings_preserve_exact_pitch_sets_and_bass_quality() 
                             let bass = bass_event(pack, &s, &phrase, &phrase, 0, step).unwrap();
                             assert_eq!(
                                 bass.note % 12,
-                                ((key + root + TONES[quality][4 + step]) % 12) as i16
+                                ((key + root + tones[4 + step]) % 12) as i16
                             );
                         }
                     }
@@ -244,4 +244,67 @@ fn device_version_negotiation_and_octave_controls_are_explicit() {
         fm1_authoring::device::advance(features["state"].clone(), &json!([7, 8, 3, 6]), None)
             .unwrap();
     assert_eq!(answer["value"]["pack_versions"], json!([1, 2, 3]));
+}
+
+#[test]
+fn synth_mode_roundtrips_in_one_reserved_byte_and_space_uses_existing_sound() {
+    let mut d = chart();
+    let baseline = compile(&d, None).unwrap();
+    assert_eq!(baseline[V2_HEAD + 25], 0);
+    d["parts"]["synth"] = json!(1);
+    let b = compile(&d, None).unwrap();
+    let mut want = baseline.clone();
+    want[V2_HEAD + 25] = 1;
+    assert_eq!(b, want);
+    let restored = decode(&b, None).unwrap();
+    assert_eq!(restored.value()["parts"]["synth"], 1);
+    assert_eq!(
+        restored.value()["sounds"],
+        decode(&baseline, None).unwrap().value()["sounds"]
+    );
+    assert_eq!(compile(restored.value(), None).unwrap(), b);
+    assert_eq!(
+        decode(&baseline, None).unwrap().value()["parts"]["synth"],
+        0
+    );
+    for bad in [
+        json!(-1),
+        json!(2),
+        json!(true),
+        json!(1.0),
+        json!("1"),
+        Value::Null,
+    ] {
+        d["parts"]["synth"] = bad;
+        assert!(compile(&d, None).is_err());
+    }
+    for bad in [2, 128, 255] {
+        let mut damaged = baseline.clone();
+        damaged[V2_HEAD + 25] = bad;
+        assert!(JamPack::parse(&damaged).is_err());
+        assert!(decode(&damaged, None).is_err());
+    }
+    let mut old = song(0).unwrap();
+    let prior = compile(&old, None).unwrap();
+    old["parts"]["synth"] = json!(1);
+    assert_eq!(compile(&old, None).unwrap(), prior);
+    let fields = fm1_authoring::device::fields();
+    assert_eq!(fields["synth"], 24);
+    assert_eq!(fields["space"], 25);
+    for (field, maximum) in [("synth", 1), ("space", 100)] {
+        for value in [-1, 0, 1, maximum, maximum + 1] {
+            let action = fm1_authoring::device::start(
+                &json!("control"),
+                &json!({"field":field,"value":value}),
+            );
+            if (0..=maximum).contains(&value) {
+                assert_eq!(
+                    action.unwrap()["action"]["data"],
+                    json!([fields[field], 0, value])
+                );
+            } else {
+                assert!(action.is_err());
+            }
+        }
+    }
 }

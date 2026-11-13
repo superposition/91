@@ -105,6 +105,7 @@ jobs:
           node tests/web_metadata_test.mjs build/site
           node tests/host/emu_browser_test.mjs build/emu/amb.wasm
           node tests/host/emu_http_test.mjs build/emu/amb.wasm
+          node tests/host/emu_synth_jam_test.mjs build/emu/amb.wasm
           node tests/web_syx_test.js
           node tests/web_backup_test.js
           node tests/web_ota_test.mjs

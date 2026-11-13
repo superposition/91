@@ -52,6 +52,8 @@ static const char *jam_ui_title(void) {return jam_view.title;}
 static const char *jam_ui_form(void) {return jam_view.form;}
 static const char *jam_ui_pending_title(void) {return jam_view.pending_title;}
 static int jam_ui_option(int field) {
+    if(field==JAM_SYNTH)return jam_view.reserved&1;
+    if(field==JAM_SPACE)return jam_view.reserved>>1;
     if(field==JAM_KEYS_OCTAVE || field==JAM_BASS_OCTAVE)return (int8_t)jam_view.reserved_tail[field-JAM_KEYS_OCTAVE];
     return field>=JAM_SWELL && field<=JAM_BRIGHTNESS?jam_view.options[field-JAM_SWELL]:0;
 }
@@ -81,6 +83,12 @@ static int jam_ui_field(int field)
     }
     return field;
 }
+static int jam_ui_row_field(unsigned row,unsigned knob,int original)
+{
+    static const int synth_fields[4]={JAM_SYNTH,JAM_KEYS_PROGRAM,JAM_KEYS_OCTAVE,JAM_SPACE};
+    return jam_ui_version()==3 && row==3?synth_fields[knob]:jam_ui_field(original);
+}
+
 enum { VZ_PLASMA, VZ_KALEIDO, VZ_BARS, VZ_FLUX, VZ_DISCO, VZ_LIFE, VZ_ORBIT, VZ_TRIP, VZ_THEORY, VZ_AUTO, VZ_N };   /* the visualizers (viz.c; TRIP and THEORY 0.16.10, THEORY not in AUTO's turn) */
 static const char *const VZ_NAME[VZ_N] = {"PLASMA", "KALEIDO", "BARS", "FLUX", "DISCO", "LIFE", "ORBIT", "TRIP", "THEORY", "AUTO"};
 /* the knobs of each page: a parameter, or one of these (the sequencer's: the lane's) */
@@ -1071,6 +1079,7 @@ static void fxp_set(int k, int v)
             break;
         }
         if (FXP_UI(k)) {
+            if(FXP_CTL(k).idx==19 && v!=ui.min_ch && en_jam_option(JAM_SYNTH))en_jam_release();
             *uiv(FXP_CTL(k).idx) = (uint8_t)v;
             if (FXP_CTL(k).idx == 12)
                 en_usb_fixed = (uint8_t)v;       /* the engine renders the USB audio at unity when a computer is recording */
@@ -2992,6 +3001,7 @@ static uint32_t ui_button_port(uint32_t op,uint32_t a,uint32_t b)
         case UIBQ_NOW:value=plat_ms();break;
         case UIBQ_PLAYING:value=en_playing;break;
         case UIBQ_JAM_ON:value=en_jam_on;break;
+        case UIBQ_JAM_SYNTH:value=(uint32_t)en_jam_option(JAM_SYNTH);break;
         case UIBQ_FROZEN:value=en_frozen;break;
         case UIBQ_SECTION:value=en_sec;break;
         case UIBQ_SECTION_REQUESTED:value=en_sec_req;break;
@@ -3005,6 +3015,7 @@ static uint32_t ui_button_port(uint32_t op,uint32_t a,uint32_t b)
     }
     switch(op) {
     case UIBA_SESSION:return (uint32_t)jam_session_save();
+    case UIBA_JAM_SYNTH:en_jam_set(JAM_SYNTH,(int)a);break;
     case UIBA_JAM_HOLD:en_jam_set(JAM_HOLD,(int)a);break;
     case UIBA_JAM_IDEA:en_jam_set(JAM_IDEA,1);break;
     case UIBA_VIEW:set_view((int)a);break;
@@ -3047,7 +3058,7 @@ static void button(int b)
     if(ui.view==V_JAMHELP && !ui.fx_menu && (b==B_REC || b==B_EDIT)) {
         jp_settings_t s; en_jam_get(&s); en_jam_set(b==B_REC?JAM_HOLD:JAM_IDEA,b==B_REC?!s.hold:1); return;
     }
-    if (b == B_HOME && en_jam_on) { set_view(V_JAMHELP); return; }
+    if (b == B_HOME && en_jam_on) {if(en_jam_option(JAM_SYNTH)){en_jam_set(JAM_SYNTH,0);ui.fx_menu=ui.fx_page=0;}set_view(V_JAMHELP);return;}
     if (b == B_HOME) {                           /* HOME: the tempo page; again, the perform screen; and back; twice quickly, the visualizers */
         const uint32_t now = plat_ms();
         if (ui.fx_menu) {                        /* HOME leaves the FX menu too (0.14.7; latched effects play on), then does its usual */
@@ -3110,7 +3121,7 @@ static void button(int b)
             en_play(0);
             say("STOPPED", 0);
         } else {
-            en_seed(plat_ms());
+            if(!en_jam_option(JAM_SYNTH))en_seed(plat_ms());
             en_play(1);
             say("PLAYING", 0);
         }
@@ -3623,6 +3634,9 @@ static void midi_in(void)
             ui.min_last = pkt;
             ui.min_n++;
         }
+        if(ch_ok && en_jam_option(JAM_SYNTH) && ((st&0xf0u)==0x90u || (st&0xf0u)==0x80u)) {
+            en_jam_key(128+(int)n,(int)n,(st&0xf0u)==0x90u?(int)v:0);continue;
+        }
         if (st < 0xF0u && mm_apply(st, n, v))   /* the player's map first (0.16.11) */
             continue;
         if (st == 0xF8u || st == 0xFAu || st == 0xFBu || st == 0xFCu)
@@ -3725,6 +3739,7 @@ static void rm_draw(void)
 static void rm_enter(void)
 {
     int e;
+    if(en_jam_option(JAM_SYNTH))en_jam_release();
     memset(&rm, 0, sizeof rm);
     rm.on = 1;
     rm.ign_b = plat_buttons();
@@ -4098,6 +4113,7 @@ static uint32_t ui_input_port(uint32_t op,uint32_t a,uint32_t b)
     case UIIA_PEDAL:en_pedal((int)a);break;
     case UIIA_GLOBALS:project_globals();break;
     case UIIA_JAM:en_jam_set((int)a,(int32_t)b);break;
+    case UIIA_SYNTH_KEY:if(a<NKEYS)en_jam_key(1+(int)a,53+(int)a,(int)b);break;
     case UIIA_PROJECT_APPLY:project_apply();break;
     case UIIA_JAM_DOWN:if(a<NKEYS)jam_down((int)a);break;
     case UIIA_JAM_UP:if(a<NKEYS)jam_up((int)a);break;
@@ -4169,6 +4185,7 @@ static void input(void)
                 ui.turn_t = plat_ms();
         if (nb || nk)
             ui.act_t = plat_ms();
+        if(en_jam_option(JAM_SYNTH))midi_in();
         return;
     }
     ch = btn ^ ui.btn;
@@ -4278,6 +4295,11 @@ static void input(void)
     }
     ch = keys ^ ui.keys;
     ui.keys = keys;
+    if(en_jam_option(JAM_SYNTH)) {
+        for(i=0;i<NKEYS;i++)if(ch>>i&1u)en_jam_key(1+(int)i,53+(int)i,(keys>>i&1u)?((btn>>B_SEL&1u)?127:100):0);
+        /* Synth mode owns the keyboard on every page, including FX. */
+        ch=0;keys=0;
+    }
     ui.shift_keys &= keys;                     /* let go: no longer the shift's */
     if (ui.pat_key >= 0 && !(keys >> ui.pat_key & 1u)) {   /* the pattern key let go: a tap kept its pattern; a hold sends it back, once it has played */
         ui.pat_key = -1;
@@ -4662,7 +4684,7 @@ static void input(void)
                     {JAM_KEYS_PROGRAM,JAM_TOUCH,JAM_BRIGHTNESS,JAM_RELEASE},
                     {JAM_BASS_PROGRAM,JAM_BASS_ATTACK,JAM_BASS_GATE,JAM_ENERGY},
                     {JAM_SWELL_VOICE,JAM_SWELL,JAM_VARIATION,JAM_MOVE}};
-                int field=jam_ui_field(fields[ui.view-V_JAMARR][i]),cur=en_jam_option(field);jp_settings_t state;en_jam_get(&state);
+                int field=jam_ui_row_field((unsigned)(ui.view-V_JAMARR),i,fields[ui.view-V_JAMARR][i]),cur=en_jam_option(field);jp_settings_t state;en_jam_get(&state);
                 if(field==JAM_FORM)cur=state.form;
                 if(field==JAM_MOVE)cur=state.movement;
                 if(field==JAM_ENERGY)cur=state.energy;
@@ -4911,6 +4933,19 @@ static void draw_header(void)
     char t[24];
     int msg = plat_ms() < ui.msg_until;
     uint32_t h;
+    if(jam_ui_version()==3 && JV(on,en_jam_on) && !msg) {
+        jp_settings_t state;char chord[32];unsigned k;
+        jam_ui_get(&state);jam_ui_name(0,chord);
+        uint32_t jh=hash(0x534a4834u,JV(revision,en_jam_revision));
+        jh=hash(jh,JV(beat,en_jam_beat)|JV(playing,en_playing)<<8|state.key<<16);
+        for(k=0;chord[k];k++)jh=hash(jh,(uint8_t)chord[k]);
+        if(jh==ui.sig[0])return;
+        ui.sig[0]=jh;
+        cv_begin(240,HDR_H,K_BG);cv_text(8,3,&FONT_XS,jam_ui_title(),K_PAD);
+        cv_text(193,3,&FONT_XS,JV(playing,en_playing)?"PLAY":"STOP",K_ACC);
+        int x=cv_text(8,17,&FONT_XS,"KEY ",K_DIM);x=cv_text(x,17,&FONT_XS,EN_NOTE_NAME[state.key],K_FROST);
+        cv_text(x+16,17,&FONT_XS,chord,K_ACC);cv_blit(0,0);return;
+    }
     if(ui.view==V_JAMHELP && !ui.fx_menu && !msg) {
         uint32_t jh=hash(0x4a414d34u,JV(revision,en_jam_revision) | JV(playing,en_playing)<<24);
         if(jh==ui.sig[0])return;
@@ -7036,15 +7071,16 @@ static void draw_main(void)
         for(k=0;k<sizeof state;k++)h=hash(h,((const uint8_t *)&state)[k]);
         if(h==ui.sig[1])return;
         ui.sig[1]=h;
-        cv_begin(240,MAIN_H,K_BG);cv_text(8,4,&FONT_B,titles[row],K_ACC);
+        cv_begin(240,MAIN_H,K_BG);cv_text(8,4,&FONT_B,row==3 && jam_ui_version()==3?"SYNTH JAM":titles[row],K_ACC);
         for(k=0;k<4;k++) {
-            int field=jam_ui_field(fields[row][k]),value=jam_ui_option(field);
+            int field=jam_ui_row_field(row,k,fields[row][k]),value=jam_ui_option(field);
             if(field==JAM_FORM)value=state.form;
                 if(field==JAM_BARS)value=state.bars;
             if(field==JAM_MOVE)value=state.movement;
                 if(field==JAM_ENERGY)value=state.energy;
-            cv_text(8,34+(int)k*29,&FONT_XS,field==JAM_KEYS_OCTAVE || field==JAM_BASS_OCTAVE?"OCTAVE":names[row][k],K_DIM);
-            if(field==JAM_FORM)cv_text(118,34+(int)k*29,&FONT_XS,jam_ui_form(),K_FROST);
+            cv_text(8,34+(int)k*29,&FONT_XS,field==JAM_SYNTH?"MODE":field==JAM_SPACE?"SPACE":field==JAM_KEYS_PROGRAM || field==JAM_BASS_PROGRAM?"PROGRAM":field==JAM_KEYS_OCTAVE || field==JAM_BASS_OCTAVE?"OCTAVE":names[row][k],K_DIM);
+            if(field==JAM_SYNTH)cv_text(118,34+(int)k*29,&FONT_B,value?"SYNTH":"BAND",K_FROST);
+            else if(field==JAM_FORM)cv_text(118,34+(int)k*29,&FONT_XS,jam_ui_form(),K_FROST);
             else if(field==JAM_KEYS_PROGRAM || field==JAM_BASS_PROGRAM) {
                 jam_ui_voice_name(field,text);
                 cv_text(100,34+(int)k*29,&FONT_XS,text,K_FROST);
@@ -7298,11 +7334,11 @@ static void imp_tabs(void)
 static void draw_knobs(void)
 {
     if(ui.view>=V_JAMARR && ui.view<=V_JAMSWELL && !ui.fx_menu) {
-        if(ui.sig[2]==0x534f4e47u)return;
-        ui.sig[2]=0x534f4e47u;cv_begin(240,KNB_H,K_BG);
+        uint32_t jh=0x534f4e47u+(unsigned)jam_ui_option(JAM_SYNTH);if(ui.sig[2]==jh)return;
+        ui.sig[2]=jh;cv_begin(240,KNB_H,K_BG);
         cv_rect(8,0,224,1,K_LINE);
-        cv_text(8,12,&FONT_XS,"KNOBS 1-4: ROWS TOP TO BOTTOM",K_DIM);
-        cv_text(8,36,&FONT_XS,"HOME: SONG / SELECT: NEXT PAGE",K_DIM);
+        cv_text(8,12,&FONT_XS,jam_ui_option(JAM_SYNTH)?"KEYS: PLAY / PLAY: BACKING":"KNOBS 1-4: ROWS TOP TO BOTTOM",K_DIM);
+        cv_text(8,36,&FONT_XS,jam_ui_option(JAM_SYNTH)?"HOME: BAND / SELECT: PAGE":"HOME: SONG / SELECT: NEXT PAGE",K_DIM);
         cv_blit(0,KNB_Y);return;
     }
     if(ui.view==V_JAMHELP && !ui.fx_menu) {
@@ -8759,7 +8795,7 @@ void ui_frame(void)
 #if EN_RUST_HANDOFF
     /* One captured generation supplies Songbook's header, body and knob row.
      * Input/application/render are serialized in the qualified emulator. */
-    if((ui.view==V_JAMHELP || (ui.view>=V_JAMARR && ui.view<=V_JAMSWELL)) && !en_jam_snapshot(&jam_view)) {
+    if(!en_jam_snapshot(&jam_view)) {
         leds();ui.frame++;return; /* bounded contention: keep the previous frame */
     }
 #endif

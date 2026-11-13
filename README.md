@@ -4,9 +4,11 @@
 
 Choose **Blue Bossa**, **Autumn Leaves** or **Satin Doll**, find your key, and play along. Give the changes a warm electric piano, a bright brass sound or a soft pad. Add a rounded bass, hold a section you like, and change the feel while you keep playing.
 
+Want to take the keyboard part yourself? **Synth Jam** puts the sound under your fingers while the drums and bass carry on. Play chords, trade lines with the bass, change the sound or add more space, then bring the band back without restarting the song.
+
 <p align="center"><img src="docs/img/naiwan91-performance.png" width="320" alt="Songbook performance screen with song, key, tempo and section controls"></p>
 
-*Blue Bossa in the 0.4.3 browser player. These five captures come from the current instrument's framebuffer.*
+*Blue Bossa in the 0.4.4 browser player. These five captures come from the current instrument's framebuffer.*
 
 [Play in your browser](https://superposition.github.io/91/emu/) · [Songbook guide](docs/JAM_PACKS.md) · [Controls and manual](docs/MANUAL.md)
 
@@ -15,17 +17,20 @@ Press **Switch on** to start the browser player. Use your mouse, touch screen or
 ## Find your sound
 
 - **Choose a standard.** Turn PRESETS for Blue Bossa, Autumn Leaves or Satin Doll, then set a comfortable key and tempo. The written changes stay intact as the accompaniment plays.
-- **Shape the band.** Each song has six keyboard sounds and two bass sounds. Change programs, lift the keys an octave or drop the bass lower, and bring swells in around your playing.
-- **Stay with a phrase.** REC holds the current section; EDIT asks for a new bass motif. The F3 and G3 piano keys do the same.
+- **Shape the band.** Each song has six keyboard sounds and two bass sounds. Change programs, lift the keys an octave or drop the bass lower, and adjust the reverb as you play.
+- **Take the keys.** Open Synth Jam with SELECT and turn MODE to SYNTH. All 27 piano keys play notes; PLAY starts or stops the backing. HOME brings the band back.
+- **Stay with a phrase.** REC holds the current section; EDIT asks for a new bass motif. In Band mode, the F3 and G3 piano keys do the same.
 - **Change the feel.** Choose close or drop-2 chords, try another inversion, or change the bass feel. These controls keep the song's harmony.
-- **Explore further.** The F4 piano key opens generative pieces, sequencers, effects and visualizers. The [manual](docs/MANUAL.md) explains their controls.
+- **Explore further.** In Band mode, the F4 piano key opens generative pieces, sequencers, effects and visualizers. The [manual](docs/MANUAL.md) explains their controls.
 
 ## Shape the song
 
 <p align="center"><img src="docs/img/naiwan91-arrangement.png" width="240" alt="Songbook Arrangement controls"> <img src="docs/img/naiwan91-dx-keys.png" width="240" alt="DX Keys sound controls"></p>
-<p align="center"><img src="docs/img/naiwan91-dx-bass.png" width="240" alt="DX Bass sound controls"> <img src="docs/img/naiwan91-swells.png" width="240" alt="Swells texture controls"></p>
+<p align="center"><img src="docs/img/naiwan91-dx-bass.png" width="240" alt="DX Bass sound controls"> <img src="docs/img/naiwan91-synth-jam.png" width="240" alt="Synth Jam mode, program, octave and space controls"></p>
 
-SELECT opens Arrangement, DX Keys, DX Bass and Swells. Each page has four matching controls, from top to bottom. In the 0.4.3 Songbook, knob 2 on DX Keys and DX Bass sets that part's octave independently, from −2 to +2. The new packs start with both parts one octave up and a spacious plate reverb, leaving the bass line clear enough to play against. HOME returns to the Songbook performance page.
+SELECT opens Arrangement, DX Keys, DX Bass and Synth Jam. Each page has four matching controls, from top to bottom. On DX Keys and DX Bass, knob 2 sets that part's octave independently, from −2 to +2. The packs start with both parts one octave up and a spacious plate reverb, leaving the bass line clear enough to play against.
+
+Synth Jam's four knobs are **Mode, Program, Octave and Space**. Switch between automatic keyboard accompaniment and your own playing, using the song's existing sounds. You can play with the backing stopped too. HOME releases the notes you were holding and returns to Band mode without resetting the chart or groove.
 
 ## Make it yours
 
@@ -37,7 +42,7 @@ If you have an FM-1, the [installer](web/amb_installer.html) includes backup and
 
 ## Development
 
-For building and contributing, see the [build instructions](BUILDING.md), [contributor guide](CONTRIBUTING.md) and [development notes](docs/RUST_MIGRATION.md). The [0.4.3 integration record](docs/RELEASE_0_4_3.md) separates source preservation, automated checks and hardware qualification. Screenshot provenance is kept with the [web documentation](docs/WEB_REFACTOR.md).
+For building and contributing, see the [build instructions](BUILDING.md), [contributor guide](CONTRIBUTING.md) and [development notes](docs/RUST_MIGRATION.md). The [0.4.4 integration record](docs/RELEASE_0_4_4.md) separates source changes, automated checks and hardware qualification; [0.4.3](docs/RELEASE_0_4_3.md) records the preceding source-preservation checkpoint. Screenshot provenance is kept with the [web documentation](docs/WEB_REFACTOR.md).
 
 ## Credits and licence
 

@@ -1,0 +1,177 @@
+{
+  "release": "0.4.4",
+  "date": "2026-11-13",
+  "source_base": "2d27650",
+  "source_preservation": "source-preservation-20261113.json",
+  "source_inputs": {
+    "source_sha256": "a937e3331cf8839a4387238b3e52554514929c0126c5acd5ae286a530e221d92",
+    "unchanged_files": 393
+  },
+  "default_octaves": {
+    "keys": 1,
+    "bass": 1
+  },
+  "default_reverb": {
+    "amount": 38,
+    "size": 68,
+    "type": 0,
+    "damping": 42,
+    "predelay": 80
+  },
+  "tools": {
+    "rust": "1.94.1",
+    "wasm_compiler": "Zig 0.17.1",
+    "node_checks": "22.21.1",
+    "node_captures": "22.14.0",
+    "python": "3.10 WSL"
+  },
+  "final_artifacts": {
+    "package": {
+      "path": "build/naiwan91-0.4.4.fwsc",
+      "bytes": 611251,
+      "sha256": "d61d38a7f76d1142cc9a2bad0f39e0dd8cab1f07f31e89601bf16957f719b7d3"
+    },
+    "wasm": {
+      "path": "build/emu/amb.wasm",
+      "bytes": 2403535,
+      "sha256": "5232ac420a875eb1f806c23f81edca0020249eee5e0c10e5e3316321bcb92542"
+    },
+    "site_manifest": {
+      "path": "build/site/site-build.json",
+      "bytes": 10947,
+      "sha256": "c3149c157560e826af2dfd9322dc60b519d46c6830da5c9302ed4f45b69b2d68"
+    },
+    "screenshots": {
+      "source": "actual WASM RGB565 framebuffer",
+      "wasm_sha256": "5232ac420a875eb1f806c23f81edca0020249eee5e0c10e5e3316321bcb92542",
+      "seed": 91,
+      "master": 2800,
+      "captures": [
+        {
+          "page": "performance",
+          "file": "naiwan91-performance.png",
+          "width": 240,
+          "height": 240,
+          "sha256": "76210a0cffdd8c9429954e6504f9f0c5424e07a9f500d65ac80a231656a09ee7"
+        },
+        {
+          "page": "arrangement",
+          "file": "naiwan91-arrangement.png",
+          "width": 240,
+          "height": 240,
+          "sha256": "f15cf3fa10231e6edc1b83f04332ba7240518668dfe067ffaeb82dd03777f2d8"
+        },
+        {
+          "page": "dx-keys",
+          "file": "naiwan91-dx-keys.png",
+          "width": 240,
+          "height": 240,
+          "sha256": "bc9e8d48b9480a348bed40cba1728d15c3acdb5199f9c074e310d803cf0b0be7"
+        },
+        {
+          "page": "dx-bass",
+          "file": "naiwan91-dx-bass.png",
+          "width": 240,
+          "height": 240,
+          "sha256": "b3216a1fcd2601835a4a855d16dc3554b54e16fe2bed65fe47446a1ecd9b0117"
+        },
+        {
+          "page": "synth-jam",
+          "file": "naiwan91-synth-jam.png",
+          "width": 240,
+          "height": 240,
+          "sha256": "4aebf5b8a3703e001172908537577fe6f4302308600849c2c1896ad3f61f97f9",
+          "mode": "SYNTH",
+          "input": "KNOB1 +1 from BAND"
+        }
+      ]
+    }
+  },
+  "checks": {
+    "site": {
+      "routes": 9,
+      "local_links_and_assets": 142,
+      "parsed_scripts": 6,
+      "parsed_module_copies": 18,
+      "css_asset_dependencies": 42,
+      "hosted_subpath": true,
+      "manifest_verified": true,
+      "shared_theme": true,
+      "standalone_assets": true,
+      "current_captures": 5,
+      "preserved_control_ids": 152,
+      "retired_engineering_ids": 2,
+      "baseline_manual_duplicate_ids": {
+        "the-perform-screen": 2
+      }
+    },
+    "metadata": {
+      "metadata_drift": "pass",
+      "locales": [
+        "en",
+        "ja"
+      ],
+      "capability_connection_busy_import_tests": "pass",
+      "legacy_backup_map_bytes": "identical",
+      "dx_user_offset": 42,
+      "hardware_qa": "not run"
+    },
+    "browser_contract": {
+      "browser_api_contract": "pass",
+      "secure_http_boot_and_pcm": true,
+      "startup_cancel_timeout_retry": true,
+      "input_midi_stream_storage_lifecycle": true,
+      "interactive_browser_qa": "not run"
+    },
+    "http_audio": {
+      "http_fallback": "pass",
+      "compared_samples": 1048576,
+      "peak": 0.2057281732559204,
+      "frame_messages": 1
+    },
+    "synth_jam_audio": {
+      "synth_jam_wasm": "pass",
+      "stopped_backing_rms": 9.669316431548207e-05,
+      "manual_chord": {
+        "peak": 0.08376133441925049,
+        "rms": 0.02749645928315041
+      },
+      "held_control_rms": 0.01889102349932262,
+      "home_release_rms": 5.887329038330035e-05,
+      "memory_bytes": 33554432,
+      "physical_hardware_qa": "not run"
+    },
+    "site_output_safety_cases": 11,
+    "release_wrapper_cases": 2,
+    "frozen_reference_selection_cases": 3,
+    "protocol_logs": {
+      "sysex": {
+        "path": "build/web-proof-0.4.4/sysex.log",
+        "bytes": 571,
+        "sha256": "81ed5b1d33b5232f6f76323073fa848101a012f124dadfe31a6c8557f9bd7700"
+      },
+      "backup": {
+        "path": "build/web-proof-0.4.4/backup.log",
+        "bytes": 1186,
+        "sha256": "b74e83a1289e590ca4759d6b1d60cd6de252a84c231475c6a92bd8a834fb121c"
+      },
+      "ota": {
+        "path": "build/web-proof-0.4.4/ota.log",
+        "bytes": 854,
+        "sha256": "cb9614421b7f4e3d090c0226181125ac5a587f92f66a359f469f7c15b784edd2"
+      },
+      "idle": {
+        "path": "build/web-proof-0.4.4/idle.log",
+        "bytes": 498,
+        "sha256": "21dd82c7bfe683447cec58aa6792e84b9e61e0c37c9f06e4489cfd780c4ed982"
+      }
+    }
+  },
+  "physical_verification": "hardware-0.4.4.json",
+  "limitations": [
+    "Browser contracts use API doubles and actual WASM; interactive browser layout was not rerun for 0.4.4.",
+    "Screenshots are actual instrument framebuffer captures, not browser or hardware photographs.",
+    "Full native 94-scenario plus extras and full emulator CI rerun is delegated to the pushed commit; local final checks were focused.",
+    "No public deployment is established by these local checks."
+  ]
+}

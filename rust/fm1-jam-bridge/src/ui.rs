@@ -412,6 +412,9 @@ mod tests {
         if op >= 0x100 {
             return 0;
         }
+        if op == Action::JamSnapshot as u32 {
+            return 1;
+        }
         if op == Action::Input as u32 {
             let pointer = active();
             // SAFETY: these writes end before a nested button action reenters UI.
