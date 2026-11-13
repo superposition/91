@@ -94,15 +94,17 @@ python3 tests/reference/ui_input_host.py . build/gen/ui_input_current.inc
 "$out/generated-ui-input" > "$out/generated-ui-input.bin"
 cmp "$out/c0-ui-input.bin" "$out/generated-ui-input.bin"
 python3 tools/ui_performance_abi.py --check
+python3 tools/ui_values_abi.py --check
 if [ -n "$baseline" ];then
     baseline=$(realpath "$baseline")
     (cd "$baseline";sha256sum -c "$repo/tests/reference/source.sha256") > "$out/frozen-source.log"
     python3 tests/reference/ui_input_host.py "$baseline" build/gen/ui_input_frozen.inc
 fi
-for profile in ui-performance jam-labels ui-automatic;do
+for profile in ui-performance jam-labels ui-automatic ui-values;do
     driver=tests/reference/ui_performance_reference.c
     if [ "$profile" = jam-labels ];then driver=tests/reference/jam_labels_reference.c;fi
     if [ "$profile" = ui-automatic ];then driver=tests/reference/ui_automatic_reference.c;fi
+    if [ "$profile" = ui-values ];then driver=tests/reference/ui_values_reference.c;fi
     "$zig" cc "${native[@]}" "${common[@]}" -DEN_WEB '-DEN_VERSION="0.3.0"' "$driver" firmware/src/dsp/amb.c -lm -o "$out/c0-$profile"
     "$zig" cc "${native[@]}" "${common[@]}" -DEN_WEB '-DEN_VERSION="0.3.0"' "${rust[@]}" "$driver" firmware/src/dsp/amb.c "$abi" "${objects[@]}" "$out/core.o" -lm -o "$out/generated-$profile"
     "$out/c0-$profile" > "$out/c0-$profile.bin"
@@ -116,13 +118,13 @@ for profile in ui-performance jam-labels ui-automatic;do
 done
 python3 tools/usb_reference.py . "$out/usb-source"
 python3 tests/reference/usb_queue_reference.py . "$out/queue-source"
-for profile in control transport queues tx host;do
+for profile in control transport queues tx host host_tx host_control;do
     source=(-I"$out/usb-source" -DFELUCCA_CDC=1 -DFELUCCA_UAC=1 -DUSB_DX=1 -DFELUCCA_OTA=1)
     fixture="tests/reference/usb_${profile}_reference.c"
     if [ "$profile" = queues ];then source=(-I"$out/queue-source" -Ifirmware/hal);fixture=tests/reference/usb_queue_reference.c;fi
     if [ "$profile" = tx ];then source+=(-DUSB_TX_ACTIVE_CONFIG_ONLY=1);fi
     if [ "$profile" = control ];then source+=(-DUSB_CONTROL_CONFIRMED_ABORTS=1);fi
-    if [ "$profile" = host ];then source+=(-DPERF_USB_HOST=1);fi
+    case "$profile" in host|host_tx|host_control) source+=(-DPERF_USB_HOST=1);;esac
     "$zig" cc "${native[@]}" "${common[@]}" "${source[@]}" "$fixture" -lm -o "$out/c0-usb-$profile"
     "$zig" cc "${native[@]}" "${common[@]}" "${source[@]}" -DEN_RUST_USB=1 "$fixture" "$abi" "${objects[@]}" "$out/core.o" -lm -o "$out/generated-usb-$profile"
     "$out/c0-usb-$profile" > "$out/c0-usb-$profile.bin"

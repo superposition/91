@@ -23,6 +23,9 @@ jobs:
           python-version: '3.10'
       - run: rustup toolchain install 1.94.1 --profile minimal
       - run: python3 -m pip install mido==1.3.3 numpy==1.24.4 Pillow==12.3.0 packaging==26.3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Reconstruct and verify the complete frozen comparison source
         run: python3 tools/frozen_source.py build/r01-source
       - name: Authoring, fake-device transactions, CLI and six complete songs
@@ -43,6 +46,8 @@ jobs:
         run: bash tests/rust_manual.sh build/r01-source
       - name: Loader, recovery stub and release inspection through compiler doubles
         run: python3 tests/rust_build_images.py build/r01-source
+      - name: Site and editor metadata through the actual Spectrum builders
+        run: bash tests/rust_site_metadata.sh build/r01-source
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -54,6 +59,8 @@ jobs:
             build/authoring-cli/
             build/authoring-preview/
             build/build-guards/**/differential.json
+            build/build-images/**/differential.json
+            build/site/provider/*.json
 
   browser_pointer_model:
     name: Retained browser and device pointers under Miri
@@ -298,6 +305,9 @@ jobs:
           sh tests/rust_ui_performance.sh build/r01-source
           sh tests/rust_jam_labels.sh build/r01-source
           sh tests/rust_ui_automatic.sh build/r01-source
+          sh tests/rust_ui_values.sh build/r01-source
+      - name: Readonly harmony snapshots preserve nested IRQ state
+        run: sh tests/rust_ui_harmony_snapshot.sh
       - name: USB descriptors, collectors and interrupt-safe MIDI queues
         run: |
           sh tests/rust_usb_control.sh build/r01-source
@@ -314,6 +324,10 @@ jobs:
           sh tests/rust_usb_lease.sh build/r01-source healthy
       - name: USB host descriptors and bounded MIDI receive traversal
         run: sh tests/rust_usb_host.sh build/r01-source
+      - name: USB host retained TX and complete control transfers
+        run: |
+          sh tests/rust_usb_host_tx.sh build/r01-source
+          sh tests/rust_usb_host_control.sh build/r01-source
       - name: Songbook snapshot and staging handoffs
         run: sh tests/rust_handoff.sh
       - uses: actions/upload-artifact@v4
