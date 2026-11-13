@@ -2,7 +2,55 @@
 
 Execution is tracked in [epic #1](https://github.com/superposition/91/issues/1). Its 25 tickets cover the complete owned firmware, simulator, browser, tools and media code. The last ticket is [How I did it](https://github.com/superposition/91/issues/26), the evidence-based Friday talk.
 
-## Current combined checkpoint — 12 November
+## Current architecture and qualification — 12 November
+
+Published source `0620997` includes Rust synthesis/voices, FM6, effects/master,
+factory recipes, planning/harmonic policy, scheduling, commands, worker handoffs,
+codecs and persistence policy. Native scenario parsing, virtual platform/clock
+and output sinks run in Rust. Native and browser share the same bounded host
+model; the browser platform/clock use six application callbacks. C application
+ABI thunks and an operating-system clock observation remain.
+
+Graphics, Runner, UI defaults, frame/cadence policy, encoder acceleration and
+storage retries are integrated. Controller helpers, page composition and
+visualizers still contain C. Browser/editor/library logic, startup/USB/update
+loader, build/media tools and whole-release qualification remain ticketed.
+The newer held-input, asset and packaging batch is under combined qualification.
+
+Concrete data boundaries for the talk:
+
+- The command ring retains 1,024 packed words. Producer publication and consumer
+  slot reuse require distinct ordering; volatile access alone supplies neither.
+- The browser has one 240×240 RGB565 framebuffer and one 31×3,840-byte object
+  bank. Persistent foreign pointers come from separate allocation roots.
+  Metadata borrows end before callbacks reenter the platform. Store reads
+  initialize raw foreign output without borrowing uninitialized destination bytes.
+- The target UI carrier is 1,320 bytes, alignment 4. All 193 offsets/sizes match
+  vendor C. This measured ABI result is separate from native/WASM layout,
+  whole-image linking and physical timing.
+
+[Host/platform proof](rust/combined-browser-platform-checkpoint-20261112.json)
+records 170 Windows tests, all 97 native scenarios, repeats/damaged stores and
+full-instrument WASM/bindings.
+[Callback proof](rust/browser-bindings-allocation-proof.json) covers 15 render
+sizes, no owned array/view/BigInt construction or IPC during rendering, and
+fixed 32 MiB memory. Frame/store serialization runs in polled MessagePort tasks.
+Browser-native allocation and actual device scheduling remain separate checks.
+
+The [USB/UI/rescue review](https://github.com/superposition/91/blob/0e42b1d/docs/rust/combined-usb-ui-rescue-checkpoint-20261112.json)
+adds descriptor/EP0, receive collectors, exact-IRQ MIDI queues, button policy,
+checked UI classification and rescue/debugger tools. Its 182 Windows tests,
+frozen/native/WASM fixtures, seven-crate vendor LTO and natural32 comparisons
+with active C assertions pass. It is not a linked/physically qualified release.
+
+The device is restored to known-working 0.3.3: all 30 saved objects are preserved,
+and follow-up audio added no XRUN/late/crash counters. The experimental failure
+remains unresolved; [restoration record](rust/firmware-restoration-20261112.json).
+The LAN preview still serves its earlier qualified artifact. The sections below
+retain historical measurements and call maps; their remaining-work statements
+describe those earlier checkpoints.
+
+## Earlier combined checkpoint — d1a2204
 
 The maintained Rust implementation now includes the scheduler, phrase planner,
 named synthesis families and DJ voices, FM6, effects/master processing, bounded
@@ -35,11 +83,11 @@ probe image.
 
 ## Compatibility and ownership
 
-The browser build now runs Rust command publication/consumption, Songbook validation, session encoding/validation, phrase planning, bass decisions, sample-clock cadence, bounded drum scheduling/drift/deadlines, Songbook display snapshots and staging arbitration inside the existing instrument. Musical event dispatch, remaining melodic/harmonic scheduling, synthesis, application state and UI drawing remain C. The physical firmware still uses its original C path. The current working-tree Songbook/DX7 changes are part of the baseline. Do not reset them to the Git HEAD baseline.
+The native/browser builds select the integrated Rust components described above, with explicit C0 comparison paths. Application/controller helpers and hardware lifecycle work remain visible at their boundaries; software comparison does not qualify an MCU image. The current working-tree Songbook/DX7 changes are part of the baseline. Do not reset them to the Git HEAD baseline.
 
 The device uses 256-frame render calls and 512-frame DMA halves at 44.1 kHz, allowing approximately 11,609 microseconds per half. Ordinary RAM is limited to 98,304 bytes, and the 344,064-byte pool must retain 4,096 bytes of reserve.
 
-The target Rust design assigns one owner to each mutable subsystem. The command ring has Rust producer/consumer endpoints and the Songbook UI consumes a copied view. Full render/application state and broader UI snapshots remain to migrate:
+The design assigns one owner to each mutable subsystem. The command ring has separate producer/consumer endpoints and the Songbook UI consumes a copied view. Application edits, snapshots and worker exclusion are distinct boundaries:
 
 ```mermaid
 flowchart LR
@@ -75,7 +123,7 @@ Existing physical-device evidence remains in `build/hardware/songbook-final`; it
 
 ## First Rust slice
 
-The workspace currently contains:
+At this first slice, the workspace contained:
 
 | Package | Responsibility implemented so far |
 | --- | --- |
@@ -125,7 +173,7 @@ The integration corpus was generated by the retained [C oracle adapters](../test
 
 Session compatibility checks cover **5,120 byte mutations**, all **65,536 tempo words**, and lengths zero through 22. Every accepted mutation re-encodes identically, including unknown trailer bytes. Encoding validates before writing, so rejected records leave the caller's buffer unchanged. A new save reproduces the legacy source marker and zero reserved tail.
 
-## Running emulator checkpoint
+## Earlier emulator integration map
 
 ```mermaid
 flowchart LR
