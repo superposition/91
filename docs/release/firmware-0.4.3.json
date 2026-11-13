@@ -1,0 +1,285 @@
+{
+  "status": "qualified candidate: MCU build, package, recovery, memory, planner, DSP, octave UI and transport gates passed; physical verification pending",
+  "qualified_at_utc": "2026-11-13T07:09:35.982432+00:00",
+  "version": "0.4.3",
+  "identity": "FM-1_7000403",
+  "package": {
+    "path": "C:\\Users\\ericm\\fm1\\rust-migration\\release-ready-20261113\\build\\naiwan91-0.4.3.fwsc",
+    "bytes": 611251,
+    "sha256": "3aff7ba0a0f290a787b5ac1e2d13dedaa331b850eff66b15ad4dde599200f4a9"
+  },
+  "source_base": "3f2d40e",
+  "source_delta": [
+    ".github/workflows/pages.yml",
+    ".github/workflows/rust.yml",
+    "BUILDING.md",
+    "LICENSING.md",
+    "README.md",
+    "docs/JAM_PACKS.md",
+    "docs/WEB_BUILD.md",
+    "docs/img/naiwan91-arrangement.png",
+    "docs/img/naiwan91-captures.json",
+    "docs/img/naiwan91-dx-bass.png",
+    "docs/img/naiwan91-dx-keys.png",
+    "docs/img/naiwan91-performance.png",
+    "docs/img/naiwan91-swells.png",
+    "firmware/src/app/jam_usb.h",
+    "firmware/src/app/ui.c",
+    "firmware/src/dsp/amb.h",
+    "firmware/src/dsp/fm6.inc",
+    "firmware/src/dsp/jam.h",
+    "firmware/src/dsp/jam_runtime.inc",
+    "firmware/src/dsp/rust_fm6.h",
+    "firmware/src/dsp/rust_ui_input.h",
+    "firmware/src/dsp/song_factory.inc",
+    "firmware/src/dsp/song_plan.inc",
+    "rust/fm1-app/src/input.rs",
+    "rust/fm1-authoring/src/acceptance.rs",
+    "rust/fm1-authoring/src/device.rs",
+    "rust/fm1-authoring/src/lib.rs",
+    "rust/fm1-authoring/src/midi.rs",
+    "rust/fm1-authoring/src/pack.rs",
+    "rust/fm1-engine/src/fm6/program.rs",
+    "rust/fm1-engine/src/planner.rs",
+    "rust/fm1-formats/src/jam.rs",
+    "tests/authoring_device.py",
+    "tests/host/jam_test.c",
+    "tests/host/jam_usb_test.c",
+    "tests/host/songbook_test.c",
+    "tests/jam_transport_test.py",
+    "tests/rust_simulator.sh",
+    "tools/fm1_jam.py",
+    "tools/release.sh",
+    "tools/songbook.py",
+    "web/README.md",
+    "web/device-data.js",
+    "web/emu/index.html",
+    "web/index.html",
+    "web/product.json"
+  ],
+  "source_added": [
+    "docs/RELEASE_0_4_3.md",
+    "docs/release/source-preservation-20261113.json",
+    "firmware/src/dsp/chord_plan.inc",
+    "packs/01-blue-bossa.jmp",
+    "packs/01-blue-bossa.json",
+    "packs/02-autumn-leaves.jmp",
+    "packs/02-autumn-leaves.json",
+    "packs/03-satin-doll.jmp",
+    "packs/03-satin-doll.json",
+    "packs/04-blue-bossa-deep.jmp",
+    "packs/04-blue-bossa-deep.json",
+    "packs/05-leaves-drawbars.jmp",
+    "packs/05-leaves-drawbars.json",
+    "packs/06-satin-muted-guitar.jmp",
+    "packs/06-satin-muted-guitar.json",
+    "packs/07-major-minor-lab.jmp",
+    "packs/07-major-minor-lab.json",
+    "packs/citypop-manifest.json",
+    "packs/citypop-sources/madfame-1.syx",
+    "packs/citypop-sources/madfame-2.syx",
+    "packs/citypop-sources/madfame-3.syx",
+    "packs/citypop-sources/pafreak-1.syx",
+    "packs/citypop-sources/pafreak-2.syx",
+    "packs/standards-base/01-blue-bossa.json",
+    "packs/standards-base/02-autumn-leaves.json",
+    "packs/standards-base/03-satin-doll.json",
+    "packs/standards-base/04-blue-bossa-deep.json",
+    "packs/standards-base/05-leaves-drawbars.json",
+    "packs/standards-base/06-satin-muted-guitar.json",
+    "packs/standards-base/07-major-minor-lab.json",
+    "packs/voice-catalog.json",
+    "rust/fm1-app/tests/jam_input.rs",
+    "rust/fm1-authoring/tests/chords.rs",
+    "rust/fm1-engine/tests/chord_reference.c",
+    "rust/fm1-engine/tests/literal_reference.rs",
+    "rust/fm1-engine/tests/native_voice.rs",
+    "rust/fm1-engine/tests/packs/literal-chords.jmp",
+    "tests/chord_chart_test.py",
+    "tests/host/chord_dsp_test.c",
+    "tests/host/chord_plan_test.c",
+    "tests/host/chord_variant_test.c",
+    "tests/host/jam_octave_test.c",
+    "tests/host/jam_octave_ui_test.c",
+    "tests/host/native_voice_test.c",
+    "tests/host/songbook_v2_fixtures.inc",
+    "tests/native_voice_test.py",
+    "tests/release_script_test.py",
+    "tests/simulator_reference_test.py",
+    "tools/build_citypop.py",
+    "tools/build_standards.py",
+    "tools/chord_chart.py",
+    "web/fonts/OFL.txt"
+  ],
+  "source_manifest": "build/qualified-source-sha256.json",
+  "scope": "Integrate literal standards, native custom DX7 profiles, splash fix and direct independent octave controls into preserved Rust migration source. New defaults keys +1, bass +1 and spacious Plate reverb; seven charts/forms/grooves and original curated VMEM programs remain unchanged.",
+  "build_architecture": "Default release JieLi MCU uses C DSP/UI runtime (EN_RUST runtime flags disabled), with Rust-backed build/package tools. Rust host/browser implementation remains integrated. This does not claim additional Rust MCU migration.",
+  "rollback": {
+    "path": "C:\\Users\\ericm\\fm1\\rust-migration\\citypop-voices-20261113\\source\\build\\naiwan91-0.4.2.fwsc",
+    "sha256": "22385db01ba86bc60385c724fc2122527a91fc385de73643622df2dceb2888c9"
+  },
+  "memory": {
+    "ram_used": 97196,
+    "ram_limit": 98304,
+    "pool_used": 339404,
+    "pool_limit": 344064,
+    "pool_reserve": 4096,
+    "body_bytes": 484272,
+    "body_limit": 573440,
+    "app_bytes": 488080
+  },
+  "recovery_stub": {
+    "bytes": 2268,
+    "sha256": "4e33bfbb5ebdadc6245a8ba36aff087231e42e66507df8a1e0dea0e620d098ef",
+    "padded_bytes": 3808,
+    "padded_sha256": "baee55ed142fe1cc336099902fa544d8844ba72182abf669f15cc78fc6bee87c",
+    "app_prefix_matches": true
+  },
+  "package_contents": {
+    "decoded_app_matches_build": true,
+    "decoded_protected_stub_matches": true,
+    "embedded_loader_matches_build": true
+  },
+  "packs": [
+    {
+      "path": "packs\\01-blue-bossa.jmp",
+      "bytes": 3181,
+      "sha256": "b40a8f777d6f5d9e27fb2e29640835feac3672f59c74e01684402c07ade59b92",
+      "charts_forms_grooves_raw_programs_match_0_4_2": true
+    },
+    {
+      "path": "packs\\02-autumn-leaves.jmp",
+      "bytes": 3374,
+      "sha256": "cdd0b2d7fba702940e765acc6eb91204c6bf28008fa4a580728cead8f06a7327",
+      "charts_forms_grooves_raw_programs_match_0_4_2": true
+    },
+    {
+      "path": "packs\\03-satin-doll.jmp",
+      "bytes": 3181,
+      "sha256": "e79db76cd50e39dbb22c648b98a2b7f8c51fb8cf64ede35dfc8ad7b339154919",
+      "charts_forms_grooves_raw_programs_match_0_4_2": true
+    },
+    {
+      "path": "packs\\04-blue-bossa-deep.jmp",
+      "bytes": 3181,
+      "sha256": "2fe07f7799dbfa7f79889a73a8136a6a800472013eeb08f030950d4b17822e14",
+      "charts_forms_grooves_raw_programs_match_0_4_2": true
+    },
+    {
+      "path": "packs\\05-leaves-drawbars.jmp",
+      "bytes": 3374,
+      "sha256": "07b54e045102653827d2f175fad6aa79cf61defe9094c761d2fd503253655a48",
+      "charts_forms_grooves_raw_programs_match_0_4_2": true
+    },
+    {
+      "path": "packs\\06-satin-muted-guitar.jmp",
+      "bytes": 3181,
+      "sha256": "0c6596e2ef243d0be4b5e26858672848fa142154af9e52f6818ab2997800f51d",
+      "charts_forms_grooves_raw_programs_match_0_4_2": true
+    },
+    {
+      "path": "packs\\07-major-minor-lab.jmp",
+      "bytes": 3200,
+      "sha256": "2d04206194aaedbda0d2e0d5fe5632fa04e87d46a7762a639ef5d6ec456ae9f0",
+      "charts_forms_grooves_raw_programs_match_0_4_2": true
+    }
+  ],
+  "defaults": {
+    "keys_octave": 1,
+    "bass_octave": 1,
+    "octave_range": [
+      -2,
+      2
+    ],
+    "fx": {
+      "69": 38,
+      "70": 68,
+      "123": 0,
+      "124": 42,
+      "125": 80
+    }
+  },
+  "checks": [
+    "Locked recovery stub and update loader exact against installed 0.4.2",
+    "Actual delivered package decoded app, stub and loader verified",
+    "Installer simulator, JS/Python package parity and actual-package OTA NOR suite",
+    "MCU RAM/pool/body limits, RAM text, no soft-double and HAL-only MMIO gates",
+    "Frozen v1/v2 planner and songbook regressions",
+    "All 17 chord qualities and four movement modes; full 16/32/32-bar factories with exact MIDI and zero fullscale",
+    "Native VMEM profile preservation and all 25 independent octave combinations: exact audio/MIDI, bounded notes, unchanged planner/profiles, correct live note-offs",
+    "Actual host UI DX Keys/Bass knob2 defaults, independence and bounds; Touch/Attack unchanged",
+    "USB signed octave mapping, literal chart transfer and save/reboot/readback",
+    "Seven released packs manifest hashes and baseline musical structure/raw-program equality"
+  ],
+  "files": {
+    "build/naiwan91-0.4.3.fwsc": {
+      "bytes": 611251,
+      "sha256": "3aff7ba0a0f290a787b5ac1e2d13dedaa331b850eff66b15ad4dde599200f4a9"
+    },
+    "build/amb.bin": {
+      "bytes": 488080,
+      "sha256": "b15a1f88b1677488e8c692ecf6b5c0695dc01d413f55fdc0b4a1bffb21506811"
+    },
+    "build/amb.elf": {
+      "bytes": 540652,
+      "sha256": "c765cf90f36f1e6140f217ef252adb6856c2b1ce97217182a929b16126cb2950"
+    },
+    "build/stub/stub.bin": {
+      "bytes": 2268,
+      "sha256": "4e33bfbb5ebdadc6245a8ba36aff087231e42e66507df8a1e0dea0e620d098ef"
+    },
+    "build/loader/ota.bin": {
+      "bytes": 8095,
+      "sha256": "fb264969d35b09657af9277527710c80af8dcc164de4946fa298da61420f2e85"
+    },
+    "build/release-0.4.3.log": {
+      "bytes": 1180,
+      "sha256": "d9b8e008b989ddae185e81f9a22a1fc431f2e59d247ec6e286c7f82a37175058"
+    },
+    "build/release-installer.log": {
+      "bytes": 1972,
+      "sha256": "453647453bcb628f253a6ee38de76dc3acecef120cf3b47e384ea8e3407db0d8"
+    },
+    "build/release-ota.log": {
+      "bytes": 1155,
+      "sha256": "adb70f19c776996c82cfe9cc6ead1a077fcb3edcd4c4c908f5d02dafa0e65d5c"
+    },
+    "build/qualified-source-sha256.json": {
+      "bytes": 142802,
+      "sha256": "e817ad6e8909f077a9cfff7fe65f6e7285ed9b35a004df778f528560b9cc7aa0"
+    },
+    "build/release-tests/chord_plan.log": {
+      "bytes": 176,
+      "sha256": "c67e72fee0104bb236833d4dd984cd3f2da2e6bce2909429da0017a26d865b39"
+    },
+    "build/release-tests/native_voice.log": {
+      "bytes": 179,
+      "sha256": "456ae2c5b2ea821984c98d2caa08bd4116449372bd49a1560d730b45e6cf61b1"
+    },
+    "build/release-tests/jam_octave.log": {
+      "bytes": 144,
+      "sha256": "96793904fb49a0153f5d63bb1c815378dbe011cf3c6f9f6d4fa596bd82edd354"
+    },
+    "build/release-tests/chord_dsp.log": {
+      "bytes": 534,
+      "sha256": "19b7fd7066bac0504df3c2bd1b449caaa9aee60a443769fc925c69c0bc23ba1f"
+    },
+    "build/release-tests/jam.log": {
+      "bytes": 142,
+      "sha256": "9e08f3755aad268ba860b1e3137de1d15235484b3aea2da0559fdcb157d8f07f"
+    },
+    "build/release-tests/songbook.log": {
+      "bytes": 147,
+      "sha256": "98bac0f592507d2e4e21d961e07e9328d65dfce99bb4677cd2710f318211ff21"
+    },
+    "build/release-tests/jam-octave-ui.log": {
+      "bytes": 117,
+      "sha256": "e162a1fee9e9e77b80a590127cb01f56f796334b8052ce38b2217c1b989ac333"
+    },
+    "build/release-tests/jam-transport.log": {
+      "bytes": 102,
+      "sha256": "622e44b46004633aabc236c7d1ccac4f68e25bd8781e57f3a0b74d256f39dff5"
+    }
+  },
+  "hardware": "No hardware access by this agent; root owns installation and physical acceptance."
+}

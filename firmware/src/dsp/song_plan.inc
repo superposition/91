@@ -2,10 +2,12 @@
 /* Authored destinations, then voice-led sixth-family movement. Flags: low
  * nibble borrowed voices, bit 4 diminished neighbour. No stateful RNG in Hold. */
 static inline int jp_abs(int x){return x<0?-x:x;}
+#include "chord_plan.inc"
 static inline void jp_plan(const uint8_t *p,const jp_settings_t *s,unsigned section,
                            const jp_phrase_t *prev,jp_phrase_t *out,uint32_t *seed)
 {
     const uint8_t *form;unsigned bar,b,i;int last[4]={52,55,59,62};
+    if(jp_v3(p)){jp_plan_chords(p,s,section,prev,out,seed);return;}
     if(!jp_v2(p)) {jp_plan_v1(p,s,section,prev,out,seed);return;}
     form=p+JP_FORM+s->form*32;
     out->bars=s->bars;out->section=(uint8_t)(section%form[16]);out->role=form[17+out->section];

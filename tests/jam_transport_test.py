@@ -6,6 +6,7 @@ delivery remains a separate device check. No mido/rtmidi dependency is needed.
 """
 import os
 import pathlib
+import re
 import subprocess
 import sys
 import types
@@ -16,6 +17,14 @@ ROOT=pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tools'))
 import fm1_jam
 from jam_midi import Device
+
+
+def factory_bytes(song):
+    """The build's immutable bank may contain a newly curated playlist."""
+    header=(ROOT/'firmware/src/dsp/song_factory.inc').read_text(encoding='utf-8')
+    match=re.search(r'JP_SONG_%d\[\]\s*=\s*\{([^}]+)\}' % song,header,re.S)
+    if not match:raise ValueError('factory bank missing song '+str(song))
+    return bytes(map(int,re.findall(r'\d+',match.group(1))))
 
 
 class Wire:
@@ -56,9 +65,9 @@ class TransportIntegration(unittest.TestCase):
             with patch.dict(sys.modules,{'mido':midi}),patch('jam_midi.time.sleep'):
                 with Device() as dev:
                     dev.control('key',18);dev.control('bars',8)
-                    for song,stem in enumerate(('velvet-changes','afterhours','neon-turnaround')):
+                    for song in range(3):
                         dev.control('song',song)
-                        active=dev.wait_active((ROOT/'packs'/f'{stem}.jmp').read_bytes())
+                        active=dev.wait_active(factory_bytes(song))
                         self.assertEqual((active['key'],active['minor'],active['bars']),(6,1,8))
                     dev.control('touch',23);dev.control('swell',45)
                     edited=dev.read();self.assertEqual(fm1_jam.decompile(edited)['parts']['touch'],23)
@@ -81,9 +90,9 @@ class TransportIntegration(unittest.TestCase):
                 with Device() as dev:
                     self.assertEqual(dev.capabilities()['max_bytes'],3840)
                     original=dev.read()
-                    self.assertEqual(original,(ROOT/'packs/velvet-changes.jmp').read_bytes())
-                    self.assertEqual(dev.features()['pack_versions'],[1,2])
-                    self.assertEqual(dev.song_status()['pack_version'],2)
+                    self.assertEqual(original,factory_bytes(0))
+                    self.assertEqual(dev.features()['pack_versions'],[1,2,3])
+                    self.assertEqual(dev.song_status()['pack_version'],original[4])
                     self.assertEqual(dev.request(13,[1]),b'\x01')
                     self.assertEqual(dev.request(13,[0]),b'\x00')
                     self.assertEqual(dev.control('hold',1)['hold'],1)
@@ -120,6 +129,36 @@ class TransportIntegration(unittest.TestCase):
                     self.assertEqual(dev.read(4),edited)
                     self.assertEqual(wire.exchange('reboot'),'ok')
                     self.assertEqual(dev.read(),edited)
+        finally:wire.finish()
+
+    def test_literal_chart_transfer_save_and_reboot(self):
+        from chord_chart import from_chords
+        from songbook import factory
+        wire=Wire(ROOT/'build/host/jam_transport_bridge')
+        midi=types.SimpleNamespace(get_input_names=lambda:['FM-1 input'],get_output_names=lambda:['FM-1 output'],
+            open_input=lambda name:wire,open_output=lambda name:wire,
+            Message=lambda kind,**kw:types.SimpleNamespace(type=kind,**kw))
+        try:
+            with patch.dict(sys.modules,{'mido':midi}),patch('jam_midi.time.sleep'):
+                with Device() as dev:
+                    chart=from_chords(factory(),['Dm7 G7','Cmaj7','Am7','D7','Gmaj7','G7b9','C6','C6'],name='Literal USB')
+                    data=fm1_jam.compile_pack(chart)
+                    self.assertIn(3,dev.features()['pack_versions'])
+                    dev.control('play',0)
+                    dev.audition(data);dev.wait_active(data)
+                    self.assertEqual(dev.song_status()['pack_version'],3)
+                    self.assertEqual(dev.read(),data)
+                    dev.control('movement',2)
+                    dev.control('keys_octave',-2);dev.control('bass_octave',2)
+                    chart['parts'].update(keys_octave=-2,bass_octave=2)
+                    data=fm1_jam.compile_pack(chart)
+                    self.assertEqual(dev.read(),data)
+                    dev.save(3)
+                    self.assertEqual(dev.read(3),data)
+                    self.assertEqual(wire.exchange('reboot'),'ok')
+                    self.assertEqual(dev.read(),data)
+                    self.assertEqual(dev.song_status()['pack_version'],3)
+                    self.assertEqual(dev.status()['movement'],2)
         finally:wire.finish()
 
 

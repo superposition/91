@@ -166,7 +166,7 @@ pub fn import_voice(
         .and_then(|i| voices.get(i))
         .ok_or_else(|| Error::value("voice index outside bank"))?;
     let mut d = decode(&compile(base, limits)?, limits)?.into_value();
-    if d["version"] != 2 {
+    if d["version"] != 2 && d["version"] != 3 {
         return Err(Error::value("voice roles require a Songbook v2 pack"));
     }
     let n = list(get(&d, "voice_programs")?)?.len();
@@ -219,9 +219,18 @@ pub fn request(request: &Value) -> Result<Value> {
         "device-control-check" => {
             device::control_check(string(get(request, "field")?)?, get(request, "value")?)
         }
-        "device-needs-features" => Ok(json!(bytes(get(request, "bytes")?)?.get(4) == Some(&2))),
+        "device-needs-features" => Ok(json!(matches!(
+            bytes(get(request, "bytes")?)?.get(4),
+            Some(2 | 3)
+        ))),
         "device-compatible" => {
-            if !list(get(get(request, "features")?, "pack_versions")?)?.contains(&json!(2)) {
+            let version = integer(
+                request.get("version").unwrap_or(&json!(2)),
+                1,
+                3,
+                "pack version",
+            )?;
+            if !list(get(get(request, "features")?, "pack_versions")?)?.contains(&json!(version)) {
                 return Err(Error::value("device needs Songbook engine upgrade"));
             }
             Ok(Value::Null)

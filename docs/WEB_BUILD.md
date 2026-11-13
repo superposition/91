@@ -30,7 +30,7 @@ The supplied package marker must match the version's `FM-1_7XXYYZZ` identity con
 
 ## Checked results
 
-Using the current 611,251-byte `naiwan91-0.3.0.fwsc` package and existing WASM artifact:
+The following is the historical W07 qualification, using a 611,251-byte `naiwan91-0.3.0.fwsc` package and its WASM artifact. It does not qualify a later release. Current integration evidence is in [the 0.4.3 record](RELEASE_0_4_3.md).
 
 - Eleven output/entrypoint tests pass on Linux, covering unsafe paths, unknown files, local changes, deterministic rebuilds, failed-rename rollback, legacy adoption, aliased paths, retired CLI behavior, release syntax and compatibility subpaths. On Windows, nine pass and the unavailable symlink/shell checks are explicitly skipped.
 - Two full builds produce byte-identical `site-build.json` output.
@@ -49,4 +49,4 @@ node tests/host/emu_browser_test.mjs build/emu/amb.wasm
 node tests/host/emu_http_test.mjs build/emu/amb.wasm
 ```
 
-Interactive desktop/mobile layout, keyboard focus, actual audio-device and optional MIDI qualification remain open. Emscripten was unavailable for rebuilding the archived API harness in this check; its explicit runner coverage is preserved. No physical hardware, server restart or publication was performed. The W06 metadata files must be integrated before the updated Pages metadata step runs.
+Interactive desktop/mobile layout, keyboard focus, actual audio-device and optional MIDI qualification were not performed in that W07 check. Emscripten was unavailable for rebuilding the archived API harness; its explicit runner coverage is preserved. No physical hardware, server restart or publication was performed. The W06 metadata source and generator are now integrated; use the release version in `web/product.json` for a new build.

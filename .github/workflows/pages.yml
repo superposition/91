@@ -101,6 +101,7 @@ jobs:
         run: |
           python3 tests/web_site_test.py build/site build/emu
           python3 tests/web_build_test.py
+          python3 tests/release_script_test.py
           node tests/web_metadata_test.mjs build/site
           node tests/host/emu_browser_test.mjs build/emu/amb.wasm
           node tests/host/emu_http_test.mjs build/emu/amb.wasm

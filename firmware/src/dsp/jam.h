@@ -24,7 +24,12 @@
 #define JP2_CHART 1280
 #define JP2_VOICE 1536
 #define JP2_META 2560
-static inline int jp_v2(const uint8_t *p) {return p[4]==2;}
+#define JP3_QUALITIES 17
+/* v3 shares the Songbook storage, voices and performance profiles. */
+static inline int jp_v2(const uint8_t *p) {return p[4]==2 || p[4]==3;}
+static inline int jp_v3(const uint8_t *p) {return p[4]==3;}
+static inline int jp_octave(const uint8_t *p,unsigned part) {return jp_v3(p)?(int8_t)p[JP2_HEAD+23+part]:0;}
+static inline int jp_play_note(const uint8_t *p,unsigned part,int note) {return note+12*jp_octave(p,part);}
 static inline const uint8_t *jp_node(const uint8_t *p,unsigned n) {return p+(n<16 ? JP_NODE+n*8:JP2_EXTRA+(n-16)*8);}
 static inline unsigned jp_u16(const uint8_t *p) { return p[0] | (unsigned)p[1] << 8; }
 static inline uint32_t jp_crc(const uint8_t *p, unsigned n)
@@ -46,15 +51,16 @@ extern uint32_t fm1_rust_jam_stat(uint32_t);
 static inline int jp_valid(const uint8_t *p, unsigned n)
 {
     unsigned i,j;
-    if (!p || n<JP_MIN || n>JP_MAX || p[0]!='J' || p[1]!='M' || p[2]!='P' || (p[3]!='1' && p[3]!='2') || (p[4]!=1 && p[4]!=2) || (p[3]-'0')!=p[4] ||
+    if (!p || n<JP_MIN || n>JP_MAX || p[0]!='J' || p[1]!='M' || p[2]!='P' || p[4]<1 || p[4]>3 || (p[3]-'0')!=p[4] ||
         !p[5] || p[5]>(jp_v2(p)?32:16) || !p[6] || p[6]>8 || !p[7] || p[7]>8 || p[8]>32 || p[39]) return 0;
     if(jp_v2(p) && n<JP2_META)return 0;
-    for(i=9;i<15;i++) if(p[i]>=p[5] || jp_node(p,p[i])[4]!=(i>=12)) return 0;
+    for(i=9;i<15;i++) if(p[i]>=p[5] || (!jp_v3(p) && jp_node(p,p[i])[4]!=(i>=12))) return 0;
     for(i=0;i<2;i++) for(j=0;j<8;j++)
         if(p[JP_SCALE+i*8+j]>11 || (!j && p[JP_SCALE+i*8+j]) || (j && p[JP_SCALE+i*8+j]<=p[JP_SCALE+i*8+j-1])) return 0;
     for(i=0;i<p[5];i++) {
         const uint8_t *a=jp_node(p,i); unsigned sum=0;
         if(a[0]>11 || a[1]>11 || a[2]>1 || a[3]>(jp_v2(p)?7:5) || a[4]>1 || a[5]>15 || (jp_v2(p) && a[6]>15)) return 0;
+        if(jp_v3(p) && a[7]>=JP3_QUALITIES)return 0;
         if(jp_v2(p)) continue;
         for(j=0;j<16;j++) { unsigned w=p[JP_EDGE+i*16+j];
             if(w && (j>=p[5] || p[JP_NODE+j*8+4]!=a[4])) return 0;
@@ -77,12 +83,14 @@ static inline int jp_valid(const uint8_t *p, unsigned n)
     }
     for(i=0;i<p[7];i++) if(p[JP_DRUM+i*16+14]>100) return 0;
     if(jp_v2(p)) {
-        if(n<JP2_META || p[JP2_HEAD]!='S' || p[JP2_HEAD+1]!='N' || p[JP2_HEAD+2]!='G' || p[JP2_HEAD+3]!='2') return 0;
+        if(n<JP2_META || p[JP2_HEAD]!='S' || p[JP2_HEAD+1]!='N' || p[JP2_HEAD+2]!='G' || p[JP2_HEAD+3]!=p[3]) return 0;
+        if(jp_v3(p) && (p[JP2_HEAD+21]>1 || p[JP2_HEAD+22]>3))return 0;
+        if(jp_v3(p) && (jp_octave(p,0)<-2 || jp_octave(p,0)>2 || jp_octave(p,1)<-2 || jp_octave(p,1)>2))return 0;
         if(!p[JP2_HEAD+4] || p[JP2_HEAD+4]>8 || p[JP2_HEAD+5]>=p[JP2_HEAD+4] || p[JP2_HEAD+6]>=p[JP2_HEAD+4] || p[JP2_HEAD+7]>=24) return 0;
         for(i=18;i<=20;i++) if(p[JP2_HEAD+i]>100)return 0;
         for(i=8;i<=10;i++) if(p[JP2_HEAD+i]>100) return 0;
         if(p[JP2_HEAD+11]>3 || p[JP2_HEAD+12]>2 || !p[JP2_HEAD+16] || p[JP2_HEAD+16]>100 || !p[JP2_HEAD+17] || p[JP2_HEAD+17]>100) return 0;
-        for(i=0;i<256;i++) {unsigned node=p[JP2_CHART+i];if(node>=p[5] || jp_node(p,node)[4]!=(i/128)) return 0;}
+        for(i=0;i<256;i++) {unsigned node=p[JP2_CHART+i];if(node>=p[5] || (!jp_v3(p) && jp_node(p,node)[4]!=(i/128))) return 0;}
         for(i=0;i<p[JP2_HEAD+4]*128u;i++) if(p[JP2_VOICE+i]>127) return 0;
     }
     return 1;
@@ -183,8 +191,8 @@ static inline int jp_bass_note(const uint8_t *p, const jp_settings_t *s, const j
         n=36+(s->key+jp_node(p,target)[0])%12-1;
         while(n-(36+root)>6) n-=12;
         while((36+root)-n>6) n+=12;
-    } else if(iv==-126) n+=a[3]==1 || a[3]==2 || a[3]==4 || a[3]==5 ? 3:4;
-    else if(iv==-125) n+=a[3]==2 || a[3]==5 ? 6:jp_v2(p) && a[3]==7 ? 8:7;
+    } else if(iv==-126) n+=jp_v3(p)?jp_chord_bass(a[7],0):(a[3]==1 || a[3]==2 || a[3]==4 || a[3]==5 ? 3:4);
+    else if(iv==-125) n+=jp_v3(p)?jp_chord_bass(a[7],1):(a[3]==2 || a[3]==5 ? 6:jp_v2(p) && a[3]==7 ? 8:7);
     else n+=iv;
     while(n<(jp_v2(p)?28:31)) n+=12;
     while(n>(jp_v2(p)?52:55)) n-=12;

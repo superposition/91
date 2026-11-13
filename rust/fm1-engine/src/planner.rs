@@ -98,8 +98,120 @@ pub fn plan_into(
     out.role = form[17 + out.section as usize];
     if pack.version() == 1 {
         plan_v1(pack, settings, previous, out, seed);
+    } else if pack.version() == 3 {
+        plan_v3(pack, settings, section, previous, out, seed)?;
     } else {
         plan_v2(pack, settings, section, previous, out, seed)?;
+    }
+    Ok(())
+}
+
+// Four literal keyboard tones, followed by the bass third (or sus fourth) and fifth.
+const CHORD_TONES: [[u8; 6]; 17] = [
+    [0, 4, 7, 11, 4, 7],
+    [0, 3, 7, 10, 3, 7],
+    [0, 4, 7, 10, 4, 7],
+    [0, 3, 6, 10, 3, 6],
+    [0, 3, 6, 9, 3, 6],
+    [0, 4, 7, 9, 4, 7],
+    [0, 3, 7, 9, 3, 7],
+    [0, 5, 7, 10, 5, 7],
+    [0, 3, 7, 11, 3, 7],
+    [0, 4, 8, 10, 4, 8],
+    [4, 7, 10, 13, 4, 7],
+    [4, 7, 11, 14, 4, 7],
+    [3, 7, 10, 14, 3, 7],
+    [4, 7, 10, 14, 4, 7],
+    [4, 8, 10, 13, 4, 8],
+    [0, 4, 7, 12, 4, 7],
+    [0, 3, 7, 12, 3, 7],
+];
+
+fn plan_v3(
+    pack: JamPack<'_>,
+    s: &Settings,
+    section: u32,
+    previous: Option<&Phrase>,
+    out: &mut Phrase,
+    seed: &mut Seed,
+) -> Result<(), PlanError> {
+    let p = pack.bytes();
+    let head = &p[jam::V2_HEAD..];
+    let part = usize::from(out.role == 1 || out.role == 2);
+    let drop = s.movement == 2 || (s.movement == 0 && head[21] != 0);
+    let mut last = last_notes(previous, [52, 55, 59, 62]);
+    out.motif = (head[12] + u8::from(head[11] != 0 && section % 4 == 2)) % p[6];
+    if head[11] >= 2 && section % 4 == 3 {
+        out.motif = ((seed.next_u32() >> 16) % p[6] as u32) as u8;
+    }
+    for bar in 0..s.bars as usize {
+        for b in 0..4 {
+            let offset = ((s.minor as usize * 2 + usize::from(s.bars == 16)) * 2 + part) * 32
+                + bar * 2
+                + b / 2;
+            let node = p[jam::V2_CHART + offset] as usize;
+            let a = pack.node(node).ok_or(PlanError::Reference)?;
+            let tones = CHORD_TONES[a[7] as usize];
+            let root = (s.key as i32 + a[0] as i32) % 12;
+            let mut best = 100_000;
+            let mut chosen = [48, 52, 55, 59];
+            for inv in 0..4 {
+                let mut shape = [0; 4];
+                for i in 0..4 {
+                    shape[i] = root + tones[(inv + i) % 4] as i32 + 12 * ((inv + i) / 4) as i32;
+                    if i != 0 {
+                        while shape[i] <= shape[i - 1] {
+                            shape[i] += 12;
+                        }
+                    }
+                }
+                if drop {
+                    let lowered = shape[2] - 12;
+                    shape[2] = shape[1];
+                    shape[1] = shape[0];
+                    shape[0] = lowered;
+                    // Insertion order mirrors the bounded C implementation.
+                    for i in 1..4 {
+                        let mut j = i;
+                        let n = shape[i];
+                        while j != 0 && shape[j - 1] > n {
+                            shape[j] = shape[j - 1];
+                            j -= 1;
+                        }
+                        shape[j] = n;
+                    }
+                    if shape[0] == shape[1] || shape[1] == shape[2] || shape[2] == shape[3] {
+                        continue;
+                    }
+                }
+                let low = ((if drop { 45 } else { 48 }) - shape[0] + 11) / 12;
+                let high = (76 - shape[3]) / 12;
+                for oct in low..=high {
+                    let mut notes = [0; 4];
+                    let mut cost = 0;
+                    for i in 0..4 {
+                        notes[i] = shape[i] + 12 * oct;
+                        cost += (notes[i] - last[i]).abs() * 3;
+                    }
+                    cost += (notes[3] - (67 + part as i32 * 2)).abs();
+                    if s.movement == 3
+                        && inv as u32 != section.wrapping_add((bar * 2 + b / 2) as u32) % 4
+                    {
+                        cost += 128;
+                    }
+                    if cost < best {
+                        best = cost;
+                        chosen = notes;
+                    }
+                }
+            }
+            last = chosen;
+            out.beats[bar * 4 + b] = Beat {
+                notes: chosen.map(|v| v as u8),
+                node: node as u8,
+                passing: 0,
+            };
+        }
     }
     Ok(())
 }
@@ -295,7 +407,8 @@ pub fn bass_event(
         return Err(PlanError::Reference);
     }
     let p = pack.bytes();
-    let v2 = pack.version() == 2;
+    let v2 = pack.version() >= 2;
+    let v3 = pack.version() == 3;
     let pattern =
         (phrase.motif as usize + s.bass as usize + usize::from(bar == phrase.bars as usize - 1))
             % p[6] as usize;
@@ -329,9 +442,17 @@ pub fn bass_event(
             note += 12;
         }
     } else if interval == -126 {
-        note += if matches!(a[3], 1 | 2 | 4 | 5) { 3 } else { 4 };
+        note += if v3 {
+            CHORD_TONES[a[7] as usize][4] as i32
+        } else if matches!(a[3], 1 | 2 | 4 | 5) {
+            3
+        } else {
+            4
+        };
     } else if interval == -125 {
-        note += if matches!(a[3], 2 | 5) {
+        note += if v3 {
+            CHORD_TONES[a[7] as usize][5] as i32
+        } else if matches!(a[3], 2 | 5) {
             6
         } else if v2 && a[3] == 7 {
             8

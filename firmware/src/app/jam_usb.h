@@ -171,7 +171,7 @@ static unsigned ju_request(const uint8_t *m,unsigned n,uint8_t *buf,int legacy_b
     case 5:
         if(alen || ju_owner()!=1 || ju.token!=token || ju.mask!=(uint16_t)((1u<<((ju.len+255)/256))-1u)) {st=JU_BAD;break;}
         if(jp_crc(buf,ju.len)!=ju.expected) {st=JU_CRC;break;}
-        if(!en_jam_valid(buf,ju.len)) {st=buf[4]!=1 && buf[4]!=2?JU_VERSION:JU_BAD;break;}
+        if(!en_jam_valid(buf,ju.len)) {st=buf[4]<1 || buf[4]>3?JU_VERSION:JU_BAD;break;}
         ju.valid=1;break;
     case 6:
         if(alen || ju_owner()!=1 || !ju.valid || ju.token!=token) {st=JU_BAD;break;}
@@ -214,7 +214,7 @@ static unsigned ju_request(const uint8_t *m,unsigned n,uint8_t *buf,int legacy_b
     }
     case 11:
         if(alen){st=JU_BAD;break;}
-        raw[0]=3;raw[1]=8;raw[2]=3;raw[3]=6;count=4;break;
+        raw[0]=7;raw[1]=8;raw[2]=3;raw[3]=6;count=4;break;
     case 13:
         if(alen!=1 || a[0]>1){st=JU_BAD;break;}
         en_usb_fixed=a[0];raw[0]=en_usb_fixed;count=1;break;
@@ -227,8 +227,13 @@ static unsigned ju_request(const uint8_t *m,unsigned n,uint8_t *buf,int legacy_b
         if(ju_owner()==2) {st=JU_BUSY;break;}
         ju_owner_set(0);ju.valid=0;ju.mask=0;break;
     case 10:
-        if(alen!=3 || a[0]>JAM_BRIGHTNESS) {st=JU_BAD;break;}
+        if(alen!=3 || a[0]>JAM_BASS_OCTAVE) {st=JU_BAD;break;}
         if(a[0]==JAM_SLOT+1) en_play(a[2]!=0);
+        else if(a[0]==JAM_KEYS_OCTAVE || a[0]==JAM_BASS_OCTAVE) {
+            unsigned value=(unsigned)a[1]<<7|a[2];
+            if(value>4){st=JU_BAD;break;}
+            en_jam_set(a[0],(int)value-2);
+        }
 #if EN_RUST_FORMATS
         else {
             uint8_t result[8];

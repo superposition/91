@@ -1,4 +1,4 @@
-"""Bounded Songbook v2 packs and three authored, transposable compositions."""
+"""Bounded Songbook v2/v3 packs through the shared Rust authoring compiler."""
 import json
 H,EXTRA,CHART,VOICE,META=1120,1152,1280,1536,2560
 

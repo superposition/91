@@ -51,13 +51,21 @@ pub struct Profile {
     pub release: i32,
     pub brightness: i32,
     pub attack: u32,
+    pub voice_flags: u32,
 }
 pub fn songbook(packed: &[u8; 128], output: &mut [u8; 155], c: &Profile) {
     *output = voice::unpack(packed);
-    output[LPMD] = 0;
+    if c.voice_flags & 2 == 0 {
+        output[LPMD] = 0;
+    }
     for op in 0..6 {
         if c.part == 0 {
-            output[op * OP + KVS] = (c.touch * 7 / 100) as u8;
+            output[op * OP + KVS] = if c.voice_flags & 1 != 0 {
+                // Signed division truncates toward zero, matching the C profile.
+                (output[op * OP + KVS] as i32 + ((c.touch as i32 - 50) * 7) / 50).clamp(0, 7) as u8
+            } else {
+                (c.touch * 7 / 100) as u8
+            };
             output[op * OP + R1 + 3] =
                 (output[op * OP + R1 + 3] as i32 + (65 - c.release) / 2).clamp(0, 99) as u8;
             if !scaling::carrier(output[ALG] as u32, 6 - op as u32) {
@@ -143,5 +151,5 @@ pub fn copy_packed(source: &[u8; 128], destination: &mut [u8; 128]) {
     }
 }
 const _: [(); 20] = [(); core::mem::size_of::<Selection>()];
-const _: [(); 20] = [(); core::mem::size_of::<Profile>()];
+const _: [(); 24] = [(); core::mem::size_of::<Profile>()];
 const _: [(); 12] = [(); core::mem::size_of::<UserState>()];

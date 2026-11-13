@@ -42,7 +42,7 @@ fn at(v: &Value, i: usize) -> Result<&Value> {
         .ok_or_else(|| Error::value("list index out of range"))
 }
 pub fn compile(d: &Value, limits: Limits<'_>) -> Result<Vec<u8>> {
-    if d.get("version").and_then(Value::as_f64) == Some(2.0) {
+    if matches!(d.get("version").and_then(Value::as_f64), Some(2.0 | 3.0)) {
         return compile_v2(d, limits);
     }
     integer(get(d, "version")?, 1, 1, "version")?;
@@ -233,6 +233,13 @@ pub fn compile(d: &Value, limits: Limits<'_>) -> Result<Vec<u8>> {
     Ok(b)
 }
 fn compile_v2(d: &Value, limits: Limits<'_>) -> Result<Vec<u8>> {
+    let v3 = d.get("version").and_then(Value::as_f64) == Some(3.0);
+    if v3 {
+        integer(get(d, "version")?, 3, 3, "songbook version")?;
+        if list(get(d, "cadence")?)?.len() != 2 || list(get(d, "charts")?)?.len() != 2 {
+            return Err(Error::value("need two cadence/chart banks"));
+        }
+    }
     let mut base = factory();
     for key in ["name", "scales", "forms", "bass", "drums", "sounds"] {
         base[key] = get(d, key)?.clone();
@@ -240,8 +247,8 @@ fn compile_v2(d: &Value, limits: Limits<'_>) -> Result<Vec<u8>> {
     let mut b = compile(&base, limits)?;
     b.truncate(MIN_V1);
     b.resize(MIN_V2, 0);
-    b[3] = b'2';
-    b[4] = 2;
+    b[3] = if v3 { b'3' } else { b'2' };
+    b[4] = if v3 { 3 } else { 2 };
     b[5] = integer(&json!(list(get(d, "nodes")?)?.len()), 1, 32, "nodes")? as u8;
     for (mode, group) in list(get(d, "cadence")?)?.iter().enumerate() {
         if mode >= 2 {
@@ -253,7 +260,7 @@ fn compile_v2(d: &Value, limits: Limits<'_>) -> Result<Vec<u8>> {
         for (n, node) in list(group)?.iter().enumerate() {
             let x = integer(node, 0, b[5] as i64 - 1, "cadence")? as usize;
             b[9 + 3 * mode + n] = x as u8;
-            if get(&d["nodes"][x], "mode")? != &json!(mode) {
+            if !v3 && get(&d["nodes"][x], "mode")? != &json!(mode) {
                 return Err(Error::value("cadence crosses mode"));
             }
         }
@@ -278,8 +285,11 @@ fn compile_v2(d: &Value, limits: Limits<'_>) -> Result<Vec<u8>> {
         {
             b[o + k] = integer(node.get(*name).unwrap_or(&json!(0)), 0, *hi, name)? as u8;
         }
+        if v3 {
+            b[o + 7] = integer(get(node, "quality")?, 0, 16, "quality")? as u8;
+        }
     }
-    b[V2_HEAD..V2_HEAD + 4].copy_from_slice(b"SNG2");
+    b[V2_HEAD..V2_HEAD + 4].copy_from_slice(if v3 { b"SNG3" } else { b"SNG2" });
     let p = get(d, "parts")?;
     let voices = list(get(d, "voice_programs")?)?;
     b[V2_HEAD + 4] = integer(&json!(voices.len()), 1, 8, "voice programs")? as u8;
@@ -317,9 +327,28 @@ fn compile_v2(d: &Value, limits: Limits<'_>) -> Result<Vec<u8>> {
             },
         )? as u8;
     }
+    if v3 {
+        b[V2_HEAD + 21] = integer(p.get("voicing").unwrap_or(&json!(0)), 0, 1, "voicing")? as u8;
+        b[V2_HEAD + 22] = integer(
+            p.get("voice_flags").unwrap_or(&json!(0)),
+            0,
+            3,
+            "voice flags",
+        )? as u8;
+        for (offset, name) in [(23, "keys_octave"), (24, "bass_octave")] {
+            b[V2_HEAD + offset] =
+                integer(p.get(name).unwrap_or(&json!(0)), -2, 2, name)? as i8 as u8;
+        }
+    }
     let charts = get(d, "charts")?;
     for mode in 0..2 {
+        if v3 && list(at(charts, mode)?)?.len() != 2 {
+            return Err(Error::value("need 8/16-bar chart versions"));
+        }
         for (length, bars) in [8, 16].iter().enumerate() {
+            if v3 && list(at(at(charts, mode)?, length)?)?.len() != 2 {
+                return Err(Error::value("need A/B chart parts"));
+            }
             for part in 0..2 {
                 let chart = list(at(at(at(charts, mode)?, length)?, part)?)?;
                 if chart.len() != bars * 2 {
@@ -332,7 +361,7 @@ fn compile_v2(d: &Value, limits: Limits<'_>) -> Result<Vec<u8>> {
                         b[5] as i64 - 1,
                         "chart node",
                     )? as usize;
-                    if d["nodes"][x]["mode"] != json!(mode) {
+                    if !v3 && d["nodes"][x]["mode"] != json!(mode) {
                         return Err(Error::value("chart crosses mode"));
                     }
                     b[V2_CHART + ((mode * 2 + length) * 2 + part) * 32 + k] = x as u8;
@@ -353,13 +382,17 @@ fn compile_v2(d: &Value, limits: Limits<'_>) -> Result<Vec<u8>> {
     if b.len() > fm1_types::STORE_MAX {
         return Err(Error::value("song exceeds 3840 bytes"));
     }
+    if v3 {
+        JamPack::parse_structural(&b)
+            .map_err(|e| Error::value(format!("invalid authored pack: {e:?}")))?;
+    }
     // Preserve the legacy v2 authoring profile, including its canonicalization
     // of historical metadata and omitted cadence rows. Strict target validation
     // remains available through the existing `fm1-rs validate` command.
     Ok(b)
 }
 pub fn decode(b: &[u8], limits: Limits<'_>) -> Result<Document> {
-    if b.starts_with(b"JMP2\x02") {
+    if b.starts_with(b"JMP2\x02") || b.starts_with(b"JMP3\x03") {
         return decode_v2(b, limits);
     }
     if !(MIN_V1..=fm1_types::STORE_MAX).contains(&b.len()) || !b.starts_with(b"JMP1\x01") {
@@ -425,6 +458,11 @@ fn decode_v2(b: &[u8], limits: Limits<'_>) -> Result<Document> {
     if !(MIN_V2..=fm1_types::STORE_MAX).contains(&b.len()) {
         return Err(Error::value("invalid v2 pack"));
     }
+    let v3 = b[4] == 3;
+    if v3 {
+        JamPack::parse_structural(b)
+            .map_err(|e| Error::value(format!("invalid v3 pack: {e:?}")))?;
+    }
     // Validate variable counts before indexing. Legacy decode would later reject
     // these counts during recompilation; explicit bounds avoid partial access.
     if b[5] > 32 || b[V2_HEAD + 4] > 8 {
@@ -437,7 +475,7 @@ fn decode_v2(b: &[u8], limits: Limits<'_>) -> Result<Document> {
     base[448..1120].copy_from_slice(&b[448..1120]);
     base[6..9].copy_from_slice(&b[6..9]);
     let mut d = decode(&base, limits)?.into_value();
-    d["version"] = json!(2);
+    d["version"] = json!(b[4]);
     d["nodes"] = json!([]);
     for i in 0..b[5] as usize {
         let o = if i < 16 {
@@ -446,6 +484,9 @@ fn decode_v2(b: &[u8], limits: Limits<'_>) -> Result<Document> {
             V2_EXTRA + (i - 16) * 8
         };
         d["nodes"].as_array_mut().unwrap().push(json!({"bass":b[o],"sixth":b[o+1],"scale":b[o+2],"label":b[o+3],"mode":b[o+4],"emphasis":b[o+5],"borrow":b[o+6]}));
+        if v3 {
+            d["nodes"][i]["quality"] = json!(b[o + 7]);
+        }
     }
     d["cadence"] = json!([&b[9..12], &b[12..15]]);
     d.as_object_mut().unwrap().shift_remove("transitions");
@@ -500,6 +541,12 @@ fn decode_v2(b: &[u8], limits: Limits<'_>) -> Result<Document> {
         d["parts"][name] = json!(b[V2_HEAD + offset]);
     }
     d["song_id"] = json!(b[V2_HEAD + 12]);
+    if v3 {
+        d["parts"]["voicing"] = json!(b[V2_HEAD + 21]);
+        d["parts"]["voice_flags"] = json!(b[V2_HEAD + 22]);
+        d["parts"]["keys_octave"] = json!(b[V2_HEAD + 23] as i8);
+        d["parts"]["bass_octave"] = json!(b[V2_HEAD + 24] as i8);
+    }
     d["sources"] = if b.len() == MIN_V2 {
         json!([])
     } else {

@@ -249,7 +249,7 @@ pub fn import_midi(
         }
         bass.push(json!({"notes":notes,"velocity":velocities,"gate":58}));
     } else if s.role == "harmony" {
-        if d["version"] == 2 {
+        if d["version"] == 2 || d["version"] == 3 {
             return Err(Error::value("v2 harmony uses authored charts; inspect the MIDI and edit chart destinations explicitly"));
         }
         // Keep insertion order: selection adds the first new group first.

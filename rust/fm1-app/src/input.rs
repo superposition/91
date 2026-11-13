@@ -59,6 +59,7 @@ pub enum Query {
     ViewKnob,
     GenreBars,
     ProgressionFillCount,
+    JamVersion,
 }
 #[repr(u32)]
 pub enum Action {
@@ -155,6 +156,8 @@ enum Jam {
     SwellVoice,
     BassAttack,
     Brightness,
+    KeysOctave,
+    BassOctave,
 }
 pub trait Port {
     fn with_ui<R>(&mut self, f: impl FnOnce(&mut State) -> R) -> R;
@@ -1005,10 +1008,15 @@ fn held_actions(p: &mut impl Port, buttons: u32) {
 fn knob_encoders(p: &mut impl Port, buttons: u32) -> u32 {
     const FIELDS: [[Jam; 4]; 4] = [
         [Jam::Form, Jam::Bars, Jam::Variation, Jam::Swell],
-        [Jam::KeysProgram, Jam::Touch, Jam::Brightness, Jam::Release],
+        [
+            Jam::KeysProgram,
+            Jam::KeysOctave,
+            Jam::Brightness,
+            Jam::Release,
+        ],
         [
             Jam::BassProgram,
-            Jam::BassAttack,
+            Jam::BassOctave,
             Jam::BassGate,
             Jam::Energy,
         ],
@@ -1023,7 +1031,14 @@ fn knob_encoders(p: &mut impl Port, buttons: u32) -> u32 {
         }
         let (view, menu) = ui!(p, u, (u.view, u.fx_menu));
         if detail(view) && menu == 0 {
-            let field = FIELDS[(view - 39) as usize][knob as usize];
+            let mut field = FIELDS[(view - 39) as usize][knob as usize];
+            if q(p, Query::JamVersion) != 3 {
+                field = match field {
+                    Jam::KeysOctave => Jam::Touch,
+                    Jam::BassOctave => Jam::BassAttack,
+                    other => other,
+                };
+            }
             let current = jam(p, field);
             let value = if field == Jam::Bars {
                 Some(if delta > 0 { 16 } else { 8 })
@@ -1047,7 +1062,12 @@ fn knob_encoders(p: &mut impl Port, buttons: u32) -> u32 {
                 0 => {
                     let key = jam(p, Jam::Key);
                     if let Some(value) = key.checked_add(delta) {
-                        set_jam(p, Jam::Key, value.rem_euclid(24));
+                        let next = if q(p, Query::JamVersion) == 3 {
+                            value.rem_euclid(12) + (key / 12) * 12
+                        } else {
+                            value.rem_euclid(24)
+                        };
+                        set_jam(p, Jam::Key, next);
                     } else {
                         rejected += 1;
                     }

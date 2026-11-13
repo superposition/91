@@ -46,7 +46,8 @@ static void snapshot_matches_live(void)
     assert(memchr(s.title,0,32) && memchr(s.form,0,32) && memchr(s.pending_title,0,32));
     assert(memchr(s.chord,0,32) && memchr(s.next,0,32));
     assert(s.keys_name[10]==0 && s.bass_name[10]==0);
-    assert(s.reserved==0 && s.reserved_tail[0]==0 && s.reserved_tail[1]==0);
+    assert(s.reserved==0 && (int8_t)s.reserved_tail[0]==en_jam_option(JAM_KEYS_OCTAVE) &&
+           (int8_t)s.reserved_tail[1]==en_jam_option(JAM_BASS_OCTAVE));
 }
 #endif
 int main(void)

@@ -14,6 +14,7 @@ pub const V2_EXTRA: usize = 1152;
 pub const V2_CHART: usize = 1280;
 pub const V2_VOICE: usize = 1536;
 pub const MIN_V2: usize = 2560;
+pub const V3_QUALITIES: u8 = 17;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PackError {
@@ -73,10 +74,10 @@ impl<'a> JamPack<'a> {
             return Err(PackError::Length);
         }
         if &p[..3] != b"JMP"
-            || !(p[4] == 1 || p[4] == 2)
+            || !(1..=3).contains(&p[4])
             || p[3] != b'0' + p[4]
             || p[5] == 0
-            || p[5] > if p[4] == 2 { 32 } else { 16 }
+            || p[5] > if p[4] >= 2 { 32 } else { 16 }
             || p[6] == 0
             || p[6] > 8
             || p[7] == 0
@@ -86,7 +87,8 @@ impl<'a> JamPack<'a> {
         {
             return Err(PackError::Header);
         }
-        let v2 = p[4] == 2;
+        let v2 = p[4] >= 2;
+        let v3 = p[4] == 3;
         if v2 && p.len() < MIN_V2 {
             return Err(PackError::Length);
         }
@@ -95,7 +97,7 @@ impl<'a> JamPack<'a> {
             let node = pack
                 .node(destination as usize)
                 .ok_or(PackError::Destination)?;
-            if node[4] != u8::from(index >= 3) {
+            if !v3 && node[4] != u8::from(index >= 3) {
                 return Err(PackError::Destination);
             }
         }
@@ -119,6 +121,7 @@ impl<'a> JamPack<'a> {
                 || node[4] > 1
                 || node[5] > 15
                 || (v2 && node[6] > 15)
+                || (v3 && node[7] >= V3_QUALITIES)
             {
                 return Err(PackError::Node);
             }
@@ -171,7 +174,7 @@ impl<'a> JamPack<'a> {
         }
         if v2 {
             let head = &p[V2_HEAD..];
-            if &head[..4] != b"SNG2"
+            if &head[..4] != if v3 { b"SNG3" } else { b"SNG2" }
                 || head[4] == 0
                 || head[4] > 8
                 || head[5] >= head[4]
@@ -183,6 +186,10 @@ impl<'a> JamPack<'a> {
                 || head[16] > 100
                 || head[17] == 0
                 || head[17] > 100
+                || (v3 && (head[21] > 1 || head[22] > 3))
+                || (v3
+                    && (!(-2..=2).contains(&(head[23] as i8))
+                        || !(-2..=2).contains(&(head[24] as i8))))
             {
                 return Err(PackError::Song);
             }
@@ -199,7 +206,7 @@ impl<'a> JamPack<'a> {
             for i in 0..256 {
                 let node = p[V2_CHART + i] as usize;
                 let destination = pack.node(node).ok_or(PackError::Chart)?;
-                if destination[4] != (i / 128) as u8 {
+                if !v3 && destination[4] != (i / 128) as u8 {
                     return Err(PackError::Chart);
                 }
             }

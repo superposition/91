@@ -37,7 +37,7 @@ pub fn ready(v: &Value) -> Result<Value> {
     let phase = integer(get(v, "phase")?, 0, 2, "readiness phase")?;
     let reply = get(v, "reply")?;
     let pending = match phase {
-        0 => reply["pack_version"] != 2,
+        0 => reply["pack_version"] != 2 && reply["pack_version"] != 3,
         1 => reply["loading"]
             .as_bool()
             .unwrap_or_else(|| reply["loading"].as_i64().unwrap_or(0) != 0),

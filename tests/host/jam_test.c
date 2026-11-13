@@ -13,9 +13,10 @@ static void render_steps(unsigned count)
 static void clean_patch_test(void)
 {
     int32_t out[512];int16_t expected[P_NPARAMS];unsigned i;
-    en_init();en_jam_set(JAM_ON,1);en_render(out,256,2048);
+    en_init();assert(en_jam_upload(JP_FACTORY,sizeof JP_FACTORY));en_jam_set(JAM_ON,1);en_render(out,256,2048);
     memcpy(expected,par,sizeof expected);
     en_init();
+    assert(en_jam_upload(JP_FACTORY,sizeof JP_FACTORY));
     /* Reproduce switching from a bright, pitch-modulated, shimmering piece. */
     apply(P_PL_DEPTH,100);apply(P_PL_DEST,3);apply(P_DL_DEPTH,100);apply(P_DL_DEST,1);
     apply(P_PL_CHO,100);apply(P_RV_TYPE,1);apply(P_REVERB,90);apply(P_SIZE,100);

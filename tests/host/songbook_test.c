@@ -3,13 +3,20 @@
 #include <string.h>
 #include <stdio.h>
 #include "../../firmware/src/dsp/amb.c"
+#include "songbook_v2_fixtures.inc"
+static const uint8_t *legacy_builtin(unsigned song,unsigned *n)
+{
+    if(song==1){*n=sizeof JP_LEGACY_SONG_1;return JP_LEGACY_SONG_1;}
+    if(song==2){*n=sizeof JP_LEGACY_SONG_2;return JP_LEGACY_SONG_2;}
+    *n=sizeof JP_LEGACY_SONG_0;return JP_LEGACY_SONG_0;
+}
 static unsigned notes[16],clocks;
 void en_midi_out(uint32_t st,uint32_t n,uint32_t v){(void)n;if(st==0xf8)clocks++;if((st&0xf0)==0x90 && v)notes[st&15]++;}
 int main(void)
 {
     unsigned song,key,minor,bars,i,j,n;uint32_t seed=4;uint8_t bad[JP_MAX];int32_t out[512];
     for(song=0;song<3;song++) {
-        const uint8_t *data=en_jam_builtin(song,&n);assert(en_jam_valid(data,n));
+        const uint8_t *data=legacy_builtin(song,&n);assert(en_jam_valid(data,n));
         memcpy(bad,data,n);assert(!en_jam_valid(bad,1120));bad[JP2_CHART]=255;assert(!en_jam_valid(bad,n));
         for(key=0;key<12;key++)for(minor=0;minor<2;minor++)for(bars=8;bars<=16;bars+=8) {
             jp_settings_t s={1,key,minor,bars,0,3,60,0,0,0};jp_phrase_t a,b,c;
@@ -36,7 +43,7 @@ int main(void)
             }
         }
     }
-    en_init();{const uint8_t *p=en_jam_builtin(0,&n);assert(en_jam_upload(p,n));}
+    en_init();{const uint8_t *p=legacy_builtin(0,&n);assert(en_jam_upload(p,n));}
     en_jam_set(JAM_ON,1);en_play(1);
     for(i=0;i<6000;i++)en_render(out,256,2048);
     assert(jp_dx() && notes[0]>10 && notes[2]>10 && notes[4]>0);
@@ -58,7 +65,8 @@ int main(void)
     en_play(0);en_render(out,256,2048);assert(!en_playing && jp_swell_phase==1.0f);
     /* Coalescing intermediate MIDI clocks must retain tempo and every musical
      * sixteenth, including irregular render sizes at the maximum tempo. */
-    en_init();clocks=0;en_set(P_TEMPO,190);en_jam_set(JAM_ON,1);en_play(1);
+    en_init();{const uint8_t *p=legacy_builtin(0,&n);assert(en_jam_upload(p,n));}
+    clocks=0;en_set(P_TEMPO,190);en_jam_set(JAM_ON,1);en_play(1);
     {unsigned total=0,target=30u*EN_SR;const unsigned sizes[]={256,91,128,253};
      while(total<target){unsigned size=sizes[total%4];if(size>target-total)size=target-total;en_render(out,size,2048);total+=size;}
      {unsigned expected=1u+(unsigned)((uint64_t)total*190u*24u/(60u*EN_SR));assert(clocks+1>=expected && clocks<=expected+1);}

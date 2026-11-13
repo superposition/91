@@ -1,0 +1,941 @@
+[
+  {
+    "name": "Blue Bossa",
+    "stem": "01-blue-bossa",
+    "preset": 0,
+    "bytes": 3181,
+    "crc32": "1b6aa68e",
+    "sha256": "b40a8f777d6f5d9e27fb2e29640835feac3672f59c74e01684402c07ade59b92",
+    "programs": [
+      {
+        "program": 0,
+        "id": "chorus_ep",
+        "name": "MF EPCHRS1",
+        "role": "keys",
+        "description": "Chorus electric piano",
+        "bank": "mf3",
+        "voice_index": 22,
+        "algorithm": 5,
+        "source_sha256": "ab0cfb39d8894419460932f978cc97a2796aac379ad5d5a984d4ac45bf0a998e",
+        "adapted_sha256": "ab0cfb39d8894419460932f978cc97a2796aac379ad5d5a984d4ac45bf0a998e",
+        "adaptations": []
+      },
+      {
+        "program": 1,
+        "id": "electric_2",
+        "name": "MF EPIANO2",
+        "role": "keys",
+        "description": "Electric piano, algorithm25",
+        "bank": "mf3",
+        "voice_index": 17,
+        "algorithm": 25,
+        "source_sha256": "49af3739ba008c035c8b9b12b573a95c52969cc980d102c51abd1ba1df74813a",
+        "adapted_sha256": "49af3739ba008c035c8b9b12b573a95c52969cc980d102c51abd1ba1df74813a",
+        "adaptations": []
+      },
+      {
+        "program": 2,
+        "id": "wurli",
+        "name": "MF EPWURL1",
+        "role": "keys",
+        "description": "Biting Wurlitzer-style electric piano",
+        "bank": "mf1",
+        "voice_index": 19,
+        "algorithm": 5,
+        "source_sha256": "abd226036abeb1a2a3ec9e560ed1c7821e8f3c079170bb15a7fa912952f9f54f",
+        "adapted_sha256": "abd226036abeb1a2a3ec9e560ed1c7821e8f3c079170bb15a7fa912952f9f54f",
+        "adaptations": []
+      },
+      {
+        "program": 3,
+        "id": "another",
+        "name": "1 ANOTHER",
+        "role": "keys",
+        "description": "Detuned vintage keys",
+        "bank": "mf3",
+        "voice_index": 12,
+        "algorithm": 5,
+        "source_sha256": "4ae27fa364d4f955bfc9aaf5b2ca2db986410af072394bf0ac44c825415d28c2",
+        "adapted_sha256": "87c89b40342ecaecb006be7fbd4ec6916604027b1c9f0352475600d78e43778d",
+        "adaptations": [
+          "transpose 12 -> 24 (octave only)"
+        ]
+      },
+      {
+        "program": 4,
+        "id": "ep_pad",
+        "name": "MF EP-PAD",
+        "role": "keys",
+        "description": "Electric piano and pad layers",
+        "bank": "mf2",
+        "voice_index": 13,
+        "algorithm": 5,
+        "source_sha256": "a6e12dd9f356a79c7bcbf96cd9ffa3995be5d1c98aee8fc11228329264a593d3",
+        "adapted_sha256": "a6e12dd9f356a79c7bcbf96cd9ffa3995be5d1c98aee8fc11228329264a593d3",
+        "adaptations": []
+      },
+      {
+        "program": 5,
+        "id": "dream",
+        "name": "DREAMPIANO",
+        "role": "keys",
+        "description": "Dream piano",
+        "bank": "mf1",
+        "voice_index": 1,
+        "algorithm": 5,
+        "source_sha256": "b58deeba8844020b070a82e9b1e98c4da2e37f4660c8c1928c5a5338d411618c",
+        "adapted_sha256": "b58deeba8844020b070a82e9b1e98c4da2e37f4660c8c1928c5a5338d411618c",
+        "adaptations": []
+      },
+      {
+        "program": 6,
+        "id": "smooth_bass",
+        "name": "SMOOTHBASS",
+        "role": "bass",
+        "description": "Rounded bass",
+        "bank": "mf2",
+        "voice_index": 24,
+        "algorithm": 2,
+        "source_sha256": "781d33a6a18b4ef432e400652a186c72bed91f368f07067d78f331a052ec7758",
+        "adapted_sha256": "781d33a6a18b4ef432e400652a186c72bed91f368f07067d78f331a052ec7758",
+        "adaptations": []
+      },
+      {
+        "program": 7,
+        "id": "velo_moog",
+        "name": "VELOMGBASS",
+        "role": "bass",
+        "description": "Velocity-sensitive synth bass",
+        "bank": "mf2",
+        "voice_index": 23,
+        "algorithm": 3,
+        "source_sha256": "f9c8c68602f802c11877b2613070c6ef7e0aa43a5cba30fdfb4c5f07e2e9ed95",
+        "adapted_sha256": "f9c8c68602f802c11877b2613070c6ef7e0aa43a5cba30fdfb4c5f07e2e9ed95",
+        "adaptations": []
+      }
+    ],
+    "preserved": [
+      "nodes",
+      "charts",
+      "forms",
+      "cadence",
+      "bass",
+      "drums"
+    ],
+    "performance_defaults": {
+      "keys_octave": 1,
+      "bass_octave": 1,
+      "reverb": 38,
+      "size": 68,
+      "type": 0,
+      "damping": 42,
+      "predelay": 80
+    }
+  },
+  {
+    "name": "Autumn Leaves",
+    "stem": "02-autumn-leaves",
+    "preset": 1,
+    "bytes": 3374,
+    "crc32": "1de52db4",
+    "sha256": "cdd0b2d7fba702940e765acc6eb91204c6bf28008fa4a580728cead8f06a7327",
+    "programs": [
+      {
+        "program": 0,
+        "id": "electric_2",
+        "name": "MF EPIANO2",
+        "role": "keys",
+        "description": "Electric piano, algorithm25",
+        "bank": "mf3",
+        "voice_index": 17,
+        "algorithm": 25,
+        "source_sha256": "49af3739ba008c035c8b9b12b573a95c52969cc980d102c51abd1ba1df74813a",
+        "adapted_sha256": "49af3739ba008c035c8b9b12b573a95c52969cc980d102c51abd1ba1df74813a",
+        "adaptations": []
+      },
+      {
+        "program": 1,
+        "id": "rhodes_2",
+        "name": "MF EPRHOD2",
+        "role": "keys",
+        "description": "Rhodes electric piano",
+        "bank": "mf3",
+        "voice_index": 21,
+        "algorithm": 5,
+        "source_sha256": "cb41b94b3ac6ecc6a05c3a4e938adb9fb9dfa297f8fe24ed3f153d054a5732b1",
+        "adapted_sha256": "cb41b94b3ac6ecc6a05c3a4e938adb9fb9dfa297f8fe24ed3f153d054a5732b1",
+        "adaptations": []
+      },
+      {
+        "program": 2,
+        "id": "triga_synth",
+        "name": "TRIGASYNTH",
+        "role": "keys",
+        "description": "Animated synth keys",
+        "bank": "mf1",
+        "voice_index": 14,
+        "algorithm": 5,
+        "source_sha256": "c14b94a20b10816a74bae3662e32746df4e8c9c71b6fb4454f12a2d92a374b6a",
+        "adapted_sha256": "c14b94a20b10816a74bae3662e32746df4e8c9c71b6fb4454f12a2d92a374b6a",
+        "adaptations": []
+      },
+      {
+        "program": 3,
+        "id": "ep_pad",
+        "name": "MF EP-PAD",
+        "role": "keys",
+        "description": "Electric piano and pad layers",
+        "bank": "mf2",
+        "voice_index": 13,
+        "algorithm": 5,
+        "source_sha256": "a6e12dd9f356a79c7bcbf96cd9ffa3995be5d1c98aee8fc11228329264a593d3",
+        "adapted_sha256": "a6e12dd9f356a79c7bcbf96cd9ffa3995be5d1c98aee8fc11228329264a593d3",
+        "adaptations": []
+      },
+      {
+        "program": 4,
+        "id": "vintage_strings",
+        "name": "VNTGSTRNG1",
+        "role": "keys",
+        "description": "Vintage string ensemble",
+        "bank": "mf3",
+        "voice_index": 8,
+        "algorithm": 5,
+        "source_sha256": "d042eb6cbd69041e6eafb5083e45879bf8a5995875293c058f172119018d20d2",
+        "adapted_sha256": "d042eb6cbd69041e6eafb5083e45879bf8a5995875293c058f172119018d20d2",
+        "adaptations": []
+      },
+      {
+        "program": 5,
+        "id": "soft_strings",
+        "name": "SOFTSTRNGS",
+        "role": "keys",
+        "description": "Soft string ensemble",
+        "bank": "mf1",
+        "voice_index": 12,
+        "algorithm": 2,
+        "source_sha256": "2a303d67d0c3e699d4a286d40a2d725bea798c54bedaf98a4f27b2fb1b89509d",
+        "adapted_sha256": "1d4e060d447615847d0f67ae274fa2f9ae2767a9961cd120f49db817fa6216ee",
+        "adaptations": [
+          "transpose 12 -> 24 (octave only)"
+        ]
+      },
+      {
+        "program": 6,
+        "id": "soft_square",
+        "name": "SOFTSQBASS",
+        "role": "bass",
+        "description": "Soft square bass",
+        "bank": "mf1",
+        "voice_index": 29,
+        "algorithm": 5,
+        "source_sha256": "2418fc8fa7641a1d151735923d3d10d8bd6c240f753aa51184955924900d94b8",
+        "adapted_sha256": "2418fc8fa7641a1d151735923d3d10d8bd6c240f753aa51184955924900d94b8",
+        "adaptations": []
+      },
+      {
+        "program": 7,
+        "id": "butter_bass",
+        "name": "BUTTER BSS",
+        "role": "bass",
+        "description": "Butter bass",
+        "bank": "pf2",
+        "voice_index": 23,
+        "algorithm": 1,
+        "source_sha256": "012bf6efc7bc5bcefb709c9c8d42331c804c8314af33d32e975bbee9ae2bb31c",
+        "adapted_sha256": "012bf6efc7bc5bcefb709c9c8d42331c804c8314af33d32e975bbee9ae2bb31c",
+        "adaptations": []
+      }
+    ],
+    "preserved": [
+      "nodes",
+      "charts",
+      "forms",
+      "cadence",
+      "bass",
+      "drums"
+    ],
+    "performance_defaults": {
+      "keys_octave": 1,
+      "bass_octave": 1,
+      "reverb": 38,
+      "size": 68,
+      "type": 0,
+      "damping": 42,
+      "predelay": 80
+    }
+  },
+  {
+    "name": "Satin Doll",
+    "stem": "03-satin-doll",
+    "preset": 2,
+    "bytes": 3181,
+    "crc32": "977f0650",
+    "sha256": "e79db76cd50e39dbb22c648b98a2b7f8c51fb8cf64ede35dfc8ad7b339154919",
+    "programs": [
+      {
+        "program": 0,
+        "id": "wurli",
+        "name": "MF EPWURL1",
+        "role": "keys",
+        "description": "Biting Wurlitzer-style electric piano",
+        "bank": "mf1",
+        "voice_index": 19,
+        "algorithm": 5,
+        "source_sha256": "abd226036abeb1a2a3ec9e560ed1c7821e8f3c079170bb15a7fa912952f9f54f",
+        "adapted_sha256": "abd226036abeb1a2a3ec9e560ed1c7821e8f3c079170bb15a7fa912952f9f54f",
+        "adaptations": []
+      },
+      {
+        "program": 1,
+        "id": "synth_brass",
+        "name": "MFSYNBRASS",
+        "role": "keys",
+        "description": "Silky synth brass",
+        "bank": "mf1",
+        "voice_index": 30,
+        "algorithm": 3,
+        "source_sha256": "5dfae30d69f4be49ce1e1cc2813d8588832e564b83cdd25e45d5f4d035462ad0",
+        "adapted_sha256": "27905fe1542d9b37b683f9bc4b3ec52e5a014dc87b5a0e44c7c21f1375e01d7c",
+        "adaptations": [
+          "transpose 12 -> 24 (octave only)"
+        ]
+      },
+      {
+        "program": 2,
+        "id": "jump",
+        "name": "JUMP BRASS",
+        "role": "keys",
+        "description": "Punchy polysynth brass",
+        "bank": "mf1",
+        "voice_index": 9,
+        "algorithm": 2,
+        "source_sha256": "1da31b108359b1b605afbfb968b1b1f366e2db7a75b2fd043279fd7e82373a86",
+        "adapted_sha256": "1da31b108359b1b605afbfb968b1b1f366e2db7a75b2fd043279fd7e82373a86",
+        "adaptations": []
+      },
+      {
+        "program": 3,
+        "id": "roland_brass",
+        "name": "ROLAND BRS",
+        "role": "keys",
+        "description": "Brass ensemble",
+        "bank": "pf2",
+        "voice_index": 0,
+        "algorithm": 24,
+        "source_sha256": "b2f1a59a306d2bb5fd58433d125f8ad6983c99ca4f6efe6a86019acbb8047906",
+        "adapted_sha256": "b2f1a59a306d2bb5fd58433d125f8ad6983c99ca4f6efe6a86019acbb8047906",
+        "adaptations": []
+      },
+      {
+        "program": 4,
+        "id": "dual_saw",
+        "name": "DUAL SAW",
+        "role": "keys",
+        "description": "Detuned saw poly",
+        "bank": "mf3",
+        "voice_index": 0,
+        "algorithm": 2,
+        "source_sha256": "0e3005853fecf52ec1bb834b78775d77dc5ece72d3466105eea023f102837753",
+        "adapted_sha256": "0e3005853fecf52ec1bb834b78775d77dc5ece72d3466105eea023f102837753",
+        "adaptations": []
+      },
+      {
+        "program": 5,
+        "id": "sport80",
+        "name": "ST.SPORT80",
+        "role": "keys",
+        "description": "Eighties synth keys",
+        "bank": "pf1",
+        "voice_index": 18,
+        "algorithm": 2,
+        "source_sha256": "9871f0478586de9b603dc823c2f5a87d092f7b5b1c760f0e2a0f27c5cd4b6686",
+        "adapted_sha256": "a7be6d2162906f2b0fb8f73c360c0cf9bf416b82e7815907f4554884b051868d",
+        "adaptations": [
+          "transpose 12 -> 24 (octave only)"
+        ]
+      },
+      {
+        "program": 6,
+        "id": "velo_moog",
+        "name": "VELOMGBASS",
+        "role": "bass",
+        "description": "Velocity-sensitive synth bass",
+        "bank": "mf2",
+        "voice_index": 23,
+        "algorithm": 3,
+        "source_sha256": "f9c8c68602f802c11877b2613070c6ef7e0aa43a5cba30fdfb4c5f07e2e9ed95",
+        "adapted_sha256": "f9c8c68602f802c11877b2613070c6ef7e0aa43a5cba30fdfb4c5f07e2e9ed95",
+        "adaptations": []
+      },
+      {
+        "program": 7,
+        "id": "digi_boogie",
+        "name": "DIGIBOOGIE",
+        "role": "bass",
+        "description": "Boogie synth bass",
+        "bank": "mf2",
+        "voice_index": 25,
+        "algorithm": 3,
+        "source_sha256": "e192a7be56119a4bf88f4795b53e4643fe426cb6ae00f184139a978f5ae387a7",
+        "adapted_sha256": "e192a7be56119a4bf88f4795b53e4643fe426cb6ae00f184139a978f5ae387a7",
+        "adaptations": []
+      }
+    ],
+    "preserved": [
+      "nodes",
+      "charts",
+      "forms",
+      "cadence",
+      "bass",
+      "drums"
+    ],
+    "performance_defaults": {
+      "keys_octave": 1,
+      "bass_octave": 1,
+      "reverb": 38,
+      "size": 68,
+      "type": 0,
+      "damping": 42,
+      "predelay": 80
+    }
+  },
+  {
+    "name": "Blue Bossa Deep",
+    "stem": "04-blue-bossa-deep",
+    "preset": 3,
+    "bytes": 3181,
+    "crc32": "343e6331",
+    "sha256": "2fe07f7799dbfa7f79889a73a8136a6a800472013eeb08f030950d4b17822e14",
+    "programs": [
+      {
+        "program": 0,
+        "id": "ep_pad",
+        "name": "MF EP-PAD",
+        "role": "keys",
+        "description": "Electric piano and pad layers",
+        "bank": "mf2",
+        "voice_index": 13,
+        "algorithm": 5,
+        "source_sha256": "a6e12dd9f356a79c7bcbf96cd9ffa3995be5d1c98aee8fc11228329264a593d3",
+        "adapted_sha256": "a6e12dd9f356a79c7bcbf96cd9ffa3995be5d1c98aee8fc11228329264a593d3",
+        "adaptations": []
+      },
+      {
+        "program": 1,
+        "id": "chorus_ep",
+        "name": "MF EPCHRS1",
+        "role": "keys",
+        "description": "Chorus electric piano",
+        "bank": "mf3",
+        "voice_index": 22,
+        "algorithm": 5,
+        "source_sha256": "ab0cfb39d8894419460932f978cc97a2796aac379ad5d5a984d4ac45bf0a998e",
+        "adapted_sha256": "ab0cfb39d8894419460932f978cc97a2796aac379ad5d5a984d4ac45bf0a998e",
+        "adaptations": []
+      },
+      {
+        "program": 2,
+        "id": "another",
+        "name": "1 ANOTHER",
+        "role": "keys",
+        "description": "Detuned vintage keys",
+        "bank": "mf3",
+        "voice_index": 12,
+        "algorithm": 5,
+        "source_sha256": "4ae27fa364d4f955bfc9aaf5b2ca2db986410af072394bf0ac44c825415d28c2",
+        "adapted_sha256": "87c89b40342ecaecb006be7fbd4ec6916604027b1c9f0352475600d78e43778d",
+        "adaptations": [
+          "transpose 12 -> 24 (octave only)"
+        ]
+      },
+      {
+        "program": 3,
+        "id": "electric_3",
+        "name": "MF EPIANO3",
+        "role": "keys",
+        "description": "Bright electric piano",
+        "bank": "mf3",
+        "voice_index": 18,
+        "algorithm": 5,
+        "source_sha256": "a2bd07c17cfd5a9b981a3a15e9b63f756486b871cf7b2a081199b56c7f31b37e",
+        "adapted_sha256": "a2bd07c17cfd5a9b981a3a15e9b63f756486b871cf7b2a081199b56c7f31b37e",
+        "adaptations": []
+      },
+      {
+        "program": 4,
+        "id": "electric_2",
+        "name": "MF EPIANO2",
+        "role": "keys",
+        "description": "Electric piano, algorithm25",
+        "bank": "mf3",
+        "voice_index": 17,
+        "algorithm": 25,
+        "source_sha256": "49af3739ba008c035c8b9b12b573a95c52969cc980d102c51abd1ba1df74813a",
+        "adapted_sha256": "49af3739ba008c035c8b9b12b573a95c52969cc980d102c51abd1ba1df74813a",
+        "adaptations": []
+      },
+      {
+        "program": 5,
+        "id": "unibella",
+        "name": "UNIBELLA",
+        "role": "keys",
+        "description": "Layered bell keys",
+        "bank": "pf1",
+        "voice_index": 16,
+        "algorithm": 11,
+        "source_sha256": "a6ecf371aabba88396420be022cdc301d4406a316c34511e95dddaf628299e3b",
+        "adapted_sha256": "8dae4c1c7e2ed529b63e18cb670204c327233ae6d3930ea36ed9b4fe4fb2af62",
+        "adaptations": [
+          "transpose 12 -> 24 (octave only)"
+        ]
+      },
+      {
+        "program": 6,
+        "id": "smooth_bass",
+        "name": "SMOOTHBASS",
+        "role": "bass",
+        "description": "Rounded bass",
+        "bank": "mf2",
+        "voice_index": 24,
+        "algorithm": 2,
+        "source_sha256": "781d33a6a18b4ef432e400652a186c72bed91f368f07067d78f331a052ec7758",
+        "adapted_sha256": "781d33a6a18b4ef432e400652a186c72bed91f368f07067d78f331a052ec7758",
+        "adaptations": []
+      },
+      {
+        "program": 7,
+        "id": "trig_bass",
+        "name": "TRIG BASS",
+        "role": "bass",
+        "description": "Punchy synth bass",
+        "bank": "mf1",
+        "voice_index": 5,
+        "algorithm": 6,
+        "source_sha256": "9f79b00426a3297704b0c8196a314aa0c9a7b6ab2bade13201d3c0f596059cf1",
+        "adapted_sha256": "9f79b00426a3297704b0c8196a314aa0c9a7b6ab2bade13201d3c0f596059cf1",
+        "adaptations": []
+      }
+    ],
+    "preserved": [
+      "nodes",
+      "charts",
+      "forms",
+      "cadence",
+      "bass",
+      "drums"
+    ],
+    "performance_defaults": {
+      "keys_octave": 1,
+      "bass_octave": 1,
+      "reverb": 38,
+      "size": 68,
+      "type": 0,
+      "damping": 42,
+      "predelay": 80
+    }
+  },
+  {
+    "name": "Leaves Drawbars",
+    "stem": "05-leaves-drawbars",
+    "preset": 4,
+    "bytes": 3374,
+    "crc32": "6eced595",
+    "sha256": "07b54e045102653827d2f175fad6aa79cf61defe9094c761d2fd503253655a48",
+    "programs": [
+      {
+        "program": 0,
+        "id": "drawbars",
+        "name": "DRAWBARS",
+        "role": "keys",
+        "description": "Drawbar organ",
+        "bank": "dy",
+        "voice_index": 6,
+        "algorithm": 32,
+        "source_sha256": "f7570f44bc3667ef5bd31c700402fb68be2e396a51e9ec1f37e7cb2ea40820c0",
+        "adapted_sha256": "f7570f44bc3667ef5bd31c700402fb68be2e396a51e9ec1f37e7cb2ea40820c0",
+        "adaptations": []
+      },
+      {
+        "program": 1,
+        "id": "vintage_strings",
+        "name": "VNTGSTRNG1",
+        "role": "keys",
+        "description": "Vintage string ensemble",
+        "bank": "mf3",
+        "voice_index": 8,
+        "algorithm": 5,
+        "source_sha256": "d042eb6cbd69041e6eafb5083e45879bf8a5995875293c058f172119018d20d2",
+        "adapted_sha256": "d042eb6cbd69041e6eafb5083e45879bf8a5995875293c058f172119018d20d2",
+        "adaptations": []
+      },
+      {
+        "program": 2,
+        "id": "vintage_strings_2",
+        "name": "VNTGSTRNG2",
+        "role": "keys",
+        "description": "Second vintage string ensemble",
+        "bank": "mf3",
+        "voice_index": 9,
+        "algorithm": 19,
+        "source_sha256": "391469c3f08ad35a71cb8a7070fd1303e49da3ed55c164bfb406e36e86c276ec",
+        "adapted_sha256": "391469c3f08ad35a71cb8a7070fd1303e49da3ed55c164bfb406e36e86c276ec",
+        "adaptations": []
+      },
+      {
+        "program": 3,
+        "id": "soft_strings",
+        "name": "SOFTSTRNGS",
+        "role": "keys",
+        "description": "Soft string ensemble",
+        "bank": "mf1",
+        "voice_index": 12,
+        "algorithm": 2,
+        "source_sha256": "2a303d67d0c3e699d4a286d40a2d725bea798c54bedaf98a4f27b2fb1b89509d",
+        "adapted_sha256": "1d4e060d447615847d0f67ae274fa2f9ae2767a9961cd120f49db817fa6216ee",
+        "adaptations": [
+          "transpose 12 -> 24 (octave only)"
+        ]
+      },
+      {
+        "program": 4,
+        "id": "ep_pad",
+        "name": "MF EP-PAD",
+        "role": "keys",
+        "description": "Electric piano and pad layers",
+        "bank": "mf2",
+        "voice_index": 13,
+        "algorithm": 5,
+        "source_sha256": "a6e12dd9f356a79c7bcbf96cd9ffa3995be5d1c98aee8fc11228329264a593d3",
+        "adapted_sha256": "a6e12dd9f356a79c7bcbf96cd9ffa3995be5d1c98aee8fc11228329264a593d3",
+        "adaptations": []
+      },
+      {
+        "program": 5,
+        "id": "dream",
+        "name": "DREAMPIANO",
+        "role": "keys",
+        "description": "Dream piano",
+        "bank": "mf1",
+        "voice_index": 1,
+        "algorithm": 5,
+        "source_sha256": "b58deeba8844020b070a82e9b1e98c4da2e37f4660c8c1928c5a5338d411618c",
+        "adapted_sha256": "b58deeba8844020b070a82e9b1e98c4da2e37f4660c8c1928c5a5338d411618c",
+        "adaptations": []
+      },
+      {
+        "program": 6,
+        "id": "butter_bass",
+        "name": "BUTTER BSS",
+        "role": "bass",
+        "description": "Butter bass",
+        "bank": "pf2",
+        "voice_index": 23,
+        "algorithm": 1,
+        "source_sha256": "012bf6efc7bc5bcefb709c9c8d42331c804c8314af33d32e975bbee9ae2bb31c",
+        "adapted_sha256": "012bf6efc7bc5bcefb709c9c8d42331c804c8314af33d32e975bbee9ae2bb31c",
+        "adaptations": []
+      },
+      {
+        "program": 7,
+        "id": "soft_square",
+        "name": "SOFTSQBASS",
+        "role": "bass",
+        "description": "Soft square bass",
+        "bank": "mf1",
+        "voice_index": 29,
+        "algorithm": 5,
+        "source_sha256": "2418fc8fa7641a1d151735923d3d10d8bd6c240f753aa51184955924900d94b8",
+        "adapted_sha256": "2418fc8fa7641a1d151735923d3d10d8bd6c240f753aa51184955924900d94b8",
+        "adaptations": []
+      }
+    ],
+    "preserved": [
+      "nodes",
+      "charts",
+      "forms",
+      "cadence",
+      "bass",
+      "drums"
+    ],
+    "performance_defaults": {
+      "keys_octave": 1,
+      "bass_octave": 1,
+      "reverb": 38,
+      "size": 68,
+      "type": 0,
+      "damping": 42,
+      "predelay": 80
+    }
+  },
+  {
+    "name": "Satin Muted Guitar",
+    "stem": "06-satin-muted-guitar",
+    "preset": 5,
+    "bytes": 3181,
+    "crc32": "c62d9343",
+    "sha256": "0c6596e2ef243d0be4b5e26858672848fa142154af9e52f6818ab2997800f51d",
+    "programs": [
+      {
+        "program": 0,
+        "id": "muted_guitar",
+        "name": "GUITARDAMP",
+        "role": "keys",
+        "description": "Muted guitar",
+        "bank": "dy",
+        "voice_index": 24,
+        "algorithm": 4,
+        "source_sha256": "03f04dc85c43483af963122ec502e7d03b0289f8d8a65103ead885727e161fc5",
+        "adapted_sha256": "03f04dc85c43483af963122ec502e7d03b0289f8d8a65103ead885727e161fc5",
+        "adaptations": []
+      },
+      {
+        "program": 1,
+        "id": "dire_straits",
+        "name": "DIRE STRTS",
+        "role": "keys",
+        "description": "Electric guitar",
+        "bank": "pf1",
+        "voice_index": 11,
+        "algorithm": 3,
+        "source_sha256": "d69065c5d5f55c8b04db56176d1ca54f30ddefcc7eff4fc51e4edce151a1157a",
+        "adapted_sha256": "537055f0853601626fbae061e2ab8a79a9c00b0df49711a82291d02ec2d04e3c",
+        "adaptations": [
+          "transpose 12 -> 24 (octave only)"
+        ]
+      },
+      {
+        "program": 2,
+        "id": "electric_guitar",
+        "name": "GITARA ELE",
+        "role": "keys",
+        "description": "Electric guitar, algorithm14",
+        "bank": "pf1",
+        "voice_index": 6,
+        "algorithm": 14,
+        "source_sha256": "bc4ade9f4f1b53bdf68c52c8c34490ba7070a65eb4918d11436ea67e1d14fea7",
+        "adapted_sha256": "bc4ade9f4f1b53bdf68c52c8c34490ba7070a65eb4918d11436ea67e1d14fea7",
+        "adaptations": []
+      },
+      {
+        "program": 3,
+        "id": "music_box",
+        "name": "MUSIC BOX",
+        "role": "keys",
+        "description": "Music box",
+        "bank": "pf1",
+        "voice_index": 29,
+        "algorithm": 31,
+        "source_sha256": "f6567c960b79ea121a41f72a4784331ad22679dbce3d6044740c13a66bbd776e",
+        "adapted_sha256": "f6567c960b79ea121a41f72a4784331ad22679dbce3d6044740c13a66bbd776e",
+        "adaptations": []
+      },
+      {
+        "program": 4,
+        "id": "harp",
+        "name": "HARFA LSR",
+        "role": "keys",
+        "description": "FM harp",
+        "bank": "pf1",
+        "voice_index": 23,
+        "algorithm": 1,
+        "source_sha256": "37dd4f117ad84d7d5c1f312f289bbc468ed0ebecce2c65370f231c2572530a9d",
+        "adapted_sha256": "37dd4f117ad84d7d5c1f312f289bbc468ed0ebecce2c65370f231c2572530a9d",
+        "adaptations": []
+      },
+      {
+        "program": 5,
+        "id": "wurli",
+        "name": "MF EPWURL1",
+        "role": "keys",
+        "description": "Biting Wurlitzer-style electric piano",
+        "bank": "mf1",
+        "voice_index": 19,
+        "algorithm": 5,
+        "source_sha256": "abd226036abeb1a2a3ec9e560ed1c7821e8f3c079170bb15a7fa912952f9f54f",
+        "adapted_sha256": "abd226036abeb1a2a3ec9e560ed1c7821e8f3c079170bb15a7fa912952f9f54f",
+        "adaptations": []
+      },
+      {
+        "program": 6,
+        "id": "velo_moog",
+        "name": "VELOMGBASS",
+        "role": "bass",
+        "description": "Velocity-sensitive synth bass",
+        "bank": "mf2",
+        "voice_index": 23,
+        "algorithm": 3,
+        "source_sha256": "f9c8c68602f802c11877b2613070c6ef7e0aa43a5cba30fdfb4c5f07e2e9ed95",
+        "adapted_sha256": "f9c8c68602f802c11877b2613070c6ef7e0aa43a5cba30fdfb4c5f07e2e9ed95",
+        "adaptations": []
+      },
+      {
+        "program": 7,
+        "id": "digi_boogie",
+        "name": "DIGIBOOGIE",
+        "role": "bass",
+        "description": "Boogie synth bass",
+        "bank": "mf2",
+        "voice_index": 25,
+        "algorithm": 3,
+        "source_sha256": "e192a7be56119a4bf88f4795b53e4643fe426cb6ae00f184139a978f5ae387a7",
+        "adapted_sha256": "e192a7be56119a4bf88f4795b53e4643fe426cb6ae00f184139a978f5ae387a7",
+        "adaptations": []
+      }
+    ],
+    "preserved": [
+      "nodes",
+      "charts",
+      "forms",
+      "cadence",
+      "bass",
+      "drums"
+    ],
+    "performance_defaults": {
+      "keys_octave": 1,
+      "bass_octave": 1,
+      "reverb": 38,
+      "size": 68,
+      "type": 0,
+      "damping": 42,
+      "predelay": 80
+    }
+  },
+  {
+    "name": "Major Minor Lab",
+    "stem": "07-major-minor-lab",
+    "preset": 6,
+    "bytes": 3200,
+    "crc32": "b514a078",
+    "sha256": "2d04206194aaedbda0d2e0d5fe5632fa04e87d46a7762a639ef5d6ec456ae9f0",
+    "programs": [
+      {
+        "program": 0,
+        "id": "chorus_ep",
+        "name": "MF EPCHRS1",
+        "role": "keys",
+        "description": "Chorus electric piano",
+        "bank": "mf3",
+        "voice_index": 22,
+        "algorithm": 5,
+        "source_sha256": "ab0cfb39d8894419460932f978cc97a2796aac379ad5d5a984d4ac45bf0a998e",
+        "adapted_sha256": "ab0cfb39d8894419460932f978cc97a2796aac379ad5d5a984d4ac45bf0a998e",
+        "adaptations": []
+      },
+      {
+        "program": 1,
+        "id": "electric_2",
+        "name": "MF EPIANO2",
+        "role": "keys",
+        "description": "Electric piano, algorithm25",
+        "bank": "mf3",
+        "voice_index": 17,
+        "algorithm": 25,
+        "source_sha256": "49af3739ba008c035c8b9b12b573a95c52969cc980d102c51abd1ba1df74813a",
+        "adapted_sha256": "49af3739ba008c035c8b9b12b573a95c52969cc980d102c51abd1ba1df74813a",
+        "adaptations": []
+      },
+      {
+        "program": 2,
+        "id": "synth_brass",
+        "name": "MFSYNBRASS",
+        "role": "keys",
+        "description": "Silky synth brass",
+        "bank": "mf1",
+        "voice_index": 30,
+        "algorithm": 3,
+        "source_sha256": "5dfae30d69f4be49ce1e1cc2813d8588832e564b83cdd25e45d5f4d035462ad0",
+        "adapted_sha256": "27905fe1542d9b37b683f9bc4b3ec52e5a014dc87b5a0e44c7c21f1375e01d7c",
+        "adaptations": [
+          "transpose 12 -> 24 (octave only)"
+        ]
+      },
+      {
+        "program": 3,
+        "id": "dual_saw",
+        "name": "DUAL SAW",
+        "role": "keys",
+        "description": "Detuned saw poly",
+        "bank": "mf3",
+        "voice_index": 0,
+        "algorithm": 2,
+        "source_sha256": "0e3005853fecf52ec1bb834b78775d77dc5ece72d3466105eea023f102837753",
+        "adapted_sha256": "0e3005853fecf52ec1bb834b78775d77dc5ece72d3466105eea023f102837753",
+        "adaptations": []
+      },
+      {
+        "program": 4,
+        "id": "unibella",
+        "name": "UNIBELLA",
+        "role": "keys",
+        "description": "Layered bell keys",
+        "bank": "pf1",
+        "voice_index": 16,
+        "algorithm": 11,
+        "source_sha256": "a6ecf371aabba88396420be022cdc301d4406a316c34511e95dddaf628299e3b",
+        "adapted_sha256": "8dae4c1c7e2ed529b63e18cb670204c327233ae6d3930ea36ed9b4fe4fb2af62",
+        "adaptations": [
+          "transpose 12 -> 24 (octave only)"
+        ]
+      },
+      {
+        "program": 5,
+        "id": "sport80",
+        "name": "ST.SPORT80",
+        "role": "keys",
+        "description": "Eighties synth keys",
+        "bank": "pf1",
+        "voice_index": 18,
+        "algorithm": 2,
+        "source_sha256": "9871f0478586de9b603dc823c2f5a87d092f7b5b1c760f0e2a0f27c5cd4b6686",
+        "adapted_sha256": "a7be6d2162906f2b0fb8f73c360c0cf9bf416b82e7815907f4554884b051868d",
+        "adaptations": [
+          "transpose 12 -> 24 (octave only)"
+        ]
+      },
+      {
+        "program": 6,
+        "id": "trig_bass",
+        "name": "TRIG BASS",
+        "role": "bass",
+        "description": "Punchy synth bass",
+        "bank": "mf1",
+        "voice_index": 5,
+        "algorithm": 6,
+        "source_sha256": "9f79b00426a3297704b0c8196a314aa0c9a7b6ab2bade13201d3c0f596059cf1",
+        "adapted_sha256": "9f79b00426a3297704b0c8196a314aa0c9a7b6ab2bade13201d3c0f596059cf1",
+        "adaptations": []
+      },
+      {
+        "program": 7,
+        "id": "smooth_bass",
+        "name": "SMOOTHBASS",
+        "role": "bass",
+        "description": "Rounded bass",
+        "bank": "mf2",
+        "voice_index": 24,
+        "algorithm": 2,
+        "source_sha256": "781d33a6a18b4ef432e400652a186c72bed91f368f07067d78f331a052ec7758",
+        "adapted_sha256": "781d33a6a18b4ef432e400652a186c72bed91f368f07067d78f331a052ec7758",
+        "adaptations": []
+      }
+    ],
+    "preserved": [
+      "nodes",
+      "charts",
+      "forms",
+      "cadence",
+      "bass",
+      "drums"
+    ],
+    "performance_defaults": {
+      "keys_octave": 1,
+      "bass_octave": 1,
+      "reverb": 38,
+      "size": 68,
+      "type": 0,
+      "damping": 42,
+      "predelay": 80
+    }
+  }
+]

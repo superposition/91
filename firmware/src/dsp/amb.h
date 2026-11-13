@@ -461,7 +461,7 @@ void en_piece_pats(int i, uint16_t pats[EN_NPAT][EN_NLANE]);   /* its factory dr
 
 /* Extensible accompaniment: separate from saved-piece parameter numbering. */
 #include "jam.h"
-enum { JAM_ON, JAM_KEY, JAM_BARS, JAM_FORM, JAM_MOVE, JAM_ENERGY, JAM_HOLD, JAM_BASS, JAM_IDEA, JAM_SLOT, JAM_TRANSPORT, JAM_SONG, JAM_SWELL, JAM_VARIATION, JAM_KEYS_PROGRAM, JAM_BASS_PROGRAM, JAM_TOUCH, JAM_RELEASE, JAM_BASS_GATE, JAM_SWELL_VOICE, JAM_BASS_ATTACK, JAM_BRIGHTNESS };
+enum { JAM_ON, JAM_KEY, JAM_BARS, JAM_FORM, JAM_MOVE, JAM_ENERGY, JAM_HOLD, JAM_BASS, JAM_IDEA, JAM_SLOT, JAM_TRANSPORT, JAM_SONG, JAM_SWELL, JAM_VARIATION, JAM_KEYS_PROGRAM, JAM_BASS_PROGRAM, JAM_TOUCH, JAM_RELEASE, JAM_BASS_GATE, JAM_SWELL_VOICE, JAM_BASS_ATTACK, JAM_BRIGHTNESS, JAM_KEYS_OCTAVE, JAM_BASS_OCTAVE };
 extern volatile uint8_t en_jam_on, en_jam_bar, en_jam_beat, en_jam_section, en_jam_pending, en_jam_length;
 extern volatile uint32_t en_jam_revision;
 void en_jam_set(int field,int value);
@@ -494,7 +494,7 @@ typedef struct {
     uint32_t revision;
     char title[32], chord[32], next[32], form[32], pending_title[32];
     char keys_name[11], bass_name[11];
-    uint8_t reserved_tail[2];
+    uint8_t reserved_tail[2]; /* signed JMP3 keys/bass octaves; ABI size unchanged */
 } en_jam_snapshot_t;
 _Static_assert(sizeof(en_jam_snapshot_t)==220, "Songbook snapshot ABI");
 _Static_assert(offsetof(en_jam_snapshot_t,revision)==32 && offsetof(en_jam_snapshot_t,title)==36 &&

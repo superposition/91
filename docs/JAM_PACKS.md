@@ -1,8 +1,140 @@
-# Songbook and USB Jam Packs (0.3.0)
+# Songbook and USB Jam Packs (0.4.3)
+
+## Current standards and instruments
+
+The factory bank contains **Blue Bossa**, **Autumn Leaves** and **Satin Doll**.
+Four user arrangements add Blue Bossa Deep, Leaves Drawbars, Satin Muted Guitar
+and Major Minor Lab. Their authored chords, forms, drums and bass patterns stay
+intact while 30 custom DX7 instruments provide six keyboard and two bass choices
+per pack. [The program manifest](../packs/citypop-manifest.json) and
+[voice catalog](../packs/voice-catalog.json) record source banks and octave adaptations.
+
+On v3 packs, turn knob 2 on **DX KEYS** or **DX BASS** to change **OCTAVE**
+independently from −2 to +2. New packs start with keys at +1 and bass at +1.
+The change applies to the next attack; note-off messages release the actual
+previous note. Native program bytes and authored chord voicings are preserved.
+Touch and bass Attack remain available through advanced pack options and USB controls.
+Earlier v1/v2 packs retain their previous Touch/Attack knob behavior.
+
+The default plate uses Reverb 38, Size 68, Damping 42 and Predelay 80.
+Regenerate the reviewed current bank with `python tools/build_citypop.py`.
+`python tools/build_standards.py` regenerates the earlier instrument arrangements;
+run the city-pop generator afterward to restore the current factory bank.
+
+## Written chord replay (v3)
+
+V3 plays the chord qualities written in the chart. A Cmaj7 contains C, E, G and B;
+Cm7 contains C, Eb, G and Bb. The planner voices those notes smoothly and can
+spread them with drop-2. It does not substitute a sixth-family approximation or
+rewrite a section's final chord. The older v1/v2 musical behavior is retained for
+older packs.
+
+Create a text file with one or two symbols per 4/4 bar, separated by `|`, or one
+bar per line. A single symbol lasts four beats; two symbols last two beats each.
+An eight-bar example is:
+
+```text
+| Dm7 | G7 | Cmaj7 | Cmaj7 | Dm7 | G7b9 | C6 | C6 |
+```
+
+Import it using an existing pack for the instruments, bass motifs and drums:
+
+```sh
+python tools/chord_chart.py my-changes.txt packs/velvet-changes.json build/my-changes.json --key C --name "My Changes"
+python tools/fm1_jam.py validate build/my-changes.json
+python tools/fm1_jam.py audition build/my-changes.json
+python tools/fm1_jam.py control bars 8
+python tools/fm1_jam.py control form 0
+python tools/fm1_jam.py control movement 0
+```
+
+The import command reports the original tonic and required section length.
+Set the session key to that tonic for the written pitches, or choose another
+key to transpose. Imported charts use identical major/minor banks, so changing
+the mode selector does not silently reharmonize a written tune. JSON input may
+contain `{"name":"My Changes","key":"C","bars":["Dm7","G7",...],"sources":[...]}`;
+each bar can also be a list of one or two symbols.
+
+Charts must contain 8, 16 or 32 bars and at most 32 distinct root/quality pairs.
+Eight- and sixteen-bar charts loop as one section of that length. A 32-bar chart
+uses two 16-bar sections in Authored/Chart form. Selecting the 8-bar view of a
+16-bar section plays its first eight bars. Three or more changes per bar, slash
+bass chords and unsupported symbols are rejected, not approximated. This is a
+chord-chart importer, not an automatic audio or arbitrary MIDI transcription.
+
+| Movement knob on a v3 chart | What changes |
+|---|---|
+| CHART (0) | Uses the chart's close/drop-2 voicing preference |
+| CLOSE (1) | Close-position voice leading |
+| DROP2 (2) | Drops the second-highest closed voice by an octave |
+| INVERT (3) | Deterministic inversion movement using the written chord tones |
+
+New Idea, bass feel and Variation change the bass accompaniment; INVERT changes
+chord inversions. The written roots, qualities and half-bar timing remain intact. `--voicing close`
+sets a close-position preference; the importer defaults to drop-2. The input
+chart and source provenance remain editable JSON. Additional songs can be
+auditioned and explicitly saved to one of four user slots without reflashing
+the v3-capable engine.
+
+| Quality ID | Symbol | Four keyboard intervals above the written root |
+|---|---|---|
+| 0 | maj7 / M7 | 0, 4, 7, 11 |
+| 1 | m7 / min7 / -7 | 0, 3, 7, 10 |
+| 2 | 7 | 0, 4, 7, 10 |
+| 3 | m7b5 / ø7 | 0, 3, 6, 10 |
+| 4 | dim7 / o7 | 0, 3, 6, 9 |
+| 5 | 6 | 0, 4, 7, 9 |
+| 6 | m6 | 0, 3, 7, 9 |
+| 7 | 7sus4 | 0, 5, 7, 10 |
+| 8 | mMaj7 | 0, 3, 7, 11 |
+| 9 | +7 / aug7 | 0, 4, 8, 10 |
+| 10 | 7b9 | 4, 7, 10, 13 |
+| 11 | maj9 | 4, 7, 11, 14 |
+| 12 | m9 | 3, 7, 10, 14 |
+| 13 | 9 | 4, 7, 10, 14 |
+| 14 | 7alt | 4, 8, 10, 13 |
+| 15 | major triad (no suffix) | 0, 4, 7, 12 |
+| 16 | minor triad (m) | 0, 3, 7, 12 |
+
+Extended four-note keyboard voicings omit the root where shown; the bass supplies
+the written root. `7alt` has the explicitly defined altered fifth and flat ninth
+above, rather than an arbitrary choice of every possible altered dominant.
+
+V3 keeps the v2 byte layout and 3,840-byte maximum: magic/version are `JMP3`/3,
+the extension magic is `SNG3`, node byte +7 stores the quality ID, and header
+1120+21 stores voicing (0 close, 1 drop-2). Node `bass` is the chord root relative
+to the session tonic. Other legacy node fields stay bounded but do not determine
+v3 chord pitches. Both chart banks may share nodes. Features operation 11 uses
+bitmask 7 for v1+v2+v3. Older engines reject v3 rather than misplaying its chart.
+
+V3 header bytes 1120+23 and 1120+24 store signed `keys_octave` and `bass_octave`
+values from −2 to +2, encoded as signed bytes. Missing fields default to zero,
+so older v3 packs keep their register. Firmware 0.4.3 applies these at playback
+to both audio and outgoing MIDI. USB control fields 22 and 23 encode the user
+value plus 2 (wire range 0–4); older control fields keep their existing encoding.
+
+V3 `parts.voice_flags` is an optional 0–3 field at header offset 1120+22.
+Its default is 0, preserving existing packs byte-for-byte and retaining their
+original playback behavior. Firmware with native-voice support interprets:
+
+| Flag bit | Behavior |
+|---|---|
+| 0 (`1`) | Preserve each keyboard operator's velocity sensitivity at Touch 50. Other Touch values add `((touch - 50) * 7) / 50` to each original sensitivity, clamped to 0–7; signed division truncates toward zero. Bass sensitivities remain unchanged. |
+| 1 (`2`) | Preserve the program's pitch-LFO depth for keys and bass. Without this bit, pitch-LFO depth is zero. |
+
+Use `voice_flags: 3`, `touch: 50`, `brightness: 50`, `keys_gate: 65` and
+`attack: 0` to retain the imported programs' operator settings and pitch-LFO
+depth. Timing, voice allocation, role gain and effects still belong to the
+accompaniment engine. Existing v1/v2 packs ignore these flags. Earlier v3
+firmware (0.4.1) ignores this previously reserved byte; native-voice profiles
+therefore require the native-voice firmware upgrade once, then ordinary pack
+uploads can change the programs without reflashing.
+
+## Earlier sixth-family songs (v1/v2)
 
 Songbook is a backing band for a lead player, with original Harris-informed Citypop compositions, a stable home key, and space above the keyboard voicings for flute. It composes moving sixth-family voicings around authored harmonic destinations. These are original arrangements informed by Barry Harris teaching, not transcriptions or a claim to reproduce everything he would play.
 
-## Three factory songs
+## Earlier v1/v2 factory bank
 
 | Song | Character | Full form |
 |---|---|---|

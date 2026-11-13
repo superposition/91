@@ -1,4 +1,6 @@
-# PERF-1 licensing
+# NAIWAN 91 licensing and provenance
+
+NAIWAN 91 continues the PERF-1 lineage below. Code licensing and third-party sound-bank provenance are recorded separately; the repository's GPL licence is not a blanket relicensing of downloaded patches.
 
 PERF-1 (by deamonSLINKY) is a fork of HYP-1 by RedtailWorks, itself a fork of Charles Vestal's AMB-1. It is free software under the GNU General Public
 License, version 3 only
@@ -26,10 +28,16 @@ your recipients its complete corresponding source under the same licence.
 
 ## Third-party material
 
+The numbered Songbook packs use custom DX programs selected from **madFame Custom Patches volumes 1–3** and **Synthoxicated Pafreak's personal banks**, downloaded from [Bobby Blues' DX7 archive](https://bobbyblues.recup.ch/yamaha_dx7/dx7_patches.html). The original bank bytes are retained in `packs/citypop-sources/`. `tools/build_citypop.py` writes the [program manifest](packs/citypop-manifest.json) and [voice catalog](packs/voice-catalog.json), including the selected bank/program and octave adaptation. DRAWBARS and GUITARDAMP are retained from the existing DY collection documented above. These creators are the sound designers; the archive is the distribution source.
+
+The archive describes its published patches as public-domain material. That is the archive's statement, not an independently verified licence grant from every patch creator, and it is not a claim that the banks were authored by this project or licensed under GPL. Keep the source files, checksums and creator credits with redistributed selections. The song titles identify the standards used for the accompaniment charts; no original recordings or lyrics are included in these packs.
+
 | What | Licence | Where |
 | --- | --- | --- |
-| Chakra Petch (Cadson Demak), the screen's face and the site's headings | SIL OFL 1.1 | `assets/fonts/ChakraPetch-*.ttf`, `assets/fonts/ChakraPetch-OFL.txt` |
-| Barlow Semi Condensed (The Barlow Project Authors), the site's text and labels | SIL OFL 1.1 | `assets/fonts/BarlowSemiCondensed-*.ttf`, `assets/fonts/Barlow-OFL.txt` |
+| Quicksand (The Quicksand Project Authors), current web headings and controls; Reserved Font Name "Quicksand" | SIL OFL 1.1, as linked in the bundled fonts' name tables | `web/fonts/f0.woff2` through `f5.woff2`, `web/fonts/OFL.txt` |
+| Nunito (The Nunito Project Authors), current web body text | SIL OFL 1.1, as linked in the bundled fonts' name tables | `web/fonts/f6.woff2` through `f20.woff2`, `web/fonts/OFL.txt` |
+| Chakra Petch (Cadson Demak), screen typography and retained assets | SIL OFL 1.1 | `assets/fonts/ChakraPetch-*.ttf`, `assets/fonts/ChakraPetch-OFL.txt` |
+| Barlow Semi Condensed (The Barlow Project Authors), retained typography assets | SIL OFL 1.1 | `assets/fonts/BarlowSemiCondensed-*.ttf`, `assets/fonts/Barlow-OFL.txt` |
 | Terminus (Dimitar Toshkov Zhekov), an alternative font set | SIL OFL 1.1 | `assets/fonts/ter-u*.bdf`, `assets/fonts/Terminus-LICENSE.txt` |
 | JieLi AC79 SDK: `uboot.boot`, `cfg_tool.bin`, `eq_cfg_hw.bin` are read from your SDK checkout at build time and placed in the package; no SDK files are in this tree | Apache-2.0 | <https://gitee.com/Jieli-Tech/fw-AC79_AIoT_SDK> |
 

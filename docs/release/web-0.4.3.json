@@ -1,0 +1,133 @@
+{
+  "release": "0.4.3",
+  "date": "2026-11-13",
+  "source_preservation": "source-preservation-20261113.json",
+  "final_defaults": {
+    "keys_octave": 1,
+    "bass_octave": 1,
+    "reverb": 38,
+    "size": 68,
+    "type": 0,
+    "damping": 42,
+    "predelay": 80
+  },
+  "tools": {
+    "rust": "1.94.1",
+    "wasm_clang": "Zig 0.17.1",
+    "node": "22.14.0",
+    "python_build": "3.10 WSL"
+  },
+  "final_artifacts": {
+    "package": {
+      "path": "build/naiwan91-0.4.3.fwsc",
+      "bytes": 611251,
+      "sha256": "3aff7ba0a0f290a787b5ac1e2d13dedaa331b850eff66b15ad4dde599200f4a9",
+      "product": "FM-1_7000403"
+    },
+    "wasm": {
+      "path": "build/emu/amb.wasm",
+      "bytes": 2388217,
+      "sha256": "1e4472818b8d97def3ed8e0a373fa256855497a82efbb78463774d2fa8265a56"
+    },
+    "site_manifest": {
+      "path": "build/site/site-build.json",
+      "sha256": "92760fcdc1f44c6ada6d22d0635ef47676e31d5a2586b5413619d5ac19e9346e"
+    },
+    "screenshots": {
+      "source": "actual WASM RGB565 framebuffer",
+      "wasm_sha256": "1e4472818b8d97def3ed8e0a373fa256855497a82efbb78463774d2fa8265a56",
+      "seed": 91,
+      "master": 2800,
+      "captures": [
+        {
+          "page": "performance",
+          "file": "naiwan91-performance.png",
+          "width": 240,
+          "height": 240,
+          "sha256": "084acb01a6ede152f82850b04b3c5a4338c6a869b6591579d5af1fdcf97541db"
+        },
+        {
+          "page": "arrangement",
+          "file": "naiwan91-arrangement.png",
+          "width": 240,
+          "height": 240,
+          "sha256": "15ac5bc0c48ae9e31bfc0ea39830878656efebbd6a5f36cae5e8ce0dd0e6e6ac"
+        },
+        {
+          "page": "dx-keys",
+          "file": "naiwan91-dx-keys.png",
+          "width": 240,
+          "height": 240,
+          "sha256": "8943b826cc4b1234eb92ae27c88130995813bb034b1061737bbb103d8aabfb08"
+        },
+        {
+          "page": "dx-bass",
+          "file": "naiwan91-dx-bass.png",
+          "width": 240,
+          "height": 240,
+          "sha256": "0197dfd56d7074920be79fbe47d40790eb4af81fb65d49399df6211623dfab85"
+        },
+        {
+          "page": "swells",
+          "file": "naiwan91-swells.png",
+          "width": 240,
+          "height": 240,
+          "sha256": "7d9f0e3097d03f90e5c2acd554f665b6e830071bc5c9c63700df265ab5bf8ca9"
+        }
+      ]
+    }
+  },
+  "unchanged_logic_checks": {
+    "release_wrapper_cases": 2,
+    "simulator_reference_boundary_cases": 3,
+    "verified_frozen_source_files": 440,
+    "web_build_safety_cases": 11,
+    "metadata_locales": [
+      "en",
+      "ja"
+    ],
+    "sysex": "pass",
+    "backup_maps": "pass",
+    "ota_identity": "pass",
+    "idle_lifecycle": "pass"
+  },
+  "pre_data_revision_browser_checks": {
+    "wasm_sha256": "fb588030425ee97a1dfbce7157ee1b40b5cc5d87f821c3e530afa7977e6aa722",
+    "package_sha256": "cae319c961dee57e480c995f40182b7d5083e33095b79fc17bf74c0d6233008b",
+    "defaults": {
+      "keys_octave": 1,
+      "bass_octave": 0
+    },
+    "browser_api_contract": "pass",
+    "secure_http_boot_and_pcm": true,
+    "startup_cancel_timeout_retry": true,
+    "input_midi_stream_storage_lifecycle": true,
+    "http_fallback": "pass",
+    "compared_samples": 1048576
+  },
+  "final_data_revision_checks": {
+    "change": "Bass default 0 to +1 in all seven packs and factory data; runtime and browser logic unchanged.",
+    "package_matches_qualified_hash": true,
+    "site_package_matches": true,
+    "site_wasm_matches": true,
+    "metadata": "pass",
+    "routes": 9,
+    "local_links_and_assets": 142,
+    "parsed_scripts": 6,
+    "parsed_module_copies": 18,
+    "css_asset_dependencies": 42,
+    "preserved_control_ids": 152,
+    "hosted_subpath": true,
+    "manifest_verified": true,
+    "five_current_framebuffer_captures": "pass",
+    "keys_and_bass_octave_plus_one_visually_confirmed": true,
+    "font_notices_copied_to_both_bundles": true
+  },
+  "not_run": [
+    "Full native scenario comparison by this audit",
+    "Interactive browser/audio-device QA",
+    "Physical MIDI or installation by this audit",
+    "Publication"
+  ],
+  "remaining_ui_observation": "Detail pages retain the legacy C05 / G Mixolyd top strip; the Songbook performance screen shows its own key and written chord."
+}

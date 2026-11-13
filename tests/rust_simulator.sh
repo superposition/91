@@ -3,12 +3,19 @@
 set -eu
 cd "$(dirname "$0")/.."
 repo=$(pwd)
-baseline=${1:-$repo}
+baseline=${1:-}
+if [ -z "$baseline" ]; then
+    python3 tools/frozen_source.py build/r01-source
+    baseline="$repo/build/r01-source"
+fi
+baseline=$(cd "$baseline" && pwd)
+if [ "$baseline" = "$repo" ]; then
+    echo "rust_simulator: use the verified frozen reference, not the current source tree" >&2
+    exit 2
+fi
 out=build/simulator
 mkdir -p "$out/gen"
-if [ "$baseline" != "$repo" ];then
-    (cd "$baseline";sha256sum -c "$repo/tests/reference/source.sha256") > "$out/source-verification.log"
-fi
+(cd "$baseline";sha256sum -c "$repo/tests/reference/source.sha256") > "$out/source-verification.log"
 python3 tools/gen_font.py "$out/gen/felucca_font.h" >/dev/null
 common='-O2 -ffp-contract=off -std=c99 -DEN_HOST -D_POSIX_C_SOURCE=200809L -Wno-unused-function'
 for flavor in reference c0;do

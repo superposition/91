@@ -11,7 +11,8 @@ NAIWAN 91 builds on Linux x86-64 (or macOS/Windows through Docker or WSL: JieLi'
 
 ## Prerequisites
 
-- Python 3.10 or newer with Pillow (`pip3 install Pillow`).
+- Python 3.10 or newer with Pillow. The full site/font workflow also uses fonttools (`python3 -m pip install Pillow fonttools`). MIDI authoring and its comparison suite additionally use `mido` and `numpy`; USB access needs `python-rtmidi`.
+- A native C compiler and POSIX shell for host checks. On Windows, run firmware and shell builds in WSL2; Python and Rust authoring tools also support native Windows. Emscripten is optional for the archived `web/app` API regression harness; its check is skipped when `emcc` is absent.
 - **The JieLi Linux toolchain** (clang 4.0.1 for pi32v2, from JieLi's package server): `tools/get_toolchain.sh` installs it to `~/.jieli/toolchain` (`JIELI_TOOLCHAIN` overrides). On macOS or with `JIELI_DOCKER=1` each tool runs in a `linux/amd64` `debian:bookworm-slim` container.
 - **The JieLi AC79 SDK** (Apache-2.0). The package uses three of its files (`cpu/wl82/tools/uboot.boot`, `cfg_tool.bin`, `cfg/eq_cfg_hw.bin`); they are not part of this tree:
 
@@ -20,27 +21,43 @@ NAIWAN 91 builds on Linux x86-64 (or macOS/Windows through Docker or WSL: JieLi'
   ```
 
   (`AC79_SDK` overrides the location.)
-- A clang with the `wasm32` target (for the emulator), Node.js 22 (the web tests), and Rust 1.94.1 with its `wasm32-unknown-unknown` target (the current browser build). The physical firmware retains its existing C build path.
+- A clang with the `wasm32` target and `wasm-ld` (for the emulator), Node.js 22 (the web tests), and Rust 1.94.1 with its `wasm32-unknown-unknown` target. Rust is used by build/codec tooling as well as the native simulator and browser instrument; the physical release still uses the JieLi C compiler and package path.
+
+  ```sh
+  rustup toolchain install 1.94.1 --profile minimal --target wasm32-unknown-unknown
+  rustup override set 1.94.1
+  ```
 
 ## Build and test
 
 ```
-tools/release.sh 0.3.0            # parameter data, the manual's page, the tests, the package, the emulator
-tools/release.sh 0.3.0 --no-tests # without the tests
+tools/release.sh 0.4.3            # parameter data, the manual's page, the tests, the package, the emulator
+tools/release.sh 0.4.3 --no-tests # without the tests
 ./build.sh                        # a development build (version DEV)
 tests/run_tests.sh                # the tests alone
 ```
 
 The tests run, on the build machine: the maths library against libm; the instrument (`tests/host/amb_test.c`); flash storage; the SysEx protocol and the editor's parameter and DX7 voice code; Felucca's update path against the package; the dual-core job handoff (identical output with the work on either core); and the whole app in a simulator (`tests/scenarios/*.amb`, about 70 scripts), with screenshots and audio in `build/scenarios/`. `host/build_host.sh` builds the simulator alone; `build/host/amb_host SCRIPT OUTDIR` runs one script (the command list is at the top of `host/amb_host.c`).
 
+For an independent native compatibility comparison, reconstruct the pinned reference before running the simulator suite:
+
+```sh
+python3 tools/frozen_source.py build/r01-source
+sh tests/rust_simulator.sh "$PWD/build/r01-source"
+```
+
+This requires Git history containing the checkpoint pinned in `tools/frozen_source.py`. Every reference file is verified against `tests/reference/source.sha256`. CI fetches that history explicitly. The legacy scenarios compare the frozen C engine, current C engine and native Rust engine; standards/chord tests cover the new Songbook behavior separately. A successful build is not a hardware qualification; see the [0.4.3 integration record](docs/RELEASE_0_4_3.md).
+
 The build fails if a soft-double routine is linked (a `double` crept in) and checks the image, RAM and pool sizes. Build options: `EN_CORE2=0` builds single-core (the reverb on the second core is the default), `EN_CDC=1` adds Felucca's USB serial function, `EN_DIAG=1` adds the status log's third frame (timers inside the render's stages, the chunk sizes, the work between chunks) for a performance hunt.
 
 The DY voices (`firmware/src/dsp/fm6_dy.h`) are generated from DX7 bank files that are not in this tree: `python3 -I tools/gen_fm6_dy.py tools/fm6_dy.txt BANKS --rom ROMDIR` reads the manifest (slot, name, bank file, voice, source), writes the header, `build/fm6_dy.bin` and the test bank `build/NAIWAN 91-test-voices.syx`, and refuses a voice whose operators match a Yamaha ROM voice in ROMDIR. `tests/host/dycal FILE` (built like the other host tools) prints each voice's level and the gain it would need against the plain sounds; `FM_GAIN_DY` in `amb.c` is set from it and `fmcal`'s rms column so each DY voice sits where its DX voice does.
 
+The current Songbook has a separate reproducible bank: `tools/build_standards.py` authors the seven charts and `tools/build_citypop.py` selects the custom voices from `packs/citypop-sources/`. The numbered JSON/JMP packs and generated factory table are kept with the source. These packs preserve explicit chord qualities and the voices' programmed velocity response and pitch modulation. See [Songbook packs](docs/JAM_PACKS.md) for import and regeneration commands, and [licensing/provenance](LICENSING.md) for the source-bank credits. Retain older pack fixtures: they exercise format compatibility.
+
 ## The site
 
 ```
-python3 tools/make_pages_site.py 0.3.0 build/site
+python3 tools/make_pages_site.py 0.4.3 build/site
 python3 tests/web_build_test.py
 python3 tests/web_site_test.py build/site build/emu
 ```
@@ -56,7 +73,7 @@ The printable quick manual (`docs/QUICK.md`, eight A4 pages) is made by `python 
 From the site, or from the command line (needs `pip3 install mido python-rtmidi`):
 
 ```
-python3 tools/fm1_install.py build/naiwan91-0.3.0.fwsc
+python3 tools/fm1_install.py build/naiwan91-0.4.3.fwsc
 python3 tools/fm1_install.py --info          # identity of the connected FM-1
 ```
 
@@ -69,5 +86,9 @@ The installer's checks (identity read from the package's own markers, the loader
 ## Where things are
 
 - `firmware/src/dsp/` the engine (`amb.c`: voices, drums, effects, the master bus; `fm6*.inc`: the DX7-style FM engine), `firmware/src/app/` the UI and the project (`ui.c`, `project.c`, `viz.c`), `firmware/hal/` the hardware layer, `firmware/loader/` the update loader.
-- `web/` the installer, emulator, editor; `tools/` build, package, install, telemetry (`fm1log.py`, `fm1sum.py`); `docs/MANUAL.md` the manual.
+- `rust/fm1-formats/` packed data and validation; `fm1-engine/` musical scheduling and synthesis; `fm1-app/` controls and UI; `fm1-rt/` bounded runtime; `fm1-hal/` platform bindings. `fm1-jam-bridge/` exposes the engine to platform callers, `fm1-sim/` runs native scenarios and `fm1-codecs-wasm/` supplies browser data codecs.
+- `rust/fm1-authoring/` and `fm1-tooling/` implement authoring/build policy; `tools/` provides file, process and USB adapters, chart/voice generation and telemetry (`fm1log.py`, `fm1sum.py`).
+- `web/emu/src/` contains the player lifecycle, audio, MIDI, storage and controls. Installer, connected editor and legacy piece-library pages use the shared device/protocol modules. [Web source](web/README.md) documents route boundaries; `docs/MANUAL.md` is the manual.
 - Stored data: `firmware/src/app/project.c` (the packed 376-byte piece records, one flash object per genre), `firmware/src/storage.c` (the A/B sector objects and the flash map).
+
+`build/` and Cargo `target/` are ignored generated outputs. Do not treat every file under `build/` as disposable: `build/hardware/` can contain unique physical recordings and qualification evidence. Keep those records outside any cache-cleaning operation. Publish source, source banks, compact test fixtures and generation recipes; keep release binaries and audio evidence as separate artifacts.

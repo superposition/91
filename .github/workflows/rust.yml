@@ -83,6 +83,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -91,11 +93,15 @@ jobs:
           node-version: '22'
       - run: rustup toolchain install 1.94.1 --profile minimal --target wasm32-unknown-unknown
       - run: python3 -m pip install --quiet Pillow
+      - name: Reconstruct and verify the independent frozen comparison source
+        run: python3 tools/frozen_source.py build/r01-source
+      - name: Default reference and tamper rejection
+        run: python3 tests/simulator_reference_test.py
       - name: Full scenario corpus and fresh-process repeatability
         env:
           RUSTUP_TOOLCHAIN: '1.94.1'
           PARITY_JOBS: '4'
-        run: sh tests/rust_simulator.sh
+        run: sh tests/rust_simulator.sh "$PWD/build/r01-source"
       - name: Existing native entry point and piece roundtrip
         env:
           RUSTUP_TOOLCHAIN: '1.94.1'
@@ -130,6 +136,7 @@ jobs:
       - run: node tests/host/codecs_wasm_test.mjs
       - run: python3 tools/make_params.py --check
       - run: python3 tests/web_build_test.py
+      - run: python3 tests/release_script_test.py
       - run: node tests/web_metadata_test.mjs
       - run: node tests/web_backup_test.js
       - run: node tests/web_piece_test.js

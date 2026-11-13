@@ -394,16 +394,20 @@ static void fm_set_patch(int idx)                /* between chunks: a new patch 
 
 static void fm_jam_program(const uint8_t *p,unsigned part)
 {
+    unsigned flags=jp_v3(p)?p[JP2_HEAD+22]:0;
 #if EN_RUST_FM6
-    const fm1_fm6_profile_t c={part,p[JP2_HEAD+18],p[JP2_HEAD+16],p[JP2_HEAD+19],p[JP2_HEAD+20]};
+    const fm1_fm6_profile_t c={part,p[JP2_HEAD+18],p[JP2_HEAD+16],p[JP2_HEAD+19],p[JP2_HEAD+20],flags};
     fm1_rust_fm6_profile(p+JP2_VOICE+p[JP2_HEAD+5+part]*128u,part?fm_bass_ed:fm_ed,&c);
 #else
     uint8_t *ed=part?fm_bass_ed:fm_ed;unsigned op;
     fm6_unpack(p+JP2_VOICE+p[JP2_HEAD+5+part]*128u,ed);
-    ed[FP_LPMD]=0;
+    if(!(flags&2u))ed[FP_LPMD]=0;
     for(op=0;op<6;op++) {
         if(!part) {
-            ed[op*FP_OP+FP_KVS]=(uint8_t)(p[JP2_HEAD+18]*7u/100u);
+            /* Native touch preserves each operator at 50; signed division
+             * truncates the relative offset toward zero in both backends. */
+            if(flags&1u)ed[op*FP_OP+FP_KVS]=(uint8_t)clamp((int)ed[op*FP_OP+FP_KVS]+((int)p[JP2_HEAD+18]-50)*7/50,0,7);
+            else ed[op*FP_OP+FP_KVS]=(uint8_t)(p[JP2_HEAD+18]*7u/100u);
             ed[op*FP_OP+FP_R1+3]=(uint8_t)clamp(ed[op*FP_OP+FP_R1+3]+(65-(int)p[JP2_HEAD+16])/2,0,99);
             if(!fm6_carrier(ed[FP_ALG],6u-op))ed[op*FP_OP+FP_OL]=(uint8_t)clamp(ed[op*FP_OP+FP_OL]+((int)p[JP2_HEAD+19]-50)/4,0,99);
         } else if(p[JP2_HEAD+20])ed[op*FP_OP+FP_R1]=(uint8_t)(99-p[JP2_HEAD+20]*60u/100u);

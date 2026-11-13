@@ -13,7 +13,7 @@ const ERRORS: [&str; 6] = [
     "persistent save/readback failed",
     "unsupported pack version",
 ];
-const FIELDS: [&str; 22] = [
+const FIELDS: [&str; 24] = [
     "on",
     "key",
     "bars",
@@ -36,6 +36,8 @@ const FIELDS: [&str; 22] = [
     "swell_voice",
     "bass_attack",
     "brightness",
+    "keys_octave",
+    "bass_octave",
 ];
 fn runtime(message: impl Into<String>) -> Error {
     Error {
@@ -67,6 +69,7 @@ pub fn control_check(field: &str, value: &Value) -> Result<Value> {
         "idea" => (1, 1),
         "song" => (0, 6),
         "release" | "bass_gate" => (1, 100),
+        "keys_octave" | "bass_octave" => (-2, 2),
         "energy" | "swell" | "touch" | "bass_attack" | "brightness" => (0, 100),
         _ => return Err(Error::missing(field)),
     };
@@ -277,7 +280,7 @@ pub fn advance(mut s: Value, value: &Value, error: Option<&Value>) -> Result<Val
                         if b.len() != 4 {
                             return Err(Error::value("bad feature response"));
                         }
-                        json!({"pack_versions":(0..2).filter(|i|b[0]>>i&1!=0).map(|i|i+1).collect::<Vec<_>>(),"voice_programs":b[1],"factory_songs":b[2],"fm_voices":b[3]})
+                        json!({"pack_versions":(0..3).filter(|i|b[0]>>i&1!=0).map(|i|i+1).collect::<Vec<_>>(),"voice_programs":b[1],"factory_songs":b[2],"fm_voices":b[3]})
                     }
                     "song_status" => {
                         if b.len() != 3 {
@@ -455,7 +458,11 @@ pub fn advance(mut s: Value, value: &Value, error: Option<&Value>) -> Result<Val
                     .iter()
                     .position(|f| *f == field)
                     .ok_or_else(|| Error::missing(field))?;
-                let value = integer(get(&a, "value")?, 0, 16383, "control value")?;
+                let value = if matches!(field, "keys_octave" | "bass_octave") {
+                    integer(get(&a, "value")?, -2, 2, "octave")? + 2
+                } else {
+                    integer(get(&a, "value")?, 0, 16383, "control value")?
+                };
                 let mut out = [0; 3];
                 tool_wire::jam_control(index as u8, value as u16, &mut out)
                     .map_err(|_| Error::value("invalid control"))?;

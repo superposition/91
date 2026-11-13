@@ -2,11 +2,11 @@
 
 **A city-pop band to play along with, in your browser or on the M-VAVE FM-1.**
 
-Choose **Velvet Changes**, **Afterhours** or **Neon Turnaround**, find your key, and play along. Shape the keys, bass and swells as the song unfolds. Hold a phrase you like, ask for a fresh idea, or change the feel while you keep playing.
+Choose **Blue Bossa**, **Autumn Leaves** or **Satin Doll**, find your key, and play along. Give the changes a warm electric piano, a bright brass sound or a soft pad. Add a rounded bass, hold a section you like, and change the feel while you keep playing.
 
-<p align="center"><img src="docs/img/naiwan91-performance.png" width="320" alt="Velvet Changes on the Songbook performance screen"></p>
+<p align="center"><img src="docs/img/naiwan91-performance.png" width="320" alt="Songbook performance screen with song, key, tempo and section controls"></p>
 
-*Velvet Changes on the performance screen.*
+*Blue Bossa in the 0.4.3 browser player. These five captures come from the current instrument's framebuffer.*
 
 [Play in your browser](https://superposition.github.io/91/emu/) · [Songbook guide](docs/JAM_PACKS.md) · [Controls and manual](docs/MANUAL.md)
 
@@ -14,28 +14,30 @@ Press **Switch on** to start the browser player. Use your mouse, touch screen or
 
 ## Find your sound
 
-- **Choose a song.** Turn PRESETS to choose between the three arrangements, then set a comfortable key and tempo.
-- **Shape the band.** Give keys and bass their own sounds, adjust their touch and release, and bring swells in around your playing.
-- **Stay with a phrase.** REC holds the current phrase; EDIT asks for a related idea. The F3 and G3 piano keys do the same.
-- **Change the feel.** Try shorter or longer sections, add movement, or turn ALGORITHM to change the energy.
+- **Choose a standard.** Turn PRESETS for Blue Bossa, Autumn Leaves or Satin Doll, then set a comfortable key and tempo. The written changes stay intact as the accompaniment plays.
+- **Shape the band.** Each song has six keyboard sounds and two bass sounds. Change programs, lift the keys an octave or drop the bass lower, and bring swells in around your playing.
+- **Stay with a phrase.** REC holds the current section; EDIT asks for a new bass motif. The F3 and G3 piano keys do the same.
+- **Change the feel.** Choose close or drop-2 chords, try another inversion, or change the bass feel. These controls keep the song's harmony.
 - **Explore further.** The F4 piano key opens generative pieces, sequencers, effects and visualizers. The [manual](docs/MANUAL.md) explains their controls.
 
 ## Shape the song
 
-<p align="center"><img src="docs/img/naiwan91-arrangement.png" width="240" alt="Arrangement: form, section bars, variation and swell amount"> <img src="docs/img/naiwan91-dx-keys.png" width="240" alt="DX Keys: program, touch, brightness and release"></p>
-<p align="center"><img src="docs/img/naiwan91-dx-bass.png" width="240" alt="DX Bass: program, attack, gate and energy"> <img src="docs/img/naiwan91-swells.png" width="240" alt="Swells: texture, amount, variation and tail"></p>
+<p align="center"><img src="docs/img/naiwan91-arrangement.png" width="240" alt="Songbook Arrangement controls"> <img src="docs/img/naiwan91-dx-keys.png" width="240" alt="DX Keys sound controls"></p>
+<p align="center"><img src="docs/img/naiwan91-dx-bass.png" width="240" alt="DX Bass sound controls"> <img src="docs/img/naiwan91-swells.png" width="240" alt="Swells texture controls"></p>
 
-SELECT opens Arrangement, DX Keys, DX Bass and Swells. Each page has four matching controls, from top to bottom. HOME returns to the Songbook performance page.
+SELECT opens Arrangement, DX Keys, DX Bass and Swells. Each page has four matching controls, from top to bottom. In the 0.4.3 Songbook, knob 2 on DX Keys and DX Bass sets that part's octave independently, from −2 to +2. The new packs start with both parts one octave up and a spacious plate reverb, leaving the bass line clear enough to play against. HOME returns to the Songbook performance page.
 
 ## Make it yours
 
-Keep your songs and sounds in packs. On an FM-1, save up to four packs and come back to them without a computer. Stop playback before saving your session settings. The [Songbook guide](docs/JAM_PACKS.md) covers creating packs, importing sounds and saving your changes.
+Keep your songs and sounds in packs. Alongside the three factory songs, the repository includes four more arrangements to load into the four user slots: **Blue Bossa Deep**, **Leaves Drawbars**, **Satin Muted Guitar** and **Major Minor Lab**. Across the seven packs there are 30 custom instrument programs, with sound-designer credits and source banks retained.
 
-If you have an FM-1, the [installer](web/amb_installer.html) includes backup and recovery tools, and the [editor](web/editor/) lets you adjust its sounds from your computer. Read the [install instructions](BUILDING.md) before updating your instrument.
+Write your own chord chart, choose a sound template and generate its accompaniment. On an FM-1, save up to four packs and come back to them without a computer. Stop playback before saving your session settings. The [Songbook guide](docs/JAM_PACKS.md) covers chart import, choosing programs, creating packs and saving your changes.
+
+If you have an FM-1, the [installer](web/amb_installer.html) includes backup and recovery tools. The [editor](web/editor/) adjusts the connected instrument's legacy parameters and DX voices; use the Songbook pages and pack tools for these arrangements. Read the [install instructions](BUILDING.md) before updating your instrument.
 
 ## Development
 
-For building and contributing, see the [build instructions](BUILDING.md), [contributor guide](CONTRIBUTING.md) and [development notes](docs/RUST_MIGRATION.md). Technical measurements and screenshot provenance are kept with the [project documentation](docs/WEB_REFACTOR.md).
+For building and contributing, see the [build instructions](BUILDING.md), [contributor guide](CONTRIBUTING.md) and [development notes](docs/RUST_MIGRATION.md). The [0.4.3 integration record](docs/RELEASE_0_4_3.md) separates source preservation, automated checks and hardware qualification. Screenshot provenance is kept with the [web documentation](docs/WEB_REFACTOR.md).
 
 ## Credits and licence
 

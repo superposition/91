@@ -87,8 +87,8 @@ void en_jam_name(int next,char *b)
     { const uint8_t *a=jp_node(data,e->node);
       int dim=jp_v2(data)?(e->passing&16)!=0:e->passing;
       const char *root=EN_NOTE_NAME[(key+(dim ? a[1]+2:a[0]))%12];
-      const char *kind=dim?"dim7":suffix[a[3]];
-      if(jp_v2(data) && !dim && e->passing) {
+      const char *kind=jp_v3(data)?jp_chord_suffix(a[7]):dim?"dim7":suffix[a[3]];
+      if(!jp_v3(data) && jp_v2(data) && !dim && e->passing) {
           if(a[3]==0)kind=e->passing&8?"maj7":"6/9";
           if(a[3]==1)kind=e->passing&8?"m9":"m11";
           if(a[3]==3)kind="13";
@@ -132,11 +132,14 @@ static int jp_option_offset(int field)
 {
     switch(field){case JAM_KEYS_PROGRAM:return 5;case JAM_BASS_PROGRAM:return 6;case JAM_SWELL:return 10;
     case JAM_VARIATION:return 11;case JAM_RELEASE:return 16;case JAM_BASS_GATE:return 17;case JAM_TOUCH:return 18;
-    case JAM_BRIGHTNESS:return 19;case JAM_BASS_ATTACK:return 20;case JAM_SWELL_VOICE:return 7;default:return -1;}
+    case JAM_BRIGHTNESS:return 19;case JAM_BASS_ATTACK:return 20;case JAM_SWELL_VOICE:return 7;
+    case JAM_KEYS_OCTAVE:return 23;case JAM_BASS_OCTAVE:return 24;default:return -1;}
 }
 int en_jam_option(int field)
 {
-    int off=jp_option_offset(field);return jp_dx() && off>=0?jp_data[JP2_HEAD+off]:0;
+    int off=jp_option_offset(field);
+    if(field==JAM_KEYS_OCTAVE || field==JAM_BASS_OCTAVE)return jp_octave(jp_data,(unsigned)(field==JAM_BASS_OCTAVE));
+    return jp_dx() && off>=0?jp_data[JP2_HEAD+off]:0;
 }
 #if EN_RUST_HANDOFF
 extern int32_t fm1_rust_snapshot_copy(const uint8_t *,uint8_t *,uint32_t);
@@ -154,6 +157,7 @@ int en_jam_snapshot(en_jam_snapshot_t *out)
     s.section=en_jam_section;s.pending=en_jam_pending;s.length=en_jam_length;
     s.busy=(uint8_t)en_jam_busy();s.load=en_jam_load;s.source=(uint8_t)en_jam_source();
     s.playing=en_playing;s.version=jp_data[4];s.revision=en_jam_revision;
+    s.reserved_tail[0]=(uint8_t)jp_octave(jp_data,0);s.reserved_tail[1]=(uint8_t)jp_octave(jp_data,1);
     for(i=0;i<10;i++)s.options[i]=(uint8_t)en_jam_option(JAM_SWELL+(int)i);
     jp_snapshot_text(s.title,(const char *)jp_data+16,sizeof s.title);
     jp_snapshot_text(s.form,en_jam_form(1),sizeof s.form);
@@ -163,7 +167,7 @@ int en_jam_snapshot(en_jam_snapshot_t *out)
     for(i=0;i<2;i++) {
         char *name=i?s.bass_name:s.keys_name;
         unsigned value=s.options[(i?JAM_BASS_PROGRAM:JAM_KEYS_PROGRAM)-JAM_SWELL],k;
-        if(s.version==2 && value<jp_data[JP2_HEAD+4]) {
+        if(jp_v2(jp_data) && value<jp_data[JP2_HEAD+4]) {
             for(k=0;k<10;k++)name[k]=(char)jp_data[JP2_VOICE+value*128+118+k];
             name[10]=0;
         } else {name[0]='-';name[1]=0;}
@@ -182,6 +186,9 @@ static void jp_control(int field,int value)
         jp_song=(uint8_t)((value%7+7)%7);
         if(jp_upload && jp_upload_source!=255) {jp_upload=0;jp_upload_prepared=0;jp_prepare(0);}
         en_jam_load=(int8_t)jp_song;return;
+    }
+    if(jp_v3(jp_data) && (field==JAM_KEYS_OCTAVE || field==JAM_BASS_OCTAVE)) {
+        jp_editable();jp_active[JP2_HEAD+jp_option_offset(field)]=(uint8_t)(int8_t)(value<-2?-2:value>2?2:value);return;
     }
     if(jp_dx() && field>=JAM_SWELL && field<=JAM_BRIGHTNESS) {
         int off=jp_option_offset(field),max=100;
@@ -250,7 +257,7 @@ static void jp_tick(int st)
     if(!(st&3)) {
         const jp_beat_t *e=&ph->beat[beat];
         chord_nt=4;
-        for(i=0;i<4;i++) { pad[i].target=(float)e->note[i]; en_chord[i]=e->note[i]; chord_pcs[i]=e->note[i]%12; }
+        for(i=0;i<4;i++) { int note=jp_play_note(jp_data,0,e->note[i]);pad[i].target=(float)note;en_chord[i]=(uint8_t)note;chord_pcs[i]=e->note[i]%12; }
         en_chord_root=(uint8_t)((jp_now.key+jp_node(jp_data,e->node)[0])%12); en_chord_n=4;
     }
     pat=(ph->role+(bar==ph->bars-1u))%jp_data[7];
@@ -261,9 +268,10 @@ static void jp_tick(int st)
             const jp_beat_t *e=&ph->beat[beat];
             uint32_t old_age=fm_age;
             for(i=0;i<4;i++) {
+                int note=jp_play_note(jp_data,0,e->note[i]);
                 if(pad[i].midi_note)midi(0x80,pad[i].midi_note,0);
-                pad[i].midi_note=e->note[i];midi(0x90,e->note[i],(unsigned)(65+jp_now.energy/3));
-                fm_jam_note(0,e->note[i],0.45f+0.004f*(float)jp_now.energy,(int32_t)(step_len*0.04f*g));
+                pad[i].midi_note=(uint8_t)note;midi(0x90,(unsigned)note,(unsigned)(65+jp_now.energy/3));
+                fm_jam_note(0,note,0.45f+0.004f*(float)jp_now.energy,(int32_t)(step_len*0.04f*g));
             }
             /* One short overlap from the previous voicing, rather than a
              * fifth sustained keyboard note blurring the next harmony. */
@@ -283,6 +291,7 @@ static void jp_tick(int st)
     }
     n=jp_bass_note(jp_data,&jp_now,ph,jp_now.hold?ph:&jp_phrase[jp_current^1],bar,(unsigned)st,&vel,&gate);
     if(n>=0 && !bass.play && !par[P_DR_MAN]) {
+        n=jp_play_note(jp_data,1,n);
         midi(0x82,bass.midi_note,0); bass.midi_note=(uint8_t)n;
         vel=vel*(60u+jp_now.energy)/110u; if(vel>127) vel=127;
         midi(0x92,(unsigned)n,vel); bass.target=bass.note=(float)n;

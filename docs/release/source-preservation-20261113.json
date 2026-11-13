@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-13",
+  "source": "original fw working directory",
+  "source_head": "5b78ae77897d8bc08981c0a620ab2cce192a2d20",
+  "checkpoint": "3f2d40e4c2d6398248e13f4a06e26c3ad625493c",
+  "publishable_files": 1317,
+  "matching_files": 1317,
+  "untracked_files": 908,
+  "untracked_matching_checkpoint": 908,
+  "different": [],
+  "unique": [],
+  "missing": [],
+  "normalized_inventory_sha256": "f8f53ee66f83de55dadec341fe63c71b24af95ac07def10bcc8d8a70963682a2",
+  "method": "git ls-files tracked + others exclude-standard; git hash-object --stdin-paths without -w; compare git ls-tree -rz checkpoint"
+}
