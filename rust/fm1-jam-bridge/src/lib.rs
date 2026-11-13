@@ -39,6 +39,7 @@ mod ui;
 mod ui_values;
 mod usb_control;
 mod usb_host;
+mod usb_host_control;
 mod usb_midi;
 mod usb_queues;
 mod usb_transport;

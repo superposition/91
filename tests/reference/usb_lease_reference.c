@@ -42,12 +42,19 @@ static uint32_t fm1_usb_sie_on(void){return sie_on;}
 static void fm1_usb_sie_wr_start(uint32_t r,uint32_t v){
  trace(100);trace(r);trace(v);failed=++serial==fail_at;if(failed&&!apply_failed)return;
  if(r==S_INDEX)ix=(uint8_t)v;else regs[r<16?0:ix][r]=(uint8_t)v;
+#ifdef USB_TEST_SIE_WRITE
+ USB_TEST_SIE_WRITE(r,v);
+#endif
  if(control_mode&&ix==0&&r==S_CSR0){
   if(v&0x20u){retire(0);regs[0][S_CSR0]=1;regs[0][S_COUNT0]=4;for(uint32_t i=0;i<4;i++)ep0buf[i]=(uint8_t)(i+41);}
   else if(v&2u)retire(0);
  }
 }
-static void fm1_usb_sie_rd_start(uint32_t r){trace(101);trace(r);failed=++serial==fail_at;pending=regs[r<16?0:ix][r];trace(pending);}
+static void fm1_usb_sie_rd_start(uint32_t r){trace(101);trace(r);failed=++serial==fail_at;
+#ifdef USB_TEST_SIE_READ
+ USB_TEST_SIE_READ(r);
+#endif
+ pending=regs[r<16?0:ix][r];trace(pending);}
 static uint32_t fm1_usb_sie_done(void){return !failed;}
 static uint32_t fm1_usb_sie_data(void){return pending;}
 static void fm1_usb_ep0_buf(void *p){(void)p;binds++;}

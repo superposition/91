@@ -1,0 +1,130 @@
+{
+  "ticket": 19,
+  "base": "d5eef08ee74afa6b8a26608fdbb2c046c5e26fc6",
+  "scope": "complete host SETUP/IN/status transfer, CSR wait/timeout/error/lease and output-prefix policy",
+  "rust_toolchain": "1.94.1",
+  "miri_toolchain": "nightly-2026-08-28",
+  "miri_flags": "-Zmiri-strict-provenance",
+  "hardware_access": false,
+  "physical_usb1_stop_provider_qualified": false,
+  "frozen_source": "../baseline-2026-11-11/source;440 files verified",
+  "source_sha256": {
+    "firmware/src/dsp/rust_usb.h": "3d5ec99d14080c901ce04d512e32fb578790502ee30c845d6395d0a03f3b18ce",
+    "firmware/src/usb_host.c": "0d09f631d694a6606c4a7a8d6a390aab8b963287c863370e1b963dfd6b3571d2",
+    "rust/fm1-hal/src/lib.rs": "f6eabe58e31c80fc52839b8f467693718e9f4eee9a9f050ad6fd75bee17c45bb",
+    "rust/fm1-hal/src/usb_host_control.rs": "d598805e481e6d82aad09a2cc7c514db35dc753903165e0d896d32a2caf1d38f",
+    "rust/fm1-hal/tests/usb_host_control.rs": "797d0adb881c436201891bc6d8126d788ef40c9d8af69749f0df9c4df6a7bae2",
+    "rust/fm1-jam-bridge/src/lib.rs": "7d55d2365765dac1f955ea2d8ded2677079fd792feb3034bbf68124fb48d9894",
+    "rust/fm1-jam-bridge/src/usb_host_control.rs": "85c9a956f3e7950d6dcba34b180ade4b570e234898e98619de009373b2cb9fd0",
+    "tests/reference/usb_lease_reference.c": "5774936556398e79e6a0cdefa1bddb32248f673f512c706b5905cdf86d041adb",
+    "tests/reference/usb_host_control_reference.c": "2923976b25d3a225635226e7c914bafdf873f2e6f0655b48bbc23a03708c9124",
+    "tests/rust_usb_host_control.sh": "1fa20eba5b2de3f97f0e5a91bc1ea1f38c025f22fcd150f32a54589df6d422fe"
+  },
+  "parity": [
+    {
+      "path": "build/usb-host-control/c0.wasm",
+      "cases": 58248,
+      "bytes": 52190208,
+      "sha256": "239a59ad9b8f1a01f29ab1ffa9d61fe403f7c798790aaafd58f334a67cd07102"
+    },
+    {
+      "path": "build/usb-host-control/rust.wasm",
+      "cases": 58248,
+      "bytes": 52190208,
+      "sha256": "239a59ad9b8f1a01f29ab1ffa9d61fe403f7c798790aaafd58f334a67cd07102"
+    }
+  ],
+  "endpoint_regression": [
+    {
+      "path": "build/usb-host-control/endpoints/c0.wasm",
+      "cases": 272,
+      "bytes": 29376,
+      "sha256": "6183cd8a3c050be0cd8956cbb034e0a2e85db40ecd17d8253b4337559a448c3a"
+    },
+    {
+      "path": "build/usb-host-control/endpoints/rust.wasm",
+      "cases": 266,
+      "bytes": 28728,
+      "sha256": "9e0fefa5f1446adacb7cd03dc616672d444adfef6f130dd4581fd0dba51c649a"
+    }
+  ],
+  "workspace_tests": 182,
+  "explicit_command_exits": {
+    "workspace": 0,
+    "nostd": 0,
+    "clippy": 0,
+    "fmt": 0
+  },
+  "miri_tests": 4,
+  "memory": {
+    "new_writable_globals": 0,
+    "new_payload_buffers": 0,
+    "private_request_bytes": 12,
+    "private_request_alignment": 2,
+    "context_pi32v2_bytes": 36,
+    "context_native64_bytes": 72,
+    "vendor_immutable_descriptor_bytes": 36,
+    "vendor_immutable_symbol": ".rodata.uh_ctl.context",
+    "vendor_address_taken_leaf_text_bytes": {
+      "fm1_usb_ep0_send": 14,
+      "fm1_usb_rx_sync": 4
+    }
+  },
+  "vendor_c_frames_before_after_bytes": {
+    "uh_ctl": [
+      40,
+      16
+    ],
+    "uh_probe": [
+      80,
+      88
+    ],
+    "uh_hub_port_probe": [
+      60,
+      72
+    ],
+    "uh_hub_status": [
+      44,
+      44
+    ],
+    "usb_poll": [
+      68,
+      68
+    ],
+    "fm1_timer5_irq": [
+      60,
+      60
+    ]
+  },
+  "vendor_inlined_probe_rejected_bytes": 188,
+  "vendor_context": "compile-only vendor -Os USB1/HAL0 and HAL1 C objects; noinline control wrapper bounds private request frame; new Rust/LTO/full-chain/target stack+timing still unqualified",
+  "remaining": "Host enumeration/hub/lifecycle/wait/activation and CDC/UAC/device poll/reset/retry C bodies; positive providers/physical traffic/cache/clock/recording/link/stack/deadlines open",
+  "artifact_sha256": {
+    "build/usb-host-control/reference.bin": "239a59ad9b8f1a01f29ab1ffa9d61fe403f7c798790aaafd58f334a67cd07102",
+    "build/usb-host-control/c0.bin": "239a59ad9b8f1a01f29ab1ffa9d61fe403f7c798790aaafd58f334a67cd07102",
+    "build/usb-host-control/rust.bin": "239a59ad9b8f1a01f29ab1ffa9d61fe403f7c798790aaafd58f334a67cd07102",
+    "build/usb-host-control/c0.wasm": "ababd56ef3f85048ba187a336e367dd8c7cf65ef6bdd2236284ff49c919005e4",
+    "build/usb-host-control/rust.wasm": "d0c6e2c1f6f552f8329fa698ac756aea16c690b5e7e74ddde41c2c41b1950117",
+    "build/usb-host-control/parity.jsonl": "57256c916c2e4474818c130a2e8fb67cc9165458c6a79899535f10ddd1c4068f",
+    "build/usb-host-control/final.log": "2e64b16fc6891413d6892e2e4ba6945630234f98140befac4154f6011a6c32af",
+    "build/usb-host-control/workspace.log": "146385ff841916310d0f83e05c29b2fb6e105c5e80d1e4ef904ba33a613fdf2a",
+    "build/usb-host-control/nostd.log": "c7de7b8b5d53337d80bd297941cbe426d39934db58993ff947d09d661ed25f63",
+    "build/usb-host-control/clippy.log": "2bc683fb4e4f4f21ee9ee39e2b8ecce2efe20d3b1be57bda5316aa519ab3d30a",
+    "build/usb-host-control/fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/usb-host-control/check-exits.json": "5e364ffa0c9c49e418654a925385bef208023e6665802c69f473ffc642f3dd42",
+    "build/usb-host-control/miri.log": "38bf8ae7b10613280085c391ee1cbf7dfb1a0dfd7313a0ed092974ab1b18268c",
+    "build/usb-host-control/target-0/main.o": "6a5f20166c26eb3d4db2b326f1d983b00a5c828485871da67ca1627a83220eb3",
+    "build/usb-host-control/target-1/main.o": "4eef577d3c764674467caa49bb9ea9377088a574086813467b6bc753287ab784",
+    "build/usb-host-control/target-0/engine.o": "e8a852d865f4bd288f6727c5fbfe85c9de9cd2d162dc74318530137661d34de3",
+    "build/usb-host-control/target-1/engine.o": "fe190e19a53985a0c750ec53de7280b2f12c57d89e7330aa6e438b7127daeb68",
+    "build/usb-host-control/target-0/main-symbols.txt": "4e96015896800c1bdfeeb02fe67b275255913b0bed254603751085bd300149b1",
+    "build/usb-host-control/after.dis": "7a3a1668c02a4d35f03ac5d943b959534f24ae47df33f1bd46254376a64743f8",
+    "build/usb-host-control/prologues.json": "56a8021beaecbfdc017958e0c9aa47574ef1f087fbd3f7aaa8076a17df650432",
+    "build/usb-host-control/caller-prologues.json": "6b22e0d87c76dcfc1d869f772601a71a6c5997299458ed683d26a18411a44ad2",
+    "build/usb-host-control/inlined-caller-prologues.json": "ef798f487927300e4a5a6204157f70adacb9458b34550242fc7536329c7edb42",
+    "build/usb-host-control/compile-target.sh": "280b15bc372abd5f5bacbade9d92d7d2246c2f1f54318dc8b7bcfdaaf494ae14",
+    "build/usb-host-control/endpoint-regression.log": "fe72eb99ce670c1a687c7e5c9aa6c3b83944f9c4a814c87c4c9a88329cecf9f5",
+    "build/usb-host-control/endpoints/c0.wasm": "04c01396685fb344330add65f6d397c47475a784527a41ad4cea4f1055232785",
+    "build/usb-host-control/endpoints/rust.wasm": "628f624f6ea58d3fd1253cc91de6a9507c38a6ad1ea326bbecb139042bd132a8"
+  }
+}

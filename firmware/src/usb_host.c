@@ -68,69 +68,14 @@ static void uh_wait(uint32_t ms)                        /* main loop only */
 
 /* CSR0 (host) until want_set bits are all set and want_clr are all clear: >= 0 the CSR0, < 0 a stall / error / timeout */
 #if EN_RUST_USB
-/* Control completion is direction-specific: TxPktRdy clear or RxPktRdy set.
- * A failed operation seals EP0 until the independent stop provider retires it;
- * a later zero TX status must not retire an uncertain IN request. */
-static int uh_ctl_error(int r)
+_Static_assert(S_FADDR==0 && S_INDEX==14 && S_CSR0==17 && S_COUNT0==22,"host control register bindings");
+/* Keep the private request lifetime in one frame: inlining each foreign call
+ * otherwise reserves many distinct request slots in the enumeration caller. */
+static __attribute__((noinline)) int uh_ctl(uint8_t addr,uint8_t rt,uint8_t rq,uint16_t val,uint16_t idx,uint16_t len,uint8_t *out,uint8_t mps)
 {
-    usb_endpoint_plan(0,FM1_USB_LEASE_SEAL);return r;
-}
-static int uh_ctl_stage_error(int r)
-{uh_d.err=(uint8_t)-r;return uh_ctl_error(r);}
-static int uh_csr0(uint32_t want_set,uint32_t want_clr)
-{
-    const uint32_t t=fm1_ms;
-    for(;;){
-        uint32_t v=sie_rd_observed(S_CSR0);
-        if(!(v&FM1_USB_SIE_KNOWN))return uh_ctl_error(-3);
-        v&=255u;
-        if(v&0x14u){
-            (void)sie_wr_observed(S_CSR0,0);
-            return uh_ctl_error(v&4u?-2:-1);
-        }
-        if((v&want_set)==want_set&&!(v&want_clr)){
-            usb_endpoint_plan(0,FM1_USB_LEASE_CLEAR);return (int)v;
-        }
-        if(fm1_ms-t>500u)return uh_ctl_error(-3);
-        fm1_wdt_feed();
-    }
-}
-static int uh_ctl_kick(uint32_t v)
-{
-    usb_endpoint_armed(0,0);
-    if(!sie_wr_observed(S_CSR0,v))return uh_ctl_stage_error(-3);
-    usb_endpoint_armed(0,1);return 0;
-}
-static int uh_ctl(uint8_t addr,uint8_t rt,uint8_t rq,uint16_t val,uint16_t idx,uint16_t len,uint8_t *out,uint8_t mps)
-{
-    uint32_t got=0,n,i;int r;
-    if(usb.tx_lease&3u)return uh_ctl_stage_error(-3);
-    if(!sie_wr_observed(S_FADDR,addr)||!sie_wr_observed(S_INDEX,0))return uh_ctl_stage_error(-3);
-    ep0buf[0]=rt;ep0buf[1]=rq;ep0buf[2]=(uint8_t)val;ep0buf[3]=(uint8_t)(val>>8);
-    ep0buf[4]=(uint8_t)idx;ep0buf[5]=(uint8_t)(idx>>8);ep0buf[6]=(uint8_t)len;ep0buf[7]=(uint8_t)(len>>8);
-    usb_endpoint_armed(0,0);fm1_usb_ep0_send(ep0buf,8);
-    if(uh_ctl_kick(0x0au)<0)return -3;
-    r=uh_csr0(0,2u);if(r<0){uh_d.err=(uint8_t)-r;return r;}
-    if(len&&(rt&0x80u)){
-        while(got<len){
-            if(uh_ctl_kick(0x20u)<0)return -3;
-            r=uh_csr0(1u,0);if(r<0){uh_d.err=(uint8_t)-r;return r;}
-            n=sie_rd_observed(S_COUNT0);if(!(n&FM1_USB_SIE_KNOWN))return uh_ctl_stage_error(-3);
-            n&=255u;if(n>64u)n=64u;
-            fm1_usb_rx_sync();
-            for(i=0;i<n&&got+i<len;i++)out[got+i]=ep0buf[i];
-            if(!sie_wr_observed(S_CSR0,0))return uh_ctl_stage_error(-3);
-            got+=n;if(n<mps)break;
-        }
-        if(got>len)got=len;
-        if(uh_ctl_kick(0x42u)<0)return -3;
-        r=uh_csr0(0,2u);
-    }else{
-        if(uh_ctl_kick(0x60u)<0)return -3;
-        r=uh_csr0(1u,0);
-        if(r>=0&&!sie_wr_observed(S_CSR0,0))return uh_ctl_stage_error(-3);
-    }
-    return r<0?r:(int)got;
+    const fm1_usb_host_control_t context={ep0buf,&fm1_ms,&usb.tx_lease,&uh_d.err,sie_wr_observed,sie_rd_observed,fm1_usb_ep0_send,fm1_usb_rx_sync,fm1_wdt_feed};
+    const fm1_usb_host_request_t request={addr,rt,rq,mps,val,idx,len,0};
+    return fm1_rust_usb_host_control(&context,&request,out);
 }
 #else
 static int uh_csr0(uint32_t want_set, uint32_t want_clr)
