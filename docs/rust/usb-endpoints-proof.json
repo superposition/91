@@ -1,0 +1,328 @@
+{
+  "ticket": 19,
+  "scope": "app-only observed SIE completion, retained DMA leases, reset/flush invalidation and deferred whole-controller role/retry admission",
+  "base": "3fff50db098e8b3b45176ce47516ff0b125aa048",
+  "rust_toolchain": "1.94.1",
+  "miri_toolchain": "nightly-2026-08-28",
+  "miri_flags": "-Zmiri-strict-provenance",
+  "frozen_baseline": "../baseline-2026-11-11/source; 440 files verified by tests/reference/source.sha256",
+  "hardware_access": false,
+  "physical_usb_provider_qualified": false,
+  "usb_dma_stopped_default": 0,
+  "source_sha256": {
+    "firmware/hal/fm1_usb.h": "56252cea982c947146d821566777dab87d84db283829269bfbfa570e3313d38a",
+    "firmware/src/dsp/rust_usb.h": "39469d92672f6719e5f0f9c84e7bcaed67010ceef4eb901ae246385126ab7f57",
+    "firmware/src/usb.c": "2278045df391c3e70929e34b70d5bd9293751e020ea889e16c7b61a6665fe342",
+    "firmware/src/usb_host.c": "bd4f3d9d90296d56336f291c7f4685aad649f728850b734d99b665ed5512bd12",
+    "rust/fm1-hal/src/lib.rs": "809e8a9ab52460c9343f2cb968261df2fbdc16e37e24b1cc82efae965e7261eb",
+    "rust/fm1-hal/src/usb_endpoint.rs": "736c2b1f5cef5c0ef0a45a70de4c471ed246f855bed006ba6f5a83d7ab57cfd6",
+    "rust/fm1-hal/tests/usb_endpoint.rs": "b9dc3ebf2000c328287e59d1068c6b9dd7b3c946a43fb937ebaefec56fe68331",
+    "rust/fm1-jam-bridge/src/usb_tx.rs": "031bf439534560f19716b9265f3a24e1d81f60181936526fbfcafccf87eefd78",
+    "tests/reference/usb_lease_reference.c": "0861c98ed2408e43669fad453966ba596a50580cd4bbb3b5509f980595d02237",
+    "tests/rust_usb_lease.sh": "869f916a239e36ec1e866019aebfbb9b2f7c0776864f6d8f53b8aaa9439918e5",
+    "tests/reference/usb_control_reference.c": "16c04fc004af591f0fdc43a111ab37600ba5051c8b108ce5f29e84de75070eba",
+    "tests/rust_usb_control.sh": "fe473fb1af418b97574ccdfa8112fd957002b93a8fda213ed9c325d0bd20fac4"
+  },
+  "correction_native": {
+    "reference": {
+      "snapshots": 272,
+      "bytes": 29376,
+      "violation_snapshots": 92,
+      "total_violations": 78
+    },
+    "c0": {
+      "snapshots": 272,
+      "bytes": 29376,
+      "violation_snapshots": 92,
+      "total_violations": 78
+    },
+    "rust": {
+      "snapshots": 266,
+      "bytes": 28728,
+      "violation_snapshots": 0,
+      "total_violations": 0
+    }
+  },
+  "correction_wasm": [
+    {
+      "path": "build/usb-lease/c0.wasm",
+      "cases": 272,
+      "bytes": 29376,
+      "sha256": "6183cd8a3c050be0cd8956cbb034e0a2e85db40ecd17d8253b4337559a448c3a"
+    },
+    {
+      "path": "build/usb-lease/rust.wasm",
+      "cases": 266,
+      "bytes": 28728,
+      "sha256": "9e0fefa5f1446adacb7cd03dc616672d444adfef6f130dd4581fd0dba51c649a"
+    }
+  ],
+  "healthy_wasm": [
+    {
+      "path": "build/usb-lease-healthy/c0.wasm",
+      "cases": 29330,
+      "bytes": 3167640,
+      "sha256": "883c12b048fb4c0184534bbf55716dd5eb6bd5dab97067ca039cb37e68f239cd"
+    },
+    {
+      "path": "build/usb-lease-healthy/rust.wasm",
+      "cases": 29330,
+      "bytes": 3167640,
+      "sha256": "883c12b048fb4c0184534bbf55716dd5eb6bd5dab97067ca039cb37e68f239cd"
+    }
+  ],
+  "control_wasm": [
+    {
+      "path": "build/usb-control/c0.wasm",
+      "cases": 67175,
+      "bytes": 793977,
+      "sha256": "dba39865c1ff23bc8fafad73651c8c71baffd0e4a43f46097b5d8115c4ca2288"
+    },
+    {
+      "path": "build/usb-control/rust.wasm",
+      "cases": 67175,
+      "bytes": 793977,
+      "sha256": "dba39865c1ff23bc8fafad73651c8c71baffd0e4a43f46097b5d8115c4ca2288"
+    },
+    {
+      "path": "build/usb-control/c0.wasm",
+      "cases": 67182,
+      "bytes": 796466,
+      "sha256": "23431c5d97d2fdf2aba8db2606fe43bbb8992a5bbc31d48e2d6106f73ad2cd88"
+    },
+    {
+      "path": "build/usb-control/rust.wasm",
+      "cases": 67182,
+      "bytes": 796466,
+      "sha256": "23431c5d97d2fdf2aba8db2606fe43bbb8992a5bbc31d48e2d6106f73ad2cd88"
+    },
+    {
+      "path": "build/usb-control/c0.wasm",
+      "cases": 67175,
+      "bytes": 818708,
+      "sha256": "652d28d8b66b7808f2b8b85a7ff5dfa0ffb5be37c19c06c87b1377f8d73d3252"
+    },
+    {
+      "path": "build/usb-control/rust.wasm",
+      "cases": 67175,
+      "bytes": 818708,
+      "sha256": "652d28d8b66b7808f2b8b85a7ff5dfa0ffb5be37c19c06c87b1377f8d73d3252"
+    },
+    {
+      "path": "build/usb-control/c0.wasm",
+      "cases": 67182,
+      "bytes": 821197,
+      "sha256": "c536464748698561569a8a1c0f43b5e40f582492e0ef16ab16be84c452b5dda9"
+    },
+    {
+      "path": "build/usb-control/rust.wasm",
+      "cases": 67182,
+      "bytes": 821197,
+      "sha256": "c536464748698561569a8a1c0f43b5e40f582492e0ef16ab16be84c452b5dda9"
+    },
+    {
+      "path": "build/usb-control/c0.wasm",
+      "cases": 67175,
+      "bytes": 862262,
+      "sha256": "bfc04fd9648e87becc99e3603fa19935e49744a2db68bed36af086786bcfbd59"
+    },
+    {
+      "path": "build/usb-control/rust.wasm",
+      "cases": 67175,
+      "bytes": 862262,
+      "sha256": "bfc04fd9648e87becc99e3603fa19935e49744a2db68bed36af086786bcfbd59"
+    },
+    {
+      "path": "build/usb-control/c0.wasm",
+      "cases": 67182,
+      "bytes": 864800,
+      "sha256": "463bfb415236421b63f941ad3523012fda392ff51f9e0207eacc5c1ba32e724a"
+    },
+    {
+      "path": "build/usb-control/rust.wasm",
+      "cases": 67182,
+      "bytes": 864800,
+      "sha256": "463bfb415236421b63f941ad3523012fda392ff51f9e0207eacc5c1ba32e724a"
+    },
+    {
+      "path": "build/usb-control/c0.wasm",
+      "cases": 67175,
+      "bytes": 886943,
+      "sha256": "448e38862d86a9b6bd5c2a80c6429f02e42a6ca1f73e777203936ea359df833f"
+    },
+    {
+      "path": "build/usb-control/rust.wasm",
+      "cases": 67175,
+      "bytes": 886943,
+      "sha256": "448e38862d86a9b6bd5c2a80c6429f02e42a6ca1f73e777203936ea359df833f"
+    },
+    {
+      "path": "build/usb-control/c0.wasm",
+      "cases": 67182,
+      "bytes": 889481,
+      "sha256": "c22aaa5f9ac2c2bd8a2e3504bb13c50fb930d6bb278c1abf42998c32f13b3666"
+    },
+    {
+      "path": "build/usb-control/rust.wasm",
+      "cases": 67182,
+      "bytes": 889481,
+      "sha256": "c22aaa5f9ac2c2bd8a2e3504bb13c50fb930d6bb278c1abf42998c32f13b3666"
+    }
+  ],
+  "tx_wasm": [
+    {
+      "path": "build/usb-tx/c0.wasm",
+      "cases": 11681,
+      "bytes": 1650708,
+      "sha256": "6f92af4a55effbae819c169bd7bc138284615cea6f6627b85d1cf7a0986d9591"
+    },
+    {
+      "path": "build/usb-tx/rust.wasm",
+      "cases": 11681,
+      "bytes": 1650708,
+      "sha256": "6f92af4a55effbae819c169bd7bc138284615cea6f6627b85d1cf7a0986d9591"
+    },
+    {
+      "path": "build/usb-tx/c0.wasm",
+      "cases": 11681,
+      "bytes": 1650708,
+      "sha256": "6f92af4a55effbae819c169bd7bc138284615cea6f6627b85d1cf7a0986d9591"
+    },
+    {
+      "path": "build/usb-tx/rust.wasm",
+      "cases": 11681,
+      "bytes": 1650708,
+      "sha256": "6f92af4a55effbae819c169bd7bc138284615cea6f6627b85d1cf7a0986d9591"
+    },
+    {
+      "path": "build/usb-tx/c0.wasm",
+      "cases": 88601,
+      "bytes": 13493284,
+      "sha256": "a053be502e8025e9d6f541d94fcb693945072ab025a8f34d50aa400e2e0bb357"
+    },
+    {
+      "path": "build/usb-tx/rust.wasm",
+      "cases": 88601,
+      "bytes": 13493284,
+      "sha256": "a053be502e8025e9d6f541d94fcb693945072ab025a8f34d50aa400e2e0bb357"
+    },
+    {
+      "path": "build/usb-tx/c0.wasm",
+      "cases": 165521,
+      "bytes": 23109124,
+      "sha256": "f3af81e7e4f8dd5233bf4387ce5c1c13c30e3950fdb897795a37f863625971eb"
+    },
+    {
+      "path": "build/usb-tx/rust.wasm",
+      "cases": 165521,
+      "bytes": 23109124,
+      "sha256": "f3af81e7e4f8dd5233bf4387ce5c1c13c30e3950fdb897795a37f863625971eb"
+    }
+  ],
+  "reset_wasm": [
+    {
+      "path": "build/usb-reset/c0.wasm",
+      "cases": 21680,
+      "bytes": 7718084,
+      "sha256": "73e600da0ee018fee5243d23f5fb38abc3466c5464d06f5912602fc0004afca7"
+    },
+    {
+      "path": "build/usb-reset/rust.wasm",
+      "cases": 21680,
+      "bytes": 7718084,
+      "sha256": "45f12cdde4843ecb3f549186962ef71dfa50bf16124cb79decfb7dbc9ab17022"
+    }
+  ],
+  "workspace_tests": 170,
+  "memory": {
+    "logical_padding_state_bytes": 1,
+    "allocated_bss_growth": 0,
+    "payload_growth": 0,
+    "new_payload_copies": 0,
+    "immutable_plan_bytes": 32,
+    "usb_native64_size_before_after": [
+      104,
+      104
+    ],
+    "usb_pi32v2_size_before_after": [
+      96,
+      96
+    ],
+    "telemetry_offset_native64": 98,
+    "lease_offset_native64": 99,
+    "telemetry_offset_pi32v2": 94,
+    "lease_offset_pi32v2": 95,
+    "existing_tx_context_pi32v2": 64
+  },
+  "vendor_c_frames_bytes": {
+    "e0_chunk": [
+      36,
+      36
+    ],
+    "fm1_timer5_irq": [
+      60,
+      60
+    ],
+    "usb_poll": [
+      56,
+      60
+    ],
+    "uac_service": [
+      40,
+      48
+    ],
+    "uh_ctl": [
+      32,
+      40
+    ],
+    "uh_csr0": [
+      20,
+      28
+    ],
+    "usb_start_opaque_test_provider": [
+      16,
+      20
+    ]
+  },
+  "stack_context": "vendor -Os strict FP USB1/HAL0 C objects; default-deny plus opaque unresolved compile-only test provider, no LTO or generated-Rust leaf; not whole-chain or measured target stack/deadline proof",
+  "vendor_compile_only": {
+    "hal0": "passed",
+    "hal1": "passed",
+    "opaque_test_provider": "passed; unresolved provider, never linked or executed"
+  },
+  "remaining": "Host/CDC/UAC/poll/lifecycle policy C bodies, real positive stop provider, generated Rust leaf/whole-link/stack/timing, combined physical traffic/recording/deadlines; see USB_ENDPOINTS.md",
+  "artifact_sha256": {
+    "build/usb-lease/reference.bin": "6183cd8a3c050be0cd8956cbb034e0a2e85db40ecd17d8253b4337559a448c3a",
+    "build/usb-lease/c0.bin": "6183cd8a3c050be0cd8956cbb034e0a2e85db40ecd17d8253b4337559a448c3a",
+    "build/usb-lease/rust.bin": "9e0fefa5f1446adacb7cd03dc616672d444adfef6f130dd4581fd0dba51c649a",
+    "build/usb-lease/c0.wasm": "527e4ea48c49f66dd34c085fdb135298869616ac23c56e9456f36b608d963100",
+    "build/usb-lease/rust.wasm": "709122c1af04d835af1f2d8453cd665f8f499b586722bb45c9acc346cf1174b3",
+    "build/usb-lease-healthy/reference.bin": "883c12b048fb4c0184534bbf55716dd5eb6bd5dab97067ca039cb37e68f239cd",
+    "build/usb-lease-healthy/rust.bin": "883c12b048fb4c0184534bbf55716dd5eb6bd5dab97067ca039cb37e68f239cd",
+    "build/usb-lease/target-0/main.o": "5fb75bf600737460f7922bca23689ac1e41cba281167847992bfc729a998c43e",
+    "build/usb-lease/target-1/main.o": "efc876ec11b7b9ae2ed9060125f7c729bf887d363effbbb39b9a1482daee3aa8",
+    "build/usb-lease/provider-main.o": "80662d61c5d9e9c9543984fc3cc0c09db5382c50795d0d10fcd2df175d37c11c",
+    "build/usb-reset/target-0/main.o": "db38263b309b39ed842a4598625e8b891d9fb4e079c469ec8d811f640f5e7921",
+    "build/usb-lease/before.dis": "699f7d357f3aadd573dd824512e48582deeed99aaa2971cdeeb74c433194b7cd",
+    "build/usb-lease/after.dis": "93a4bc02fa31b84694b4261abf80c6065e9a080e63f654a23d3d6e4214e5ff39",
+    "build/usb-lease/provider-after.dis": "8b6fcfb44a711d9512968a122021024c7e3141f8fd3e5fd20f9065df4902da50",
+    "build/usb-lease/prologues.json": "9bbe91c9a18ae4bd404fba8bdb561faf85d95cdd7901ac0aa441a33df5371cb9",
+    "build/usb-lease/workspace.log": "7217c353721bdce1998bb6f55d5f7b5847a2bec16e101d44cf5aa0e42e222cd0",
+    "build/usb-lease/check-exits.json": "5e364ffa0c9c49e418654a925385bef208023e6665802c69f473ffc642f3dd42",
+    "build/usb-lease/clippy.log": "bafabe75f7078b0023540cafb0afb8ae83b3fbd4d3d1449dd5df9671499dc496",
+    "build/usb-lease/fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/usb-lease/nostd.log": "ee1d3fffa2022e962e63e0dbe4d35c9c198450a20c29fc09030f635dbb38bfcd",
+    "build/usb-lease/miri.log": "89b4b20d56b7e0a41e04a350459ef29b0bb0438e468ce1698bac46ee7727e522",
+    "build/usb-lease/control.log": "f4b0d9cb3a313ba9f8267f3307c73f3da9b6e3866be29b2fefa3fea685c820d5",
+    "build/usb-lease/tx.log": "bcf8233ec19fe0c103403f46da73905f72e4c1f40f4de34260ecb78320c59a33",
+    "build/usb-lease/reset.log": "3bcbb6269cb61809f7a967dbc5824f95da755a71ee4a9e0435535f5a41d7dee7",
+    "build/usb-lease/proof.log": "a27dcdcf457bf800de3383ddc0652407244d43f7783493e0f8e8c8155e5c8423",
+    "build/usb-lease/healthy.log": "7f62dade19baccdf53e8bd6fd789bdbc95f3dd468dc192e248e2ac19250367ae",
+    "build/usb-lease/vendor-before.c": "6d354630b80119e705fa9134a1a3d894a39acb758a33e28ec1ecd76c85eb78a0",
+    "build/usb-lease/vendor-before.o": "38ed5b02cf031677e8e7a3f38b2157bc40119593a0efc55a3bba19a046dd89eb",
+    "build/usb-lease/vendor-after.c": "a7a42dd70a59ebcfedf5e073d3919f42959d1fae51fd7591da268cea088343b6",
+    "build/usb-lease/vendor-provider.c": "9f0bb9d925ceb14f30bef9a3421c26f47e5ee6b6c3c4c10c5cdb06d2e091f314",
+    "build/usb-lease/compile-target.sh": "285677d596edd6768c11a1bd4d31b81c03d0cf120491443f83bbec55610a108c",
+    "build/usb-lease/compile-provider.sh": "90b7512f0ea42832870f0b53bb8494a24c36aa256d6402520351bcc852df2928"
+  }
+}

@@ -34,6 +34,12 @@ typedef struct {
     uint32_t (*epoch)(void),(*enter)(void);void (*exit)(uint32_t);
 } fm1_usb_tx_t;
 _Static_assert(sizeof(fm1_usb_tx_t)==16u*sizeof(void *) && offsetof(fm1_usb_tx_t,publish)==10u*sizeof(void *),"TX context ABI");
+enum {
+    FM1_USB_LEASE_CLEAR=0,FM1_USB_LEASE_BUSY=1,FM1_USB_LEASE_UNKNOWN=2,
+    FM1_USB_LEASE_ARMED=3,FM1_USB_LEASE_UNCERTAIN_ARM=4,FM1_USB_LEASE_STOPPED=5,FM1_USB_LEASE_SEAL=6,FM1_USB_LEASE_INVALIDATE=7,
+    FM1_USB_LEASE_ALLOWED=(1u<<8),FM1_USB_SIE_KNOWN=(1u<<8),FM1_USB_ENDPOINT_ALLOWED=(1u<<16)
+};
+uint32_t fm1_rust_usb_endpoint(uint32_t request);
 uint32_t fm1_rust_usb_next_epoch(uint32_t previous);
 int32_t fm1_rust_usb_tx_fill(const fm1_usb_tx_t *);
 int32_t fm1_rust_usb_tx_send(const fm1_usb_tx_t *,const void *,uint32_t count,uint32_t blocking);

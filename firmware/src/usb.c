@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GPL-3.0-only
- * Copyright (C) 2026 Leo Kuroshita (@kurogedelic), Hügelton Instruments */
+ * Copyright (C) 2026 Leo Kuroshita (@kurogedelic), HÃ¼gelton Instruments */
 /* USB full-speed device on USB0: a class-compliant USB-MIDI interface.
  * All SIE traffic happens in usb_poll(), called from the TIMER5 ISR at 2 kHz,
  * so INDEX is never shared and no USB IRQ is needed. MIDI in goes to a ring
@@ -127,7 +127,14 @@ static struct {
     volatile uint8_t uboot_req;
     volatile uint8_t ota_req;    /* F0 22 24 35 7F F7: M-UPGRADE upgrade command (FELUCCA_OTA) */
     volatile uint8_t tel_req;    /* F0 7D 50 46 c F7: telemetry on (c = 1) or off (c = 0), plus one: the main loop answers (FELUCCA_OTA) */
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+    volatile uint8_t tx_lease; /* EP0/1/3/4 two-bit phases; consumes existing tail padding */
+#endif
 } usb;
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+_Static_assert(sizeof(usb)==(sizeof(void *)==4?96u:104u) &&
+    offsetof(__typeof__(usb),tx_lease)==offsetof(__typeof__(usb),tel_req)+1u,"retained USB padding lease ABI");
+#endif
 
 #if FELUCCA_OTA
 /* M-UPGRADE SysEx (ota.c): one received frame at a time (7-bit bytes between
@@ -282,6 +289,63 @@ static int get_desc(uint32_t wvalue, const uint8_t **d, uint16_t *l)
 #endif /* C0 descriptor tables/lookup: Rust streams bytes into existing EP0 RAM */
 
 /* ---------------------------------------------------------- the SIE --- */
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+/* Separate observed success from a legitimate zero register value. These are
+ * the same bounded MMIO polls; no IRQ exclusion or new transport payload. */
+static uint32_t sie_wr_observed(uint32_t r,uint32_t v)
+{
+    uint32_t n=20000;
+    if(!fm1_usb_sie_on())return 0;
+    fm1_usb_sie_wr_start(r,v);
+    while(!fm1_usb_sie_done()&&--n);
+    if(n){usb.timeouts=0;return 1;}
+    if(++usb.timeouts>50u)usb.up=0;
+    return 0;
+}
+static uint32_t sie_rd_observed(uint32_t r)
+{
+    uint32_t n=20000;
+    if(!fm1_usb_sie_on())return 0;
+    fm1_usb_sie_rd_start(r);
+    while(!fm1_usb_sie_done())if(!--n){if(++usb.timeouts>50u)usb.up=0;return 0;}
+    usb.timeouts=0;return FM1_USB_SIE_KNOWN|fm1_usb_sie_data();
+}
+#define sie_wr(r,v) ((void)sie_wr_observed((r),(v)))
+#define sie_rd(r) (sie_rd_observed(r)&255u)
+static inline __attribute__((always_inline)) uint32_t usb_endpoint_plan(uint32_t ep,uint32_t event)
+{
+    const uint32_t shift=ep==0?0:ep==1?2:ep==3?4:ep==4?6:7;
+    const uint32_t plan=fm1_rust_usb_endpoint((uint32_t)usb.tx_lease|(shift<<8)|(event<<11));
+    usb.tx_lease=(uint8_t)plan;return plan;
+}
+static inline __attribute__((always_inline)) uint32_t usb_endpoint_observe(uint32_t ep,uint32_t busy)
+{
+    uint32_t value,plan;
+    if(!sie_wr_observed(S_INDEX,ep)){usb_endpoint_plan(ep,FM1_USB_LEASE_UNKNOWN);return 0;}
+    value=sie_rd_observed(S_CSR0);
+    plan=usb_endpoint_plan(ep,!(value&FM1_USB_SIE_KNOWN)?FM1_USB_LEASE_UNKNOWN:
+        value&busy?FM1_USB_LEASE_BUSY:FM1_USB_LEASE_CLEAR);
+    return value|((plan&FM1_USB_LEASE_ALLOWED)?FM1_USB_ENDPOINT_ALLOWED:0u);
+}
+static inline __attribute__((always_inline)) void usb_endpoint_armed(uint32_t ep,uint32_t known)
+{(void)usb_endpoint_plan(ep,known?FM1_USB_LEASE_ARMED:FM1_USB_LEASE_UNCERTAIN_ARM);}
+#ifndef USB_DMA_STOPPED
+#define USB_DMA_STOPPED() 0u /* deny if a nonphysical/test HAL omitted its fact provider */
+#endif
+/* A reset/flush/rebind can clear a busy bit without retiring DMA. Invalidate
+ * prior acceptance before that operation; idle endpoints need no stop. */
+static inline __attribute__((always_inline)) uint32_t usb_endpoint_reset_ready(uint32_t ep)
+{
+    const uint32_t shift=ep==0?0:ep==1?2:ep==3?4:6;
+    if(!((usb.tx_lease>>shift)&3u))return 1;
+    usb_endpoint_plan(ep,FM1_USB_LEASE_INVALIDATE);usb.up=0;usb.config=0;return 0;
+}
+static inline __attribute__((always_inline)) uint32_t usb_endpoints_stopped(void)
+{
+    if(!USB_DMA_STOPPED())return 0;
+    (void)usb_endpoint_plan(255u,FM1_USB_LEASE_STOPPED);return 1;
+}
+#else
 static void sie_wr(uint32_t r, uint32_t v)
 {
     uint32_t n = 20000;
@@ -312,9 +376,14 @@ static uint32_t sie_rd(uint32_t r)
     return fm1_usb_sie_data();
 }
 
+#endif
+
 #if FELUCCA_UAC
 static void uac_ep4_reset(void)                         /* drop a queued packet; isochronous mode */
 {
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+    if(!usb_endpoint_reset_ready(4))return;
+#endif
     sie_wr(S_INDEX, 4);
     sie_wr(S_TXCSR1, 0x48);                             /* ClrDataTog + FlushFIFO (SDK usb_g_ep_config) */
     sie_wr(S_TXCSR2, 0);
@@ -342,6 +411,9 @@ static void uac_stream(uint32_t alt)                    /* SET_INTERFACE, config
 
 static void ep1_config(void)
 {
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+    if(usb.tx_lease){usb_endpoint_plan(255u,FM1_USB_LEASE_INVALIDATE);usb.up=0;usb.config=0;return;}
+#endif
     fm1_usb_ep_txbuf(1, ep1tx);
     fm1_usb_ep_rxbuf(1, ep1rx);
     sie_wr(S_INDEX, 1);
@@ -384,6 +456,13 @@ static void ep1_config(void)
 
 static void e0_chunk(void)
 {
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+    if(usb.tx_lease&3u)return; /* no reuse while submitted/uncertain */
+    if(usb.e0_tx==2u){
+        if(!sie_wr_observed(S_INDEX,0)||!sie_wr_observed(S_CSR0,0x40))return;
+        usb.e0_tx=1;
+    }
+#endif
 #if EN_RUST_USB
     const uint32_t plan=fm1_rust_usb_ep0_packet(usb.e0_left,usb.e0_zlp);
     uint32_t n=plan&127u,i;
@@ -405,6 +484,9 @@ static void e0_chunk(void)
 #endif
     for (i = 0; i < n; i++)
         ep0buf[i] = usb.e0_src[i];
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+    usb_endpoint_armed(0,0);
+#endif
     fm1_usb_ep0_send(ep0buf, n);
 #if EN_RUST_USB
     if(usb.e0_src)
@@ -418,8 +500,12 @@ static void e0_chunk(void)
     if (usb.e0_left == 0 && n == 64u)
         usb.e0_zlp = 0;
 #endif
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+    usb_endpoint_armed(0,sie_wr_observed(S_INDEX,0)&&sie_wr_observed(S_CSR0,last?0x0a:0x02));
+#else
     sie_wr(S_INDEX, 0);
     sie_wr(S_CSR0, last ? 0x0A : 0x02);
+#endif
     if (last)
         usb.e0_tx = 0;
 }
@@ -436,9 +522,15 @@ static void e0_send(const uint8_t *p, uint16_t len, uint16_t wlen)
     usb.e0_left = len;
     usb.e0_zlp = (len < wlen) && (len % 64u == 0);
 #endif
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+    usb.e0_tx=2;
+    if(!sie_wr_observed(S_INDEX,0)||!sie_wr_observed(S_CSR0,0x40))return;
+    usb.e0_tx=1;
+#else
     usb.e0_tx = 1;
     sie_wr(S_INDEX, 0);
     sie_wr(S_CSR0, 0x40);
+#endif
     e0_chunk();
 }
 
@@ -452,8 +544,18 @@ static void ep0_service(void)
         sie_wr(S_FADDR, usb.pend_addr);
         usb.has_pend_addr = 0;
     }
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+    if(!sie_wr_observed(S_INDEX,0)){usb_endpoint_plan(0,FM1_USB_LEASE_UNKNOWN);return;}
+    csr=sie_rd_observed(S_CSR0);
+    if((csr&FM1_USB_SIE_KNOWN)&&(csr&0x14u)&&(usb.tx_lease&3u)){
+        usb_endpoint_plan(0,FM1_USB_LEASE_INVALIDATE);usb.up=0;usb.config=0;
+    }else usb_endpoint_plan(0,!(csr&FM1_USB_SIE_KNOWN)?FM1_USB_LEASE_UNKNOWN:csr&2u?FM1_USB_LEASE_BUSY:FM1_USB_LEASE_CLEAR);
+    if(!(csr&FM1_USB_SIE_KNOWN))return;
+    csr&=255u;
+#else
     sie_wr(S_INDEX, 0);
     csr = sie_rd(S_CSR0);
+#endif
     if (csr & 0x04u) {                                  /* SentStall */
         sie_wr(S_CSR0, 0);
         usb.e0_tx = 0;
@@ -475,6 +577,9 @@ static void ep0_service(void)
         uac.e0_rx = 0;
 #endif
     }
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+    if(usb.tx_lease&3u)return; /* metadata above never writes the retained source */
+#endif
     if (usb.e0_tx) {
         if (!(csr & 0x02u))
             e0_chunk();
@@ -526,6 +631,9 @@ static void ep0_service(void)
     case FM1_USB_GET_CONFIG: e0_send(&usb.config,1,wlength);return;
     case FM1_USB_STATUS: e0_send(zero2,value?1:2,wlength);return;
     case FM1_USB_CLEAR_HALT:
+#ifndef FELUCCA_LOADER
+        if((value&0x80u)&&((value&15u)==1u||(value&15u)==3u)&&!usb_endpoint_reset_ready(value&15u))goto ack;
+#endif
         sie_wr(S_INDEX,value&15u);
         if(value&0x80u)sie_wr(S_TXCSR1,0x40);else sie_wr(S_RXCSR1,0x80);
         goto ack;
@@ -1024,12 +1132,19 @@ static void ep1_tx(void)
     if (mo_w == mo_r)
         return;
 #endif
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+    csr=usb_endpoint_observe(1,1u);
+    if(!(csr&FM1_USB_ENDPOINT_ALLOWED))return;
+    csr&=255u;
+    if((csr&0x80u)&&!sie_wr_observed(S_TXCSR1,csr&~0x80u))return;
+#else
     sie_wr(S_INDEX, 1);
     csr = sie_rd(S_TXCSR1);
     if (csr & 0x01u)
         return;                                         /* previous packet still pending */
     if (csr & 0x80u)
         sie_wr(S_TXCSR1, csr & ~0x80u);
+#endif
 #if EN_RUST_USB
     const fm1_usb_tx_t context=USB_TX_CONTEXT;
     const int32_t bytes=fm1_rust_usb_tx_fill(&context);
@@ -1064,8 +1179,15 @@ static void ep1_tx(void)
 #endif
     if (!n)
         return;
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+    usb_endpoint_armed(1,0); /* quarantine before the first possible DMA touch */
+    fm1_usb_ep_send(1,ep1tx,n);
+    csr=sie_rd_observed(S_TXCSR1);
+    usb_endpoint_armed(1,(csr&FM1_USB_SIE_KNOWN)&&sie_wr_observed(S_TXCSR1,(csr&255u)|1u));
+#else
     fm1_usb_ep_send(1, ep1tx, n);
     sie_wr(S_TXCSR1, sie_rd(S_TXCSR1) | 0x01u);
+#endif
     usb.tx_pkts++;
 }
 
@@ -1101,16 +1223,30 @@ static void ep3_tx(void)                                /* <= 63 bytes per packe
     uint32_t csr, n = 0;
     if (co_w == co_r)
         return;
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+    csr=usb_endpoint_observe(3,1u);
+    if(!(csr&FM1_USB_ENDPOINT_ALLOWED))return;
+    csr&=255u;
+    if((csr&0x80u)&&!sie_wr_observed(S_TXCSR1,csr&~0x80u))return;
+#else
     sie_wr(S_INDEX, 3);
     csr = sie_rd(S_TXCSR1);
     if (csr & 0x01u)
         return;
     if (csr & 0x80u)
         sie_wr(S_TXCSR1, csr & ~0x80u);
+#endif
     while (co_r != co_w && n < 63u)
         ep3tx[n++] = cdc_out[co_r++ % CO_N];
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+    usb_endpoint_armed(3,0);
+    fm1_usb_ep_send(3,ep3tx,n);
+    csr=sie_rd_observed(S_TXCSR1);
+    usb_endpoint_armed(3,(csr&FM1_USB_SIE_KNOWN)&&sie_wr_observed(S_TXCSR1,(csr&255u)|1u));
+#else
     fm1_usb_ep_send(3, ep3tx, n);
     sie_wr(S_TXCSR1, sie_rd(S_TXCSR1) | 0x01u);
+#endif
     cdc.tx_pkts++;
 }
 #endif
@@ -1254,8 +1390,15 @@ static void uac_service(void)
     uint32_t csr, n;
     if (!usb.up || !usb.config || !uac.alt)
         return;
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+    csr=usb_endpoint_observe(4,1u);
+    if(!(csr&FM1_USB_SIE_KNOWN))return;
+    if(!(csr&FM1_USB_ENDPOINT_ALLOWED)&&!(csr&1u))return;
+    csr&=255u;
+#else
     sie_wr(S_INDEX, 4);
     csr = sie_rd(S_TXCSR1);
+#endif
     if (csr & 0x01u) {                                  /* still queued */
         if (uac.wait < 255u && ++uac.wait == 40u && uac.flowing) {
             uac.flowing = 0;
@@ -1272,8 +1415,14 @@ static void uac_service(void)
     uac.wait = 0;
     ep4_k ^= 1u;
     n = uac_packet(ep4tx[ep4_k]);
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+    usb_endpoint_armed(4,0);
+    fm1_usb_ep4_send(ep4tx[ep4_k],n*4u);
+    usb_endpoint_armed(4,sie_wr_observed(S_TXCSR1,1u));
+#else
     fm1_usb_ep4_send(ep4tx[ep4_k], n * 4u);
     sie_wr(S_TXCSR1, 0x01);                             /* TxPktRdy (and UnderRun cleared) */
+#endif
 }
 #endif
 
@@ -1339,6 +1488,7 @@ static void usb_poll(void)                              /* TIMER5 ISR, 2 kHz */
         usb.suspended = 0;
     if (iu & 0x04u) {                                   /* bus reset */
 #if EN_RUST_USB && !defined(FELUCCA_LOADER)
+        if(usb.tx_lease){usb_endpoint_plan(255u,FM1_USB_LEASE_INVALIDATE);usb.up=0;}
         usb.resets=fm1_rust_usb_next_epoch(usb.resets);
         if(usb.resets==0xffffffffu){usb.up=0;usb.detached=1;}
 #else
@@ -1369,7 +1519,7 @@ static void usb_poll(void)                              /* TIMER5 ISR, 2 kHz */
         sie_wr(S_INTRTX1E, 0x01);
         sie_wr(S_INTRRX1E, 0);
 #if EN_RUST_USB && !defined(FELUCCA_LOADER)
-        if(usb.resets==0xffffffffu)return; /* no epoch reuse or new endpoint work */
+        if(!usb.up||usb.resets==0xffffffffu)return; /* no reuse after retained reset, nor exhausted epoch */
 #endif
     }
     if (it & 0x01u)
@@ -1396,7 +1546,13 @@ static void usb_poll(void)                              /* TIMER5 ISR, 2 kHz */
 static void usb_start(void)                             /* boot, or main-loop retry while usb.up == 0 */
 {
     usb.timeouts = 0;
-    fm1_usb_reset();                                    /* reset whatever the ROM left */
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+    usb.up=0;usb.config=0;RING_PUBLISH(); /* stop admission before requesting reset */
+#endif
+    fm1_usb_reset();                                    /* bounded stop request */
+#if EN_RUST_USB && !defined(FELUCCA_LOADER)
+    if(!usb_endpoints_stopped()){usb.up=0;return;}
+#endif
     fm1_delay_ms(25);
     fm1_usb_attach(ep0buf);
     sie_wr(S_POWER, 0x60);

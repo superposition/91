@@ -67,6 +67,72 @@ static void uh_wait(uint32_t ms)                        /* main loop only */
 }
 
 /* CSR0 (host) until want_set bits are all set and want_clr are all clear: >= 0 the CSR0, < 0 a stall / error / timeout */
+#if EN_RUST_USB
+/* Control completion is direction-specific: TxPktRdy clear or RxPktRdy set.
+ * A failed operation seals EP0 until the independent stop provider retires it;
+ * a later zero TX status must not retire an uncertain IN request. */
+static int uh_ctl_error(int r)
+{
+    usb_endpoint_plan(0,FM1_USB_LEASE_SEAL);return r;
+}
+static int uh_ctl_stage_error(int r)
+{uh_d.err=(uint8_t)-r;return uh_ctl_error(r);}
+static int uh_csr0(uint32_t want_set,uint32_t want_clr)
+{
+    const uint32_t t=fm1_ms;
+    for(;;){
+        uint32_t v=sie_rd_observed(S_CSR0);
+        if(!(v&FM1_USB_SIE_KNOWN))return uh_ctl_error(-3);
+        v&=255u;
+        if(v&0x14u){
+            (void)sie_wr_observed(S_CSR0,0);
+            return uh_ctl_error(v&4u?-2:-1);
+        }
+        if((v&want_set)==want_set&&!(v&want_clr)){
+            usb_endpoint_plan(0,FM1_USB_LEASE_CLEAR);return (int)v;
+        }
+        if(fm1_ms-t>500u)return uh_ctl_error(-3);
+        fm1_wdt_feed();
+    }
+}
+static int uh_ctl_kick(uint32_t v)
+{
+    usb_endpoint_armed(0,0);
+    if(!sie_wr_observed(S_CSR0,v))return uh_ctl_stage_error(-3);
+    usb_endpoint_armed(0,1);return 0;
+}
+static int uh_ctl(uint8_t addr,uint8_t rt,uint8_t rq,uint16_t val,uint16_t idx,uint16_t len,uint8_t *out,uint8_t mps)
+{
+    uint32_t got=0,n,i;int r;
+    if(usb.tx_lease&3u)return uh_ctl_stage_error(-3);
+    if(!sie_wr_observed(S_FADDR,addr)||!sie_wr_observed(S_INDEX,0))return uh_ctl_stage_error(-3);
+    ep0buf[0]=rt;ep0buf[1]=rq;ep0buf[2]=(uint8_t)val;ep0buf[3]=(uint8_t)(val>>8);
+    ep0buf[4]=(uint8_t)idx;ep0buf[5]=(uint8_t)(idx>>8);ep0buf[6]=(uint8_t)len;ep0buf[7]=(uint8_t)(len>>8);
+    usb_endpoint_armed(0,0);fm1_usb_ep0_send(ep0buf,8);
+    if(uh_ctl_kick(0x0au)<0)return -3;
+    r=uh_csr0(0,2u);if(r<0){uh_d.err=(uint8_t)-r;return r;}
+    if(len&&(rt&0x80u)){
+        while(got<len){
+            if(uh_ctl_kick(0x20u)<0)return -3;
+            r=uh_csr0(1u,0);if(r<0){uh_d.err=(uint8_t)-r;return r;}
+            n=sie_rd_observed(S_COUNT0);if(!(n&FM1_USB_SIE_KNOWN))return uh_ctl_stage_error(-3);
+            n&=255u;if(n>64u)n=64u;
+            fm1_usb_rx_sync();
+            for(i=0;i<n&&got+i<len;i++)out[got+i]=ep0buf[i];
+            if(!sie_wr_observed(S_CSR0,0))return uh_ctl_stage_error(-3);
+            got+=n;if(n<mps)break;
+        }
+        if(got>len)got=len;
+        if(uh_ctl_kick(0x42u)<0)return -3;
+        r=uh_csr0(0,2u);
+    }else{
+        if(uh_ctl_kick(0x60u)<0)return -3;
+        r=uh_csr0(1u,0);
+        if(r>=0&&!sie_wr_observed(S_CSR0,0))return uh_ctl_stage_error(-3);
+    }
+    return r<0?r:(int)got;
+}
+#else
 static int uh_csr0(uint32_t want_set, uint32_t want_clr)
 {
     uint32_t t = fm1_ms, v;
@@ -143,6 +209,8 @@ static int uh_ctl(uint8_t addr, uint8_t rt, uint8_t rq, uint16_t val, uint16_t i
     }
     return r < 0 ? r : (int)got;
 }
+
+#endif
 
 /* ---------------------------------------------------- enumeration --- */
 static int uh_hub_probe(uint8_t addr, uint8_t mps, uint8_t cfgval, uh_midi_t *m);
@@ -282,28 +350,33 @@ static void uh_start_ep(const uh_midi_t *m)
 #if EN_RUST_USB
     if(*(volatile uint32_t *)&usb.resets==0xffffffffu){uh.run=0;uh_out=0;return;}
 #endif
-    sie_wr(S_FADDR, uh.dev);
-    sie_wr(S_INDEX, 1);
+#if EN_RUST_USB
+#define UH_START_WR(r,v) do{if(!sie_wr_observed((r),(v)))goto failed;}while(0)
+#else
+#define UH_START_WR(r,v) sie_wr((r),(v))
+#endif
+    UH_START_WR(S_FADDR, uh.dev);
+    UH_START_WR(S_INDEX, 1);
     uh.in_ep = m->in_ep;
     uh.out_mps = (uint8_t)m->out_mps;
     uh.tx_count = uh.tx_errors = 0;
     uh.line_idle = 0;
     if (m->in_ep) {
         fm1_usb_ep_rxbuf(1, uh_rx);
-        sie_wr(S_RXMAXP, 0xFF);
-        sie_wr(S_RXCSR1, 0x90);                         /* clear data toggle, flush */
-        sie_wr(S_RXCSR2, 0);
-        sie_wr(S_RXTYPE, (uint32_t)(m->in_type << 4 | m->in_ep));
-        sie_wr(S_RXINTERVAL, m->in_type == 3u ? m->in_interval : 0u);
-        sie_wr(S_RXCSR1, 0x20u);                        /* ReqPkt */
+        UH_START_WR(S_RXMAXP, 0xFF);
+        UH_START_WR(S_RXCSR1, 0x90);                         /* clear data toggle, flush */
+        UH_START_WR(S_RXCSR2, 0);
+        UH_START_WR(S_RXTYPE, (uint32_t)(m->in_type << 4 | m->in_ep));
+        UH_START_WR(S_RXINTERVAL, m->in_type == 3u ? m->in_interval : 0u);
+        UH_START_WR(S_RXCSR1, 0x20u);                        /* ReqPkt */
     }
     if (m->out_ep) {
         fm1_usb_ep_txbuf(1, ep1tx);
-        sie_wr(S_TXMAXP, 0xFF);                         /* AC79 USB0's DMA maximum, as in the device driver */
-        sie_wr(S_TXCSR1, 0x48);                         /* ClrDataTog | FlushFIFO, only at endpoint start */
-        sie_wr(S_TXCSR2, 0x20);                         /* MODE: TX half of a bidirectional endpoint */
-        sie_wr(S_TXTYPE, (uint32_t)(m->out_type << 4 | m->out_ep));
-        sie_wr(S_TXINTERVAL, m->out_type == 3u ? m->out_interval : 0u);
+        UH_START_WR(S_TXMAXP, 0xFF);                         /* AC79 USB0's DMA maximum, as in the device driver */
+        UH_START_WR(S_TXCSR1, 0x48);                         /* ClrDataTog | FlushFIFO, only at endpoint start */
+        UH_START_WR(S_TXCSR2, 0x20);                         /* MODE: TX half of a bidirectional endpoint */
+        UH_START_WR(S_TXTYPE, (uint32_t)(m->out_type << 4 | m->out_ep));
+        UH_START_WR(S_TXINTERVAL, m->out_type == 3u ? m->out_interval : 0u);
     }
     fm1_usb_ep_enable(1u << 1);
     uh.errors = 0;
@@ -312,6 +385,12 @@ static void uh_start_ep(const uh_midi_t *m)
     uh_out = m->out_ep != 0;                            /* midi_out_event queues for it from now */
     RING_PUBLISH();
     uh.run = 1;
+#undef UH_START_WR
+#if EN_RUST_USB
+    return;
+failed:
+    uh.run=0;uh_out=0;uh.fault=1; /* old roots remain until whole-controller stop */
+#endif
 }
 
 /* Stop admitting output before discarding queued notes. CPU0 releases the old USB input owners and schedules
@@ -351,8 +430,16 @@ static void uh_host_up(void)
 static void uh_connect(void)
 {
     uh_midi_t m;
-    const uint8_t line = (uint8_t)fm1_usb_line(), devctl = (uint8_t)sie_rd(S_DEVCTL);
-    if (sie_rd(S_DEVCTL) & 0x20u) {                     /* low speed (FSDev is bit 6, LSDev bit 5) */
+    const uint8_t line=(uint8_t)fm1_usb_line();
+#if EN_RUST_USB
+    const uint32_t first=sie_rd_observed(S_DEVCTL),second=sie_rd_observed(S_DEVCTL);
+    if(!(first&FM1_USB_SIE_KNOWN)||!(second&FM1_USB_SIE_KNOWN)){uh.fault=1;return;}
+    const uint8_t devctl=(uint8_t)first;
+    if(second&0x20u){
+#else
+    const uint8_t devctl=(uint8_t)sie_rd(S_DEVCTL);
+    if (sie_rd(S_DEVCTL) & 0x20u) {
+#endif                     /* low speed (FSDev is bit 6, LSDev bit 5) */
         if (!uh.tried)
             uh.msg = UH_MSG_LOW;                        /* said once per attach, as NO MIDI is */
         uh.tried = 1;
@@ -384,6 +471,14 @@ static void uh_task(uint32_t now)
     if(*(volatile uint32_t *)&usb.resets==0xffffffffu){uh.run=0;uh_out=0;return;}
 #endif
     if (uh.want != uh.on) {
+#if EN_RUST_USB
+        /* Stop new producers/polls first. Requesting off is bounded, but its
+         * write is not completion. Keep mode/queue/DMA roots until the separate
+         * provider confirms all old TX/RX accesses have retired. */
+        usb.up=0;usb.config=0;uh.run=0;uh_out=0;RING_PUBLISH();
+        fm1_usb_off();
+        if(!usb_endpoints_stopped())return;
+#endif
         usb.up = 0;                                     /* TIMER5 leaves the SIE to this context */
 #if EN_RUST_USB
         /* Once device polling is off, its reset epoch cannot advance. Recheck
@@ -401,14 +496,18 @@ static void uh_task(uint32_t now)
             uac_stream(0);                              /* (usb_poll and uac_service leave the SIE alone while usb.up is 0) */
 #endif
             usb.sx_on = 0;
+#if !EN_RUST_USB
             fm1_usb_off();
+#endif
             uh.on = 1;
             uh_host_up();
             uh.retry_ms = now;
             uh.msg = UH_MSG_ON;
         } else {
             uh.on = 0;
+#if !EN_RUST_USB
             fm1_usb_off();
+#endif
             usb_retry_t = now - 1000u;                  /* usb_retry makes the port a device again at once */
             uh.msg = UH_MSG_OFF;
         }
@@ -416,7 +515,14 @@ static void uh_task(uint32_t now)
     }
     if (!uh.on)
         return;
+#if EN_RUST_USB
+    if(usb.tx_lease&3u)uh.fault=1;
+#endif
     if (uh.fault) {                                     /* stall, or the controller stopped answering (TIMER5 cleared run) */
+#if EN_RUST_USB
+        usb.up=0;uh.run=0;uh_out=0;RING_PUBLISH();fm1_usb_off();
+        if(!usb_endpoints_stopped())return;
+#endif
         uh_session_end();
         uh.fault = 0;
         uh_host_up();
@@ -475,7 +581,14 @@ static void uh_fail(void)
  * a stall, repeated errors or 500 ms without completion hands recovery to the main loop. Never wait here. */
 static void uh_tx_poll(void)
 {
-    uint32_t csr = sie_rd(S_TXCSR1), n = 0;
+    uint32_t csr,n=0;
+#if EN_RUST_USB
+    csr=sie_rd_observed(S_TXCSR1);
+    if(!(csr&FM1_USB_SIE_KNOWN)){usb_endpoint_plan(1,FM1_USB_LEASE_SEAL);uh_fail();return;}
+    csr&=255u;
+#else
+    csr=sie_rd(S_TXCSR1);
+#endif
     if (uh.tx_count) {
         if ((csr & 0x20u) || fm1_ms - uh.tx_ms >= 500u) {
             uh_fail();
@@ -486,14 +599,24 @@ static void uh_tx_poll(void)
                 uh_fail();
                 return;
             }
+#if EN_RUST_USB
+            if(!sie_wr_observed(S_TXCSR1,1u)){usb_endpoint_plan(1,FM1_USB_LEASE_SEAL);uh_fail();}
+#else
             sie_wr(S_TXCSR1, 0x01u);                    /* retry retained FIFO, preserving data toggle */
+#endif
             return;
         }
         if (csr & 0x03u) return;                        /* TxPktRdy / FIFONotEmpty: no ACK yet */
+#if EN_RUST_USB
+        if(!(usb_endpoint_plan(1,FM1_USB_LEASE_CLEAR)&FM1_USB_LEASE_ALLOWED)){uh_fail();return;}
+#endif
         RING_PUBLISH();
         mo_r += uh.tx_count;
         uh.tx_count = uh.tx_errors = 0;
     }
+#if EN_RUST_USB
+    if(!(usb_endpoint_plan(1,csr&3u?FM1_USB_LEASE_BUSY:FM1_USB_LEASE_CLEAR)&FM1_USB_LEASE_ALLOWED))return;
+#endif
     while (mo_r + n / 4u != mo_w && n + 4u <= uh.out_mps) {
         uint32_t p = midi_out_q[(mo_r + n / 4u) % MQ];
         ep1tx[n] = (uint8_t)p;
@@ -505,8 +628,14 @@ static void uh_tx_poll(void)
     if (!n) return;
     uh.tx_count = (uint8_t)(n / 4u);
     uh.tx_ms = fm1_ms;
+#if EN_RUST_USB
+    usb_endpoint_armed(1,0);fm1_usb_ep_send(1,ep1tx,n);
+    if(!sie_wr_observed(S_TXCSR1,1u)){usb_endpoint_plan(1,FM1_USB_LEASE_SEAL);uh_fail();return;}
+    usb_endpoint_armed(1,1);
+#else
     fm1_usb_ep_send(1, ep1tx, n);
     sie_wr(S_TXCSR1, 0x01u);
+#endif
 }
 
 static void uh_poll(void)
@@ -518,10 +647,18 @@ static void uh_poll(void)
         return;
     }
     uh.line_idle = 0;
+#if EN_RUST_USB
+    if(!sie_wr_observed(S_INDEX,1)){usb_endpoint_plan(1,FM1_USB_LEASE_SEAL);uh_fail();return;}
+#else
     sie_wr(S_INDEX, 1);
+#endif
     if (uh.out_mps) uh_tx_poll();
     if (!uh.run || !uh.in_ep) return;
+#if EN_RUST_USB
+    csr=sie_rd_observed(S_RXCSR1);if(!(csr&FM1_USB_SIE_KNOWN)){uh_fail();return;}csr&=255u;
+#else
     csr = sie_rd(S_RXCSR1);
+#endif
     if (csr & 0x40u) {                                  /* RxStall: the endpoint is gone */
         uh_fail();
         return;
@@ -531,12 +668,22 @@ static void uh_poll(void)
             uh_fail();
             return;
         }
-        sie_wr(S_RXCSR1, 0x20u);                        /* the flags clear (written 0) and the request goes again; the
-                                                         * data toggle stays: it is reset when the endpoint starts only */
+#if EN_RUST_USB
+        if(!sie_wr_observed(S_RXCSR1,0x20u))uh_fail();
+#else
+        sie_wr(S_RXCSR1, 0x20u);
+#endif
+        /* flags clear; data toggle stays */
         return;
     }
     if (csr & 0x01u) {                                  /* a packet is in uh_rx */
+#if EN_RUST_USB
+        n=sie_rd_observed(S_RXCOUNT1);i=sie_rd_observed(S_RXCOUNT2);
+        if(!(n&FM1_USB_SIE_KNOWN)||!(i&FM1_USB_SIE_KNOWN)){uh_fail();return;}
+        n=(n&255u)|((i&255u)<<8);
+#else
         n = sie_rd(S_RXCOUNT1) | (sie_rd(S_RXCOUNT2) << 8);
+#endif
         if (n > 64u)
             n = 64u;
         fm1_usb_rx_sync();
@@ -554,11 +701,21 @@ static void uh_poll(void)
         }
         uh.pkts++;
         uh.errors = 0;
+#if EN_RUST_USB
+        if(!sie_wr_observed(S_RXCSR1,0x10u)||!sie_wr_observed(S_RXCSR1,0x20u))uh_fail();
+#else
         sie_wr(S_RXCSR1, 0x10u);                        /* release the packet */
-        sie_wr(S_RXCSR1, 0x20u);                        /* and ask for the next */
+        sie_wr(S_RXCSR1, 0x20u);
+#endif
+        /* and ask for the next */
         return;
     }
-    if (!(csr & 0x20u))                                 /* nothing pending: ask */
+    if (!(csr & 0x20u)) {                               /* nothing pending: ask */
+#if EN_RUST_USB
+        if(!sie_wr_observed(S_RXCSR1,0x20u))uh_fail();
+#else
         sie_wr(S_RXCSR1, 0x20u);
+#endif
+    }
 }
 #endif /* PERF_USB_HOST */

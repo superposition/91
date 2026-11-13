@@ -173,6 +173,12 @@ int usb_control_run(void){
      * next packet, so a new SETUP never fabricates endpoint exclusivity. */
     static const uint32_t csrs[]={0,1,2,4,6,0x10,0x11,0x12,0x14,0x15};
     for(uint32_t kind=0;kind<3;kind++)for(uint32_t k=0;k<10;k++) {
+#if USB_CONTROL_CONFIRMED_ABORTS
+        /* Active abort flags cannot prove retained DMA retirement. Those seven
+         * app cases live in usb_lease_reference.c with the stop/retention oracle;
+         * idle class-stage aborts and all loader cases remain here. */
+        if(kind==0 && (csrs[k]&0x14u))continue;
+#endif
         reset();
         if(kind==0)e0_send(source,128,129);
         else {

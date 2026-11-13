@@ -163,6 +163,12 @@ unsafe fn raw<'a>(
         count: count as usize,
     })
 }
+/// Pure lease decision. STOPPED may be selected only by the caller's real
+/// confirmed-stop provider, never by a timeout or a completed control write.
+#[no_mangle]
+pub extern "C" fn fm1_rust_usb_endpoint(request: u32) -> u32 {
+    fm1_hal::usb_endpoint::request(request)
+}
 #[no_mangle]
 pub extern "C" fn fm1_rust_usb_next_epoch(previous: u32) -> u32 {
     usb_tx::next_epoch(previous)

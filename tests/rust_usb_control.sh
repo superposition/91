@@ -19,7 +19,7 @@ for cdc in 0 1;do
 for uac in 0 1;do
 for loader in 0 1;do
     flags="-DFELUCCA_CDC=$cdc -DFELUCCA_UAC=$uac"
-    if [ "$loader" = 1 ];then flags="$flags -DFELUCCA_LOADER=1 -DFELUCCA_USB_PID=2";fi
+    if [ "$loader" = 1 ];then flags="$flags -DFELUCCA_LOADER=1 -DFELUCCA_USB_PID=2";else flags="$flags -DUSB_CONTROL_CONFIRMED_ABORTS=1";fi
     name="$cdc-$uac-$loader"
     cc $common $flags -I"$out/frozen" -I"$baseline/firmware/src" tests/reference/usb_control_reference.c -lm -o "$out/reference"
     cc $common $flags -I"$out/current" -Ifirmware/src tests/reference/usb_control_reference.c -lm -o "$out/c0"

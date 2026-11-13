@@ -22,6 +22,12 @@
 #include "fm1_irq_state.h"
 #define USB_TX_IRQ_ENTER() fm1_irq_state_save()
 #define USB_TX_IRQ_EXIT(flags) fm1_irq_state_restore(flags)
+/* An integration provider may report1 only after no USB endpoint TX/RX DMA
+ * can access its old roots. A write/readback, logical off flag or timeout is
+ * not that proof. Default unqualified; loader keeps its original path. */
+#ifndef USB_DMA_STOPPED
+#define USB_DMA_STOPPED() 0u
+#endif
 #endif
 
 #define FM1_USB_CON0 (*(volatile uint32_t *)0x11800u)
