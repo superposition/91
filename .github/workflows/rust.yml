@@ -33,6 +33,8 @@ jobs:
         run: python3 tests/rust_build_policy.py build/r01-source
       - name: Font, pattern and sine generator compatibility
         run: bash tests/rust_assets.sh build/r01-source
+      - name: DX voice banks, permissive authoring import and logo generation
+        run: bash tests/rust_dx_logo.sh build/r01-source
       - name: Native bootstrap under inherited Cargo features and compiler flags
         run: python3 tests/host_bootstrap_test.py build/r01-source
       - uses: actions/upload-artifact@v4
@@ -284,12 +286,20 @@ jobs:
         run: sh tests/rust_usb_busy_dispatch.sh build/r01-source
       - name: Full application held controls, keys and encoder routing
         run: sh tests/rust_ui_input.sh build/r01-source
+      - name: Scene, tempo, view and Jam-off label compatibility
+        run: |
+          sh tests/rust_ui_performance.sh build/r01-source
+          sh tests/rust_jam_labels.sh build/r01-source
       - name: USB descriptors, collectors and interrupt-safe MIDI queues
         run: |
           sh tests/rust_usb_control.sh build/r01-source
           sh tests/rust_usb_transport.sh build/r01-source
           sh tests/rust_usb_transport.sh build/r01-source edge
           sh tests/rust_usb_queues.sh build/r01-source
+      - name: Device TX traversal and reset-boundary publication
+        run: |
+          sh tests/rust_usb_tx.sh build/r01-source
+          sh tests/rust_usb_reset.sh build/r01-source
       - name: Songbook snapshot and staging handoffs
         run: sh tests/rust_handoff.sh
       - uses: actions/upload-artifact@v4

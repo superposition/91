@@ -1,13 +1,15 @@
 #!/bin/bash
 # SPDX-License-Identifier: GPL-3.0-only
 # Generated PI32 C on a natural32-bit ABI, retaining all layout/PCM assertions.
-# Usage: bash tests/rust_compiler_generated.sh CORE_OUTPUT BRIDGE_OUTPUT ZIG [OUTPUT]
+# Usage: bash tests/rust_compiler_generated.sh CORE_OUTPUT BRIDGE_OUTPUT ZIG [OUTPUT] [FROZEN_SOURCE]
 set -eu
 cd "$(dirname "$0")/.."
+repo=$PWD
 core=$(realpath "${1:?generated core output directory}")
 bridge=$(realpath "${2:?generated application output directory}")
 zig=$(realpath "${3:?pinned Zig compiler}")
 out=${4:-build/compiler-generated-regression}
+baseline=${5:-}
 mkdir -p "$out" build/gen
 [ -f build/gen/felucca_font.h ] || python3 tools/gen_font.py build/gen/felucca_font.h >/dev/null
 native=(-target x86-linux-musl -msse2 -mfpmath=sse -ffp-contract=off -fexcess-precision=standard -O2 -std=gnu11 -w -ffunction-sections -fdata-sections)
@@ -91,17 +93,53 @@ python3 tests/reference/ui_input_host.py . build/gen/ui_input_current.inc
 "$out/c0-ui-input" > "$out/c0-ui-input.bin"
 "$out/generated-ui-input" > "$out/generated-ui-input.bin"
 cmp "$out/c0-ui-input.bin" "$out/generated-ui-input.bin"
+python3 tools/ui_performance_abi.py --check
+if [ -n "$baseline" ];then
+    baseline=$(realpath "$baseline")
+    (cd "$baseline";sha256sum -c "$repo/tests/reference/source.sha256") > "$out/frozen-source.log"
+    python3 tests/reference/ui_input_host.py "$baseline" build/gen/ui_input_frozen.inc
+fi
+for profile in ui-performance jam-labels;do
+    driver=tests/reference/ui_performance_reference.c
+    if [ "$profile" = jam-labels ];then driver=tests/reference/jam_labels_reference.c;fi
+    "$zig" cc "${native[@]}" "${common[@]}" -DEN_WEB '-DEN_VERSION="0.3.0"' "$driver" firmware/src/dsp/amb.c -lm -o "$out/c0-$profile"
+    "$zig" cc "${native[@]}" "${common[@]}" -DEN_WEB '-DEN_VERSION="0.3.0"' "${rust[@]}" "$driver" firmware/src/dsp/amb.c "$abi" "${objects[@]}" "$out/core.o" -lm -o "$out/generated-$profile"
+    "$out/c0-$profile" > "$out/c0-$profile.bin"
+    "$out/generated-$profile" > "$out/generated-$profile.bin"
+    cmp "$out/c0-$profile.bin" "$out/generated-$profile.bin"
+    if [ -n "$baseline" ];then
+        "$zig" cc "${native[@]}" "${common[@]}" -DEN_WEB '-DEN_VERSION="0.3.0"' '-DUI_INPUT_HOST="ui_input_frozen.inc"' "$driver" "$baseline/firmware/src/dsp/amb.c" -lm -o "$out/frozen-$profile"
+        "$out/frozen-$profile" > "$out/frozen-$profile.bin"
+        cmp "$out/frozen-$profile.bin" "$out/generated-$profile.bin"
+    fi
+done
 python3 tools/usb_reference.py . "$out/usb-source"
 python3 tests/reference/usb_queue_reference.py . "$out/queue-source"
-for profile in control transport queues;do
+for profile in control transport queues tx;do
     source=(-I"$out/usb-source" -DFELUCCA_CDC=1 -DFELUCCA_UAC=1 -DUSB_DX=1 -DFELUCCA_OTA=1)
     fixture="tests/reference/usb_${profile}_reference.c"
     if [ "$profile" = queues ];then source=(-I"$out/queue-source" -Ifirmware/hal);fixture=tests/reference/usb_queue_reference.c;fi
+    if [ "$profile" = tx ];then source+=(-DUSB_TX_ACTIVE_CONFIG_ONLY=1);fi
     "$zig" cc "${native[@]}" "${common[@]}" "${source[@]}" "$fixture" -lm -o "$out/c0-usb-$profile"
     "$zig" cc "${native[@]}" "${common[@]}" "${source[@]}" -DEN_RUST_USB=1 "$fixture" "$abi" "${objects[@]}" "$out/core.o" -lm -o "$out/generated-usb-$profile"
     "$out/c0-usb-$profile" > "$out/c0-usb-$profile.bin"
     "$out/generated-usb-$profile" > "$out/generated-usb-$profile.bin"
     cmp "$out/c0-usb-$profile.bin" "$out/generated-usb-$profile.bin"
+done
+# Corrected reset behavior deliberately differs from the legacy C witness.
+# Compare both natural32 implementations to their independently compiled native
+# counterparts, while each fixture also asserts its own reset invariants.
+cargo +1.94.1 build --release --locked -p fm1-jam-bridge --target-dir "$out/reference-native"
+reset=(-I"$out/usb-source" -DFELUCCA_CDC=1 -DFELUCCA_UAC=1 -DFELUCCA_OTA=1)
+for profile in c0 rust;do
+    selected=();if [ "$profile" = rust ];then selected+=(-DEN_RUST_USB=1);fi
+    objects_for_profile=();if [ "$profile" = rust ];then objects_for_profile+=("${objects[@]}" "$out/core.o" "$abi");fi
+    "$zig" cc "${native[@]}" "${common[@]}" "${reset[@]}" "${selected[@]}" tests/reference/usb_reset_reference.c "${objects_for_profile[@]}" -lm -o "$out/generated-reset-$profile"
+    "$out/generated-reset-$profile" > "$out/generated-reset-$profile.bin"
+    library=();if [ "$profile" = rust ];then library+=("$out/reference-native/release/libfm1_jam_bridge.a");fi
+    cc -O2 -UNDEBUG -ffp-contract=off -std=gnu99 -ffunction-sections -fdata-sections -Wl,--gc-sections -Ifirmware/src "${reset[@]}" "${selected[@]}" tests/reference/usb_reset_reference.c "${library[@]}" -lpthread -ldl -lm -o "$out/native-reset-$profile"
+    "$out/native-reset-$profile" > "$out/native-reset-$profile.bin"
+    cmp "$out/native-reset-$profile.bin" "$out/generated-reset-$profile.bin"
 done
 sha256sum "$core/libcore.rlib.c" "$bridge"/*.rlib.c "$out/generated.pcm" > "$out/identities.sha256"
 echo 'Generated-C natural32 factory,12 effects,Runner,UI layout/frame/encoders/buttons/classification,TRS and USB control/transport/queues match C0.'
