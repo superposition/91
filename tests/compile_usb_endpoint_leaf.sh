@@ -18,12 +18,20 @@ SECTIONS {
   .bss : { *(.bss*) *(COMMON) }
 }
 LINKER
+cat > "$out/inspection-panic.c" <<'PANIC'
+/* Inspection-only sink for the freestanding bridge's panic/unwind symbol.
+ * Never flashed or used as an assertion about a physical platform provider. */
+__attribute__((noreturn)) void fm1_mcu_panic(void) { for (;;) {} }
+PANIC
+"$JIELI_TOOLCHAIN/pi32v2/bin/clang" -target pi32v2 -mcpu=r3 -mfprev1 -ffp-contract=off -O2 -flto \
+    -ffunction-sections -fdata-sections -c "$out/inspection-panic.c" -o "$out/inspection-panic.o"
 objects=()
 for package in hal types formats engine rt app jam_bridge;do
     objects+=("$bridge/libfm1_$package.rlib.o")
 done
-"$JIELI_TOOLCHAIN/pi32v2/bin/ld" --gc-sections -e fm1_rust_usb_endpoint -T "$out/leaf.ld" \
-    "${objects[@]}" "$core/libcore.lto.o" -o "$out/leaf.elf" > "$out/link.log" 2>&1
+"$JIELI_TOOLCHAIN/pi32v2/bin/clang" -target pi32v2 -mcpu=r3 -mfprev1 -ffp-contract=off -flto -nostdlib \
+    -Wl,--gc-sections -Wl,-e,fm1_rust_usb_endpoint "-Wl,-T,$out/leaf.ld" \
+    "${objects[@]}" "$core/libcore.lto.o" "$out/inspection-panic.o" -o "$out/leaf.elf" > "$out/link.log" 2>&1
 "$JIELI_TOOLCHAIN/common/bin/objdump" -d "$out/leaf.elf" > "$out/leaf.dis"
 "$JIELI_TOOLCHAIN/common/bin/objdump" -t "$out/leaf.elf" > "$out/leaf.symbols"
 "$JIELI_TOOLCHAIN/common/bin/objdump" -h "$out/leaf.elf" > "$out/leaf.sections"
