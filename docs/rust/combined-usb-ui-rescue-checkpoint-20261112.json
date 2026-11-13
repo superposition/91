@@ -1,0 +1,449 @@
+{
+  "production_source": "7c5b8a53a8bacfd3fad1a3c27707873b69e638e7",
+  "harness_source": "3e7e3b9423d375ab604e2d9936138d922fdd8519",
+  "windows_tests": 182,
+  "matrices": {
+    "usb-control": [
+      {
+        "file": "0-0-0.jsonl",
+        "results": [
+          {
+            "path": "build/usb-control/c0.wasm",
+            "cases": 67182,
+            "bytes": 796226,
+            "sha256": "21071ad07f5543c8b986e70f694e3c794282c86630587f83e155c7a1055d665f"
+          },
+          {
+            "path": "build/usb-control/rust.wasm",
+            "cases": 67182,
+            "bytes": 796226,
+            "sha256": "21071ad07f5543c8b986e70f694e3c794282c86630587f83e155c7a1055d665f"
+          }
+        ]
+      },
+      {
+        "file": "0-0-1.jsonl",
+        "results": [
+          {
+            "path": "build/usb-control/c0.wasm",
+            "cases": 67182,
+            "bytes": 796466,
+            "sha256": "23431c5d97d2fdf2aba8db2606fe43bbb8992a5bbc31d48e2d6106f73ad2cd88"
+          },
+          {
+            "path": "build/usb-control/rust.wasm",
+            "cases": 67182,
+            "bytes": 796466,
+            "sha256": "23431c5d97d2fdf2aba8db2606fe43bbb8992a5bbc31d48e2d6106f73ad2cd88"
+          }
+        ]
+      },
+      {
+        "file": "0-1-0.jsonl",
+        "results": [
+          {
+            "path": "build/usb-control/c0.wasm",
+            "cases": 67182,
+            "bytes": 820957,
+            "sha256": "91233636e69c62a6ee353ce0067dfba1ae04e856611134d9d1c8701df11f46b0"
+          },
+          {
+            "path": "build/usb-control/rust.wasm",
+            "cases": 67182,
+            "bytes": 820957,
+            "sha256": "91233636e69c62a6ee353ce0067dfba1ae04e856611134d9d1c8701df11f46b0"
+          }
+        ]
+      },
+      {
+        "file": "0-1-1.jsonl",
+        "results": [
+          {
+            "path": "build/usb-control/c0.wasm",
+            "cases": 67182,
+            "bytes": 821197,
+            "sha256": "c536464748698561569a8a1c0f43b5e40f582492e0ef16ab16be84c452b5dda9"
+          },
+          {
+            "path": "build/usb-control/rust.wasm",
+            "cases": 67182,
+            "bytes": 821197,
+            "sha256": "c536464748698561569a8a1c0f43b5e40f582492e0ef16ab16be84c452b5dda9"
+          }
+        ]
+      },
+      {
+        "file": "1-0-0.jsonl",
+        "results": [
+          {
+            "path": "build/usb-control/c0.wasm",
+            "cases": 67182,
+            "bytes": 864560,
+            "sha256": "705196b966ad77c739d09dfb1359571684b5d9a92d89f44e1dd8e9c6a4ae0158"
+          },
+          {
+            "path": "build/usb-control/rust.wasm",
+            "cases": 67182,
+            "bytes": 864560,
+            "sha256": "705196b966ad77c739d09dfb1359571684b5d9a92d89f44e1dd8e9c6a4ae0158"
+          }
+        ]
+      },
+      {
+        "file": "1-0-1.jsonl",
+        "results": [
+          {
+            "path": "build/usb-control/c0.wasm",
+            "cases": 67182,
+            "bytes": 864800,
+            "sha256": "463bfb415236421b63f941ad3523012fda392ff51f9e0207eacc5c1ba32e724a"
+          },
+          {
+            "path": "build/usb-control/rust.wasm",
+            "cases": 67182,
+            "bytes": 864800,
+            "sha256": "463bfb415236421b63f941ad3523012fda392ff51f9e0207eacc5c1ba32e724a"
+          }
+        ]
+      },
+      {
+        "file": "1-1-0.jsonl",
+        "results": [
+          {
+            "path": "build/usb-control/c0.wasm",
+            "cases": 67182,
+            "bytes": 889241,
+            "sha256": "1321a52cd72b13c985430013196435ae50e4f5ed79d4fb60f71da3b965167fb0"
+          },
+          {
+            "path": "build/usb-control/rust.wasm",
+            "cases": 67182,
+            "bytes": 889241,
+            "sha256": "1321a52cd72b13c985430013196435ae50e4f5ed79d4fb60f71da3b965167fb0"
+          }
+        ]
+      },
+      {
+        "file": "1-1-1.jsonl",
+        "results": [
+          {
+            "path": "build/usb-control/c0.wasm",
+            "cases": 67182,
+            "bytes": 889481,
+            "sha256": "c22aaa5f9ac2c2bd8a2e3504bb13c50fb930d6bb278c1abf42998c32f13b3666"
+          },
+          {
+            "path": "build/usb-control/rust.wasm",
+            "cases": 67182,
+            "bytes": 889481,
+            "sha256": "c22aaa5f9ac2c2bd8a2e3504bb13c50fb930d6bb278c1abf42998c32f13b3666"
+          }
+        ]
+      }
+    ],
+    "usb-transport": [
+      {
+        "file": "0-0.jsonl",
+        "results": [
+          {
+            "path": "build/usb-transport/c0.wasm",
+            "cases": 59981,
+            "bytes": 22102384,
+            "sha256": "7f2d6e21f4ecad9debcb19e86c263788d98fdeb9872086d87a54b4311b9b5847"
+          },
+          {
+            "path": "build/usb-transport/rust.wasm",
+            "cases": 59981,
+            "bytes": 22102384,
+            "sha256": "7f2d6e21f4ecad9debcb19e86c263788d98fdeb9872086d87a54b4311b9b5847"
+          }
+        ]
+      },
+      {
+        "file": "0-1.jsonl",
+        "results": [
+          {
+            "path": "build/usb-transport/c0.wasm",
+            "cases": 59981,
+            "bytes": 31590384,
+            "sha256": "b716bf4d18a5b47b980c6d2fa9a4504bfd616aa5bb17b279521ceff3f943ea4f"
+          },
+          {
+            "path": "build/usb-transport/rust.wasm",
+            "cases": 59981,
+            "bytes": 31590384,
+            "sha256": "b716bf4d18a5b47b980c6d2fa9a4504bfd616aa5bb17b279521ceff3f943ea4f"
+          }
+        ]
+      },
+      {
+        "file": "1-0.jsonl",
+        "results": [
+          {
+            "path": "build/usb-transport/c0.wasm",
+            "cases": 59981,
+            "bytes": 90977552,
+            "sha256": "40a32d4e91fae542b011e0ce316796effbc609e7b4388fd5b00ff12910ed6968"
+          },
+          {
+            "path": "build/usb-transport/rust.wasm",
+            "cases": 59981,
+            "bytes": 90977552,
+            "sha256": "40a32d4e91fae542b011e0ce316796effbc609e7b4388fd5b00ff12910ed6968"
+          }
+        ]
+      },
+      {
+        "file": "1-1.jsonl",
+        "results": [
+          {
+            "path": "build/usb-transport/c0.wasm",
+            "cases": 59981,
+            "bytes": 100465552,
+            "sha256": "a8d544a5d2f02ac3c27af64e8ee1b0507a3a081cc3cdc34771f2be9f69469fbe"
+          },
+          {
+            "path": "build/usb-transport/rust.wasm",
+            "cases": 59981,
+            "bytes": 100465552,
+            "sha256": "a8d544a5d2f02ac3c27af64e8ee1b0507a3a081cc3cdc34771f2be9f69469fbe"
+          }
+        ]
+      }
+    ],
+    "usb-transport-edge": [
+      {
+        "file": "0-0.jsonl",
+        "results": [
+          {
+            "path": "build/usb-transport-edge/c0.wasm",
+            "cases": 579,
+            "bytes": 204012,
+            "sha256": "8cb817cbec48b314f33cbad7a7045593a5e2b6f9d0c8a88132a031a92613627b"
+          },
+          {
+            "path": "build/usb-transport-edge/rust.wasm",
+            "cases": 579,
+            "bytes": 204012,
+            "sha256": "8cb817cbec48b314f33cbad7a7045593a5e2b6f9d0c8a88132a031a92613627b"
+          }
+        ]
+      },
+      {
+        "file": "0-1.jsonl",
+        "results": [
+          {
+            "path": "build/usb-transport-edge/c0.wasm",
+            "cases": 579,
+            "bytes": 211692,
+            "sha256": "a8b1c01702493965413ab85c81922b1197c98262839edffbed155b7c8d533598"
+          },
+          {
+            "path": "build/usb-transport-edge/rust.wasm",
+            "cases": 579,
+            "bytes": 211692,
+            "sha256": "a8b1c01702493965413ab85c81922b1197c98262839edffbed155b7c8d533598"
+          }
+        ]
+      },
+      {
+        "file": "1-0.jsonl",
+        "results": [
+          {
+            "path": "build/usb-transport-edge/c0.wasm",
+            "cases": 579,
+            "bytes": 327660,
+            "sha256": "5554c87e49305d26ef8399e2dd6d89d7ad638777ea10882e1c9915483fb5ba1b"
+          },
+          {
+            "path": "build/usb-transport-edge/rust.wasm",
+            "cases": 579,
+            "bytes": 327660,
+            "sha256": "5554c87e49305d26ef8399e2dd6d89d7ad638777ea10882e1c9915483fb5ba1b"
+          }
+        ]
+      },
+      {
+        "file": "1-1.jsonl",
+        "results": [
+          {
+            "path": "build/usb-transport-edge/c0.wasm",
+            "cases": 579,
+            "bytes": 335340,
+            "sha256": "74e803c818285c88148eda21f283848e9cd40944ba3036d62fb3ba05fad70a89"
+          },
+          {
+            "path": "build/usb-transport-edge/rust.wasm",
+            "cases": 579,
+            "bytes": 335340,
+            "sha256": "74e803c818285c88148eda21f283848e9cd40944ba3036d62fb3ba05fad70a89"
+          }
+        ]
+      }
+    ],
+    "usb-queues": [
+      {
+        "file": "c0.jsonl",
+        "results": [
+          {
+            "path": "build/usb-queues/c0.wasm",
+            "cases": 41600,
+            "bytes": 16883840,
+            "sha256": "2d08e7e418a7833683c7d9acfcc96d07ebcd73b2647b5beef4ac2e0244b36ef8"
+          }
+        ]
+      },
+      {
+        "file": "hal-0.jsonl",
+        "results": [
+          {
+            "path": "build/usb-queues/rust.wasm",
+            "cases": 41600,
+            "bytes": 16883840,
+            "sha256": "2d08e7e418a7833683c7d9acfcc96d07ebcd73b2647b5beef4ac2e0244b36ef8"
+          }
+        ]
+      },
+      {
+        "file": "hal-1.jsonl",
+        "results": [
+          {
+            "path": "build/usb-queues/rust.wasm",
+            "cases": 41600,
+            "bytes": 16883840,
+            "sha256": "2d08e7e418a7833683c7d9acfcc96d07ebcd73b2647b5beef4ac2e0244b36ef8"
+          }
+        ]
+      }
+    ]
+  },
+  "generated_natural32": {
+    "ui-state": {
+      "bytes": 1329680,
+      "sha256": "d66288aa69af60e1eeea057e7c01b7f7b1af0491b47e9fea477c0e974541b1c4"
+    },
+    "ui-frame": {
+      "bytes": 14176176,
+      "sha256": "21e45cf98bed52b02bb1e5405fe74cf1cda6839da07ca14f249ae8e3f3cfe152"
+    },
+    "ui_controls": {
+      "bytes": 13928544,
+      "sha256": "2f922a13b0d4d7b9f2b14500ecb54215b168559ffa330a7694b75fdbbba23ebb"
+    },
+    "ui-buttons": {
+      "bytes": 48835104,
+      "sha256": "8a14104a25a1af3cf274cdc71db36562fe9b5f4e232e93cc57dceb545cdbf5f9"
+    },
+    "ui-classify": {
+      "bytes": 15400,
+      "sha256": "ef57ef0c1f9a2cae846a8f8e8b753e9f203cebc23385f9a7043234914d0a891d"
+    },
+    "usb_trs": {
+      "bytes": 8016980,
+      "sha256": "551a1137552d8d079b655c41e663a829b1b1ad52ce7dc8951f908b5f6006627b"
+    },
+    "usb-control": {
+      "bytes": 889241,
+      "sha256": "1321a52cd72b13c985430013196435ae50e4f5ed79d4fb60f71da3b965167fb0"
+    },
+    "usb-transport": {
+      "bytes": 100465552,
+      "sha256": "a8d544a5d2f02ac3c27af64e8ee1b0507a3a081cc3cdc34771f2be9f69469fbe"
+    },
+    "usb-queues": {
+      "bytes": 16883840,
+      "sha256": "2d08e7e418a7833683c7d9acfcc96d07ebcd73b2647b5beef4ac2e0244b36ef8"
+    }
+  },
+  "target_ui": {
+    "fields": 193,
+    "bytes": 1320,
+    "alignment": 4,
+    "layout": {
+      "bytes": 1552,
+      "sha256": "0a4bdc438a4763d6988c823b338e6c88dd7ab41ddaebaf75dae3c0544ebd7cfc"
+    }
+  },
+  "artifacts": {
+    "build/round18-focused.log": {
+      "bytes": 17000,
+      "sha256": "3b0bb98beaddb2fa92129f5c331588ce4dfb557c6cd6dedc77f70b00a8ad2532"
+    },
+    "build/round18-windows.log": {
+      "bytes": 31510,
+      "sha256": "d59fde64a99ccb90cf2d2842473c2425ae7aa65cdf2e7651011592d65ef77da3"
+    },
+    "build/round18-compiler.log": {
+      "bytes": 1054,
+      "sha256": "7d7594d919045634257549f41dc93dfce60561cf6a786175a7b5765b0bf965c8"
+    },
+    "build/round18-generated-full.log": {
+      "bytes": 259,
+      "sha256": "4d18df5e1ad1f90eca10194d2cab070388f3de1c5bde221845285e71fcf19143"
+    },
+    "build/hal-target/main.o": {
+      "bytes": 479784,
+      "sha256": "cf542cef67acedb1b90576355b1ed00e9fc55351da8524acc7c615b3d6918f5c"
+    },
+    "build/hal-target/main-app.o": {
+      "bytes": 484296,
+      "sha256": "f6b909fef1e8549d6d6142565f890bae206aae8c364bd68c18b6b08e1da38d5e"
+    },
+    "build/hal-target/engine.o": {
+      "bytes": 412960,
+      "sha256": "fc1067003f789ee28f5dafd4bfcac576633b2a7ae7963b09153ca36099b4853f"
+    },
+    "build/hal-target/engine-app.o": {
+      "bytes": 412960,
+      "sha256": "fc1067003f789ee28f5dafd4bfcac576633b2a7ae7963b09153ca36099b4853f"
+    }
+  },
+  "vendor_lto": {
+    "libfm1_types.rlib.o": {
+      "bytes": 83776,
+      "sha256": "bb68503f495b438677acb8bc1220c53f7216235b5031789945db96d6c9527316"
+    },
+    "libfm1_rt.rlib.o": {
+      "bytes": 28248,
+      "sha256": "60e79824d132769986f9ea1e0802da2455499ecca6b69885d541700f713ee077"
+    },
+    "libfm1_hal.rlib.o": {
+      "bytes": 50712,
+      "sha256": "5f01805593e2caeafe28515c9bbcb4c54523a3090d25d17ae7b07b2c9cffd759"
+    },
+    "libfm1_formats.rlib.o": {
+      "bytes": 350012,
+      "sha256": "8b8642762a0dd4e15f42a1565f1004859568435d0b938bf37ecf1a8eeb6dc3b5"
+    },
+    "libfm1_engine.rlib.o": {
+      "bytes": 901244,
+      "sha256": "208a61e663dd54c208df09f43f6c5e28e88f28e0309808cd8a71cbeef3c8d6fd"
+    },
+    "libfm1_app.rlib.o": {
+      "bytes": 150604,
+      "sha256": "4436b5b5d43e9c5550412b27606938f8996024f701acd5efe61525b98e2868bc"
+    },
+    "libfm1_jam_bridge.rlib.o": {
+      "bytes": 408616,
+      "sha256": "d771cce626c8409d07ba34687d0e8468d1ce678fa8284a7b9432521df1b635a7"
+    }
+  },
+  "qualification": [
+    "Combined frozen/native/WASM descriptors+EP0,SysEx receive/collectors,exact-IRQ MIDI queues,button/classification and Busy-glide tests pass.",
+    "Actual pending-foreground SysEx retry witness,UI callbacks and6 DMA/raw-output strict-provenance Miri gates pass.",
+    "626 rescue/debugger cases plus2 invalid-fragment refusals and2,739 prior installer/diagnostic cases pass over virtual endpoints.",
+    "Adopted mrustc emits seven crates; vendor LTO compiles all. Fresh full natural32 factory/12 effects/Runner/UI/TRS/USB run passes with test assertions forced active.",
+    "Vendor platform/engine units compile USB1/HAL1 with APP0/APP1 and all193 target UI offsets/sizes agree."
+  ],
+  "harness_corrections": [
+    "Generate the button-port include before its target fixture.",
+    "Zig optimized C definesNDEBUG. A side-effectful descriptor copy insideassert was removed, producing zero fixture bytes. Direct linked generated-function diagnostics returned correct bytes; production/compiler code required no workaround.",
+    "Move that copy out ofassert; force-include a test header rejectingNDEBUG,pass-UNDEBUG,then rerun the complete generated comparison from scratch. Earlier partial resumed runs do not substitute for this final active-check run."
+  ],
+  "limits": [
+    "No full application link/image-memory-stack-deadline gate or physical qualification of this source.",
+    "USB TX/device reset/unknown-SIE completion,host/UAC and further controller helpers remain separate work.",
+    "Full application native/WASM integration with the newer browser/held-input/assets batch is a separate next checkpoint.",
+    "Physical device remains restored known-working0.3.3; no new flash occurred."
+  ]
+}
