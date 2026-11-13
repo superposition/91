@@ -54,8 +54,64 @@ pub fn loader_wrap(image: &[u8]) -> Result<Vec<u8>> {
     Ok(out)
 }
 pub fn request(method: &str, v: &Value) -> Result<Value> {
+    fn optional_text(value: &Value) -> Result<Option<&str>> {
+        if value.is_null() {
+            Ok(None)
+        } else {
+            Ok(Some(crate::text(value)?))
+        }
+    }
     let a = &v["args"];
     Ok(match method {
+        "release" => crate::build_image::release(
+            optional_text(&a[0])?,
+            crate::text(&a[1])?,
+            optional_text(&a[2])?,
+        )?,
+        "sdk-check" => json!(crate::build_image::sdk_check(
+            crate::text(&a[0])?,
+            &bytes(&a[1])?,
+            crate::text(&a[2])?
+        )),
+        "loader-sections" => {
+            crate::build_image::loader_sections(crate::text(&a[0])?)?;
+            Value::Null
+        }
+        "loader-image" => {
+            crate::build_image::loader_image(
+                a[0].as_u64()
+                    .ok_or_else(|| Error::value("invalid image length"))?,
+            )?;
+            Value::Null
+        }
+        "loader-summary" => json!(crate::build_image::loader_summary(
+            a[0].as_u64()
+                .and_then(|v| usize::try_from(v).ok())
+                .ok_or_else(|| Error::value("invalid image length"))?,
+            crate::text(&a[1])?
+        )?),
+        "stub-inspect" => crate::build_image::stub(
+            &bytes(&a[0])?,
+            crate::text(&a[1])?,
+            crate::text(&a[2])?,
+            crate::text(&a[3])?,
+        )?,
+        "stub-lock" => crate::build_image::stub_lock(
+            if a[0].is_null() {
+                None
+            } else {
+                Some(crate::text(&a[0])?)
+            },
+            crate::text(&a[1])?,
+            a[2].as_u64()
+                .and_then(|v| u16::try_from(v).ok())
+                .ok_or_else(|| Error::value("invalid stub version"))?,
+            crate::text(&a[3])?,
+            a[4].as_bool()
+                .ok_or_else(|| Error::value("expected update flag"))?,
+            a[5].as_bool()
+                .ok_or_else(|| Error::value("expected release flag"))?,
+        )?,
         "mmio-check" => {
             fn files(value: &Value) -> Result<Vec<(String, String)>> {
                 value

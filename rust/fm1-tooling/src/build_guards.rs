@@ -58,7 +58,7 @@ fn contains_call(line: &str) -> bool {
 static SOFT: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?m)[\s\x1c-\x1f](__(?:add|sub|mul|div|neg|cmp|eq|ne|lt|le|gt|ge|un|extendsf|truncdf|fixdf|fixunsdf|floatsidf|floatunsidf|floatdidf)[\p{L}\p{N}_]*df[\p{L}\p{N}_]*)$").unwrap()
 });
-fn symbol(text: &str, name: &str) -> Result<Option<i128>> {
+pub(crate) fn symbol(text: &str, name: &str) -> Result<Option<i128>> {
     let regex = Regex::new(&format!(
         r"(?m)^([0-9a-f]+) .*[\s\x1c-\x1f]{}$",
         regex::escape(name)
@@ -72,7 +72,7 @@ fn symbol(text: &str, name: &str) -> Result<Option<i128>> {
         })
         .transpose()
 }
-fn quoted(text: &str) -> String {
+pub(crate) fn quoted(text: &str) -> String {
     let quote = if text.contains('\'') && !text.contains('"') {
         '"'
     } else {
@@ -120,7 +120,7 @@ fn list(values: &[String]) -> String {
             .join(", ")
     )
 }
-fn decimal_word(text: &str) -> Result<u32> {
+pub(crate) fn decimal_word(text: &str) -> Result<u32> {
     let (negative, digits) = text.strip_prefix('-').map_or((false, text), |v| (true, v));
     let mut value = 0u32;
     for c in digits.chars() {
@@ -152,6 +152,30 @@ fn decimal_word(text: &str) -> Result<u32> {
     } else {
         value
     })
+}
+pub(crate) fn rom_addresses(
+    disassembly: &str,
+    mut emit: impl FnMut(u32) -> Result<()>,
+) -> Result<()> {
+    for line in lines(disassembly) {
+        let Some(instruction) = LINE.captures(line) else {
+            continue;
+        };
+        for capture in REFERENCES.captures_iter(&instruction[3]) {
+            let value = if let Some(decimal) = capture.get(1) {
+                decimal_word(decimal.as_str())?
+            } else {
+                capture[2].bytes().fold(0u32, |v, c| {
+                    v.wrapping_mul(16)
+                        .wrapping_add((c as char).to_digit(16).unwrap())
+                })
+            };
+            if (0xffc00000..0xffd00000).contains(&value) {
+                emit(value)?;
+            }
+        }
+    }
+    Ok(())
 }
 pub fn check(
     image: &[u8],
@@ -186,24 +210,10 @@ pub fn check(
             lines(ram_text).filter(|line| LINE.is_match(line)).count()
         ));
     }
-    for line in lines(disassembly) {
-        let Some(instruction) = LINE.captures(line) else {
-            continue;
-        };
-        for capture in REFERENCES.captures_iter(&instruction[3]) {
-            let value = if let Some(decimal) = capture.get(1) {
-                decimal_word(decimal.as_str())?
-            } else {
-                capture[2].bytes().fold(0u32, |v, c| {
-                    v.wrapping_mul(16)
-                        .wrapping_add((c as char).to_digit(16).unwrap())
-                })
-            };
-            if (0xffc00000..0xffd00000).contains(&value) {
-                errors.push(format!("reference to ROM address {value:#010x}"));
-            }
-        }
-    }
+    rom_addresses(disassembly, |value| {
+        errors.push(format!("reference to ROM address {value:#010x}"));
+        Ok(())
+    })?;
     if image.len() > 0x8dfbc {
         errors.push(format!("image {} B exceeds the app slot", image.len()));
     }

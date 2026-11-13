@@ -144,6 +144,15 @@ def generate():
 
 # ---- update loader
 
+def _policy(method, args):
+    try:
+        return rust_tooling.call('build.' + method, args)
+    except rust_tooling.ToolError as error:
+        if error.kind == 'SystemExit':
+            raise SystemExit(str(error)) from None
+        raise ValueError(str(error)) from None
+
+
 def crc16(d, c=0):
     return fm1pkg_make.crc16(d, c)
 
@@ -173,17 +182,12 @@ def build_loader():
                                ("common/bin/objdump", "-h", elf),
                                ("common/bin/objdump", "-t", elf))
     (LDR / "loader.dis").write_text(dis)
-    for ln in hdr.splitlines():     # the loader rewrites the flash: nothing may run from XIP
-        p = ln.split()
-        if len(p) > 4 and p[1].startswith(".") and int(p[3], 16) >= 0x02000000 and int(p[2], 16):
-            raise SystemExit(f"loader: section {p[1]} at {p[3]} is outside RAM")
+    _policy('loader-sections', [hdr])
     image = (LDR / "loader.bin").read_bytes()
-    if not image or len(image) > 0x14000:
-        raise SystemExit("loader: image empty or too big")
+    _policy('loader-image', [len(image)])
     ota = ldr_wrap(image)
     (LDR / "ota.bin").write_bytes(ota)
-    bss = [int(ln.split()[0], 16) for ln in syms.splitlines() if ln.rstrip().endswith("_bss_end")]
-    print(f"loader: image {len(image)} B at {LOADER_LOAD:#x}" + (f", bss end {bss[0]:#x}" if bss else ""))
+    print(_policy('loader-summary', [len(image), syms]))
     print(f"loader: ota.bin {len(ota)} B")
     return ota
 
@@ -209,44 +213,17 @@ def build_stub():
                                ("common/bin/objdump", "-t", elf))
     (STB / "stub.dis").write_text(dis)
     img = (STB / "stub.bin").read_bytes()
-    for ln in hdr.splitlines():     # no .data, no .bss: nothing but .text may have a size
-        p = ln.split()
-        if len(p) > 3 and p[0].isdigit() and p[1].startswith(".") and int(p[2], 16) and \
-                p[1] not in (".text", ".shstrtab", ".symtab", ".strtab"):
-            raise SystemExit(f"stub: section {p[1]} holds {int(p[2], 16)} B; the stub is code and constants only")
-    m = re.search(r"^([0-9a-f]+) .*\s_start$", syms, re.M)
-    if not m or int(m.group(1), 16) != STUB_XIP:
-        raise SystemExit(f"stub: _start is not at {STUB_XIP:#x}")
-    if img[:4] != bytes.fromhex("04818000"):
-        raise SystemExit(f"stub: starts with {img[:4].hex()}, not the entry the SPL expects (goto +4; rts)")
-    if not fm1pkg_make.has_stub(img + bytes(STUB_LEN)):
-        raise SystemExit("stub: no CRSTUB signature at offset 8")
-    if not img or len(img) > STUB_LEN - 256:     # keep a margin: a stub that grows to the brim cannot be fixed
-        raise SystemExit(f"stub: {len(img)} B does not fit {STUB_LEN} B with 256 B to spare")
-    for ln in dis.splitlines():     # nothing may call or load an address in the chip ROM (as the app's check)
-        mm = LINE.match(ln)
-        for v in (re.findall(r"= (-?\d+) <|call -?\d+ <[^:>]*: ([0-9a-f]+) >", mm.group(3)) if mm else ()):
-            val = (int(v[0]) & 0xFFFFFFFF) if v[0] else int(v[1], 16) & 0xFFFFFFFF
-            if 0xFFC00000 <= val < 0xFFD00000:
-                raise SystemExit(f"stub: reference to ROM address {val:#010x}")
-    used = len(img)
-    img += b"\xff" * (STUB_LEN - len(img))
-    ver, sha = fm1pkg_make.stub_version(img), hashlib.sha256(img).hexdigest()
-    print(f"stub: {used} B of {STUB_LEN} ({100 * used / STUB_LEN:.1f}%), version {ver}, sha256 {sha[:16]}")
+    inspected = _policy('stub-inspect', [list(img), hdr, syms, dis])
+    img = bytes(inspected['image'])
+    print(inspected['line'])
     lock = src / "stub.lock"
-    want = lock.read_text().split() if lock.exists() else []
-    if want != [str(ver), sha]:
-        if os.environ.get("FM1_STUB_LOCK") == "update":
-            lock.write_text(f"{ver} {sha}\n")
-            print(f"stub: {lock.relative_to(SRC)} updated")
-        else:
-            msg = (f"the boot stub differs from {lock.relative_to(SRC)} ({' '.join(want)[:20] or 'none'}..): installing "
-                   "this build rewrites sector 0x4000, the one window an interruption is not rescued in. If the "
-                   "change is meant: bump STUB_VERSION (firmware/stub/stub_core.h), rebuild with "
-                   "FM1_STUB_LOCK=update, and say so in the release notes")
-            if VERSION:
-                raise SystemExit("build: " + msg)
-            print("WARNING: " + msg)
+    decision = _policy('stub-lock', [lock.read_text() if lock.exists() else None,
+                                   str(lock.relative_to(SRC)), inspected['version'], inspected['sha'],
+                                   os.environ.get('FM1_STUB_LOCK') == 'update', bool(VERSION)])
+    if decision['kind'] == 'update':
+        lock.write_text(decision['write'])
+    if 'line' in decision:
+        print(decision['line'])
     return img
 
 
@@ -341,21 +318,13 @@ def main():
     ap.add_argument("--release", metavar="X.Y[.Z]", help="release build: identity FM-1_7XXYYZZ, version string X.Y[.Z]")
     ap.add_argument("--sdk", type=Path, help="JieLi AC79 SDK checkout (default: $AC79_SDK)")
     a = ap.parse_args()
-    name = "naiwan91.fwsc"
-    if a.release:
-        # identity FM-1_7 + major, minor, patch as two digits each (0.1 -> FM-1_7000100): FM-1 is the
-        # model the update tools match on; the number is ours (X0X is FM-1_9...). Digits only after the
-        # underscore, as the tools parse it.
-        m = re.fullmatch(r"(\d{1,2})\.(\d{1,2})(?:\.(\d{1,2}))?(-[A-Za-z0-9]+)?", a.release)
-        if not m:
-            raise SystemExit(f"--release {a.release}: use X.Y[.Z][-suffix], up to two digits each")
-        PRODUCT = "FM-1_7%02d%02d%02d" % (int(m[1]), int(m[2]), int(m[3] or 0))
-        VERSION = a.release.upper()
-        name = f"naiwan91-{a.release}.fwsc"
+    release = _policy('release', [a.release, PRODUCT, VERSION])
+    PRODUCT, VERSION, name = release['product'], release['version'], release['name']
     fm1pkg_make.SDK = a.sdk
     for rel, sha in SDK_SHA256.items():          # fail early without the SDK
-        if hashlib.sha256(fm1pkg_make.sdk_file(rel)).hexdigest() != sha:
-            print(f"warning: SDK {rel} differs from AC79NN_SDK_V1.2.1; the package will not match the reference")
+        note = _policy('sdk-check', [rel, list(fm1pkg_make.sdk_file(rel)), sha])
+        if note:
+            print(note)
     OUT.mkdir(parents=True, exist_ok=True)
     with ThreadPoolExecutor(2) as ex:
         gen, ldr = ex.submit(generate), ex.submit(build_loader)

@@ -5,6 +5,7 @@
 pub mod assets;
 pub mod build;
 pub mod build_guards;
+pub mod build_image;
 pub mod debugger;
 pub mod installer;
 pub mod lz4;
