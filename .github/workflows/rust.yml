@@ -31,6 +31,8 @@ jobs:
         run: bash tests/rust_rescue.sh build/r01-source
       - name: Loader block compression and package wrappers
         run: python3 tests/rust_build_policy.py build/r01-source
+      - name: Vendor image, disassembly and HAL source guards
+        run: python3 tests/rust_build_guards.py build/r01-source
       - uses: actions/upload-artifact@v4
         if: always()
         with:

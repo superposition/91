@@ -312,50 +312,10 @@ def build_app(stub):
 
 
 def check(img, syms, dis, rt):
-    errors, notes = [], []
-    m = re.search(r"^([0-9a-f]+) .*\s_start$", syms, re.M)
-    if not m or int(m.group(1), 16) != APP_XIP:
-        errors.append(f"_start is not at {APP_XIP:#x}")
-    if img[:4] != bytes.fromhex("04818000"):
-        errors.append(f"image starts with {img[:4].hex()}, not the entry stub")
-    rt_calls = [ln for ln in rt.splitlines() if re.search(r"\bcall\b", ln)]
-    if rt_calls:                    # RAM code runs with the flash off: no calls into XIP
-        errors.append(f".ram_text contains calls: {rt_calls[:3]}")
-    else:
-        notes.append(f".ram_text: {len([ln for ln in rt.splitlines() if LINE.match(ln)])} insns, no calls")
-    for ln in dis.splitlines():     # nothing may call or load an address in the chip ROM
-        mm = LINE.match(ln)
-        if not mm:
-            continue
-        for v in re.findall(r"= (-?\d+) <|call -?\d+ <[^:>]*: ([0-9a-f]+) >", mm.group(3)):
-            val = (int(v[0]) & 0xFFFFFFFF) if v[0] else int(v[1], 16) & 0xFFFFFFFF
-            if 0xFFC00000 <= val < 0xFFD00000:
-                errors.append(f"reference to ROM address {val:#010x}")
-    if len(img) > APP_SLOT:
-        errors.append(f"image {len(img)} B exceeds the app slot")
-    if len(img) - STUB_LEN > fm1pkg_make.BODY_MAX:
-        errors.append(f"app body {len(img) - STUB_LEN} B overlaps the commit-marker sector (at most {fm1pkg_make.BODY_MAX} B)")
-    else:
-        notes.append(f"body {len(img) - STUB_LEN} B of {fm1pkg_make.BODY_MAX} below the commit marker's sector")
-    # the FPU is single precision; a soft-double routine in the image means a double crept in
-    soft = sorted(set(re.findall(r"\s(__(?:add|sub|mul|div|neg|cmp|eq|ne|lt|le|gt|ge|un|extendsf|truncdf|fixdf|fixunsdf|floatsidf|floatunsidf|floatdidf)\w*df\w*)$", syms, re.M)))
-    if soft:
-        errors.append(f"soft-double routines linked: {soft[:6]} (a double in the code)")
-    else:
-        notes.append("no soft-double routines (single-precision FPU only)")
-
-    def sym(name):
-        mm = re.search(r"^([0-9a-f]+) .*\s" + name + r"$", syms, re.M)
-        return int(mm.group(1), 16) if mm else 0
-    bss = sym("_bss_end") - 0x01C08000
-    pool = sym("_pool_end") - sym("_pool_start")
-    notes.append(f"image {len(img)} B; RAM .data+.bss {bss} B of 98304; pool {pool} B of {0x54000}")
-    if bss > 96 * 1024:
-        errors.append("RAM region overflow")
-    spare = 4096                                  # (8192 until the reverb's predelay line grew a chunk for the second core)
-    if 0x54000 - pool < spare:                    # keep some of the pool spare
-        errors.append(f"pool headroom {0x54000 - pool} B < {spare} B")
-    return errors, notes
+    try:
+        return tuple(rust_tooling.call('build.check',[list(img),syms,dis,rt]))
+    except rust_tooling.ToolError as error:
+        raise ValueError(str(error)) from None
 
 
 # Every hardware register access lives in hal/. In src/ and loader/ (comments stripped):
@@ -367,39 +327,12 @@ def check(img, syms, dis, rt):
 #  - no inline asm, except the empty compiler barrier RING_PUBLISH() (emits no instruction);
 #  - no HAL register macro (a hal/ #define that is, or expands to, a volatile access).
 # Linker symbols (_bss_start[], _rt_load[], ...) are plain C objects and pass.
-MMIO_LIT = re.compile(r"\b0x0*(1[0-3][0-9a-f]{3}|4[0-3][0-9a-f]{3}|5[01][0-9a-f]{3}|1ee[0-9a-f]{4}|"
-                      r"1c7f[0-9a-f]{3}|20[0-9a-f]{5})u?l?\b", re.I)
-MMIO_CAST = re.compile(r"\(\s*(?:const\s+)?volatile\b[^()]*\*\s*\)(?!\s*&)")
-MMIO_ASM = re.compile(r"\b(?:__asm__|asm)\b(?!\s+volatile\s*\(\s*\"\"\s*:::\s*\"memory\"\s*\))")
-
-
 def mmio_check():
-    def strip(s):
-        s = re.sub(r"/\*.*?\*/", lambda m: "\n" * m.group(0).count("\n"), s, flags=re.S)
-        return re.sub(r"//[^\n]*", "", s)
-    defs = {}
-    for h in sorted((FW / "hal").glob("*.h")):
-        for m in re.finditer(r"^#define\s+(\w+)(?:\([^)]*\))?\s+(.*)$", strip(h.read_text()), re.M):
-            defs[m.group(1)] = m.group(2)
-    regs = {n for n, b in defs.items() if re.search(r"\bvolatile\b", b)}
-    while True:                                   # macros built on register macros (FM1_WR_LIMIT_H -> FM1_X2)
-        more = {n for n, b in defs.items() if n not in regs and set(re.findall(r"\w+", b)) & regs}
-        if not more:
-            break
-        regs |= more
-    errors = []
-    for f in sorted([*(FW / "src").rglob("*.[ch]"), *(FW / "loader").glob("*.c")]):
-        for no, ln in enumerate(strip(f.read_text()).splitlines(), 1):
-            where = f"{f.relative_to(FW)}:{no}"
-            for rx, what in ((MMIO_LIT, "register/window address"), (MMIO_CAST, "volatile pointer cast"),
-                             (MMIO_ASM, "inline asm")):
-                m = rx.search(ln)
-                if m:
-                    errors.append(f"{where}: {what} outside hal/ ({m.group(0).strip()}); add a hal/ helper")
-            used = set(re.findall(r"\b[A-Z_][A-Z0-9_]*\b", ln)) & regs
-            if used:
-                errors.append(f"{where}: HAL register macro {sorted(used)[0]} outside hal/; use a hal/ helper")
-    return errors
+    headers = [(str(h.relative_to(FW)), h.read_text())
+               for h in sorted((FW / "hal").glob("*.h"))]
+    sources = [(str(f.relative_to(FW)), f.read_text())
+               for f in sorted([*(FW / "src").rglob("*.[ch]"), *(FW / "loader").glob("*.c")])]
+    return rust_tooling.call('build.mmio-check', [headers, sources])
 
 
 def main():
