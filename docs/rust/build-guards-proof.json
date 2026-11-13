@@ -1,0 +1,52 @@
+{
+  "tested_source": "757b2864c5e433c880b013dfb3af6d27147d9bcb",
+  "platforms": {
+    "windows": {
+      "result": {
+        "cases": 927,
+        "image_cases": 605,
+        "mmio_cases": 322,
+        "source_hashes": 440,
+        "sha256": "8827e47836614e7e21720d350f5a3f723539cf2c547cf735b2bf30b02d299aad"
+      },
+      "log": {
+        "bytes": 420,
+        "sha256": "6c5e9cf2abfd39254f31fede4f57cee26a06bd56e4b7fa69cb9a0b9d41b1970b"
+      }
+    },
+    "linux": {
+      "result": {
+        "cases": 927,
+        "image_cases": 605,
+        "mmio_cases": 322,
+        "source_hashes": 440,
+        "sha256": "8871694d9b17bc4f70d63b2016b0e6c089181b16dcd88871718c745af9211ebe"
+      },
+      "log": {
+        "bytes": 452,
+        "sha256": "ec8c51f51bd5f152cc384422f8fde39832de76e5e28beeff5d4e4ce54259cd2a"
+      }
+    }
+  },
+  "rust": "1.94.1",
+  "regex": "1.13.1",
+  "strict_clippy": "pass on Windows and Linux",
+  "frozen_source_hashes": 440,
+  "actual_consumers": [
+    "tools/build.py::check",
+    "tools/build.py::mmio_check"
+  ],
+  "platform_difference": "Each result matches its own immutable Python oracle. Native path spelling and ordering deliberately preserve platform-specific diagnostics, so Windows and Linux combined trace hashes differ.",
+  "request_limits": {
+    "image_bytes": 1100000,
+    "symbol_bits": 127,
+    "scope": "Checked host request limits exceed valid image/address sizes; they are not target resource limits."
+  },
+  "unicode": "Explicit Python word/whitespace classes, CRLF-aware splitlines, printable-string quoting and Nd decimal conversion; pinned regex supplies the Unicode database. Real vendor artifacts are ASCII.",
+  "remaining": [
+    "Compiler graph and process delivery",
+    "Stub/loader linker-section and lock checks",
+    "SDK lookup",
+    "Physical execution, stack and timing acceptance"
+  ]
+}
