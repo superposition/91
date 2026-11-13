@@ -88,3 +88,110 @@ fn conservative_admission_and_wrap_publish_each_slot_before_its_index() {
     );
     assert_eq!(receive(&mut ring, 65), None);
 }
+
+struct Tx {
+    queue: [u32; 64],
+    output: [u8; 64],
+    write: u32,
+    read: u32,
+    clock: core::cell::Cell<u32>,
+    clock_reads: core::cell::Cell<u32>,
+    denied: bool,
+    published: Vec<u32>,
+}
+impl fm1_hal::usb_host::Transmit for Tx {
+    fn write(&self) -> u32 {
+        self.write
+    }
+    fn read(&self) -> u32 {
+        self.read
+    }
+    fn set_read(&mut self, v: u32) {
+        self.read = v;
+    }
+    fn word(&self, i: usize) -> u32 {
+        self.queue[i]
+    }
+    fn output(&mut self, i: usize, v: u8) {
+        self.output[i] = v;
+    }
+    fn publish(&mut self) {
+        self.published.push(self.read);
+    }
+    fn now(&self) -> u32 {
+        let n = self.clock.get();
+        self.clock.set(n.wrapping_add(1));
+        self.clock_reads.set(self.clock_reads.get() + 1);
+        n
+    }
+    fn grant(&mut self, csr: u32) -> bool {
+        !self.denied && csr & 3 == 0
+    }
+}
+fn tx() -> Tx {
+    let mut q = [0; 64];
+    for (i, v) in q.iter_mut().enumerate() {
+        *v = 0x7f40_9009 + ((i as u32) << 16);
+    }
+    Tx {
+        queue: q,
+        output: [0xa5; 64],
+        write: 4,
+        read: 0,
+        clock: core::cell::Cell::new(499),
+        clock_reads: core::cell::Cell::new(0),
+        denied: false,
+        published: Vec::new(),
+    }
+}
+#[test]
+fn host_ack_uses_the_two_original_clock_read_points_and_keeps_slots_until_ack() {
+    use fm1_hal::usb_host::{transmit, TxAction, TxState};
+    let mut io = tx();
+    let mut state = TxState {
+        timestamp: 0,
+        count: 1,
+        errors: 15,
+        reserved: [0; 2],
+    };
+    assert_eq!(transmit(&mut io, &mut state, 0, 4), TxAction::Send(4));
+    assert_eq!(io.read, 1);
+    assert_eq!(io.published, vec![0]);
+    assert_eq!(io.clock_reads.get(), 2);
+    assert_eq!(state.timestamp, 500);
+    assert_eq!(&io.output[..4], &io.queue[1].to_le_bytes());
+    assert_eq!((state.count, state.errors), (1, 0));
+    let before = io.output;
+    assert_eq!(transmit(&mut io, &mut state, 1, 64), TxAction::Wait);
+    assert_eq!(io.read, 1);
+    assert_eq!(io.output, before);
+}
+#[test]
+fn host_stall_retry_expiry_and_unknown_retirement_never_consume_or_rewrite() {
+    use fm1_hal::usb_host::{transmit, TxAction, TxState};
+    let mut io = tx();
+    let mut state = TxState {
+        timestamp: 0,
+        count: 1,
+        errors: 15,
+        reserved: [0; 2],
+    };
+    assert_eq!(transmit(&mut io, &mut state, 0x24, 64), TxAction::Fail);
+    assert_eq!(io.clock_reads.get(), 0);
+    assert_eq!(state.errors, 15);
+    assert_eq!(transmit(&mut io, &mut state, 4, 64), TxAction::Fail);
+    assert_eq!(state.errors, 16);
+    io.clock.set(2);
+    state.errors = 255;
+    assert_eq!(transmit(&mut io, &mut state, 4, 64), TxAction::Retry);
+    assert_eq!(state.errors, 0); // existing u8 pre-increment compatibility
+    io.denied = true;
+    assert_eq!(transmit(&mut io, &mut state, 0, 64), TxAction::Fail);
+    assert_eq!(io.read, 0);
+    assert_eq!(io.output, [0xa5; 64]);
+    io.denied = false;
+    io.clock.set(500);
+    assert_eq!(transmit(&mut io, &mut state, 0, 64), TxAction::Fail);
+    assert_eq!(io.read, 0);
+    assert_eq!(state.count, 1);
+}

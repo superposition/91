@@ -1,0 +1,109 @@
+{
+  "ticket": 19,
+  "base": "509e5645253b5bde37de57354c600daa5c93eba4",
+  "scope": "active host TX ACK/FIFO/error/timeout/queue and retained-source policy",
+  "rust_toolchain": "1.94.1",
+  "miri_toolchain": "nightly-2026-08-28",
+  "miri_flags": "-Zmiri-strict-provenance",
+  "hardware_access": false,
+  "physical_usb1_stop_provider_qualified": false,
+  "frozen_source": "../baseline-2026-11-11/source;440 files verified",
+  "source_sha256": {
+    "firmware/src/dsp/rust_usb.h": "957a36b080bc826bf438f58244c01fa365086aff5daf61bed6c1726fbe1dc2e5",
+    "firmware/src/usb_host.c": "c365e26385570669b96b827c9337cf99cecf42c1fc8cdd9c0f64a426ceaa358b",
+    "rust/fm1-hal/src/usb_host.rs": "0c4de20f9be201ee1ad1f7ee023e182aafaeb0aecae17ac3441aff2cf083589f",
+    "rust/fm1-hal/tests/usb_host.rs": "65d99c01f240cb99227e3f917967276cd33bb76c38d0acbcac75226dd14aafcd",
+    "rust/fm1-jam-bridge/src/usb_host.rs": "4cf4dedc003e5ac6556714f500872d33c3ab0523ab3580b2b8121f002d2dea16",
+    "tests/reference/usb_host_tx_reference.c": "ce3bfbb330701601996baf833e511153369c30d0501816ac37ea029219e76756",
+    "tests/rust_usb_host_tx.sh": "accd0419ef065a470f0f07ad0785ec2e0a7ac7e9d9fb316e1275aebd307f4025"
+  },
+  "parity": [
+    {
+      "path": "build/usb-host-tx/c0.wasm",
+      "cases": 158978,
+      "bytes": 62319376,
+      "sha256": "1d17801c0c5469fa6a03629c68554d5928b971a54de699e7282b79f1ec615483"
+    },
+    {
+      "path": "build/usb-host-tx/rust.wasm",
+      "cases": 158978,
+      "bytes": 62319376,
+      "sha256": "1d17801c0c5469fa6a03629c68554d5928b971a54de699e7282b79f1ec615483"
+    }
+  ],
+  "endpoint_regression": [
+    {
+      "path": "build/usb-host-tx/endpoints/c0.wasm",
+      "cases": 272,
+      "bytes": 29376,
+      "sha256": "6183cd8a3c050be0cd8956cbb034e0a2e85db40ecd17d8253b4337559a448c3a"
+    },
+    {
+      "path": "build/usb-host-tx/endpoints/rust.wasm",
+      "cases": 266,
+      "bytes": 28728,
+      "sha256": "9e0fefa5f1446adacb7cd03dc616672d444adfef6f130dd4581fd0dba51c649a"
+    }
+  ],
+  "workspace_tests": 178,
+  "explicit_command_exits": {
+    "workspace": 0,
+    "nostd": 0,
+    "clippy": 0,
+    "fmt": 0
+  },
+  "miri_tests": 8,
+  "memory": {
+    "writable_state_growth": 0,
+    "new_payload_bytes": 0,
+    "new_packet_cache_bytes": 0,
+    "private_metadata_bytes": 8,
+    "private_metadata_alignment": 4,
+    "context_pi32v2_bytes": 28,
+    "context_native64_bytes": 56,
+    "vendor_immutable_descriptor_bytes": 28,
+    "vendor_immutable_symbol": ".rodata.uh_tx_poll.context"
+  },
+  "vendor_c_frames_before_after_bytes": {
+    "usb_poll": [
+      60,
+      68
+    ],
+    "fm1_timer5_irq": [
+      60,
+      60
+    ],
+    "uh_ctl": [
+      40,
+      40
+    ]
+  },
+  "vendor_context": "compile-only vendor -Os USB1/HAL0 and HAL1 main/engine C; new Rust/LTO/whole-chain/target stack+timing unqualified; endpoint source remains pinned",
+  "remaining": "Host enumeration/control/hub/lifecycle and CDC/UAC/device poll/reset/retry C bodies; positive physical providers/traffic/cache/recording/link/stack/deadlines open",
+  "artifact_sha256": {
+    "build/usb-host-tx/reference.bin": "1d17801c0c5469fa6a03629c68554d5928b971a54de699e7282b79f1ec615483",
+    "build/usb-host-tx/c0.bin": "1d17801c0c5469fa6a03629c68554d5928b971a54de699e7282b79f1ec615483",
+    "build/usb-host-tx/rust.bin": "1d17801c0c5469fa6a03629c68554d5928b971a54de699e7282b79f1ec615483",
+    "build/usb-host-tx/c0.wasm": "fee1b299fd6b7d0137b25a3953386995e440f0ca219a958969ead4a15e1e8491",
+    "build/usb-host-tx/rust.wasm": "c6337284d52e98fd2fbbdacb1be7d7f17f0c26f74b790468c837409b1fc512f5",
+    "build/usb-host-tx/parity.jsonl": "e2302a8e104250cac987a77553cf7a599d9e4621f385fadab129d20c8b1370b6",
+    "build/usb-host-tx/final.log": "6236cf8d392362ad53c3c82ce9fe69219d32206f7a99730bee8997633df8a1b6",
+    "build/usb-host-tx/workspace.log": "0221a45956866c283b0e6b6cc1747167ec4054414d20f613d04beaac2a146abb",
+    "build/usb-host-tx/nostd.log": "2e03f270615ba346dbb69bbfe08b82f22a5f094a3d1b7bdb463f9545ff8b6aee",
+    "build/usb-host-tx/clippy.log": "f4403412cb20dc7d8a0a94c08c9c8853e4bac9b3e8489158834f30512311ed97",
+    "build/usb-host-tx/fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/usb-host-tx/check-exits.json": "5e364ffa0c9c49e418654a925385bef208023e6665802c69f473ffc642f3dd42",
+    "build/usb-host-tx/miri.log": "d49387f471b973e3bf8bc1eee3ea4c701557e13f1dfbc781def3c06a5c917015",
+    "build/usb-host-tx/target-0/main.o": "fc423ee421e546290ffc5901d5e900b710afea6008ac4e330a751e545c94e078",
+    "build/usb-host-tx/target-1/main.o": "6c8952a0fc9fd148f181627d02fabdc8920733429d57a7180949dee734703f54",
+    "build/usb-host-tx/target-0/engine.o": "e8a852d865f4bd288f6727c5fbfe85c9de9cd2d162dc74318530137661d34de3",
+    "build/usb-host-tx/target-1/engine.o": "fe190e19a53985a0c750ec53de7280b2f12c57d89e7330aa6e438b7127daeb68",
+    "build/usb-host-tx/target-0/main-symbols.txt": "10aaa6cf99c2a3822c4131bca462bc6c6950ee92c13175368d9a4ccbfaa268e7",
+    "build/usb-host-tx/after.dis": "ab3a36a9988966410184f9af1b08f160ae700aa9b34fc93afed755fd66037b2b",
+    "build/usb-host-tx/prologues.json": "0ae5841e09ff6e3eaf495221e577dde7251d56d6dd2a48ff535d43dca394fd9c",
+    "build/usb-host-tx/compile-target.sh": "3e2c61d09331891a6402fcc39527a7f94876a864eb16e4d720c513e796ace3a1",
+    "build/usb-host-tx/endpoint-regression.log": "08632eea84720253e9cc0b2412902703cfeac407a578fc29316d422dd2e929e4",
+    "build/usb-host-tx/endpoints/c0.wasm": "52491a95b72b00c5e3547ea0ea49631d5752fe212277fbe6bdef0eba232ec38b",
+    "build/usb-host-tx/endpoints/rust.wasm": "39e84985ea147f060533acb327ae78269019f2fca884ad0f526f740c26d7fb50"
+  }
+}

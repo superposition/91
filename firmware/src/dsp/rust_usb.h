@@ -46,6 +46,19 @@ typedef struct {
 } fm1_usb_host_rx_t;
 _Static_assert(sizeof(fm1_usb_host_rx_t)==5u*sizeof(void *),"USB host RX context ABI");
 int32_t fm1_rust_usb_host_receive(const fm1_usb_host_rx_t *,uint32_t);
+typedef struct {uint32_t timestamp;uint8_t count,errors,reserved[2];} fm1_usb_host_tx_state_t;
+typedef struct {
+    const uint32_t *data;
+    const volatile uint32_t *write;
+    volatile uint32_t *read;
+    volatile uint8_t *output;
+    const volatile uint32_t *clock;
+    void (*publish)(void);
+    volatile uint8_t *lease;
+} fm1_usb_host_tx_t;
+_Static_assert(sizeof(fm1_usb_host_tx_state_t)==8 && sizeof(fm1_usb_host_tx_t)==7u*sizeof(void *),"USB host TX ABI");
+enum {FM1_USB_HOST_TX_WAIT=0,FM1_USB_HOST_TX_RETRY=1,FM1_USB_HOST_TX_FAIL=2,FM1_USB_HOST_TX_SEND=3};
+uint32_t fm1_rust_usb_host_transmit(const fm1_usb_host_tx_t *,fm1_usb_host_tx_state_t *,uint32_t csr,uint32_t maximum);
 /*64B PI32 caller-stack descriptor; no persistent state or payload. */
 typedef struct {
     uint32_t flags;void *slots[9];void (*publish)(void);
