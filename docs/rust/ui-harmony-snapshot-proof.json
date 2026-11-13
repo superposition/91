@@ -1,0 +1,49 @@
+{
+  "scope": "foreground readonly harmony capture/preview source exclusion",
+  "source_state_bytes": 208,
+  "source_config_bytes": 48,
+  "physical": "named saved-IRQ capture, restore before Rust math/output access",
+  "hosted": "serialized boundary unchanged",
+  "protected": {
+    "calls": 262144,
+    "source_bytes": 256,
+    "copies": 67108864,
+    "deliveries": 131072,
+    "bad": 0,
+    "early_output": 0
+  },
+  "negative_control": {
+    "calls": 262144,
+    "source_bytes": 256,
+    "copies": 67108864,
+    "deliveries": 16842752,
+    "bad": 16678822,
+    "early_output": 0
+  },
+  "IRQ_low_word_variants": 65536,
+  "high_word_sentinel": "0xa50f0000",
+  "outer_context_modes": 2,
+  "operations": [
+    "preview",
+    "capture"
+  ],
+  "harmony_native": {
+    "modes": 6,
+    "rows": 1194720,
+    "flavors": [
+      "immutable R01",
+      "current C0",
+      "combined Rust",
+      "harmony-only Rust"
+    ],
+    "status": "exact musical fields/callbacks/MIDI/RNG and fixed goldens"
+  },
+  "footprint": {
+    "extra_persistent_bytes": 0,
+    "extra_payloads": 0,
+    "extra_counters": 0,
+    "existing_stack_packets": "208+48 bytes reused",
+    "target_latency_stack": "requires adopted-compiler/physical gate"
+  },
+  "ownership": "CPU0 harmony/history/scale/parameters only; no private worker/voice/sample span; no transition or publication changes"
+}

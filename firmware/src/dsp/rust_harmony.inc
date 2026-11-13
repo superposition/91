@@ -2,6 +2,7 @@
 /* Engine/render/drain numeric capture/publication only. Callback dispatch occurs after
  * every Rust borrow has ended; then the next phase recaptures state and RNG. */
 #include "rust_harmony_state.inc"
+#include "rust_harmony_snapshot.inc"
 static uint32_t harmony_transition(uint32_t kind,uint32_t a,uint32_t b,uint32_t d)
 {
     fm1_harm_state_t s;fm1_harm_config_t c;uint32_t action;
@@ -24,11 +25,11 @@ static void harmony_pad_retarget(void)
 }
 static int harmony_preview(int degree,int kind,int *pcs)
 {
-    fm1_harm_state_t s;fm1_harm_config_t c;harmony_read(&s,&c);
+    fm1_harm_state_t s;fm1_harm_config_t c;harmony_readonly(&s,&c);
     return fm1_rust_harm_preview(&s,&c,degree,kind,pcs);
 }
 static void harmony_capture(uint8_t *bytes)
 {
-    fm1_harm_state_t s;fm1_harm_config_t c;harmony_read(&s,&c);
+    fm1_harm_state_t s;fm1_harm_config_t c;harmony_readonly(&s,&c);
     (void)fm1_rust_harm_capture(&s,&c,bytes);
 }
