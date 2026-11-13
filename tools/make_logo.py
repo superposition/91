@@ -3,42 +3,41 @@
 """The deamonSLINKY mascot (the sprite of the boot card in firmware/src/app/ui.c, its colours) as PNGs for the web pages:
 web/img/slinky.png (a logo, 4 px a pixel) and web/img/favicon.png (32 x 32).  python tools/make_logo.py
 The pages carry them inline (tools/make_logo.py --inline rewrites the data: URIs in web/amb_installer.html)."""
-import base64
 import io
+import json
 import os
-import re
 import sys
-
 from PIL import Image
+import rust_tooling as _tools
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 UI = os.path.join(HERE, "..", "firmware", "src", "app", "ui.c")
-PAL = {"K": (27, 16, 34), "T": (27, 16, 34), "H": (242, 230, 196), "h": (196, 173, 126), "Y": (255, 212, 71),
-       "R": (224, 52, 79), "r": (156, 29, 58), "L": (255, 143, 143)}
+PAL = {key: tuple(value) for key, value in json.loads(
+    open(os.path.join(HERE, "data", "logo-palette.json"), encoding="utf-8").read()).items()}
+
+
+def _image(value):
+    width, height, data = value
+    return Image.frombytes("RGBA", (width, height), bytes(data)) if data else Image.new("RGBA", (width, height))
+
+
+def _call(method, args, adapter=None):
+    try:
+        return _tools.call("asset.logo." + method, args, adapter=adapter)
+    except _tools.ToolError as error:
+        cls = {"ValueError": ValueError, "IndexError": IndexError,
+               "AttributeError": AttributeError, "AssertionError": AssertionError}.get(error.kind)
+        if cls is None:
+            raise
+        raise cls(error.args[0]) from None
 
 
 def sprite():
-    t = open(UI, encoding="utf-8").read()
-    m = re.search(r"static const char \*const MASCOT\[23\] = \{(.*?)\};", t, re.S)
-    rows = re.findall(r'"([^"]*)"', m.group(1))
-    assert len(rows) == 23 and all(len(r) == 23 for r in rows), "the sprite changed shape"
-    return rows
+    return _call("sprite", [open(UI, encoding="utf-8").read()])
 
 
 def render(rows, scale, size=None):
-    w = 23 * scale
-    im = Image.new("RGBA", (w, w), (0, 0, 0, 0))
-    for y, r in enumerate(rows):
-        for x, c in enumerate(r):
-            if c in PAL:
-                for dy in range(scale):
-                    for dx in range(scale):
-                        im.putpixel((x * scale + dx, y * scale + dy), PAL[c] + (255,))
-    if size:
-        out = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-        out.paste(im, ((size - w) // 2, (size - w) // 2))
-        return out
-    return im
+    return _image(_call("render", [rows, scale, size, PAL]))
 
 
 def png(im):
@@ -47,23 +46,27 @@ def png(im):
     return b.getvalue()
 
 
+class _Adapter:
+    def __call__(self, action):
+        kind, args = action["kind"], action["args"]
+        if kind == "read_text":
+            return open(args[0], encoding="utf-8").read()
+        if kind == "png":
+            return list(png(_image(args)))
+        if kind == "mkdir":
+            os.makedirs(args[0], exist_ok=True)
+        elif kind == "write":
+            open(args[0], "wb").write(bytes(args[1]))
+        elif kind == "write_text":
+            open(args[0], "w", encoding="utf-8", newline="\n").write(args[1])
+        elif kind == "print":
+            print(args[0])
+        else:
+            raise RuntimeError("unknown logo adapter action: " + kind)
+
+
 def main():
-    rows = sprite()
-    logo, fav = png(render(rows, 4)), png(render(rows, 1, 32))
-    os.makedirs(os.path.join(HERE, "..", "web", "img"), exist_ok=True)
-    open(os.path.join(HERE, "..", "web", "img", "slinky.png"), "wb").write(logo)
-    open(os.path.join(HERE, "..", "web", "img", "favicon.png"), "wb").write(fav)
-    print("slinky.png %d B, favicon.png %d B" % (len(logo), len(fav)))
-    if "--inline" in sys.argv:
-        d1 = "data:image/png;base64," + base64.b64encode(logo).decode()
-        d2 = "data:image/png;base64," + base64.b64encode(fav).decode()
-        for name in ("amb_installer.html", os.path.join("editor", "index.html")):
-            p = os.path.join(HERE, "..", "web", name)
-            t = open(p, encoding="utf-8").read()
-            t = re.sub(r'(<img class="logo" src=")[^"]*(")', lambda m: m.group(1) + d1 + m.group(2), t)
-            t = re.sub(r'(<link rel="icon" type="image/png" href=")[^"]*(")', lambda m: m.group(1) + d2 + m.group(2), t)
-            open(p, "w", encoding="utf-8", newline="\n").write(t)
-            print("inlined into", p)
+    _call("main", [sys.argv[1:], HERE, UI, PAL], _Adapter())
 
 
 if __name__ == "__main__":

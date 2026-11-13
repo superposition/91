@@ -158,23 +158,9 @@ pub fn import_voice(
     name: &str,
     limits: Limits<'_>,
 ) -> Result<Value> {
-    let mut voices = Vec::new();
-    let mut at = 0;
-    while let Some(n) = data
-        .get(at..)
-        .and_then(|s| s.windows(2).position(|w| w == [240, 67]))
-    {
-        let start = at + n;
-        if start + 4104 > data.len() {
-            break;
-        }
-        if data[start + 3..start + 6] == [9, 32, 0] {
-            voices.extend(data[start + 6..start + 4102].chunks_exact(128));
-            at = start + 4104;
-        } else {
-            at = start + 1;
-        }
-    }
+    let voices: Vec<_> = fm1_formats::voice_file::BulkBanks::new(data)
+        .flat_map(|bank| bank.chunks_exact(128))
+        .collect();
     let voice = usize::try_from(index)
         .ok()
         .and_then(|i| voices.get(i))

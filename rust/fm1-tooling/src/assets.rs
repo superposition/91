@@ -3,7 +3,9 @@
 //! decisions are shared by native commands and the existing script bindings.
 use crate::{text, Adapter, Error, Result};
 use serde_json::{json, Value};
+pub mod dy;
 pub mod fonts;
+pub mod logo;
 pub fn assertion(message: impl Into<String>) -> Error {
     Error {
         kind: "AssertionError".into(),
@@ -119,6 +121,12 @@ pub fn request(method: &str, v: &Value, io: &mut impl Adapter) -> Result<Value> 
     let a = &v["args"];
     if let Some(method) = method.strip_prefix("font.") {
         return fonts::request(method, v, io);
+    }
+    if let Some(method) = method.strip_prefix("dy.") {
+        return dy::request(method, v, io);
+    }
+    if let Some(method) = method.strip_prefix("logo.") {
+        return logo::request(method, v, io);
     }
     Ok(match method {
         "pattern-data" => pattern_data(),

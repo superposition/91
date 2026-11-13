@@ -1,0 +1,320 @@
+{
+  "schema": 1,
+  "ticket": 22,
+  "checkpoint": "dy-voice-and-logo-generators",
+  "status": "qualified host generator slice; whole R21 remains open",
+  "base": "8c84886402500fee0fa530069b9d1a25050a7e75",
+  "source_fingerprint": "0f39522cb38411b67e0be29ca554cee166b623644eeef181a91a12c8ad3229af",
+  "source_fingerprint_encoding": "sha256 of sorted UTF-8 path + space + sha256 + LF",
+  "sources": {
+    "Cargo.lock": {
+      "bytes": 7030,
+      "sha256": "6a3201800d39efc96ab43ed77c0e48e8d0ea9d5b0ac5480892a694c7614d34cd"
+    },
+    "Cargo.toml": {
+      "bytes": 679,
+      "sha256": "e1b0bd0471ff7e7fba904743b87a689affede01a317d6ada96b2ed2433c38bb3"
+    },
+    "firmware/src/app/ui.c": {
+      "bytes": 403573,
+      "sha256": "a0daef47df279a16e13f078aa98c714e9f1294c72720e3850fb598fe25e7b35c"
+    },
+    "rust/fm1-authoring/src/lib.rs": {
+      "bytes": 12274,
+      "sha256": "f7d6d8d7a35daf132c5bffbf955fb4edefc44cf0269a9f5df784abfb0f28601c"
+    },
+    "rust/fm1-cli/Cargo.toml": {
+      "bytes": 444,
+      "sha256": "bd02753c37dc73b455cf6c54ec87aa47c70118f9a16854f69e230f1781b64a36"
+    },
+    "rust/fm1-cli/src/main.rs": {
+      "bytes": 5181,
+      "sha256": "60ea19a37ca1c39a240596cfaac6d7a50a5a36b8f638f813f41127cb4889bcdf"
+    },
+    "rust/fm1-formats/src/voice.rs": {
+      "bytes": 8959,
+      "sha256": "6c3e1e3c6c37fe2c50c31c87233fbbcacf11bff856e4a6fde0b68cc930a1072d"
+    },
+    "rust/fm1-formats/src/voice_file.rs": {
+      "bytes": 4903,
+      "sha256": "2dc21d5998b0e8f1daf389b554d2ae5cc8b0235055b1c34c10de00c1620d7a03"
+    },
+    "rust/fm1-formats/src/wire.rs": {
+      "bytes": 17502,
+      "sha256": "f4c5f7b0c744de169a59c8bef7b2cf27f2618fcb9d4529abe32fab8605a7c534"
+    },
+    "rust/fm1-formats/tests/bulk_banks.rs": {
+      "bytes": 1418,
+      "sha256": "9c27c421fd6688c6d89d3f1b6787c64f527a5d968a40de62d2b1392a5578e21e"
+    },
+    "rust/fm1-tooling/Cargo.toml": {
+      "bytes": 321,
+      "sha256": "98fb1a64db2bc71c164fec4f08fc4ff73f91edf11abaee39a93ffe098d8e09ff"
+    },
+    "rust/fm1-tooling/src/assets.rs": {
+      "bytes": 6299,
+      "sha256": "bd107ee22bce024f4d7095a0b2f073911f563ae185c138568f5e5c923ef46b9d"
+    },
+    "rust/fm1-tooling/src/assets/dy.rs": {
+      "bytes": 13441,
+      "sha256": "4a43aaa9c10bb8269ebaf32f154700fd38b655dc4b7fc6aae0fd3fe1e556c4ef"
+    },
+    "rust/fm1-tooling/src/assets/logo.rs": {
+      "bytes": 9847,
+      "sha256": "78777a210c2fcfcbb2063f896beb06719846bcc2b0e26d2acda34956f0e805b7"
+    },
+    "rust/fm1-tooling/src/lib.rs": {
+      "bytes": 10053,
+      "sha256": "7a7030c670ab76a20e05194e21c7c64f72edabc6c98b3301156a7b0077e4f8ba"
+    },
+    "tests/assets_differential.py": {
+      "bytes": 14792,
+      "sha256": "1c91623ea1f5ed35bf0a3cd82417d9b27a14f15ff28dccf92224024463b7823d"
+    },
+    "tests/authoring_differential.py": {
+      "bytes": 13727,
+      "sha256": "80feaf80e3903b8b1156431860333bfbf08b8a152061fa69d20e6d65f9bea55e"
+    },
+    "tests/dx_logo_differential.py": {
+      "bytes": 16449,
+      "sha256": "1bc3f0679ebaf735bed6f38a5640030833c98a63f345f70a152ffcaea8beb4dd"
+    },
+    "tests/reference/source.sha256": {
+      "bytes": 39958,
+      "sha256": "6148afa57b782c81e5a794f0ded441763fe986f35bf275014f304f6da76d88af"
+    },
+    "tests/rust_dx_logo.sh": {
+      "bytes": 837,
+      "sha256": "f0657feb2e24725208fd6bd6478d30904a395c901729feb02f354f280fab73e9"
+    },
+    "tools/data/dy-init.json": {
+      "bytes": 718,
+      "sha256": "7b437f5e3cec2088de3461334899f27f0282d3e64a895ec7b31bd294cdb9ef89"
+    },
+    "tools/data/logo-palette.json": {
+      "bytes": 312,
+      "sha256": "2c850bacd1f694b029881170980cb143841ccf8f36769358d85f545b89b46bf3"
+    },
+    "tools/fm6_dy.txt": {
+      "bytes": 6886,
+      "sha256": "91e08156b7b772420128f1a5b630df9e5ef8d13bd522451f8c12f7e4c57ff458"
+    },
+    "tools/gen_fm6_dy.py": {
+      "bytes": 3002,
+      "sha256": "9bd0a0a507d1a8cfc87ded773ea4fa6128783285b2ca2e471bbfa9ab8a800f4c"
+    },
+    "tools/make_logo.py": {
+      "bytes": 2405,
+      "sha256": "8f9093b2f0b63b072281b8bd7a552bdb656d6a77c74c3bab0e2b9a49d2217688"
+    },
+    "tools/rust_codecs.py": {
+      "bytes": 3639,
+      "sha256": "2efa2a8ee0cdbf61a563cc3d49e98487e05c633075eb0bf5747f284e51636e92"
+    },
+    "tools/rust_tooling.py": {
+      "bytes": 4282,
+      "sha256": "569183c6a84809ba386398ad450492e5fad35faf23c52910ab5b180edbacabbb"
+    }
+  },
+  "toolchain": "rustc/cargo1.94.1",
+  "frozen_source_files": 440,
+  "platforms": {
+    "linux": {
+      "generators": {
+        "cases": 621,
+        "trace_sha256": "e0c71f7e64b7b692d856740e5deda9690dd7d23d469b3d5b1383ffa1dabdee65",
+        "frozen_files": 440,
+        "python": "3.10.12",
+        "pillow": "12.3.0",
+        "physical_io": false
+      },
+      "authoring": {
+        "cases": 903,
+        "accepted": 600,
+        "rejected": 303,
+        "hashes": {
+          "harris-citypop": "5af1401d7226c1483e0a90577087a64e6ced048367132f9bcfcf5d4a3a58550a",
+          "velvet-changes": "5ff54336047b67f2f7898f6aef38a1c080adfec78f098db59fbd9b88634e954f",
+          "afterhours": "19e42007b5e96208295a86d63919dfd2faa736ca3a31d9e60e3d81ffd430bc1e",
+          "neon-turnaround": "6f77429cd23fab5b8b55127c991b558cd1e4c3e9176d1c9623be69b96de908d2",
+          "midi-log-70": "45e46ffa061bddc4c75512ecb62c031536f1736eb9b1db988cdda31473e26b0c",
+          "midi-log-91": "a5bf3828155d118ae77d2842d139be6c35d0017cba3ce590cdd4eb79af13560d",
+          "midi-log-100": "c169042a04b80f34b6574b110fb9b725a2de418907be7d05f6cf88ce2ef76063",
+          "midi-log-127": "25fccaf99155bdcf981e34a6f8bad34402f099e7cebfdeffec83cac4c876c014",
+          "midi-log-190": "f58d7ef5e61010eee14f4a0d82d7013107ddfacced7b6a1ee0de2b2675565658"
+        },
+        "source_files": 440
+      },
+      "previous_assets": {
+        "cases": 653,
+        "trace_sha256": "d19d2a3d90e05bf15c644f066a6aa7341b084d1ff2a2bf5838cacaf0b770a90a",
+        "python": "3.10.12",
+        "pillow": "12.3.0",
+        "frozen_files": 440
+      }
+    },
+    "windows": {
+      "generators": {
+        "cases": 621,
+        "trace_sha256": "cdce8d35ce0b79cce19eec3b05b7ca15380cf1560e23ff603c6a9436f5b16a79",
+        "frozen_files": 440,
+        "python": "3.8.3",
+        "pillow": "10.4.0",
+        "physical_io": false
+      },
+      "authoring": {
+        "cases": 903,
+        "accepted": 600,
+        "rejected": 303,
+        "hashes": {
+          "harris-citypop": "5af1401d7226c1483e0a90577087a64e6ced048367132f9bcfcf5d4a3a58550a",
+          "velvet-changes": "5ff54336047b67f2f7898f6aef38a1c080adfec78f098db59fbd9b88634e954f",
+          "afterhours": "19e42007b5e96208295a86d63919dfd2faa736ca3a31d9e60e3d81ffd430bc1e",
+          "neon-turnaround": "6f77429cd23fab5b8b55127c991b558cd1e4c3e9176d1c9623be69b96de908d2",
+          "midi-log-70": "45e46ffa061bddc4c75512ecb62c031536f1736eb9b1db988cdda31473e26b0c",
+          "midi-log-91": "a5bf3828155d118ae77d2842d139be6c35d0017cba3ce590cdd4eb79af13560d",
+          "midi-log-100": "c169042a04b80f34b6574b110fb9b725a2de418907be7d05f6cf88ce2ef76063",
+          "midi-log-127": "25fccaf99155bdcf981e34a6f8bad34402f099e7cebfdeffec83cac4c876c014",
+          "midi-log-190": "f58d7ef5e61010eee14f4a0d82d7013107ddfacced7b6a1ee0de2b2675565658"
+        },
+        "source_files": 440
+      },
+      "previous_assets": {
+        "cases": 653,
+        "trace_sha256": "3ed378a414259c49db51c604e6136c81e6d59a2c74e0154558434fdb3369280f",
+        "python": "3.8.3",
+        "pillow": "10.4.0",
+        "frozen_files": 440
+      }
+    }
+  },
+  "checks": {
+    "workspace_tests": 164,
+    "windows_tooling_tests": 16,
+    "fmt": true,
+    "clippy_all_targets_deny_warnings": true,
+    "no_std_formats_wasm": true,
+    "cli_c_app_feature": false,
+    "new_dependency_crates": 0,
+    "codec_wasm_tooling_dependency": false,
+    "mcu_bridge_tooling_dependency": false
+  },
+  "native_binaries": {
+    "linux": {
+      "bytes": 1772400,
+      "sha256": "5b8e0d7bf53a07d0e004378750cc42a30629da046fcd86d2f8d6120096468672"
+    },
+    "windows": {
+      "bytes": 1447424,
+      "sha256": "02691c6f8d89c51b1a694904f7615e04ab7e05a38c3d1a12f733aeea23c160dd"
+    }
+  },
+  "evidence": {
+    "linux-final.log": {
+      "bytes": 1622,
+      "sha256": "219bd9d066c45062c274c388354733e4d5fde3919f580a3c84732d10fc00fbc0"
+    },
+    "windows-final.log": {
+      "bytes": 1184,
+      "sha256": "fb88203c553a124869cc9ca3d807b0d594e659203483f37cfaa45b9e8ce125dd"
+    },
+    "linux-generators-qualified.log": {
+      "bytes": 183,
+      "sha256": "b65cd1e3d16897896df23919cec87a9660a7efe7f1cb0835fef1f1887f613d43"
+    },
+    "windows-generators-qualified.log": {
+      "bytes": 182,
+      "sha256": "63db1d0662300e4481630fd9e3f5d8be33100e2abafebd10385c759ea8a33274"
+    },
+    "workspace-final.log": {
+      "bytes": 23060,
+      "sha256": "728d408b2142393dd9a54b3ffdc3961b6fa36514fdf7b08710094428716e0049"
+    },
+    "windows/tests-final.log": {
+      "bytes": 2716,
+      "sha256": "d675c4bbd4c3897bb704fc87fbc21b2563c1c7e199eab40cdfc0da1d78996471"
+    },
+    "clippy-final.log": {
+      "bytes": 272,
+      "sha256": "69bcce17b67d751984b35a327ca1a1942ba23bbb5dfcae0ad052ef777d8e7413"
+    },
+    "fmt-final.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "no-std-wasm.log": {
+      "bytes": 276,
+      "sha256": "4bb97cfec720c664d3d5d8893dad53f7fd48e2c31de57dab1f01f8400bf0d41e"
+    },
+    "cli-features.txt": {
+      "bytes": 4973,
+      "sha256": "ceca9f3706327d7a3d2f45029a051ccba120b635d621718bd45ca73ef6800758"
+    },
+    "codec-features.txt": {
+      "bytes": 1059,
+      "sha256": "23e5c8bc3108da6b712b5fa1cd93166fba04a78fb42aba883155ea4ffcabfb22"
+    },
+    "bridge-features.txt": {
+      "bytes": 1259,
+      "sha256": "bf2403057a908eb58dd36c76a88f7b1173a3c1dc0ecca2706b7b2d91243fb530"
+    }
+  },
+  "coverage": {
+    "bank_vectors": 137,
+    "voice_name_vectors": 150,
+    "full_manifest_rows": 62,
+    "factory_records": 30,
+    "user_rows": 32,
+    "full_factory_header_byte_exact": true,
+    "frozen_factory_header": {
+      "bytes": 24642,
+      "sha256": "483625174949055b34135c410f2f11e79d966d4676994f43251e387118d0ee4a"
+    },
+    "unknown_user_only_records": "deterministic fixtures; external banks not present",
+    "source_sprite_current_and_frozen_equal": true,
+    "python_isolated_cli": true,
+    "native_dy_build": true,
+    "native_logo_rgba": true,
+    "permissive_and_strict_profiles_distinguished": true,
+    "high_bit_audition_bytes_preserved": true,
+    "partial_write_refusals": true,
+    "physical_io": false,
+    "public_abi_changes": false,
+    "production_assets_modified": false
+  },
+  "profiles": {
+    "shared_bank_reader": "borrowed no_std BulkBanks; scans six-byte header and complete4104 extent only",
+    "strict_live_decoder": "unchanged voice::DxMessage",
+    "editor_file_reader": "unchanged FileVoices",
+    "init_byte99": {
+      "generator": 0,
+      "runtime": 99
+    }
+  },
+  "limits": {
+    "frame_bytes": 33554432,
+    "bank_bytes": 1100000,
+    "manifest_records": 4096,
+    "manifest_row_bytes": 16384,
+    "rom_directory_entries": 4096,
+    "distinct_rom_operators": 65536,
+    "integer_index_magnitude": 1099511627776,
+    "logo_source_bytes": 16777216,
+    "inline_output_bytes": 16777216,
+    "render_rows_columns": 64,
+    "palette_entries": 256,
+    "scale": [
+      0,
+      16
+    ],
+    "canvas_size": [
+      0,
+      512
+    ]
+  },
+  "remaining": [
+    "root-owned build/emitter policy and common bootstrap poisoned-env qualification",
+    "parameter generation/current UI extraction",
+    "manual/site/acquisition/bootstrap policy beyond this checkpoint"
+  ]
+}

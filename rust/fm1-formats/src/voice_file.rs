@@ -3,6 +3,42 @@
 //! The editor historically ignored file checksums; strict MIDI messages use
 //! voice::DxMessage instead. This explicit profile retains old import behavior.
 use crate::{voice, CodecError};
+/// Header-only VMEM-bank file profile used by authoring and DY asset tools.
+/// Unlike FileVoices this scans every byte offset, skips exactly 4104 bytes for
+/// an accepted bank and deliberately ignores channel, checksum and trailer.
+/// Strict live messages must continue to use voice::DxMessage.
+pub struct BulkBanks<'a> {
+    bytes: &'a [u8],
+    at: usize,
+}
+impl<'a> BulkBanks<'a> {
+    pub fn new(bytes: &'a [u8]) -> Self {
+        Self { bytes, at: 0 }
+    }
+}
+impl<'a> Iterator for BulkBanks<'a> {
+    type Item = &'a [u8; 4096];
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            let n = self
+                .bytes
+                .get(self.at..)?
+                .windows(2)
+                .position(|v| v == [240, 67])?;
+            let start = self.at + n;
+            let end = start.checked_add(4104)?;
+            if end > self.bytes.len() {
+                self.at = self.bytes.len();
+                return None;
+            }
+            if self.bytes[start + 3..start + 6] == [9, 32, 0] {
+                self.at = end;
+                return self.bytes[start + 6..start + 4102].try_into().ok();
+            }
+            self.at = start + 1;
+        }
+    }
+}
 #[derive(Clone, Copy)]
 pub struct FileVoice<'a> {
     pub packed: bool,

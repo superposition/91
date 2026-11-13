@@ -7,101 +7,73 @@ anywhere in the file) and writes firmware/src/dsp/fm6_dy.h (FM6_DY[][128], FM6_D
 and build/PERF-1-test-voices.syx (the U lines, a 32-voice bank for the installer's "Load DX7 voices"). With --rom DIR every voice is compared with
 the dumps in DIR's rom*.syx (Yamaha's ROM banks): one whose operator bytes match a ROM voice is refused, since those are not ours to take.
 The bank files are data, not code: run with -I."""
+import json
 import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.dirname(HERE)
-INIT = bytes([99, 99, 99, 99, 99, 99, 99, 0, 39, 0, 0, 0, 56, 0, 0, 2, 0] * 6 + [99, 99, 99, 99, 50, 50, 50, 50, 0, 8, 35, 0, 0, 0, 49, 24]) + b"INIT VOICE"
+# -I omits the script directory. Only this trusted sibling module path is added;
+# no working-directory or PYTHONPATH lookup is needed for bank data.
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
+import rust_tooling as _tools
+INIT = bytes(json.loads(open(os.path.join(HERE, "data", "dy-init.json"), encoding="utf-8").read()))
+
+
+def _call(method, args, adapter=None):
+    try:
+        return _tools.call("asset.dy." + method, args, adapter=adapter)
+    except _tools.ToolError as error:
+        cls = {"ValueError": ValueError, "IndexError": IndexError,
+               "SystemExit": SystemExit, "AssertionError": AssertionError}.get(error.kind)
+        if cls is None:
+            raise
+        raise cls(error.args[0]) from None
 
 
 def dumps(data):
-    """every 32-voice VMEM dump in the bytes: a list of 32 128-byte records each"""
-    out, i = [], 0
-    while True:
-        j = data.find(b"\xf0\x43", i)
-        if j < 0 or j + 4104 > len(data):
-            return out
-        if data[j + 3] == 0x09 and data[j + 4] == 0x20 and data[j + 5] == 0x00:
-            out.append([bytes(data[j + 6 + 128 * k:j + 6 + 128 * (k + 1)]) for k in range(32)])
-            i = j + 4104
-        else:
-            i = j + 1
+    return [[bytes(record) for record in bank] for bank in _call("dumps", [list(data)])]
 
 
 def name_of(r):
-    return "".join(chr(c) if 32 <= c < 127 else "?" for c in r[118:128]).rstrip()
+    return _call("name", [list(r)])
+
+
+class _Adapter:
+    lines = None
+    def __call__(self, action):
+        kind, args = action["kind"], action["args"]
+        if kind == "read":
+            return list(open(args[0], "rb").read())
+        if kind == "listdir":
+            return os.listdir(args[0])
+        if kind == "open_lines":
+            self.lines = open(args[0], encoding="utf-8")
+        elif kind == "line":
+            return self.lines.readline() or None
+        elif kind == "close_lines":
+            self.lines.close()
+            self.lines = None
+        elif kind == "print":
+            print(args[0])
+        elif kind == "write":
+            open(args[0], "wb").write(bytes(args[1]))
+        elif kind == "write_text":
+            open(args[0], "w", encoding="utf-8", newline="\n").write(args[1])
+        elif kind == "mkdir":
+            os.makedirs(args[0], exist_ok=True)
+        else:
+            raise RuntimeError("unknown DY adapter action: " + kind)
 
 
 def main():
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    if len(args) < 2:
-        sys.exit(__doc__)
-    manifest, banks = args[0], args[1]
-    romdir = sys.argv[sys.argv.index("--rom") + 1] if "--rom" in sys.argv else None
-    if romdir:
-        args = [a for a in args if a != romdir]
-    roms = set()
-    if romdir:
-        for f in sorted(os.listdir(romdir)):
-            if f.lower().startswith("rom") and f.lower().endswith(".syx"):
-                for d in dumps(open(os.path.join(romdir, f), "rb").read()):
-                    for r in d:
-                        roms.add(r[:118])
-        print(f"{len(roms)} ROM voices to steer clear of")
-    voices, user = {}, []
-    for ln in open(manifest, encoding="utf-8"):
-        ln = ln.strip()
-        if not ln or ln.startswith("#"):
-            continue
-        slot, name, bank, vslot, src = [x.strip() for x in ln.split("|", 4)]
-        path, _, which = bank.partition("#")
-        d = dumps(open(os.path.join(banks, path), "rb").read())
-        if not d:
-            sys.exit(f"{path}: no 32-voice dump in it")
-        rec = d[int(which or 0)][int(vslot)]
-        flag = "  ROM!" if rec[:118] in roms else ""
-        print(f"{slot:>2} {name:<16} <- {name_of(rec):<10} alg {(rec[110] & 31) + 1:>2}  {os.path.basename(path)} {vslot}{flag}")
-        if flag:
-            sys.exit(f"{name}: the same operators as a Yamaha ROM voice; pick another")
-        if slot == "U":
-            user.append((name, rec, src))
-        else:
-            voices[int(slot)] = (name, rec, name_of(rec), os.path.basename(path), int(vslot), src)
-    n = len(voices)
-    if sorted(voices) != list(range(n)):
-        sys.exit("the slots are not 0..n-1")
-    out = ["/* SPDX-License-Identifier: GPL-3.0-only */",
-           "/* The DY voices: human-made DX7 voices from public-domain banks (tools/fm6_dy.txt lists each one's bank and source; LICENSING.md the terms),",
-           " * one for each of the thirty DX voices, as 128-byte packed records (the DX7's bulk-dump format). Generated by tools/gen_fm6_dy.py: do not edit. */",
-           "#pragma once", "#include <stdint.h>", f"#define FM6_NDY {n}",
-           "static const char *const FM6_DY_NAME[FM6_NDY] = {" + ", ".join('"%s"' % voices[i][2].replace("\\", "/").replace('"', "'") for i in range(n)) + "};",   # the voice's own name, as its bank has it
-           "static const uint8_t FM6_DY[FM6_NDY][128] = {"]
-    for i in range(n):
-        name, rec, orig, bank, vs, src = voices[i]
-        out.append(f"    {{/* {i}: {name}: \"{orig}\", {bank} voice {vs}: {src} */")
-        for k in range(0, 128, 16):
-            out.append("     " + ", ".join("%3d" % b for b in rec[k:k + 16]) + ("," if k < 112 else ""))
-        out.append("    }," if i < n - 1 else "    }")
-    out.append("};")
-    hp = os.path.join(SRC, "firmware", "src", "dsp", "fm6_dy.h")
-    open(hp, "w", encoding="utf-8", newline="\n").write("\n".join(out) + "\n")
-    print(f"{hp}: {n} voices")
-    os.makedirs(os.path.join(SRC, "build"), exist_ok=True)
-    bp = os.path.join(SRC, "build", "fm6_dy.bin")
-    open(bp, "wb").write(b"".join(voices[i][1] for i in range(n)))
-    print(f"{bp}: {n} records")
-    if user:
-        recs = [r for _, r, _ in user][:32]
-        while len(recs) < 32:
-            recs.append(INIT)
-        body = b"".join(recs)
-        syx = b"\xf0\x43\x00\x09\x20\x00" + body + bytes([(128 - (sum(body) & 127)) & 127]) + b"\xf7"
-        sp = os.path.join(SRC, "build", "PERF-1-test-voices.syx")
-        open(sp, "wb").write(syx)
-        print(f"{sp}: {min(len(user), 32)} voices ({len(syx)} bytes)")
-        if len(user) > 32:
-            print(f"({len(user) - 32} U lines past the 32 a bank holds were left out)")
+    adapter = _Adapter()
+    try:
+        _call("main", [sys.argv[1:], SRC, __doc__], adapter)
+    finally:
+        if adapter.lines is not None:
+            adapter.lines.close()
 
 
 if __name__ == "__main__":

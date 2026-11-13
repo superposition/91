@@ -178,6 +178,18 @@ pub fn cli(args: &[String]) -> Result<()> {
             let output=if args[0]=="lz4-compress" {lz4::compress(&image)?}else{lz4::decompress(&image,&[])?};
             std::fs::write(&args[2],output)?;
         }
+        Some("dy-build") if args.len()==4||args.len()==5 => {
+            let mut argv=vec![args[1].clone(),args[2].clone()];
+            if let Some(rom)=args.get(4){argv.push("--rom".into());argv.push(rom.clone());}
+            assets::dy::generate(&mut assets::dy::Native::default(),&json!(argv),&args[3],"dy-build MANIFEST BANKS OUTROOT [ROMDIR]")?;
+        }
+        Some("logo-rgba") if args.len()==5 => {
+            let source=String::from_utf8(read_file(&args[1],16*1024*1024)?).map_err(|_|Error::value("sprite source must be UTF-8"))?;
+            let rows=assets::logo::sprite(&source)?;
+            let image=assets::logo::render(&json!(rows),cli_integer(&args[2])?,Some(cli_integer(&args[3])?),&assets::logo::palette())?;
+            std::fs::write(&args[4],&image.rgba)?;
+            println!("{}",json!({"width":image.width,"height":image.height,"rgba_bytes":image.rgba.len()}));
+        }
         Some(kind @ ("sine" | "patterns")) if args.len() == 1 => {
             let report = if kind == "sine" { assets::sine_header() }
                 else { assets::pattern_header(&assets::pattern_data())? };
@@ -220,7 +232,7 @@ pub fn cli(args: &[String]) -> Result<()> {
         }
         _ => {
             return Err(Error::value(
-                "usage: fm1-rs tools package-info PACKAGE [--force] | decode KIND RAW-SYSEX-DATA | summary TELEMETRY.csv | rescue-plan V15-PACKAGE SNAPSHOT | debug-plan peek|poke|clock A [B] | sine | patterns | lz4-compress IN OUT | lz4-decompress IN OUT | loader-wrap IN OUT",
+                "usage: fm1-rs tools package-info PACKAGE [--force] | decode KIND RAW-SYSEX-DATA | summary TELEMETRY.csv | rescue-plan V15-PACKAGE SNAPSHOT | debug-plan peek|poke|clock A [B] | sine | patterns | lz4-compress IN OUT | lz4-decompress IN OUT | loader-wrap IN OUT | dy-build MANIFEST BANKS OUTROOT [ROMDIR] | logo-rgba UI SCALE SIZE OUTPUT",
             ))
         }
     }
