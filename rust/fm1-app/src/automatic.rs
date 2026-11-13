@@ -9,8 +9,8 @@ const ROUNDS: [u8; 4] = [1, 2, 4, 8];
 const RAMP: [u8; 5] = [0, 2, 4, 8, 12];
 const INTRO: [u16; 5] = [0, 60, 120, 240, 480];
 macro_rules! ui {
-    ($p:ident,$u:ident,$e:expr) => {
-        $p.with_ui(|$u| $e)
+    ($p:ident,$u:ident,$($e:tt)+) => {
+        $p.with_ui(|$u| $($e)+)
     };
 }
 #[repr(C)]
@@ -460,13 +460,13 @@ pub fn mix_key(p: &mut impl Port, key: usize) -> bool {
     match code {
         0..=7 => {
             ui!(p, u, u.trk_m ^= 1u8 << code);
-            let on = p.with_ui(|u| u.trk_m & (1u8 << code) != 0);
+            let on = ui!(p, u, u.trk_m & (1u8 << code) != 0);
             p.notice(Notice::MixTrack, code as u32, u32::from(on) << 1);
         }
         8..=15 => {
             let track = code - 8;
             ui!(p, u, u.trk_s ^= 1u8 << track);
-            let on = p.with_ui(|u| u.trk_s & (1u8 << track) != 0);
+            let on = ui!(p, u, u.trk_s & (1u8 << track) != 0);
             p.notice(Notice::MixTrack, track as u32, 1 | (u32::from(on) << 1));
         }
         16 | 17 => {
