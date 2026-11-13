@@ -1,0 +1,71 @@
+{
+  "scope": "production mix keys, DJ next/bar/tick and automatic FX",
+  "toolchain": "Rust1.94.1; GCC11; Clang22 WASM",
+  "reference": {
+    "cases": 4096,
+    "bytes": 48844800,
+    "record_bytes": 11925,
+    "sha256": "5957639b63f19b256d509e1b778074c7fa510e85b3b11944da2ee4b9b5488a3a",
+    "targets": [
+      "R01/currentC0/Rust native",
+      "R01/currentC0/Rust WASM"
+    ],
+    "cross_target": "all bytes exact",
+    "R01_manifest_files_verified": 440,
+    "AFX_records": 28,
+    "AFX_fields_per_record": 5,
+    "mix_key_mappings": 27,
+    "scheduled_cases": 247,
+    "distinct_scheduled_effects": 28,
+    "seen_required_mask_asserted": true
+  },
+  "miri": {
+    "toolchain": "nightly-2026-08-28",
+    "pinned_native": "passed",
+    "strict_provenance": "passed",
+    "UI_reentry_tests": 4,
+    "DJ_cache_effect_view_reentry": true,
+    "later_map_mutation_observed": true,
+    "DJ_missing_argument_guards": 3,
+    "metadata_index_field_null_guards": 5,
+    "unchanged_error_outputs": true,
+    "malformed_queued_scene": "cleared without indexing"
+  },
+  "native_scenarios": {
+    "cases": 8,
+    "artifacts": 32,
+    "names": [
+      "chordkeys",
+      "dj",
+      "groups",
+      "keydrop",
+      "mixglide",
+      "octave",
+      "scene",
+      "setlist"
+    ],
+    "status": "exact five-way including historical assertion fingerprints"
+  },
+  "instrument_wasm": {
+    "compared_samples_including_HTTP_game_controls": 59649924,
+    "exports": 24,
+    "memory_bytes": 33554432,
+    "bytes": 2371206,
+    "sha256": "855cff9605eeaffd8aa71ed5fffa39186755e866e684dac76fb9390ed3e96776"
+  },
+  "footprint": {
+    "DJ_cache_bytes": 5,
+    "replaced_C_static_bytes": 5,
+    "added_mutable_bytes": 0,
+    "auto_table_bytes": 224,
+    "active_C_auto_table": false,
+    "mix_key_bytes": 27,
+    "live_C_mix_render_lookup": "remains until presentation port",
+    "DJ_timing_table_bytes": 24,
+    "candidate_weight_stack_bytes": 56,
+    "extra_pixel_storage_payloads": 0,
+    "new_counters": 0,
+    "target_ROM_RAM_stack": "requires adopted-compiler gate"
+  },
+  "remaining": "parameter/knob/MIDI helpers, labels/widgets, page composition, visualizers and physical QA"
+}

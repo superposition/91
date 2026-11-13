@@ -13,6 +13,18 @@ pub enum Query {
     Parameter,
     MixSetting,
     FxFirst,
+    SectionRequested,
+    PatternNow,
+    HostMessage,
+    Bars,
+    SectionBars,
+    IntroFraction,
+    DriftBars,
+    BuildLength,
+    SetlistPlay,
+    SetlistStep,
+    Piece,
+    Genre,
 }
 #[repr(u32)]
 pub enum Action {
@@ -21,6 +33,12 @@ pub enum Action {
     EngineSet,
     ProjectSet,
     BassCapture,
+    Intro,
+    MidiMap,
+    UsbHost,
+    DjSync,
+    Fill,
+    Section,
 }
 #[repr(u32)]
 pub enum Notice {
@@ -32,6 +50,15 @@ pub enum Notice {
     Reset,
     Key,
     Breadcrumb,
+    PatternBack,
+    Host,
+    AutoFx,
+    MixTrack,
+    MixDrums,
+    AllTracks,
+    DjOn,
+    DjLength,
+    DjPieces,
 }
 #[repr(u32)]
 pub enum Operation {
@@ -47,6 +74,10 @@ pub enum Operation {
     MixTick,
     KeyTick,
     View,
+    DjNext,
+    DjBar,
+    AutoFx,
+    MixKey,
 }
 pub trait Port {
     fn with_ui<R>(&mut self, f: impl FnOnce(&mut State) -> R) -> R;
@@ -59,19 +90,19 @@ macro_rules! ui {
         $p.with_ui(|$u| $e)
     };
 }
-fn query(p: &mut impl Port, q: Query) -> u32 {
+pub(crate) fn query(p: &mut impl Port, q: Query) -> u32 {
     p.query(q, 0)
 }
-fn parameter(p: &mut impl Port, id: ParamId) -> i32 {
+pub(crate) fn parameter(p: &mut impl Port, id: ParamId) -> i32 {
     p.query(Query::Parameter, id.index() as u32) as i32
 }
-fn knob(p: &mut impl Port, id: u32, value: i32) {
+pub(crate) fn knob(p: &mut impl Port, id: u32, value: i32) {
     p.action(Action::Knob, id, value as u32);
 }
 fn engine(p: &mut impl Port, id: ParamId, value: i32) {
     p.action(Action::EngineSet, id.index() as u32, value as u32);
 }
-fn tempo(p: &mut impl Port, value: i32) {
+pub(crate) fn tempo(p: &mut impl Port, value: i32) {
     p.action(
         Action::ProjectSet,
         ParamId::TEMPO.index() as u32,
@@ -88,7 +119,7 @@ pub fn undo_save(p: &mut impl Port) {
         u.undo_ok = 1;
     });
 }
-fn undo_swap(p: &mut impl Port) {
+pub(crate) fn undo_swap(p: &mut impl Port) {
     if ui!(p, u, u.undo_ok == 0) {
         p.notice(Notice::Nothing, 0, 0);
         return;
@@ -114,7 +145,7 @@ fn undo_swap(p: &mut impl Port) {
     });
     p.notice(Notice::Undo, 0, 0);
 }
-fn tap(p: &mut impl Port) -> bool {
+pub(crate) fn tap(p: &mut impl Port) -> bool {
     let now = query(p, Query::Now);
     let result = ui!(p, u, {
         if u.tap_n != 0
@@ -168,7 +199,7 @@ fn scene_store(p: &mut impl Port, scene: usize) {
     });
     p.notice(Notice::Scene, scene as u32, 1);
 }
-fn scene_apply(p: &mut impl Port, scene: usize) {
+pub(crate) fn scene_apply(p: &mut impl Port, scene: usize) {
     undo_save(p);
     let tracks = ui!(p, u, {
         u.fx_lock = u.scene_lock[scene];
@@ -207,7 +238,7 @@ fn scene_recall(p: &mut impl Port, scene: usize) {
         scene_apply(p, scene);
     }
 }
-fn scene_reset(p: &mut impl Port) {
+pub(crate) fn scene_reset(p: &mut impl Port) {
     undo_save(p);
     ui!(p, u, {
         u.fx_lock = 0;
@@ -389,6 +420,12 @@ pub fn dispatch(p: &mut impl Port, operation: u32, argument: i32) -> bool {
         x if x == Operation::MixTick as u32 => mix_tick(p),
         x if x == Operation::KeyTick as u32 => key_tick(p),
         x if x == Operation::View as u32 && (0..43).contains(&argument) => view(p, argument),
+        x if x == Operation::DjNext as u32 => crate::automatic::dj_next(p),
+        x if x == Operation::DjBar as u32 => crate::automatic::dj_bar(p),
+        x if x == Operation::AutoFx as u32 => crate::automatic::auto_fx(p),
+        x if x == Operation::MixKey as u32 && (0..27).contains(&argument) => {
+            return crate::automatic::mix_key(p, argument as usize)
+        }
         _ => return false,
     }
     true

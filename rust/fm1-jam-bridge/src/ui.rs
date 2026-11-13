@@ -63,6 +63,76 @@ struct PerformancePort {
     ui: *mut State,
     callback: FrameCallback,
 }
+struct AutomaticPort {
+    foreground: PerformancePort,
+    dj: *mut fm1_app::automatic::DjState,
+}
+impl fm1_app::performance::Port for AutomaticPort {
+    fn with_ui<R>(&mut self, f: impl FnOnce(&mut State) -> R) -> R {
+        fm1_app::performance::Port::with_ui(&mut self.foreground, f)
+    }
+    fn query(&mut self, q: fm1_app::performance::Query, a: u32) -> u32 {
+        fm1_app::performance::Port::query(&mut self.foreground, q, a)
+    }
+    fn action(&mut self, a: fm1_app::performance::Action, x: u32, y: u32) {
+        fm1_app::performance::Port::action(&mut self.foreground, a, x, y)
+    }
+    fn notice(&mut self, n: fm1_app::performance::Notice, x: u32, y: u32) {
+        fm1_app::performance::Port::notice(&mut self.foreground, n, x, y)
+    }
+}
+impl fm1_app::automatic::DjPort for AutomaticPort {
+    fn with_dj<R>(&mut self, f: impl FnOnce(&mut fm1_app::automatic::DjState) -> R) -> R {
+        // SAFETY: initialized, aligned foreground cache disjoint from UI. No
+        // callback occurs until this exclusive five-byte loan has ended.
+        f(unsafe { &mut *self.dj })
+    }
+}
+/// # Safety
+/// UI and the initialized five-byte DJ cache are disjoint foreground roots.
+/// Synchronous callbacks may access these roots between loans, retaining no
+/// pointer/reference to this stack adapter. IRQ/worker code does not access them.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_ui_dj_tick(
+    state: *mut State,
+    dj: *mut fm1_app::automatic::DjState,
+    callback: Option<FrameCallback>,
+) -> i32 {
+    let Some(callback) = callback else {
+        return crate::app::reject();
+    };
+    if state.is_null() || dj.is_null() {
+        return crate::app::reject();
+    }
+    fm1_app::automatic::dj_tick(&mut AutomaticPort {
+        foreground: PerformancePort {
+            ui: state,
+            callback,
+        },
+        dj,
+    });
+    crate::app::game_call();
+    0
+}
+/// # Safety
+/// Output is one initialized/exclusively writable u32, disjoint from immutable
+/// factory metadata. No callback or retained reference; errors leave it intact.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_ui_auto_metadata(
+    index: u32,
+    field: u32,
+    output: *mut u32,
+) -> i32 {
+    if output.is_null() {
+        return crate::app::reject();
+    }
+    let Some(value) = fm1_app::automatic::auto_metadata(index as usize, field) else {
+        return crate::app::reject();
+    };
+    // SAFETY: exclusive caller-owned scalar, with no outstanding metadata loan.
+    unsafe { output.write(value) };
+    0
+}
 impl fm1_app::performance::Port for PerformancePort {
     fn with_ui<R>(&mut self, f: impl FnOnce(&mut State) -> R) -> R {
         // SAFETY: initialized foreground-owned UI; no call occurs during the loan.
@@ -292,6 +362,8 @@ mod tests {
         static BAD_ENCODER: Cell<bool> = const {Cell::new(false)};
         static SCENE_DENSITY: Cell<u32> = const {Cell::new(0)};
         static TAP_NOW: Cell<u32> = const {Cell::new(0)};
+        static DJ_ACTIVE: Cell<*mut fm1_app::automatic::DjState> = const {Cell::new(core::ptr::null_mut())};
+        static DJ_MAP: Cell<u32> = const {Cell::new(0)};
     }
     struct Reset;
     impl Drop for Reset {
@@ -299,6 +371,7 @@ mod tests {
             ACTIVE.with(|state| state.set(core::ptr::null_mut()));
             SEEN.with(|state| state.set(core::ptr::null_mut()));
             HELD.with(|state| state.set(core::ptr::null_mut()));
+            DJ_ACTIVE.with(|state| state.set(core::ptr::null_mut()));
         }
     }
     fn active() -> *mut State {
@@ -583,5 +656,134 @@ mod tests {
                 -1
             );
         }
+    }
+    unsafe extern "C" fn automatic(op: u32, a: u32, _b: u32) -> u32 {
+        use fm1_app::performance::{Action as A, Operation as O, Query as Q};
+        INPUT_CALLBACKS.with(|count| count.set(count.get() + 1));
+        // SAFETY: distinct retained roots. No exclusive UI/cache loan may
+        // survive any metadata, message or effect callback.
+        unsafe {
+            (*active()).frame += 1;
+            DJ_ACTIVE.with(|cache| (*cache.get()).host ^= 0);
+        }
+        if op == 0x100 + Q::Now as u32 {
+            return 100;
+        }
+        if op == 0x100 + Q::Playing as u32 {
+            return 1;
+        }
+        if op == 0x100 + Q::IntroFraction as u32 {
+            return 1.0f32.to_bits();
+        }
+        if op == 0x100 + Q::DriftBars as u32 {
+            return 3.0f32.to_bits();
+        }
+        if op == 0x100 + Q::BuildLength as u32 {
+            return 4;
+        }
+        if op == 0x100 + Q::HostMessage as u32 {
+            return 3;
+        }
+        if op == A::Intro as u32 {
+            // SAFETY: cache/UI loans ended before this effect; the next map
+            // decision must observe this changed field.
+            unsafe {
+                (*active()).midi_map = 2;
+            }
+        } else if op == A::MidiMap as u32 {
+            DJ_MAP.with(|map| map.set(a));
+        } else if op == A::DjSync as u32 {
+            // SAFETY: reenter page policy while the outer DJ cache is retained
+            // as a raw pointer, without an outstanding typed reference.
+            unsafe {
+                fm1_rust_ui_performance(active(), O::View as u32, 13, Some(automatic));
+            }
+        }
+        0
+    }
+    #[test]
+    fn dj_callbacks_reenter_ui_and_cache_between_scoped_loans() {
+        // SAFETY: every plain UI field admits zero; padding is not read.
+        let state = Box::new(UnsafeCell::new(unsafe { core::mem::zeroed::<State>() }));
+        let cache = Box::new(UnsafeCell::new(fm1_app::automatic::DjState::initial()));
+        ACTIVE.with(|pointer| pointer.set(state.get()));
+        DJ_ACTIVE.with(|pointer| pointer.set(cache.get()));
+        let _reset = Reset;
+        // SAFETY: no typed loan lives at setup, roots remain allocated.
+        unsafe {
+            (*cache.get()).last = 15;
+            (*state.get()).intro = 2;
+            (*state.get()).midi_map = 1;
+            (*state.get()).usb_host = 1;
+            (*state.get()).dj_on = 1;
+            (*state.get()).dj_len = 4;
+            (*state.get()).scene_q = 1;
+            (*state.get()).mx_bars = 4;
+            (*state.get()).mx_n = 2;
+        }
+        DJ_MAP.with(|map| map.set(0));
+        // SAFETY: complete initialized disjoint roots and synchronous callbacks.
+        assert_eq!(
+            unsafe { fm1_rust_ui_dj_tick(state.get(), cache.get(), Some(automatic)) },
+            0
+        );
+        assert_eq!(DJ_MAP.with(Cell::get), 2);
+        // SAFETY: all application loans ended on return.
+        unsafe {
+            assert_eq!(
+                *cache.get(),
+                fm1_app::automatic::DjState {
+                    last: 0,
+                    intro: 2,
+                    map: 2,
+                    host: 1,
+                    sync: 1
+                }
+            );
+            assert_eq!((*state.get()).view, 13);
+            assert_eq!((*state.get()).scene_q, 0);
+            assert_eq!((*state.get()).mx_n, 3);
+            (*cache.get()).last = 15;
+            (*state.get()).scene_q = 255;
+            (*state.get()).glide_on = 0xa5;
+        }
+        // SAFETY: malformed queued scene is cleared without indexing its arrays.
+        assert_eq!(
+            unsafe { fm1_rust_ui_dj_tick(state.get(), cache.get(), Some(automatic)) },
+            0
+        );
+        // SAFETY: callback sequence returned, no typed loan remains.
+        unsafe {
+            assert_eq!((*state.get()).scene_q, 0);
+            assert_eq!((*state.get()).glide_on, 0xa5);
+        }
+        INPUT_CALLBACKS.with(|count| count.set(0));
+        // SAFETY: each missing argument is rejected before access/callbacks.
+        unsafe {
+            assert_eq!(
+                fm1_rust_ui_dj_tick(core::ptr::null_mut(), cache.get(), Some(automatic)),
+                -1
+            );
+            assert_eq!(
+                fm1_rust_ui_dj_tick(state.get(), core::ptr::null_mut(), Some(automatic)),
+                -1
+            );
+            assert_eq!(fm1_rust_ui_dj_tick(state.get(), cache.get(), None), -1);
+        }
+        assert_eq!(INPUT_CALLBACKS.with(Cell::get), 0);
+        let mut value = 0xdead_beefu32;
+        for (index, field) in [(28, 0), (0, 6), (27, 5), (u32::MAX, 0)] {
+            // SAFETY: exclusive initialized scalar; invalid metadata leaves it intact.
+            assert_eq!(
+                unsafe { fm1_rust_ui_auto_metadata(index, field, &mut value) },
+                -1
+            );
+            assert_eq!(value, 0xdead_beef);
+        }
+        // SAFETY: null output is rejected before any access.
+        assert_eq!(
+            unsafe { fm1_rust_ui_auto_metadata(0, 0, core::ptr::null_mut()) },
+            -1
+        );
     }
 }

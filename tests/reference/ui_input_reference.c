@@ -37,6 +37,9 @@ static uint32_t random_word(uint32_t*s){*s=*s*1664525u+1013904223u;return *s;}
 #ifdef UI_PERFORMANCE_CORPUS
 #include "ui_performance_cases.inc"
 #endif
+#ifdef UI_AUTOMATIC_CORPUS
+#include "ui_automatic_cases.inc"
+#endif
 #ifdef __wasm__
 __attribute__((export_name("run")))
 #endif
@@ -64,6 +67,9 @@ int state_run(void){unsigned n,i,phase;uint32_t random=91;static int32_t pcm[512
 #ifdef UI_PERFORMANCE_CORPUS
   performance_case(n,&random);
 #endif
+#ifdef UI_AUTOMATIC_CORPUS
+  automatic_case(n,&random,pcm);
+#endif
 #if EN_RUST_APP
   {const uint32_t calls=fm1_rust_jam_stat(82);
    ui_input_only();
@@ -89,6 +95,9 @@ int state_run(void){unsigned n,i,phase;uint32_t random=91;static int32_t pcm[512
   emit(record,used);
 #endif
  }
+#ifdef UI_AUTOMATIC_CORPUS
+ if(automatic_seen!=automatic_required)return -4;
+#endif
  return 4096;
 }
 #ifndef __wasm__

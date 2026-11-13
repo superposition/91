@@ -490,6 +490,7 @@ static uint32_t ui_performance_port(uint32_t,uint32_t,uint32_t);
 #include "../../hal/fm1_irq_state.h"
 #endif
 static fm1_ui_state ui;
+static fm1_ui_dj_state ui_dj_state={255,255,255,0,0};
 #else
 static struct {
     uint8_t view, last_dial;
@@ -812,6 +813,9 @@ static int dj_break_len(int g)                  /* the breakdown's bars: short, 
 }
 static void mix_key(int k)
 {
+#if EN_RUST_APP
+    (void)fm1_rust_ui_performance(&ui,UIPO_MIX_KEY,k,ui_performance_port);
+#else
     int c = MIXK[k];
     uint8_t *m = &ui.trk_m, *s = &ui.trk_s;
     if (c < 0)
@@ -875,6 +879,7 @@ static void mix_key(int k)
         say("DJ NEW PIECES", ui.dj_piece ? "ON" : "OFF");
     }
     en_trk(*m, *s);
+#endif
 }
 
 /* the MOOD macro (the PERFORM screen, the ALGORITHM dial): 0 chill .. 100 peak, 50 leaves the piece as it is. Each setting listed
@@ -1896,11 +1901,15 @@ static void scene_tick(void)                   /* a scene key down: held long en
  * SAVE pressed by hand just moves it on from there. */
 static void dj_next(void)                       /* the auto-DJ's next piece, on the bar: the set list's next slot when it plays, else the bank's next */
 {
+#if EN_RUST_APP
+    (void)fm1_rust_ui_performance(&ui,UIPO_DJ_NEXT,0,ui_performance_port);
+#else
     const int s = sl_play() ? sl_step(ui.sl_pos, 1) : -1;
     if (s >= 0)
         ui.sl_q = (uint8_t)(s + 1);
     else
         ui.piece_q = (uint8_t)((proj.piece + 1) % NPIECES + 1);
+#endif
 }
 /* THE MIX (the SET page's Mix, 0.16.1): a piece that comes on the bar (the auto-DJ's, the set list's, SEL + PRESETS) starts at the tempo that was
  * playing and glides to its own over 4 to 32 bars, as a DJ brings the next record in at the old one's speed and lets it go back to its own. A tempo
@@ -1955,6 +1964,9 @@ static void mix_tick(void)                       /* each frame: the glide, by th
 }
 static void dj_bar(void)                       /* a new bar (while playing) */
 {
+#if EN_RUST_APP
+    (void)fm1_rust_ui_performance(&ui,UIPO_DJ_BAR,0,ui_performance_port);
+#else
     const int g = DJ_G(), b = dj_break_len(g), sync = ui.dj_len == 4, rounds = DJ_ROUNDS[ui.dj_rounds & 3];
     const int ph = en_sec == EN_SEC_GROOVE ? 0 : en_sec == EN_SEC_BREAK ? 1 : 2;
     const int last_round = ui.dj_round + 1 >= rounds;   /* the piece's last round: the next piece follows its drop */
@@ -1999,9 +2011,13 @@ static void dj_bar(void)                       /* a new bar (while playing) */
         if (ui.dj_n >= (uint16_t)b && !en_sec_req)
             en_section(EN_CMD_BUILD);
     }
+#endif
 }
 static void dj_tick(void)                    /* each new bar while playing: a scene waiting, the auto-DJ's count */
 {
+#if EN_RUST_APP
+    (void)fm1_rust_ui_dj_tick(&ui,&ui_dj_state,ui_performance_port);
+#else
     static uint8_t last = 255;
     uint8_t p = en_drum_pos;
     if (ui.pat_rev && ui.pat_up && (!en_playing || en_pat_now == ui.pat_held)) {   /* a held pattern, let go: the one before, from the next bar */
@@ -2067,6 +2083,7 @@ static void dj_tick(void)                    /* each new bar while playing: a sc
         }
         last = p;
     }
+#endif
 }
 
 /* AUTO FX (0.16.8; the idea after DARK-1's Auto FX, by Polystellarflow, rebuilt for PERF-1's sections and genres): now and then an effect plays by itself and lets
@@ -2077,6 +2094,7 @@ static void dj_tick(void)                    /* each new bar while playing: a sc
  * At the end of a build (Medium and up) a stop, a reverse, a brake or a spin-back leads into the drop; the four bars after a drop are left alone. It keeps
  * out of the way: nothing while an effect is played or latched by hand (that ends one under way), in the FX menu, in the intro, or stopped; with the
  * auto-DJ on, its fill and riser are left to it. */
+#if !EN_RUST_APP
 #define AG(g) (1u << (g))                       /* the genres: 0 HYPNO, 1 LOFI, 2 HOUSE, 3 DUBSTEP, 4 DUB, 5 DNB, 6 BREAKS, 7 GARAGE, 8 ELECTRO, 9 TRAP, 10 DISCO,
                                                  * 11 FUNK, 12 REGGAE, 13 SYNTHWAVE, 14 AMAPIANO, 15 TRIP-HOP, 16 INDUSTRIAL, 17 PSY, 18 FOREST */
 static const struct {
@@ -2121,8 +2139,12 @@ static uint32_t af_dice(void)
     ui.af_rng ^= ui.af_rng << 5;
     return ui.af_rng;
 }
+#endif
 static void af_tick(void)
 {
+#if EN_RUST_APP
+    (void)fm1_rust_ui_performance(&ui,UIPO_AUTO_FX,0,ui_performance_port);
+#else
     static const uint8_t CHANCE[4] = {0, 50, 70, 90};   /* how often a phrase line gets one, by the amount */
     const int amt = ui.fxs[EN_FXS_AF_AMT] & 3, len_set = 4 << (ui.fxs[EN_FXS_AF_LEN] & 3), every = 4 << (ui.fxs[EN_FXS_AF_EVERY] & 3);
     const uint32_t s16 = en_bars, bar = s16 >> 4;
@@ -2186,6 +2208,7 @@ static void af_tick(void)
     ui.af_end = (bar + (uint32_t)nb) * 16u;      /* it ends on the line */
     ui.af_start = ui.af_end - (uint32_t)len;
     ui.af_said = 0;
+#endif
 }
 
 /* the key change on the drop (the DROP page: SAME, +2, +3, +5, +7 semitones): when a breakdown or a build gives way to the groove, the
@@ -3767,21 +3790,32 @@ static void runner_start(void);
 static uint32_t ui_performance_port(uint32_t op,uint32_t a,uint32_t b)
 {
     volatile uint8_t *byte=0;
+    volatile uint32_t *word=0;
+    volatile float *number=0;
     switch(op) {
     case UIPQ_PLAYING:byte=&en_playing;break;
     case UIPQ_JAM_ON:byte=&en_jam_on;break;
     case UIPQ_SECTION:byte=&en_sec;break;
     case UIPQ_DRUM_POSITION:byte=&en_drum_pos;break;
+    case UIPQ_SECTION_REQUESTED:byte=&en_sec_req;break;
+    case UIPQ_PATTERN_NOW:byte=&en_pat_now;break;
+    case UIPQ_SECTION_BARS:byte=&en_sec_bars;break;
+    case UIPQ_BARS:word=&en_bars;break;
+    case UIPQ_INTRO_FRACTION:number=&en_intro_k;break;
+    case UIPQ_DRIFT_BARS:number=&en_drift_bars;break;
     }
-    if(byte) {
+    if(byte || word || number) {
         uint32_t value;
+        float copied=0;
 #if !defined(EN_HOST) && !defined(EN_WEB)
         const uint32_t irq=fm1_irq_state_save();
 #endif
-        value=*byte;
+        if(number)copied=*number;
+        else value=byte?*byte:*word;
 #if !defined(EN_HOST) && !defined(EN_WEB)
         fm1_irq_state_restore(irq);
 #endif
+        if(number)memcpy(&value,&copied,sizeof value);
         return value;
     }
     switch(op) {
@@ -3789,11 +3823,23 @@ static uint32_t ui_performance_port(uint32_t op,uint32_t a,uint32_t b)
     case UIPQ_PARAMETER:return a<P_NPARAMS?(uint32_t)(int32_t)proj.par[a]:0;
     case UIPQ_MIX_SETTING:return glob.sl_rsv[1];
     case UIPQ_FX_FIRST:return K_FXF;
+    case UIPQ_HOST_MESSAGE:return (uint32_t)plat_usb_host_msg();
+    case UIPQ_BUILD_LENGTH:return (uint32_t)en_build_len();
+    case UIPQ_SETLIST_PLAY:return (uint32_t)sl_play();
+    case UIPQ_SETLIST_STEP:return (uint32_t)sl_step((int)a,1);
+    case UIPQ_PIECE:return proj.piece;
+    case UIPQ_GENRE:return proj.genre;
     case UIPA_KNOB:knob_set((int)a,(int32_t)b);break;
     case UIPA_TRACKS:en_trk((uint8_t)a,(uint8_t)b);break;
     case UIPA_ENGINE_SET:if(a<P_NPARAMS)en_set((int)a,(int32_t)b);break;
     case UIPA_PROJECT_SET:if(a<P_NPARAMS)proj.par[a]=(int16_t)b;break;
     case UIPA_BASS_CAPTURE:en_bass_capture();break;
+    case UIPA_INTRO:en_intro((int)a);break;
+    case UIPA_MIDI_MAP:en_midi_map((int)a);break;
+    case UIPA_USB_HOST:plat_usb_host((int)a);break;
+    case UIPA_DJ_SYNC:en_dj_sync((int)a);break;
+    case UIPA_FILL:en_fill_next();break;
+    case UIPA_SECTION:en_section((int)a);break;
     case UIPN_NOTHING:say("NOTHING","TO UNDO");break;
     case UIPN_UNDO:say("UNDO","(AGAIN: REDO)");break;
     case UIPN_TEMPO: {char t[12];itoa_u((uint32_t)proj.par[P_TEMPO],t);say("TEMPO",t);break;}
@@ -3801,6 +3847,23 @@ static uint32_t ui_performance_port(uint32_t op,uint32_t a,uint32_t b)
     case UIPN_SCENE:if(a<4) {char t[12]="SCENE 1";t[6]=(char)('1'+a);say(t,b==1?"STORED":b==2?"EMPTY: HOLD TO STORE":b==3?"NEXT BAR":0);}break;
     case UIPN_RESET:say("RESET","ALL CLEAR");break;
     case UIPN_KEY: {char t[8]="+0";t[1]=(char)('0'+a);say("KEY CHANGE",t);break;}
+    case UIPN_PATTERN_BACK: {char t[16];pat_name((int32_t)a,t);say(t,b?"BACK, NEXT BAR":0);break;}
+    case UIPN_HOST: {
+        static const char *const text[7]={0,"ON: PLUG IN A DEVICE","OFF: USB AS BEFORE","DEVICE CONNECTED","NO MIDI DEVICE FOUND","LOW SPEED: NOT SUPPORTED","DEVICE LOST: LOOKING"};
+        if(a==PLAT_UH_NOMIDI)say("NO MIDI DEVICE","SEE MIDI IN");
+        else if(a>0 && a<7)say("USB HOST",text[a]);break;
+    }
+    case UIPN_AUTO_FX:if(a<EN_NFX)say("AUTO FX",EN_FX_NAME[a]);break;
+    case UIPN_MIX_TRACK:if(a<8)say((b&1)?((b&2)?"SOLO":"UNSOLO"):((b&2)?"MUTE":"UNMUTE"),MIX_NAME[a]);break;
+    case UIPN_MIX_DRUMS:say(a==16?(b?"MUTE":"UNMUTE"):(b?"SOLO":"UNSOLO"),"ALL DRUMS");break;
+    case UIPN_ALL_TRACKS:say("ALL TRACKS","BACK");break;
+    case UIPN_DJ_ON:say("AUTO-DJ",a?"ON":"OFF");break;
+    case UIPN_DJ_LENGTH:if(a<5) {
+        char t[12];
+        if(a==4)say("DJ GROOVE","WITH THE CHORDS");
+        else {int n;itoa_u(DJ_LEN[a],t);for(n=0;t[n];n++);memcpy(t+n," BARS",6);say("DJ GROOVE",t);}
+    }break;
+    case UIPN_DJ_PIECES:say("DJ NEW PIECES",a?"ON":"OFF");break;
     case UIPN_BREADCRUMB:if(a<10 && b<NVIEWS) {
         char text[24];int n;
         caps(text,VIEW_NAME[b],18);

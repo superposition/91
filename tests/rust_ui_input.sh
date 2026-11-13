@@ -6,7 +6,7 @@ repo=$(pwd)
 baseline=${1:?immutable R01 source is required for the independent full-app input corpus}
 baseline=$(CDPATH= cd -- "$baseline" && pwd)
 corpus=${UI_APP_CORPUS:-input}
-case "$corpus" in input|performance);;*)echo 'unknown UI corpus' >&2;exit 2;;esac
+case "$corpus" in input|performance|automatic);;*)echo 'unknown UI corpus' >&2;exit 2;;esac
 out=build/ui-$corpus
 driver=tests/reference/ui_${corpus}_reference.c
 mkdir -p "$out/gen"

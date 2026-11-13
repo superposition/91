@@ -13,7 +13,7 @@ pub mod master;
 pub mod math;
 pub mod mix;
 #[rustfmt::skip]
-mod ids;
+pub mod ids;
 pub mod render;
 pub mod reverb;
 pub mod sampler;
