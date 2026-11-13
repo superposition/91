@@ -42,6 +42,8 @@ If you have an FM-1, the [installer](web/amb_installer.html) includes backup and
 
 ## Development
 
+The [JieLi architectural field guide](docs/jieli-field-guide.html) is a standalone HTML guide to the chip, memory, dual-core execution and toolchain. Open it from a local checkout in your browser to explore the illustrations and source links.
+
 For building and contributing, see the [build instructions](BUILDING.md), [contributor guide](CONTRIBUTING.md) and [development notes](docs/RUST_MIGRATION.md). The [0.4.4 integration record](docs/RELEASE_0_4_4.md) separates source changes, automated checks and hardware qualification; [0.4.3](docs/RELEASE_0_4_3.md) records the preceding source-preservation checkpoint. Screenshot provenance is kept with the [web documentation](docs/WEB_REFACTOR.md).
 
 ## Credits and licence

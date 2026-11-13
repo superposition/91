@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#152638">
+  <meta name="description" content="An illustrated technical field guide to JieLi AC79, PI32v2, floating point, memory, dual-core execution, and the FM-1 toolchain.">
+  <title>JieLi — An Architectural Field Guide</title>
+  <style>
+    :root {
+      --paper: #f6f1e7;
+      --paper-light: #fbf8f1;
+      --ink: #24323b;
+      --muted: #5f6b6c;
+      --gold: #86672f;
+      --gold-light: #d8bd81;
+      --line: #d9d1c1;
+      --navy: #152638;
+      --serif: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+      --display: Georgia, "Times New Roman", serif;
+      --sans: "Segoe UI", system-ui, sans-serif;
+      --mono: "Cascadia Code", Consolas, "Liberation Mono", monospace;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 98px; }
+    body { margin: 0; color: var(--ink); background: var(--paper); font: 18px/1.8 var(--serif); }
+    ::selection { background: #dfcea8; color: #152c2d; }
+    button, input, select { font: inherit; }
+    button, a, input, select, summary { -webkit-tap-highlight-color: transparent; }
+    button, summary { cursor: pointer; }
+    a { color: inherit; text-decoration-color: #ad9665; text-underline-offset: 4px; }
+    a:hover { color: #846126; }
+    :focus-visible { outline: 2px solid #a77829; outline-offset: 5px; border-radius: 2px; }
+    .skip-link { position: fixed; top: -80px; left: 20px; z-index: 100; padding: 8px 20px; background: white; }
+    .skip-link:focus { top: 14px; }
+    .site-header { position: sticky; top: 0; z-index: 20; background: var(--navy); color: var(--paper); border-bottom: 1px solid #867044; }
+    .header-inner { max-width: 1360px; min-height: 78px; padding: 0 46px; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .brand { display: flex; gap: 14px; align-items: center; text-decoration: none; color: var(--paper); }
+    .brand:hover { color: white; }
+    .monogram { width: 38px; height: 42px; display: grid; place-items: center; border: 1px solid #b79a5d; color: var(--gold-light); font: 20px var(--display); position: relative; }
+    .monogram::after { content: ""; position: absolute; inset: 3px; border: 1px solid #b79a5d55; }
+    .brand-text { font: 10px/1.55 var(--sans); letter-spacing: .19em; text-transform: uppercase; }
+    .brand-text strong { display: block; font-weight: 500; font-size: 12px; letter-spacing: .17em; }
+    .header-nav { display: flex; align-items: center; gap: 28px; font: 11px var(--sans); letter-spacing: .13em; text-transform: uppercase; }
+    .header-nav a { text-decoration: none; color: #e6dfcf; }
+    .header-nav a:hover { color: var(--gold-light); }
+    .print-button { color: var(--gold-light); background: transparent; border: 1px solid #8d7e59; padding: 10px 15px; font: 10px var(--sans); letter-spacing: .13em; text-transform: uppercase; }
+    .print-button:hover { background: #ffffff0a; }
+    .reading-progress { height: 2px; width: 0; position: absolute; bottom: -2px; left: 0; background: var(--gold-light); }
+    .hero { max-width: 1360px; margin: 0 auto; padding: 76px 46px 60px; }
+    .edition-line { display: flex; justify-content: space-between; align-items: center; gap: 16px; border-bottom: 1px solid var(--line); padding-bottom: 17px; font: 10px/1.5 var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+    .edition-line span:first-child { color: var(--gold); }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(260px, .85fr); align-items: center; gap: 66px; padding-top: 52px; }
+    .eyebrow { margin: 0 0 22px; color: var(--gold); font: 11px/1.6 var(--sans); letter-spacing: .19em; text-transform: uppercase; }
+    h1 { font: normal clamp(58px, 7.2vw, 100px)/1.01 var(--display); letter-spacing: -.055em; margin: 0 0 28px -4px; }
+    h1 em { color: #8e713d; font-weight: 400; }
+    .hero-deck { max-width: 550px; font-size: 21px; line-height: 1.65; color: #59635d; margin: 0 0 26px; }
+    .hero-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; color: var(--muted); font: 10px/1.7 var(--sans); text-transform: uppercase; letter-spacing: .12em; }
+    .hero-meta .diamond { color: var(--gold); font-size: 8px; }
+    .hero-link { display: inline-flex; align-items: center; gap: 24px; margin-top: 32px; text-decoration: none; padding-bottom: 7px; border-bottom: 1px solid var(--gold); font: 11px var(--sans); letter-spacing: .14em; text-transform: uppercase; }
+    .hero-link span { font-size: 18px; }
+    .silicon-plate { position: relative; padding: 29px; color: #e8e0cb; background: var(--navy); box-shadow: 14px 14px 0 #e8dfce; }
+    .plate-inner { border: 1px solid #b3975c88; padding: 29px 24px 22px; text-align: center; position: relative; }
+    .plate-inner::before, .plate-inner::after { content: "◆"; position: absolute; color: var(--gold-light); background: var(--navy); padding: 0 9px; font-size: 9px; left: 50%; transform: translateX(-50%); }
+    .plate-inner::before { top: -12px; }
+    .plate-inner::after { bottom: -12px; }
+    .plate-kicker { font: 9px var(--sans); letter-spacing: .21em; color: var(--gold-light); text-transform: uppercase; }
+    .plate-title { font: 65px/1.1 var(--display); margin: 23px 0 1px; letter-spacing: -.04em; }
+    .plate-subtitle { font-style: italic; color: #c5c6b7; font-size: 15px; }
+    .plate-cores { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 26px 0; }
+    .plate-core { border: 1px solid #b3975c65; padding: 12px 5px; font: 9px/1.7 var(--sans); letter-spacing: .13em; text-transform: uppercase; }
+    .plate-core strong { display: block; font: 22px/1.5 var(--display); color: #eedbb0; letter-spacing: .02em; }
+    .plate-footer { border-top: 1px solid #b3975c65; padding-top: 15px; font: 10px/1.8 var(--mono); color: #d4c9ab; }
+    .plate-caption { margin: 23px 0 0; text-align: center; font: 9px/1.6 var(--sans); letter-spacing: .13em; color: #d1c5a7; text-transform: uppercase; }
+    .thesis { margin: 66px 0 0; padding: 25px 0; display: grid; grid-template-columns: 120px 1fr; gap: 25px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .thesis-label { color: var(--gold); font: 10px/1.8 var(--sans); letter-spacing: .14em; text-transform: uppercase; padding-top: 5px; }
+    .thesis p { margin: 0; max-width: 940px; font-size: 22px; line-height: 1.6; }
+    .document-shell { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 66px; max-width: 1280px; padding: 0 46px 90px; margin: 0 auto; }
+    .contents { align-self: start; position: sticky; top: 114px; font-family: var(--sans); padding-top: 12px; }
+    .contents-label { font-size: 10px; color: var(--gold); letter-spacing: .18em; text-transform: uppercase; padding-bottom: 17px; margin-bottom: 10px; border-bottom: 1px solid var(--line); }
+    .contents ol { list-style: none; margin: 0; padding: 0; }
+    .contents a { display: flex; align-items: baseline; gap: 13px; padding: 8px 0 8px 12px; border-left: 1px solid var(--line); color: var(--muted); font-size: 11px; line-height: 1.6; text-decoration: none; transition: color .18s, border-color .18s; }
+    .contents a span { font: 10px var(--mono); color: #a79b85; min-width: 16px; }
+    .contents a:hover, .contents a[aria-current="location"] { border-left: 2px solid var(--gold); padding-left: 11px; color: var(--ink); }
+    .contents a[aria-current="location"] span { color: var(--gold); }
+    .contents-foot { border-top: 1px solid var(--line); padding-top: 17px; margin-top: 24px; font-size: 10px; line-height: 1.8; color: #6e7569; }
+    main { min-width: 0; }
+    .chapter { padding: 40px 0 30px; border-bottom: 1px solid var(--line); scroll-margin-top: 95px; }
+    .chapter:first-child { padding-top: 0; }
+    .chapter-kicker { display: flex; align-items: center; gap: 16px; margin-bottom: 15px; color: var(--gold); font: 10px/1.6 var(--sans); letter-spacing: .16em; text-transform: uppercase; }
+    .chapter-kicker span { font: italic 23px var(--display); letter-spacing: 0; }
+    h2 { font: normal clamp(30px, 3.25vw, 43px)/1.15 var(--display); letter-spacing: -.025em; margin: 0 0 24px; text-wrap: balance; }
+    h3 { font: normal 25px/1.35 var(--serif); margin: 34px 0 15px; letter-spacing: -.02em; }
+    p { margin: 0 0 20px; }
+    strong { font-weight: 700; }
+    .lead { font-size: 21px; line-height: 1.75; }
+    .drop-cap::first-letter { font: 73px/.82 var(--display); color: var(--gold); float: left; padding: 9px 10px 0 0; }
+    .source-note { margin: 14px 0 25px; color: var(--muted); font: 11px/1.8 var(--sans); }
+    .source-note a { text-decoration-thickness: 1px; }
+    .evidence-tag { display: inline-block; color: var(--gold); font: 9px/1.5 var(--sans); letter-spacing: .1em; text-transform: uppercase; margin-right: 9px; }
+    .table-wrap { overflow-x: auto; margin: 26px 0; border-top: 2px solid var(--gold); }
+    table { border-collapse: collapse; width: 100%; font: 14px/1.7 var(--sans); text-align: left; }
+    caption { text-align: left; font: italic 16px/1.6 var(--serif); padding: 13px 0; color: var(--muted); caption-side: bottom; }
+    th { padding: 14px 15px; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; background: #ebe4d6; color: #5b614f; white-space: nowrap; }
+    td { padding: 14px 15px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    tr:last-child td { border-bottom-color: #c3b697; }
+    td:first-child { font-weight: 600; }
+    table code { font-size: 12px; }
+    code { font: .8em/1.6 var(--mono); padding: .1em .28em; background: #eae3d5; border-radius: 2px; overflow-wrap: anywhere; }
+    .code-panel { margin: 24px 0; background: var(--navy); color: #e8e4d7; border: 1px solid #2c3e4f; }
+    .code-bar { min-height: 41px; padding: 11px 18px; border-bottom: 1px solid #7d8b7440; display: flex; align-items: center; justify-content: space-between; gap: 15px; color: #b8c3b4; font: 9px/1.5 var(--sans); letter-spacing: .13em; text-transform: uppercase; }
+    .copy-button { border: 0; background: none; color: var(--gold-light); font: 9px var(--sans); letter-spacing: .1em; text-transform: uppercase; padding: 3px 0 3px 12px; }
+    .copy-button:hover { color: #fff6d8; }
+    pre { font: 13px/1.85 var(--mono); margin: 0; padding: 22px 24px; overflow-x: auto; tab-size: 4; }
+    pre code { font: inherit; color: inherit; padding: 0; background: none; border-radius: 0; overflow-wrap: normal; }
+    .comment { color: #9fac9b; }
+    .keyword { color: #e1c08a; }
+    .literal { color: #b9d1c8; }
+    .code-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #72816d55; }
+    .code-columns > div { min-width: 0; background: var(--navy); }
+    .code-columns .mini-label { display: block; padding: 15px 24px 0; color: var(--gold-light); font: 9px var(--sans); letter-spacing: .12em; text-transform: uppercase; }
+    .code-columns pre { padding-top: 13px; }
+    .note { border-left: 2px solid var(--gold); background: #ebe3d359; padding: 21px 25px; margin: 26px 0; }
+    .note p { margin-bottom: 0; font-size: 16px; line-height: 1.8; }
+    .note-label { display: block; margin-bottom: 8px; font: 9px var(--sans); letter-spacing: .15em; color: var(--gold); text-transform: uppercase; }
+    .pullquote { margin: 35px 0; padding: 25px 10px 26px; border-top: 1px solid var(--gold); border-bottom: 1px solid var(--gold); text-align: center; font: italic 27px/1.5 var(--serif); color: #6c613f; }
+    .tablist { display: flex; gap: 0; border-bottom: 1px solid #b2a17b; margin-top: 28px; overflow-x: auto; }
+    .tablist button { font: 11px var(--sans); padding: 14px 18px; color: var(--muted); border: 0; border-bottom: 2px solid transparent; background: transparent; white-space: nowrap; }
+    .tablist button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--gold); background: #eee5d5; }
+    .tab-panel { padding-top: 22px; }
+    .tab-panel[hidden] { display: none; }
+    .tab-panel p { font-size: 17px; }
+    .stat-band { margin: 28px 0; padding: 25px 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .stat-band > div { border-right: 1px solid var(--line); padding-left: 16px; }
+    .stat-band > div:first-child { padding-left: 0; }
+    .stat-band > div:last-child { border: 0; }
+    .stat-band strong { font: 37px/1.2 var(--display); letter-spacing: -.04em; display: block; }
+    .stat-band small { font: 9px/1.7 var(--sans); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); display: block; margin-top: 9px; }
+    .budget { margin: 28px 0; padding: 28px; border: 1px solid #b8a16d; background: var(--paper-light); }
+    .budget-title { display: flex; justify-content: space-between; gap: 18px; align-items: baseline; margin-bottom: 24px; }
+    .budget-title h3 { margin: 0; font-size: 26px; }
+    .budget-title span { color: var(--gold); font: 9px var(--sans); letter-spacing: .12em; text-transform: uppercase; }
+    .budget-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .budget label { display: block; font: 10px/1.6 var(--sans); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+    .budget select { width: 100%; margin-top: 8px; color: var(--ink); border: 1px solid #c9bea8; background: var(--paper); padding: 10px; font: 14px var(--sans); border-radius: 0; }
+    .clock-control { margin-top: 21px; }
+    .clock-row { display: flex; justify-content: space-between; align-items: center; }
+    #clock-value { font: 13px var(--mono); color: var(--ink); }
+    input[type="range"] { width: 100%; accent-color: var(--gold); margin: 14px 0 0; }
+    .budget-results { border-top: 1px solid var(--line); margin-top: 23px; padding-top: 23px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    .budget-results output { font: 38px/1.2 var(--display); letter-spacing: -.04em; }
+    .budget-results small { display: block; margin-top: 7px; color: var(--muted); font: 9px/1.7 var(--sans); text-transform: uppercase; letter-spacing: .08em; }
+    .budget .model-note { font: 11px/1.8 var(--sans); color: var(--muted); margin: 21px 0 0; }
+    .boot-flow { margin: 25px 0; display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid #b8a16d; background: var(--paper-light); }
+    .boot-step { position: relative; padding: 22px 14px; border-right: 1px solid var(--line); }
+    .boot-step:last-child { border: 0; }
+    .boot-step .step-number { display: block; color: var(--gold); font: 10px var(--mono); margin-bottom: 11px; }
+    .boot-step strong { display: block; font: 18px/1.4 var(--serif); }
+    .boot-step small { display: block; color: var(--muted); font: 10px/1.8 var(--sans); margin-top: 7px; }
+    .boot-step:not(:last-child)::after { content: "→"; position: absolute; right: -8px; top: 47px; background: var(--paper-light); color: var(--gold); z-index: 1; font-size: 17px; }
+    .reference-list { list-style: none; padding: 0; margin: 24px 0 0; counter-reset: references; }
+    .reference-list li { counter-increment: references; position: relative; padding: 18px 0 18px 43px; border-top: 1px solid var(--line); }
+    .reference-list li::before { content: counter(references, decimal-leading-zero); position: absolute; top: 22px; left: 0; font: 10px var(--mono); color: var(--gold); }
+    .reference-list a { font-size: 17px; }
+    .reference-list small { display: block; font: 11px/1.8 var(--sans); color: var(--muted); margin-top: 5px; }
+    .source-group { margin: 28px 0 0; padding: 22px 0; border-top: 1px solid var(--line); }
+    .source-group p { font-size: 15px; }
+    .source-group .local-links { display: flex; flex-wrap: wrap; gap: 9px 22px; font: 12px/1.7 var(--mono); }
+    .colophon { background: var(--navy); color: #d9d5c6; padding: 43px 46px; }
+    .colophon-inner { max-width: 1188px; margin: auto; display: flex; justify-content: space-between; align-items: center; gap: 30px; }
+    .colophon-title { font: 26px/1.4 var(--display); margin-bottom: 6px; }
+    .colophon p { margin: 0; font: 10px/1.9 var(--sans); letter-spacing: .06em; color: #b7bca9; }
+    .colophon a { color: var(--gold-light); font: 10px var(--sans); letter-spacing: .1em; text-transform: uppercase; text-decoration: none; white-space: nowrap; }
+    .toast { position: fixed; bottom: 25px; left: 50%; transform: translate(-50%, 20px); z-index: 30; color: var(--paper); background: var(--navy); border: 1px solid #a68b54; padding: 9px 20px; font: 12px var(--sans); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; }
+    .toast.visible { opacity: 1; transform: translate(-50%, 0); }
+    @media (min-width: 1600px) { .hero { padding-top: 88px; } }
+    @media (max-width: 1050px) {
+      .header-inner { padding: 0 28px; }
+      .header-nav { gap: 20px; }
+      .hero { padding: 49px 32px; }
+      .hero-grid { gap: 37px; }
+      .silicon-plate { padding: 21px; }
+      .plate-inner { padding: 26px 17px 20px; }
+      .document-shell { padding: 0 32px 70px; grid-template-columns: 155px minmax(0, 1fr); gap: 35px; }
+      .contents a { font-size: 10px; gap: 8px; }
+      pre { font-size: 12px; padding: 19px; }
+      .code-columns { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 960px) {
+      .header-nav a { display: none; }
+    }
+    @media (max-width: 760px) {
+      html { scroll-padding-top: 85px; }
+      .header-inner { min-height: 67px; padding: 0 22px; }
+      .header-nav a { display: none; }
+      .brand-text strong { font-size: 10px; }
+      .brand-text { font-size: 8px; }
+      .monogram { height: 36px; width: 32px; font-size: 18px; }
+      .print-button { font-size: 9px; padding: 9px 11px; }
+      .hero { padding: 35px 23px 38px; }
+      .edition-line { font-size: 8px; letter-spacing: .12em; }
+      .edition-line span:last-child { text-align: right; }
+      .hero-grid { grid-template-columns: 1fr; gap: 38px; padding-top: 37px; }
+      h1 { font-size: clamp(61px, 12vw, 88px); }
+      .eyebrow { font-size: 10px; margin-bottom: 18px; }
+      .hero-deck { font-size: 19px; }
+      .silicon-plate { max-width: 390px; width: calc(100% - 13px); margin: 0 auto 10px; padding: 23px; }
+      .plate-title { font-size: 55px; margin-top: 17px; }
+      .plate-cores { margin: 20px 0; }
+      .thesis { margin-top: 42px; grid-template-columns: 1fr; gap: 12px; }
+      .thesis-label { padding-top: 0; }
+      .thesis p { font-size: 20px; }
+      .document-shell { display: block; padding: 0 23px 55px; }
+      .contents { position: static; margin-bottom: 38px; padding: 0 0 22px; border-bottom: 1px solid var(--line); }
+      .contents ol { display: grid; grid-template-columns: 1fr 1fr; gap: 1px 20px; }
+      .contents a { padding-top: 7px; padding-bottom: 7px; font-size: 10px; }
+      .contents-foot { display: none; }
+      .chapter { padding-top: 32px; }
+      h2 { font-size: 34px; }
+      body { font-size: 17px; }
+      .lead { font-size: 19px; }
+      .table-wrap { margin: 22px 0; }
+      th, td { padding: 12px 11px; }
+      table { font-size: 12px; min-width: 420px; }
+      .note { padding: 18px; }
+      .pullquote { font-size: 24px; }
+      .tablist button { padding: 13px 12px; font-size: 10px; }
+      .stat-band strong { font-size: 32px; }
+      .stat-band small { font-size: 8px; }
+      .stat-band > div { padding-left: 10px; }
+      .budget { padding: 22px 18px; }
+      .budget-title { display: block; }
+      .budget-title span { display: block; margin-top: 8px; }
+      .budget-results output { font-size: 33px; }
+      .boot-flow { grid-template-columns: 1fr 1fr; }
+      .boot-step:nth-child(2) { border-right: 0; }
+      .boot-step:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+      .boot-step:nth-child(2)::after { display: none; }
+      .colophon { padding: 34px 23px; }
+      .colophon-inner { display: block; }
+      .colophon a { display: inline-block; margin-top: 22px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; }
+    }
+    @media print {
+      @page { margin: 18mm; }
+      html { scroll-behavior: auto; }
+      body { font-size: 10.5pt; line-height: 1.6; background: white; color: #111; }
+      .site-header, .contents, .hero-link, .copy-button, .toast, .budget-controls, .clock-control { display: none !important; }
+      .hero { padding: 0 0 25px; }
+      .hero-grid { gap: 35px; padding-top: 30px; }
+      h1 { font-size: 53pt; }
+      .hero-deck { font-size: 13pt; }
+      .silicon-plate { print-color-adjust: exact; -webkit-print-color-adjust: exact; box-shadow: none; }
+      .thesis { margin-top: 30px; }
+      .thesis p { font-size: 13pt; }
+      .document-shell { display: block; padding: 0; }
+      h2 { font-size: 24pt; break-after: avoid; }
+      h3 { font-size: 17pt; break-after: avoid; }
+      .chapter { padding: 25px 0 15px; }
+      .lead { font-size: 12pt; }
+      .tablist { display: none; }
+      .tab-panel[hidden] { display: block !important; }
+      .tab-panel::before { content: attr(data-print-title); font: bold 13pt var(--serif); }
+      .table-wrap { overflow: visible; }
+      table { font-size: 9pt; min-width: 0; }
+      th, td { padding: 7px; }
+      .code-panel { background: #f4f2ec; color: #111; border-color: #c8c1b2; break-inside: avoid; }
+      .code-bar { color: #555; border-color: #ccc; }
+      .code-columns, .code-columns > div { background: transparent; }
+      .code-columns .mini-label, .comment, .keyword, .literal { color: #555; }
+      pre { font-size: 8pt; white-space: pre-wrap; padding: 14px; }
+      .note, .budget, .boot-flow, .stat-band { break-inside: avoid; }
+      .colophon { background: white; color: #111; padding: 25px 0 0; margin-top: 25px; border-top: 1px solid #bbb; }
+      .colophon p { color: #555; }
+      .colophon a { display: none; }
+      a { color: inherit; }
+    }
+  </style>
+</head>
+<body id="top">
+  <a class="skip-link" href="#orientation">Skip to the field guide</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#top" aria-label="JieLi field guide, back to top">
+        <span class="monogram" aria-hidden="true">JL</span>
+        <span class="brand-text"><strong>The architecture series</strong>A field guide to the machine</span>
+      </a>
+      <nav class="header-nav" aria-label="Primary navigation">
+        <a href="#silicon">The silicon</a><a href="#instructions">The machine</a><a href="#realtime">The instrument</a><a href="#references">Sources</a>
+        <button class="print-button" id="print-button" type="button">Print edition ↗</button>
+      </nav>
+    </div>
+    <div class="reading-progress" id="reading-progress" aria-hidden="true"></div>
+  </header>
+
+  <section class="hero" aria-labelledby="page-title">
+    <div class="edition-line"><span>Engineering field notes · Nº 01</span><span>Research edition · 12 November 2026</span></div>
+    <div class="hero-grid">
+      <div>
+        <p class="eyebrow">AC79 · PI32v2 · M-VAVE FM-1</p>
+        <h1 id="page-title">A field guide<br>to <em>JieLi.</em></h1>
+        <p class="hero-deck">From silicon to sound. A close reading of the processor, its instructions, and the engineering decisions that make an instrument work.</p>
+        <div class="hero-meta"><span>Vendor documentation</span><span class="diamond" aria-hidden="true">◆</span><span>Compiler experiments</span><span class="diamond" aria-hidden="true">◆</span><span>Project evidence</span></div>
+        <a class="hero-link" href="#orientation">Enter the field guide <span aria-hidden="true">↓</span></a>
+      </div>
+      <div class="silicon-plate" aria-label="AC79 platform: two 32-bit DSP cores, PI32v2 target, r3 CPU variant, fprev1 floating-point feature">
+        <div class="plate-inner">
+          <div class="plate-kicker">The silicon at the centre</div>
+          <div class="plate-title">AC79</div>
+          <div class="plate-subtitle">A multimedia system, on one die.</div>
+          <div class="plate-cores"><div class="plate-core">Core 00<strong>32-bit</strong>DSP processor</div><div class="plate-core">Core 01<strong>32-bit</strong>DSP processor</div></div>
+          <div class="plate-footer">PI32v2 &nbsp; / &nbsp; r3<br>hardware float &nbsp; · &nbsp; fprev1</div>
+        </div>
+        <p class="plate-caption">Architecture identification · not a floorplan</p>
+      </div>
+    </div>
+    <div class="thesis"><div class="thesis-label">The central idea</div><p>JieLi designs the silicon. AC79 defines the system. PI32v2 defines the instructions. The FM-1 turns those layers into an instrument with a deadline.</p></div>
+  </section>
+
+  <div class="document-shell">
+    <aside class="contents" aria-label="Table of contents">
+      <div class="contents-label">In this edition</div>
+      <nav aria-label="Chapters"><ol>
+        <li><a href="#orientation"><span>01</span>The names &amp; the layers</a></li>
+        <li><a href="#silicon"><span>02</span>Inside the silicon</a></li>
+        <li><a href="#instructions"><span>03</span>Reading the instructions</a></li>
+        <li><a href="#abi"><span>04</span>The function contract</a></li>
+        <li><a href="#floating-point"><span>05</span>The price of precision</a></li>
+        <li><a href="#memory"><span>06</span>Where the code lives</a></li>
+        <li><a href="#concurrency"><span>07</span>Two cores, shared work</a></li>
+        <li><a href="#realtime"><span>08</span>The audio deadline</a></li>
+        <li><a href="#boot"><span>09</span>From reset to sound</a></li>
+        <li><a href="#objdump"><span>10</span>Inspecting the binary</a></li>
+        <li><a href="#boundaries"><span>11</span>Evidence &amp; its limits</a></li>
+        <li><a href="#references"><span>12</span>Sources &amp; provenance</a></li>
+      </ol></nav>
+      <p class="contents-foot">A standalone reading edition.<br>All typography, diagrams, and interactions work locally.</p>
+    </aside>
+
+    <main id="main-content">
+      <section class="chapter" id="orientation" aria-labelledby="orientation-title">
+        <div class="chapter-kicker"><span>I.</span>Orientation</div>
+        <h2 id="orientation-title">First, a map of the names.</h2>
+        <p class="lead drop-cap">JieLi is the chip designer; AC79 is the system-on-chip family; PI32v2 is the CPU instruction set this FM-1 project targets. Their relationship explains the firmware, the toolchain, and the unusual disassembly.</p>
+        <p>JieLi—珠海市杰理科技股份有限公司, based in Zhuhai—designs highly integrated SoCs for Bluetooth audio, multimedia, wearables, and connected devices. Its products combine processors, radios, memory controllers, audio interfaces, and specialized accelerators. This guide concerns the <strong>AC79/AC791 platform used by this project</strong>; other JieLi families can have different processors and peripherals.</p>
+        <p class="source-note"><span class="evidence-tag">Vendor source</span><a href="#ref-company">JieLi company and product overview ↗</a></p>
+        <div class="table-wrap"><table><caption>The names identify separate layers of the system.</caption><thead><tr><th scope="col">Name</th><th scope="col">Meaning</th><th scope="col">Why it matters</th></tr></thead><tbody>
+          <tr><td>JieLi / JL</td><td>Silicon vendor</td><td>Supplies chips, SDKs, compiler tools, and boot components.</td></tr>
+          <tr><td>AC79 / AC791N</td><td>SoC family</td><td>Determines the processors, memory system, and peripherals.</td></tr>
+          <tr><td>WL82</td><td>SDK platform identifier</td><td>Explains paths such as <code>cpu/wl82</code>.</td></tr>
+          <tr><td>PI32v2</td><td>Instruction-set target</td><td>Determines how machine-code bytes are decoded.</td></tr>
+          <tr><td><code>r3</code></td><td>CPU variant</td><td>Selected with <code>-mcpu=r3</code>; separate from the register named <code>r3</code>.</td></tr>
+          <tr><td><code>fprev1</code></td><td>Floating-point feature</td><td>Required to decode the floating-point instructions tested here correctly.</td></tr>
+          <tr><td>ELF</td><td>Object/executable container</td><td>Holds sections, symbols, relocations, and addresses.</td></tr>
+          <tr><td>FM-1</td><td>Finished instrument</td><td>Adds board wiring, codec, controls, display, flash layout, and firmware policy.</td></tr>
+        </tbody></table></div>
+        <p>A program can use the correct instruction set and still fail because its calling convention, memory placement, interrupt handling, or board initialization is wrong.</p>
+      </section>
+
+      <section class="chapter" id="silicon" aria-labelledby="silicon-title">
+        <div class="chapter-kicker"><span>II.</span>The system on chip</div>
+        <h2 id="silicon-title">A multimedia computer with a DSP at its heart.</h2>
+        <p>JieLi’s AC791 development-board documentation describes a dual-core, 32-bit DSP subsystem with hardware single-precision floating point, caches, memory-management functionality, and a broad collection of interfaces.</p>
+        <div class="stat-band"><div><strong>2 × 32</strong><small>DSP cores · bits per core</small></div><div><strong>320</strong><small>MHz · advertised configuration</small></div><div><strong>578</strong><small>KB · advertised SRAM total</small></div></div>
+        <div class="table-wrap"><table><thead><tr><th scope="col">Resource</th><th scope="col">Vendor description</th></tr></thead><tbody>
+          <tr><td>Floating point</td><td>Hardware single precision.</td></tr><tr><td>Instruction cache</td><td>32 KB, eight-way associative, consuming SRAM.</td></tr><tr><td>Data cache</td><td>32 KB, eight-way associative, consuming SRAM.</td></tr><tr><td>Memory system</td><td>MMU functionality; external flash and RAM support.</td></tr><tr><td>Interfaces</td><td>USB, SPI, UART, timers, GPIO, audio, camera, display, and other peripherals.</td></tr>
+        </tbody></table></div>
+        <p>These are <strong>platform capabilities</strong>. They do not establish which package, external memory, radio connections, or operating frequency a particular FM-1 board uses. The advertised SRAM total also exceeds the memory available to application variables: caches and reserved regions consume space.</p>
+        <p class="source-note"><span class="evidence-tag">Vendor source</span><a href="#ref-hardware">AC791 hardware overview ↗</a></p>
+        <h3>One chip, several clocks.</h3>
+        <p>JieLi distinguishes the CPU/system clock, external RAM clock, high-speed bus, low-speed bus, and serial-flash clock. “320 MHz CPU” does not mean memory, USB, SPI, and instruction fetching all operate at 320 MHz. A faster core can spend more time waiting for an unchanged memory subsystem.</p>
+        <p class="source-note"><span class="evidence-tag">Vendor source</span><a href="#ref-clocks">Clock architecture and dividers ↗</a></p>
+      </section>
+
+      <section class="chapter" id="instructions" aria-labelledby="instructions-title">
+        <div class="chapter-kicker"><span>III.</span>The instruction set</div>
+        <h2 id="instructions-title">Reading the machine’s handwriting.</h2>
+        <p>PI32v2 has its own instruction encoding and assembly language. It is a distinct target from x86, ARM, and RISC-V. Selecting one of those disassemblers cannot recover the intended instructions.</p>
+        <p>The installed JieLi tools register <code>pi32</code>, <code>pi32v2</code>, and <code>q32s</code>. This firmware selects:</p>
+        <div class="code-panel"><div class="code-bar"><span>Compiler target</span></div><pre><code>-target pi32v2 -mcpu=r3 -mfprev1</code></pre></div>
+        <p>The installed compiler is a vendor LLVM/Clang <strong>4.0.1</strong> build inside <code>jieli-linux-toolchains-20260730.1</code>. The package date and compiler generation are different facts. The workstation’s Windows LLVM 20.1.3 does not list these JieLi targets.</p>
+        <p>The assembly resembles statements. These are real instructions printed in JieLi’s syntax, rather than reconstructed C:</p>
+        <div class="code-panel"><div class="code-bar"><span>PI32v2 assembly</span></div><pre><code>r0 += r1
+r0 = r0 * r1 (f)
+r0 = b[r0+0] (u)
+if (r2 != 7) goto ...</code></pre></div>
+        <p>Two small compiler experiments make the relationship concrete.</p>
+        <div class="code-panel"><div class="code-bar"><span>Experiment 01 · integer addition</span></div><div class="code-columns"><div><span class="mini-label">C source</span><pre><code>int add(int a, int b) {
+    return a + b;
+}</code></pre></div><div><span class="mini-label">Actual disassembly</span><pre><code>0:  10 18    r0 += r1
+2:  80 00    rts</code></pre></div></div></div>
+        <div class="code-panel"><div class="code-bar"><span>Experiment 02 · extracting a bit field</span></div><div class="code-columns"><div><span class="mini-label">C source</span><pre><code>unsigned bits(unsigned x) {
+    return (x &gt;&gt; 11) &amp; 7;
+}</code></pre></div><div><span class="mini-label">Actual assembly</span><pre><code>r0 = uextra(r0, p:11, l:3)
+rts</code></pre></div></div></div>
+        <p>The processor extracts that field directly. Counting C operators would overestimate the instructions required.</p>
+        <p>The inspected code contains <strong>two-, four-, and six-byte instructions</strong>. Instruction boundaries matter: beginning two bytes into a longer instruction can yield plausible but incorrect output. A 32-bit processor does not imply four-byte instructions.</p>
+        <div class="table-wrap"><table><thead><tr><th scope="col">Syntax</th><th scope="col">Interpretation</th></tr></thead><tbody>
+          <tr><td><code>b[address]</code></td><td>Byte memory access.</td></tr><tr><td><code>(u)</code> / <code>(s)</code></td><td>Unsigned / signed interpretation or extension.</td></tr><tr><td><code>(f)</code></td><td>Floating-point operation.</td></tr><tr><td><code>rets</code> / <code>rts</code></td><td>Function-return address register / return instruction.</td></tr><tr><td><code>reti</code> / <code>rti</code></td><td>Interrupt-return state / return from interrupt.</td></tr><tr><td><code>[--sp] = {...}</code></td><td>Save registers on the descending stack.</td></tr><tr><td><code>{pc, ...} = [sp++]</code></td><td>Restore registers and return through the restored program counter.</td></tr>
+        </tbody></table></div>
+        <p class="source-note"><span class="evidence-tag">Compiler evidence</span>Compiled locally with the project’s CPU and floating-point options. The distinction between function return and interrupt return matters in startup code and interrupt wrappers.</p>
+      </section>
+
+      <section class="chapter" id="abi" aria-labelledby="abi-title">
+        <div class="chapter-kicker"><span>IV.</span>The binary interface</div>
+        <h2 id="abi-title">The contract between functions.</h2>
+        <p>The application binary interface, or ABI, is the agreement between independently compiled functions. In the simple scalar functions tested, the first four 32-bit arguments use <code>r0</code>–<code>r3</code>, additional arguments use the stack, and a 32-bit integer or <code>float</code> result returns in <code>r0</code>.</p>
+        <p>The seven-argument wrapper saved <code>r4</code>–<code>r6</code> and <code>rets</code> while moving the stack arguments. Register preservation and stack layout are part of the contract.</p>
+        <div class="table-wrap"><table><thead><tr><th scope="col">C type</th><th scope="col">Compiler-reported size</th></tr></thead><tbody>
+          <tr><td><code>short</code></td><td>2 bytes</td></tr><tr><td><code>int</code>, <code>long</code>, pointer, <code>size_t</code></td><td>4 bytes</td></tr><tr><td><code>long long</code></td><td>8 bytes</td></tr><tr><td><code>float</code></td><td>4 bytes</td></tr><tr><td><code>double</code>, <code>long double</code></td><td>8 bytes</td></tr>
+        </tbody></table></div>
+        <p>The target is <strong>little endian</strong>, with a 32-bit pointer model. Its LLVM data layout gives 64-bit integers and doubles four-byte ABI alignment. When sharing structures with another compiler or language, matching field types alone does not establish matching structure layout.</p>
+        <div class="note"><span class="note-label">The interrupt boundary</span><p>The project’s wrapper saves <code>psr</code>, <code>rets</code>, <code>reti</code>, and <code>r0</code>–<code>r3</code>, calls the C handler, restores state, executes <code>csync</code>, then executes <code>rti</code>. Its source records that the compiler does not automatically emit the synchronization needed by this wrapper. Function ABI compatibility is only one part of interrupt correctness.</p></div>
+        <p class="source-note"><span class="evidence-tag">Project evidence</span><a href="../firmware/hal/fm1_isr.S">Interrupt-entry wrappers ↗</a></p>
+      </section>
+
+      <section class="chapter" id="floating-point" aria-labelledby="floating-title">
+        <div class="chapter-kicker"><span>V.</span>Numerical behaviour</div>
+        <h2 id="floating-title">Precision has a price.</h2>
+        <p class="lead">AC79 has hardware <code>float</code> support. JieLi explicitly says that hardware does not support <code>double</code>; double-precision arithmetic uses software.</p>
+        <p>The local hardware note’s statement about lacking a useful FPU is misleading. The vendor documentation, project build flags, and actual generated instructions establish hardware single precision.</p>
+        <p class="source-note"><span class="evidence-tag">Vendor + project</span><a href="#ref-float">Hardware floating-point documentation ↗</a> · <a href="../tools/build.py">Build flags ↗</a></p>
+        <div class="tablist" role="tablist" aria-label="Floating-point compiler experiments">
+          <button id="tab-float" role="tab" aria-selected="true" aria-controls="panel-float" tabindex="0" type="button">Hardware float</button>
+          <button id="tab-double" role="tab" aria-selected="false" aria-controls="panel-double" tabindex="-1" type="button">Software double</button>
+          <button id="tab-literal" role="tab" aria-selected="false" aria-controls="panel-literal" tabindex="-1" type="button">The literal trap</button>
+          <button id="tab-speculation" role="tab" aria-selected="false" aria-controls="panel-speculation" tabindex="-1" type="button">A guarded divide</button>
+        </div>
+        <div class="tab-panel" id="panel-float" role="tabpanel" aria-labelledby="tab-float" tabindex="0" data-print-title="Hardware float">
+          <p>With the project’s floating-point options, multiplication, addition, and division produce hardware floating-point instructions.</p>
+          <div class="code-panel"><div class="code-bar"><span>Source → generated instructions</span></div><pre><code><span class="comment">// float madd(float a, float b, float c) { return a*b+c; }</span>
+r0 = r0 * r1 (f)
+r0 = r0 + r2 (f)
+rts
+
+<span class="comment">// float divide(float a, float b) { return a/b; }</span>
+r0 = r0 / r1 (f)
+rts</code></pre></div>
+          <p>The multiply and add remain separate under <code>-ffp-contract=off</code>. This experiment does not establish every possible fused operation. A single divide instruction also does not establish its latency or throughput.</p>
+        </div>
+        <div class="tab-panel" id="panel-double" role="tabpanel" aria-labelledby="tab-double" tabindex="0" data-print-title="Software double" hidden>
+          <p>Changing the arithmetic to double precision moves the work into a software helper.</p>
+          <div class="code-panel"><div class="code-bar"><span>Source → generated instructions</span></div><pre><code><span class="comment">// double dadd(double a, double b) { return a+b; }</span>
+goto __adddf3</code></pre></div>
+          <p>The compiler emits a transfer to <code>__adddf3</code>. In an unlinked object, that destination is unresolved; the symbol and relocation identify the helper.</p>
+        </div>
+        <div class="tab-panel" id="panel-literal" role="tabpanel" aria-labelledby="tab-literal" tabindex="0" data-print-title="The literal trap" hidden>
+          <p>A literal without the <code>f</code> suffix can silently introduce double-precision arithmetic.</p>
+          <div class="code-panel"><div class="code-bar"><span>Source → generated helper calls</span></div><pre><code><span class="comment">// float accidental_double(float x) { return x + 0.1; }</span>
+call __extendsfdf2
+call __adddf3
+goto __truncdfsf2</code></pre></div>
+          <p>That is float-to-double conversion, software double addition, then conversion back to float. Writing <code>0.1f</code> selects single precision. Likewise, <code>sinf</code> and <code>sin</code> have different argument and result precision. <code>-Wdouble-promotion</code> caught this example.</p>
+        </div>
+        <div class="tab-panel" id="panel-speculation" role="tabpanel" aria-labelledby="tab-speculation" tabindex="0" data-print-title="A guarded divide" hidden>
+          <p>The compiler moved the division ahead of the condition in this expression:</p>
+          <div class="code-panel"><div class="code-bar"><span>Actual compiler output · simplified comments</span></div><pre><code><span class="comment">// return x &gt; 0.8f ? 1.0f / x : 0.0f;</span>
+r1 = r0
+r0 = 0x3F800000
+r0 = r0 / r1 (f)
+...
+iff (r1 u&lt;= r2) {
+    r0 = 0
+}</code></pre></div>
+          <p>A zero input can reach the divide instruction even though the C expression ultimately selects zero. The firmware explicitly disables the hardware divide-by-zero trap and documents this compiler behaviour.</p>
+          <p class="source-note"><a href="../firmware/hal/fm1_irq.h">IRQ initialization and floating-point trap explanation ↗</a></p>
+        </div>
+        <blockquote class="pullquote">Hardware exception configuration must agree with the compiler’s floating-point execution assumptions.</blockquote>
+        <h3>Acceleration is another layer.</h3>
+        <p>JieLi supplies FFT/IFFT, vector, and mathematical APIs with software, assembly, or hardware implementations. Those interfaces have their own data formats, scaling, saturation, memory-placement, and length constraints. A hardware math block does not imply that an arbitrary C loop or standard-library call automatically uses it.</p>
+        <p class="source-note"><span class="evidence-tag">Vendor source</span><a href="#ref-math">Math acceleration documentation ↗</a></p>
+      </section>
+
+      <section class="chapter" id="memory" aria-labelledby="memory-title">
+        <div class="chapter-kicker"><span>VI.</span>Placement &amp; execution</div>
+        <h2 id="memory-title">Where the code lives changes what it can do.</h2>
+        <p>Memory placement determines execution speed and whether code remains accessible at all. The current application linker script allocates these regions:</p>
+        <div class="table-wrap"><table><caption>Current firmware allocations; these are not a universal AC79 memory map.</caption><thead><tr><th scope="col">Region</th><th scope="col">CPU address</th><th scope="col">Allocation</th></tr></thead><tbody>
+          <tr><td>RAM code &amp; core-1 stacks</td><td><code>0x01C00000</code></td><td>24 KiB</td></tr><tr><td>Ordinary data &amp; BSS</td><td><code>0x01C08000</code></td><td>96 KiB</td></tr><tr><td>Large buffer pool</td><td><code>0x01C20000</code></td><td>336 KiB</td></tr><tr><td>Main stacks &amp; guards</td><td><code>0x01C74000</code> onward</td><td>Explicit reserved ranges</td></tr><tr><td>Warm-reset retained state</td><td><code>0x01C7C020</code></td><td><code>.noinit</code> region</td></tr><tr><td>Application code &amp; constants</td><td><code>0x02001000</code></td><td>Up to 560 KiB in this region</td></tr>
+        </tbody></table></div>
+        <p class="source-note"><span class="evidence-tag">Project evidence</span><a href="../firmware/app.ld">Application linker script ↗</a></p>
+        <p>Most application code executes directly from memory-mapped serial flash: <strong>execute in place</strong>, or XIP. Cache hits make that efficient; misses require fetching through the serial-flash controller.</p>
+        <p>Some sections have two addresses. Their <strong>load address</strong> identifies where their initial bytes reside in the image. Their <strong>execution address</strong> identifies where those bytes must be copied before use. The project’s <code>.ram_text</code>, <code>.dsp_text</code>, <code>.ram_hot</code>, and <code>.data</code> sections are stored in flash but assigned RAM addresses. Startup must copy them correctly.</p>
+        <p><code>.bss</code> and <code>.pool</code> reserve RAM without storing a corresponding block of zero bytes in the image. A section name is a linker convention: naming a section <code>.text</code> does not itself establish hardware permissions, and this script also places constants there.</p>
+        <h3>Two address spaces, one image.</h3>
+        <p>CPU addresses differ from physical flash offsets. The project defines:</p>
+        <div class="code-panel"><div class="code-bar"><span>XIP mapping</span></div><pre><code>CPU XIP address = 0x02000000 + flash offset - 0x4000
+
+flash 0x4120  →  CPU 0x02000120    <span class="comment">// boot stub</span>
+flash 0x5000  →  CPU 0x02001000    <span class="comment">// application body</span></code></pre></div>
+        <p>Confusing those address spaces sends debugging and patching to the wrong location.</p>
+        <p class="source-note"><a href="../firmware/hal/fm1_xip.h">Project XIP mapping ↗</a></p>
+        <h3>What happens when flash is busy?</h3>
+        <p>The RAM flash driver waits for the cache/controller, disables XIP, takes ownership of the flash pins, performs operations, restores the controller, and invalidates affected cached data. Every instruction and constant needed during that interval must remain accessible.</p>
+        <div class="note"><span class="note-label">A transitive requirement</span><p>Placing the outermost function in RAM is insufficient if it calls a flash-resident helper or reads a flash-resident table. The entire active path matters.</p></div>
+        <p>The driver also records that a direct XIP-to-RAM call exceeds the relevant relative-call range, so it deliberately uses an indirect call. Placement affects branch reach as well as speed.</p>
+        <p class="source-note"><span class="evidence-tag">Project evidence</span><a href="../firmware/hal/fm1_flash.h">RAM flash driver ↗</a> · <a href="#ref-memory">Vendor memory documentation ↗</a></p>
+      </section>
+
+      <section class="chapter" id="concurrency" aria-labelledby="concurrency-title">
+        <div class="chapter-kicker"><span>VII.</span>Concurrency &amp; ownership</div>
+        <h2 id="concurrency-title">Two cores share more than the work.</h2>
+        <p>JieLi documents two operating arrangements: an operating system scheduling work across both cores, or one core running the OS while the other performs a dedicated function.</p>
+        <p>In the dedicated-core arrangement, the vendor warns that the second core cannot freely call OS APIs, including printing functions that depend on the OS. Flash writes normally suspend CPU1 in SFC mode. Avoiding that suspension requires CPU1’s complete execution path to reside in internal or external RAM.</p>
+        <p class="source-note"><span class="evidence-tag">Vendor source</span><a href="#ref-dualcore">Dual-core operation ↗</a></p>
+        <p>This project uses a dedicated worker with a mailbox. CPU0 publishes a function, context, and request; CPU1 performs the job and publishes completion. The implementation includes synchronization, separate stacks, request validation, timeouts, and fallback when the worker is retired. Its polling loop resides in RAM.</p>
+        <p class="source-note"><span class="evidence-tag">Project evidence</span><a href="../firmware/hal/fm1_core1.h">Core-1 worker ↗</a></p>
+        <div class="table-wrap"><table><thead><tr><th scope="col">Mechanism</th><th scope="col">What it addresses</th></tr></thead><tbody>
+          <tr><td>Compiler ordering</td><td>Whether the compiler may move or remove accesses.</td></tr><tr><td>CPU synchronization</td><td>Ordering and visibility according to the processor’s rules.</td></tr><tr><td>Cache maintenance</td><td>Whether another agent sees the intended memory contents.</td></tr><tr><td>Ownership</td><td>Which agent may access or reuse the storage now.</td></tr>
+        </tbody></table></div>
+        <p>A compiler barrier does not flush a cache. A CPU synchronization instruction does not establish exclusive ownership. Disabling CPU0 interrupts does not stop CPU1 or DMA. An enable-bit readback does not necessarily prove that outstanding bus transfers have finished.</p>
+        <p><code>volatile</code> alone does not provide C/C++ inter-thread synchronization. The SDK uses hardware <code>testset</code> and <code>csync</code> in its locks; the project’s experimental atomic backend combines those mechanisms with interrupt-state handling.</p>
+        <p class="source-note"><a href="../firmware/hal/fm1_rust_atomic.h">Project atomic backend ↗</a></p>
+        <p>Two cores improve performance where work overlaps usefully. Serial processing, publication, waiting, cache misses, and shared-bus contention remain on the critical path. Two 320 MHz cores cannot make one serial function execute as though it had a 640 MHz core.</p>
+      </section>
+
+      <section class="chapter" id="realtime" aria-labelledby="realtime-title">
+        <div class="chapter-kicker"><span>VIII.</span>Real-time audio</div>
+        <h2 id="realtime-title">An instrument lives by its deadline.</h2>
+        <p class="lead">The DSP declares a 44.1 kHz sample rate, and the worker describes 256-frame render chunks. That gives the system approximately 5.805 milliseconds to prepare each chunk.</p>
+        <p>At a hypothetical 320 MHz operating frequency, approximately 7,256 core clock cycles are available per audio frame. That is a clock budget, not a count of useful instructions: stalls, interrupts, bus traffic, and synchronization consume it.</p>
+        <div class="budget" aria-labelledby="budget-heading">
+          <div class="budget-title"><h3 id="budget-heading">The deadline, calculated.</h3><span>Explore the clock budget</span></div>
+          <div class="budget-controls">
+            <label for="sample-rate">Sample rate<select id="sample-rate"><option value="44100" selected>44.1 kHz</option><option value="48000">48 kHz</option><option value="96000">96 kHz</option></select></label>
+            <label for="block-size">Frames per block<select id="block-size"><option value="64">64 frames</option><option value="128">128 frames</option><option value="256" selected>256 frames</option><option value="512">512 frames</option></select></label>
+          </div>
+          <div class="clock-control"><div class="clock-row"><label for="clock-mhz">Modelled core frequency</label><output id="clock-value" for="clock-mhz">320 MHz</output></div><input id="clock-mhz" type="range" min="160" max="320" step="10" value="320" aria-label="Modelled core frequency in megahertz"></div>
+          <div class="budget-results" aria-live="polite" aria-atomic="true"><div><output id="deadline-output" for="sample-rate block-size">5.805 ms</output><small>Available time per block</small></div><div><output id="cycles-output" for="clock-mhz sample-rate">7,256</output><small>Core clock cycles per frame</small></div></div>
+          <p class="model-note" id="budget-detail">256 ÷ 44,100 seconds · approximately 1.858 million core clock cycles per block.</p>
+          <p class="model-note">Illustrative model. Use measured clocks and supported audio configurations for hardware analysis. Instructions, stalls, and shared-resource costs all consume this budget.</p>
+        </div>
+        <p>The audio HAL uses <strong>double-buffered DMA through ALNK/I²S to an external codec</strong>, with stereo 24-bit audio represented in 32-bit words. DMA consumes one buffer half while software prepares the other. A deadline miss can expose stale or unfinished output data.</p>
+        <p>Worst-case render time, interrupt latency, memory contention, and flash-operation pauses are more informative than average CPU percentage. The project’s free-running 24 MHz timer measures elapsed time independently of assumptions about instruction throughput.</p>
+        <p class="source-note"><span class="evidence-tag">Project evidence</span><a href="../firmware/src/dsp/amb.h">Sample rate ↗</a> · <a href="../firmware/hal/fm1_core1.h">Worker timing ↗</a> · <a href="../firmware/hal/fm1_audio.h">Audio HAL ↗</a> · <a href="../firmware/hal/fm1_time.h">Timer ↗</a></p>
+      </section>
+
+      <section class="chapter" id="boot" aria-labelledby="boot-title">
+        <div class="chapter-kicker"><span>IX.</span>Startup &amp; packaging</div>
+        <h2 id="boot-title">The journey from reset to sound.</h2>
+        <p>Booting involves several components with different responsibilities. The project’s normal path is approximately:</p>
+        <div class="boot-flow" aria-label="Boot sequence: chip ROM, SDK startup in flash, application recovery stub, application startup">
+          <div class="boot-step"><span class="step-number">01</span><strong>Chip ROM</strong><small>Immutable first stage</small></div>
+          <div class="boot-step"><span class="step-number">02</span><strong>SDK startup</strong><small>Flash-resident SPL</small></div>
+          <div class="boot-step"><span class="step-number">03</span><strong>Recovery stub</strong><small>Application entry checks</small></div>
+          <div class="boot-step"><span class="step-number">04</span><strong>Application</strong><small>RAM, IRQs, peripherals, DSP</small></div>
+        </div>
+        <p>The immutable ROM stage and flash-resident <code>uboot.boot</code> component are separate. The package builder places the SDK SPL in the flash header region. The local statement that “the bootloader lives in ROM” collapses multiple stages into one. JieLi also supplies <code>uboot.boot</code> variants with different update and debugging capabilities.</p>
+        <p class="source-note"><span class="evidence-tag">Vendor + project</span><a href="#ref-uboot">UBOOT documentation ↗</a> · <a href="../tools/fm1pkg_make.py">Package layout ↗</a></p>
+        <div class="table-wrap"><table><thead><tr><th scope="col">Artifact</th><th scope="col">Contents</th></tr></thead><tbody>
+          <tr><td><code>.o</code></td><td>Relocatable machine code, symbols, and unresolved references.</td></tr><tr><td><code>.elf</code></td><td>Linked sections and addresses; potentially symbols and debug information.</td></tr><tr><td>Application <code>.bin</code></td><td>Raw image bytes assembled from selected sections.</td></tr><tr><td>Flash image</td><td>Boot metadata, startup components, application regions, and storage encoding.</td></tr><tr><td><code>.fwsc</code></td><td>Update-package format consumed by the installation path.</td></tr>
+        </tbody></table></div>
+        <p>The package builder also applies SFC encoding/encryption to relevant flash-image regions. Bytes from a package or physical flash image cannot automatically be treated as the clean instructions in the linked ELF.</p>
+      </section>
+
+      <section class="chapter" id="objdump" aria-labelledby="objdump-title">
+        <div class="chapter-kicker"><span>X.</span>Binary inspection</div>
+        <h2 id="objdump-title">A familiar tool, with an unfamiliar target.</h2>
+        <p>The compiled probe is ELF32, little endian, with machine identifier <code>0xF1</code>. Generic tools can parse much of the ELF container while lacking its instructions or relocation definitions. Recognizing the container does not establish correct instruction decoding.</p>
+        <p>Even the vendor disassembler needs the right CPU features. Without them, it printed the first four floating-point bytes as:</p>
+        <div class="code-panel"><div class="code-bar"><span>Same bytes · different decoder configuration</span></div><pre><code><span class="comment">// Without the correct CPU features</span>
+3f e5          &lt;unknown instruction&gt;
+02 01          tbb [r2]
+
+<span class="comment">// With -mcpu=r3 -mattr=+fprev1</span>
+3f e5 02 01    r0 = r0 * r1 (f)</code></pre></div>
+        <p>The wrong configuration changed instruction boundaries and produced a misleading instruction. <strong>Plausible assembly is not sufficient evidence of correct decoding.</strong></p>
+        <p>Use these commands inside WSL with the installed toolchain. Replace the example filenames with the object or ELF you want to inspect.</p>
+        <div class="code-panel"><div class="code-bar"><span>WSL · Bash · verified command forms</span></div><pre><code>JIELI_BIN="$HOME/.jieli/toolchain/pi32v2/bin"
+
+<span class="comment"># Section layout</span>
+"$JIELI_BIN/objdump" -h program.elf
+
+<span class="comment"># Symbols, including undefined references in an object</span>
+"$JIELI_BIN/objdump" -t program.o
+
+<span class="comment"># Decode the tested CPU and floating-point features</span>
+"$JIELI_BIN/objdump" -d -mcpu=r3 -mattr=+fprev1 program.elf
+
+<span class="comment"># Instructions and relocations in an unlinked object</span>
+"$JIELI_BIN/objdump" -d -r -mcpu=r3 -mattr=+fprev1 program.o
+
+<span class="comment"># Restrict the address range</span>
+"$JIELI_BIN/objdump" -d -mcpu=r3 -mattr=+fprev1 \
+  -start-address=0x02001000 -stop-address=0x02001080 program.elf</code></pre></div>
+        <div class="note"><span class="note-label">A command-line distinction</span><p>This old LLVM-derived <code>objdump</code> differs from GNU’s. The tested form <code>-d -r</code> works; combined <code>-dr</code> is rejected. Some relocation symbols displayed as <code>Unknown</code> even though the symbol table and generated assembly identified them. Cross-check unresolved calls before interpreting displayed destinations.</p></div>
+      </section>
+
+      <section class="chapter" id="boundaries" aria-labelledby="boundaries-title">
+        <div class="chapter-kicker"><span>XI.</span>Evidence &amp; diagnosis</div>
+        <h2 id="boundaries-title">What the binary can—and cannot—tell you.</h2>
+        <p>Keep the exact linked ELF corresponding to the running image. JieLi’s exception documentation distinguishes misaligned accesses, illegal instructions, invalid addresses, divide-by-zero, stack overflow, and watchdog resets. It also warns that memory corruption can happen before the instruction where the exception finally appears.</p>
+        <p class="source-note"><span class="evidence-tag">Vendor source</span><a href="#ref-exceptions">Exception analysis ↗</a></p>
+        <p>The remaining questions require evidence beyond the sources checked here: exact FM-1 chip/package identification and live clocks; complete instruction latencies; floating-point corner behaviour such as subnormals; and precise cache-coherency guarantees between cores and DMA.</p>
+        <blockquote class="pullquote">Compiler output establishes what was emitted. Silicon documentation and measurements establish how it behaves.</blockquote>
+        <p>Use generated instructions to understand transformations and dependencies. Use the memory map to understand placement and access. Use on-device timing and fault records to establish whether the complete system meets its deadlines.</p>
+      </section>
+
+      <section class="chapter" id="references" aria-labelledby="references-title">
+        <div class="chapter-kicker"><span>XII.</span>The reading room</div>
+        <h2 id="references-title">Sources &amp; provenance.</h2>
+        <p>This edition draws on JieLi’s public documentation, the installed AC79 SDK pinned to <code>AC79NN_SDK_V1.2.1_2023-12-13</code>, the FM-1 project’s hardware-facing code, and compiler probes run on 12 November 2026. Vendor pages are primarily in Chinese; explanations here are paraphrased in English.</p>
+        <ol class="reference-list">
+          <li id="ref-company"><a href="https://www.zh-jieli.com/#/home" target="_blank" rel="noopener noreferrer">JieLi · company and product overview ↗</a><small>Vendor identity, product categories, and integration focus.</small></li>
+          <li id="ref-hardware"><a href="https://doc.zh-jieli.com/AC79/zh-cn/master/board_description/board_overview/index.html" target="_blank" rel="noopener noreferrer">AC791 · hardware and board overview ↗</a><small>DSP cores, single precision, SRAM, caches, and interfaces. Family capabilities require board-specific verification.</small></li>
+          <li id="ref-clocks"><a href="https://doc.zh-jieli.com/AC79/zh-cn/master/module_example/system/system_clock.html" target="_blank" rel="noopener noreferrer">Clock architecture and dividers ↗</a><small>System, memory, high/low-speed bus, and serial-flash clock domains.</small></li>
+          <li id="ref-float"><a href="https://doc.zh-jieli.com/AC79/zh-cn/master/module_example/system/%E7%A1%AC%E4%BB%B6%E6%B5%AE%E7%82%B9.html" target="_blank" rel="noopener noreferrer">Hardware floating point ↗</a><small>Hardware float versus software double; precision of numeric literals.</small></li>
+          <li id="ref-math"><a href="https://doc.zh-jieli.com/AC79/zh-cn/master/module_example/system/math.html" target="_blank" rel="noopener noreferrer">Mathematics and acceleration ↗</a><small>FFT/IFFT and vector API implementations, formats, and constraints.</small></li>
+          <li id="ref-memory"><a href="https://doc.zh-jieli.com/AC79/zh-cn/master/module_example/system/memory.html" target="_blank" rel="noopener noreferrer">Memory placement and reporting ↗</a><small>Flash/RAM placement, memory accounting, and execution-range diagnostics.</small></li>
+          <li id="ref-dualcore"><a href="https://doc.zh-jieli.com/AC79/zh-cn/master/module_example/system/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%8D%95%E5%8F%8C%E6%A0%B8%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95.html" target="_blank" rel="noopener noreferrer">Single- and dual-core operating arrangements ↗</a><small>Dedicated-core restrictions, synchronization, and flash-write interaction.</small></li>
+          <li id="ref-uboot"><a href="https://doc.zh-jieli.com/AC79/zh-cn/master/module_example/system/UBOOT%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E.html" target="_blank" rel="noopener noreferrer">UBOOT component variants ↗</a><small>SDK startup components with different update and debugging capabilities.</small></li>
+          <li id="ref-exceptions"><a href="https://doc.zh-jieli.com/AC79/zh-cn/master/module_example/system/exception.html" target="_blank" rel="noopener noreferrer">Exception analysis and fault localization ↗</a><small>Fault categories, address lookup, corruption, guards, and watchdog behaviour.</small></li>
+          <li id="ref-sdk"><a href="https://gitee.com/Jieli-Tech/fw-AC79_AIoT_SDK/tree/AC79NN_SDK_V1.2.1_2023-12-13" target="_blank" rel="noopener noreferrer">Pinned AC79 SDK ↗</a><small>Tag: AC79NN_SDK_V1.2.1_2023-12-13 · local commit d179b4484759423312073f5fbb232501aa491047.</small></li>
+        </ol>
+        <div class="source-group"><span class="note-label">Local project record</span><p>These links open the underlying files when this HTML remains in the project’s <code>docs</code> folder.</p><div class="local-links"><a href="../tools/build.py">build.py</a><a href="../firmware/app.ld">app.ld</a><a href="../firmware/hal/fm1_isr.S">fm1_isr.S</a><a href="../firmware/hal/fm1_irq.h">fm1_irq.h</a><a href="../firmware/hal/fm1_core1.h">fm1_core1.h</a><a href="../firmware/hal/fm1_flash.h">fm1_flash.h</a><a href="../firmware/hal/fm1_xip.h">fm1_xip.h</a><a href="../firmware/hal/fm1_audio.h">fm1_audio.h</a><a href="../firmware/hal/fm1_time.h">fm1_time.h</a><a href="../firmware/hal/fm1_rust_atomic.h">fm1_rust_atomic.h</a><a href="../tools/fm1pkg_make.py">fm1pkg_make.py</a></div></div>
+        <div class="source-group"><span class="note-label">Compiler experiment record</span><p>The displayed C and assembly examples were compiled with the installed vendor Clang 4.0.1 using <code>-target pi32v2 -mcpu=r3 -mfprev1 -ffp-contract=off -O2</code>. Object headers, predefined type sizes, generated assembly, and disassembler feature selection were checked. Instruction timing and hardware operation were not measured by those compiler experiments.</p></div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="colophon"><div class="colophon-inner"><div><div class="colophon-title">Understand the machine. Hear the result.</div><p>The architecture series · JieLi AC79 / PI32v2 / FM-1<br>Research edition · 12 November 2026</p></div><a href="#top">Return to the beginning ↑</a></div></footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      'use strict';
+      const $ = (selector, parent = document) => parent.querySelector(selector);
+      const $$ = (selector, parent = document) => Array.from(parent.querySelectorAll(selector));
+      const toast = $('#toast');
+      let toastTimer;
+      function announce(message) {
+        toast.textContent = message;
+        toast.classList.add('visible');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('visible'), 2200);
+      }
+      $$('.code-panel').forEach(panel => {
+        const bar = $('.code-bar', panel);
+        if (!bar) return;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'copy-button';
+        button.textContent = 'Copy';
+        button.setAttribute('aria-label', `Copy ${$('span', bar)?.textContent || 'code example'}`);
+        button.addEventListener('click', async () => {
+          const text = $$('pre', panel).map(pre => pre.textContent).join('\n\n');
+          try {
+            await navigator.clipboard.writeText(text);
+            button.textContent = 'Copied';
+            announce('Code copied to clipboard.');
+            setTimeout(() => { button.textContent = 'Copy'; }, 1800);
+          } catch {
+            const selection = window.getSelection();
+            const range = document.createRange();
+            const pre = $('pre', panel);
+            range.selectNodeContents(pre);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            announce('Code selected. Press Ctrl+C to copy.');
+          }
+        });
+        bar.append(button);
+      });
+
+      const tabs = $$('[role="tab"]');
+      function activateTab(tab, focus = false) {
+        tabs.forEach(item => {
+          const selected = item === tab;
+          item.setAttribute('aria-selected', String(selected));
+          item.tabIndex = selected ? 0 : -1;
+          document.getElementById(item.getAttribute('aria-controls')).hidden = !selected;
+        });
+        if (focus) tab.focus();
+      }
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => activateTab(tab));
+        tab.addEventListener('keydown', event => {
+          let next;
+          if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+          if (event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+          if (event.key === 'Home') next = 0;
+          if (event.key === 'End') next = tabs.length - 1;
+          if (next !== undefined) { event.preventDefault(); activateTab(tabs[next], true); }
+        });
+      });
+
+      const rate = $('#sample-rate'), frames = $('#block-size'), clock = $('#clock-mhz');
+      function calculateBudget() {
+        const hz = Number(rate.value), block = Number(frames.value), mhz = Number(clock.value);
+        $('#clock-value').textContent = `${mhz} MHz`;
+        $('#deadline-output').textContent = `${(block / hz * 1000).toFixed(3)} ms`;
+        $('#cycles-output').textContent = Math.round(mhz * 1000000 / hz).toLocaleString('en-US');
+        $('#budget-detail').textContent = `${block} ÷ ${hz.toLocaleString('en-US')} seconds · approximately ${(block / hz * mhz).toFixed(3)} million core clock cycles per block.`;
+      }
+      [rate, frames, clock].forEach(control => control.addEventListener('input', calculateBudget));
+      calculateBudget();
+
+      const chapters = $$('.chapter');
+      const links = $$('.contents a');
+      let scrollQueued = false;
+      function updateReadingPosition() {
+        const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+        $('#reading-progress').style.width = `${scrollable > 0 ? Math.min(100, window.scrollY / scrollable * 100) : 0}%`;
+        let current = chapters[0];
+        for (const chapter of chapters) {
+          if (chapter.getBoundingClientRect().top <= 155) current = chapter;
+        }
+        links.forEach(link => {
+          if (link.hash === `#${current.id}`) link.setAttribute('aria-current', 'location');
+          else link.removeAttribute('aria-current');
+        });
+        scrollQueued = false;
+      }
+      window.addEventListener('scroll', () => {
+        if (!scrollQueued) { scrollQueued = true; requestAnimationFrame(updateReadingPosition); }
+      }, { passive: true });
+      window.addEventListener('resize', updateReadingPosition);
+      updateReadingPosition();
+      $('#print-button').addEventListener('click', () => window.print());
+    })();
+  </script>
+</body>
+</html>
