@@ -689,6 +689,12 @@ static void uh_poll(void)
         fm1_usb_rx_sync();
         if (MQ - (mi_w - mi_r) < UH_ROOM)
             return;                                     /* ring too full: the packet stays, retried next poll */
+#if EN_RUST_USB
+        const fm1_usb_host_rx_t context={uh_rx,midi_in_q,&mi_w,&mi_r,usb_transport_publish};
+        const int32_t accepted=fm1_rust_usb_host_receive(&context,n);
+        if(accepted<0)return;
+        uh.events+=(uint32_t)accepted;
+#else
         for (i = 0; i + 3u < n; i += 4u) {
             uint32_t p = uh_midi_ok((uint32_t)uh_rx[i] | (uint32_t)uh_rx[i + 1] << 8 |
                                     (uint32_t)uh_rx[i + 2] << 16 | (uint32_t)uh_rx[i + 3] << 24);
@@ -699,6 +705,7 @@ static void uh_poll(void)
                 uh.events++;
             }
         }
+#endif
         uh.pkts++;
         uh.errors = 0;
 #if EN_RUST_USB

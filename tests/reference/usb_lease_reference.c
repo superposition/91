@@ -264,9 +264,10 @@ static void healthy_cases(void){
   }
  }
 }
-#ifdef __wasm__
+#if defined(__wasm__) && !defined(USB_LEASE_EMBEDDED)
 __attribute__((export_name("run")))
 #endif
+#ifndef USB_LEASE_EMBEDDED
 int run(void){
 #if USB_LEASE_HEALTHY
  healthy_cases();
@@ -280,4 +281,5 @@ int run(void){
 }
 #ifndef __wasm__
 int main(void){run();return 0;}
+#endif
 #endif

@@ -4,8 +4,8 @@ set -eu
 cd "$(dirname "$0")/.."
 repo=$(pwd)
 baseline=${1:?independent frozen source path}
-out=build/usb-lease
-if [ "${2:-correction}" = healthy ];then out=build/usb-lease-healthy;fi
+out=${3:-build/usb-lease}
+if [ "${2:-correction}" = healthy ];then out=${3:-build/usb-lease-healthy};fi
 mkdir -p "$out"
 (cd "$baseline";sha256sum -c "$repo/tests/reference/source.sha256") > "$out/source-verification.log"
 python3 tools/usb_reference.py "$baseline" "$out/frozen"

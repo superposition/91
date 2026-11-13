@@ -12,6 +12,7 @@ pub mod midi;
 pub mod usb_control;
 pub mod usb_descriptors;
 pub mod usb_endpoint;
+pub mod usb_host;
 pub mod usb_queues;
 pub mod usb_transport;
 pub mod usb_tx;

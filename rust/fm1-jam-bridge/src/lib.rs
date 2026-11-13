@@ -37,6 +37,7 @@ mod sequencer;
 mod transport;
 mod ui;
 mod usb_control;
+mod usb_host;
 mod usb_midi;
 mod usb_queues;
 mod usb_transport;

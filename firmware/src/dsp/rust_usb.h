@@ -27,6 +27,25 @@ int32_t fm1_rust_usb_sysex(const fm1_usb_transport_t *,const void *input,uint32_
 int32_t fm1_rust_usb_device_receive(const fm1_usb_transport_t *,const void *input,uint32_t count);
 int32_t fm1_rust_usb_midi_push(uint32_t *data,volatile uint32_t *write,volatile uint32_t *read,uint32_t value,uint32_t enabled,void (*publish)(void));
 int32_t fm1_rust_usb_midi_pop(uint32_t *data,volatile uint32_t *write,volatile uint32_t *read,uint32_t *output,void (*publish)(void));
+typedef struct {
+    uint8_t found,cfg,iface,alt,in_ep,in_type,in_interval,reserved0;
+    uint16_t in_mps;
+    uint8_t out_ep,out_type,out_interval,reserved1;
+    uint16_t out_mps;
+} fm1_usb_host_midi_t;
+_Static_assert(sizeof(fm1_usb_host_midi_t)==16 && offsetof(fm1_usb_host_midi_t,in_mps)==8 &&
+    offsetof(fm1_usb_host_midi_t,out_mps)==14,"USB host descriptor ABI");
+int32_t fm1_rust_usb_host_parse(const uint8_t *,uint32_t,fm1_usb_host_midi_t *);
+uint32_t fm1_rust_usb_host_packet(uint32_t);
+typedef struct {
+    const volatile uint8_t *input;
+    uint32_t *data;
+    volatile uint32_t *write;
+    const volatile uint32_t *read;
+    void (*publish)(void);
+} fm1_usb_host_rx_t;
+_Static_assert(sizeof(fm1_usb_host_rx_t)==5u*sizeof(void *),"USB host RX context ABI");
+int32_t fm1_rust_usb_host_receive(const fm1_usb_host_rx_t *,uint32_t);
 /*64B PI32 caller-stack descriptor; no persistent state or payload. */
 typedef struct {
     uint32_t flags;void *slots[9];void (*publish)(void);

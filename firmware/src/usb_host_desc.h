@@ -9,6 +9,14 @@
 #pragma once
 #include <stdint.h>
 
+#if EN_RUST_USB
+#include "dsp/rust_usb.h"
+typedef fm1_usb_host_midi_t uh_midi_t;
+static int uh_parse_midi(const uint8_t *d,uint32_t len,uh_midi_t *m)
+{return fm1_rust_usb_host_parse(d,len,m);}
+static uint32_t uh_midi_ok(uint32_t pkt)
+{return fm1_rust_usb_host_packet(pkt);}
+#else
 typedef struct {
     uint8_t found;               /* a usable endpoint of a MIDI streaming interface was found */
     uint8_t cfg;                 /* bConfigurationValue */
@@ -82,3 +90,4 @@ static uint32_t uh_midi_ok(uint32_t pkt)
         return pkt;
     return 0u;
 }
+#endif /* preserved C0 host policy */
