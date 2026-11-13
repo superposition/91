@@ -1,0 +1,36 @@
+{
+  "tested_source": "aa5413ee44cf7a0e700a3e13c30deed651d83c66",
+  "platforms": {
+    "windows": {
+      "result": {
+        "platform": "windows",
+        "poisoned_cli_graph": "pass",
+        "nested_font_bootstrap": "pass",
+        "font_bytes": 359094,
+        "sha256": "41a1ab01e24c314014f1989a444923907ce1b763ce02d41b98fbdd9304208169"
+      },
+      "log": {
+        "bytes": 2364,
+        "sha256": "12cc01acc8bf1e46d19df9fda810a7da3df48b082e91091a07c7afee0eb5c851"
+      }
+    },
+    "linux": {
+      "result": {
+        "platform": "linux",
+        "poisoned_cli_graph": "pass",
+        "nested_font_bootstrap": "pass",
+        "font_bytes": 356691,
+        "sha256": "9bc26350bf8b548bcf38553afd0e2c520b729853e056ba91741b4c2172034436"
+      },
+      "log": {
+        "bytes": 1902,
+        "sha256": "e50f778d6fd7206509e170ca88c761abbd60fdb4c1a2506f11372a6fdd392f19"
+      }
+    }
+  },
+  "fontset": "terminus",
+  "failure": "A simulator c-app build launched font generation,which bootstrapped the native CLI. The child simulator build script trusted inherited CARGO_FEATURE_C_APP and recursively rebuilt the same host target until blocked on its lock.",
+  "fix": "Use actual compile-time feature cfg in the simulator build script. Native host bootstrap clears parent feature/compiler/source/jobserver overrides while honoring an explicit FM1_CODEC_CLI override.",
+  "regression": "Real CLI builds under poisoned feature/source state and actual font generator bootstrap under invalid parent compiler/cross-target/jobserver state succeed; generated BDF header bytes match independent frozen Python on each platform.",
+  "limits": "This probe uses Terminus BDF to isolate process/feature behavior from optional platform TTF shaping libraries. Ordinary Linux instrument and Miri checks exercise the default font separately. No hardware or live preview is involved."
+}
