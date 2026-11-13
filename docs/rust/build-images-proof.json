@@ -1,0 +1,86 @@
+{
+  "tested_source": "3723c62b3195b7ef2182b2fe5c0d03ca35f0dcc7",
+  "platforms": {
+    "windows": {
+      "result": {
+        "cases": 697,
+        "profiles": {
+          "stub": 323,
+          "loader": 180,
+          "release": 162,
+          "sdk": 32
+        },
+        "source_hashes": 440,
+        "sha256": "2b78ee805aa2b8e6e0bdaf798d0cbe988c1ce26c2b018e309371f1ddbb509260",
+        "compiler_executed": false,
+        "hardware_io": false
+      },
+      "log": {
+        "bytes": 908,
+        "sha256": "73165e1c3fdeffcd7ab3a288f09b73be500758fdd023366a1be81ede656a8179"
+      }
+    },
+    "linux": {
+      "result": {
+        "cases": 697,
+        "profiles": {
+          "stub": 323,
+          "loader": 180,
+          "release": 162,
+          "sdk": 32
+        },
+        "source_hashes": 440,
+        "sha256": "991007f09d4abaf9775a940427724384d7cdffa1a6d1f66afc0a42fff3a3c61f",
+        "compiler_executed": false,
+        "hardware_io": false
+      },
+      "log": {
+        "bytes": 2031,
+        "sha256": "299b71c3600ccecc909058bec44fc1b2c935cd89af526fc630800e6ab1798554"
+      }
+    }
+  },
+  "protected_stub": {
+    "crt0_stub.S": {
+      "bytes": 1356,
+      "sha256": "4e2f6e68d31c1032bd01a45ba05b755cdacfaee48aae3db5bd5eabdefb2dca41"
+    },
+    "stub.c": {
+      "bytes": 13777,
+      "sha256": "bceee45795f3c087485d19ae4d4848eaf9c72f1de2311aba0fd6479eb1c1ffeb"
+    },
+    "stub.ld": {
+      "bytes": 1010,
+      "sha256": "ad16c9e6e42081a252ea532e14478d121fe86843da39e4a9c15778fd5b4f6cdd"
+    },
+    "stub.lock": {
+      "bytes": 67,
+      "sha256": "927d1a1ecf3628714ee503ae4a1bfea836fa09b347b93d20aba3f90582fb2462"
+    },
+    "stub_core.h": {
+      "bytes": 14255,
+      "sha256": "90778d2c71f7dd4aa1b68ba2f76c6c90db9e8ab6bd60552a2b84a7bb0b3cc118"
+    }
+  },
+  "rust": "1.94.1",
+  "frozen_source_hashes": 440,
+  "strict_clippy": "pass on Windows and Linux",
+  "actual_entrypoints": [
+    "tools/build.py::build_loader",
+    "tools/build.py::build_stub",
+    "tools/build.py::main"
+  ],
+  "additional_regressions": {
+    "image_disassembly_mmio_cases_per_host": 927,
+    "block_wrapper_cli_cases_per_host": 814
+  },
+  "compiler_delivery": "Controlled tc/tc_all output and command capture, with actual old/current builder functions. Compare bytes, stdout/error order, lock/file results and compiler argument order. No vendor compiler or hardware executes in this differential.",
+  "stage_order": "Loader sections precede image read, compression precedes BSS summary; stub inspection/summary precede lock read, and lock write precedes update message. Compound failures and absent binary delivery retain old outcomes.",
+  "formatting": "Seven exact half-way percentage cases plus ordinary lengths; signed/prefixed/underscored ASCII hexadecimal grammar, invalid duplicate signs, Unicode release digits and repeated entrypoint prior-state profiles.",
+  "scope_limits": [
+    "Only controlled workspace lock files are written in tests; protected source/lock bytes match the immutable baseline.",
+    "Compiler/process graph and application segment assembly remain adapters/unported policy.",
+    "Checked image/signed-integer request bounds and the pinned regex Unicode database are explicit host profiles.",
+    "No linked image, physical execution or timing claim."
+  ]
+}
