@@ -33,6 +33,8 @@ jobs:
         run: python3 tests/rust_build_policy.py build/r01-source
       - name: Font, pattern and sine generator compatibility
         run: bash tests/rust_assets.sh build/r01-source
+      - name: Native bootstrap under inherited Cargo features and compiler flags
+        run: python3 tests/host_bootstrap_test.py build/r01-source
       - uses: actions/upload-artifact@v4
         if: always()
         with:

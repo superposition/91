@@ -8,7 +8,9 @@ fn main() {
     println!("cargo:rerun-if-env-changed=FM1_SIM_SOURCE");
     println!("cargo:rerun-if-env-changed=CC");
     println!("cargo:rerun-if-env-changed=AR");
-    if env::var_os("CARGO_FEATURE_C_APP").is_none() {
+    // Nested Cargo invocations may inherit another build script's feature env.
+    // Compile-time cfg describes this package's actual resolved feature graph.
+    if !cfg!(feature = "c-app") {
         return;
     }
     let repo = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap()).join("../..");
@@ -60,7 +62,7 @@ fn main() {
         .arg(source.join("firmware/src"))
         .arg("-I")
         .arg(source.join("firmware/src/dsp"));
-        if env::var_os("CARGO_FEATURE_RUST_ENGINE").is_some() {
+        if cfg!(feature = "rust-engine") {
             for flag in [
                 "JAM",
                 "COMMANDS",
