@@ -6,6 +6,7 @@ use serde_json::{json, Value};
 pub mod dy;
 pub mod fonts;
 pub mod logo;
+pub mod manual;
 pub fn assertion(message: impl Into<String>) -> Error {
     Error {
         kind: "AssertionError".into(),
@@ -127,6 +128,9 @@ pub fn request(method: &str, v: &Value, io: &mut impl Adapter) -> Result<Value> 
     }
     if let Some(method) = method.strip_prefix("logo.") {
         return logo::request(method, v, io);
+    }
+    if let Some(method) = method.strip_prefix("manual.") {
+        return manual::request(method, v, io);
     }
     Ok(match method {
         "pattern-data" => pattern_data(),

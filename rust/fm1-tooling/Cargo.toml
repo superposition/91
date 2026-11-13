@@ -11,3 +11,4 @@ fm1-engine.workspace = true
 regex = "=1.13.1"
 serde_json.workspace = true
 sha2 = { version = "=0.10.9", default-features = false, features = ["force-soft"] }
+fancy-regex = "=0.16.2"

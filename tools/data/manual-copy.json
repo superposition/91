@@ -1,0 +1,16 @@
+{
+  "name": "NAIWAN 91",
+  "site_header": "<header class=\"site\"><a class=\"home\" href=\"../\">内湾 91</a><nav><a href=\"../emu/\">Emulator</a><a href=\"../editor/\">Editor</a><a href=\"../install/\">Install</a><a href=\"../manual/\" aria-current=\"page\">Manual</a></nav></header>",
+  "title_manual": "<h1>Manual</h1>",
+  "printable": "<p class=\"printable\">Printable: <a href=\"NAIWAN 91-manual.pdf\" download>the full manual (PDF)</a> &middot; <a href=\"NAIWAN 91-quick-manual.pdf\" download>the quick manual (PDF, eight A4 pages)</a> &middot; <a href=\"NAIWAN 91-beginners-guide.pdf\" download>the beginner's guide (PDF)</a></p>",
+  "contents_open": "<nav class=\"contents\" aria-label=\"Contents\"><h2 id=\"contents\">Contents</h2>",
+  "font_link": "<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow+Semi+Condensed:wght@400;500;600&display=swap\">",
+  "quick_fallback_title": "Quick manual",
+  "edge": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+  "want_pages": 8,
+  "footer_style": "<style>@page { @bottom-center { content: \"%s · page \" counter(page) \" of \" counter(pages); font-size: 6.8pt; color: #333; font-family: \"Segoe UI\", Arial, sans-serif; } }</style>\n",
+  "quick_document": "<!doctype html>\n<html lang=\"en-GB\"><head><meta charset=\"utf-8\">\n<title>%s</title>\n<style>%s</style></head>\n<body>\n%s\n</body></html>\n",
+  "manual_description_tail": "live-performance firmware for the M-VAVE FM-1 (a fork of HYP-1).",
+  "manual_title_suffix": "Manual",
+  "manual_default_description": "The manual"
+}

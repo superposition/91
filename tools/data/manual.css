@@ -1,0 +1,88 @@
+
+/* NAIWAN 91's page: the mascot's colours (the slinky on the boot card): a warm black ground, crimson, light pink,
+   ember yellow for what is live, cream. (The names below are inherited from AMB-1: paper the ground, sheet the
+   cards, river the crimson, ink the text.) */
+:root {
+  --paper: #130a0e; --sheet: #211219; --green-1: #2e1822; --green-3: #9c1d3a;
+  --river: #e0344f; --river-2: #ff8f8f; --ink: #f6ece0; --muted: #bba79a; --rule: #4a2a35;
+  --orange: #ffd447; --cream: #f2e6c4; --rust: #9c1d3a;
+  color-scheme: dark;
+}
+body {
+  background: var(--paper); color: var(--ink); margin: 0;
+  font: 400 18px/1.6 "Barlow Semi Condensed", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  padding-inline: 16px; padding-block: 32px 64px;
+}
+main { max-width: 48rem; margin: 0 auto; }
+h1, h2, h3, th, .site .home { font-family: "Chakra Petch", "Helvetica Neue", Arial, sans-serif; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.2; }
+h1 { font-size: 2.1rem; font-weight: 700; margin: 0 0 .6rem; letter-spacing: .05em; text-transform: uppercase; display: flex; align-items: center; gap: .7rem; }
+h1::before { content: ""; width: 34px; height: 5px; flex: none; background: linear-gradient(90deg, var(--orange) 0 38%, var(--river) 38%); }
+h2 { font-size: 1.3rem; font-weight: 400; margin: 3rem 0 .8rem; padding-top: .8rem; border-top: 1px solid var(--rule);
+     text-transform: uppercase; letter-spacing: .04em; }
+h2 .num { color: var(--orange); margin-right: .5em; font-variant-numeric: tabular-nums; }
+h3 { font-size: 1.1rem; font-weight: 600; margin: 2rem 0 .5rem; color: var(--cream); }
+p, li { max-width: 65ch; }
+p { margin: 0 0 1rem; }
+ul, ol { padding-left: 1.3rem; margin: 0 0 1rem; }
+li { margin: .2rem 0; }
+li::marker { color: var(--river-2); }
+strong { font-weight: 600; }
+a { color: var(--ink); text-decoration-color: var(--river-2); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+a:hover { background: var(--green-1); }
+a:focus-visible { outline: 2px solid var(--river-2); outline-offset: 2px; }
+code, pre { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .86em; }
+code { background: var(--sheet); padding: .08em .35em; border: 1px solid var(--rule); }
+pre { background: var(--sheet); border: 1px solid var(--rule); padding: 14px 16px; overflow-x: auto; line-height: 1.45; margin: 0 0 1.2rem; }
+pre code { background: none; padding: 0; border: 0; font-size: inherit; }
+hr { display: none; }
+.table { overflow-x: auto; margin: 0 0 1.3rem; }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; vertical-align: top; padding: .45rem .7rem .45rem 0; border-bottom: 1px solid var(--rule); }
+th { font-weight: 400; text-transform: uppercase; letter-spacing: .06em; font-size: .8rem; color: var(--muted); border-bottom-color: var(--ink); }
+td:first-child { white-space: nowrap; }
+.lede { margin-bottom: 1.6rem; }
+.status { background: var(--sheet); border: 1px solid var(--rule); padding: 12px 16px; }
+.status p { margin: 0; }
+.site { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem 1.2rem; margin: 0 0 1.6rem; padding-bottom: .5rem; border-bottom: 1px solid var(--rule); }
+.site .home { font-size: 1.3rem; font-weight: 700; letter-spacing: .06em; color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: .55rem; }
+.site .home img { image-rendering: pixelated; display: block; width: 46px; height: 46px; }
+.site nav a.yt { color: var(--orange); }
+.site .home:hover { color: var(--river-2); background: none; }
+.site nav { margin-left: auto; display: flex; flex-wrap: wrap; gap: .2rem 1rem; font-size: .92rem; }
+.site nav a { color: var(--ink); text-decoration-color: var(--river-2); text-underline-offset: 3px; }
+.site nav a[aria-current] { text-decoration: none; color: var(--river-2); }
+a.home { color: inherit; text-decoration: none; }
+a.home:hover { background: none; color: var(--river-2); }
+main > a.home { display: inline-block; font-size: .9rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 .4rem; }
+.callout { border-left: 4px solid var(--river); background: var(--sheet); padding: 10px 16px; margin: 0 0 1.2rem; max-width: 65ch; }
+.callout p { margin: 0; }
+details { border: 1px solid var(--rule); background: var(--sheet); padding: 0 16px; margin: 0 0 1.2rem; }
+details > summary { cursor: pointer; padding: 10px 0; }
+details[open] > summary { margin-bottom: .4rem; }
+details > :last-child { margin-bottom: 1rem; }
+.swatch { display: inline-block; width: .7em; height: .7em; margin-right: .4em; vertical-align: .02em; box-shadow: 0 0 0 1px var(--ink); }
+nav.contents ol { columns: 2 14rem; column-gap: 2rem; padding-left: 1.3rem; }
+.figs { display: flex; flex-wrap: wrap; gap: 16px; margin: .4rem 0 1.6rem; }
+figure { margin: 0; flex: 0 1 auto; }
+figure img { display: block; max-width: 100%; height: auto; }
+figure.shot img { width: 240px; image-rendering: pixelated; border: 1px solid var(--rule); border-radius: 6px; }
+figure.wide img { border-radius: 10px; }
+figure.wide { flex-basis: 100%; }
+figure.wide img { width: 100%; }
+figcaption { color: var(--muted); font-size: .88rem; margin-top: .4rem; max-width: 240px; }
+figure.wide figcaption { max-width: none; }
+nav.contents li { break-inside: avoid; }
+p.printable { margin: -0.4rem 0 1.4rem; color: var(--muted); }
+p.printable a { font-weight: 600; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+@media print {                                   /* the PDF (Edge headless prints this page): paper colours, no site chrome, sections on new pages */
+  :root { --paper: #fff; --sheet: #f3f1ee; --green-1: #e8e2e6; --green-3: #7a1030; --river: #8c1028; --river-2: #a03050; --ink: #111; --muted: #555; --rule: #bbb; }
+  header.site, p.printable, a.home { display: none; }
+  body { font-size: 10.5pt; }
+  main { max-width: none; padding: 0; }
+  h2 { break-before: page; }
+  h1 + h2, nav.contents + h2 { break-before: auto; }
+  figure, table, pre, li { break-inside: avoid; }
+  a { color: inherit; text-decoration: none; }
+}

@@ -1,0 +1,315 @@
+{
+  "schema": 1,
+  "ticket": 22,
+  "checkpoint": "manual-generation-policy",
+  "status": "qualified source/policy slice; no actual PDF rendering",
+  "base": "0f0d4a1dfbbd6a26456c3b4609121a1563083a3c",
+  "source_fingerprint": "f7a318b0450007015ece6f5a241130c5389a229ca5e6087ee641397c2465dd72",
+  "source_fingerprint_encoding": "sha256 of sorted UTF-8 path + space + sha256 + LF",
+  "sources": {
+    "Cargo.lock": {
+      "bytes": 8408,
+      "sha256": "54c01f736382c54f72d9527abeef7fdd536f7fa6d318441973c6e788eb61042f"
+    },
+    "Cargo.toml": {
+      "bytes": 679,
+      "sha256": "e1b0bd0471ff7e7fba904743b87a689affede01a317d6ada96b2ed2433c38bb3"
+    },
+    "docs/GUIDE.md": {
+      "bytes": 8934,
+      "sha256": "53713ca3146bed10baa716685a88004e19d6b7ee0004705f347f000a5f1d0d96"
+    },
+    "docs/MANUAL.md": {
+      "bytes": 185888,
+      "sha256": "d0788e4c9b0edb9e129eac56bc855cca053889e041fee40bdc69e2fa01030f04"
+    },
+    "docs/QUICK.md": {
+      "bytes": 53041,
+      "sha256": "d4535b668e168eb649e2ad0e11c7e5fd3a7542f4b22c7fcad86922af508e1e91"
+    },
+    "rust/fm1-cli/Cargo.toml": {
+      "bytes": 444,
+      "sha256": "bd02753c37dc73b455cf6c54ec87aa47c70118f9a16854f69e230f1781b64a36"
+    },
+    "rust/fm1-cli/src/main.rs": {
+      "bytes": 5181,
+      "sha256": "60ea19a37ca1c39a240596cfaac6d7a50a5a36b8f638f813f41127cb4889bcdf"
+    },
+    "rust/fm1-tooling/Cargo.toml": {
+      "bytes": 345,
+      "sha256": "c725af697a316928295079d1bf1e2aae1b6c19d58d5efb925489e12b145f2bde"
+    },
+    "rust/fm1-tooling/src/assets.rs": {
+      "bytes": 6427,
+      "sha256": "301eb48a440194f2c7b6f163801daee4a02fcfa2147b1e5a8291604bc15fcc5d"
+    },
+    "rust/fm1-tooling/src/assets/logo.rs": {
+      "bytes": 9858,
+      "sha256": "9e21283a9ca741ffe4ef18304fc2e67f30bc96129c33cbe4fdd47e9ec899006a"
+    },
+    "rust/fm1-tooling/src/assets/manual.rs": {
+      "bytes": 11015,
+      "sha256": "791ffb1641221b789bbf3851f811d1fe82e8188d73a0218cbe6f4c3c8cb630e7"
+    },
+    "rust/fm1-tooling/src/assets/manual/page.rs": {
+      "bytes": 11948,
+      "sha256": "4b3d4a2e71f27897195266d32faf28ffa5af3886e0ac0c836c35bebf05f14846"
+    },
+    "rust/fm1-tooling/src/assets/manual/pdf.rs": {
+      "bytes": 10561,
+      "sha256": "b269769a5cef304a2022dfa56fe3b3700686c7f158ab55df784b95bcb2ae863b"
+    },
+    "rust/fm1-tooling/src/assets/manual/quick.rs": {
+      "bytes": 7583,
+      "sha256": "14d218c6df1e970243a32bbad82bae6745aa5fe80b9b262b6147927a52fd862b"
+    },
+    "rust/fm1-tooling/src/lib.rs": {
+      "bytes": 10761,
+      "sha256": "69cc1cc6be20f00e139e46237f617ab92f761fc132e0951b6052540b2e7169dd"
+    },
+    "tests/manual_differential.py": {
+      "bytes": 10851,
+      "sha256": "2df695ebe5b5cd41d22fe0e7dfe50b84659ffca2f52fc5703994763422b15edc"
+    },
+    "tests/manual_pdf_policy.py": {
+      "bytes": 13850,
+      "sha256": "dd83c41c131324cb2c0dfdf3bfe0d8a0314f413cee9b6643208c137e4d385c3c"
+    },
+    "tests/reference/manual_current_c0/manifest.json": {
+      "bytes": 491,
+      "sha256": "4fc991707d8dc9e58ced124c91a76d6bb9edf1f0e7ffae9d074f0ca44a5f22ce"
+    },
+    "tests/reference/source.sha256": {
+      "bytes": 39958,
+      "sha256": "6148afa57b782c81e5a794f0ded441763fe986f35bf275014f304f6da76d88af"
+    },
+    "tests/rust_manual.sh": {
+      "bytes": 604,
+      "sha256": "4f2deff3ab4dd9bb3b65d8637a83ebb60809a020b5a64d7987694e4b940538f8"
+    },
+    "tools/data/manual-copy.json": {
+      "bytes": 1621,
+      "sha256": "a9bb040e3ebf012712c9f4e56984389f5df94c6948a9e02090a75e500153f613"
+    },
+    "tools/data/manual.css": {
+      "bytes": 6128,
+      "sha256": "7a70c836e7b4067e955e423731a7bb24b8036cb02a70eac152ccec95826304b0"
+    },
+    "tools/data/quick-manual.css": {
+      "bytes": 2275,
+      "sha256": "530d0c80b97d2c75ca0709b8b8afc1aac7467bdcc7f69eed99f7651891387451"
+    },
+    "tools/make_manual_pdf.py": {
+      "bytes": 822,
+      "sha256": "69f4daa9f7ef4b7a97e4fd97199e9d354777516199e5eb768b929785eaa557a1"
+    },
+    "tools/make_quick_manual.py": {
+      "bytes": 2219,
+      "sha256": "cef33e6ce64ca235852602362259880cd2c09c04bfd83d64359bc5ee87a33f27"
+    },
+    "tools/manual_html.py": {
+      "bytes": 1649,
+      "sha256": "8b425ad2518ad0660215f5d9523d233a9cd83a0867af17b68010e174cc98b36f"
+    },
+    "tools/rust_codecs.py": {
+      "bytes": 3639,
+      "sha256": "2efa2a8ee0cdbf61a563cc3d49e98487e05c633075eb0bf5747f284e51636e92"
+    },
+    "tools/rust_manual.py": {
+      "bytes": 4288,
+      "sha256": "73d460fdb3bccdd08f984f85cf8525746299cc5d461c333f505eb97133b2695c"
+    },
+    "tools/rust_tooling.py": {
+      "bytes": 4282,
+      "sha256": "569183c6a84809ba386398ad450492e5fad35faf23c52910ab5b180edbacabbb"
+    }
+  },
+  "toolchain": "rustc/cargo1.94.1",
+  "frozen_source_files": 440,
+  "current_c0": {
+    "base": "0f0d4a1dfbbd6a26456c3b4609121a1563083a3c",
+    "files": {
+      "manual_html.py": {
+        "bytes": 16450,
+        "sha256": "8b9f97d27ed3fd2a3012734a3eb46f52473ec90c99aa085a0614505b7fe4368b"
+      },
+      "make_quick_manual.py": {
+        "bytes": 13465,
+        "sha256": "8595e6ddfc0322bb6de028ab97a42b2c5cdf6bc9e10a98e29d9eca2ed61ed662"
+      },
+      "make_manual_pdf.py": {
+        "bytes": 1266,
+        "sha256": "5c550eb4e668c19e0a820d434aed697a6fd7b51e4fb26b4556770829fe4403b0"
+      }
+    }
+  },
+  "current_c0_git_and_r01_bytes_identical": true,
+  "platforms": {
+    "linux": [
+      {
+        "cases": 996,
+        "trace_sha256": "2bbe6888b963c69a9a140521a1232b28fe0a95ea239ead52032c97e4fd753f8d",
+        "frozen_files": 440,
+        "current_c0_base": "0f0d4a1dfbbd6a26456c3b4609121a1563083a3c",
+        "python": "3.10.12",
+        "actual_pdf_rendering": false
+      },
+      {
+        "cases": 855,
+        "trace_sha256": "98cfe7888480167d006ac55693a140145f6ba35f247279c05b13845b61cc900a",
+        "frozen_files": 440,
+        "python": "3.10.12",
+        "edge_launched": false,
+        "pdf_rendered": false
+      }
+    ],
+    "windows": [
+      {
+        "cases": 996,
+        "trace_sha256": "dd358f4268489988e5416fe99ce40f60de3431b2822c23b7808bde9afe6dc8c0",
+        "frozen_files": 440,
+        "current_c0_base": "0f0d4a1dfbbd6a26456c3b4609121a1563083a3c",
+        "python": "3.8.3",
+        "actual_pdf_rendering": false
+      },
+      {
+        "cases": 855,
+        "trace_sha256": "e52d87f7a95db14d8506043aa673fdd51a2dc81089bdf13ff5585ca524e55863",
+        "frozen_files": 440,
+        "python": "3.8.3",
+        "edge_launched": false,
+        "pdf_rendered": false
+      }
+    ]
+  },
+  "repeat_trace_hashes_identical": true,
+  "checks": {
+    "workspace_tests": 167,
+    "windows_tooling_tests": 19,
+    "fmt": true,
+    "clippy_all_targets_deny_warnings": true,
+    "actual_isolated_cli_processes": true,
+    "native_commands": [
+      "manual-body",
+      "quick-html",
+      "pdf-count"
+    ],
+    "native_file_universal_newline_fix": true,
+    "cli_c_app_feature": false,
+    "mcu_and_codec_wasm_fancy_regex_dependency": false
+  },
+  "native_binaries": {
+    "linux": {
+      "bytes": 3810624,
+      "sha256": "fd989f373e4947b12b8ef86e91b7df4085b57f59fdf1820393c93e24726870f2"
+    },
+    "windows": {
+      "bytes": 3099648,
+      "sha256": "ec3c236b439d103ff39ea1afb420537e61a9c7514daf5bdb846b2ec3f0cd0438"
+    }
+  },
+  "evidence": {
+    "linux-proof.log": {
+      "bytes": 485,
+      "sha256": "b7688567156ee0fa935c3a7c967b7f6878beaad6374e4e55bf86256b00c5d10d"
+    },
+    "windows-proof.log": {
+      "bytes": 421,
+      "sha256": "1d21482d7a2e601ce08f37952e79a421a46e26c03a766977b06e6c9a65325356"
+    },
+    "parser-repeat-proof.log": {
+      "bytes": 235,
+      "sha256": "43ae46088431086c0a0b08fcd7ce386a74b2ece949bb039780ac2f78654bbfa3"
+    },
+    "pdf-repeat-complete.log": {
+      "bytes": 188,
+      "sha256": "8afee45a84cc31ef092e1742ed477a848abf81bf0a21086ee2e1a81189c57c42"
+    },
+    "workspace-complete.log": {
+      "bytes": 22666,
+      "sha256": "3fba09479dfce842f4c731117fd47ffe7c918e96b3cf01630f3cb375ee741ba1"
+    },
+    "windows/tests-qualified.log": {
+      "bytes": 3196,
+      "sha256": "3048cfd8e5f9864cc919a5ac3390c83bec28c9b135dbac9aac8deeaa1cb50fd9"
+    },
+    "fmt-verified.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "clippy-verified.log": {
+      "bytes": 270,
+      "sha256": "696798433bc28499fc3f5b94d90c95d5cff021807452a4be0735444ea738c3c3"
+    },
+    "cli-features.txt": {
+      "bytes": 12924,
+      "sha256": "5e708a49f610691d7dbde16a6256ba48fcf03769ee52cf03312e5522bc6faee8"
+    },
+    "codec-features.txt": {
+      "bytes": 1056,
+      "sha256": "bae0139b754ce695e581169fb874f71110aa6ef91fcb04f6bd3259729994ce2c"
+    },
+    "bridge-features.txt": {
+      "bytes": 1253,
+      "sha256": "7a463c274b02a62b93d89bf11b75d830fff9e2ec93f9816e5e12f2ec6b5922ef"
+    },
+    "windows-crlf-attempt.log": {
+      "bytes": 939,
+      "sha256": "313a0df429f3d2f37a98dcf8ac63ef7a4e036237fd7f85d618cc8ab6e876cb77"
+    },
+    "windows-crlf-failure.json": {
+      "bytes": 10794,
+      "sha256": "95d9bfc11ee6c65080f2480774bb4beed61d5f581a505f69e61fc3b5ffa7333f"
+    }
+  },
+  "dependencies_added": [
+    "fancy-regex0.16.2",
+    "aho-corasick1.1.5",
+    "regex-automata0.4.18",
+    "regex-syntax0.8.11",
+    "bit-set0.8.0",
+    "bit-vec0.8.0"
+  ],
+  "coverage": {
+    "current_and_r01_manual_quick_guide": true,
+    "copy_css_exact": true,
+    "python_word_and_control_space_profiles": true,
+    "composed_decomposed_unicode": true,
+    "protected_code_spans": true,
+    "figures_paths_mime_and_embedding": true,
+    "header_contents_details_callouts_tables_lists": true,
+    "main_flags_environment_and_public_state": true,
+    "edge_command_and_poll_order": true,
+    "positive_size_stability_missing_zero_churn": true,
+    "timeout_unlink_io_and_constructor_errors": true,
+    "library_available_unavailable_profiles": true,
+    "all256_following_byte_count_profiles": true,
+    "geometry_sort_continuations_and267mm_threshold": true,
+    "half_rounding_and_near_thresholds": true,
+    "printed_prefixes_and_return_codes": true
+  },
+  "limits": {
+    "frame_bytes": 33554432,
+    "text_and_html_bytes": 16777216,
+    "pdf_bytes": 12582912,
+    "image_bytes": 1100000,
+    "pages": 4096,
+    "visitor_records_per_page": 100000,
+    "finite_coordinate_magnitude": 1000000000000,
+    "regex_cache_patterns": 256,
+    "regex_backtrack_limit": 1000000
+  },
+  "qualifications": {
+    "edge_launched": false,
+    "pdf_rendered": false,
+    "physical_io": false,
+    "production_documents_assets_or_sites_modified": false,
+    "public_abi_changed": false,
+    "python3_8_quick_cli": "original Path.write_text newline keyword failure preserved; complete policy covered with Python3.10 I/O doubles and Linux3.10 actual CLI",
+    "unicode": "controlled grammar normalized to Python categories; dependency Unicode tables pinned; generated code indices ASCII"
+  },
+  "remaining": [
+    "root-owned site/parameter/build/emitter/bootstrap policy",
+    "actual PDF visual/page layout qualification requires separate renderer/font evidence"
+  ]
+}

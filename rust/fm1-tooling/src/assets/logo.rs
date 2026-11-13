@@ -131,7 +131,7 @@ pub fn render(rows: &Value, scale: i64, size: Option<i64>, colors: &Value) -> Re
         })
     }
 }
-fn b64(data: &[u8]) -> String {
+pub(super) fn b64(data: &[u8]) -> String {
     const TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let mut out = String::with_capacity(data.len().div_ceil(3) * 4);
     for c in data.chunks(3) {

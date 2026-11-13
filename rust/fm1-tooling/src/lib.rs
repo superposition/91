@@ -180,6 +180,15 @@ pub fn cli(args: &[String]) -> Result<()> {
             let output=if args[0]=="lz4-compress" {lz4::compress(&image)?}else{lz4::decompress(&image,&[])?};
             std::fs::write(&args[2],output)?;
         }
+        Some(kind @ ("manual-body"|"quick-html")) if args.len()==3=>{
+            let source=String::from_utf8(read_file(&args[1],16*1024*1024)?).map_err(|_|Error::value("manual must be UTF-8"))?;
+            let source=source.replace("\r\n","\n").replace('\r',"\n");
+            std::fs::write(&args[2],assets::manual::native(&source,kind=="quick-html")?)?;
+        }
+        Some("pdf-count") if args.len()==2||(args.len()==3&&args[2]=="--full")=>{
+            let data=read_file(&args[1],12*1024*1024)?;
+            println!("{}",json!({"pages":assets::manual::pdf::count(&data,args.len()==3),"bytes":data.len()}));
+        }
         Some("dy-build") if args.len()==4||args.len()==5 => {
             let mut argv=vec![args[1].clone(),args[2].clone()];
             if let Some(rom)=args.get(4){argv.push("--rom".into());argv.push(rom.clone());}
@@ -234,7 +243,7 @@ pub fn cli(args: &[String]) -> Result<()> {
         }
         _ => {
             return Err(Error::value(
-                "usage: fm1-rs tools package-info PACKAGE [--force] | decode KIND RAW-SYSEX-DATA | summary TELEMETRY.csv | rescue-plan V15-PACKAGE SNAPSHOT | debug-plan peek|poke|clock A [B] | sine | patterns | lz4-compress IN OUT | lz4-decompress IN OUT | loader-wrap IN OUT | dy-build MANIFEST BANKS OUTROOT [ROMDIR] | logo-rgba UI SCALE SIZE OUTPUT",
+                "usage: fm1-rs tools package-info PACKAGE [--force] | decode KIND RAW-SYSEX-DATA | summary TELEMETRY.csv | rescue-plan V15-PACKAGE SNAPSHOT | debug-plan peek|poke|clock A [B] | sine | patterns | lz4-compress IN OUT | lz4-decompress IN OUT | loader-wrap IN OUT | dy-build MANIFEST BANKS OUTROOT [ROMDIR] | logo-rgba UI SCALE SIZE OUTPUT | manual-body INPUT OUTPUT | quick-html INPUT OUTPUT | pdf-count FILE [--full]",
             ))
         }
     }

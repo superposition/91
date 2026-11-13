@@ -1,0 +1,17 @@
+{
+  "base": "0f0d4a1dfbbd6a26456c3b4609121a1563083a3c",
+  "files": {
+    "manual_html.py": {
+      "bytes": 16450,
+      "sha256": "8b9f97d27ed3fd2a3012734a3eb46f52473ec90c99aa085a0614505b7fe4368b"
+    },
+    "make_quick_manual.py": {
+      "bytes": 13465,
+      "sha256": "8595e6ddfc0322bb6de028ab97a42b2c5cdf6bc9e10a98e29d9eca2ed61ed662"
+    },
+    "make_manual_pdf.py": {
+      "bytes": 1266,
+      "sha256": "5c550eb4e668c19e0a820d434aed697a6fd7b51e4fb26b4556770829fe4403b0"
+    }
+  }
+}
