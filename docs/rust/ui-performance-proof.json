@@ -1,0 +1,77 @@
+{
+  "scope": "12 production scene/undo/tap/glide/key/page helpers",
+  "toolchain": "Rust1.94.1; GCC11; Clang22 WASM",
+  "reference": {
+    "cases": 4096,
+    "bytes": 48713728,
+    "native_sha256": "94148ccee2cd33f6a480fb94c4021b962f68275db08ed8d0e87eb32d955b985c",
+    "wasm_sha256": "269c04f2555d83a3d8a49965d4021fe5a16de143616e157237aab27d0de12cf1",
+    "targets": [
+      "R01/currentC0/Rust native",
+      "R01/currentC0/Rust WASM"
+    ],
+    "R01_manifest_files_verified": 440,
+    "native_wasm_semantic_PCM_fields": "exact",
+    "legacy_target_frame_hash_cases": [
+      1152,
+      3456
+    ],
+    "legacy_target_differing_bytes": 8,
+    "tolerance_within_target": "none"
+  },
+  "malformed_C": {
+    "reference": "independently extracted R01 tap_tempo",
+    "same_clock_taps": 2,
+    "undefined_behavior": "integer division by zero",
+    "sanitizer": "GCC undefined",
+    "returncode": 1,
+    "diagnostic": "build/ui-performance/gen/ui_tap_frozen.inc:12:81: runtime error: division by zero",
+    "plain_C_signal": "SIGFPE",
+    "plain_C_returncode": -8
+  },
+  "miri": {
+    "toolchain": "nightly-2026-08-28",
+    "strict_provenance": "passed",
+    "pinned_native": "passed",
+    "reentry_tests": 3,
+    "scene_view_reentry": true,
+    "later_callback_mutations_observed": true,
+    "invalid_operation_index_guards": 6,
+    "null_guards": 2,
+    "zero_interval_refusal_and_recovery": true
+  },
+  "native_scenarios": {
+    "cases": 8,
+    "artifacts": 32,
+    "names": [
+      "chordkeys",
+      "dj",
+      "groups",
+      "keydrop",
+      "mixglide",
+      "octave",
+      "scene",
+      "setlist"
+    ],
+    "status": "exact five-way including historical fingerprints"
+  },
+  "original_input_regression": {
+    "cases": 4096,
+    "target": "native",
+    "golden": "af2f3884e7257027a7d75420b627d8516194c92c79acd9b3f241c647541ca2ae"
+  },
+  "instrument_wasm": {
+    "compared_samples_including_HTTP_game_controls": 59649924,
+    "exports": 24,
+    "memory_bytes": 33554432,
+    "bytes": 2375430,
+    "sha256": "3e6c8884c73fd11efe6eb0360b2d0883ef6da483cbb2e8cd8b75b4910b2b6a67"
+  },
+  "footprint": {
+    "added_mutable_bytes": 0,
+    "extra_pixel_storage_payloads": 0,
+    "new_counters": 0,
+    "target_ROM_RAM_stack": "requires adopted-compiler gate"
+  },
+  "remaining": "DJ/AutoFX, remaining helpers, parameter/text/widget presentation, page composition, visualizers and physical QA"
+}

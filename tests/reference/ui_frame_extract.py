@@ -7,7 +7,7 @@ text=(Path(sys.argv[1])/'firmware/src/app/ui.c').read_text(encoding='utf-8')
 mode=sys.argv[3]
 name={'frozen':'void ui_frame(', 'port':'static uint32_t ui_frame_port(', 'accel':'static int32_t accel(',
       'button_frozen':'static void button(', 'button_current':'static void button(', 'button_port':'static uint32_t ui_button_port(',
-      'classify':'static int voice_of('}[mode]
+      'classify':'static int voice_of(', 'tap':'static void tap_tempo('}[mode]
 match=re.search(re.escape(name)+r'[^;{]*\{',text)
 if not match:raise ValueError('missing '+name)
 start=match.start();end=match.end();depth=1

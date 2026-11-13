@@ -484,6 +484,8 @@ uint32_t ui_splash_ms = 3200u;           /* the boot cards: RedtailWorks, then H
 #include "../dsp/rust_ui_controller.h"
 #include "../dsp/rust_ui_buttons.h"
 #include "../dsp/rust_ui_input.h"
+#include "../dsp/rust_ui_performance.h"
+static uint32_t ui_performance_port(uint32_t,uint32_t,uint32_t);
 #if !defined(EN_HOST) && !defined(EN_WEB)
 #include "../../hal/fm1_irq_state.h"
 #endif
@@ -735,6 +737,9 @@ static void jam_capture(void);
 static void scene_reset(void);
 static void undo_save(void)                    /* before a big change: what it will undo to */
 {
+#if EN_RUST_APP
+    (void)fm1_rust_ui_performance(&ui,UIPO_UNDO_SAVE,0,ui_performance_port);
+#else
     int k;
     ui.undo_lock = ui.fx_lock;
     ui.undo_m = ui.trk_m;
@@ -742,9 +747,13 @@ static void undo_save(void)                    /* before a big change: what it w
     for (k = 0; k < 4; k++)
         ui.undo_k[k] = ui.fxk[k];
     ui.undo_ok = 1;
+#endif
 }
 static void undo_swap(void)                    /* UNDO: the state before the last big change, and (again) back */
 {
+#if EN_RUST_APP
+    (void)fm1_rust_ui_performance(&ui,UIPO_UNDO_SWAP,0,ui_performance_port);
+#else
     uint64_t l = ui.fx_lock;
     uint8_t m = ui.trk_m, s = ui.trk_s;
     int8_t kk[4];
@@ -767,9 +776,13 @@ static void undo_swap(void)                    /* UNDO: the state before the las
     for (k = 0; k < 4; k++)
         ui.undo_k[k] = kk[k];
     say("UNDO", "(AGAIN: REDO)");
+#endif
 }
 static void tap_tempo(void)                    /* four taps or so: the tempo from their average */
 {
+#if EN_RUST_APP
+    (void)fm1_rust_ui_performance(&ui,UIPO_TAP,0,ui_performance_port);
+#else
     const uint32_t now = plat_ms();
     if (ui.tap_n && now - ui.tap_t[(ui.tap_n - 1) & 3u] > 2000u)
         ui.tap_n = 0;                          /* too long since the last: a new count */
@@ -786,6 +799,7 @@ static void tap_tempo(void)                    /* four taps or so: the tempo fro
     } else {
         say("TAP TEMPO", "TAP AGAIN");
     }
+#endif
 }
 static const uint8_t DJ_LEN[5] = {8, 16, 32, 64, 16};   /* the fifth: SYNC, with the drift's chord changes (16 only for the bar of the count) */
 #define DJ_G() (DJ_LEN[ui.dj_len % 5u])
@@ -1772,6 +1786,9 @@ static void turn(int role, int k, int32_t e)
 static void pat_name(int i, char *t);
 static void scene_store(int s)
 {
+#if EN_RUST_APP
+    (void)fm1_rust_ui_performance(&ui,UIPO_SCENE_STORE,s,ui_performance_port);
+#else
     int k;
     ui.scene_lock[s] = ui.fx_lock;
     ui.scene_m[s] = ui.trk_m;
@@ -1789,9 +1806,13 @@ static void scene_store(int s)
         t[6] = (char)('1' + s);
         say(t, "STORED");
     }
+#endif
 }
 static void scene_apply(int s)
 {
+#if EN_RUST_APP
+    (void)fm1_rust_ui_performance(&ui,UIPO_SCENE_APPLY,s,ui_performance_port);
+#else
     char t[12] = "SCENE 1";
     int k;
     t[6] = (char)('1' + s);
@@ -1811,9 +1832,13 @@ static void scene_apply(int s)
     }
     ui.glide_on = 15;
     say(t, 0);
+#endif
 }
 static void scene_recall(int s)                /* a scene: on the next bar while playing (a setting), else at once */
 {
+#if EN_RUST_APP
+    (void)fm1_rust_ui_performance(&ui,UIPO_SCENE_RECALL,s,ui_performance_port);
+#else
     char t[12] = "SCENE 1";
     t[6] = (char)('1' + s);
     if (!(ui.scene_set >> s & 1u)) {
@@ -1827,9 +1852,13 @@ static void scene_recall(int s)                /* a scene: on the next bar while
         ui.scene_q = 0;
         scene_apply(s);
     }
+#endif
 }
 static void scene_reset(void)                  /* everything back: no effects locked, no mutes or solos, the FX knobs home */
 {
+#if EN_RUST_APP
+    (void)fm1_rust_ui_performance(&ui,UIPO_SCENE_RESET,0,ui_performance_port);
+#else
     int k;
     undo_save();
     ui.fx_lock = 0;
@@ -1838,9 +1867,13 @@ static void scene_reset(void)                  /* everything back: no effects lo
     for (k = 0; k < 4; k++)
         knob_set(K_FXF + k, 0);
     say("RESET", "ALL CLEAR");
+#endif
 }
 static void scene_tick(void)                   /* a scene key down: held long enough, stored; let go first, recalled */
 {
+#if EN_RUST_APP
+    (void)fm1_rust_ui_performance(&ui,UIPO_SCENE_TICK,0,ui_performance_port);
+#else
     int s;
     for (s = 0; s < 4; s++)
         if (ui.scene_pend >> s & 1u) {
@@ -1852,6 +1885,7 @@ static void scene_tick(void)                   /* a scene key down: held long en
                 scene_store(s);
             }
         }
+#endif
 }
 
 /* --------------------------------------------------------------- auto-DJ --- */
@@ -1873,6 +1907,9 @@ static void dj_next(void)                       /* the auto-DJ's next piece, on 
  * turned by hand stops it there. */
 static void mix_start(int from)
 {
+#if EN_RUST_APP
+    (void)fm1_rust_ui_performance(&ui,UIPO_MIX_START,from,ui_performance_port);
+#else
     const int bars = XMIX_BARS[glob.sl_rsv[1] % 5u];
     ui.mx_bars = 0;
     if (!bars || from == proj.par[P_TEMPO])
@@ -1884,9 +1921,13 @@ static void mix_start(int from)
     proj.par[P_TEMPO] = (int16_t)from;
     en_set(P_TEMPO, from);
     ui.mx_last = (int16_t)from;
+#endif
 }
 static void mix_tick(void)                       /* each frame: the glide, by the bar and the step */
 {
+#if EN_RUST_APP
+    (void)fm1_rust_ui_performance(&ui,UIPO_MIX_TICK,0,ui_performance_port);
+#else
     int t;
     if (en_jam_on) {ui.mx_bars=0;return;}
     if (!ui.mx_bars)
@@ -1910,6 +1951,7 @@ static void mix_tick(void)                       /* each frame: the glide, by th
         en_set(P_TEMPO, t);
     }
     ui.mx_last = (int16_t)t;
+#endif
 }
 static void dj_bar(void)                       /* a new bar (while playing) */
 {
@@ -2151,6 +2193,9 @@ static void af_tick(void)
  * own root (the Global page) stays. */
 static void key_tick(void)
 {
+#if EN_RUST_APP
+    (void)fm1_rust_ui_performance(&ui,UIPO_KEY_TICK,0,ui_performance_port);
+#else
     if (en_jam_on) {ui.key_on=0;ui.sec_last=en_sec;return;}
     const int sec = en_playing ? en_sec : EN_SEC_GROOVE, sh = KEY_SH[ui.key_set % 5];
     if (sec != ui.sec_last) {
@@ -2170,6 +2215,7 @@ static void key_tick(void)
         ui.key_on = 0;
         en_set(P_ROOT, proj.par[P_ROOT]);
     }
+#endif
 }
 
 /* ------------------------------------------------------------- the pool --- */
@@ -2718,6 +2764,9 @@ static const struct { const char *name; char ltr; uint8_t first, n; } TB[10] = {
     {"DRUMS", 'R', V_DRUMS, 8}, {"SPACE", 'S', V_SPACE, 2}, {"MIX", 'M', V_MASTER, 2}, {"GLOBAL", 'G', V_GLOBAL, 2}, {"JAM", 'J', V_JAM, 1}};
 static void set_view(int v)
 {
+#if EN_RUST_APP
+    (void)fm1_rust_ui_performance(&ui,UIPO_VIEW,v,ui_performance_port);
+#else
     int g;
     if (v == V_BLSTEP)
         en_bass_capture();                       /* (the Bass steps page: the line heard, if none are set) */
@@ -2746,6 +2795,7 @@ static void set_view(int v)
     if (v < NDIAL)
         ui.last_dial = (uint8_t)v;
     ui.touched = -1;
+#endif
 }
 
 static int voice_of(int v)                      /* the voice page v belongs to (EN_V_*), or -1 */
@@ -3714,6 +3764,55 @@ static void runner_input(uint32_t btn, uint32_t keys);
 static void runner_start(void);
 
 #if EN_RUST_APP
+static uint32_t ui_performance_port(uint32_t op,uint32_t a,uint32_t b)
+{
+    volatile uint8_t *byte=0;
+    switch(op) {
+    case UIPQ_PLAYING:byte=&en_playing;break;
+    case UIPQ_JAM_ON:byte=&en_jam_on;break;
+    case UIPQ_SECTION:byte=&en_sec;break;
+    case UIPQ_DRUM_POSITION:byte=&en_drum_pos;break;
+    }
+    if(byte) {
+        uint32_t value;
+#if !defined(EN_HOST) && !defined(EN_WEB)
+        const uint32_t irq=fm1_irq_state_save();
+#endif
+        value=*byte;
+#if !defined(EN_HOST) && !defined(EN_WEB)
+        fm1_irq_state_restore(irq);
+#endif
+        return value;
+    }
+    switch(op) {
+    case UIPQ_NOW:return plat_ms();
+    case UIPQ_PARAMETER:return a<P_NPARAMS?(uint32_t)(int32_t)proj.par[a]:0;
+    case UIPQ_MIX_SETTING:return glob.sl_rsv[1];
+    case UIPQ_FX_FIRST:return K_FXF;
+    case UIPA_KNOB:knob_set((int)a,(int32_t)b);break;
+    case UIPA_TRACKS:en_trk((uint8_t)a,(uint8_t)b);break;
+    case UIPA_ENGINE_SET:if(a<P_NPARAMS)en_set((int)a,(int32_t)b);break;
+    case UIPA_PROJECT_SET:if(a<P_NPARAMS)proj.par[a]=(int16_t)b;break;
+    case UIPA_BASS_CAPTURE:en_bass_capture();break;
+    case UIPN_NOTHING:say("NOTHING","TO UNDO");break;
+    case UIPN_UNDO:say("UNDO","(AGAIN: REDO)");break;
+    case UIPN_TEMPO: {char t[12];itoa_u((uint32_t)proj.par[P_TEMPO],t);say("TEMPO",t);break;}
+    case UIPN_TAP:say("TAP TEMPO","TAP AGAIN");break;
+    case UIPN_SCENE:if(a<4) {char t[12]="SCENE 1";t[6]=(char)('1'+a);say(t,b==1?"STORED":b==2?"EMPTY: HOLD TO STORE":b==3?"NEXT BAR":0);}break;
+    case UIPN_RESET:say("RESET","ALL CLEAR");break;
+    case UIPN_KEY: {char t[8]="+0";t[1]=(char)('0'+a);say("KEY CHANGE",t);break;}
+    case UIPN_BREADCRUMB:if(a<10 && b<NVIEWS) {
+        char text[24];int n;
+        caps(text,VIEW_NAME[b],18);
+        for(n=0;text[n];n++);
+        text[n++]=' ';text[n++]=(char)('1'+b-TB[a].first);
+        text[n++]='/';text[n++]=(char)('0'+TB[a].n);text[n]=0;
+        say(TB[a].name,text);
+    }break;
+    }
+    return 0;
+}
+
 static uint32_t ui_input_port(uint32_t op,uint32_t a,uint32_t b)
 {
     if(op>=UIIQ_NOW && op<UIIN_FX_PAGE) {

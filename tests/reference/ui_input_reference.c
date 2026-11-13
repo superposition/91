@@ -34,6 +34,9 @@ static void emit(const void*p,uint32_t n){state_emit(p,n);}
 static void emit(const void*p,uint32_t n){fwrite(p,1,n,stdout);}
 #endif
 static uint32_t random_word(uint32_t*s){*s=*s*1664525u+1013904223u;return *s;}
+#ifdef UI_PERFORMANCE_CORPUS
+#include "ui_performance_cases.inc"
+#endif
 #ifdef __wasm__
 __attribute__((export_name("run")))
 #endif
@@ -58,6 +61,9 @@ int state_run(void){unsigned n,i,phase;uint32_t random=91;static int32_t pcm[512
   if(phase%5==0)held_keys=random_word(&random)&((1u<<NKEYS)-1u);
   if(phase%5==3)held_keys=0;
   for(i=0;i<NE;i++)if((random_word(&random)&7u)==0)enc_acc[i]=(int32_t)((random_word(&random)>>16)%33u)-16;
+#ifdef UI_PERFORMANCE_CORPUS
+  performance_case(n,&random);
+#endif
 #if EN_RUST_APP
   {const uint32_t calls=fm1_rust_jam_stat(82);
    ui_input_only();
@@ -76,7 +82,12 @@ int state_run(void){unsigned n,i,phase;uint32_t random=91;static int32_t pcm[512
   RAW(en_jam_on);RAW(en_jam_bar);RAW(en_jam_beat);RAW(en_jam_section);RAW(en_jam_pending);RAW(en_jam_length);RAW(en_jam_revision);
   RAW(store_len);RAW(store_lock);RAW(store_writes);RAW(rm.on);RAW(rm.lit_b);RAW(rm.lit_k);
   word(input_hash(2166136261u,store,sizeof store));word(input_hash(2166136261u,fb,sizeof fb));
-  if(overflow)return -1;emit(record,used);
+  if(overflow)return -1;
+#ifdef UI_CAPTURE_FRAME
+  if(n==UI_CAPTURE_FRAME){emit(fb,sizeof fb);return (int)n+1;}
+#else
+  emit(record,used);
+#endif
  }
  return 4096;
 }

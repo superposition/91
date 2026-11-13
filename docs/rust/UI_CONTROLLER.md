@@ -9,7 +9,8 @@ and visualizers still need their Rust policy ports; graphics and Kick Runner
 are already ported.
 Issue #15 remains open. See [frame boundaries](UI_FRAME.md) and
 [storage retries](UI_STORAGE_BUSY.md), [encoder policy](UI_CONTROLS.md) and
-[button actions](UI_BUTTONS.md) and [held controls](UI_INPUT.md).
+[button actions](UI_BUTTONS.md), [held controls](UI_INPUT.md) and
+[scene/tempo/page policy](UI_PERFORMANCE.md).
 
 The carrier has 193 plain scalar/array fields. Its C declaration is identical
 to R01 after comments and whitespace are removed. `tools/ui_abi.py` maintains

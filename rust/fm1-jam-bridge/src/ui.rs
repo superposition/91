@@ -59,6 +59,57 @@ pub unsafe extern "C" fn fm1_rust_ui_accel(
 }
 
 type FrameCallback = unsafe extern "C" fn(u32, u32, u32) -> u32;
+struct PerformancePort {
+    ui: *mut State,
+    callback: FrameCallback,
+}
+impl fm1_app::performance::Port for PerformancePort {
+    fn with_ui<R>(&mut self, f: impl FnOnce(&mut State) -> R) -> R {
+        // SAFETY: initialized foreground-owned UI; no call occurs during the loan.
+        f(unsafe { &mut *self.ui })
+    }
+    fn query(&mut self, q: fm1_app::performance::Query, argument: u32) -> u32 {
+        // SAFETY: every exclusive state loan has ended before the callback.
+        unsafe { (self.callback)(0x100 + q as u32, argument, 0) }
+    }
+    fn action(&mut self, a: fm1_app::performance::Action, x: u32, y: u32) {
+        // SAFETY: effects can reenter/access UI only between scoped loans.
+        unsafe { (self.callback)(a as u32, x, y) };
+    }
+    fn notice(&mut self, n: fm1_app::performance::Notice, x: u32, y: u32) {
+        // SAFETY: no state reference survives into message/view callbacks.
+        unsafe { (self.callback)(0x200 + n as u32, x, y) };
+    }
+}
+/// # Safety
+/// State is initialized, aligned and foreground-owned. Synchronous callbacks
+/// may access/reenter leaf app APIs, but retain no reference to this stack port.
+#[no_mangle]
+pub unsafe extern "C" fn fm1_rust_ui_performance(
+    state: *mut State,
+    operation: u32,
+    argument: i32,
+    callback: Option<FrameCallback>,
+) -> i32 {
+    let Some(callback) = callback else {
+        return crate::app::reject();
+    };
+    if state.is_null() {
+        return crate::app::reject();
+    }
+    if !fm1_app::performance::dispatch(
+        &mut PerformancePort {
+            ui: state,
+            callback,
+        },
+        operation,
+        argument,
+    ) {
+        return crate::app::reject();
+    }
+    crate::app::game_call();
+    0
+}
 struct InputPort {
     ui: *mut State,
     seen: *mut u32,
@@ -239,6 +290,8 @@ mod tests {
         static HELD: Cell<*mut u8> = const {Cell::new(core::ptr::null_mut())};
         static INPUT_CALLBACKS: Cell<u32> = const {Cell::new(0)};
         static BAD_ENCODER: Cell<bool> = const {Cell::new(false)};
+        static SCENE_DENSITY: Cell<u32> = const {Cell::new(0)};
+        static TAP_NOW: Cell<u32> = const {Cell::new(0)};
     }
     struct Reset;
     impl Drop for Reset {
@@ -431,5 +484,104 @@ mod tests {
             );
         }
         assert_eq!(INPUT_CALLBACKS.with(Cell::get), 0);
+    }
+    unsafe extern "C" fn performance_leaf(_op: u32, _a: u32, _b: u32) -> u32 {
+        // SAFETY: the nested view adapter ended every UI loan before this call.
+        unsafe { (*active()).frame += 1 };
+        0
+    }
+    unsafe extern "C" fn performance(op: u32, a: u32, b: u32) -> u32 {
+        use fm1_app::performance::{Action as A, Operation as O, Query as Q};
+        if op == 0x100 + Q::Now as u32 {
+            return TAP_NOW.with(Cell::get);
+        }
+        if op == A::Tracks as u32 {
+            // SAFETY: outer scene state loans ended. This nested view runs its
+            // own short loans and callback without retaining the outer adapter.
+            unsafe {
+                fm1_rust_ui_performance(active(), O::View as u32, 12, Some(performance_leaf));
+                (*active()).scene_g[2][0] = 91;
+            }
+        } else if op == A::Knob as u32 {
+            if a == fm1_types::ParamId::DENS.index() as u32 {
+                SCENE_DENSITY.with(|density| density.set(b));
+            }
+            // SAFETY: callback mutates the live root between exclusive loans.
+            unsafe { (*active()).fxk[0] += 1 };
+        }
+        0
+    }
+    #[test]
+    fn scene_callbacks_reenter_view_before_later_scene_reads() {
+        use fm1_app::performance::Operation as O;
+        // SAFETY: the UI's plain fields admit zero; padding is never read.
+        let state = Box::new(UnsafeCell::new(unsafe { core::mem::zeroed::<State>() }));
+        ACTIVE.with(|pointer| pointer.set(state.get()));
+        let _reset = Reset;
+        // SAFETY: root is live with no loan at this boundary.
+        unsafe { (*state.get()).fxk[0] = 3 };
+        SCENE_DENSITY.with(|density| density.set(0));
+        // SAFETY: initialized foreground UI, callback and nested call synchronous.
+        assert_eq!(
+            unsafe {
+                fm1_rust_ui_performance(state.get(), O::SceneApply as u32, 2, Some(performance))
+            },
+            0
+        );
+        assert_eq!(SCENE_DENSITY.with(Cell::get), 91);
+        // SAFETY: every outer/nested loan ended when the call returned.
+        unsafe {
+            assert_eq!((*state.get()).view, 12);
+            assert_eq!((*state.get()).fxk[0], 16);
+            assert_eq!((*state.get()).glide_f[0], 16.0);
+            assert_eq!((*state.get()).glide_on, 15);
+        }
+        for (operation, argument) in [
+            (O::SceneStore as u32, -1),
+            (O::SceneApply as u32, 4),
+            (O::SceneRecall as u32, i32::MAX),
+            (O::View as u32, -1),
+            (O::View as u32, 43),
+            (99, 0),
+        ] {
+            // SAFETY: invalid operation/index is rejected before access/effects.
+            assert_eq!(
+                unsafe {
+                    fm1_rust_ui_performance(state.get(), operation, argument, Some(performance))
+                },
+                -1
+            );
+        }
+        // Same-clock taps preserve history while rejecting only the undefined
+        // tempo division. A later nonzero interval remains usable.
+        TAP_NOW.with(|now| now.set(100));
+        // SAFETY: no live UI loan; reset the isolated tap history.
+        unsafe { (*state.get()).tap_n = 0 };
+        for (now, expected) in [(100, 0), (100, -1), (600, 0)] {
+            TAP_NOW.with(|clock| clock.set(now));
+            // SAFETY: the same initialized root and synchronous callback.
+            assert_eq!(
+                unsafe {
+                    fm1_rust_ui_performance(state.get(), O::Tap as u32, 0, Some(performance))
+                },
+                expected
+            );
+        }
+        // SAFETY: missing pointers are rejected before callback/access.
+        unsafe {
+            assert_eq!(
+                fm1_rust_ui_performance(
+                    core::ptr::null_mut(),
+                    O::SceneTick as u32,
+                    0,
+                    Some(performance)
+                ),
+                -1
+            );
+            assert_eq!(
+                fm1_rust_ui_performance(state.get(), O::SceneTick as u32, 0, None),
+                -1
+            );
+        }
     }
 }
