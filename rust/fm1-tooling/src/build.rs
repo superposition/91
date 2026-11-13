@@ -56,6 +56,32 @@ pub fn loader_wrap(image: &[u8]) -> Result<Vec<u8>> {
 pub fn request(method: &str, v: &Value) -> Result<Value> {
     let a = &v["args"];
     Ok(match method {
+        "mmio-check" => {
+            fn files(value: &Value) -> Result<Vec<(String, String)>> {
+                value
+                    .as_array()
+                    .ok_or_else(|| Error::value("expected source file list"))?
+                    .iter()
+                    .map(|entry| {
+                        let pair = entry
+                            .as_array()
+                            .filter(|a| a.len() == 2)
+                            .ok_or_else(|| Error::value("expected source name and text"))?;
+                        Ok((
+                            crate::text(&pair[0])?.to_owned(),
+                            crate::text(&pair[1])?.to_owned(),
+                        ))
+                    })
+                    .collect()
+            }
+            json!(crate::mmio::check(&files(&a[0])?, &files(&a[1])?))
+        }
+        "check" => json!(crate::build_guards::check(
+            &bytes(&a[0])?,
+            crate::text(&a[1])?,
+            crate::text(&a[2])?,
+            crate::text(&a[3])?
+        )?),
         "lz4.compress" => json!(crate::lz4::compress(&bytes(&a[0])?)?),
         "lz4.decompress" => json!(crate::lz4::decompress(
             &block_bytes(&a[0])?,

@@ -37,6 +37,8 @@ jobs:
         run: bash tests/rust_dx_logo.sh build/r01-source
       - name: Native bootstrap under inherited Cargo features and compiler flags
         run: python3 tests/host_bootstrap_test.py build/r01-source
+      - name: Vendor image, disassembly and HAL source guards
+        run: python3 tests/rust_build_guards.py build/r01-source
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -4,9 +4,11 @@
 #![forbid(unsafe_code)]
 pub mod assets;
 pub mod build;
+pub mod build_guards;
 pub mod debugger;
 pub mod installer;
 pub mod lz4;
+pub mod mmio;
 pub mod rescue;
 pub mod summary;
 pub mod telemetry;
