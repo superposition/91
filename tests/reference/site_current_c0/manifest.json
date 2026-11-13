@@ -1,0 +1,20 @@
+{
+  "git": "fa187ac20459923367db12e7e42c68033e4a38e0",
+  "sha256": {
+    "tools/make_params.py": "5d671c12de5931270cea81877b967384e9006aab8714f5ac8bb9deeca69559b6",
+    "tools/make_pages_site.py": "3dd7efc44920f2527b732b5ca6b971bb1f0e1d7f85e72136b50272253b889fe3",
+    "tools/web_site_support.py": "caaa488be95d32a01add2b40750e68c996404a9cca0c9e5839a2bbf7d10f24d7",
+    "tools/web_metadata.py": "2ef3adfed38a4514a4c7f111c1a92d0131497e8cc619e9daff3d690fab6f710a",
+    "tools/build_codecs.py": "1dd17a8602b108b0a45c13c1add02757c261c24d81a3b0b394609b7a475e9d9c",
+    "web/make_site.py": "f1e73c24d7d4707131b08f9ede55e3e017e8b2f7bbca49a89ce0243d7810ef7c"
+  },
+  "raw_worktree_sha256": {
+    "tools/make_params.py": "5d671c12de5931270cea81877b967384e9006aab8714f5ac8bb9deeca69559b6",
+    "tools/make_pages_site.py": "3dd7efc44920f2527b732b5ca6b971bb1f0e1d7f85e72136b50272253b889fe3",
+    "tools/web_site_support.py": "caaa488be95d32a01add2b40750e68c996404a9cca0c9e5839a2bbf7d10f24d7",
+    "tools/web_metadata.py": "2ef3adfed38a4514a4c7f111c1a92d0131497e8cc619e9daff3d690fab6f710a",
+    "tools/build_codecs.py": "1dd17a8602b108b0a45c13c1add02757c261c24d81a3b0b394609b7a475e9d9c",
+    "web/make_site.py": "f1e73c24d7d4707131b08f9ede55e3e017e8b2f7bbca49a89ce0243d7810ef7c"
+  },
+  "profile": "Git LF blobs; raw initial Windows worktree fingerprints retained separately"
+}

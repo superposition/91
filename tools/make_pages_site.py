@@ -15,6 +15,7 @@ import argparse
 import hashlib
 import json
 import re
+from rust_site import transform
 import shutil
 import sys
 from pathlib import Path
@@ -76,15 +77,15 @@ for capture in (SRC / "docs" / "img").glob("naiwan91-*.png"):
 page = (SRC / "web" / "amb_installer.html").read_text(encoding="utf-8")
 lib = strip_module((SRC / "web" / "fm1pkg.js").read_text(encoding="utf-8")) + "\n" + strip_module((SRC / "web" / "fm1ota.js").read_text(encoding="utf-8")) + "\n" + strip_module((SRC / "web" / "fm1backup.js").read_text(encoding="utf-8")) + "\n" + strip_module((SRC / "web" / "fm1idle.js").read_text(encoding="utf-8"))
 sha = hashlib.sha256(raw).hexdigest()
-meta = json.dumps({"version": ver, "product": product, "pkg": "../firmware/" + name, "sha": sha[:16]})
+meta = transform("site.json", {"version": ver, "product": product, "pkg": "../firmware/" + name, "sha": sha[:16]}, True, None, False, False)
 device = device_javascript(SRC, json.loads(meta), strip_module)
-page = page.replace("/*DEVICE*/", device).replace("/*LIB*/", lib).replace("/*META*/", meta).replace("<h1>Install NAIWAN 91</h1>", f"<h1>Install NAIWAN 91 {ver}</h1>")
+page = transform("site.replace", page, [["/*DEVICE*/", device], ["/*LIB*/", lib], ["/*META*/", meta], ["<h1>Install NAIWAN 91</h1>", f"<h1>Install NAIWAN 91 {ver}</h1>"]])
 (OUT / "install" / "index.html").write_text(page, encoding="utf-8", newline="\n")
 
 params = SRC / "build" / "params.json"
 if params.exists():
     (OUT / "editor").mkdir(exist_ok=True)
-    ed = (SRC / "web" / "editor" / "index.html").read_text(encoding="utf-8").replace("/*DEVICE*/", device).replace("/*PARAMS*/", params.read_text(encoding="utf-8"))
+    ed = transform("site.replace", (SRC / "web" / "editor" / "index.html").read_text(encoding="utf-8"), [["/*DEVICE*/", device], ["/*PARAMS*/", params.read_text(encoding="utf-8")]])
     (OUT / "editor" / "index.html").write_text(ed, encoding="utf-8", newline="\n")
     plib = "\n".join(strip_module((SRC / "web" / f).read_text(encoding="utf-8")) for f in ("fm1backup.js", "fm1piece.js", "fm1card.js", "fm1share.js", "fm1idle.js"))
     lib_json = (SRC / "web" / "library" / "library.json").read_text(encoding="utf-8")
@@ -92,44 +93,38 @@ if params.exists():
     relay_json = relay.read_text(encoding="utf-8").strip() if relay.exists() else "{}"
     for d in ("pieces", "library") if SHARING else ():   # sharing pieces and sets, and the library of them: the modules, the parameters' names, the library's codes
         (OUT / d).mkdir(exist_ok=True)
-        pg = (SRC / "web" / d / "index.html").read_text(encoding="utf-8").replace("/*DEVICE*/", device).replace("/*PARAMS*/", params.read_text(encoding="utf-8")).replace("/*LIB*/", plib)
-        (OUT / d / "index.html").write_text(pg.replace("/*LIBRARY*/", lib_json).replace("/*RELAY*/", relay_json), encoding="utf-8", newline="\n")
+        pg = transform("site.replace", (SRC / "web" / d / "index.html").read_text(encoding="utf-8"), [["/*DEVICE*/", device], ["/*PARAMS*/", params.read_text(encoding="utf-8")], ["/*LIB*/", plib]])
+        (OUT / d / "index.html").write_text(transform("site.replace", pg, [["/*LIBRARY*/", lib_json], ["/*RELAY*/", relay_json]]), encoding="utf-8", newline="\n")
 manual = (SRC / "docs" / "manual.html").read_text(encoding="utf-8")
-manual = re.sub(r'<link rel="stylesheet" href="https://fonts.googleapis.com[^>]+>\n', "", manual)
-manual = manual.replace("</head>", '<link rel="stylesheet" href="../fonts/fm1-fonts.css">\n<link rel="stylesheet" href="../site.css">\n<style>.site .home img{display:none}</style>\n</head>', 1)
-manual = manual.replace("<main>", '<main><div class="project-note"><p><b>Current Songbook:</b> <a href="../emu/">play the browser instrument</a> or read the <a href="https://github.com/superposition/91/blob/rust/emulator-first/docs/JAM_PACKS.md">Songbook guide</a>. The reference below covers the retained legacy instrument.</p></div>', 1)
-for source_pdf, served_pdf in (("manual.pdf", "NAIWAN 91-manual.pdf"), ("quick-manual.pdf", "NAIWAN 91-quick-manual.pdf"), ("beginners-guide.pdf", "NAIWAN 91-beginners-guide.pdf")):
-    if not (SRC / "build" / source_pdf).exists():
-        manual = re.sub(r'<a\b[^>]*href="' + re.escape(served_pdf) + r'"[^>]*>.*?</a>', "", manual, flags=re.S)
+pdfs = [(SRC / "build" / name).exists() for name in ("manual.pdf", "quick-manual.pdf", "beginners-guide.pdf")]
+manual = transform("site.manual", manual, pdfs)
 (OUT / "manual" / "index.html").write_text(manual, encoding="utf-8", newline="\n")
 (OUT / "manual" / "maps").mkdir(exist_ok=True)         # ready MIDI maps the manual links (0.16.18: the Launch Control XL 3's)
 for f in (SRC / "docs" / "maps").glob("*.perfmap"):
     shutil.copy(f, OUT / "manual" / "maps" / f.name)
-quick_card = ""
+card_pdfs = [False, False, False]
 if (SRC / "build" / "quick-manual.pdf").exists():   # the printable quick manual (tools/make_quick_manual.py, made on Windows with Edge)
     shutil.copy(SRC / "build" / "quick-manual.pdf", OUT / "manual" / "NAIWAN 91-quick-manual.pdf")
-    quick_card = '<a class="card" href="manual/NAIWAN 91-quick-manual.pdf" download><b>Quick manual (PDF)</b><span>Eight A4 pages to print: every control, page and key map on paper.</span></a>'
+    card_pdfs[1] = True
 if (SRC / "build" / "beginners-guide.pdf").exists():  # the beginner's guide (docs/GUIDE.md, tools/make_quick_manual.py docs/GUIDE.md --out beginners-guide)
     shutil.copy(SRC / "build" / "beginners-guide.pdf", OUT / "manual" / "NAIWAN 91-beginners-guide.pdf")
-    quick_card = '<a class="card" href="manual/NAIWAN 91-beginners-guide.pdf" download><b>Beginner\'s guide (PDF)</b><span>Your first hour, step by step, in plain words.</span></a>' + quick_card
+    card_pdfs[2] = True
 if (SRC / "build" / "manual.pdf").exists():         # the whole manual as a PDF (Edge headless printing docs/manual.html: tools/make_manual_pdf.sh)
     shutil.copy(SRC / "build" / "manual.pdf", OUT / "manual" / "NAIWAN 91-manual.pdf")
-    quick_card += '<a class="card" href="manual/NAIWAN 91-manual.pdf" download><b>Full manual (PDF)</b><span>The whole manual to download or print.</span></a>'
+    card_pdfs[0] = True
+quick_card = transform("site.cards", card_pdfs)
 for img in [*(SRC / "docs" / "img").glob("perf-screen-*.png"), *(SRC / "docs" / "img").glob("guide-*.png")]:
     shutil.copy(img, OUT / "manual" / "img" / img.name)
 
 landing = (SRC / "web" / "index.html").read_text(encoding="utf-8")
 values = {"REPO": REPO, "VERSION": ver, "FIRMWARE_NAME": name, "SHA": sha,
           "PACKAGE_KB": str(len(raw) // 1024), "QUICK_CARDS": quick_card}
-for key, value in values.items():
-    landing = landing.replace("@@" + key + "@@", value)
-if re.search(r"@@[A-Z_]+@@", landing):
-    sys.exit("unresolved landing-page placeholder")
+landing = transform("site.landing", landing, values)
 (OUT / "index.html").write_text(landing, encoding="utf-8", newline="\n")
 if not SHARING:                                 # the menus and the landing page without them
     for f in OUT.rglob("*.html"):
         t = f.read_text(encoding="utf-8")
-        u = re.sub(r'<a (?:class="card" )?href="(?:\.\./)?(?:pieces|library)/(?:[?#][^"]*)?"[^>]*>.*?</a>\n?', "", t)
+        u = transform("site.sharing", t)
         if u != t:
             f.write_text(u, encoding="utf-8", newline="\n")
 for route, target, label in (("installer", "../../install/", "Install"), ("editor", "../../editor/", "Editor")):

@@ -197,6 +197,7 @@ dependencies = [
  "fancy-regex",
  "fm1-engine",
  "fm1-formats",
+ "fm1-types",
  "regex",
  "serde_json",
  "sha2",

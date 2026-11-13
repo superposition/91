@@ -7,6 +7,8 @@ pub mod dy;
 pub mod fonts;
 pub mod logo;
 pub mod manual;
+pub mod metadata;
+pub mod site;
 pub fn assertion(message: impl Into<String>) -> Error {
     Error {
         kind: "AssertionError".into(),
@@ -131,6 +133,15 @@ pub fn request(method: &str, v: &Value, io: &mut impl Adapter) -> Result<Value> 
     }
     if let Some(method) = method.strip_prefix("manual.") {
         return manual::request(method, v, io);
+    }
+    if let Some(method) = method.strip_prefix("metadata.") {
+        return metadata::request(method, v);
+    }
+    if let Some(method) = method.strip_prefix("site.") {
+        if method == "runtime-source" {
+            return site::runtime_source(text(&a[0])?, io);
+        }
+        return site::request(method, v);
     }
     Ok(match method {
         "pattern-data" => pattern_data(),

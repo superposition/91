@@ -8,7 +8,8 @@ license.workspace = true
 [dependencies]
 fm1-formats.workspace = true
 fm1-engine.workspace = true
+fm1-types.workspace = true
 regex = "=1.13.1"
-serde_json.workspace = true
+serde_json = { workspace = true, features = ["preserve_order"] }
 sha2 = { version = "=0.10.9", default-features = false, features = ["force-soft"] }
 fancy-regex = "=0.16.2"

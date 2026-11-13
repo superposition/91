@@ -1,0 +1,7 @@
+{
+  "manual_head": "<link rel=\"stylesheet\" href=\"../fonts/fm1-fonts.css\">\n<link rel=\"stylesheet\" href=\"../site.css\">\n<style>.site .home img{display:none}</style>\n</head>",
+  "manual_note": "<main><div class=\"project-note\"><p><b>Current Songbook:</b> <a href=\"../emu/\">play the browser instrument</a> or read the <a href=\"https://github.com/superposition/91/blob/rust/emulator-first/docs/JAM_PACKS.md\">Songbook guide</a>. The reference below covers the retained legacy instrument.</p></div>",
+  "quick_card": "<a class=\"card\" href=\"manual/NAIWAN 91-quick-manual.pdf\" download><b>Quick manual (PDF)</b><span>Eight A4 pages to print: every control, page and key map on paper.</span></a>",
+  "beginner_card": "<a class=\"card\" href=\"manual/NAIWAN 91-beginners-guide.pdf\" download><b>Beginner's guide (PDF)</b><span>Your first hour, step by step, in plain words.</span></a>",
+  "full_card": "<a class=\"card\" href=\"manual/NAIWAN 91-manual.pdf\" download><b>Full manual (PDF)</b><span>The whole manual to download or print.</span></a>"
+}

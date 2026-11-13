@@ -181,6 +181,20 @@ pub fn cli(args: &[String]) -> Result<()> {
             let output=if args[0]=="lz4-compress" {lz4::compress(&image)?}else{lz4::decompress(&image,&[])?};
             std::fs::write(&args[2],output)?;
         }
+        Some("site-transform") if args.len()==4=>{
+            let input: Value=serde_json::from_slice(&std::fs::read(&args[2])?)?;
+            let value=assets::site::request(&args[1],&json!({"args":input}))?;
+            std::fs::write(&args[3],text(&value)?)?;
+        },
+        Some("editor-metadata") if args.len()==4=>{
+            let input: Value=serde_json::from_slice(&std::fs::read(&args[1])?)?;
+            let p=assets::metadata::param_enum(text(&input["header"])?)?;
+            let groups=assets::metadata::ui_tables(text(&input["ui"])?,&p)?;
+            let alg=assets::metadata::algorithms(text(&input["fm6"])?)?;
+            let result=assets::metadata::assemble(&input["params"],&p,&groups,&alg,&input["names"],&input["product"],true)?;
+            std::fs::write(&args[2],text(&result["params"])?)?;
+            std::fs::write(&args[3],text(&result["device"])?)?;
+        },
         Some(kind @ ("manual-body"|"quick-html")) if args.len()==3=>{
             let source=String::from_utf8(read_file(&args[1],16*1024*1024)?).map_err(|_|Error::value("manual must be UTF-8"))?;
             let source=source.replace("\r\n","\n").replace('\r',"\n");
@@ -244,7 +258,7 @@ pub fn cli(args: &[String]) -> Result<()> {
         }
         _ => {
             return Err(Error::value(
-                "usage: fm1-rs tools package-info PACKAGE [--force] | decode KIND RAW-SYSEX-DATA | summary TELEMETRY.csv | rescue-plan V15-PACKAGE SNAPSHOT | debug-plan peek|poke|clock A [B] | sine | patterns | lz4-compress IN OUT | lz4-decompress IN OUT | loader-wrap IN OUT | dy-build MANIFEST BANKS OUTROOT [ROMDIR] | logo-rgba UI SCALE SIZE OUTPUT | manual-body INPUT OUTPUT | quick-html INPUT OUTPUT | pdf-count FILE [--full]",
+                "usage: fm1-rs tools package-info PACKAGE [--force] | decode KIND RAW-SYSEX-DATA | summary TELEMETRY.csv | rescue-plan V15-PACKAGE SNAPSHOT | debug-plan peek|poke|clock A [B] | sine | patterns | lz4-compress IN OUT | lz4-decompress IN OUT | loader-wrap IN OUT | dy-build MANIFEST BANKS OUTROOT [ROMDIR] | logo-rgba UI SCALE SIZE OUTPUT | manual-body INPUT OUTPUT | quick-html INPUT OUTPUT | pdf-count FILE [--full] | site-transform METHOD INPUT_JSON OUTPUT | editor-metadata INPUT_JSON PARAMS DEVICE_JS",
             ))
         }
     }

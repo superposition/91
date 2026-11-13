@@ -4,6 +4,10 @@
 """Maintained static-site helpers and bounded generated-output replacement."""
 import atexit
 if __package__:
+    from .rust_site import transform
+else:
+    from rust_site import transform
+if __package__:
     from . import rust_codecs
 else:
     import rust_codecs
@@ -23,8 +27,7 @@ GENERATOR = "naiwan91-static-site"
 
 def strip_module(source):
     """Inline the repository's single-line ESM imports/exports, unchanged."""
-    source = re.sub(r"^export\s+", "", source, flags=re.M)
-    return re.sub(r"^import .*?;\n", "", source, flags=re.M)
+    return transform("site.strip-module", source)
 
 
 def product_of(raw):
@@ -35,10 +38,7 @@ def product_of(raw):
 
 def release_identity(version):
     """The release identity contract used by tools/build.py: FM-1_7XXYYZZ."""
-    match = re.fullmatch(r"(\d{1,2})\.(\d{1,2})(?:\.(\d{1,2}))?(-[A-Za-z0-9]+)?", version)
-    if not match:
-        raise ValueError("release version must be X.Y[.Z][-suffix], up to two digits each")
-    return "FM-1_7%02d%02d%02d" % (int(match[1]), int(match[2]), int(match[3] or 0))
+    return transform("site.release", version)
 
 
 def output_path(source_root, requested):
@@ -200,10 +200,4 @@ class SiteOutput:
 def compatibility_redirect(target, label):
     """A relative compatibility URL that works below a GitHub Pages subpath."""
     # These values are maintained source constants, never package/user input.
-    return ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
-            '<meta name="viewport" content="width=device-width,initial-scale=1">'
-            f'<title>NAIWAN 91 {label}</title><meta http-equiv="refresh" content="0; url={target}">'
-            f'<link rel="canonical" href="{target}"><link rel="stylesheet" href="../../site.css"></head><body>'
-            f'<p><a href="{target}">{label}</a></p>'
-            f'<script>location.replace({json.dumps(target)}+location.search+location.hash);</script>'
-            '</body></html>\n')
+    return transform("site.redirect", target, label)
