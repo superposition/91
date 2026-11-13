@@ -116,12 +116,13 @@ for profile in ui-performance jam-labels ui-automatic;do
 done
 python3 tools/usb_reference.py . "$out/usb-source"
 python3 tests/reference/usb_queue_reference.py . "$out/queue-source"
-for profile in control transport queues tx;do
+for profile in control transport queues tx host;do
     source=(-I"$out/usb-source" -DFELUCCA_CDC=1 -DFELUCCA_UAC=1 -DUSB_DX=1 -DFELUCCA_OTA=1)
     fixture="tests/reference/usb_${profile}_reference.c"
     if [ "$profile" = queues ];then source=(-I"$out/queue-source" -Ifirmware/hal);fixture=tests/reference/usb_queue_reference.c;fi
     if [ "$profile" = tx ];then source+=(-DUSB_TX_ACTIVE_CONFIG_ONLY=1);fi
     if [ "$profile" = control ];then source+=(-DUSB_CONTROL_CONFIRMED_ABORTS=1);fi
+    if [ "$profile" = host ];then source+=(-DPERF_USB_HOST=1);fi
     "$zig" cc "${native[@]}" "${common[@]}" "${source[@]}" "$fixture" -lm -o "$out/c0-usb-$profile"
     "$zig" cc "${native[@]}" "${common[@]}" "${source[@]}" -DEN_RUST_USB=1 "$fixture" "$abi" "${objects[@]}" "$out/core.o" -lm -o "$out/generated-usb-$profile"
     "$out/c0-usb-$profile" > "$out/c0-usb-$profile.bin"

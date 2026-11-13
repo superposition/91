@@ -32,7 +32,7 @@ pub fn transition(state: u32, endpoint: u32, event: u32) -> u32 {
 /// The scalar ABI uses one argument/result; target frames need emitted evidence.
 #[inline(always)]
 pub fn request(value: u32) -> u32 {
-    const PLANS: [[u8; 4]; 8] = [
+    static PLANS: [[u8; 4]; 8] = [
         [4, 1, 4, 3],
         [2, 2, 2, 3],
         [0, 1, 2, 3],

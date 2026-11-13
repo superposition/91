@@ -39,6 +39,8 @@ jobs:
         run: python3 tests/host_bootstrap_test.py build/r01-source
       - name: Vendor image, disassembly and HAL source guards
         run: python3 tests/rust_build_guards.py build/r01-source
+      - name: Manual HTML and PDF workflow policy with controlled adapters
+        run: bash tests/rust_manual.sh build/r01-source
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -308,6 +310,8 @@ jobs:
         run: |
           sh tests/rust_usb_lease.sh build/r01-source
           sh tests/rust_usb_lease.sh build/r01-source healthy
+      - name: USB host descriptors and bounded MIDI receive traversal
+        run: sh tests/rust_usb_host.sh build/r01-source
       - name: Songbook snapshot and staging handoffs
         run: sh tests/rust_handoff.sh
       - uses: actions/upload-artifact@v4
