@@ -1,0 +1,349 @@
+{
+  "release": "0.4.4",
+  "date": "2026-11-13",
+  "boundary": "Historical scenarios use only the SHA-verified R01 factory table in current builds. Frozen source, oracle, corpus and golden fingerprints are unchanged. Production and current-family tests use the ordinary JMP3 table.",
+  "frozen_source": {
+    "files": 440,
+    "checkpoint": "43db648fb9b31f944b7f29fb24e70f152a3b5b13",
+    "factory_sha256": "b2bb8b25e228e51124ffaea443729685811179e40d61dbfca9c32025b05040a2"
+  },
+  "earlier_legacy_checks": {
+    "source_inputs": {
+      "source_sha256": "f0e1e855994f3fc6ce68e51408a406c391ecfd8d74a3c52238575e4471a8304d",
+      "unchanged_files": 392
+    },
+    "native_cases": 5,
+    "native_flavors": [
+      "reference",
+      "c0",
+      "frozen-runner",
+      "c0-runner",
+      "rust"
+    ],
+    "scenarios": [
+      {
+        "name": "first",
+        "status": 0,
+        "expected_assertions": []
+      },
+      {
+        "name": "jam-helper",
+        "status": 0,
+        "expected_assertions": []
+      },
+      {
+        "name": "songbook",
+        "status": 0,
+        "expected_assertions": []
+      },
+      {
+        "name": "compat",
+        "status": 0,
+        "expected_assertions": []
+      },
+      {
+        "name": "restarts",
+        "status": 1,
+        "expected_assertions": [
+          "FAIL expect parsbad == 0, got 170",
+          "FAIL expect parsbad == 0, got 188",
+          "FAIL expect parsbad == 0, got 86",
+          "FAIL expect parsbad == 0, got 59",
+          "FAIL expect parsbad == 0, got 445",
+          "FAIL expect parsbad == 0, got 200",
+          "FAIL expect parsbad == 0, got 17",
+          "FAIL expect parsbad == 0, got 41",
+          "FAIL expect parsbad == 0, got 175",
+          "FAIL expect parsbad == 0, got 27",
+          "FAIL expect parsbad == 0, got 273",
+          "FAIL expect parsbad == 0, got 52",
+          "FAIL expect parsbad == 0, got 56",
+          "FAIL expect parsbad == 0, got 348",
+          "FAIL expect parsbad == 0, got 67",
+          "FAIL expect parsbad == 0, got 73",
+          "FAIL expect parsbad == 0, got 483",
+          "FAIL expect parsbad == 0, got 137",
+          "FAIL expect parsbad == 0, got 290",
+          "FAIL expect parsbad == 0, got 98",
+          "FAIL expect parsbad == 0, got 204",
+          "FAIL expect parsbad == 0, got 189",
+          "FAIL expect parsbad == 0, got 29",
+          "FAIL expect parsbad == 0, got 133",
+          "FAIL expect parsbad == 0, got 58",
+          "FAIL expect parsbad == 0, got 343",
+          "FAIL expect parsbad == 0, got 132"
+        ]
+      }
+    ],
+    "comparison": "Exact status, expected failures, normalized logs, PCM/WAV/MIDI/PNG and platform/object bytes.",
+    "fresh_process_repeat": [
+      {
+        "scenario": "first",
+        "status": 0,
+        "artifacts": {
+          "acid.png": "2eef3c6cdad9bcccf93050661772c9a3ee64a2f6afe372c738bac0e72c209c5e",
+          "acid_line.png": "5426156c4700cb839704e09c493bea11098688e56412f566175c940c78898ff4",
+          "audio.pcm": "210353de0fed41c4536eeb7ed5edafbc490c0c33ddb6fcd4f1227ed6ace6d68e",
+          "chords.png": "67c690924be2f5d44bf0bc16e332add066d809d34c23bf2fb5b15c0f4b8224b7",
+          "drone.png": "27a747de78bf46355842b31458c3dd19d8e3c4d2237f4f22d58b04cc3fa7b028",
+          "drone_lfo.png": "86f72b943d625fb25bfaef39c9b12abe02e11dcabed7fe28c4bb750168042d1d",
+          "drums.png": "b8e893e1c8f0cd9157f743c67ab2b4d26012b91b4744e1f956bf795085d0d5d1",
+          "first.wav": "4fee5b2e8d24c0c39e361014b03068665b1be44b26678ca0b1933458dfd7f8d5",
+          "flow.png": "a4a7119a9a18ff0f8a70d2d39f16ced6249d9a66142ebb7062a9b9e4b5122d91",
+          "flow30.png": "6886b5c47ab790b32bbe09e6da59c9fd46422ac2870be7fa912d9437e28f5e83",
+          "global.png": "3afbd09421872ee9cabd29632b78c0ba701e58e6f7e4c2c89cbc00c34dec9526",
+          "master.png": "873d17d23f30b395ed9a7712356fa615e70199eef8f2057ec0b341d3885acbb6",
+          "midi_out.txt": "8bebc573cfd043703fc871fc275b05d3249b6060161c28f528bf0f4131f254cb",
+          "mixer.png": "2f6d003eeaf7d5d859fc1f676f0a879d151a0240f7b0bc1ebdcdfdc1c05491c7",
+          "noise.png": "ece425faa6dcbfc3fbd76b83e5b1672cf3648a22a0d63973f52b6d95852671fb",
+          "pad.png": "7e4d9bb87d59deae628abe7f3ef994357a50ddf6e213a1795e8139b106475008",
+          "pad_env.png": "79bbb4406aec71a8c7de0bcfcc8e6b1f79b89e12a2b96fc56dfc6e1f0444cd3e",
+          "pad_lfo.png": "44194fab43fa850bb4afd201f8f087f51842de4afd32ddcee361eaa29f1dcc4d",
+          "platform.bin": "1a25fa7b5265546e46a6292cd65d2f979abf266ca124204138d73cb30c90de32",
+          "reverb.png": "42e382568194dfb840895dd6439a592465451092271142e61acb0d7c507d2048",
+          "space.png": "9bf3d6b139eb9cb56963604da39de060f5c505d6d6bb1e34288a12d45e103401"
+        }
+      },
+      {
+        "scenario": "compat",
+        "status": 0,
+        "artifacts": {
+          "audio.pcm": "9f3c8cdbad5d0e862a012e7a12959bc1ca3c72226113f58f88a85b94756e6035",
+          "autopilot.png": "308f474706c976373135a0492cf9dd22750e534a25da58905d9bab9feec5df2c",
+          "compatibility.wav": "c00d3edf60d54d58fcf0c4062a6a4cd31d2bfae0110fcec85bccba77c8f62a27",
+          "frame_00000.png": "aeb950773078c2194e60bb895065eb1c6d5d9ec602d3b4ec118c263a017433be",
+          "frame_00001.png": "33c474bdf29280e2ad283cb86d02303436ac6063dfd23ccdd9b6ce6f5ed50033",
+          "frame_00002.png": "38238af13616dc33e06b8f8a5136ee5fd1f56dfbc4a35e4d2acedf28ceea0ff1",
+          "frame_00003.png": "db4ae28b8fe9056355415b402e35d734d8969018bf320873045e4ebdbcd72be1",
+          "frame_00004.png": "4a096d65c38bbc9d8e0f96710e8f0f169d77ae89137cce12c69dae90f4c75bbd",
+          "frames.txt": "a0d5f1bd0df11a944c78623b88979baca1143e1351d7f195cd574f1b21f5175e",
+          "jam_stopped.png": "da82eec73d22632570b9a57bb5a3bad3dba77ac327b17e774e0b6d1f5d4fce00",
+          "midi_out.txt": "a65214b7b0f80150a4e0aa01e8ebd4a7442794d2e4d328df7ff85d449a7d959c",
+          "object.bin": "a38051734ac7a5145791e9fe5780e19833856be0b8afc9d362b7f2d5a3ed3a79",
+          "platform.bin": "a6dcfa17211cf91bd438c476042a01caf21ecf9acc7f86cb1d64001ee1cfffa6"
+        }
+      },
+      {
+        "scenario": "restarts",
+        "status": 1,
+        "artifacts": {
+          "audio.pcm": "7de279e07cd402ad54cbb57b085b33b4d00b943ccc8388d492b5215a50f3fac5",
+          "midi_out.txt": "57e804b63b49b55e9c883657b0dc77f16c57ba08a3ebddab239d005db7b33c50",
+          "platform.bin": "42de18e79bb243835f044e26bdd15ce60e47cb666582fde2019bdcf595d3e69d"
+        }
+      }
+    ],
+    "wasm_goldens": [
+      {
+        "fixture_family": "frozen-r01-factory",
+        "frozen_golden_checked": true,
+        "initial_pack": "factory",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "baeff971",
+        "peak": 0.3714040517807007,
+        "blits": 4679,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 0,
+          "plans": 8,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1037,
+          "sessions": 1,
+          "commands": {
+            "accepted": 961,
+            "consumed": 961,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6215,
+            "chunks": 28982,
+            "controls": 27668
+          },
+          "sequencer": {
+            "lanes": 6222,
+            "mutations": 0,
+            "waits": 463712,
+            "boundaries": 1037
+          },
+          "factory": {
+            "accesses": 13390,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 72
+          }
+        }
+      },
+      {
+        "fixture_family": "frozen-r01-factory",
+        "frozen_golden_checked": true,
+        "initial_pack": "rust/fm1-engine/tests/packs/harris-citypop.jmp",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "28722449",
+        "peak": 0.4303741455078125,
+        "blits": 4673,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 1,
+          "plans": 10,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1033,
+          "sessions": 1,
+          "commands": {
+            "accepted": 751,
+            "consumed": 751,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6192,
+            "chunks": 34155,
+            "controls": 27682
+          },
+          "sequencer": {
+            "lanes": 6198,
+            "mutations": 0,
+            "waits": 546480,
+            "boundaries": 1033
+          },
+          "factory": {
+            "accesses": 13656,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 72
+          }
+        }
+      }
+    ]
+  },
+  "final_current_checks": {
+    "source_inputs": {
+      "source_sha256": "a937e3331cf8839a4387238b3e52554514929c0126c5acd5ae286a530e221d92",
+      "unchanged_files": 393
+    },
+    "native": {
+      "fixture_family": "current-jmp3",
+      "flavors": [
+        "current-c0",
+        "current-c0-runner",
+        "current-rust"
+      ],
+      "cases": 2,
+      "historical_cases": 0,
+      "known_failures": 0,
+      "artifact_count": 13,
+      "results": [
+        {
+          "scenario": "jam-helper",
+          "fixture_family": "current-jmp3",
+          "status": 0,
+          "historical": false,
+          "failures": [],
+          "audio_frames": 1778944,
+          "artifact_count": 4,
+          "artifact_bytes": 14666739,
+          "artifacts": {
+            "audio.pcm": "efcda58a5bf9010cd2fa005595cd4b8dcf6f8ce2a958515c8c74507c4169b4d9",
+            "jam_helper.png": "35483cc6d6b76358992de74c7a415dac49c1324f78dfc7b3877c8d7c24fa5c73",
+            "midi_out.txt": "dfeebf79abb4341814313e209f398853cf21f2393544a04b103679794dd6c162",
+            "platform.bin": "889cb40964aa2b583ce5cfeec7f0ed859231098a56c8ceeefc50c03692361b8a"
+          },
+          "normalized_log_sha256": "dfe56eb47ca8f5b5bd1b6081b3648eadae178b5a3f0d95b334d20eac54c83f86"
+        },
+        {
+          "scenario": "songbook",
+          "fixture_family": "current-jmp3",
+          "status": 0,
+          "historical": false,
+          "failures": [],
+          "audio_frames": 503808,
+          "artifact_count": 9,
+          "artifact_bytes": 5311116,
+          "artifacts": {
+            "arrangement.png": "93e522a8d5c383c2b418daa831d7335972fb75b06baeab90a693c1046f075db1",
+            "audio.pcm": "57cc8a6fed29cd7747bb3c55b70f9a54739d2f39fca5482456041533f2902331",
+            "band-resumed.png": "6831989486c06d0ed1aed89eca48266ee1864ba4d4d72c4653b4f70d21f91d80",
+            "dx-bass.png": "eb6f94bbb7000cd4fc997913b36b3e45ea5501491bf85f74480a5b93293a7967",
+            "dx-keys.png": "fd3ffb28adf9e885be7817d7eef5b1bf8c0c8073c680044c5b941c9f297ce070",
+            "midi_out.txt": "654d751a3c117336a72c192e2adf321ffcdc4586721630b167cf3646d6400d4f",
+            "platform.bin": "c78b77b2561c7776ac191016da8531646ca6cec97d34b9ec6b3a0f97581c2307",
+            "synth-held.png": "88dadf2ea0a958f00c5e0966c92628de359db5e8c58ab7a1a858a06f7524ecda",
+            "synth-stopped.png": "1b622a3b2826cbc8f471408644bbabb99f1481b3a1ae35239f7fe23825fc799a"
+          },
+          "normalized_log_sha256": "bbdc574854afad1fb1e74127d219270ff7de05812a87c95a0db9a1d312449625"
+        }
+      ]
+    },
+    "wasm_source_inputs": {
+      "source_sha256": "a937e3331cf8839a4387238b3e52554514929c0126c5acd5ae286a530e221d92",
+      "unchanged_files": 393
+    },
+    "wasm_f4_transition": {
+      "scenario": "legacy-f4-piece-genre-transport",
+      "compared_samples": 3475080,
+      "render_calls": 5744,
+      "peak": 0.43745994567871094,
+      "sequencer": {
+        "lanes": 1320,
+        "waits": 133792,
+        "boundaries": 21
+      },
+      "melodic": {
+        "acid": 227,
+        "mutations": 27,
+        "pluck": 227,
+        "bass": 227,
+        "bar": 6010,
+        "midi_transport": 66943
+      },
+      "voices": {
+        "drums": 8362,
+        "pluck": 8362,
+        "drone": 7273,
+        "acid": 8362,
+        "pad": 8362,
+        "pad_bus": 8362,
+        "controls": 6873,
+        "configs": 40721
+      },
+      "factory": {
+        "accesses": 3943,
+        "codecs": 0,
+        "rejections": 0,
+        "copied_bytes": 72
+      },
+      "harmony": [
+        6978,
+        34,
+        2,
+        0
+      ],
+      "memory_bytes": 33554432
+    },
+    "independent_frozen_ui_frame": {
+      "cases": 8192,
+      "compared_bytes": 14176176,
+      "sha256": "21e45cf98bed52b02bb1e5405fe74cf1cda6839da07ca14f249ae8e3f3cfe152",
+      "implementations": [
+        "native frozen C",
+        "native Rust",
+        "WASM frozen C",
+        "WASM Rust"
+      ],
+      "log": {
+        "path": "build/ui-frame-review.log",
+        "bytes": 4185,
+        "sha256": "857c7636e3c3dc6a1fc05de7bbfae010663252edfd7a634188d2037031263187"
+      }
+    }
+  },
+  "bug_fixed": "Current JMP3 header needed a fresh JamSnapshot on every normal draw. The Rust Songbook-only guard left stale on-state after F4 exit, causing frame and blit mismatches. The final builds refresh like C; exact comparisons now pass.",
+  "full_ci": "Pending on the pushed commit. No full-suite local pass is claimed after the final snapshot fix.",
+  "preserved_test_contract": "No historical scenario, frozen oracle, known failure or golden fingerprint was rebased or removed."
+}

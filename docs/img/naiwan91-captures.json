@@ -1,6 +1,6 @@
 {
   "source": "actual WASM RGB565 framebuffer",
-  "wasm_sha256": "5232ac420a875eb1f806c23f81edca0020249eee5e0c10e5e3316321bcb92542",
+  "wasm_sha256": "f6bbaa22cff650475f9e96e303cb0d5bb681f57bad8a72a239ed51343c34927d",
   "seed": 91,
   "master": 2800,
   "captures": [

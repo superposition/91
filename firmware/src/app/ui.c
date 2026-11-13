@@ -7346,7 +7346,7 @@ static void draw_knobs(void)
         static const char *const names[]={"KEY","BPM","BARS","MOVE"};
         static const char *const movement[]={"OFF","SPARSE","FLOW","ACTIVE"};
         uint32_t jh=hash(0x4a414d33u,(unsigned)proj.par[P_TEMPO]);
-        jh=hash(jh,jam_ui_version());
+        if(jam_ui_version()==3)jh=hash(jh,jam_ui_version());
         jam_ui_get(&s);for(k=0;k<sizeof s;k++)jh=hash(jh,((const uint8_t *)&s)[k]);
         if(jh==ui.sig[2])return;
         ui.sig[2]=jh;

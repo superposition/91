@@ -34,18 +34,18 @@ the current controls/help, release metadata and real framebuffer captures.
 
 The MCU build, memory/recovery gates, held-note DSP tests, UI routing and USB
 persistence tests passed. The installed package is `FM-1_7000404`, 611,251 bytes,
-SHA-256 `d61d38a7f76d1142cc9a2bad0f39e0dd8cab1f07f31e89601bf16957f719b7d3`.
+SHA-256 `be511345bf19e3aa3843f1e9a62d6bae68de08b18000520d59da39c27a82dfaf`.
 
 [Physical verification](release/hardware-0.4.4.json) records a verified restart
-and 131 telemetry frames over 32 seconds with zero crashes, xruns or added late
-events. Backing stayed active in Synth mode, CPU readings were 45–48%, and both
-part octaves remained +1. All four saved banks were byte-identical; the active
-bank changed only its mode byte. These observations establish that device run;
+and 129 telemetry frames over 32 seconds with zero crashes, xruns or added late
+events. Backing stayed active in Synth mode, CPU readings were 45–49%, and both
+part octaves remained +1. All four saved banks and the active bank were
+byte-identical. These observations establish that device run;
 held-note sound and input transitions also have separate automated DSP/UI tests.
 
 The final 0.4.4 [web qualification record](release/web-0.4.4.json) verifies the
 same package in the site and the production WASM SHA-256
-`5232ac420a875eb1f806c23f81edca0020249eee5e0c10e5e3316321bcb92542`.
+`f6bbaa22cff650475f9e96e303cb0d5bb681f57bad8a72a239ed51343c34927d`.
 All five new framebuffer captures were visually reviewed. The site checks pass
 for nine routes, 142 local links/assets, 152 retained controls and 18 module
 copies, plus metadata, backup, SysEx, OTA and lifecycle contracts. Eleven site
@@ -77,9 +77,45 @@ Songbook/Synth case, with zero assertions. The real F4 exit sequence compares
 3,475,080 WASM samples and every framebuffer exactly. This caught and fixed a
 Rust snapshot refresh that left the Songbook header stale after changing pages.
 An independent frozen UI-frame gate also passes 8,192 native/WASM cases and
-14,176,176 exact bytes. The full 94-scenario native corpus plus extras and the
-full emulator workflow will run on the pushed commit; no final full-suite local
-pass is claimed here.
+14,176,176 exact bytes. Those local checks preceded the remote run below.
+
+## CI follow-up
+
+[Run 43388392909](https://github.com/superposition/91/actions/runs/43388392909)
+on `3e245ad` passed six jobs: native simulator, Linux and Windows portable,
+Miri, authoring, and web metadata/build safety. Native coverage includes all
+94 historical scenarios, three extra cases and two current JMP3 cases. The
+emulator job passed its first 28 stages, including full instrument playback and
+browser codecs, then stopped at the historical device-wire test: it expected
+the original bank's reverb value 10 while the new bank uses 38.
+
+The fixture repairs change test scripts and isolated test adapters. Historical
+USB, persistence and full-app UI comparisons receive the SHA-verified R01
+factory table; current JMP3 tests keep their production bank. The native handoff
+build also declares `EN_HOST`, and isolated Runner/button adapters provide the
+callbacks now required by the code under test. No golden values or inherited
+assertions are rebased.
+
+The full-app comparison also found that hashing the pack version on every
+knob redraw changed an internal redraw fingerprint for legacy packs. A small
+runtime guard restricts that additional version hash to v3 packs. All four
+historical UI corpora now match their original golden bytes across native and
+WASM C/Rust/frozen implementations, with 4,096 cases per corpus. The current
+Songbook/Synth and F4 comparisons also pass exactly after the guard. The
+production WASM, firmware package and site have been rebuilt and qualified.
+The new package is installed with the bounded physical evidence above. All five
+regenerated PNGs match the initially reviewed images byte for byte. Initial
+[web](release/web-0.4.4-initial.json),
+[parity](release/parity-0.4.4-initial.json),
+[firmware](release/firmware-0.4.4-initial.json) and
+[physical](release/hardware-0.4.4-initial.json) records preserve the first build.
+
+Device-wire and handoff checks now pass against C, Rust and the frozen source,
+retaining USB response fingerprint `eff97ff8`. All remaining local workflow
+commands now pass: 13 persistence/DSP/HAL commands, 21 UI/environment commands
+and 11 USB commands, with original failure logs and corrected reruns retained. The
+[follow-up evidence](release/ci-followup-0.4.4.json) distinguishes these local
+results from the remote run; a green remote rerun is not yet established.
 
 ```sh
 EN_VERSION=0.4.4 sh web/emu/build_clang.sh

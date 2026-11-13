@@ -43,6 +43,10 @@ static void itoa_u(uint32_t v,char*s){(void)v;s[0]=0;}
 static void px_blend(int32_t x,int32_t y,uint16_t c,uint32_t a){(void)x;(void)y;(void)c;(void)a;}
 #endif
 static void midi_in(void);
+/* This frozen runner corpus has no Synth Jam owners. The actual full-app
+ * Synth takeover test covers release; calling it here would change the corpus. */
+int en_jam_option(int field){if(field!=JAM_SYNTH)__builtin_trap();return 0;}
+void en_jam_release(void){__builtin_trap();}
 #ifndef APP_RUNNER_SOURCE
 #define APP_RUNNER_SOURCE "../../firmware/src/app/runner.c"
 #endif

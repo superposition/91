@@ -1,0 +1,234 @@
+{
+  "release": "0.4.4",
+  "date": "2026-11-13",
+  "source_before_followup": "3e245ad",
+  "remote_run": {
+    "id": 43388392909,
+    "url": "https://github.com/superposition/91/actions/runs/43388392909",
+    "status": "six jobs passed; emulator stopped at historical device-wire fixture",
+    "passed_jobs": [
+      "native_simulator",
+      "portable_linux",
+      "portable_windows",
+      "browser_pointer_model",
+      "authoring",
+      "web_metadata"
+    ],
+    "native_cases": {
+      "historical": 94,
+      "extra": 3,
+      "current_jmp3": 2,
+      "total": 99
+    },
+    "emulator_passed_stages": 28,
+    "failure": "tests/host/jam_usb_test.c expected historical P_REVERB=10 but compiled against the new factory's value38",
+    "followup_rerun": "not yet established"
+  },
+  "scope": {
+    "kind": "historical fixture repairs, legacy redraw compatibility and documentation",
+    "changed_tests": [
+      "tests/rust_device_wire.sh",
+      "tests/rust_handoff.sh",
+      "tests/rust_persistence_ui.sh",
+      "tests/rust_ui_input.sh",
+      "tests/reference/runner_policy_reference.c",
+      "tests/reference/ui_buttons_reference.c",
+      "tests/rust_jam_labels.sh"
+    ],
+    "factory_sha256": "b2bb8b25e228e51124ffaea443729685811179e40d61dbfca9c32025b05040a2",
+    "frozen_source_files_verified": 440,
+    "historical_oracles_goldens_assertions": "unchanged",
+    "current_jmp3_tests": "remain separate with the production factory",
+    "runtime_change": "draw_knobs hashes the pack version only for JMP3, restoring exact legacy redraw state.",
+    "changed_runtime": [
+      "firmware/src/app/ui.c"
+    ]
+  },
+  "prior_qualified_artifacts": {
+    "package": {
+      "path": "build/naiwan91-0.4.4.fwsc",
+      "bytes": 611251,
+      "sha256": "d61d38a7f76d1142cc9a2bad0f39e0dd8cab1f07f31e89601bf16957f719b7d3"
+    },
+    "wasm": {
+      "path": "build/emu/amb.wasm",
+      "bytes": 2403535,
+      "sha256": "5232ac420a875eb1f806c23f81edca0020249eee5e0c10e5e3316321bcb92542"
+    }
+  },
+  "local_checks": {
+    "device_wire": {
+      "status": "passed",
+      "implementations": [
+        "current C",
+        "Rust formats",
+        "frozen C"
+      ],
+      "compared_bytes": 2526273,
+      "sha256": "6094adefee3b9f962afdc11ef82ed9136a1e5774011dc5ee185c1f9f97e8482e",
+      "usb_response_hash": "eff97ff8",
+      "evidence_directory": "build/device-wire"
+    },
+    "handoff": {
+      "status": "passed",
+      "implementations": [
+        "current C",
+        "full Rust runtime",
+        "frozen C"
+      ],
+      "usb_response_hash": "eff97ff8",
+      "evidence_directory": "build/handoff"
+    },
+    "persistence_to_harmony": {
+      "status": "passed",
+      "gate_count": 13,
+      "gates": [
+        "persistence",
+        "project",
+        "persistence_ui",
+        "project_scenarios",
+        "effects_parity",
+        "effects_workers",
+        "effects_completion",
+        "worker_handoff",
+        "mcu_hal",
+        "hal_irq_compile",
+        "hal_irq_state",
+        "command_irq",
+        "harmony_parity"
+      ],
+      "evidence": {
+        "path": "build/ci-remainder-jam/summary.json",
+        "sha256": "d694f3068bb3892d90cdccb48177ccf2392bb06d4e9446a3c92f501d5b2d9b88"
+      },
+      "persistence_ui_corrected_rerun": {
+        "cases": 10624,
+        "sha256": "8bf2f2416d5515bbe80a5fec9ef27dd47f6908e22a35b16db17886b315f93804",
+        "comparisons": "native C/Rust, WASM and independent frozen witness; original golden unchanged"
+      }
+    },
+    "graphics_to_harmony_snapshot": {
+      "status": "passed",
+      "commands": 21,
+      "evidence": {
+        "path": "build/ci-remainder-ui/final-results.json",
+        "sha256": "5000d3c596283bd70f98ce2be7046fc59de93a9098be5aa13493f3f017a5291d"
+      },
+      "historical_full_app": {
+        "corpora": [
+          "input",
+          "performance",
+          "automatic",
+          "values"
+        ],
+        "cases_per_corpus": 4096,
+        "comparisons": "native C/Rust/frozen and WASM C/Rust/frozen exactly match existing golden bytes",
+        "retest_record": {
+          "path": "build/ci-remainder-ui/input-retest-results.json",
+          "sha256": "31c3f816da500af507f8f39fd5ca931a1398ed562f6fd4a269bb445c6b63bb01"
+        }
+      },
+      "local_environment": "R01 reconstruction passed with native Windows Python; initial WSL Git worktree-pointer failure is retained in initial logs."
+    },
+    "usb_control_through_host": {
+      "status": "passed",
+      "gate_count": 11,
+      "gates": [
+        "control",
+        "transport",
+        "transport-edge",
+        "queues",
+        "tx",
+        "reset",
+        "lease",
+        "lease-healthy",
+        "host",
+        "host-tx",
+        "host-control"
+      ],
+      "host_cases": 552622,
+      "host_compared_bytes": 38947344,
+      "policy": "Each gate retains its original frozen/corrected witness contract; lease includes intentionally distinct C/Rust cases.",
+      "evidence_directory": "build/ci-remainder-usb",
+      "log_set_sha256": "32f9119c54b74ff6498d14968b1f9022b791e681f2544156a5229ee6e406bc25",
+      "log_set_encoding": "SHA256 of sorted <file SHA256>  <repository-relative path> lines, each terminated by LF"
+    },
+    "current_songbook_and_f4": {
+      "status": "passed",
+      "source_inputs": {
+        "source_sha256": "c335b60e5080d51a580c2a007e358f6a2cd21d4d7ea404cc57df8aa115f700d2",
+        "unchanged_files": 393
+      },
+      "native_cases": [
+        "jam-helper",
+        "songbook"
+      ],
+      "native_implementations": [
+        "C oracle",
+        "C runner",
+        "Rust runner"
+      ],
+      "assertion_failures": 0,
+      "comparison": "exact normalized logs, PCM, PNG, MIDI and platform bytes",
+      "wasm_f4_compared_samples": 3475080,
+      "wasm_framebuffer": "exact",
+      "initial_0_4_4_current_artifact_hashes": "unchanged"
+    }
+  },
+  "local_remainder_complete": true,
+  "refreshed_production_artifacts": {
+    "wasm": {
+      "path": "build/emu/amb.wasm",
+      "bytes": 2403341,
+      "sha256": "f6bbaa22cff650475f9e96e303cb0d5bb681f57bad8a72a239ed51343c34927d"
+    },
+    "screenshots": "All five regenerated PNG hashes equal their initially reviewed images; new capture manifest binds them to refreshed WASM.",
+    "firmware_package": {
+      "path": "build/naiwan91-0.4.4.fwsc",
+      "bytes": 611251,
+      "sha256": "be511345bf19e3aa3843f1e9a62d6bae68de08b18000520d59da39c27a82dfaf"
+    },
+    "site": {
+      "status": "passed",
+      "manifest": {
+        "path": "build/site/site-build.json",
+        "bytes": 10947,
+        "sha256": "a34347580ee94b87e5872eb7790e602a5e12f9d3c566f37078a89e680c060f47"
+      },
+      "web_record": "web-0.4.4.json",
+      "physical_acceptance": {
+        "status": "passed",
+        "record": "hardware-0.4.4.json",
+        "package_sha256": "be511345bf19e3aa3843f1e9a62d6bae68de08b18000520d59da39c27a82dfaf",
+        "verified_restart": true,
+        "telemetry_frames": 129,
+        "seconds": 32,
+        "crashes": 0,
+        "xruns": 0,
+        "late_delta": 0,
+        "cpu_range": [
+          45,
+          49
+        ],
+        "active_and_four_saved_banks": "byte-identical"
+      }
+    },
+    "source_inputs": {
+      "source_sha256": "c335b60e5080d51a580c2a007e358f6a2cd21d4d7ea404cc57df8aa115f700d2",
+      "unchanged_files": 393
+    },
+    "web_qualification": "web-0.4.4.json",
+    "parity_qualification": "parity-0.4.4.json",
+    "status": "qualified locally; installed with bounded physical verification"
+  },
+  "limits": [
+    "Local gate completion and device verification do not establish a successful remote rerun.",
+    "The original remote run predates the one-line redraw correction; initial artifacts and evidence are retained separately."
+  ],
+  "initial_evidence": {
+    "web": "web-0.4.4-initial.json",
+    "parity": "parity-0.4.4-initial.json",
+    "firmware": "firmware-0.4.4-initial.json",
+    "physical": "hardware-0.4.4-initial.json"
+  }
+}

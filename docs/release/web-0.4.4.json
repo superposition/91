@@ -1,10 +1,13 @@
 {
   "release": "0.4.4",
   "date": "2026-11-13",
-  "source_base": "2d27650",
+  "source_base": "3e245ad",
+  "revision": "Legacy redraw version hash restricted to JMP3; fixture repairs remain test-only.",
+  "initial_evidence": "web-0.4.4-initial.json",
+  "ci_followup": "ci-followup-0.4.4.json",
   "source_preservation": "source-preservation-20261113.json",
   "source_inputs": {
-    "source_sha256": "a937e3331cf8839a4387238b3e52554514929c0126c5acd5ae286a530e221d92",
+    "source_sha256": "c335b60e5080d51a580c2a007e358f6a2cd21d4d7ea404cc57df8aa115f700d2",
     "unchanged_files": 393
   },
   "default_octaves": {
@@ -29,21 +32,21 @@
     "package": {
       "path": "build/naiwan91-0.4.4.fwsc",
       "bytes": 611251,
-      "sha256": "d61d38a7f76d1142cc9a2bad0f39e0dd8cab1f07f31e89601bf16957f719b7d3"
+      "sha256": "be511345bf19e3aa3843f1e9a62d6bae68de08b18000520d59da39c27a82dfaf"
     },
     "wasm": {
       "path": "build/emu/amb.wasm",
-      "bytes": 2403535,
-      "sha256": "5232ac420a875eb1f806c23f81edca0020249eee5e0c10e5e3316321bcb92542"
+      "bytes": 2403341,
+      "sha256": "f6bbaa22cff650475f9e96e303cb0d5bb681f57bad8a72a239ed51343c34927d"
     },
     "site_manifest": {
       "path": "build/site/site-build.json",
       "bytes": 10947,
-      "sha256": "c3149c157560e826af2dfd9322dc60b519d46c6830da5c9302ed4f45b69b2d68"
+      "sha256": "a34347580ee94b87e5872eb7790e602a5e12f9d3c566f37078a89e680c060f47"
     },
     "screenshots": {
       "source": "actual WASM RGB565 framebuffer",
-      "wasm_sha256": "5232ac420a875eb1f806c23f81edca0020249eee5e0c10e5e3316321bcb92542",
+      "wasm_sha256": "f6bbaa22cff650475f9e96e303cb0d5bb681f57bad8a72a239ed51343c34927d",
       "seed": 91,
       "master": 2800,
       "captures": [
@@ -171,7 +174,7 @@
   "limitations": [
     "Browser contracts use API doubles and actual WASM; interactive browser layout was not rerun for 0.4.4.",
     "Screenshots are actual instrument framebuffer captures, not browser or hardware photographs.",
-    "Full native 94-scenario plus extras and full emulator CI rerun is delegated to the pushed commit; local final checks were focused.",
+    "The initial remote run passed all 99 native cases and six jobs; the final follow-up remote rerun is not yet established.",
     "No public deployment is established by these local checks."
   ]
 }

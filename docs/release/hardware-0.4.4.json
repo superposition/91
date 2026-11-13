@@ -1,19 +1,19 @@
 {
   "identity": "FM-1_7000404",
-  "sha256": "d61d38a7f76d1142cc9a2bad0f39e0dd8cab1f07f31e89601bf16957f719b7d3",
+  "sha256": "be511345bf19e3aa3843f1e9a62d6bae68de08b18000520d59da39c27a82dfaf",
   "verified_restart": true,
   "playback": {
     "identity": "FM-1_7000404",
     "before": {
       "on": 1,
       "bars": 8,
-      "bar": 7,
-      "beat": 31,
+      "bar": 5,
+      "beat": 20,
       "hold": 0,
       "pending": 0,
       "slot": 0,
       "crc32": "0371a573",
-      "revision": 4,
+      "revision": 3,
       "xruns": 0,
       "key": 6,
       "minor": 0,
@@ -25,13 +25,13 @@
     "after": {
       "on": 1,
       "bars": 8,
-      "bar": 7,
-      "beat": 28,
+      "bar": 4,
+      "beat": 17,
       "hold": 0,
       "pending": 0,
       "slot": 0,
       "crc32": "0371a573",
-      "revision": 4,
+      "revision": 3,
       "xruns": 0,
       "key": 6,
       "minor": 0,
@@ -45,14 +45,14 @@
       "pack_version": 3,
       "loading": 0
     },
-    "frames": 131,
+    "frames": 129,
     "seconds": 32,
     "max_xruns": 0,
     "max_crashes": 0,
     "late_delta": 0,
     "cpu_range": [
       45,
-      48
+      49
     ],
     "core2_active": true,
     "playback_active": true,
@@ -63,8 +63,8 @@
       1
     ],
     "note_events_by_channel": {
-      "2": 238,
-      "9": 514
+      "2": 234,
+      "9": 538
     }
   },
   "bank": {
@@ -77,7 +77,7 @@
       "pending": 0,
       "slot": 0,
       "crc32": "0371a573",
-      "revision": 4,
+      "revision": 3,
       "xruns": 0,
       "key": 6,
       "minor": 0,
@@ -102,7 +102,7 @@
       "fm_voices": 6
     },
     "saved_banks_unchanged": true,
-    "active_bank_preserved_except_synth": true,
+    "active_bank_preserved": true,
     "synth": 1,
     "backing": 1
   },
@@ -114,5 +114,6 @@
     "Damping": 42,
     "Predelay": 80
   },
-  "limits": "Physical installer restart, pack byte preservation and 32-second passive telemetry observation. This record does not claim subjective listening or physical key/button actuation; those paths have separate actual C UI and WASM tests."
+  "supersedes": "docs/release/hardware-0.4.4-initial.json",
+  "limits": "Verified installer restart, byte-preserved active/saved banks and a 32-second passive telemetry. Physical key/button actuation and subjective listening are not claimed; actual C UI and WASM tests cover those software paths."
 }

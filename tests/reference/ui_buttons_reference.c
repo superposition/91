@@ -29,6 +29,8 @@ void en_next(void){event(204,0,0);if(seed&8)en_playing^=1;}
 void en_freeze(int on){event(205,(uint32_t)on,0);en_frozen=(uint8_t)on;}
 void en_section(int cmd){event(206,(uint32_t)cmd,0);en_sec_req=(uint8_t)(cmd+1);}
 void en_jam_get(jp_settings_t*s){memset(s,0,sizeof *s);s->hold=(uint8_t)hold;}
+/* The frozen button corpus predates Synth Jam; its new guard must stay off. */
+int en_jam_option(int field){if(field!=JAM_SYNTH)__builtin_trap();return 0;}
 void en_jam_set(int field,int value){event(207,(uint32_t)field,(uint32_t)value);if(field==JAM_HOLD)hold=(uint32_t)value;ui.mood++;}
 void en_param_text(int p,int value,char*b){uint32_t x=(uint32_t)value;(void)p;b[0]=(char)('A'+x%26);b[1]=(char)('A'+(x>>8)%26);b[2]=0;}
 static int jam_session_save(void){event(208,0,0);ui.frame+=2;return seed&32?PLAT_STORE_BUSY:0;}

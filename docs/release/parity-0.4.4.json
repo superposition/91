@@ -1,6 +1,8 @@
 {
   "release": "0.4.4",
   "date": "2026-11-13",
+  "initial_evidence": "parity-0.4.4-initial.json",
+  "ci_followup": "ci-followup-0.4.4.json",
   "boundary": "Historical scenarios use only the SHA-verified R01 factory table in current builds. Frozen source, oracle, corpus and golden fingerprints are unchanged. Production and current-family tests use the ordinary JMP3 table.",
   "frozen_source": {
     "files": 440,
@@ -224,7 +226,7 @@
   },
   "final_current_checks": {
     "source_inputs": {
-      "source_sha256": "a937e3331cf8839a4387238b3e52554514929c0126c5acd5ae286a530e221d92",
+      "source_sha256": "c335b60e5080d51a580c2a007e358f6a2cd21d4d7ea404cc57df8aa115f700d2",
       "unchanged_files": 393
     },
     "native": {
@@ -281,7 +283,7 @@
       ]
     },
     "wasm_source_inputs": {
-      "source_sha256": "a937e3331cf8839a4387238b3e52554514929c0126c5acd5ae286a530e221d92",
+      "source_sha256": "c335b60e5080d51a580c2a007e358f6a2cd21d4d7ea404cc57df8aa115f700d2",
       "unchanged_files": 393
     },
     "wasm_f4_transition": {
@@ -344,6 +346,6 @@
     }
   },
   "bug_fixed": "Current JMP3 header needed a fresh JamSnapshot on every normal draw. The Rust Songbook-only guard left stale on-state after F4 exit, causing frame and blit mismatches. The final builds refresh like C; exact comparisons now pass.",
-  "full_ci": "Pending on the pushed commit. No full-suite local pass is claimed after the final snapshot fix.",
+  "full_ci": "Run 43388392909 on 3e245ad passed six jobs including all 99 native cases; emulator reached the historical device-wire fixture failure. Follow-up remote rerun not yet established; see ci-followup-0.4.4.json for final local remainder and redraw-regression evidence.",
   "preserved_test_contract": "No historical scenario, frozen oracle, known failure or golden fingerprint was rebased or removed."
 }
