@@ -4,51 +4,74 @@ Execution is tracked in [epic #1](https://github.com/superposition/91/issues/1).
 
 ## Current architecture and qualification — 12 November
 
-Published source `0620997` includes Rust synthesis/voices, FM6, effects/master,
-factory recipes, planning/harmonic policy, scheduling, commands, worker handoffs,
-codecs and persistence policy. Native scenario parsing, virtual platform/clock
-and output sinks run in Rust. Native and browser share the same bounded host
-model; the browser platform/clock use six application callbacks. C application
-ABI thunks and an operating-system clock observation remain.
+Qualified source `64e4603` includes synthesis/voices, FM6, effects/master,
+factory recipes, planning/harmonic policy, scheduling, commands, worker handoff,
+codecs and persistence. The controller now includes graphics/Runner, all 193
+defaults, frame/input/encoder/button policy, scene/tempo/view helpers,
+DJ/automatic effects and knob value/range/mood/acid observations. Native and
+browser share bounded host state, scenario/platform policy and audio behavior.
+C application ABI thunks, further setters/labels/pages/visualizers and hardware
+lifecycle work remain visible migration boundaries.
 
-Graphics, Runner, UI defaults, frame/cadence policy, encoder acceleration and
-storage retries are integrated. Controller helpers, page composition and
-visualizers still contain C. Browser/editor/library logic, startup/USB/update
-loader, build/media tools and whole-release qualification remain ticketed.
-The newer held-input, asset and packaging batch is under combined qualification.
+The [combined checkpoint](rust/combined-values-host-site-checkpoint-20261112.json)
+records 220 Windows tests, all 97 five-way native scenarios, all 19 inherited
+failure fingerprints, three fresh-process repeats and 129 damaged-store trials.
+Each flavor compares 538 artifacts and 80,748,288 audio frames. Full instrument
+WASM/HTTP/binding checks pass. All seven selected Rust libraries emit C through
+the pinned bootstrap compiler. That source compiles with vendor LTO for PI32v2
+and separately executes on a 32-bit x86 natural ABI with C assertions active.
+These software results do not qualify a linked MCU release, full stack bound
+or physical deadlines.
 
 Concrete data boundaries for the talk:
 
-- The command ring retains 1,024 packed words. Producer publication and consumer
-  slot reuse require distinct ordering; volatile access alone supplies neither.
+- The command ring is 1,024 packed words plus two indices: 4,104 bytes.
+  Publication and safe slot reuse require separate producer/consumer ordering.
+- The target UI carrier is 1,320 bytes, alignment 4; every one of its 193 field
+  offsets/sizes matches vendor C. The five-byte DJ cache replaces five existing
+  statics. Callbacks run between scoped accesses so later reads see reentry.
+- Readonly harmony uses the existing 208-byte state and 48-byte configuration.
+  CPU0 IRQ state is saved only for the bounded copy and restored before Rust
+  math/output. A byte-interruption double covers 262,144 calls and 67,108,864
+  copy opportunities; the independent unmasked control demonstrates torn data.
+- Four endpoint leases fit in one existing padding byte of the 96-byte target
+  USB structure. Unknown I/O, accepted work and confirmed retirement are distinct
+  facts. A 16-byte host endpoint result initializes every output byte, while raw
+  DMA/output roots remain separate from private Rust metadata.
+- A 32-byte immutable endpoint table moved from stack initialization into
+  read-only storage. Its measured isolated entry frame shrank from 48 to 8 bytes.
+  Host TX measures 28 bytes; host control measures 48, plus a 40-byte direct wait
+  helper. C callers/callbacks, interrupt overlap and whole-image LTO remain outside
+  these inspection measurements. [Assembly and context](rust/USB_ENDPOINT_LEAF.md).
 - The browser has one 240×240 RGB565 framebuffer and one 31×3,840-byte object
-  bank. Persistent foreign pointers come from separate allocation roots.
-  Metadata borrows end before callbacks reenter the platform. Store reads
-  initialize raw foreign output without borrowing uninitialized destination bytes.
-- The target UI carrier is 1,320 bytes, alignment 4. All 193 offsets/sizes match
-  vendor C. This measured ABI result is separate from native/WASM layout,
-  whole-image linking and physical timing.
+  bank. Foreign roots remain raw; metadata borrows end before callbacks.
+  Validated reads initialize uninitialized foreign output without borrowing it.
 
-[Host/platform proof](rust/combined-browser-platform-checkpoint-20261112.json)
-records 170 Windows tests, all 97 native scenarios, repeats/damaged stores and
-full-instrument WASM/bindings.
-[Callback proof](rust/browser-bindings-allocation-proof.json) covers 15 render
-sizes, no owned array/view/BigInt construction or IPC during rendering, and
-fixed 32 MiB memory. Frame/store serialization runs in polled MessagePort tasks.
-Browser-native allocation and actual device scheduling remain separate checks.
+The 4,096-case value corpus compares 52,072,448 exact bytes across R01/current
+C0/Rust native, WASM and generated-natural32 implementations. Host RX, TX and
+complete control transfers have separate frozen/native/WASM/target comparisons.
+Retained DMA correction and reset witnesses remain distinct from normal parity.
+The positive physical USB-stop provider remains unqualified/default-deny.
 
-The [USB/UI/rescue review](https://github.com/superposition/91/blob/0e42b1d/docs/rust/combined-usb-ui-rescue-checkpoint-20261112.json)
-adds descriptor/EP0, receive collectors, exact-IRQ MIDI queues, button policy,
-checked UI classification and rescue/debugger tools. Its 182 Windows tests,
-frozen/native/WASM fixtures, seven-crate vendor LTO and natural32 comparisons
-with active C assertions pass. It is not a linked/physically qualified release.
+Offline installer/rescue/diagnostic, authoring, asset/DX/logo generation,
+compression/wrappers, image/source/stub/release inspection, manual generation
+and site/editor metadata transforms use Rust policy with explicit OS adapters.
+The actual C display/name exporter and remaining build/site/media/browser
+orchestration are still transitional. Spectrum templates and musician-facing
+copy remain unchanged; controlled PDF/site tests do not claim an actual render.
 
-The device is restored to known-working 0.3.3: all 30 saved objects are preserved,
-and follow-up audio added no XRUN/late/crash counters. The experimental failure
-remains unresolved; [restoration record](rust/firmware-restoration-20261112.json).
-The LAN preview still serves its earlier qualified artifact. The sections below
-retain historical measurements and call maps; their remaining-work statements
-describe those earlier checkpoints.
+[Callback evidence](rust/browser-bindings-allocation-proof.json) covers 15 render
+sizes, no owned array/view/BigInt construction or IPC during processing, and
+fixed 32 MiB memory. Frame/store copies run in polled MessagePort tasks. Actual
+interactive AudioWorklet/mobile/restart qualification remains separate; the LAN
+preview still serves its earlier deployed artifact.
+
+The last physical installation is known-working 0.3.3. Restoration verified all
+30 saved objects and a short audio follow-up added no XRUN/late/crash counters;
+[restoration evidence](rust/firmware-restoration-20261112.json). The earlier
+experimental crash has no established cause. The protected recovery stub stays
+unchanged. The sections below retain historical measurements and call maps;
+their remaining-work statements describe those earlier checkpoints.
 
 ## Earlier combined checkpoint — d1a2204
 

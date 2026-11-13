@@ -1,0 +1,719 @@
+{
+  "tested_source": "64e46030370711fa301432feaf400d31a62111b1",
+  "windows_tests": 220,
+  "native": {
+    "cases": 97,
+    "historical_cases": 94,
+    "known_failures": 19,
+    "artifact_count": 538,
+    "audio_frames": 80748288,
+    "artifact_bytes": 753826710
+  },
+  "traces": {
+    "ui-values": {
+      "cases": 4096,
+      "trace": {
+        "bytes": 52072448,
+        "sha256": "b24e4b6c20f883ed91e13e4693a83816868d6d5d9f059e0e0a524fc230066f8e"
+      },
+      "all_frozen_current_native_wasm_generated_natural32_exact": true
+    },
+    "usb-host-tx": {
+      "cases": 158978,
+      "trace": {
+        "bytes": 62319376,
+        "sha256": "1d17801c0c5469fa6a03629c68554d5928b971a54de699e7282b79f1ec615483"
+      },
+      "all_frozen_current_native_wasm_generated_natural32_exact": true
+    },
+    "usb-host-control": {
+      "cases": 58248,
+      "trace": {
+        "bytes": 52190208,
+        "sha256": "239a59ad9b8f1a01f29ab1ffa9d61fe403f7c798790aaafd58f334a67cd07102"
+      },
+      "all_frozen_current_native_wasm_generated_natural32_exact": true
+    },
+    "usb-host": {
+      "cases": 552622,
+      "trace": {
+        "bytes": 38947344,
+        "sha256": "e0a13b6211c51c4670552d2665b7aadafe2f42a75e044645494989e2cd91c534"
+      },
+      "all_frozen_current_native_wasm_generated_natural32_exact": true
+    }
+  },
+  "readonly_harmony": {
+    "calls": 262144,
+    "source_bytes": 256,
+    "copies": 67108864,
+    "deliveries": 131072,
+    "bad": 0,
+    "early_output": 0
+  },
+  "unmasked_harmony_witness": {
+    "calls": 262144,
+    "source_bytes": 256,
+    "copies": 67108864,
+    "deliveries": 16842752,
+    "bad": 16678822,
+    "early_output": 0
+  },
+  "tooling_reports": [
+    {
+      "cases": 697,
+      "profiles": {
+        "stub": 323,
+        "loader": 180,
+        "release": 162,
+        "sdk": 32
+      },
+      "source_hashes": 440,
+      "sha256": "991007f09d4abaf9775a940427724384d7cdffa1a6d1f66afc0a42fff3a3c61f",
+      "compiler_executed": false,
+      "hardware_io": false
+    },
+    {
+      "schema": 1,
+      "cases": 1219,
+      "trace_sha256": "c2b658043a85cedccef24d01dca482217657942ebd99e130de9d9b0feb40545f",
+      "python": "3.10.12",
+      "platform": "linux",
+      "reference_files": 440,
+      "current_c0": "fa187ac20459923367db12e7e42c68033e4a38e0"
+    },
+    {
+      "schema": 1,
+      "cases": 51,
+      "trace_sha256": "e43ef2c3469e441ba829e0c5c37f599280a9c5cda9762f1db73cedd6fdde8438",
+      "python": "3.10.12",
+      "platform": "linux",
+      "full_build_profiles": 16,
+      "wasm_and_pdf_payloads": "deterministic copy-only fixtures",
+      "browser_or_server": false
+    }
+  ],
+  "wasm": [
+    {
+      "file": "audio-views.json",
+      "proof": {
+        "variable_render_sizes": [
+          0,
+          1,
+          3,
+          31,
+          127,
+          128,
+          129,
+          255,
+          256,
+          257,
+          1023,
+          1024,
+          1025,
+          2048,
+          4097
+        ],
+        "compared_values": 665856,
+        "audio_constructor_allocations": 0,
+        "render_ipc_calls": 0,
+        "memory_growth": "rejected",
+        "scope": "Owned audio copying and WASI clock; frame/store serialization and IPC run in polled MessagePort tasks"
+      }
+    },
+    {
+      "file": "controls.json",
+      "proof": {
+        "scenario": "panel-encoder-acceleration-and-nested-frame-input",
+        "compared_samples": 619164,
+        "actual_encoder_witness": 1,
+        "malformed_rejections": 1,
+        "exports": 24,
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "dj.json",
+      "proof": {
+        "scenario": "all27-dj-keys-polyphony-release-and-stop",
+        "compared_samples": 2651292,
+        "render_calls": 6312,
+        "peak": 0.6429266929626465,
+        "pcm_hash": "34cf7253",
+        "dj": {
+          "accepted_notes": 36,
+          "voice_samples": 1522343
+        },
+        "memory_bytes": 33554432,
+        "public_exports": 24
+      }
+    },
+    {
+      "file": "effects.json",
+      "proof": {
+        "scenario": "panel-effects-banks-release-tails",
+        "compared_samples": 2769480,
+        "render_calls": 5160,
+        "peak": 0.4538612365722656,
+        "pcm_hash": "fd659ab9",
+        "effects": {
+          "master_samples": 1384960,
+          "echo_samples": 1384960,
+          "tank_samples": 1384960,
+          "colour_sample_calls": 4154880
+        },
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "factory-lines.json",
+      "proof": {
+        "scenario": "stored-frozen-acid-pluck-save",
+        "compared_samples": 970200,
+        "render_calls": 1613,
+        "saved_bytes": 3836,
+        "factory": {
+          "accesses": 1178,
+          "codecs": 6,
+          "rejections": 0,
+          "copied_bytes": 230
+        },
+        "formats": {
+          "decodes": 0,
+          "encodes": 0,
+          "rejections": 0,
+          "copied_bytes": 0
+        },
+        "persistence": {
+          "project_calls": 12,
+          "object_saves": 2,
+          "bytes": 6884
+        },
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "factory.json",
+      "proof": {
+        "initial_pack": "factory",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "baeff971",
+        "peak": 0.3714040517807007,
+        "blits": 4679,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 0,
+          "plans": 8,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1037,
+          "sessions": 1,
+          "commands": {
+            "accepted": 961,
+            "consumed": 961,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6215,
+            "chunks": 28982,
+            "controls": 27668
+          },
+          "sequencer": {
+            "lanes": 6222,
+            "mutations": 0,
+            "waits": 463712,
+            "boundaries": 1037
+          },
+          "factory": {
+            "accesses": 13390,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 72
+          }
+        }
+      }
+    },
+    {
+      "file": "fm6.json",
+      "proof": {
+        "scenario": "loaded-user-FM6-algorithms-key-retrigger-stop-tails",
+        "cases": [
+          {
+            "algorithm": 0,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.47700321674346924,
+            "pcm_hash": "d393a85d",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 3,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.4807950258255005,
+            "pcm_hash": "d9669c55",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 5,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.5013117790222168,
+            "pcm_hash": "abebadf5",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          },
+          {
+            "algorithm": 31,
+            "compared_samples": 1188054,
+            "render_calls": 2596,
+            "peak": 0.48351776599884033,
+            "pcm_hash": "cafdb8b9",
+            "fm6": [
+              9284,
+              19,
+              0,
+              19,
+              1,
+              1,
+              594176,
+              2
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "file": "handoff.json",
+      "proof": {
+        "snapshot_bytes": 220,
+        "published": 134,
+        "copied": 134,
+        "detail_pages": 4,
+        "staging_claims": 0,
+        "staging_activations": 0,
+        "staging_rejections": 0,
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "project.json",
+      "proof": {
+        "legacy_project": [
+          {
+            "scenario": "recipes",
+            "compared_samples": 904050,
+            "render_calls": 1494,
+            "pcm_hash": "d5eb8651",
+            "project_calls": 7,
+            "object_saves": 0
+          },
+          {
+            "scenario": "corrupt-record",
+            "compared_samples": 904050,
+            "render_calls": 1494,
+            "pcm_hash": "d5eb8651",
+            "project_calls": 7,
+            "object_saves": 0
+          },
+          {
+            "scenario": "saved-factory-reset",
+            "compared_samples": 1177470,
+            "render_calls": 1950,
+            "pcm_hash": "d23160e5",
+            "project_calls": 10,
+            "object_saves": 2
+          }
+        ],
+        "frozen_reference": null
+      }
+    },
+    {
+      "file": "runner.json",
+      "proof": {
+        "scenario": "kick-runner-steering-restart-pause-exit",
+        "compared_samples": 4368546,
+        "render_calls": 10512,
+        "peak": 0.20634067058563232,
+        "pcm_hash": "cdcd5715",
+        "application_calls": 186869,
+        "public_exports": 24,
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "saved-v1.json",
+      "proof": {
+        "initial_pack": "rust/fm1-engine/tests/packs/harris-citypop.jmp",
+        "blocks": 55000,
+        "seconds": 159.63718820861678,
+        "compared_samples": 14080000,
+        "pcm_hash": "28722449",
+        "peak": 0.4303741455078125,
+        "blits": 4673,
+        "memory_bytes": 33554432,
+        "rust": {
+          "validations": 1,
+          "plans": 10,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 1033,
+          "sessions": 1,
+          "commands": {
+            "accepted": 751,
+            "consumed": 751,
+            "dropped": 0,
+            "high_water": 213
+          },
+          "transport": {
+            "pulses": 6192,
+            "chunks": 34155,
+            "controls": 27682
+          },
+          "sequencer": {
+            "lanes": 6198,
+            "mutations": 0,
+            "waits": 546480,
+            "boundaries": 1033
+          },
+          "factory": {
+            "accesses": 13656,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 72
+          }
+        }
+      }
+    },
+    {
+      "file": "sequencer.json",
+      "proof": {
+        "scenario": "legacy-f4-piece-genre-transport",
+        "compared_samples": 3475080,
+        "render_calls": 5744,
+        "peak": 0.4515293836593628,
+        "sequencer": {
+          "lanes": 1320,
+          "waits": 134032,
+          "boundaries": 21
+        },
+        "melodic": {
+          "acid": 227,
+          "mutations": 27,
+          "pluck": 227,
+          "bass": 227,
+          "bar": 6017,
+          "midi_transport": 67070
+        },
+        "voices": {
+          "drums": 8377,
+          "pluck": 8377,
+          "drone": 7287,
+          "acid": 8377,
+          "pad": 8377,
+          "pad_bus": 8377,
+          "controls": 6880,
+          "configs": 40795
+        },
+        "factory": {
+          "accesses": 3950,
+          "codecs": 0,
+          "rejections": 0,
+          "copied_bytes": 72
+        },
+        "harmony": [
+          6986,
+          35,
+          2,
+          0
+        ],
+        "memory_bytes": 33554432
+      }
+    },
+    {
+      "file": "session.json",
+      "proof": {
+        "scenario": "v2-hold-idea-save-restart",
+        "render_calls": 11663,
+        "compared_samples": 6570900,
+        "seconds": 74.5,
+        "peak": 0.22903597354888916,
+        "memory_bytes": 33554432,
+        "saved_session": [
+          74,
+          83,
+          77,
+          1,
+          1,
+          11,
+          1,
+          8,
+          2,
+          1,
+          83,
+          0,
+          7,
+          1,
+          190,
+          0,
+          3,
+          83,
+          0,
+          0
+        ],
+        "rust": {
+          "validations": 1,
+          "plans": 9,
+          "rejections": 0,
+          "fallbacks": 0,
+          "bass_events": 804,
+          "sessions": 2,
+          "commands": {
+            "accepted": 319,
+            "consumed": 319,
+            "dropped": 0,
+            "high_water": 208
+          },
+          "transport": {
+            "pulses": 4819,
+            "chunks": 12684,
+            "controls": 11829
+          },
+          "sequencer": {
+            "lanes": 4824,
+            "mutations": 0,
+            "waits": 202944,
+            "boundaries": 804
+          },
+          "factory": {
+            "accesses": 1103,
+            "codecs": 0,
+            "rejections": 0,
+            "copied_bytes": 72
+          }
+        }
+      }
+    },
+    {
+      "file": "wasi-clock.json",
+      "proof": {
+        "wasi_clock_cases": 12,
+        "legacy_u64_bytes": "exact",
+        "clock_bigint_construction": 0
+      }
+    },
+    {
+      "file": "worker.json",
+      "proof": {
+        "scenario": "serialized-generation-stage-ownership",
+        "compared_samples": 1278900,
+        "render_calls": 2361,
+        "peak": 0.47122979164123535,
+        "pcm_hash": "f99f9451",
+        "worker": [
+          2710,
+          2710,
+          5420,
+          2710,
+          2710,
+          0,
+          0,
+          0
+        ],
+        "memory_bytes": 33554432
+      }
+    }
+  ],
+  "artifacts": {
+    "build/round23-windows.log": {
+      "bytes": 36443,
+      "sha256": "3b7bfa3ce7ab74ffb3586950ed49b7771d9112c9f52b4f87c151536bb5295dee"
+    },
+    "build/round23-runtime.log": {
+      "bytes": 78901,
+      "sha256": "03584e2b0a489ed7c09ba8913fb7752d8d2c491241cafedc23d2907473d72022"
+    },
+    "build/round23-focused.log": {
+      "bytes": 4369,
+      "sha256": "5cb71f761468995ef63ceaf86214246890799484a616110dcfe3890f0d9330ec"
+    },
+    "build/round23-focused-finish.log": {
+      "bytes": 14234,
+      "sha256": "9182024fca780f89746098e96e4e55a9064de25c7cdfeeb9c06a90147b8aeffc"
+    },
+    "build/round23-compiler.log": {
+      "bytes": 1762,
+      "sha256": "6124495f49163c143257c3cf2cf9a5e5ec09fd8aef11efb4f3c1021b994045a7"
+    },
+    "build/emu-parity/rust.wasm": {
+      "bytes": 2372203,
+      "sha256": "767c452cb38b5b16e39e7a88a0e8d023e4195c868b179c025af1c23e5c7c00c9"
+    },
+    "build/emu-parity/reference.wasm": {
+      "bytes": 1945667,
+      "sha256": "f496acabf4b5b3767357c66ed08f671ff90d80d832ad70795dc73cb19d6d46c4"
+    },
+    "build/simulator/results.json": {
+      "bytes": 85751,
+      "sha256": "96160e11317ba808656457924158dabc06aa6a54b99ad69ebaec55680c85ec0e"
+    },
+    "build/simulator/repeat-results.json": {
+      "bytes": 3532,
+      "sha256": "55eb0568e9ca51f75889c66a055403518fd5c885564f6ae228f69a96dda1b422"
+    },
+    "build/hal-target/main.o": {
+      "bytes": 482404,
+      "sha256": "817edc0d079de4a6c02db56724642acfeadc331dfbbe1e994bded97e5560c3bd"
+    },
+    "build/hal-target/main-app.o": {
+      "bytes": 475600,
+      "sha256": "bfeddb65fd67056c42df85772e723187a1ea07af6494c555efd99bf123ad49ed"
+    },
+    "build/hal-target/engine.o": {
+      "bytes": 412976,
+      "sha256": "8725ce009d4f0738c8906d5afa40f4aa3a48185978e2b7818b86ea90bdbf1f4e"
+    },
+    "build/hal-target/engine-app.o": {
+      "bytes": 412976,
+      "sha256": "8725ce009d4f0738c8906d5afa40f4aa3a48185978e2b7818b86ea90bdbf1f4e"
+    },
+    "build/hal-target/ui-layout.bin": {
+      "bytes": 1552,
+      "sha256": "0a4bdc438a4763d6988c823b338e6c88dd7ab41ddaebaf75dae3c0544ebd7cfc"
+    },
+    "build/hal-target/engine-app.dis": {
+      "bytes": 1040517,
+      "sha256": "84b8f1be0b9613f50aba601e6e7a13e3b3517eb802646330f8d484e9e432061a"
+    }
+  },
+  "entries": {
+    "fm1_rust_usb_endpoint": {
+      "elf": {
+        "bytes": 1316,
+        "sha256": "07fe580948adde32ce29d4c3737c4733a886320a19168a63501b62c2410b225b"
+      },
+      "disassembly": {
+        "bytes": 2311,
+        "sha256": "6de98354a8413aedf2d22c0f98f248c3870987f106ead493a6aa84e73b19865d"
+      },
+      "writable_allocated_bytes": 0,
+      "code_bytes": 106,
+      "entry_frame_bytes": 8,
+      "readonly_lease_table_bytes": 32
+    },
+    "fm1_rust_usb_host_transmit": {
+      "elf": {
+        "bytes": 1576,
+        "sha256": "c27f20d5851fc3942dbcb116975eb617a62720cf141583cc6e5a23c4e74ec3b7"
+      },
+      "disassembly": {
+        "bytes": 8255,
+        "sha256": "ed953bae8e2696ecda88611e01a7609ac95069c302f5443b3999188ceafee533"
+      },
+      "writable_allocated_bytes": 0,
+      "code_bytes": 362,
+      "entry_frame_bytes": 28,
+      "readonly_lease_table_bytes": 32
+    },
+    "fm1_rust_usb_host_control": {
+      "elf": {
+        "bytes": 2564,
+        "sha256": "d92c42876079724ff2134cccbe3c4995eabc40df42ad8e925959520feaf0e334"
+      },
+      "disassembly": {
+        "bytes": 26017,
+        "sha256": "1955dca5f8ae2cb7e58e22cd5f032d4228d94da50579fa1a7c204fdd4247edab"
+      },
+      "writable_allocated_bytes": 0,
+      "code_bytes": 1044,
+      "entry_frame_bytes": 48,
+      "readonly_lease_table_bytes": 32,
+      "wait_code_bytes": 224,
+      "wait_frame_bytes": 40,
+      "known_rust_export_wait_frame_bytes": 88
+    }
+  },
+  "entry_context": "Same real seven-library vendor clang LTO inspection link with pinned core and disconnected two-byte panic sink. Frame prologues and direct Rust wait edge are measured; C callers/callbacks, interrupt overlap and whole-firmware LTO/stack/deadlines are excluded.",
+  "vendor_lto": {
+    "libfm1_types.rlib.o": {
+      "bytes": 85660,
+      "sha256": "8a6ee35822681a434941dab5b9c534cf395a46d504e51227f86139ae22b7820f"
+    },
+    "libfm1_rt.rlib.o": {
+      "bytes": 28252,
+      "sha256": "bb9742a7e86de8719880e537caac96ffb31c5e78416779884301f86a2672af98"
+    },
+    "libfm1_hal.rlib.o": {
+      "bytes": 75320,
+      "sha256": "6b10c0b2a842253705e4388a1797981cfe76da6d24da651514fb8b9c500f1b66"
+    },
+    "libfm1_formats.rlib.o": {
+      "bytes": 353872,
+      "sha256": "0115434070f7e05c9ef26ca08822a416bd87dd754152a3c4ccd5f29f19617f4d"
+    },
+    "libfm1_engine.rlib.o": {
+      "bytes": 901248,
+      "sha256": "fb94729a51fe2273aa38f1e0357093edb8521b2a66ea6cf49a324e1a4e54c39c"
+    },
+    "libfm1_app.rlib.o": {
+      "bytes": 438640,
+      "sha256": "ba60edeb1474cb1bdf939845702d3bc5ec657850b3c832bc62958e917a1c34cb"
+    },
+    "libfm1_jam_bridge.rlib.o": {
+      "bytes": 623528,
+      "sha256": "cf3d8a085f2292d902f1380784cae59018a4d7669bb94407de9fce0269ab4bdb"
+    }
+  },
+  "completed_jobs": {
+    "windows": 0,
+    "runtime": 0,
+    "focused_initial": 2,
+    "focused_finish": 0,
+    "compiler": 0
+  },
+  "execution_notes": [
+    "The initial focused runner passed the complete value corpus and readonly IRQ double, then referenced an old harmony script filename. The continuation uses the maintained rust_harmony_parity.sh and completes every remaining gate; production source stayed fixed.",
+    "The full legacy harmony six-mode corpus remains exact. Actual readonly source wrappers retain the caller IRQ flags and restore them before Rust math/output.",
+    "Both site transforms and build inspection keep native file/process/error delivery in adapters. Current Spectrum templates/copy remain unchanged; no live preview is rebuilt."
+  ],
+  "qualification": [
+    "Full instrument WASM/HTTP/bindings/views/u64 clock, 97 five-way native scenarios with all 19 inherited fingerprints, three repeat sweeps and 129 damaged-store trials pass.",
+    "Actual getters/ranges/mood/acid readers, host TX/control/RX match immutable C0 on native, WASM and generated natural32. Separate IRQ injection protects coherent producer copies.",
+    "Legacy harmony, 697 loader/stub/release/SDK cases, 1219 metadata cases and current-site profiles pass in the combined source. UI/HAL/endpoint/host/control strict-provenance Miri passes.",
+    "Seven selected Rust crates freshly emitted/vendor-LTO compiled. The full active-assertion natural32 factory/effects/Runner/UI/input/performance/automatic/value/MIDI/USB profiles and corrected per-implementation traces pass; USB1/HAL1 APP0/APP1 C units and target UI layout compile."
+  ],
+  "limits": [
+    "No new physical flash, live preview, full-image/RAM/stack/deadline or positive USB-stop qualification. Physical device remains restored 0.3.3.",
+    "Later setter/turn ports, site output-state/orchestration and application assembly are separately queued; remaining labels/pages/visualizers, C ABI retirement, enumeration/lifecycle/CDC/UAC, build/media/browser scope and final talk packaging remain open.",
+    "The actual C display/name exporter remains transitional; controlled site/PDF checks do not claim an actual browser/PDF render."
+  ]
+}
