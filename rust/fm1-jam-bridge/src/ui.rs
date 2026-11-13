@@ -58,10 +58,10 @@ pub unsafe extern "C" fn fm1_rust_ui_accel(
     0
 }
 
-type FrameCallback = unsafe extern "C" fn(u32, u32, u32) -> u32;
-struct PerformancePort {
-    ui: *mut State,
-    callback: FrameCallback,
+pub(crate) type FrameCallback = unsafe extern "C" fn(u32, u32, u32) -> u32;
+pub(crate) struct PerformancePort {
+    pub(crate) ui: *mut State,
+    pub(crate) callback: FrameCallback,
 }
 struct AutomaticPort {
     foreground: PerformancePort,
@@ -355,6 +355,7 @@ mod tests {
     use super::*;
     use std::cell::{Cell, UnsafeCell};
     thread_local! {static ACTIVE: Cell<*mut State> = const {Cell::new(core::ptr::null_mut())};}
+    thread_local! {static READ_FAIL: Cell<bool> = const {Cell::new(false)};}
     thread_local! {
         static SEEN: Cell<*mut u32> = const {Cell::new(core::ptr::null_mut())};
         static HELD: Cell<*mut u8> = const {Cell::new(core::ptr::null_mut())};
@@ -461,6 +462,245 @@ mod tests {
             assert_eq!((*state.get()).mood, 73);
             assert_eq!((*state.get()).view, 36);
             assert_eq!((*state.get()).saver_on, 1);
+        }
+    }
+    unsafe extern "C" fn value_query(op: u32, _a: u32, _b: u32) -> u32 {
+        use fm1_app::performance::Query as Q;
+        // SAFETY: no scoped state loan survives into a query callback.
+        unsafe {
+            (*active()).frame += 1;
+        }
+        if op == 0x100 + Q::Now as u32 {
+            5000
+        } else if op == 0x100 + Q::FxPages as u32 {
+            35
+        } else if op == 0x100 + Q::FxValue as u32 {
+            let mut out = 0;
+            // SAFETY: nested leaf query of the same UI, disjoint output.
+            assert_eq!(
+                unsafe {
+                    crate::ui_values::fm1_rust_ui_value(active(), 0, 200, 0, None, None, &mut out)
+                },
+                0
+            );
+            out as u32
+        } else {
+            0
+        }
+    }
+    unsafe extern "C" fn value_read(kind: u32, output: *mut u8, len: u32) -> i32 {
+        use fm1_app::values::Read;
+        // SAFETY: callback owns exactly the derived initialized packet span,
+        // disjoint from UI. The raw destination is never retained.
+        let bytes = unsafe { core::slice::from_raw_parts_mut(output, len as usize) };
+        assert!(bytes.iter().all(|&b| b == 0));
+        // SAFETY: outer state loans ended; the packet is a separate local root.
+        unsafe {
+            (*active()).frame += 1;
+            (*active()).lane = 3;
+        }
+        let mut result = 123;
+        // SAFETY: reenter even while the outer packet is exclusively writable.
+        assert_eq!(
+            unsafe {
+                crate::ui_values::fm1_rust_ui_value(active(), 0, 200, 0, None, None, &mut result)
+            },
+            0
+        );
+        assert_eq!(result, 58);
+        if READ_FAIL.with(Cell::get) {
+            bytes[0] = 255;
+            return -1;
+        }
+        if kind == Read::Acid as u32 {
+            assert_eq!(len, 38);
+            bytes.fill(255);
+        } else if kind == Read::Progression as u32 {
+            assert_eq!(len, 6);
+        } else if kind == Read::Preview as u32 {
+            assert_eq!(len, 6);
+            bytes[0] = 7;
+        } else {
+            assert_eq!(kind, Read::Kinds as u32);
+            assert_eq!(len, 3);
+            bytes[0] = 7;
+        }
+        0
+    }
+    #[test]
+    fn values_readers_reenter_ui_without_borrowing_producer_or_output_spans() {
+        use crate::ui_values::fm1_rust_ui_value as call;
+        use fm1_app::values::{code::*, Operation as O};
+        // SAFETY: every plain field permits zero; no padding is inspected.
+        let state = Box::new(UnsafeCell::new(unsafe { core::mem::zeroed::<State>() }));
+        ACTIVE.with(|p| p.set(state.get()));
+        let _reset = Reset;
+        READ_FAIL.with(|p| p.set(false));
+        let mut out = 1234;
+        // SAFETY: live foreground UI, disjoint writable scalar and callbacks.
+        unsafe {
+            assert_eq!(
+                call(
+                    state.get(),
+                    O::Get as u32,
+                    K_ASTY,
+                    0,
+                    Some(value_query),
+                    Some(value_read),
+                    &mut out
+                ),
+                0
+            );
+            assert_eq!(out, 4);
+            assert_eq!((*state.get()).as_off, [15; 16]);
+            assert_eq!((*state.get()).as_oct, [3; 16]);
+            assert_eq!(
+                call(
+                    state.get(),
+                    O::Get as u32,
+                    K_PGCH,
+                    0,
+                    Some(value_query),
+                    Some(value_read),
+                    &mut out
+                ),
+                0
+            );
+            assert_eq!(out, 7);
+            assert_eq!(
+                call(
+                    state.get(),
+                    O::Get as u32,
+                    K_PGTY,
+                    0,
+                    Some(value_query),
+                    Some(value_read),
+                    &mut out
+                ),
+                0
+            );
+            assert_eq!(out, 7);
+            assert_eq!(
+                call(
+                    state.get(),
+                    O::Get as u32,
+                    K_FXP,
+                    0,
+                    Some(value_query),
+                    Some(value_read),
+                    &mut out
+                ),
+                0
+            );
+            assert_eq!(out, 58);
+            let acid = (*state.get()).as_off;
+            READ_FAIL.with(|p| p.set(true));
+            out = 1234;
+            assert_eq!(
+                call(
+                    state.get(),
+                    O::Get as u32,
+                    K_ASTY,
+                    0,
+                    Some(value_query),
+                    Some(value_read),
+                    &mut out
+                ),
+                -1
+            );
+            assert_eq!(out, 1234);
+            assert_eq!((*state.get()).as_off, acid);
+            READ_FAIL.with(|p| p.set(false));
+            for code in [K_FXP + 140, i32::MAX] {
+                assert_eq!(
+                    call(
+                        state.get(),
+                        O::Get as u32,
+                        code,
+                        0,
+                        Some(value_query),
+                        Some(value_read),
+                        &mut out
+                    ),
+                    -1
+                );
+                assert_eq!(out, 1234);
+            }
+            for code in [-1, 16, i32::MAX] {
+                assert_eq!(
+                    call(
+                        state.get(),
+                        O::AcidKind as u32,
+                        code,
+                        0,
+                        None,
+                        None,
+                        &mut out
+                    ),
+                    -1
+                );
+                assert_eq!(out, 1234);
+            }
+            assert_eq!(call(state.get(), 99, 0, 0, None, None, &mut out), -1);
+            assert_eq!(
+                call(core::ptr::null_mut(), 0, 0, 0, None, None, &mut out),
+                -1
+            );
+            assert_eq!(
+                call(state.get(), 0, 0, 0, None, None, core::ptr::null_mut()),
+                -1
+            );
+            assert_eq!(
+                call(
+                    state.get(),
+                    O::Get as u32,
+                    0,
+                    0,
+                    None,
+                    Some(value_read),
+                    &mut out
+                ),
+                -1
+            );
+            assert_eq!(
+                call(
+                    state.get(),
+                    O::Get as u32,
+                    0,
+                    0,
+                    Some(value_query),
+                    None,
+                    &mut out
+                ),
+                -1
+            );
+            let mut limits = [1234; 2];
+            assert_eq!(
+                call(
+                    state.get(),
+                    O::Range as u32,
+                    i32::MAX,
+                    0,
+                    Some(value_query),
+                    None,
+                    limits.as_mut_ptr()
+                ),
+                -1
+            );
+            assert_eq!(limits, [1234; 2]);
+            assert_eq!(
+                call(
+                    state.get(),
+                    O::Range as u32,
+                    K_FXF,
+                    0,
+                    Some(value_query),
+                    None,
+                    limits.as_mut_ptr()
+                ),
+                0
+            );
+            assert_eq!(limits, [-50, 50]);
         }
     }
     unsafe extern "C" fn input(op: u32, _a: u32, _b: u32) -> u32 {

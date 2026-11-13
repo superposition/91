@@ -6,13 +6,14 @@ repo=$(pwd)
 baseline=${1:?immutable R01 source is required for the independent full-app input corpus}
 baseline=$(CDPATH= cd -- "$baseline" && pwd)
 corpus=${UI_APP_CORPUS:-input}
-case "$corpus" in input|performance|automatic);;*)echo 'unknown UI corpus' >&2;exit 2;;esac
+case "$corpus" in input|performance|automatic|values);;*)echo 'unknown UI corpus' >&2;exit 2;;esac
 out=build/ui-$corpus
 driver=tests/reference/ui_${corpus}_reference.c
 mkdir -p "$out/gen"
 (cd "$baseline" && sha256sum -c "$repo/tests/reference/source.sha256") >"$out/r01-verification.log"
 python3 tools/ui_input_abi.py --check
 python3 tools/ui_performance_abi.py --check
+python3 tools/ui_values_abi.py --check
 python3 tests/reference/ui_input_host.py . "$out/ui_input_current.inc"
 python3 tests/reference/ui_input_host.py "$baseline" "$out/ui_input_frozen.inc"
 python3 tools/gen_font.py "$out/gen/felucca_font.h" >"$out/font.log"

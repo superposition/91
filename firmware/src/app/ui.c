@@ -485,6 +485,9 @@ uint32_t ui_splash_ms = 3200u;           /* the boot cards: RedtailWorks, then H
 #include "../dsp/rust_ui_buttons.h"
 #include "../dsp/rust_ui_input.h"
 #include "../dsp/rust_ui_performance.h"
+#include "../dsp/rust_ui_values.h"
+static uint32_t ui_values_port(uint32_t,uint32_t,uint32_t);
+static int32_t ui_values_read(uint32_t,uint8_t*,uint32_t);
 static uint32_t ui_performance_port(uint32_t,uint32_t,uint32_t);
 #if !defined(EN_HOST) && !defined(EN_WEB)
 #include "../../hal/fm1_irq_state.h"
@@ -885,14 +888,21 @@ static void mix_key(int k)
 /* the MOOD macro (the PERFORM screen, the ALGORITHM dial): 0 chill .. 100 peak, 50 leaves the piece as it is. Each setting listed
  * moves by its share of the distance from 50: the engine is given the moved value; the piece (proj.par), the screens and the
  * store keep their own. A setting turned by hand while the mood is off 50 is moved the same way. */
+#if !EN_RUST_APP
 static const struct {
     uint8_t p;
     int8_t d;                                  /* the change at 0 (minus this) and at 100 (plus this) */
 } MOOD[] = {{P_AC_DENS, 30}, {P_AC_CUT, 25}, {P_LANE_LVL(3), 25}, {P_LANE_LVL(4), 20}, {P_LANE_LVL(5), 25}, {P_BRIGHT, 20},
             {P_CM_DENS, 25}, {P_CM_LVL, 20}, {P_CM_DEC, -15}, {P_DR_CUT, 20},  {P_DRIVE, 20},  {P_REVERB, -15},     {P_ECHO, -10},        {P_EVOLVE, 20},       {P_PULSE, 10}};
 #define NMOOD (int)(sizeof MOOD / sizeof MOOD[0])
+#endif
 static int mood_val(int p, int v)
 {
+#if EN_RUST_APP
+    int32_t out=0;
+    (void)fm1_rust_ui_value(&ui,UIVO_MOOD_VALUE,p,v,ui_values_port,ui_values_read,&out);
+    return out;
+#else
     int i;
     if (ui.mood == 50 || (p == P_CM_LVL && v == 0))   /* (a pluck set to nothing stays nothing) */
         return v;
@@ -903,12 +913,17 @@ static int mood_val(int p, int v)
             return v < pi->lo ? pi->lo : v > pi->hi ? pi->hi : v;
         }
     return v;
+#endif
 }
 static void mood_apply(void)
 {
+#if EN_RUST_APP
+    (void)fm1_rust_ui_value(&ui,UIVO_MOOD_APPLY,0,0,ui_values_port,ui_values_read,0);
+#else
     int i;
     for (i = 0; i < NMOOD; i++)
         en_set(MOOD[i].p, mood_val(MOOD[i].p, proj.par[MOOD[i].p]));
+#endif
 }
 
 /* the knobs now: the page's, or with the FX menu on, the FX knobs */
@@ -1103,6 +1118,11 @@ static void fxp_text(int k, char *b)
 /* ------------------------------------------------------------ values --- */
 static int knob_par(int k)                     /* a knob's parameter (the sequencer's: its lane's) */
 {
+#if EN_RUST_APP
+    int32_t out=0;
+    (void)fm1_rust_ui_value(&ui,UIVO_PARAMETER,k,0,ui_values_port,ui_values_read,&out);
+    return out;
+#else
     if (k == K_LVL)
         return P_LANE_LVL(ui.lane);
     if (k == K_TUNE)
@@ -1124,10 +1144,14 @@ static int knob_par(int k)                     /* a knob's parameter (the sequen
     if (k == K_MXS)
         return P_SEND + (int)(ui.mix_trk % 5u);
     return k < P_NPARAMS ? k : -1;
+#endif
 }
 /* the acid steps' working copy: while the player edits, the page works on its own copy (the engine takes an edit a chunk later); otherwise it reads the engine's */
 static void as_sync(void)
 {
+#if EN_RUST_APP
+    (void)fm1_rust_ui_value(&ui,UIVO_ACID_SYNC,0,0,ui_values_port,ui_values_read,0);
+#else
     int s;
     if (plat_ms() - ui.as_t < 400u)
         return;
@@ -1138,11 +1162,18 @@ static void as_sync(void)
     ui.as_gate = en_acid_gate;
     ui.as_acc = en_acid_acc;
     ui.as_slide = en_acid_slide;
+#endif
 }
 static int as_kind(int s)                       /* 0 rest, 1 note, 2 accent, 3 slide, 4 accent and slide */
 {
+#if EN_RUST_APP
+    int32_t out=0;
+    (void)fm1_rust_ui_value(&ui,UIVO_ACID_KIND,s,0,ui_values_port,ui_values_read,&out);
+    return out;
+#else
     const int g = ui.as_gate >> s & 1, a = ui.as_acc >> s & 1, sl = ui.as_slide >> s & 1;
     return !g ? 0 : a ? (sl ? 4 : 2) : (sl ? 3 : 1);
+#endif
 }
 static void as_put(int s, int note, int oct, int kind)
 {
@@ -1245,6 +1276,11 @@ static const char *pg_roman(int d, char *b)     /* and its degree, lower case wh
 static const char *const MXT_NAME[5] = {"PAD", "BASS", "ACID", "PLUCK", "DRUMS"};
 static int knob_get(int k)
 {
+#if EN_RUST_APP
+    int32_t out=0;
+    (void)fm1_rust_ui_value(&ui,UIVO_GET,k,0,ui_values_port,ui_values_read,&out);
+    return out;
+#else
     int p = knob_par(k);
     if (k == K_MXT)
         return ui.mix_trk;
@@ -1306,9 +1342,15 @@ static int knob_get(int k)
         return p==P_ROOT ? j.key : j.minor ? MODE_AEOLIAN:MODE_IONIAN;
     }
     return p >= 0 ? (en_jam_on ? en_par_now(p):proj.par[p]) : 0;
+#endif
 }
 static void knob_range(int k, int *lo, int *hi)
 {
+#if EN_RUST_APP
+    int32_t out[2]={0,0};
+    (void)fm1_rust_ui_value(&ui,UIVO_RANGE,k,0,ui_values_port,0,out);
+    *lo=out[0];*hi=out[1];
+#else
     int p = knob_par(k);
     if (k == K_MXT) {
         *lo = 0;
@@ -1371,6 +1413,7 @@ static void knob_range(int k, int *lo, int *hi)
     }
     *lo = p >= 0 ? en_param_info(p)->lo : 0;
     *hi = p >= 0 ? en_param_info(p)->hi : 0;
+#endif
 }
 static void knob_text(int k, char *b)
 {
@@ -3787,6 +3830,60 @@ static void runner_input(uint32_t btn, uint32_t keys);
 static void runner_start(void);
 
 #if EN_RUST_APP
+/* These packets contain only CPU0 musical publications, never worker-private
+ * sample spans. Restore the exact incoming IRQ state before Rust calculations. */
+static int32_t ui_values_read(uint32_t kind,uint8_t *out,uint32_t len)
+{
+    unsigned s;
+    if(!out)return -1;
+    if(kind==UIVR_PROGRESSION && len==EN_PRG_LEN){memcpy(out,proj.prg,len);return 0;}
+    if(kind==UIVR_KINDS && len==3){memcpy(out,proj.prk,len);return 0;}
+    if(kind==UIVR_PREVIEW && len==EN_PRG_LEN){en_prog_capture(out);return 0;}
+    if(kind!=UIVR_ACID || len!=38)return -1;
+#if !defined(EN_HOST) && !defined(EN_WEB)
+    const uint32_t irq=fm1_irq_state_save();
+#endif
+    for(s=0;s<16;s++){out[s]=(uint8_t)en_acid_off[s];out[16+s]=(uint8_t)en_acid_oct[s];}
+    out[32]=(uint8_t)en_acid_gate;out[33]=(uint8_t)(en_acid_gate>>8);
+    out[34]=(uint8_t)en_acid_acc;out[35]=(uint8_t)(en_acid_acc>>8);
+    out[36]=(uint8_t)en_acid_slide;out[37]=(uint8_t)(en_acid_slide>>8);
+#if !defined(EN_HOST) && !defined(EN_WEB)
+    fm1_irq_state_restore(irq);
+#endif
+    return 0;
+}
+static uint32_t ui_values_port(uint32_t op,uint32_t a,uint32_t b)
+{
+    uint32_t value;
+    switch(op){
+    case UIPQ_FX_PAGES:return NFXP;
+    case UIPQ_FX_VALUE:return a>=K_FXP && a<K_FXP+4*NFXP?(uint32_t)fxp_get((int)a):0;
+    case UIPQ_FX_RANGE:{int lo=0,hi=0;if(a>=K_FXP && a<K_FXP+4*NFXP)fxp_range((int)a,&lo,&hi);return (uint16_t)lo|((uint32_t)(uint16_t)hi<<16);}
+    case UIPQ_SETLIST_ENTRY:return a<SL_N?glob.sl[a]:0;
+    case UIPQ_SETLIST_ON:return glob.sl_on;
+    case UIPQ_PROGRESSION_SCALE:return (uint32_t)pg_scale();
+    case UIPQ_CURRENT_PARAMETER:
+    case UIPQ_JAM_SETTINGS:
+    case UIPQ_BASS_STEP:
+    case UIPQ_PLUCK_RUNG:
+    case UIPQ_PLUCK_LEVEL:
+    case UIPQ_MOD_STEP:
+#if !defined(EN_HOST) && !defined(EN_WEB)
+        {const uint32_t irq=fm1_irq_state_save();
+#endif
+        if(op==UIPQ_CURRENT_PARAMETER)value=(uint32_t)(int32_t)en_par_now((int)a);
+        else if(op==UIPQ_JAM_SETTINGS){jp_settings_t j;en_jam_get(&j);value=(uint32_t)j.key|((uint32_t)j.minor<<8);}
+        else if(op==UIPQ_BASS_STEP)value=a<16?en_bs[a]:0;
+        else if(op==UIPQ_PLUCK_RUNG)value=a<16?(uint32_t)(int32_t)en_cm_rung[a]:0;
+        else if(op==UIPQ_PLUCK_LEVEL)value=a<16?en_cm_lvl[a]:0;
+        else value=(a&255)<EN_NLANE && (a>>8)<16?en_mod[a&255][a>>8]:0;
+#if !defined(EN_HOST) && !defined(EN_WEB)
+        fm1_irq_state_restore(irq);}
+#endif
+        return value;
+    default:return ui_performance_port(op,a,b);
+    }
+}
 static uint32_t ui_performance_port(uint32_t op,uint32_t a,uint32_t b)
 {
     volatile uint8_t *byte=0;

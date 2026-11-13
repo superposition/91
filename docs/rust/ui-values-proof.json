@@ -1,0 +1,489 @@
+{
+  "scope": "R15 knob values/ranges, acid working copy and mood; seven live consumers",
+  "parent": "51f18cdc81938e15a53f8a483eef2690641c2551",
+  "rust_toolchain": "1.94.1",
+  "reference": {
+    "source_manifest": "tests/reference/source.sha256",
+    "verified_files": 440
+  },
+  "corpus": {
+    "cases": 4096,
+    "record_bytes": 12713,
+    "total_bytes": 52072448,
+    "sha256": "b24e4b6c20f883ed91e13e4693a83816868d6d5d9f059e0e0a524fc230066f8e",
+    "targets": [
+      "native R01",
+      "native current C0",
+      "native combined Rust",
+      "WASM R01",
+      "WASM current C0",
+      "WASM combined Rust"
+    ],
+    "all_byte_exact": true,
+    "parameter_ids": 176,
+    "pseudo_controls": 40,
+    "fx_controls": 140,
+    "mood_values": 256,
+    "raw_bass_bytes": 256,
+    "serialized_padding": false
+  },
+  "snapshot": {
+    "protected": {
+      "calls": 131072,
+      "reads": 4980736,
+      "deliveries": 65536,
+      "incoherent_bytes": 0
+    },
+    "unmasked_negative_control": {
+      "calls": 131072,
+      "reads": 4980736,
+      "deliveries": 1277952,
+      "incoherent_bytes": 1212416
+    },
+    "instrumentation": "Only individual producer read expressions substituted in actual C adapter; IRQ/control/copy decisions retained"
+  },
+  "borrow_tests": {
+    "strict_provenance_miri": 5,
+    "passed": true,
+    "covers": [
+      "reader disjoint destination",
+      "reader reentry into same UI",
+      "nested metadata lookup",
+      "partial reader failure",
+      "bounded indices and missing/null arguments",
+      "untouched error outputs"
+    ]
+  },
+  "native_unit_tests": {
+    "app": 6,
+    "graphics": 4,
+    "runner": 8,
+    "types_compatibility": 3,
+    "doctest": 1,
+    "passed": true
+  },
+  "frontend": [
+    {
+      "graphics_calls": 15940,
+      "pixel_writes": 2926841,
+      "rejections": 0,
+      "exports": 24,
+      "memory_bytes": 33554432
+    },
+    {
+      "scenario": "kick-runner-steering-restart-pause-exit",
+      "compared_samples": 4368546,
+      "render_calls": 10512,
+      "peak": 0.20634067058563232,
+      "pcm_hash": "cdcd5715",
+      "application_calls": 186869,
+      "public_exports": 24,
+      "memory_bytes": 33554432
+    },
+    {
+      "scenario": "panel-encoder-acceleration-and-nested-frame-input",
+      "compared_samples": 619164,
+      "actual_encoder_witness": 1,
+      "malformed_rejections": 1,
+      "exports": 24,
+      "memory_bytes": 33554432
+    },
+    {
+      "http_fallback": "pass",
+      "compared_samples": 1048576,
+      "peak": 0.19218111038208008,
+      "frame_messages": 1
+    },
+    {
+      "initial_pack": "factory",
+      "blocks": 55000,
+      "seconds": 159.63718820861678,
+      "compared_samples": 14080000,
+      "pcm_hash": "baeff971",
+      "peak": 0.3714040517807007,
+      "blits": 4679,
+      "memory_bytes": 33554432,
+      "rust": {
+        "validations": 0,
+        "plans": 8,
+        "rejections": 0,
+        "fallbacks": 0,
+        "bass_events": 1037,
+        "sessions": 1,
+        "commands": {
+          "accepted": 961,
+          "consumed": 961,
+          "dropped": 0,
+          "high_water": 213
+        },
+        "transport": {
+          "pulses": 6215,
+          "chunks": 28982,
+          "controls": 27668
+        },
+        "sequencer": {
+          "lanes": 6222,
+          "mutations": 0,
+          "waits": 463712,
+          "boundaries": 1037
+        },
+        "factory": {
+          "accesses": 13390,
+          "codecs": 0,
+          "rejections": 0,
+          "copied_bytes": 72
+        }
+      }
+    },
+    {
+      "initial_pack": "rust/fm1-engine/tests/packs/harris-citypop.jmp",
+      "blocks": 55000,
+      "seconds": 159.63718820861678,
+      "compared_samples": 14080000,
+      "pcm_hash": "28722449",
+      "peak": 0.4303741455078125,
+      "blits": 4673,
+      "memory_bytes": 33554432,
+      "rust": {
+        "validations": 1,
+        "plans": 10,
+        "rejections": 0,
+        "fallbacks": 0,
+        "bass_events": 1033,
+        "sessions": 1,
+        "commands": {
+          "accepted": 751,
+          "consumed": 751,
+          "dropped": 0,
+          "high_water": 213
+        },
+        "transport": {
+          "pulses": 6192,
+          "chunks": 34155,
+          "controls": 27682
+        },
+        "sequencer": {
+          "lanes": 6198,
+          "mutations": 0,
+          "waits": 546480,
+          "boundaries": 1033
+        },
+        "factory": {
+          "accesses": 13656,
+          "codecs": 0,
+          "rejections": 0,
+          "copied_bytes": 72
+        }
+      }
+    },
+    {
+      "scenario": "v2-hold-idea-save-restart",
+      "render_calls": 11663,
+      "compared_samples": 6570900,
+      "seconds": 74.5,
+      "peak": 0.22903597354888916,
+      "memory_bytes": 33554432,
+      "saved_session": [
+        74,
+        83,
+        77,
+        1,
+        1,
+        11,
+        1,
+        8,
+        2,
+        1,
+        83,
+        0,
+        7,
+        1,
+        190,
+        0,
+        3,
+        83,
+        0,
+        0
+      ],
+      "rust": {
+        "validations": 1,
+        "plans": 9,
+        "rejections": 0,
+        "fallbacks": 0,
+        "bass_events": 804,
+        "sessions": 2,
+        "commands": {
+          "accepted": 319,
+          "consumed": 319,
+          "dropped": 0,
+          "high_water": 208
+        },
+        "transport": {
+          "pulses": 4819,
+          "chunks": 12684,
+          "controls": 11829
+        },
+        "sequencer": {
+          "lanes": 4824,
+          "mutations": 0,
+          "waits": 202944,
+          "boundaries": 804
+        },
+        "factory": {
+          "accesses": 1103,
+          "codecs": 0,
+          "rejections": 0,
+          "copied_bytes": 72
+        }
+      }
+    },
+    {
+      "snapshot_bytes": 220,
+      "published": 134,
+      "copied": 134,
+      "detail_pages": 4,
+      "staging_claims": 0,
+      "staging_activations": 0,
+      "staging_rejections": 0,
+      "memory_bytes": 33554432
+    },
+    {
+      "scenario": "legacy-f4-piece-genre-transport",
+      "compared_samples": 3475080,
+      "render_calls": 5744,
+      "peak": 0.4515293836593628,
+      "sequencer": {
+        "lanes": 1320,
+        "waits": 134032,
+        "boundaries": 21
+      },
+      "melodic": {
+        "acid": 227,
+        "mutations": 27,
+        "pluck": 227,
+        "bass": 227,
+        "bar": 6017,
+        "midi_transport": 67070
+      },
+      "voices": {
+        "drums": 8377,
+        "pluck": 8377,
+        "drone": 7287,
+        "acid": 8377,
+        "pad": 8377,
+        "pad_bus": 8377,
+        "controls": 6880,
+        "configs": 40795
+      },
+      "factory": {
+        "accesses": 3950,
+        "codecs": 0,
+        "rejections": 0,
+        "copied_bytes": 72
+      },
+      "harmony": [
+        6986,
+        35,
+        2,
+        0
+      ],
+      "memory_bytes": 33554432
+    },
+    {
+      "scenario": "stored-frozen-acid-pluck-save",
+      "compared_samples": 970200,
+      "render_calls": 1613,
+      "saved_bytes": 3836,
+      "factory": {
+        "accesses": 1178,
+        "codecs": 6,
+        "rejections": 0,
+        "copied_bytes": 230
+      },
+      "formats": {
+        "decodes": 0,
+        "encodes": 0,
+        "rejections": 0,
+        "copied_bytes": 0
+      },
+      "persistence": {
+        "project_calls": 12,
+        "object_saves": 2,
+        "bytes": 6884
+      },
+      "memory_bytes": 33554432
+    },
+    {
+      "legacy_project": [
+        {
+          "scenario": "recipes",
+          "compared_samples": 904050,
+          "render_calls": 1494,
+          "pcm_hash": "d5eb8651",
+          "project_calls": 7,
+          "object_saves": 0
+        },
+        {
+          "scenario": "corrupt-record",
+          "compared_samples": 904050,
+          "render_calls": 1494,
+          "pcm_hash": "d5eb8651",
+          "project_calls": 7,
+          "object_saves": 0
+        },
+        {
+          "scenario": "saved-factory-reset",
+          "compared_samples": 1177470,
+          "render_calls": 1950,
+          "pcm_hash": "d23160e5",
+          "project_calls": 10,
+          "object_saves": 2
+        }
+      ],
+      "frozen_reference": null
+    },
+    {
+      "scenario": "loaded-user-FM6-algorithms-key-retrigger-stop-tails",
+      "cases": [
+        {
+          "algorithm": 0,
+          "compared_samples": 1188054,
+          "render_calls": 2596,
+          "peak": 0.47700321674346924,
+          "pcm_hash": "d393a85d",
+          "fm6": [
+            9284,
+            19,
+            0,
+            19,
+            1,
+            1,
+            594176,
+            2
+          ]
+        },
+        {
+          "algorithm": 3,
+          "compared_samples": 1188054,
+          "render_calls": 2596,
+          "peak": 0.4807950258255005,
+          "pcm_hash": "d9669c55",
+          "fm6": [
+            9284,
+            19,
+            0,
+            19,
+            1,
+            1,
+            594176,
+            2
+          ]
+        },
+        {
+          "algorithm": 5,
+          "compared_samples": 1188054,
+          "render_calls": 2596,
+          "peak": 0.5013117790222168,
+          "pcm_hash": "abebadf5",
+          "fm6": [
+            9284,
+            19,
+            0,
+            19,
+            1,
+            1,
+            594176,
+            2
+          ]
+        },
+        {
+          "algorithm": 31,
+          "compared_samples": 1188054,
+          "render_calls": 2596,
+          "peak": 0.48351776599884033,
+          "pcm_hash": "cafdb8b9",
+          "fm6": [
+            9284,
+            19,
+            0,
+            19,
+            1,
+            1,
+            594176,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": "serialized-generation-stage-ownership",
+      "compared_samples": 1278900,
+      "render_calls": 2361,
+      "peak": 0.47122979164123535,
+      "pcm_hash": "f99f9451",
+      "worker": [
+        2710,
+        2710,
+        5420,
+        2710,
+        2710,
+        0,
+        0,
+        0
+      ],
+      "memory_bytes": 33554432
+    },
+    {
+      "scenario": "all27-dj-keys-polyphony-release-and-stop",
+      "compared_samples": 2651292,
+      "render_calls": 6312,
+      "peak": 0.6429266929626465,
+      "pcm_hash": "34cf7253",
+      "dj": {
+        "accepted_notes": 36,
+        "voice_samples": 1522343
+      },
+      "memory_bytes": 33554432,
+      "public_exports": 24
+    },
+    {
+      "scenario": "panel-effects-banks-release-tails",
+      "compared_samples": 2769480,
+      "render_calls": 5160,
+      "peak": 0.4538612365722656,
+      "pcm_hash": "fd659ab9",
+      "effects": {
+        "master_samples": 1384960,
+        "echo_samples": 1384960,
+        "tank_samples": 1384960,
+        "colour_sample_calls": 4154880
+      },
+      "memory_bytes": 33554432
+    }
+  ],
+  "wasm": {
+    "path": "build/emu-parity/rust.wasm",
+    "bytes": 2372199,
+    "sha256": "ba759119af2da9b1abfdc47c851072dce86fd8af0b320d11238131ad12db01a8",
+    "public_exports": 24,
+    "memory_bytes": 33554432
+  },
+  "footprint": {
+    "new_mutable_state_bytes": 0,
+    "new_counters": 0,
+    "mood_static_bytes": 30,
+    "replaced_c_mood_bytes": 30,
+    "largest_new_local_packet": 38,
+    "ui_shape_changed": false,
+    "worker_private_spans_read": false
+  },
+  "remaining": [
+    "setters and MIDI helper policy",
+    "bounded text/widgets",
+    "page composition and visualizers",
+    "adopted-compiler MCU ROM/RAM/stack and IRQ latency",
+    "interactive browser/physical-device QA"
+  ],
+  "hardware_accessed": false,
+  "live_site_changed": false
+}

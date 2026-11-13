@@ -25,6 +25,18 @@ pub enum Query {
     SetlistStep,
     Piece,
     Genre,
+    FxPages,
+    FxValue,
+    FxRange,
+    SetlistEntry,
+    SetlistOn,
+    ProgressionScale,
+    BassStep,
+    PluckRung,
+    PluckLevel,
+    ModStep,
+    CurrentParameter,
+    JamSettings,
 }
 #[repr(u32)]
 pub enum Action {

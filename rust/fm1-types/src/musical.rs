@@ -30,6 +30,35 @@ index!(StepId, 16);
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 #[repr(transparent)]
+pub struct BassStep(u8);
+impl BassStep {
+    /// Retain every stored bit, including reserved kind/octave values.
+    pub const fn from_bits(bits: u8) -> Self {
+        Self(bits)
+    }
+    pub const fn bits(self) -> u8 {
+        self.0
+    }
+    pub const fn new(kind: u8, note: u8, octave: u8) -> Result<Self, ValueError> {
+        if kind > 7 || note > 7 || octave > 3 {
+            Err(ValueError::Range)
+        } else {
+            Ok(Self(kind | (note << 3) | (octave << 6)))
+        }
+    }
+    pub const fn kind(self) -> u8 {
+        self.0 & 7
+    }
+    pub const fn note(self) -> u8 {
+        (self.0 >> 3) & 7
+    }
+    pub const fn octave(self) -> u8 {
+        self.0 >> 6
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[repr(transparent)]
 pub struct AcidStep(u16);
 impl AcidStep {
     pub const fn from_bits(bits: u16) -> Self {
