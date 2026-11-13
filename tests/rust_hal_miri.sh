@@ -10,3 +10,4 @@ for test in retained_ep0_root_and_uninitialized_destination_need_no_mutable_dma_
     cargo +nightly-2026-08-28 miri test --locked -p fm1-jam-bridge --features hal-test "$test"
 done
 cargo +nightly-2026-08-28 miri test --locked -p fm1-jam-bridge --features hal-test retained_roots_survive_a_scoped_producer_reentered_only_by_its_consumer
+cargo +nightly-2026-08-28 miri test --locked -p fm1-hal --test usb_endpoint

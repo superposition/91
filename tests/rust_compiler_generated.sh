@@ -99,9 +99,10 @@ if [ -n "$baseline" ];then
     (cd "$baseline";sha256sum -c "$repo/tests/reference/source.sha256") > "$out/frozen-source.log"
     python3 tests/reference/ui_input_host.py "$baseline" build/gen/ui_input_frozen.inc
 fi
-for profile in ui-performance jam-labels;do
+for profile in ui-performance jam-labels ui-automatic;do
     driver=tests/reference/ui_performance_reference.c
     if [ "$profile" = jam-labels ];then driver=tests/reference/jam_labels_reference.c;fi
+    if [ "$profile" = ui-automatic ];then driver=tests/reference/ui_automatic_reference.c;fi
     "$zig" cc "${native[@]}" "${common[@]}" -DEN_WEB '-DEN_VERSION="0.3.0"' "$driver" firmware/src/dsp/amb.c -lm -o "$out/c0-$profile"
     "$zig" cc "${native[@]}" "${common[@]}" -DEN_WEB '-DEN_VERSION="0.3.0"' "${rust[@]}" "$driver" firmware/src/dsp/amb.c "$abi" "${objects[@]}" "$out/core.o" -lm -o "$out/generated-$profile"
     "$out/c0-$profile" > "$out/c0-$profile.bin"
@@ -120,6 +121,7 @@ for profile in control transport queues tx;do
     fixture="tests/reference/usb_${profile}_reference.c"
     if [ "$profile" = queues ];then source=(-I"$out/queue-source" -Ifirmware/hal);fixture=tests/reference/usb_queue_reference.c;fi
     if [ "$profile" = tx ];then source+=(-DUSB_TX_ACTIVE_CONFIG_ONLY=1);fi
+    if [ "$profile" = control ];then source+=(-DUSB_CONTROL_CONFIRMED_ABORTS=1);fi
     "$zig" cc "${native[@]}" "${common[@]}" "${source[@]}" "$fixture" -lm -o "$out/c0-usb-$profile"
     "$zig" cc "${native[@]}" "${common[@]}" "${source[@]}" -DEN_RUST_USB=1 "$fixture" "$abi" "${objects[@]}" "$out/core.o" -lm -o "$out/generated-usb-$profile"
     "$out/c0-usb-$profile" > "$out/c0-usb-$profile.bin"
@@ -140,6 +142,24 @@ for profile in c0 rust;do
     cc -O2 -UNDEBUG -ffp-contract=off -std=gnu99 -ffunction-sections -fdata-sections -Wl,--gc-sections -Ifirmware/src "${reset[@]}" "${selected[@]}" tests/reference/usb_reset_reference.c "${library[@]}" -lpthread -ldl -lm -o "$out/native-reset-$profile"
     "$out/native-reset-$profile" > "$out/native-reset-$profile.bin"
     cmp "$out/native-reset-$profile.bin" "$out/generated-reset-$profile.bin"
+done
+lease=(-I"$out/usb-source" -DPERF_USB_HOST=1 -DFELUCCA_CDC=1 -DFELUCCA_UAC=1 -DFELUCCA_OTA=1)
+for mode in correction healthy;do
+    mode_flags=();if [ "$mode" = healthy ];then mode_flags+=(-DUSB_LEASE_HEALTHY=1);fi
+    for profile in c0 rust;do
+        selected=();library=();objects_for_profile=()
+        if [ "$profile" = rust ];then
+            selected+=(-DEN_RUST_USB=1)
+            library+=("$out/reference-native/release/libfm1_jam_bridge.a")
+            objects_for_profile+=("${objects[@]}" "$out/core.o" "$abi")
+        fi
+        "$zig" cc "${native[@]}" "${common[@]}" "${lease[@]}" "${selected[@]}" "${mode_flags[@]}" tests/reference/usb_lease_reference.c "${objects_for_profile[@]}" -lm -o "$out/generated-lease-$mode-$profile"
+        "$out/generated-lease-$mode-$profile" > "$out/generated-lease-$mode-$profile.bin"
+        cc -O2 -UNDEBUG -ffp-contract=off -std=gnu99 -ffunction-sections -fdata-sections -Wl,--gc-sections -Ifirmware/src "${lease[@]}" "${selected[@]}" "${mode_flags[@]}" tests/reference/usb_lease_reference.c "${library[@]}" -lpthread -ldl -lm -o "$out/native-lease-$mode-$profile"
+        "$out/native-lease-$mode-$profile" > "$out/native-lease-$mode-$profile.bin"
+        cmp "$out/native-lease-$mode-$profile.bin" "$out/generated-lease-$mode-$profile.bin"
+    done
+    if [ "$mode" = healthy ];then cmp "$out/generated-lease-$mode-c0.bin" "$out/generated-lease-$mode-rust.bin";fi
 done
 sha256sum "$core/libcore.rlib.c" "$bridge"/*.rlib.c "$out/generated.pcm" > "$out/identities.sha256"
 echo 'Generated-C natural32 factory,12 effects,Runner,UI layout/frame/encoders/buttons/classification,TRS and USB control/transport/queues match C0.'

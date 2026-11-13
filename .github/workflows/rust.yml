@@ -49,6 +49,7 @@ jobs:
             build/authoring-acceptance/
             build/authoring-cli/
             build/authoring-preview/
+            build/build-guards/**/differential.json
 
   browser_pointer_model:
     name: Retained browser and device pointers under Miri
@@ -292,6 +293,7 @@ jobs:
         run: |
           sh tests/rust_ui_performance.sh build/r01-source
           sh tests/rust_jam_labels.sh build/r01-source
+          sh tests/rust_ui_automatic.sh build/r01-source
       - name: USB descriptors, collectors and interrupt-safe MIDI queues
         run: |
           sh tests/rust_usb_control.sh build/r01-source
@@ -302,6 +304,10 @@ jobs:
         run: |
           sh tests/rust_usb_tx.sh build/r01-source
           sh tests/rust_usb_reset.sh build/r01-source
+      - name: USB retained sources under failed observations and aborts
+        run: |
+          sh tests/rust_usb_lease.sh build/r01-source
+          sh tests/rust_usb_lease.sh build/r01-source healthy
       - name: Songbook snapshot and staging handoffs
         run: sh tests/rust_handoff.sh
       - uses: actions/upload-artifact@v4
