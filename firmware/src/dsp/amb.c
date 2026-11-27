@@ -720,7 +720,7 @@ static const char *const NOISE_NAME[8] = {"Mint", "Clean", "Light", "Used", "Wor
 static const char *const TRIG_NAME[6] = {"Chord", "1 bar", "2 bars", "4 bars", "8 bars", "Off"};
 #endif
 #if !EN_RUST_FACTORY
-static const char *const THEME_NAME[EN_NTHEME] = {"Beach", "Synth", "Acid", "Ice", "Ember", "Phosphor"};
+static const char *const THEME_NAME[EN_NTHEME] = {"Momo", "Sora", "Matcha", "Yuzu", "Sakura", "Yoru"};
 #endif
 /* the voice bank: what each voice can play (the sounds themselves: PAD_SOUND, DRONE_SOUND, ACID_SOUND, and
  * the kits: the old styles' drums) */
