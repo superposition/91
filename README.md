@@ -6,13 +6,48 @@ Choose **Blue Bossa**, **Autumn Leaves** or **Satin Doll**, find your key, and p
 
 Want to take the keyboard part yourself? **Synth Jam** puts the sound under your fingers while the drums and bass carry on. Play chords, trade lines with the bass, change the sound or add more space, then bring the band back without restarting the song.
 
-<p align="center"><img src="docs/img/naiwan91-performance.png" width="320" alt="Songbook performance screen with song, key, tempo and section controls"></p>
+<p align="center"><img src="docs/img/kawaii-idle.png" width="240" alt="The NAIWAN 91 performance screen: a cream card with the song, its key and the chord, a scalloped bar strip, and Nami the seal in the header"> <img src="docs/img/kawaii-arrangement.png" width="240" alt="Arrangement page: four cream rows with the form, section bars, variation and swell"></p>
+<p align="center"><img src="docs/img/kawaii-boot.png" width="240" alt="Boot card: a smiling sun over a scalloped sea, with Nami on the sand"> <img src="docs/img/kawaii-boot-name.png" width="240" alt="Boot card: 内湾 and the name plate"></p>
 
-*Blue Bossa in the 0.4.4 browser player. These five captures come from the current instrument's framebuffer.*
+*The screen states above are the firmware's own framebuffer, captured from the C host simulator
+(`tests/scenarios/kawaii.amb`), which runs the same layout code as the FM-1.*
 
 [Play in your browser](https://superposition.github.io/91/emu/) · [Songbook guide](docs/JAM_PACKS.md) · [Controls and manual](docs/MANUAL.md)
 
 Press **Switch on** to start the browser player. Use your mouse, touch screen or keyboard; an FM-1 is optional. Updates on this branch may not be on the published site yet.
+
+## The look: coast kawaii
+
+The screen is 240 × 240 and everything on it is drawn by hand in `firmware/src/app/ui.c` and
+`firmware/src/gfx.c`. One family of six looks (Global → Theme), all built the same way: a soft ground,
+cream cards with a one-pixel rule, an ink that clears 7:1 against the ground, and a single warm
+"now" colour for the playhead and the knob you touched.
+
+| | Momo (default) | Sora | Matcha | Yuzu | Sakura | Yoru |
+| --- | --- | --- | --- | --- | --- | --- |
+| ground | `#AEE7F5` | `#84C4EC` | `#CEE8CE` | `#FAE29E` | `#FAD6E0` | `#1E2040` |
+| card | `#FFF9EC` | `#FFFCF4` | `#FFFCF0` | `#FFFAF0` | `#FFFAF4` | `#36366A` |
+| ink | `#262C48` | `#1C3052` | `#2C3A2E` | `#382E28` | `#44283A` | `#FFF6EC` |
+| now (large) | `#E23A60` | `#E23E60` | `#D84860` | `#D63A56` | `#D03468` | `#FF8EAC` |
+| now (small type) | `#B0123C` | `#A20F36` | `#A81038` | `#A81030` | `#A31058` | `#FFB3C7` |
+| card edge | `#5C5F71` | `#5C5F71` | `#5C5F71` | `#5C5F71` | `#5C5F71` | `#5C5F71` |
+
+Measured on the Momo look: ink on card **13.3:1**, the small "now" **6.7:1** on card and **5.4:1** on
+the ground, the card's edge **4.8:1** against the ground, the sea **3.4:1**, and the large chord's warm
+red **3.95:1** on card (large text only — it is never used at 8 px). A card is cream with a one-pixel
+edge at a 12–14 px radius: the shape carries the softness, not a washed-out fill.
+
+Two marks carry the identity, both drawn from integer geometry so they never alias:
+
+- **The scallop.** One round bump every eight pixels, two rows high. It closes the header, sits under a
+  page title and edges the boot card's sea. There is no other ornament on the screen.
+- **Nami.** A baby seal, sixteen pixels wide, a cream body with two ink-dot eyes, blush cheeks and a bow
+  in the theme's "now" colour. She has a spring: she hops on the kick, squashes on the snare, sleeps
+  through a breakdown and shakes in a build. The spring code was already in the firmware; the sprite
+  had been orphaned, so the animation was running against nothing. It has a body again.
+
+Sparkles (four-point, one pixel a point) mark playing states. Rounded cards and pills are the only
+containers; rules are one pixel of the ground's shadow, never a box.
 
 ## Find your sound
 
@@ -25,8 +60,7 @@ Press **Switch on** to start the browser player. Use your mouse, touch screen or
 
 ## Shape the song
 
-<p align="center"><img src="docs/img/naiwan91-arrangement.png" width="240" alt="Songbook Arrangement controls"> <img src="docs/img/naiwan91-dx-keys.png" width="240" alt="DX Keys sound controls"></p>
-<p align="center"><img src="docs/img/naiwan91-dx-bass.png" width="240" alt="DX Bass sound controls"> <img src="docs/img/naiwan91-synth-jam.png" width="240" alt="Synth Jam mode, program, octave and space controls"></p>
+<p align="center"><img src="docs/img/kawaii-dx-keys.png" width="240" alt="DX Keys page: program, touch, brightness and gate/release on cream rows"> <img src="docs/img/kawaii-playing.png" width="240" alt="The performance screen with the band playing"></p>
 
 SELECT opens Arrangement, DX Keys, DX Bass and Synth Jam. Each page has four matching controls, from top to bottom. On DX Keys and DX Bass, knob 2 sets that part's octave independently, from −2 to +2. The packs start with both parts one octave up and a spacious plate reverb, leaving the bass line clear enough to play against.
 

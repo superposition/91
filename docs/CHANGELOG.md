@@ -1,5 +1,17 @@
 # NAIWAN 91 changelog
 
+## Which releases are this firmware's
+
+The entries below to **0.17.0** are the history of the firmware this tree forked from: PERF-1 v0.17.0
+by deamonSLINKY, imported as the fork base (`a8415fb`), with NAIWAN 91's own identity landing on top of
+it (`739dc81`). They are kept because the code they describe is still here and the lineage matters.
+
+This tree's own releases are numbered separately and are recorded where they were qualified:
+[0.4.3](RELEASE_0_4_3.md) (the source-preservation checkpoint) and
+[0.4.4](RELEASE_0_4_4.md) (the qualified package, identity `FM-1_7000404`, 2026-11-13). `web/product.json`
+and `docs/release/firmware-0.4.4.json` carry that number; the Songbook, Synth Jam and the seven packs are
+what 0.4.4 ships.
+
 ## A note on version numbers
 
 **0.13.0 is the first public release.** Its code is identical to the last development build, 0.12.8.

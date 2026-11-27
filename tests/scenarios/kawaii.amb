@@ -1,0 +1,26 @@
+# The kawaii look, for the README and docs/img: the two boot cards, the Songbook page stopped and
+# playing, the parameter pages, and a patch name after PRESETS.
+splash 3200
+reboot
+seed 0
+wait 600
+shot kawaii-boot.png
+wait 1200
+shot kawaii-boot-name.png
+splash 0
+wait 2500
+jamboot
+wait 400
+shot kawaii-idle.png
+spin SELECT 1
+wait 300
+shot kawaii-arrangement.png
+spin SELECT 1
+wait 300
+shot kawaii-dx-keys.png
+spin PRESET 1
+wait 1600
+shot kawaii-patch.png
+tap PLAY
+wait 1700
+shot kawaii-playing.png
