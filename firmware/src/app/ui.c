@@ -453,7 +453,8 @@ static const uint8_t BLACK_KEY[11] = {1, 3, 5, 8, 10, 13, 15, 17, 20, 22, 25};
  * shades (the pad and the chord; the acid; the drone), the drums' colour, and a colour for the sections
  * and freeze. Each layer has a dark tint for shapes at rest. */
 typedef struct {
-    uint16_t bg, panel, line, dim, text, acc, pad, pad_t, acid, acid_t, bass, bass_t, pulse, pulse_t, frost, pluck;
+    uint16_t bg, panel, line, dim, text, acc, pad, pad_t, acid, acid_t, bass, bass_t, pulse, pulse_t, frost, pluck,
+        acc_t;   /* the accent as small text: dark enough for an 8 px glyph on cream (the warm acc is large-text only) */
 } theme_t;
 /* NAIWAN 91's six looks (Global > Theme). One family, not six moods: each is a soft ground, cream
  * surfaces, an ink that clears 7:1 against the ground, and a single warm "now" colour for the playhead
@@ -462,27 +463,27 @@ static const theme_t THEMES[EN_NTHEME] = {
     /* Momo (default): the coast at noon: a sky ground, cream cards, ink navy, strawberry for "now" */
     {RGB(176, 232, 246), RGB(255, 249, 236), RGB(140, 203, 224), RGB(64, 96, 120), RGB(38, 44, 72), RGB(226, 58, 96),
      RGB(232, 106, 138), RGB(146, 50, 76), RGB(32, 158, 134), RGB(18, 96, 82), RGB(198, 122, 36), RGB(120, 70, 18),
-     RGB(255, 206, 120), RGB(170, 126, 52), RGB(34, 124, 190), RGB(96, 204, 224)},
+     RGB(255, 206, 120), RGB(170, 126, 52), RGB(34, 124, 190), RGB(96, 204, 224), RGB(176, 18, 60)},
     /* Sora: the same coast one hour later: a deeper sky, the same cream and ink */
     {RGB(132, 196, 236), RGB(255, 252, 244), RGB(92, 158, 196), RGB(58, 92, 120), RGB(28, 48, 82), RGB(226, 62, 96),
      RGB(58, 120, 196), RGB(28, 72, 124), RGB(26, 150, 140), RGB(14, 92, 86), RGB(206, 110, 48), RGB(126, 62, 22),
-     RGB(255, 214, 140), RGB(176, 140, 64), RGB(20, 104, 176), RGB(72, 186, 216)},
+     RGB(255, 214, 140), RGB(176, 140, 64), RGB(20, 104, 176), RGB(72, 186, 216), RGB(162, 15, 54)},
     /* Matcha: a garden bench: pale green ground, cream cards, the same strawberry */
     {RGB(206, 232, 206), RGB(255, 252, 240), RGB(150, 196, 158), RGB(74, 104, 80), RGB(44, 58, 46), RGB(216, 72, 96),
      RGB(214, 110, 128), RGB(134, 56, 70), RGB(48, 150, 96), RGB(26, 92, 58), RGB(196, 132, 48), RGB(118, 76, 24),
-     RGB(248, 226, 150), RGB(168, 148, 78), RGB(44, 140, 132), RGB(120, 204, 170)},
+     RGB(248, 226, 150), RGB(168, 148, 78), RGB(44, 140, 132), RGB(120, 204, 170), RGB(168, 16, 56)},
     /* Yuzu: late sun: a butter ground, cream cards, deep plum ink */
     {RGB(250, 226, 158), RGB(255, 251, 240), RGB(222, 190, 120), RGB(110, 92, 60), RGB(56, 46, 40), RGB(214, 58, 86),
      RGB(226, 104, 96), RGB(140, 58, 52), RGB(40, 150, 130), RGB(20, 92, 78), RGB(188, 116, 32), RGB(110, 64, 14),
-     RGB(255, 196, 96), RGB(172, 124, 44), RGB(40, 120, 180), RGB(96, 196, 210)},
+     RGB(255, 196, 96), RGB(172, 124, 44), RGB(40, 120, 180), RGB(96, 196, 210), RGB(168, 16, 48)},
     /* Sakura: a blossom in the pocket: blush ground, cream cards, plum ink */
     {RGB(250, 214, 224), RGB(255, 250, 244), RGB(230, 176, 196), RGB(120, 84, 100), RGB(68, 40, 58), RGB(208, 52, 104),
      RGB(224, 96, 132), RGB(138, 48, 72), RGB(34, 150, 130), RGB(16, 90, 78), RGB(196, 120, 52), RGB(118, 68, 26),
-     RGB(255, 212, 150), RGB(170, 132, 72), RGB(46, 124, 180), RGB(110, 200, 214)},
+     RGB(255, 212, 150), RGB(170, 132, 72), RGB(46, 124, 180), RGB(110, 200, 214), RGB(163, 16, 88)},
     /* Yoru: a night beach: the deep ground (the horizon behind the sigil, the mascot in lamplight) */
     {RGB(30, 32, 64), RGB(54, 54, 102), RGB(78, 80, 132), RGB(150, 152, 196), RGB(255, 246, 236), RGB(255, 142, 172),
      RGB(176, 150, 255), RGB(86, 68, 150), RGB(128, 232, 190), RGB(46, 120, 96), RGB(255, 178, 110), RGB(150, 94, 44),
-     RGB(255, 214, 132), RGB(156, 126, 64), RGB(140, 210, 255), RGB(110, 226, 232)},
+     RGB(255, 214, 132), RGB(156, 126, 64), RGB(140, 210, 255), RGB(110, 226, 232), RGB(255, 179, 199)},
 };
 static const theme_t *th = &THEMES[0];
 #define LOOK_SYNTH (th == &THEMES[5])           /* Yoru (the night look) draws its own horizon behind the sigil and lights the mascot */
@@ -492,6 +493,7 @@ static const theme_t *th = &THEMES[0];
 #define K_DIM (th->dim)
 #define K_TEXT (th->text)
 #define K_ACC (th->acc)
+#define K_ACC_TXT (th->acc_t)           /* the same "now", dark enough for small type */
 #define K_PAD (th->pad)
 #define K_PAD_T (th->pad_t)
 #define K_ACID (th->acid)
@@ -4738,9 +4740,9 @@ static void input(void)
 
 /* ------------------------------------------------------------- screen --- */
 /* three bands: the header (28 px), the main area (144), the knobs (68) */
-#define HDR_H 28
-#define MAIN_Y 28
-#define MAIN_H 144
+#define HDR_H 40
+#define MAIN_Y 40
+#define MAIN_H 132
 #define KNB_Y 172
 #define KNB_H 68
 
@@ -4846,17 +4848,19 @@ static uint16_t mix(uint16_t a, uint16_t b, int t)   /* t 0..16: a -> b */
     return (uint16_t)(r << 11 | g << 5 | bl);
 }
 static int q16(float x) { return x <= 0.0f ? 0 : x >= 1.0f ? 16 : (int)(x * 16.0f + 0.5f); }
-/* a card: the panel's cream, one pixel of rule round it. A cream sheet on a pale ground is 1.3:1,
- * so the ring is what makes a card read as a card at arm's length. */
+/* a card: the panel's cream, one pixel of rule round it. Cream on a pale ground is 1.3:1, so the ring
+ * carries the edge (5.5:1 against the ground); at a 12-14 px radius it reads as a sticker, which is
+ * the shape doing the softness instead of a washed-out fill. */
 static void cv_card(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r)
 {
-    cv_round(x, y, w, h, r, mix(K_PANEL, K_LINE, 6));
+    cv_round(x, y, w, h, r, mix(K_PANEL, K_TEXT, 12));
     cv_round(x + 1, y + 1, w - 2, h - 2, r > 1 ? r - 1 : 1, K_PANEL);
 }
 
 static const char *const MASCOT[23];            /* the visualizer's dancer (viz.c) */
 static uint16_t mascot_color(char ch);
 static void draw_nami(int32_t x, int32_t y);
+static void draw_nami_scale(int32_t x, int32_t y, int32_t sc);
 static void draw_sparkle(int32_t x, int32_t y, int s, uint16_t c);
 static void cv_scallop(int32_t x, int32_t y, int32_t w, uint16_t c);
 /* the mascot, one pixel a pixel, on a spring like the big dancer's (viz.c), smaller: a hop on the kick (the head lags, the coils spread
@@ -4952,24 +4956,33 @@ static void draw_header(void)
         if(jh==ui.sig[0])return;
         ui.sig[0]=jh;
         cv_begin(240,HDR_H,K_BG);
-        cv_card(6, 3, 200, 19, 5);                            /* the song, and what it is doing: one cream card */
+        cv_card(6, 1, 228, 26, 6);                            /* the song, and what it is doing */
         cv_text(12,6,&FONT_XS,jam_ui_title(),K_TEXT);
-        cv_text(210-text_w(&FONT_XS,JV(playing,en_playing)?"PLAY":"STOP"),11,&FONT_XS,JV(playing,en_playing)?"PLAY":"STOP",K_ACC);
-        int x=cv_text(12,17,&FONT_XS,"KEY ",K_DIM);x=cv_text(x,17,&FONT_XS,EN_NOTE_NAME[state.key],th->frost);
-        cv_text(x+14,17,&FONT_XS,chord,K_TEXT);
-        cv_scallop(0,25,240,mix(K_BG,K_LINE,9));
-        draw_nami(216,4);cv_blit(0,0);return;
+        {   /* the state, right-aligned in the card and clear of the mascot's eight-pixel inset */
+            const char *st=JV(playing,en_playing)?"PLAY":"STOP";
+            cv_text(204-text_w(&FONT_XS,st),13,&FONT_XS,st,K_ACC_TXT);
+        }
+        draw_nami(210,7);
+        {   /* the key strip: its own row, under the card's edge */
+            int32_t x=cv_text(12,27,&FONT_XS,"KEY ",K_DIM);
+            x=cv_text(x,27,&FONT_XS,EN_NOTE_NAME[state.key],K_TEXT);
+            cv_text(x+12,27,&FONT_XS,chord,K_DIM);
+        }
+        cv_scallop(0,38,240,mix(K_BG,K_LINE,9));
+        cv_blit(0,0);return;
     }
     if(ui.view==V_JAMHELP && !ui.fx_menu && !msg) {
         uint32_t jh=hash(0x4a414d34u,JV(revision,en_jam_revision) | JV(playing,en_playing)<<24);
         if(jh==ui.sig[0])return;
         ui.sig[0]=jh;
         cv_begin(240,HDR_H,K_BG);
-        cv_card(6,3,200,19,5);
-        cv_text(12,5,&FONT_B,jam_ui_title(),K_TEXT);
-        cv_text(210-text_w(&FONT_XS,JV(playing,en_playing)?"PLAY":"STOP"),11,&FONT_XS,JV(playing,en_playing)?"PLAY":"STOP",K_ACC);
-        cv_scallop(0,25,240,mix(K_BG,K_LINE,9));
-        draw_nami(216,4);cv_blit(0,0);return;
+        cv_card(6,1,228,26,6);
+        cv_text(12,6,&FONT_B,jam_ui_title(),K_TEXT);
+        {   const char *st=JV(playing,en_playing)?"PLAY":"STOP";
+            cv_text(204-text_w(&FONT_XS,st),15,&FONT_XS,st,K_ACC_TXT); }
+        draw_nami(210,7);
+        cv_scallop(0,38,240,mix(K_BG,K_LINE,9));
+        cv_blit(0,0);return;
     }
     mascot_step();
     if (ui.frame % 2u)                          /* (the spring moves every frame; the header is redrawn thirty times a second) */
@@ -7086,8 +7099,8 @@ static void draw_main(void)
         ui.sig[1]=h;
         cv_begin(240,MAIN_H,K_BG);
         cv_text(8,3,&FONT_B,row==3 && jam_ui_version()==3?"SYNTH JAM":titles[row],K_TEXT);
-        draw_sparkle(210,7,2,K_PULSE);                            /* the motif's other half: a sparkle by the title */
-        draw_sparkle(226,15,1,mix(K_BG,K_PULSE,9));
+        draw_sparkle(192,8,2,K_PULSE);                            /* a sparkle by the title */
+        draw_nami(210,2);                                         /* and the mascot, so the identity is here too */
         cv_scallop(8,22,224,mix(K_BG,K_LINE,9));
         for(k=0;k<4;k++) {
             int field=jam_ui_row_field(row,k,fields[row][k]),value=jam_ui_option(field);
@@ -7097,8 +7110,10 @@ static void draw_main(void)
             if(field==JAM_MOVE)value=state.movement;
                 if(field==JAM_ENERGY)value=state.energy;
             cv_card(6,y,228,25,5);                                /* a row, a cream pill */
+            if (plat_ms() < ui.touch_until && (int)k == (int)ui.touched)
+                cv_round(2, y + 4, 3, 17, 1, K_ACC_TXT);          /* the row the last knob touched */
             cv_text(13,y+5,&FONT_XS,field==JAM_SYNTH?"MODE":field==JAM_SPACE?"SPACE":field==JAM_KEYS_PROGRAM || field==JAM_BASS_PROGRAM?"PROGRAM":field==JAM_KEYS_OCTAVE || field==JAM_BASS_OCTAVE?"OCTAVE":names[row][k],K_DIM);
-            if(field==JAM_SYNTH)cv_text(226-text_w(&FONT_B,value?"SYNTH":"BAND"),y+4,&FONT_B,value?"SYNTH":"BAND",K_ACC);
+            if(field==JAM_SYNTH)cv_text(226-text_w(&FONT_B,value?"SYNTH":"BAND"),y+4,&FONT_B,value?"SYNTH":"BAND",K_ACC_TXT);
             else if(field==JAM_FORM)cv_text(226-text_w(&FONT_XS,jam_ui_form()),y+5,&FONT_XS,jam_ui_form(),K_TEXT);
             else if(field==JAM_KEYS_PROGRAM || field==JAM_BASS_PROGRAM) {
                 jam_ui_voice_name(field,text);
@@ -7108,8 +7123,8 @@ static void draw_main(void)
             } else if(field==JAM_KEYS_OCTAVE || field==JAM_BASS_OCTAVE) {
                 if(value)text[0]=value<0?'-':'+';
                 itoa_u((unsigned)(value<0?-value:value),text+(value!=0));
-                cv_text(226-text_w(&FONT_B,text),y+3,&FONT_B,text,K_ACC);
-            } else {itoa_u((unsigned)value,text);cv_text(226-text_w(&FONT_B,text),y+3,&FONT_B,text,K_ACC);}
+                cv_text(226-text_w(&FONT_B,text),y+3,&FONT_B,text,K_ACC_TXT);
+            } else {itoa_u((unsigned)value,text);cv_text(226-text_w(&FONT_B,text),y+3,&FONT_B,text,K_ACC_TXT);}
         }
         cv_blit(0,MAIN_Y);return;
     }
@@ -7124,38 +7139,44 @@ static void draw_main(void)
         ui.sig[1]=h;
         jam_ui_name(0,a); jam_ui_name(1,b); root[0]=a[0];root[1]=0;
         cv_begin(240,MAIN_H,K_BG);
-        cv_card(8,2,224,60,6);                                /* the song's card: a cream rounded sheet */
-        cv_text(16,8,&FONT_XS,jam_ui_title(),K_DIM);
-        cv_text(16,18,&FONT_L,root,K_ACC);
-        cv_text(44,26,&FONT_M,a+1,K_TEXT);
-        cv_round(146,18,80,16,5,mix(K_BG,K_LINE,8));          /* "next", a quieter chip of its own */
-        cv_text(152,21,&FONT_XS,"NEXT",K_DIM); cv_text(152,30,&FONT_XS,b,K_PAD);
+        cv_card(8,2,224,60,14);                               /* the song's card: a deep-rounded cream sheet */
+        draw_nami_scale(16,12,2);                             /* the mascot, 32 x 28 */
+        cv_round(54,6,74,34,8,mix(K_PANEL,K_LINE,7));         /* her bubble, two lines of slate */
+        cv_round(55,7,72,32,7,K_PANEL);
+        cv_text(62,10,&FONT_XS,role[JV(section,en_jam_section)%4],K_DIM);
+        cv_text(62,23,&FONT_XS,s.hold?"HELD":"EVOLVING",K_ACC_TXT);
+        cv_text(228-text_w(&FONT_L,a),10,&FONT_L,a,K_ACC);    /* the chord, the page's one large mark */
         if(JV(playing,en_playing)) {                          /* a sparkle while the band plays */
-            const int sx = 198, sy = 46 - (int)(2.0f * fm_fabsf(fm_sinf((float)(plat_ms() % 1600u) * 0.0039f)) * 2.0f);
-            draw_sparkle(sx, sy, 2, K_PULSE);
-            draw_sparkle(178, 12, 1, mix(K_PANEL, K_PULSE, 9));
+            draw_sparkle(200, 50, 2, K_PULSE);
+            draw_sparkle(14, 56, 1, mix(K_PANEL, K_PULSE, 9));
         }
-        {   /* the bar: rounded segments, the one playing in the accent */
+        {   /* under the card: what comes next, and where the bar is */
+            int32_t x=cv_text(12,66,&FONT_XS,"NEXT",K_DIM);
+            cv_text(x+8,66,&FONT_XS,b,K_DIM);
+            {   /* "3 / 8" */
+                char bl[8]; int q=0;
+                itoa_u(JV(bar,en_jam_bar)+1,bl); while(bl[q]) q++;
+                bl[q++]=' '; bl[q++]='/'; bl[q++]=' ';
+                itoa_u(JV(length,en_jam_length),bl+q);
+                cv_text(228-text_w(&FONT_XS,bl),66,&FONT_XS,bl,K_DIM);
+            }
+        }
+        {   /* the pattern: nine-pixel beads, ringed so the structure reads, the one playing filled */
             const int n = JV(length,en_jam_length) ? JV(length,en_jam_length) : 1;
             const int w = 224 / n;
-            for(k=0;k<(unsigned)n;k++) {                              /* cream pill, the bar's fill inset in it */
-                const uint16_t sc = k==JV(bar,en_jam_bar)?K_ACC:k<JV(bar,en_jam_bar)?K_FROST:mix(K_BG,K_LINE,9);
-                cv_round(8+(int)k*w, 70, w-3, 7, 3, K_PANEL);
-                cv_round(9+(int)k*w, 72, w-5, 3, 2, sc);
+            for(k=0;k<(unsigned)n;k++) {
+                cv_round(8+(int)k*w, 78, w-3, 9, 3, K_DIM);
+                cv_round(9+(int)k*w, 79, w-5, 7, 2, k==JV(bar,en_jam_bar)?K_ACC_TXT:K_PANEL);
             }
-            cv_scallop(8, 79, 224, mix(K_BG, K_LINE, 7));
         }
-        itoa_u(JV(bar,en_jam_bar)+1,t); cv_text(8,86,&FONT_XS,t,K_TEXT);
-        cv_text(32,86,&FONT_XS,role[JV(section,en_jam_section)%4],K_DIM);
-        cv_text(160,86,&FONT_XS,s.hold?"HELD":"EVOLVING",K_ACC);
         if(JV(pending,en_jam_pending) || JV(busy,en_jam_busy()) || JV(load,en_jam_load)>=0) {
-            cv_text(8,105,&FONT_XS,(JV(busy,en_jam_busy()) || JV(load,en_jam_load)>=0)?jam_ui_pending_title():jam_ui_form(),K_ACC);
-            itoa_u(JV(length,en_jam_length)-JV(bar,en_jam_bar),t); cv_text(8,122,&FONT_XS,t,K_ACC);
-            cv_text(29,122,&FONT_XS,"BARS TO CHANGE",K_DIM);
+            cv_text(12,94,&FONT_XS,(JV(busy,en_jam_busy()) || JV(load,en_jam_load)>=0)?jam_ui_pending_title():jam_ui_form(),K_ACC_TXT);
+            itoa_u(JV(length,en_jam_length)-JV(bar,en_jam_bar),t); cv_text(12,112,&FONT_XS,t,K_ACC_TXT);
+            cv_text(34,112,&FONT_XS,"BARS TO CHANGE",K_DIM);
         } else {
-            cv_text(8,105,&FONT_XS,"PRESETS: SONG / SEL: DETAILS",K_DIM);
-            itoa_u(s.energy,t);cv_text(8,122,&FONT_XS,"ENERGY",K_DIM);cv_text(61,122,&FONT_XS,t,K_ACC);
-            cv_text(105,122,&FONT_XS,"SAVE WHEN STOPPED",K_DIM);
+            cv_text(12,94,&FONT_XS,"PRESETS: SONG / SEL: DETAILS",K_DIM);
+            itoa_u(s.energy,t);cv_text(12,112,&FONT_XS,"ENERGY",K_DIM);cv_text(70,112,&FONT_XS,t,K_ACC_TXT);
+            cv_text(102,112,&FONT_XS,"SAVE WHEN STOPPED",K_DIM);
         }
         cv_blit(0,MAIN_Y); return;
     }
@@ -7393,10 +7414,10 @@ static void draw_knobs(void)
             int x=8+(int)k*59;
             cv_card(x,20,54,42,6);                            /* a cream pill a knob */
             cv_text(x+7,25,&FONT_XS,names[k],K_DIM);
-            if(k==0) {cv_text(x+7,40,&FONT_B,EN_NOTE_NAME[s.key],K_ACC);cv_text(x+7+text_w(&FONT_B,EN_NOTE_NAME[s.key]),43,&FONT_XS,jam_ui_version()!=3 && s.minor?"m":"",K_ACC);}
+            if(k==0) {cv_text(x+7,40,&FONT_B,EN_NOTE_NAME[s.key],K_ACC_TXT);cv_text(x+7+text_w(&FONT_B,EN_NOTE_NAME[s.key]),43,&FONT_XS,jam_ui_version()!=3 && s.minor?"m":"",K_ACC_TXT);}
             if(k==1) {itoa_u((unsigned)proj.par[P_TEMPO],t);cv_text(x+7,40,&FONT_B,t,K_TEXT);}
             if(k==2) {itoa_u(s.bars,t);cv_text(x+7,40,&FONT_B,t,K_TEXT);}
-            if(k==3) cv_text(x+7,44,&FONT_XS,jam_ui_version()==3?jp_chord_movement(s.movement):movement[s.movement],K_ACC);
+            if(k==3) cv_text(x+7,44,&FONT_XS,jam_ui_version()==3?jp_chord_movement(s.movement):movement[s.movement],K_ACC_TXT);
         }
         cv_blit(0,KNB_Y);return;
     }
@@ -8482,6 +8503,16 @@ static uint16_t nami_color(char ch)
 }
 /* Nami, sixteen pixels wide: the hop lifts her by up to three pixels, the head lag (hm.dh) opens a
  * pixel of neck on the way up and squashes her on the way down. */
+static void draw_nami_scale(int32_t x, int32_t y, int32_t sc)
+{
+    int r, c;
+    for (r = 0; r < 14; r++)
+        for (c = 0; NAMI[r][c]; c++) {
+            const uint16_t col = nami_color(NAMI[r][c]);
+            if (col)
+                cv_rect(x + c * sc, y + r * sc, sc, sc, col);
+        }
+}
 static void draw_nami(int32_t x, int32_t y)
 {
     int r, c;
@@ -8533,7 +8564,8 @@ static void cv_circle(int32_t cx, int32_t cy, int32_t r, uint16_t c)
 static void draw_sun_face(int32_t cx, int32_t cy, int32_t r)
 {
     const uint16_t ray = mix(K_BG, K_PULSE, 6), face = RGB(38, 44, 72);
-    cv_circle(cx, cy, r + 3, ray);
+    cv_circle(cx, cy, r + 4, ray);
+    cv_circle(cx, cy, r + 2, RGB(32, 44, 74));       /* a two-pixel ink edge, so the sun is a drawing */
     cv_circle(cx, cy, r, K_PULSE);
     cv_circle(cx - r / 3, cy - r / 4, 2, face);      /* two dot eyes */
     cv_circle(cx + r / 3, cy - r / 4, 2, face);
@@ -8558,14 +8590,12 @@ static void draw_splash(uint32_t t)
         if (q > 0.25f)
             draw_sparkle(24 + (i * 43) % 168, 10 + (i * 29) % 46, 1 + (int)(q * 2.0f), i & 1 ? RGB(255, 255, 255) : K_PULSE);
     }
-    for (i = 0; i < 3; i++) {                        /* the sea: three scallop bands, pale to deep */
-        const int32_t y = 68 + i * 8;
-        cv_rect(0, y, 240, 8, mix(K_PULSE, K_FROST, 4 + i * 5));
-        cv_scallop(0, y, 240, mix(K_PANEL, K_FROST, 3 + i * 4));
-    }
-    cv_rect(0, 92, 240, 16, K_PANEL);                /* the sand */
-    cv_scallop(0, 90, 240, mix(K_PANEL, K_FROST, 2));
-    draw_nami(198, 78);
+    cv_rect(0, 68, 240, 40, K_FROST);                /* the sea: two blues, one crest */
+    cv_rect(0, 68, 240, 10, mix(K_PANEL, K_FROST, 4));
+    cv_scallop(0, 66, 240, mix(K_FROST, K_PANEL, 5));
+    for (i = 0; i < 3; i++)
+        cv_rect(0, 84 + i * 8, 240, 1, mix(K_FROST, K_BG, 2));
+    draw_nami_scale(96, 26, 3);                      /* standing on the horizon */
     cv_blit(0, 0);
 
     cv_begin(240, 132, K_BG);                        /* the name, and what is next */

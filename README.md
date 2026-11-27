@@ -28,7 +28,14 @@ cream cards with a one-pixel rule, an ink that clears 7:1 against the ground, an
 | ground | `#AEE7F5` | `#84C4EC` | `#CEE8CE` | `#FAE29E` | `#FAD6E0` | `#1E2040` |
 | card | `#FFF9EC` | `#FFFCF4` | `#FFFCF0` | `#FFFAF0` | `#FFFAF4` | `#36366A` |
 | ink | `#262C48` | `#1C3052` | `#2C3A2E` | `#382E28` | `#44283A` | `#FFF6EC` |
-| now | `#E23A60` | `#E23E60` | `#D84860` | `#D63A56` | `#D03468` | `#FF8EAC` |
+| now (large) | `#E23A60` | `#E23E60` | `#D84860` | `#D63A56` | `#D03468` | `#FF8EAC` |
+| now (small type) | `#B0123C` | `#A20F36` | `#A81038` | `#A81030` | `#A31058` | `#FFB3C7` |
+| card edge | `#5C5F71` | `#5C5F71` | `#5C5F71` | `#5C5F71` | `#5C5F71` | `#5C5F71` |
+
+Measured on the Momo look: ink on card **13.3:1**, the small "now" **6.7:1** on card and **5.4:1** on
+the ground, the card's edge **4.8:1** against the ground, the sea **3.4:1**, and the large chord's warm
+red **3.95:1** on card (large text only — it is never used at 8 px). A card is cream with a one-pixel
+edge at a 12–14 px radius: the shape carries the softness, not a washed-out fill.
 
 Two marks carry the identity, both drawn from integer geometry so they never alias:
 

@@ -22,5 +22,5 @@ spin PRESET 1
 wait 1600
 shot kawaii-patch.png
 tap PLAY
-wait 700
+wait 1700
 shot kawaii-playing.png
