@@ -1119,7 +1119,7 @@ int main(int argc, char **argv)
             plat_store_save(OBJ_PROJ, bk, (uint32_t)o + 16u);
         } else if (!strcmp(cmd, "autopilot")) {      /* autopilot 0/1: Kick Runner steers itself (for videos) */
             autopilot = atoi(a);
-        } else if (!strcmp(cmd, "splash")) {         /* splash MS: the next boot's RedtailWorks card */
+        } else if (!strcmp(cmd, "splash")) {         /* splash MS: the next boot's cards */
             ui_splash_ms = (uint32_t)strtoul(a, 0, 10);
         } else if (!strcmp(cmd, "setpar")) {         /* setpar N V: parameter N set as its knob sets it */
             ui_param_set(atoi(a), atoi(b));

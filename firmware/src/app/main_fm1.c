@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-only
  * Boot, audio ISR and main loop adapted from Felucca's main.c / audio.c, Copyright (C) 2026
  * Leo Kuroshita (@kurogedelic), Hugelton Instruments. */
-/* AMB-1 on the FM-1 (from X0X's): boot (WDT first, boot-loop guard, guards), LCD, input (TIMER5
+/* NAIWAN 91 on the FM-1 (from the AMB-1 platform layer, via X0X and Felucca): boot (WDT first, boot-loop guard, guards), LCD, input (TIMER5
  * 10 kHz), audio (ALNK0), USB; then the main loop: UI at ~60 frames/s, input polled in between. */
 extern uint32_t _data_start[], _data_end[], _data_load[], _bss_start[], _bss_end[];
 extern uint32_t _pool_start[], _pool_end[], _rt_start[], _rt_end[], _rt_load[], _dsp_start[], _dsp_end[], _dsp_load[], _rh_start[], _rh_end[], _rh_load[];
@@ -28,7 +28,7 @@ static uint32_t stk_used(const uint32_t *lo, const uint32_t *top)
 }
 
 /* --------------------------------------------------------------- audio --- */
-/* Felucca's 256-frame halves (5.8 ms): AMB-1's render is light, and a strum wants the short latency */
+/* Felucca's 256-frame halves (5.8 ms): the render is light, and a strum wants the short latency */
 #ifndef EN_HALF
 #define EN_HALF 512u                        /* two renders per half: a slow chunk borrows from a quick one (the telemetry showed the xruns were
                                              * single renders of 6.0 .. 6.2 ms against the 5.8 ms a half of 256 allows, at 70% load on average);
@@ -314,9 +314,9 @@ static void enter_uboot(const char *why)
     fm1_enter_uboot();
 }
 
-/* SAFE MODE: AMB-1 crashed (or hung) twice while starting. Nothing that makes sound runs: no audio,
+/* SAFE MODE: NAIWAN 91 crashed (or hung) twice while starting. Nothing that makes sound runs: no audio,
  * no engine, no UI; USB is on, so the web installer (AMB-1, or the stock firmware) and M-UPGRADE can
- * reach it. PLAY tries AMB-1 again. The chip's own update mode stays the last resort (fm1_cstart). */
+ * reach it. PLAY tries NAIWAN 91 again. The chip's own update mode stays the last resort (fm1_cstart). */
 static void safe_main(void)
 {
     char b[24];
@@ -350,7 +350,7 @@ static void safe_main(void)
         if (bootguard.pending && fm1_ms - t0 > 10000u)
             bootguard.pending = 0;                  /* safe mode itself is up: not another failed boot */
         if ((fm1_in.buttons & play) && fm1_ms - t0 > 500u) {
-            bootguard.failed = 0;                   /* try AMB-1 again, from scratch */
+            bootguard.failed = 0;                   /* try NAIWAN 91 again, from scratch */
             bootguard.pending = 0;
             draw_text_box(0, 172, 240, &FONT_S, "STARTING NAIWAN 91...", C_HI, 1);
             usb_detach();
@@ -898,7 +898,7 @@ static void tel_service(void)
 
 static void splash(void)
 {
-    lcd_fill(0, 0, 240, 240, RGB(22, 21, 27));       /* charcoal, until the UI's RedtailWorks card (ui_init) */
+    lcd_fill(0, 0, 240, 240, RGB(22, 21, 27));       /* charcoal, until the UI's boot cards (ui_init) */
     lcd_sync();
 }
 
