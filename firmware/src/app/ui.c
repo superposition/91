@@ -4848,13 +4848,35 @@ static uint16_t mix(uint16_t a, uint16_t b, int t)   /* t 0..16: a -> b */
     return (uint16_t)(r << 11 | g << 5 | bl);
 }
 static int q16(float x) { return x <= 0.0f ? 0 : x >= 1.0f ? 16 : (int)(x * 16.0f + 0.5f); }
+static int32_t isqrt32(uint32_t v);          /* (defined with the boot card's sun) */
+/* a rounded rectangle with a radius bigger than six: the corner rows come from an integer circle, so a
+ * 14 px card corner is still exact pixel geometry, not a curve routine */
+static void cv_round_big(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r, uint16_t c)
+{
+    int32_t j;
+    if (r > h / 2)
+        r = h / 2;
+    if (r > w / 2)
+        r = w / 2;
+    if (r <= 6) {
+        cv_round(x, y, w, h, r, c);
+        return;
+    }
+    cv_rect(x, y + r, w, h - 2 * r, c);
+    for (j = 0; j < r; j++) {
+        const int32_t d = r - 1 - j;
+        const int32_t dx = r - isqrt32((uint32_t)(r * r - d * d));
+        cv_rect(x + dx, y + j, w - 2 * dx, 1, c);
+        cv_rect(x + dx, y + h - 1 - j, w - 2 * dx, 1, c);
+    }
+}
 /* a card: the panel's cream, one pixel of rule round it. Cream on a pale ground is 1.3:1, so the ring
  * carries the edge (5.5:1 against the ground); at a 12-14 px radius it reads as a sticker, which is
  * the shape doing the softness instead of a washed-out fill. */
 static void cv_card(int32_t x, int32_t y, int32_t w, int32_t h, int32_t r)
 {
-    cv_round(x, y, w, h, r, mix(K_PANEL, K_TEXT, 12));
-    cv_round(x + 1, y + 1, w - 2, h - 2, r > 1 ? r - 1 : 1, K_PANEL);
+    cv_round_big(x, y, w, h, r, mix(K_PANEL, K_TEXT, 12));
+    cv_round_big(x + 1, y + 1, w - 2, h - 2, r > 1 ? r - 1 : 1, K_PANEL);
 }
 
 static const char *const MASCOT[23];            /* the visualizer's dancer (viz.c) */
@@ -4960,7 +4982,7 @@ static void draw_header(void)
         cv_text(12,6,&FONT_XS,jam_ui_title(),K_TEXT);
         {   /* the state, right-aligned in the card and clear of the mascot's eight-pixel inset */
             const char *st=JV(playing,en_playing)?"PLAY":"STOP";
-            cv_text(204-text_w(&FONT_XS,st),13,&FONT_XS,st,K_ACC_TXT);
+            cv_text(204-text_w(&FONT_XS,st),6,&FONT_XS,st,K_ACC_TXT);   /* one baseline with the title */
         }
         draw_nami(210,7);
         {   /* the key strip: its own row, under the card's edge */
@@ -4979,7 +5001,7 @@ static void draw_header(void)
         cv_card(6,1,228,26,6);
         cv_text(12,6,&FONT_B,jam_ui_title(),K_TEXT);
         {   const char *st=JV(playing,en_playing)?"PLAY":"STOP";
-            cv_text(204-text_w(&FONT_XS,st),15,&FONT_XS,st,K_ACC_TXT); }
+            cv_text(204-text_w(&FONT_XS,st),6,&FONT_XS,st,K_ACC_TXT); }
         draw_nami(210,7);
         cv_scallop(0,38,240,mix(K_BG,K_LINE,9));
         cv_blit(0,0);return;
@@ -7098,20 +7120,20 @@ static void draw_main(void)
         if(h==ui.sig[1])return;
         ui.sig[1]=h;
         cv_begin(240,MAIN_H,K_BG);
-        cv_text(8,3,&FONT_B,row==3 && jam_ui_version()==3?"SYNTH JAM":titles[row],K_TEXT);
-        draw_sparkle(192,8,2,K_PULSE);                            /* a sparkle by the title */
-        draw_nami(210,2);                                         /* and the mascot, so the identity is here too */
+        draw_nami(8,1);                                           /* a companion by the title, not a copy of the header's */
+        cv_text(30,4,&FONT_B,row==3 && jam_ui_version()==3?"SYNTH JAM":titles[row],K_TEXT);
+        draw_sparkle(222,6,2,K_PULSE);                            /* a sparkle at the far end of the title line */
         cv_scallop(8,22,224,mix(K_BG,K_LINE,9));
         for(k=0;k<4;k++) {
             int field=jam_ui_row_field(row,k,fields[row][k]),value=jam_ui_option(field);
-            const int32_t y=27+(int32_t)k*28;
+            const int32_t y=27+(int32_t)k*26;
             if(field==JAM_FORM)value=state.form;
                 if(field==JAM_BARS)value=state.bars;
             if(field==JAM_MOVE)value=state.movement;
                 if(field==JAM_ENERGY)value=state.energy;
-            cv_card(6,y,228,25,5);                                /* a row, a cream pill */
+            cv_card(6,y,228,24,10);                               /* a row: the same sticker radius as the chord card */
             if (plat_ms() < ui.touch_until && (int)k == (int)ui.touched)
-                cv_round(2, y + 4, 3, 17, 1, K_ACC_TXT);          /* the row the last knob touched */
+                cv_round(2, y + 4, 3, 16, 1, K_ACC_TXT);          /* the row the last knob touched */
             cv_text(13,y+5,&FONT_XS,field==JAM_SYNTH?"MODE":field==JAM_SPACE?"SPACE":field==JAM_KEYS_PROGRAM || field==JAM_BASS_PROGRAM?"PROGRAM":field==JAM_KEYS_OCTAVE || field==JAM_BASS_OCTAVE?"OCTAVE":names[row][k],K_DIM);
             if(field==JAM_SYNTH)cv_text(226-text_w(&FONT_B,value?"SYNTH":"BAND"),y+4,&FONT_B,value?"SYNTH":"BAND",K_ACC_TXT);
             else if(field==JAM_FORM)cv_text(226-text_w(&FONT_XS,jam_ui_form()),y+5,&FONT_XS,jam_ui_form(),K_TEXT);
@@ -7129,7 +7151,7 @@ static void draw_main(void)
         cv_blit(0,MAIN_Y);return;
     }
     if(ui.view==V_JAMHELP) {
-        jp_settings_t s; char a[32],b[32],t[32],root[2]; unsigned k;
+        jp_settings_t s; char a[32],b[32],t[32]; unsigned k;
         static const char *const role[]={"VERSE","CHORUS","BRIDGE","RETURN"};
         jam_ui_get(&s);
         h=hash(0x4a414d32u,JV(beat,en_jam_beat) | JV(length,en_jam_length)<<8 | JV(pending,en_jam_pending)<<16 | JV(busy,en_jam_busy())<<17 | (uint32_t)(JV(load,en_jam_load)+1)<<18 | (uint32_t)JV(source,en_jam_source())<<22);
@@ -7137,18 +7159,19 @@ static void draw_main(void)
         for(k=0;k<sizeof s;k++) h=hash(h,((const uint8_t *)&s)[k]);
         if(h==ui.sig[1]) return;
         ui.sig[1]=h;
-        jam_ui_name(0,a); jam_ui_name(1,b); root[0]=a[0];root[1]=0;
+        jam_ui_name(0,a); jam_ui_name(1,b);
         cv_begin(240,MAIN_H,K_BG);
         cv_card(8,2,224,60,14);                               /* the song's card: a deep-rounded cream sheet */
-        draw_nami_scale(16,12,2);                             /* the mascot, 32 x 28 */
-        cv_round(54,6,74,34,8,mix(K_PANEL,K_LINE,7));         /* her bubble, two lines of slate */
-        cv_round(55,7,72,32,7,K_PANEL);
-        cv_text(62,10,&FONT_XS,role[JV(section,en_jam_section)%4],K_DIM);
-        cv_text(62,23,&FONT_XS,s.hold?"HELD":"EVOLVING",K_ACC_TXT);
-        cv_text(228-text_w(&FONT_L,a),10,&FONT_L,a,K_ACC);    /* the chord, the page's one large mark */
+        draw_nami_scale(16,14,2);                             /* the mascot, 32 x 28 */
+        cv_round_big(54,6,74,34,11,mix(K_PANEL,K_TEXT,12));   /* her bubble: the same sticker edge as the cards */
+        cv_round_big(55,7,72,32,10,K_PANEL);
+        cv_text(62,12,&FONT_XS,role[JV(section,en_jam_section)%4],K_DIM);
+        cv_text(62,25,&FONT_XS,s.hold?"HELD":"EVOLVING",K_ACC_TXT);
+        cv_text(228-text_w(&FONT_L,a),13,&FONT_L,a,K_ACC);    /* the chord, the page's one large mark */
+        cv_scallop(24, 53, 192, mix(K_PANEL, K_LINE, 9));     /* the card's floor: the motif, not empty space */
         if(JV(playing,en_playing)) {                          /* a sparkle while the band plays */
-            draw_sparkle(200, 50, 2, K_PULSE);
-            draw_sparkle(14, 56, 1, mix(K_PANEL, K_PULSE, 9));
+            draw_sparkle(200, 46, 2, K_PULSE);
+            draw_sparkle(70, 52, 1, mix(K_PANEL, K_PULSE, 9));
         }
         {   /* under the card: what comes next, and where the bar is */
             int32_t x=cv_text(12,66,&FONT_XS,"NEXT",K_DIM);
@@ -8581,7 +8604,6 @@ static void draw_splash(uint32_t t)
     int i;
     const float p = t > 900u ? 1.0f : (float)t / 900.0f;             /* the wipe */
     const float cols = 50.0f * p;
-    const float shine = 50.0f * ((float)(t % 1500u) / 1500.0f) * 1.5f - 24.0f;   /* the shine */
 
     cv_begin(240, 108, K_BG);
     draw_sun_face(196, 30, 18);
@@ -8599,7 +8621,7 @@ static void draw_splash(uint32_t t)
     cv_blit(0, 0);
 
     cv_begin(240, 132, K_BG);                        /* the name, and what is next */
-    draw_kanji_reveal(46, 0, 3, cols, shine, th->text, th->acc);   /* 内湾 */
+    draw_kanji_reveal(46, 0, 3, cols, -1000.0f, th->text, th->acc);   /* 内湾: the wipe, without the white column */
     text_c(120, 74, &FONT_S, "91", th->acc);
     for (i = 0; i < 16; i++)                         /* the steps: cream blocks, the lit ones in the accent */
         cv_rect(48 + (i & 7) * 18, 92 + (i >> 3) * 10, 14, 7, i < (int)(cols / 3.2f) ? (i & 1 ? th->pad : th->acc) : mix(K_BG, K_LINE, 6));
